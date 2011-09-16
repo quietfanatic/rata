@@ -23,36 +23,24 @@ struct Rata : Damagable {
 	float aim_center_x () { return x() + 2*PX*facing; }
 	float aim_center_y () { return y() + 13*PX; }
 	b2Fixture* fix_main () { return body->GetFixtureList(); }
-	b2Fixture* fix_feet () { return body->GetFixtureList()->GetNext(); }
-	b2Fixture* fix_hurt () { return body->GetFixtureList()->GetNext()->GetNext(); }
-	b2Fixture* fix_feet_hurt () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext(); }
+	b2Fixture* fix_hurt () { return body->GetFixtureList()->GetNext(); }
 
 	b2Fixture* fix_main_current () {
 		if (hurting) return fix_hurt();
 		else return fix_main();
 	}
-	b2Fixture* fix_feet_current () {
-		if (hurting) return fix_feet_hurt();
-		else return fix_feet();
-	}
 
 	void set_fix_normal () {
 		fix_main()->SetFilterData(cf::rata);
-		fix_feet()->SetFilterData(cf::rata_feet);
 		fix_hurt()->SetFilterData(cf::disabled);
-		fix_feet_hurt()->SetFilterData(cf::disabled);
 	}
 	void set_fix_invincible () {
 		fix_main()->SetFilterData(cf::rata_invincible);
-		fix_feet()->SetFilterData(cf::rata_feet);
 		fix_hurt()->SetFilterData(cf::disabled);
-		fix_feet_hurt()->SetFilterData(cf::disabled);
 	}
 	void set_fix_hurt () {
 		fix_main()->SetFilterData(cf::disabled);
-		fix_feet()->SetFilterData(cf::disabled);
 		fix_hurt()->SetFilterData(cf::rata_invincible);
-		fix_feet_hurt()->SetFilterData(cf::rata_feet);
 	}
 
 	 // Character stats (affected by items and such)
