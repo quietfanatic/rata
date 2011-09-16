@@ -1,0 +1,368 @@
+
+sf::Clock frameclock;
+float lastframe = 0;
+
+sf::View window_view = sf::View(sf::FloatRect(0, -240, 320, 0));
+
+void set_video () {
+	if (window_fullscreen) {
+		window->Create(sf::VideoMode(640, 480, 32), "", sf::Style::Fullscreen);
+		window->SetView(window_view);
+	}
+	else {
+		window->Create(sf::VideoMode(320*window_scale, 240*window_scale, 32), "");
+		window->SetView(window_view);
+	}
+	window->UseVerticalSync(true);
+	window->SetFramerateLimit(60);
+	window->EnableKeyRepeat(false);
+	window->ShowMouseCursor(false);
+	window->Display();
+	lastframe = frameclock.GetElapsedTime();
+}
+
+
+void main_init () {
+	 // SFML
+	window = new sf::RenderWindow;
+	//window = new sf::Image(320, 240);
+	set_video();
+	 // box2d
+	world = new b2World(
+		b2Vec2(0.0, -30.0),  // grav
+		true  // allow sleep
+	);
+	world->SetContactListener(new myCL);
+	 // Initial room
+	//room::testroom.start();	
+}
+
+
+
+void create_phase () {
+	 // We must repeat if an object creates a new object in on_create()
+	while (Object* tq = creation_queue) {
+		creation_queue = NULL;
+		for (Object* next; tq; tq = next) {
+			Object* c = tq;
+			next = c->next_depth;
+			Object** o;
+			for (o = &objects_by_depth; *o; o = &(*o)->next_depth) {
+				if (obj::def[c->desc->id].depth > obj::def[(*o)->desc->id].depth) {
+					c->next_depth = *o;
+					*o = c;
+					goto done_depth;
+				}
+			}  // Least deep object
+			c->next_depth = NULL;
+			*o = c;
+			done_depth:
+			for (o = &objects_by_order; *o; o = &(*o)->next_order) {
+				if (obj::def[c->desc->id].order > obj::def[(*o)->desc->id].order) {
+					c->next_order = *o;
+					*o = c;
+					goto done_order;
+				}
+			}  // Least deep object
+			c->next_order = NULL;
+			*o = c;
+			done_order:
+			c->on_create();
+	//		if (c->realtest != 151783) printf("Error: junk object detected\n");
+		}
+	}
+}
+
+void destroy_phase () {
+	Object** next;
+	for (Object** o = &objects_by_depth; *o; o = next) {
+		next = &(*o)->next_depth;
+		if ((*o)->doomed) {
+			*o = *next;
+		}
+	}
+	for (Object** o = &objects_by_order; *o;) {
+		if ((*o)->doomed) {
+			Object* doomed = *o;
+			doomed->on_destroy();
+			*o = doomed->next_order;
+			if (doomed->body) {
+				world->DestroyBody(doomed->body);
+			}
+			if (doomed->desc->temp) delete doomed->desc;
+			delete doomed;
+		}  // Need to ensure we don't leave any dead pointers
+		else { o = &(*o)->next_order; }
+	}
+}
+
+
+void draw_tiles_back () {
+}
+
+void draw_tiles_front () {
+}
+
+
+void draw_phase () {
+	Room* rc = room::current;
+	if (! room::current->bg_image)
+		window->Clear(rc->bg_color);
+	if (rata) {
+		float focusx = rata->x() + cursor.x/2.0;
+		float focusy = rata->y() + cursor.y/2.0;
+		if (focusx < 10) focusx = 10;
+		if (focusy < 7.5) focusy = 7.5;
+		if (focusx > rc->width-10) focusx = rc->width-10;
+		if (focusy > rc->height-7.5) focusy = rc->height-7.5;
+		 // To look smooth in a pixelated environment,
+		 //  we need a minimum speed.
+		if (abs_f(focusx - camera.x) < .25*PX) camera.x = focusx;
+		else {
+			float newx = (9*camera.x + focusx) / 10;
+			if (abs_f(newx - camera.x) < .25*PX) camera.x += .25*PX * sign_f(newx - camera.x);
+			else camera.x = newx;
+		}
+		if (abs_f(focusy - camera.y) < .25*PX) camera.y = focusy;
+		else {
+			float newy = (9*camera.y + focusy) / 10;
+			if (abs_f(newy - camera.y) < .25*PX) camera.y += .25*PX * sign_f(newy - camera.y);
+			else camera.y = newy;
+		}
+		window_view.SetFromRect(sf::FloatRect(
+			(camera.x - 10)*UNPX,
+			-(camera.y + 7.5)*UNPX,
+			(camera.x + 10)*UNPX,
+			-(camera.y - 7.5)*UNPX
+		));
+
+		window->SetView(window_view);
+	}
+	 // Draw background
+	if (rc->bg_image) {
+		float w = rc->bg_image->sfi.GetWidth()*PX;
+		float h = rc->bg_image->sfi.GetHeight()*PX;
+		float bg_x = .5+MOD(-camera.x/2, w);
+		float bg_y = .5+MOD(-camera.y/2, h);
+		for (float x = bg_x + camera.x-10; x < bg_x + w + camera.x + 10; x += w)
+		for (float y = bg_y + camera.y-0; y < bg_y + h + camera.y + 15; y += h) {
+			draw_image(*rc->bg_image, x, y);
+		}
+	}
+	 // Draw back tiles
+	uint maxx = MIN(rc->width, ceil(camera.x + 10));
+	uint maxy = MIN(rc->height, rc->height - floor(camera.y - 7.5));
+	for (uint x=MAX(0, floor(camera.x - 10)); x < maxx ; x++)
+	for (uint y=MAX(0, rc->height - ceil(camera.y + 7.5)); y < maxy; y++) {
+	//for (uint x=0; x<width; x++)
+	//for (uint y=0; y<height; y++) {
+		int tile = rc->tile(x, y);
+		bool flip = (tile < 0);
+		if (flip) tile = -tile;
+		if (tileinfo[tile].back) {
+			int xs = tile%16*16;
+			int ys = tile/16*16;
+			//printf("Drawing tile %d at %d, %d\n", data[(y*width+x)], x, y);
+			draw_image_sub(
+				img::tiles,
+				x+.5, rc->height-y-.5,
+				xs, ys, xs+16, ys+16,
+				flip
+			);
+		}
+	}
+	 // Draw objects
+	for (Object* o = objects_by_depth; o; o = o->next_depth) {
+		//if (o->realtest != 151783) printf("Error: junk object detected\n");
+		dbg(8, "Drawing 0x%08x\n", o);
+		o->draw();
+		 // Debug draw
+		if (debug_mode) {
+			if (o->body)
+				window->Draw(sf::Shape::Rectangle(
+					coords2sf(o->x()-1/16.0, o->y()-1/16.0),
+					coords2sf(o->x()+1/16.0, o->y()+1/16.0), sf::Color(255, 0, 0, 127)
+				));
+		}
+	}
+	 // Draw front tiles
+	for (uint x=MAX(0, floor(camera.x - 10)); x < maxx ; x++)
+	for (uint y=MAX(0, rc->height - ceil(camera.y + 7.5)); y < maxy; y++) {
+	//for (uint x=0; x<width; x++)
+	//for (uint y=0; y<height; y++) {
+		int tile = rc->tile(x, y);
+		bool flip = (tile < 0);
+		if (flip) tile = -tile;
+		if (tileinfo[tile].front) {
+			int xs = tile%16*16;
+			int ys = tile/16*16;
+			//printf("Drawing tile %d at %d, %d\n", data[(y*width+x)], x, y);
+			draw_image_sub(
+				img::tiles,
+				x+.5, rc->height-y-.5,
+				xs, ys, xs+16, ys+16,
+				flip
+			);
+		}
+	}
+	if (debug_mode) {
+		 // Debug draw tilemap
+		for (b2Fixture* f = room::tilemap_obj->body->GetFixtureList(); f; f = f->GetNext()) {
+			b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
+			window->Draw(sf::Shape::Line(
+				e->m_vertex1.x*UNPX, -e->m_vertex1.y*UNPX,
+				e->m_vertex2.x*UNPX, -e->m_vertex2.y*UNPX,
+				1.0, sf::Color(0, 255, 0, 127)
+			));  // Neighboring edges
+			window->Draw(sf::Shape::Line(
+				e->m_vertex1.x*UNPX, -e->m_vertex1.y*UNPX,
+				e->m_vertex0.x*UNPX+3, -e->m_vertex0.y*UNPX+3,
+				1.0, sf::Color(255, 255, 0, 127)
+			));
+			window->Draw(sf::Shape::Line(
+				e->m_vertex3.x*UNPX-3, -e->m_vertex3.y*UNPX-3,
+				e->m_vertex2.x*UNPX, -e->m_vertex2.y*UNPX,
+				1.0, sf::Color(0, 0, 255, 127)
+			));
+		}
+		 // Debug draw camera
+		window->Draw(sf::Shape::Rectangle(
+			coords2sf(camera.x-0.2, camera.y-0.2),
+			coords2sf(camera.x+0.2, camera.y+0.2),
+			sf::Color(255, 0, 0, 127)
+		));
+	}
+	 // Draw cursor
+	if (rata) {
+		window->ShowMouseCursor(false);
+		draw_image(*cursor.img, cursor.x + rata->aim_center_x(), cursor.y + rata->aim_center_y());
+	}
+	else {
+		window->ShowMouseCursor(true);
+	}
+	if (message) {
+		float pos;
+		if (message_pos_next)
+			pos = 10 - (message_pos_next - message_pos + 1)*3*PX;
+		else pos = 10 - (strlen(message_pos)+2)*3*PX;
+		draw_image_sub(img::font_6x16, pos, 1,
+			0, 0, 6, 16,
+			false, true
+		);
+		pos += 6*PX;
+		char* p;
+		for (p = message_pos; message_pos_next ? (p < message_pos_next) : (*p); p++) {
+			draw_image_sub(img::font_6x16, pos, 1,
+				*p%16*6, *p/16*16,
+				*p%16*6+6, *p/16*16+16,
+				false, true
+			);
+			pos += 6*PX;
+		}
+		if (!*p) 
+			draw_image_sub(img::font_6x16, pos, 1,
+				0, 0, 6, 16,
+				false, true
+			);
+	}
+	//sf::Sprite window_s (window);
+	//window_s.SetScale(window_scale, window_scale);
+	//window->Draw(window_s);
+	window->Display();
+	float time = frameclock.GetElapsedTime();
+	dbg(6, "%f\r", 1/(time - lastframe));
+	fflush(stdout);
+	lastframe = time;
+}
+
+void input_phase () {
+	 // Count frames for each key and button
+	for (uint sym = 0; sym < 400; sym++)
+	if (key[sym] > 0 and key[sym] < 255) key[sym]++;
+	for (uint btn = 0; btn < 10; btn++)
+	if (button[btn] > 0 and btn[button] < 255) button[btn]++;
+	 // Start event handling
+	sf::Event event;
+	while (window->GetEvent(event))
+	switch (event.Type) {
+		case sf::Event::KeyPressed: {
+			if (event.Key.Code == sf::Key::Escape) {
+				window->Close();
+				exit(0);
+			}
+			if (event.Key.Code == sf::Key::Equal) debug_mode = !debug_mode;
+			if (event.Key.Code == sf::Key::F11) {
+				window_fullscreen = !window_fullscreen;
+				set_video();
+			}
+			if (event.Key.Code >= 400) break;
+			key[event.Key.Code] = 1;
+			break;
+		}
+		case sf::Event::KeyReleased: {
+			if (event.Key.Code >= 400) break;
+			key[event.Key.Code] = 0;
+			break;
+		}
+		case sf::Event::MouseButtonPressed: {
+			if (event.MouseButton.Button >= 10) break;
+			button[event.MouseButton.Button] = 1;
+			break;
+		}
+		case sf::Event::MouseButtonReleased: {
+			if (event.MouseButton.Button >= 10) break;
+			button[event.MouseButton.Button] = 0;
+			break;
+		}
+		case sf::Event::MouseMoved: {
+			if (rata && frame_number > 1) {
+				cursor.x += (event.MouseMove.X - window->GetWidth()/2.0)
+					* PX * cursor_scale / window_scale;
+				cursor.y += -(event.MouseMove.Y - window->GetHeight()/2.0)
+					* PX * cursor_scale / window_scale;
+				window->SetCursorPosition(window->GetWidth()/2, window->GetHeight()/2);
+				if (cursor.x > 19) cursor.x = 19;
+				else if (cursor.x < -19) cursor.x = -19;
+				if (cursor.y > 14) cursor.y = 14;
+				else if (cursor.y < -14) cursor.y = -14;
+			}
+			break;
+		}
+		case sf::Event::Closed: {
+			window->Close();
+			exit(0);
+			break;
+		}
+	}
+};
+
+void move_phase () {
+	for (Object* o = objects_by_order; o; o = o->next_order)
+		o->before_move();
+
+	world->Step(1/120.0, 10, 10);
+	world->Step(1/120.0, 10, 10);
+	//world->Step(1/180.0, 10, 10);
+	//world->Step(1/240.0, 10, 10);
+
+	for (Object* o = objects_by_order; o; o = o->next_order)
+		o->after_move();
+}
+
+
+void main_loop () {
+	window->SetCursorPosition(window->GetWidth()/2, window->GetHeight()/2);
+	for (;;) {
+		frame_number++;
+		create_phase();
+		draw_phase();
+		destroy_phase();
+		input_phase();
+		move_phase();
+		destroy_phase();
+	}
+}
+
+
+
+

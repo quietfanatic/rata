@@ -1,0 +1,38 @@
+
+
+
+
+
+A lot of graphics
+	tiles
+	backgrounds
+	enemies
+	more animations
+
+✓ Fix Camera weirdness
+
+text
+
+Figure out pixel weirdness
+
+Rework object creation and the Desc type
+
+Figure out floor dillemma, generalize walking
+
+✓ Center all actors by their feet
+
+✓ Generate room fixtures from tilemaps
+
+Rework Rata drawing routine with modularity for poses and items
+
+More rooms
+
+More enemies
+
+items, equipment
+
+story perhaps?
+
+
+
+

@@ -1,0 +1,32 @@
+
+Requirements
+	libsoil1 (libSOIL.so)
+	1.6GHz CPU
+	GPU that can do 2D OpenGL at 60fps, preferably with VSYNC
+
+
+Instructions:
+	To run: ./test
+	To recompile and run: ./try
+	To recompile (optimized) and run: ./tryopt
+	To reindex images (required if you change any image filenames): perl gen_img.pl > img.c++
+	 
+
+
+Controls:
+              A :  move left
+              D :  move right
+              W :  jump
+     Move Mouse :  look around
+        L-click :  examine
+R-click/L-Shift :  aim weapon
+        L-click :  (while aiming) fire weapon
+         Escape :  quit
+
+
+
+
+
+
+
+
