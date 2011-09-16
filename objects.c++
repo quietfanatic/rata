@@ -659,20 +659,21 @@ struct myCL : b2ContactListener {
 		//if (!contact->IsTouching()) return;
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
+		b2Manifold* manifold = contact->GetManifold();
 		if (a->is_standable()) {
-			if (contact->GetManifold()->type == b2Manifold::e_faceA
-			 && contact->GetManifold()->localNormal.y > 0.3)
+			if (manifold->type == b2Manifold::e_faceA
+			 && manifold->localNormal.y > 0.3)
 				b->floor = a;
-			else if (contact->GetManifold()->type == b2Manifold::e_faceB
-				  && contact->GetManifold()->localNormal.y < -0.3)
+			else if (manifold->type == b2Manifold::e_faceB
+				  && manifold->localNormal.y < -0.3)
 				b->floor = a;
 		}
 		if (b->is_standable()) {
-			if (contact->GetManifold()->type == b2Manifold::e_faceB
-			 && contact->GetManifold()->localNormal.y > 0.3)
+			if (manifold->type == b2Manifold::e_faceB
+			 && manifold->localNormal.y > 0.3)
 				a->floor = b;
-			else if (contact->GetManifold()->type == b2Manifold::e_faceA
-				  && contact->GetManifold()->localNormal.y < -0.3)
+			else if (manifold->type == b2Manifold::e_faceA
+				  && manifold->localNormal.y < -0.3)
 				a->floor = b;
 		}
 		if (a->desc->id == obj::bullet) {
@@ -705,11 +706,18 @@ struct myCL : b2ContactListener {
 			      || ci->normalImpulses[0] < -10.0) bb->destroy_after_draw();
 			else if (bb->speed() < 100) bb->destroy_after_draw();
 		}
+#define DAMAGE_KNOCKBACK 2.0
 		if (a->desc->id == obj::rata) {
 			Rata* r = (Rata*) a;
 			if (!r->hurting && !r->flashing)
 			if (int damage = b->touch_damage()) {
 				r->damage(damage);
+				if (manifold->type == b2Manifold::e_faceA)
+					r->add_vel(-manifold->localNormal.x*DAMAGE_KNOCKBACK,
+					           -manifold->localNormal.y*DAMAGE_KNOCKBACK);
+				else if (manifold->type == b2Manifold::e_faceB)
+					r->add_vel(manifold->localNormal.x*DAMAGE_KNOCKBACK,
+					           manifold->localNormal.y*DAMAGE_KNOCKBACK);
 			}
 		}
 		if (b->desc->id == obj::rata) {
@@ -717,6 +725,12 @@ struct myCL : b2ContactListener {
 			if (!r->hurting && !r->flashing)
 			if (int damage = a->touch_damage()) {
 				r->damage(damage);
+				if (manifold->type == b2Manifold::e_faceB)
+					r->add_vel(-manifold->localNormal.x*DAMAGE_KNOCKBACK,
+					           -manifold->localNormal.y*DAMAGE_KNOCKBACK);
+				else if (manifold->type == b2Manifold::e_faceA)
+					r->add_vel(manifold->localNormal.x*DAMAGE_KNOCKBACK,
+					           manifold->localNormal.y*DAMAGE_KNOCKBACK);
 			}
 		}
 		if (a->desc->id == obj::heart && b->desc->id == obj::rata) {

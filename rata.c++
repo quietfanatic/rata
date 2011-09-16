@@ -108,8 +108,7 @@ struct Rata : Damagable {
 		}
 		else if (!hurting && !take_damage) body->GetFixtureList()->SetFilterData(cf::rata);
 		if (take_damage) {
-			if (yvel() > 5.0) add_vel(0, -5.0);
-			else add_vel(0, 5.0);
+			if (floor) add_vel(0, 3.0);
 			take_damage = false;
 			printf("Ouch!\n");
 			set_fix_hurt();
