@@ -25,7 +25,11 @@ R-click/L-Shift :  aim weapon
 
 
 
+Directories:
 
+img  - image files used in game
+res  - used for working images and files
+lib  - required libraries
 
 
 

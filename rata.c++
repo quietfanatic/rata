@@ -5,7 +5,7 @@
 
 struct Rata : Damagable {
 	 // Character state
-	Object* floor;
+	//Object* floor;
 	int float_frames;
 	bool aiming;
 	bool can_see;
@@ -87,27 +87,8 @@ struct Rata : Damagable {
 		return 144;
 	}
 
-	void detect_floor () {
-		floor = NULL;
-		for (b2ContactEdge* ce = body->GetContactList(); ce; ce = ce->next) {
-			b2Contact* c = ce->contact;
-			if (c->IsTouching()) {
-				if (c->GetFixtureA() == fix_feet_current()) {
-					Object* other = (Object*)c->GetFixtureB()->GetBody()->GetUserData();
-					if (yvelrel(other) <= 0.4)
-						floor = other;
-				}
-				else if (c->GetFixtureB() == fix_feet_current()) {
-					Object* other = (Object*)c->GetFixtureA()->GetBody()->GetUserData();
-					if (yvelrel(other) <= 0.4)
-						floor = other;
-				}
-			}
-		}
-	}
-
 	void before_move () {
-		detect_floor();
+		//floor = get_floor(fix_feet_current());
 		 // Aiming
 		aiming = (button[sf::Mouse::Right] > 0 || key[sf::Key::LShift] > 0);
 		if (cursor.x > 0) facing = 1;
@@ -126,7 +107,7 @@ struct Rata : Damagable {
 			}
 			else {
 				Object* seeing = check_line(
-					x(), y(), x()+cursor.x, y()+cursor.y
+					aim_center_x(), aim_center_y(), aim_center_x()+cursor.x, aim_center_y()+cursor.y
 				);
 				can_see = (seeing == NULL || seeing == pointed_object);
 			}
@@ -315,7 +296,8 @@ struct Rata : Damagable {
 
 
 	void after_move () {
-		detect_floor();
+//		printf("%08x's floor is: %08x\n", this, floor);
+//		floor = get_floor(fix_feet_current());
 		if (floor) {
 			if (abs_f(xvelrel(floor)) < 0.1)
 				distance_walked = 0;

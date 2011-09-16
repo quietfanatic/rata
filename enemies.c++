@@ -47,7 +47,7 @@ struct Rat : Damagable {
 	virtual void on_destroy () {
 		if (rand() % 4 == 0)
 			(new obj::Desc(
-				obj::heart, NULL, x(), y()+4*PX, 0, 0, 0, true
+				obj::heart, NULL, x(), y(), 0, 0, 0, true
 			))->manifest();
 	}
 };
@@ -73,16 +73,13 @@ struct Patroller : Damagable {
 		set_vel(3.0*facing, 0.0);
 	}
 	virtual void before_move () {
+		bool see_floor = check_line(x(), y()+1, x()+0.5*facing, y()-0.3);
 		lifetime++;
 		if (threat_detected) {
 			set_vel(0.0, yvel());
 		}
 		else {
-			Object* floor = check_area(
-			 	x() + 6*PX*facing, y() - 14*PX,
-				x() + 14*PX*facing, y() - 6*PX
-			);
-			if (xvel()*facing < 0.1 || !floor) {
+			if (xvel()*facing < 0.1 || !see_floor) {
 				facing = -facing;
 				set_vel(3.0*facing, 0.0);
 			}

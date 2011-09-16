@@ -101,7 +101,6 @@ struct Object {
 	b2Body* body;
 	bool doomed;
 	int facing;  // 1 = right, -1 = left
-//	int realtest;  // Must be 151783
 	Object* floor;
 	
 
@@ -119,6 +118,7 @@ struct Object {
 	}
 	
 	 // Find one object (by default solid) in the area given by world coords
+	 // This has false positives.
 	struct AreaChecker : public b2QueryCallback {
 		b2Fixture* found;
 		uint16 cat;
@@ -169,6 +169,39 @@ struct Object {
 			return (Object*)checker.hit->GetBody()->GetUserData();
 		}
 		else return NULL;
+	}
+	 // Get contacts of a fixture
+	Object* get_touching (b2Fixture* fix) {
+		Object* r = NULL;
+		for (b2ContactEdge* ce = body->GetContactList(); ce; ce = ce->next) {
+			b2Contact* c = ce->contact;
+			if (c->IsEnabled() && c->IsTouching()) {
+				if (c->GetFixtureA() == fix)
+					r = (Object*)c->GetFixtureB()->GetBody()->GetUserData();
+				else if (c->GetFixtureB() == fix)
+					r = (Object*)c->GetFixtureA()->GetBody()->GetUserData();
+			}
+		}
+		return r;
+	}
+	Object* get_floor (b2Fixture* fix) {
+		Object* r = NULL;
+		for (b2ContactEdge* ce = body->GetContactList(); ce; ce = ce->next) {
+			b2Contact* c = ce->contact;
+			if (c->IsEnabled() && c->IsTouching()) {
+				if (c->GetFixtureA() == fix) {
+					Object* other = (Object*)c->GetFixtureB()->GetBody()->GetUserData();
+					if (yvelrel(other) <= 0.4)
+						r = other;
+				}
+				else if (c->GetFixtureB() == fix) {
+					Object* other = (Object*)c->GetFixtureA()->GetBody()->GetUserData();
+					if (yvelrel(other) <= 0.4)
+						r = other;
+				}
+			}
+		}
+		return r;
 	}
 
 	 // Events
@@ -310,6 +343,7 @@ struct Damagable : Object {
 
 struct Tilemap : Object {
 	void on_create () { };
+	bool is_standable () { return true; }
 };
 
 
@@ -506,20 +540,20 @@ Object* obj::Desc::manifest () const {
  // Some utilities for this file
 
 
-b2PolygonShape* make_poly (uint n, b2Vec2* vs) {
+b2PolygonShape* make_poly (uint n, b2Vec2* vs, float radius = 0.01) {
 	b2PolygonShape* r = new b2PolygonShape;
 	r->Set(vs, n);
-//	r->m_radius = 0.005;
+	r->m_radius = radius;
 	return r;
 }
 
-b2PolygonShape* make_rect (float w, float h) {
+b2PolygonShape* make_rect (float w, float h, float radius = 0.01) {
 	return make_poly(4, (b2Vec2[]){
 		b2Vec2(-w/2, 0),
 		b2Vec2(w/2, 0),
 		b2Vec2(w/2, h),
 		b2Vec2(-w/2, h)
-	});
+	}, radius);
 }
 
 b2CircleShape* make_circle (float rad, b2Vec2 center = b2Vec2(0, 0)) {
@@ -586,9 +620,11 @@ b2FixtureDef rata_fixes [] = {
 
 b2FixtureDef bullet_fix = make_fixdef(make_circle(0.05), cf::bullet, 0, 0.8, 10.0);
 b2FixtureDef rat_fix = make_fixdef(make_rect(12*PX, 5*PX), cf::enemy, 0, 0, 4.0);
-b2FixtureDef crate_fix = make_fixdef(make_rect(1, 1), cf::movable, 0.4, 0, 4.0);
+b2FixtureDef crate_fix = make_fixdef(make_rect(1, 1, 0.005), cf::movable, 0.4, 0, 4.0);
 b2FixtureDef mousehole_fix = make_fixdef(make_rect(14*PX, 10*PX), cf::scenery, 0, 0, 0);
-b2FixtureDef patroller_fix = make_fixdef(make_rect(14*PX, 12*PX), cf::enemy, 0, 0.1, 4.0);
+b2FixtureDef patroller_fixes [] = {
+	make_fixdef(make_rect(14*PX, 12*PX), cf::enemy, 0, 0.1, 4.0),
+};
 b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.1);
 
 const obj::Def obj::def [] = {
@@ -603,7 +639,7 @@ const obj::Def obj::def [] = {
 	{"Mousehole", 1, &mousehole_fix, 50, 0, obj::ALLOC<Mousehole>},
 	{"Life Bar", 0, NULL, -100, 0, obj::ALLOC<Lifebar>},
 	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>},
-	{"Patroller", 1, &patroller_fix, 20, 20, obj::ALLOC<Patroller>},
+	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>},
 	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>},
 
 };
@@ -637,6 +673,22 @@ struct myCL : b2ContactListener {
 		//if (!contact->IsTouching()) return;
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
+		if (a->is_standable()) {
+			if (contact->GetManifold()->type == b2Manifold::e_faceA
+			 && contact->GetManifold()->localNormal.y > 0.3)
+				b->floor = a;
+			else if (contact->GetManifold()->type == b2Manifold::e_faceB
+				  && contact->GetManifold()->localNormal.y < -0.3)
+				b->floor = a;
+		}
+		if (b->is_standable()) {
+			if (contact->GetManifold()->type == b2Manifold::e_faceB
+			 && contact->GetManifold()->localNormal.y > 0.3)
+				a->floor = b;
+			else if (contact->GetManifold()->type == b2Manifold::e_faceA
+				  && contact->GetManifold()->localNormal.y < -0.3)
+				a->floor = b;
+		}
 		if (a->desc->id == obj::bullet) {
 			Bullet* ba = (Bullet*) a;
 			ba->find_hit(contact->GetFixtureB());
@@ -689,6 +741,12 @@ struct myCL : b2ContactListener {
 			rata->heal(48);
 			b->destroy();
 		}
+	}
+	void EndContact (b2Contact* contact) {
+		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
+		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
+		if (a->floor = b) a->floor = NULL;
+		if (b->floor = a) b->floor = NULL;
 	}
 };
 

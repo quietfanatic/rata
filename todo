@@ -15,7 +15,11 @@ text
 
 Figure out pixel weirdness
 
+Formalize organization of object data
+
 Rework object creation and the Desc type
+
+Add fixture properties
 
 Figure out floor dillemma, generalize walking
 
