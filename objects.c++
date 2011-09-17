@@ -645,6 +645,26 @@ struct myCL : b2ContactListener {
 		b2Manifold* manifold = contact->GetManifold();
 		if (a->doomed or b->doomed)
 			return contact->SetEnabled(false);
+		if (a->desc->id == obj::bullet) {
+			Bullet* ba = (Bullet*) a;
+			if (ba->lifetime == -1
+			 || (ba->lifetime < 2 && ba->desc->data == b)) {
+				return contact->SetEnabled(false);
+			}
+		}
+		if (b->desc->id == obj::bullet) {
+			Bullet* bb = (Bullet*) b;
+			if (bb->lifetime == -1
+			 || (bb->lifetime < 2 && bb->desc->data == a)) {
+				return contact->SetEnabled(false);
+			}
+		}
+	}
+	void PostSolve (b2Contact* contact, const b2ContactImpulse* ci) {
+		//if (!contact->IsTouching()) return;
+		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
+		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
+		b2Manifold* manifold = contact->GetManifold();
 		if (a->is_standable()) {
 			if (manifold->type == b2Manifold::e_faceA
 			 && manifold->localNormal.y > 0.7) {
@@ -669,26 +689,6 @@ struct myCL : b2ContactListener {
 				a->floor_contact = contact;
 			}
 		}
-		if (a->desc->id == obj::bullet) {
-			Bullet* ba = (Bullet*) a;
-			if (ba->lifetime == -1
-			 || (ba->lifetime < 2 && ba->desc->data == b)) {
-				return contact->SetEnabled(false);
-			}
-		}
-		if (b->desc->id == obj::bullet) {
-			Bullet* bb = (Bullet*) b;
-			if (bb->lifetime == -1
-			 || (bb->lifetime < 2 && bb->desc->data == a)) {
-				return contact->SetEnabled(false);
-			}
-		}
-	}
-	void PostSolve (b2Contact* contact, const b2ContactImpulse* ci) {
-		//if (!contact->IsTouching()) return;
-		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
-		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
-		b2Manifold* manifold = contact->GetManifold();
 		if (a->desc->id == obj::bullet) {
 			Bullet* ba = (Bullet*) a;
 			ba->find_hit(contact->GetFixtureB());
