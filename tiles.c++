@@ -24,7 +24,9 @@ Tileinfo tileinfo [] = {
 	{"Metal support", 0, 1, 0},
 	{"Metal support", 0, 1, 0},
 	{"Metal support", 0, 1, 0},
-	{"END OF TILE", 0, 0, 9}
+	{"Metal ramp l", 0, 1, 3, {v(0, 0), v(1, 1), v(0, 1)}},
+	{"Metal ramp r", 0, 1, 3, {v(0, 0), v(1, 0), v(0, 1)}},
+	{"END OF TILES", 0, 0, 9}
 };
 
 #undef v

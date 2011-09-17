@@ -108,8 +108,8 @@ void draw_phase () {
 	if (! room::current->bg_image)
 		window->Clear(rc->bg_color);
 	if (rata) {
-		float focusx = rata->x() + cursor.x/2.0;
-		float focusy = rata->y() + cursor.y/2.0;
+		float focusx = rata->aim_center_x() + cursor.x/2.0;
+		float focusy = rata->aim_center_y() + cursor.y/2.0;
 		if (focusx < 10) focusx = 10;
 		if (focusy < 7.5) focusy = 7.5;
 		if (focusx > rc->width-10) focusx = rc->width-10;
@@ -299,6 +299,7 @@ void input_phase () {
 			}
 			if (event.Key.Code == sf::Key::Num1) room::list[room::test1].start();
 			if (event.Key.Code == sf::Key::Num2) room::list[room::test2].start();
+			if (event.Key.Code == sf::Key::Num3) room::list[room::test3].start();
 			if (event.Key.Code >= 400) break;
 			key[event.Key.Code] = 1;
 			break;
