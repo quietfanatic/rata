@@ -44,7 +44,8 @@ struct Rat : Damagable {
 		}
 	}
 	virtual int touch_damage () { return 12; }
-	virtual void on_destroy () {
+	virtual void kill () {
+		Damagable::kill();
 		if (rand() % 4 == 0)
 			(new obj::Desc(
 				obj::heart, NULL, x(), y(), 0, 0, 0, true
@@ -72,8 +73,10 @@ struct Patroller : Damagable {
 		if (!facing) facing = -1;
 		set_vel(3.0*facing, 0.0);
 	}
+	float camera_x () { return x(); }
+	float camera_y () { return y()+1; }
 	virtual void before_move () {
-		bool see_floor = check_line(x(), y()+1, x()+0.5*facing, y()-0.3);
+		bool see_floor = check_line(camera_x(), camera_y(), x()+0.5*facing, y()-0.3);
 		lifetime++;
 		if (threat_detected) {
 			set_vel(0.0, yvel());
@@ -94,13 +97,13 @@ struct Patroller : Damagable {
 				float bvx = bullet_velocity * cos(aim_direction);
 				float bvy = bullet_velocity * sin(aim_direction);
 				(new obj::Desc(obj::bullet, this,
-					x(), y(), bvx, bvy, 0, true
+					x(), y()+0.5, bvx, bvy, 0, true
 				))->manifest();
 				add_vel(-bvx/60, 0);
 			}
 			if ((threat_detected = detect_threat())) {
-				threat_x = rata->x();
-				threat_y = rata->y();
+				threat_x = rata->aim_center_x();
+				threat_y = rata->aim_center_y();
 				threat_xvel = rata->xvel() * (0.8 + rand()*0.2/RAND_MAX);
 				threat_yvel = rata->yvel() * (0.8 + rand()*0.2/RAND_MAX);
 			}
@@ -123,7 +126,7 @@ struct Patroller : Damagable {
 
 	bool detect_threat () {
 		if (rata && (rata->x() - x())*facing > 0) {
-			return !check_line(x(), y(), rata->x(), rata->y(), 2|32);
+			return !check_line(camera_x(), camera_y(), rata->aim_center_x(), rata->aim_center_y(), 2|32);
 		}
 		return false;
 	}

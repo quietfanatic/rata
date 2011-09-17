@@ -190,11 +190,11 @@ namespace room {
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 	};
 	obj::Desc test_o [5] = {
-		obj::Desc(obj::rata, NULL, 1.5, 3, 0, 0, 1),
+		obj::Desc(obj::rata, NULL, 1.5, 1, 0, 0, 1),
 		obj::Desc(obj::rat, NULL, 16, 10),
 		obj::Desc(obj::rat, NULL, 12, 10),
 		obj::Desc(obj::rat, NULL, 7.5, 12),
-		obj::Desc(obj::crate, NULL, 8.5, 10.5)
+		obj::Desc(obj::crate, NULL, 8.5, 10)
 	};
 	Room test = {20, 15, sf::Color(127, 127, 127), NULL, test_t, 5, test_o};
 
@@ -232,19 +232,6 @@ namespace room {
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1   // 0
 	//  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39
 	};
-	// 17,9; 17,10; 25,10; 25,9; 24,9; 24,8; 22,8; 22,5; 20,5; 20,8; 18,8; 18,9; <loop>
-	b2Vec2 v0(17, 9);
-	b2Vec2 v1(17, 10);
-	b2Vec2 v2(25, 10);
-	b2Vec2 v3(25, 9);
-	b2Vec2 v4(24, 9);
-	b2Vec2 v5(24, 8);
-	b2Vec2 v6(22, 8);
-	b2Vec2 v7(22, 5);
-	b2Vec2 v8(20, 5);
-	b2Vec2 v9(20, 8);
-	b2Vec2 v10(18, 8);
-	b2Vec2 v11(18, 9);
 
 	obj::Desc test2_o [24] = {
 		/*
@@ -292,32 +279,32 @@ namespace room {
 		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(4, 1), cf::solid, 0.4)), 21, 2.5),
 		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(10, 1), cf::solid, 0.4)), 20, 1.5),
 		*/
-		obj::Desc(obj::rata, NULL, 2.5, 22, 0, 0, 1),
-		obj::Desc(obj::rat, NULL, 13, 21.5),
-		obj::Desc(obj::rat, NULL, 17, 21.5),
-		obj::Desc(obj::rat, NULL, 21, 21.5),
-		obj::Desc(obj::rat, NULL, 25, 21.5),
-		obj::Desc(obj::rat, NULL, 29, 21.5),
-		obj::Desc(obj::rat, NULL, 32, 21.5),
+		obj::Desc(obj::rata, NULL, 2.5, 21, 0, 0, 1),
+		obj::Desc(obj::rat, NULL, 13, 21),
+		obj::Desc(obj::rat, NULL, 17, 21),
+		obj::Desc(obj::rat, NULL, 21, 21),
+		obj::Desc(obj::rat, NULL, 25, 21),
+		obj::Desc(obj::rat, NULL, 29, 21),
+		obj::Desc(obj::rat, NULL, 32, 21),
 		//obj::Desc(obj::crate, NULL, 31.5, 12.5),
-		obj::Desc(obj::crate, NULL, 10.5, 17.5),
-		obj::Desc(obj::crate, NULL, 6.5, 5.5),
-		obj::Desc(obj::crate, NULL, 7.5, 5.5),
-		obj::Desc(obj::crate, NULL, 7, 6.5),
-		obj::Desc(obj::crate, NULL, 21.5, 15.5),
-		obj::Desc(obj::crate, NULL, 22.5, 15.5),
-		obj::Desc(obj::crate, NULL, 22, 16.5),
-		obj::Desc(obj::crate, NULL, 20.5, 3.5),
-		obj::Desc(obj::crate, NULL, 21.5, 4.5),
-		obj::Desc(obj::crate, NULL, 21.5, 3.5),
-		obj::Desc(obj::crate, NULL, 20.5, 4.5),
-		obj::Desc(obj::crate, NULL, 1.5, 1.5),
-		obj::Desc(obj::crate, NULL, 2.5, 1.5),
+		obj::Desc(obj::crate, NULL, 10.5, 17),
+		obj::Desc(obj::crate, NULL, 6.5, 5),
+		obj::Desc(obj::crate, NULL, 7.5, 5),
+		obj::Desc(obj::crate, NULL, 7, 6),
+		obj::Desc(obj::crate, NULL, 21.5, 15),
+		obj::Desc(obj::crate, NULL, 22.5, 15),
+		obj::Desc(obj::crate, NULL, 22, 16),
+		obj::Desc(obj::crate, NULL, 20.5, 3),
+		obj::Desc(obj::crate, NULL, 21.5, 4),
+		obj::Desc(obj::crate, NULL, 21.5, 3),
+		obj::Desc(obj::crate, NULL, 20.5, 4),
+		obj::Desc(obj::crate, NULL, 1.5, 1),
+		obj::Desc(obj::crate, NULL, 2.5, 1),
 		obj::Desc(obj::mousehole, NULL, 15.5, 21),
 		obj::Desc(obj::mousehole, NULL, 27.5, 21),
 		//obj::Desc(obj::mousehole, NULL, 38, 17),
-		obj::Desc(obj::patroller, NULL, 29.5, 12.5),
-		obj::Desc(obj::patroller, NULL, 11.5, 8.5)
+		obj::Desc(obj::patroller, NULL, 29.5, 12),
+		obj::Desc(obj::patroller, NULL, 11.5, 8)
 	};
 	Room test2 = {40, 30, sf::Color(127, 127, 127), &img::bg_metal, test2_t, 24, test2_o};
 
