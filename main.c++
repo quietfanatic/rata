@@ -240,30 +240,26 @@ void draw_phase () {
 	else {
 		window->ShowMouseCursor(true);
 	}
+	 // Draw text message
 	if (message) {
-		float pos;
-		if (message_pos_next)
-			pos = 10 - (message_pos_next - message_pos + 1)*3*PX;
-		else pos = 10 - (strlen(message_pos)+2)*3*PX;
-		draw_image_sub(img::font_6x16, pos, 1,
-			0, 0, 6, 16,
-			false, true
-		);
-		pos += 6*PX;
+		float w = text_width(message_pos);
+		float pos = 10 - w*PX/2;
+		if (message_pos_next) w += 8;
+		else w += 6;
+		window->Draw(sf::Shape::Rectangle(
+			camera.x*UNPX - w/2, -camera.y*UNPX + 104,
+			camera.x*UNPX + w/2, -camera.y*UNPX + 120,
+			sf::Color(0, 0, 0, 127)
+		));
 		char* p;
 		for (p = message_pos; message_pos_next ? (p < message_pos_next) : (*p); p++) {
-			draw_image_sub(img::font_6x16, pos, 1,
-				*p%16*6, *p/16*16,
-				*p%16*6+6, *p/16*16+16,
+			draw_image_sub(img::font_proportional, pos, 1,
+				*p%16*8, *p/16*16,
+				*p%16*8+8, *p/16*16+16,
 				false, true
 			);
-			pos += 6*PX;
+			pos += letter_width[*p]*PX;
 		}
-		if (!*p) 
-			draw_image_sub(img::font_6x16, pos, 1,
-				0, 0, 6, 16,
-				false, true
-			);
 	}
 	//sf::Sprite window_s (window);
 	//window_s.SetScale(window_scale, window_scale);

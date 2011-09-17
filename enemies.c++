@@ -55,7 +55,7 @@ struct Rat : Damagable {
 
 
 struct Patroller : Damagable {
-	virtual char* describe () { return "A small robot is patrolling the area.\nIt has a gun attached. Best be cautious."; }
+	virtual char* describe () { return "A small robot is patrolling the area.\nIt has a gun attached.  Best be cautious."; }
 	virtual int update_interval () { return 30; }
 	virtual int max_life () { return 144; }
 	uint lifetime;
