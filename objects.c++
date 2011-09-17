@@ -229,8 +229,8 @@ struct Object {
 	virtual void after_move () { }
 	virtual void on_destroy () { }
 	virtual void draw () {
-		if (def().image)
-			draw_image(def().image, x(), y(), subimage, facing == 1);
+		if (def()->image)
+			draw_image(def()->image, x(), y(), subimage, facing == 1);
 	}
 
 	 // Other overridable functions
@@ -308,7 +308,7 @@ struct Object {
 
 	 // Get def, id
 	const uint16 id () { return desc->id; }
-	const obj::Def def () { return obj::def[id()]; }
+	const obj::Def* def () { return &obj::def[id()]; }
 
 };
 
@@ -470,7 +470,7 @@ struct Mousehole : Object {
 	}
 	virtual void on_create () {
 		make_body(desc, false, false);
-		body->CreateFixture(&def().fixdef[0]);
+		body->CreateFixture(&def()->fixdef[0]);
 		timer = 300 + rand() % 1200;
 	}
 };
