@@ -53,6 +53,7 @@ struct obj::Def {
 	float depth;
 	float order;
 	Object* (& alloc) ();
+	img::Image* image;
 };
 
 struct obj::Desc {
@@ -101,6 +102,7 @@ struct Object {
 	b2Body* body;
 	bool doomed;
 	int facing;  // 1 = right, -1 = left
+	uint subimage;
 	Object* floor;
 	
 
@@ -216,12 +218,16 @@ struct Object {
 		else body = NULL;
 		facing = desc->facing;
 		floor = NULL;
+		subimage = 0;
 //		realtest = 151783;
 	}
 	virtual void before_move () { }
 	virtual void after_move () { }
 	virtual void on_destroy () { }
-	virtual void draw () { }
+	virtual void draw () {
+		if (def().image)
+			draw_image(def().image, x(), y(), subimage, facing == 1);
+	}
 
 	 // Other overridable functions
 	virtual void record_to (obj::Desc* dest) {
@@ -438,9 +444,6 @@ struct Bullet : Object {
 
 struct Crate : Damagable {
 	virtual char* describe () { return "There's a wooden crate sitting here.\nIt looks like it can be pushed around."; }
-	virtual void draw () {
-		draw_image(img::crate, x(), y());
-	}
 	virtual int max_life () { return 144; }
 };
 
@@ -448,7 +451,7 @@ struct Mousehole : Object {
 	int timer;
 	virtual char* describe () { return "A large metal pipe is coming out of the ground.\nFor ventilation, perhaps?\nIt's big enough for a rat to crawl through.\nMaybe that's where they're coming from."; }
 	virtual void draw () {
-		draw_image(img::mousehole, desc->x, desc->y);
+		draw_image(&img::mousehole, desc->x, desc->y);
 	}
 	virtual void before_move () {
 		timer--;
@@ -473,20 +476,22 @@ struct Lifebar : Object {
 		int life = rata->life;
 		for (int i = 0; i < (rata->max_life()+47)/48; i++) {
 			if (life >= i*48 + 48)
-				draw_image_sub(img::heart, 19.5 - (i * 12*PX), 14.25,
-					0, 0, 8, 8, false, true);
+				subimage = 0;
 			else if (life >= i*48 + 36)
-				draw_image_sub(img::heart, 19.5 - (i * 12*PX), 14.25,
-					0, 8, 8, 16, false, true);
+				subimage = 1;
 			else if (life >= i*48 + 24)
-				draw_image_sub(img::heart, 19.5 - (i * 12*PX), 14.25,
-					0, 16, 8, 24, false, true);
+				subimage = 2;
 			else if (life >= i*48 + 12)
-				draw_image_sub(img::heart, 19.5 - (i * 12*PX), 14.25,
-					0, 24, 8, 32, false, true);
+				subimage = 3;
 			else
-				draw_image_sub(img::heart, 19.5 - (i * 12*PX), 14.25,
-					0, 32, 8, 40, false, true);
+				subimage = 4;
+			draw_image(
+				&img::heart,
+				19.5 - (i * 12*PX),
+				14.25,
+				subimage,
+				false, true
+			);
 		}
 	}
 };
@@ -500,26 +505,21 @@ struct HitEffect : Object {
 		timer = desc->xvel;
 		//img::Image* image = ((img::Image*)desc->data);
 		img::Image* image = &img::hit_damagable;
-		numsubs = image->sfi.GetHeight() / image->sfi.GetWidth();
+		numsubs = image->numsubs();
 		fpsub = (timer+numsubs-1) / numsubs;
 	}
 	virtual void draw () {
 		//img::Image* image = ((img::Image*)desc->data);
 		img::Image* image = &img::hit_damagable;
-		uint sub = numsubs - timer / numsubs;
-		draw_image_sub(*image, desc->x, desc->y,
-			0, sub * image->sfi.GetWidth(),
-			image->sfi.GetWidth(), (sub+1) * image->sfi.GetWidth()
-		);
+		uint sub = numsubs - timer / numsubs - 1;
+		draw_image(image, desc->x, desc->y, sub);
 		timer--;
+		if (timer == 0) destroy();
 	}
 };
 
 struct Heart : Object {
 	virtual char* describe () { return "Just as rats live off the refuse of humans,\nYou too can live off of the rats.\nPick this up to restore one heart."; }
-	virtual void draw () {
-		draw_image_sub(img::heart, x(), y(), 0, 0, 8, 8);
-	}
 };
 
 
@@ -615,18 +615,18 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 
 const obj::Def obj::def [] = {
 
-	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>},
-	{"Rata", 2, rata_fixes, 10, 100, obj::ALLOC<Rata>},
-	{"Solid Object", 0, NULL, 0, 0, obj::ALLOC<Solid>},
-	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>},
-	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>},
-	{"Rat", 1, &rat_fix, 15, 10, obj::ALLOC<Rat>},
-	{"Crate", 1, &crate_fix, 0, 0, obj::ALLOC<Crate>},
-	{"Mousehole", 1, &mousehole_fix, 50, 0, obj::ALLOC<Mousehole>},
-	{"Life Bar", 0, NULL, -100, 0, obj::ALLOC<Lifebar>},
-	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>},
-	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>},
-	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>},
+	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, NULL},
+	{"Rata", 2, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
+	{"Solid Object", 0, NULL, 0, 0, obj::ALLOC<Solid>, NULL},
+	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, NULL},
+	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>, NULL},
+	{"Rat", 1, &rat_fix, 15, 10, obj::ALLOC<Rat>, &img::rat},
+	{"Crate", 1, &crate_fix, 0, 0, obj::ALLOC<Crate>, &img::crate},
+	{"Mousehole", 1, &mousehole_fix, 50, 0, obj::ALLOC<Mousehole>, &img::mousehole},
+	{"Life Bar", 0, NULL, -100, 0, obj::ALLOC<Lifebar>, NULL},
+	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>, NULL},
+	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>, &img::patroller},
+	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, &img::heart},
 
 };
 

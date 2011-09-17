@@ -43,11 +43,9 @@ void render_text (char* text, float x, float y, uint lines=2, bool cam=false) {
 			charcount = 0;
 		}
 		else {
-			draw_image_sub(img::font,
+			draw_image(&img::font,
 				x + charcount*6*PX, y - linecount*8*PX,
-				*text % 16 * 6, *text / 16 * 8,
-				*text % 16 * 6 + 6, *text / 16 * 8 + 8,
-				false, cam
+				*text, false, cam
 			);
 			charcount++;
 		}

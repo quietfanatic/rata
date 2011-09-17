@@ -4,13 +4,11 @@
 struct Rat : Damagable {
 	int decision_timer;
 	int anim_timer;
-	int facing;
 	char* describe () { return "It's a large gray rat that smells like trash.\nDoesn't seem very timid for a rodent."; }
 	void on_create () {
 		Damagable::on_create();
 		decision_timer = 0;
 		anim_timer = 0;
-		facing = -1;
 		life = max_life();
 	}
 	void before_move () {
@@ -32,16 +30,12 @@ struct Rat : Damagable {
 		else decision_timer--;
 	}
 	void draw () {
-		if (anim_timer < 6) {
-			draw_image_sub(img::rat, x(), y(), 0, 0, 16, 8, facing == 1);
-		}
-		else {
-			draw_image_sub(img::rat, x(), y(), 0, 8, 16, 16, facing == 1);
-		}
+		subimage = (anim_timer > 5);
 		if (abs_f(xvel()) > 0.1) {
 			anim_timer++;
 			anim_timer %= 12;
 		}
+		Object::draw();
 	}
 	virtual int touch_damage () { return 12; }
 	virtual void kill () {
@@ -112,16 +106,8 @@ struct Patroller : Damagable {
 	}
 	virtual void draw () {
 		motion_frames %= 60;
-		if (motion_frames > 30)
-			draw_image_sub(
-				img::patroller, x(), y(),
-				0, 0, 16, 16, (facing == 1)
-			);
-		else
-			draw_image_sub(
-				img::patroller, x(), y(),
-				0, 16, 16, 32, (facing == 1)
-			);
+		subimage = (motion_frames > 30);
+		Object::draw();
 	}
 
 	bool detect_threat () {

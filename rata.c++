@@ -1,5 +1,5 @@
 #define RATA_STEP 1.0
-#define RATA_DRAW(img) draw_image(img, lx, ly, flip);
+#define RATA_DRAW(img) draw_image(&img, lx, ly, 0, flip);
 
 
 
@@ -97,7 +97,7 @@ struct Rata : Damagable {
 				Object* seeing = check_line(
 					aim_center_x(), aim_center_y(), aim_center_x()+cursor.x, aim_center_y()+cursor.y
 				);
-				can_see = (seeing == NULL || seeing == pointed_object);
+				can_see = (seeing == NULL);
 			}
 		}
 		if (flashing) {
@@ -243,7 +243,7 @@ struct Rata : Damagable {
 						message = message_pos = NULL;
 					}
 				}
-				else if (pointed_object && pointed_object->desc->id != obj::solid) {
+				else if (pointed_object && pointed_object->desc->id != obj::tilemap) {
 					message = pointed_object->describe();
 					message_pos = message;
 					message_pos_next = NULL;
@@ -261,7 +261,7 @@ struct Rata : Damagable {
 		if (aiming) cursor.img = &img::target;
 		else if (message) cursor.img = &img::readmore;
 		else if (can_see) {
-			if (pointed_object && pointed_object->desc->id != obj::solid)
+			if (pointed_object && pointed_object->desc->id != obj::tilemap)
 				cursor.img = &img::see;
 			else cursor.img = &img::look;
 		}

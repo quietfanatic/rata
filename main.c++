@@ -74,7 +74,6 @@ void create_phase () {
 }
 
 void destroy_phase () {
-	Object** next;
 	for (Object** o = &objects_by_depth; *o;) {
 		if ((*o)->doomed) {
 			*o = (*o)->next_depth;
@@ -146,7 +145,7 @@ void draw_phase () {
 		float bg_y = .5+MOD(-camera.y/2, h);
 		for (float x = bg_x + camera.x-10; x < bg_x + w + camera.x + 10; x += w)
 		for (float y = bg_y + camera.y-0; y < bg_y + h + camera.y + 15; y += h) {
-			draw_image(*rc->bg_image, x, y);
+			draw_image(rc->bg_image, x, y);
 		}
 	}
 	 // Draw back tiles
@@ -160,14 +159,11 @@ void draw_phase () {
 		bool flip = (tile < 0);
 		if (flip) tile = -tile;
 		if (tileinfo[tile].back) {
-			int xs = tile%16*16;
-			int ys = tile/16*16;
 			//printf("Drawing tile %d at %d, %d\n", data[(y*width+x)], x, y);
-			draw_image_sub(
-				img::tiles,
+			draw_image(
+				&img::tiles,
 				x+.5, rc->height-y-.5,
-				xs, ys, xs+16, ys+16,
-				flip
+				tile, flip
 			);
 		}
 	}
@@ -194,14 +190,11 @@ void draw_phase () {
 		bool flip = (tile < 0);
 		if (flip) tile = -tile;
 		if (tileinfo[tile].front) {
-			int xs = tile%16*16;
-			int ys = tile/16*16;
 			//printf("Drawing tile %d at %d, %d\n", data[(y*width+x)], x, y);
-			draw_image_sub(
-				img::tiles,
+			draw_image(
+				&img::tiles,
 				x+.5, rc->height-y-.5,
-				xs, ys, xs+16, ys+16,
-				flip
+				tile, flip
 			);
 		}
 	}
@@ -235,7 +228,7 @@ void draw_phase () {
 	 // Draw cursor
 	if (rata) {
 		window->ShowMouseCursor(false);
-		draw_image(*cursor.img, cursor.x + rata->aim_center_x(), cursor.y + rata->aim_center_y());
+		draw_image(cursor.img, cursor.x + rata->aim_center_x(), cursor.y + rata->aim_center_y());
 	}
 	else {
 		window->ShowMouseCursor(true);
@@ -253,10 +246,9 @@ void draw_phase () {
 		));
 		char* p;
 		for (p = message_pos; message_pos_next ? (p < message_pos_next) : (*p); p++) {
-			draw_image_sub(img::font_proportional, pos, 1,
-				*p%16*8, *p/16*16,
-				*p%16*8+8, *p/16*16+16,
-				false, true
+			draw_image(
+				&img::font_proportional, pos, 1,
+				*p, false, true
 			);
 			pos += letter_width[*p]*PX;
 		}
