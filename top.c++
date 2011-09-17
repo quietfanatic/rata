@@ -101,7 +101,7 @@ int main () {
 	obj::Desc(obj::rat, NULL, 7.5, 12).manifest();
 	obj::Desc(obj::crate, NULL, 8.5, 10.5).manifest();
 	*/
-	room::test2.start();
+	room::list[room::test2].start();
 	main_loop();
 	return 0;
 }

@@ -3,7 +3,7 @@
 
 
 
-A lot of graphics
+  A lot of graphics
 	tiles
 	backgrounds
 	enemies
@@ -11,31 +11,33 @@ A lot of graphics
 
 ✓ Fix Camera weirdness
 
-text
+? text
 
 ✓ Figure out pixel weirdness
 
-Formalize organization of object data
+? Formalize organization of object data
 
-Rework object creation and the Desc type
+? Rework object creation and the Desc type
 
-Add fixture properties
+  Add fixture properties
 
-Figure out floor dillemma, generalize walking
+½ Figure out floor dillemma, generalize walking
+
+  Experiment with slopes
 
 ✓ Center all actors by their feet
 
 ✓ Generate room fixtures from tilemaps
 
-Rework Rata drawing routine with modularity for poses and items
+  Rework Rata drawing routine with modularity for poses and items
 
-More rooms
+  More rooms
 
-More enemies
+  More enemies
 
-items, equipment
+  items, equipment
 
-story perhaps?
+  story perhaps?
 
 
 

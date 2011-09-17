@@ -283,8 +283,8 @@ void input_phase () {
 				window_fullscreen = !window_fullscreen;
 				set_video();
 			}
-			if (event.Key.Code == sf::Key::Num1) room::test.start();
-			if (event.Key.Code == sf::Key::Num2) room::test2.start();
+			if (event.Key.Code == sf::Key::Num1) room::list[room::test1].start();
+			if (event.Key.Code == sf::Key::Num2) room::list[room::test2].start();
 			if (event.Key.Code >= 400) break;
 			key[event.Key.Code] = 1;
 			break;

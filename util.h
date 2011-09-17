@@ -40,10 +40,11 @@ void draw_image (img::Image* img, float x, float y, int sub=0, bool flip=false, 
 	drawing_sprite.SetImage(img->sfi);
 	drawing_sprite.SetSubRect(sr);
 	drawing_sprite.FlipX(flip);
+	uint xpos = flip && img->w ? img->w - img->x : img->x;
 	if (!cam)
-		drawing_sprite.SetPosition(round((x)*UNPX - img->x), round((-y)*UNPX - img->y));
+		drawing_sprite.SetPosition(round((x)*UNPX - xpos), round((-y)*UNPX - img->y));
 	else
-		drawing_sprite.SetPosition((camera.x+x-10)*UNPX - img->x, (-(camera.y+y-7.5))*UNPX - img->y);
+		drawing_sprite.SetPosition((camera.x+x-10)*UNPX - xpos, (-(camera.y+y-7.5))*UNPX - img->y);
 	window->Draw(drawing_sprite);
 };
 
