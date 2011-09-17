@@ -104,6 +104,8 @@ struct Object {
 	int facing;  // 1 = right, -1 = left
 	uint subimage;
 	Object* floor;
+	b2Contact* floor_contact;
+	bool walking;
 	
 
 	 // Create a Box2d body for this object
@@ -218,6 +220,8 @@ struct Object {
 		else body = NULL;
 		facing = desc->facing;
 		floor = NULL;
+		floor_contact = NULL;
+		walking = false;
 		subimage = 0;
 //		realtest = 151783;
 	}
@@ -253,6 +257,7 @@ struct Object {
 	virtual int touch_damage () { return 0; }
 	virtual int touch_hurt () { return 30; }
 	virtual char* describe () { return "What a mysterious object."; }
+	virtual float floor_friction () { return body->GetFixtureList()->GetFriction(); }
 
 	 // Non-overridable
 	void create () {
@@ -638,8 +643,37 @@ struct myCL : b2ContactListener {
 		if (!contact->IsTouching()) return;
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
+		b2Manifold* manifold = contact->GetManifold();
 		if (a->doomed or b->doomed)
 			return contact->SetEnabled(false);
+		if (a->is_standable()) {
+			if (manifold->type == b2Manifold::e_faceA
+			 && manifold->localNormal.y > 0.7) {
+				b->floor = a;
+				b->floor_contact = contact;
+				contact->SetFriction(b->floor_friction());
+			}
+			else if (manifold->type == b2Manifold::e_faceB
+				  && manifold->localNormal.y < -0.7) {
+				b->floor = a;
+				b->floor_contact = contact;
+				contact->SetFriction(b->floor_friction());
+			}
+		}
+		if (b->is_standable()) {
+			if (manifold->type == b2Manifold::e_faceB
+			 && manifold->localNormal.y > 0.7) {
+				a->floor = b;
+				a->floor_contact = contact;
+				contact->SetFriction(a->floor_friction());
+			}
+			else if (manifold->type == b2Manifold::e_faceA
+				  && manifold->localNormal.y < -0.7) {
+				a->floor = b;
+				a->floor_contact = contact;
+				contact->SetFriction(a->floor_friction());
+			}
+		}
 		if (a->desc->id == obj::bullet) {
 			Bullet* ba = (Bullet*) a;
 			if (ba->lifetime == -1
@@ -660,22 +694,6 @@ struct myCL : b2ContactListener {
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
 		b2Manifold* manifold = contact->GetManifold();
-		if (a->is_standable()) {
-			if (manifold->type == b2Manifold::e_faceA
-			 && manifold->localNormal.y > 0.3)
-				b->floor = a;
-			else if (manifold->type == b2Manifold::e_faceB
-				  && manifold->localNormal.y < -0.3)
-				b->floor = a;
-		}
-		if (b->is_standable()) {
-			if (manifold->type == b2Manifold::e_faceB
-			 && manifold->localNormal.y > 0.3)
-				a->floor = b;
-			else if (manifold->type == b2Manifold::e_faceA
-				  && manifold->localNormal.y < -0.3)
-				a->floor = b;
-		}
 		if (a->desc->id == obj::bullet) {
 			Bullet* ba = (Bullet*) a;
 			ba->find_hit(contact->GetFixtureB());
