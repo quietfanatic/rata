@@ -47,8 +47,9 @@ struct Rata : Damagable {
 	float ground_accel () {
 		return 0.2;
 	}
-	float ground_decel () {
-		return 0.4;
+	float _floor_friction;
+	float floor_friction () {
+		return _floor_friction;
 	}
 	float max_forward_speed () {
 		return 6.0;
@@ -130,6 +131,7 @@ struct Rata : Damagable {
 				}
 				oldxrel = x() - floor->x();
 				if (key[sf::Key::A] && !key[sf::Key::D]) {  // Left
+					_floor_friction = 0;
 					float max = facing<=0 ? -max_forward_speed() : -max_backward_speed();
 					if (xvelrel(floor) > max) {
 						//mutual_impulse(floor, ground_accel()*mass(), 0);
@@ -142,6 +144,7 @@ struct Rata : Damagable {
 					else if (facing > 0) goto stop;
 				}
 				else if (key[sf::Key::D] && !key[sf::Key::A]) {  // Right
+					_floor_friction = 0;
 					float max = facing>=0 ? max_forward_speed() : max_backward_speed();
 					if (xvelrel(floor) < max) {
 						//mutual_impulse(floor, -ground_accel()*mass(), 0);
@@ -155,10 +158,8 @@ struct Rata : Damagable {
 				}
 				else {  // Stop
 					stop:
-					if (xvelrel(floor) > 0)
-						add_vel(-MIN(xvelrel(floor), ground_decel()), 0);
-					else if (xvelrel(floor) < 0)
-						add_vel(MIN(-xvelrel(floor), ground_decel()), 0);
+					walking = false;
+					_floor_friction = 0.4;
 				}
 				 // Jump
 				if (key[sf::Key::W] && key[sf::Key::W] == 1) {  // Jump

@@ -257,6 +257,7 @@ struct Object {
 	virtual int touch_damage () { return 0; }
 	virtual int touch_hurt () { return 30; }
 	virtual char* describe () { return "What a mysterious object."; }
+	virtual float floor_friction () { return body->GetFixtureList()->GetFriction(); }
 
 	 // Non-overridable
 	void create () {
@@ -650,11 +651,13 @@ struct myCL : b2ContactListener {
 			 && manifold->localNormal.y > 0.7) {
 				b->floor = a;
 				b->floor_contact = contact;
+				contact->SetFriction(b->floor_friction());
 			}
 			else if (manifold->type == b2Manifold::e_faceB
 				  && manifold->localNormal.y < -0.7) {
 				b->floor = a;
 				b->floor_contact = contact;
+				contact->SetFriction(b->floor_friction());
 			}
 		}
 		if (b->is_standable()) {
@@ -662,11 +665,13 @@ struct myCL : b2ContactListener {
 			 && manifold->localNormal.y > 0.7) {
 				a->floor = b;
 				a->floor_contact = contact;
+				contact->SetFriction(a->floor_friction());
 			}
 			else if (manifold->type == b2Manifold::e_faceA
 				  && manifold->localNormal.y < -0.7) {
 				a->floor = b;
 				a->floor_contact = contact;
+				contact->SetFriction(a->floor_friction());
 			}
 		}
 		if (a->desc->id == obj::bullet) {
