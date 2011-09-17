@@ -33,7 +33,9 @@ b2World* world;
  // SFML main window
 sf::Image* screen;
 sf::RenderWindow* window;
-
+bool screen_shade = false;
+sf::Color screen_shade_color = sf::Color(255, 196, 63);
+sf::Blend::Mode screen_shade_blend = sf::Blend::Multiply;
 
  // Cursor state
 struct Cursor {

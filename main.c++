@@ -141,8 +141,8 @@ void draw_phase () {
 	if (rc->bg_image) {
 		float w = rc->bg_image->sfi.GetWidth()*PX;
 		float h = rc->bg_image->sfi.GetHeight()*PX;
-		float bg_x = .5+MOD(-camera.x/2, w);
-		float bg_y = .5+MOD(-camera.y/2, h);
+		float bg_x = MOD(-camera.x/2, w);
+		float bg_y = MOD(-camera.y/2, h);
 		for (float x = bg_x + camera.x-10; x < bg_x + w + camera.x + 10; x += w)
 		for (float y = bg_y + camera.y-0; y < bg_y + h + camera.y + 15; y += h) {
 			draw_image(rc->bg_image, x, y);
@@ -202,12 +202,16 @@ void draw_phase () {
 		 // Debug draw tilemap
 		for (b2Fixture* f = room::tilemap_obj->body->GetFixtureList(); f; f = f->GetNext()) {
 			b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
-			window->Draw(sf::Shape::Line(
-				e->m_vertex1.x*UNPX, -e->m_vertex1.y*UNPX,
-				e->m_vertex2.x*UNPX, -e->m_vertex2.y*UNPX,
-				1.0, sf::Color(0, 255, 0, 127)
-			));  // Neighboring edges
-			window->Draw(sf::Shape::Line(
+			if (e->m_vertex1.x > camera.x - 11
+			 && e->m_vertex1.x < camera.x + 11
+			 && e->m_vertex1.y > camera.y - 8.5
+			 && e->m_vertex1.y < camera.y + 8.5)
+				window->Draw(sf::Shape::Line(
+					e->m_vertex1.x*UNPX, -e->m_vertex1.y*UNPX,
+					e->m_vertex2.x*UNPX, -e->m_vertex2.y*UNPX,
+					1.0, sf::Color(0, 255, 0, 127)
+				));
+			/*window->Draw(sf::Shape::Line(
 				e->m_vertex1.x*UNPX, -e->m_vertex1.y*UNPX,
 				e->m_vertex0.x*UNPX+3, -e->m_vertex0.y*UNPX+3,
 				1.0, sf::Color(255, 255, 0, 127)
@@ -216,7 +220,7 @@ void draw_phase () {
 				e->m_vertex3.x*UNPX-3, -e->m_vertex3.y*UNPX-3,
 				e->m_vertex2.x*UNPX, -e->m_vertex2.y*UNPX,
 				1.0, sf::Color(0, 0, 255, 127)
-			));
+			));*/
 		}
 		 // Debug draw camera
 		window->Draw(sf::Shape::Rectangle(
@@ -224,6 +228,16 @@ void draw_phase () {
 			coords2sf(camera.x+0.2, camera.y+0.2),
 			sf::Color(255, 0, 0, 127)
 		));
+	}
+	 // Draw screen shade
+	if (screen_shade) {
+		sf::Shape shade_rect = sf::Shape::Rectangle(
+			camera.x*UNPX - 160, -camera.y*UNPX - 120,
+			camera.x*UNPX + 160, -camera.y*UNPX + 120,
+			screen_shade_color
+		);
+		shade_rect.SetBlendMode(screen_shade_blend);
+		window->Draw(shade_rect);
 	}
 	 // Draw cursor
 	if (rata) {
