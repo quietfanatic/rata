@@ -75,11 +75,11 @@ void create_phase () {
 
 void destroy_phase () {
 	Object** next;
-	for (Object** o = &objects_by_depth; *o; o = next) {
-		next = &(*o)->next_depth;
+	for (Object** o = &objects_by_depth; *o;) {
 		if ((*o)->doomed) {
-			*o = *next;
+			*o = (*o)->next_depth;
 		}
+		else { o = &(*o)->next_depth; }
 	}
 	for (Object** o = &objects_by_order; *o;) {
 		if ((*o)->doomed) {
@@ -295,6 +295,8 @@ void input_phase () {
 				window_fullscreen = !window_fullscreen;
 				set_video();
 			}
+			if (event.Key.Code == sf::Key::Num1) room::test.start();
+			if (event.Key.Code == sf::Key::Num2) room::test2.start();
 			if (event.Key.Code >= 400) break;
 			key[event.Key.Code] = 1;
 			break;
@@ -355,10 +357,11 @@ void main_loop () {
 	for (;;) {
 		frame_number++;
 		create_phase();
-		draw_phase();
-		destroy_phase();
-		input_phase();
-		move_phase();
+		if (!room::transition) draw_phase();
+		if (!room::transition) destroy_phase();
+		if (!room::transition) input_phase();
+		if (!room::transition) move_phase();
+		room::transition = false;
 		destroy_phase();
 	}
 }

@@ -4,6 +4,7 @@
 namespace room {
 	struct Room;
 	Room* current = NULL;
+	bool transition = false;
 	Object* tilemap_obj = NULL;
 	struct Room {
 		float width;
@@ -13,7 +14,9 @@ namespace room {
 		const int16* tiles;
 		uint nobjects;
 		const obj::Desc* objects;
+		obj::Desc* saved_objects;
 
+		void exit ();
 		void start ();
 		const int16 tile (uint x, uint y);
 		void manifest_tilemap ();
@@ -85,12 +88,21 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 namespace room {
 
 	void Room::start () {
+		if (current) current->exit();
 		current = this;
 		manifest_tilemap();
 		for (uint i = 0; i < nobjects; i++) {
 			objects[i].manifest();
 		}
 	}
+
+	void Room::exit () {
+		transition = true;
+		for (Object* o = objects_by_depth; o; o = o->next_depth) {
+			o->destroy();
+		}
+	}
+
 	const int16 Room::tile (uint x, uint y) {
 		return tiles[y * (uint)ceil(width) + x];
 	}
@@ -177,24 +189,14 @@ namespace room {
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1,
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 	};
-	obj::Desc test_o [15] = {
-		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(20, 1), cf::solid, 0.4)), 10, 0.5),
-		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(1, 15), cf::solid, 0.4)), 0.5, 7.5),
-		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(1, 15), cf::solid, 0.4)), 19.5, 7.5),
-		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(20, 1), cf::solid, 0.4)), 10, 14.5),
-		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(4, 1), cf::solid, 0.4)), 3, 6.5),
-		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(5, 1), cf::solid, 0.4)), 8.5, 9.5),
-		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(4, 1), cf::solid, 0.4)), 8, 3.5),
-		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(1, 4), cf::solid, 0.4)), 10.5, 12),
-		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(1, 5), cf::solid, 0.4)), 13.5, 3.5),
-		obj::Desc(obj::solid, new b2FixtureDef(make_fixdef(make_rect(2, 1), cf::solid, 0.4)), 18, 4.5),
+	obj::Desc test_o [5] = {
 		obj::Desc(obj::rata, NULL, 1.5, 3, 0, 0, 1),
 		obj::Desc(obj::rat, NULL, 16, 10),
 		obj::Desc(obj::rat, NULL, 12, 10),
 		obj::Desc(obj::rat, NULL, 7.5, 12),
 		obj::Desc(obj::crate, NULL, 8.5, 10.5)
 	};
-	Room test = {20, 15, sf::Color(127, 127, 127), NULL, test_t, 15, test_o};
+	Room test = {20, 15, sf::Color(127, 127, 127), NULL, test_t, 5, test_o};
 
 	const int16 test2_t [] = {
 	//  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39

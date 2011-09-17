@@ -252,6 +252,7 @@ struct Object {
 	void create () {
 		next_depth = creation_queue;
 		creation_queue = this;
+		next_order = NULL;
 		doomed = false;
 		dbg(2, "Creating 0x%08x\n", this);
 	}
@@ -583,8 +584,7 @@ b2Vec2 rata_poly_main [] = {
 	b2Vec2(2.5*PX, 0*PX),
 	b2Vec2(5.5*PX, 11*PX),
 	b2Vec2(5.5*PX, 24*PX),
-	b2Vec2(2.5*PX, 27*PX),
-	b2Vec2(-2.5*PX, 27*PX),
+	b2Vec2(0*PX, 27*PX),
 	b2Vec2(-5.5*PX, 24*PX),
 	b2Vec2(-5.5*PX, 11*PX)
 };
@@ -600,7 +600,7 @@ b2Vec2 rata_poly_hurt [] = {
 };
 
 b2FixtureDef rata_fixes [] = {
-	make_fixdef(make_poly(8, rata_poly_main), cf::rata, 0, 0, 2.0),
+	make_fixdef(make_poly(7, rata_poly_main), cf::rata, 0, 0, 2.0),
 	make_fixdef(make_poly(8, rata_poly_hurt), cf::disabled, 0, 0, 2.0)
 };
 
@@ -745,8 +745,8 @@ struct myCL : b2ContactListener {
 	void EndContact (b2Contact* contact) {
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
-		if (a->floor = b) a->floor = NULL;
-		if (b->floor = a) b->floor = NULL;
+		if (a->floor == b) a->floor = NULL;
+		if (b->floor == a) b->floor = NULL;
 	}
 };
 
