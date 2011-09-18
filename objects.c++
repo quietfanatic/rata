@@ -104,7 +104,9 @@ struct Object {
 	int facing;  // 1 = right, -1 = left
 	uint subimage;
 	Object* floor;
+	b2Fixture* floor_fix;
 	b2Contact* floor_contact;
+	b2Vec2 floor_normal;
 	bool walking;
 	
 
@@ -349,6 +351,68 @@ struct Damagable : Object {
 		destroy();
 	}
 };
+
+ // Base class for walking objects
+ //  (They need a moving friction joint)
+struct Walking : Object {
+	b2Body* friction_body;
+	b2FrictionJoint* friction_joint;
+	float floor_friction;
+	float ideal_xvel;
+	virtual void on_create () {
+		 // Create friction body
+		b2BodyDef fricdef;
+		fricdef.type = b2_kinematicBody;
+		fricdef.position.Set(desc->x, desc->y);
+		friction_body = world->CreateBody(&fricdef);
+		 // Create joint
+		b2FrictionJointDef fjd;
+		fjd.bodyA = body;
+		fjd.bodyB = friction_body;
+		fjd.localAnchorA = b2Vec2(0, 0);
+		fjd.localAnchorB = b2Vec2(0, 0);
+		fjd.maxForce = 0;
+		fjd.maxTorque = 0;
+		friction_joint = (b2FrictionJoint*)world->CreateJoint(&fjd);
+		 // Some default values
+		floor_friction = 0.4;
+	}
+	virtual void before_move () {
+		friction_body->SetTransform(body->GetPosition(), 0);
+		if (floor) {
+			friction_joint->SetMaxForce(
+				  body->GetMass()
+				* sqrt(floor_friction * floor_fix->GetFriction())
+				* 30  // Some kind of gravity
+			);
+			if (ideal_xvel == 0) {
+				friction_body->SetLinearVelocity(b2Vec2(0, 0));
+			}
+			else if (abs_f(floor_normal.x) < 0.01)
+				friction_body->SetLinearVelocity(b2Vec2(ideal_xvel, 0));
+			else if (sign_f(floor_normal.x) == sign_f(ideal_xvel)) {
+				friction_body->SetLinearVelocity(b2Vec2(
+					ideal_xvel,
+					-ideal_xvel * floor_normal.x / floor_normal.y
+				));
+			}
+			else {
+				friction_body->SetLinearVelocity(b2Vec2(
+					ideal_xvel * floor_normal.y,
+					-ideal_xvel * floor_normal.x
+				));
+			}
+		}
+		else {
+			friction_joint->SetMaxForce(0);
+		}
+	}
+	virtual void on_destroy () {
+		Object::on_destroy();
+		world->DestroyBody(friction_body);
+	}
+};
+
 
 #include "rata.c++"
 
@@ -613,7 +677,7 @@ b2FixtureDef rat_fix = make_fixdef(make_rect(12*PX, 5*PX), cf::enemy, 0, 0, 4.0)
 b2FixtureDef crate_fix = make_fixdef(make_rect(1, 1, 0.005), cf::movable, 0.4, 0, 4.0);
 b2FixtureDef mousehole_fix = make_fixdef(make_rect(14*PX, 10*PX), cf::scenery, 0, 0, 0);
 b2FixtureDef patroller_fixes [] = {
-	make_fixdef(make_rect(14*PX, 12*PX), cf::enemy, 0, 0.1, 4.0),
+	make_fixdef(make_rect(14*PX, 12*PX), cf::enemy, 0, 0.1, 6.0),
 };
 b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.1);
 
@@ -635,14 +699,12 @@ const obj::Def obj::def [] = {
 };
 
 
-
-
 struct myCL : b2ContactListener {
 	void PreSolve (b2Contact* contact, const b2Manifold* oldmanifold) {
 		if (!contact->IsTouching()) return;
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
-		b2Manifold* manifold = contact->GetManifold();
+		//b2Manifold* manifold = contact->GetManifold();
 		if (a->doomed or b->doomed)
 			return contact->SetEnabled(false);
 		if (a->desc->id == obj::bullet) {
@@ -669,24 +731,32 @@ struct myCL : b2ContactListener {
 			if (manifold->type == b2Manifold::e_faceA
 			 && manifold->localNormal.y > 0.7) {
 				b->floor = a;
+				b->floor_fix = contact->GetFixtureA();
 				b->floor_contact = contact;
+				b->floor_normal = manifold->localNormal;
 			}
 			else if (manifold->type == b2Manifold::e_faceB
 				  && manifold->localNormal.y < -0.7) {
 				b->floor = a;
+				b->floor_fix = contact->GetFixtureA();
 				b->floor_contact = contact;
+				b->floor_normal = -manifold->localNormal;
 			}
 		}
 		if (b->is_standable()) {
 			if (manifold->type == b2Manifold::e_faceB
 			 && manifold->localNormal.y > 0.7) {
 				a->floor = b;
+				a->floor_fix = contact->GetFixtureB();
 				a->floor_contact = contact;
+				a->floor_normal = manifold->localNormal;
 			}
 			else if (manifold->type == b2Manifold::e_faceA
 				  && manifold->localNormal.y < -0.7) {
 				a->floor = b;
+				a->floor_fix = contact->GetFixtureB();
 				a->floor_contact = contact;
+				a->floor_normal = -manifold->localNormal;
 			}
 		}
 		if (a->desc->id == obj::bullet) {
@@ -747,11 +817,11 @@ struct myCL : b2ContactListener {
 			}
 		}
 		if (a->desc->id == obj::heart && b->desc->id == obj::rata) {
-			rata->heal(48);
+			//rata->heal(48);
 			a->destroy();
 		}
 		else if (b->desc->id == obj::heart && a->desc->id == obj::rata) {
-			rata->heal(48);
+			//rata->heal(48);
 			b->destroy();
 		}
 	}

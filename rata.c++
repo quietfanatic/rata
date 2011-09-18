@@ -3,7 +3,7 @@
 
 
 
-struct Rata : Damagable {
+struct Rata : Walking {
 	 // Character state
 	//Object* floor;
 	int float_frames;
@@ -18,6 +18,7 @@ struct Rata : Damagable {
 	float distance_walked;  // For drawing
 	float oldxrel;
 	int recoil_frames;
+	int life;
 
 	 // Easy access to bits
 	float aim_center_x () { return x() + 2*PX*facing; }
@@ -45,10 +46,10 @@ struct Rata : Damagable {
 
 	 // Character stats (affected by items and such)
 	float ground_accel () {
-		return 0.2;
+		return 0.5;
 	}
 	float ground_decel () {
-		return 0.4;
+		return 1.0;
 	}
 	float max_forward_speed () {
 		return 6.0;
@@ -130,40 +131,31 @@ struct Rata : Damagable {
 				}
 				oldxrel = x() - floor->x();
 				if (key[sf::Key::A] && !key[sf::Key::D]) {  // Left
-					float max = facing<=0 ? -max_forward_speed() : -max_backward_speed();
-					if (xvelrel(floor) > max) {
-						//mutual_impulse(floor, ground_accel()*mass(), 0);
-						add_vel(-ground_accel(), 0);
-						if (xvelrel(floor) < max) {
-							//mutual_impulse(floor, xvelrel(floor) - max, 0);
-							add_vel(max - xvelrel(floor), 0);
-						}
-					}
-					else if (facing > 0) goto stop;
+					if (xvel() < 0)
+						floor_friction = ground_accel();
+					else floor_friction = ground_decel();
+					if (facing < 0)
+						ideal_xvel = -max_forward_speed();
+					else
+						ideal_xvel = -max_backward_speed();
 				}
 				else if (key[sf::Key::D] && !key[sf::Key::A]) {  // Right
-					float max = facing>=0 ? max_forward_speed() : max_backward_speed();
-					if (xvelrel(floor) < max) {
-						//mutual_impulse(floor, -ground_accel()*mass(), 0);
-						add_vel(ground_accel(), 0);
-						if (xvelrel(floor) > max) {
-							//mutual_impulse(floor, xvelrel(floor) - max, 0);
-							add_vel(max - xvelrel(floor), 0);
-						}
-					}
-					else if (facing < 0) goto stop;
+					if (xvel() > 0)
+						floor_friction = ground_accel();
+					else floor_friction = ground_decel();
+					if (facing > 0)
+						ideal_xvel = max_forward_speed();
+					else
+						ideal_xvel = max_backward_speed();
 				}
 				else {  // Stop
-					stop:
-					if (xvelrel(floor) > 0)
-						add_vel(-MIN(xvelrel(floor), ground_decel()), 0);
-					else if (xvelrel(floor) < 0)
-						add_vel(MIN(-xvelrel(floor), ground_decel()), 0);
+					floor_friction = ground_decel();
+					ideal_xvel = 0;
 				}
 				 // Jump
 				if (key[sf::Key::W] && key[sf::Key::W] == 1) {  // Jump
 					//mutual_impulse(floor, 0, -jump_velocity()*mass());
-					add_vel(0, jump_velocity());
+					set_vel(xvel(), jump_velocity());
 					float_frames = jump_float_time();
 				}
 			}
@@ -265,11 +257,12 @@ struct Rata : Damagable {
 		 // Request debug information
 //		if (key[sf::Key::BackSlash] == 1)
 //			print_debug_all();
+		Walking::before_move();
 	};
 
 	virtual void damage (int power) {
 		if (!hurting && !flashing) {
-			Damagable::damage(power);
+//			Damagable::damage(power);
 			take_damage = true;
 			hurting = 6 + power / 2;
 		}
@@ -316,12 +309,13 @@ struct Rata : Damagable {
 			}
 		dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
 		floor = NULL;
+		Walking::on_create();
 		float_frames = 0;
 		recoil_frames = 0;
 		take_damage = false;
 		hurting = 0;
 		flashing = 0;
-		life = max_life();
+		//life = max_life();
 		camera.x = x();
 		camera.y = y();
 		if (camera.x < 10) camera.x = 10;
@@ -334,7 +328,7 @@ struct Rata : Damagable {
 		cursor.x = 2.0 * facing;
 		cursor.img = &img::look;
 		rata = this;
-		lifebar_desc.manifest();
+		//lifebar_desc.manifest();
 	}
 	virtual void on_destroy () {
 		rata = NULL;
@@ -373,7 +367,12 @@ struct Rata : Damagable {
 		else walk_pose = 1;
 		if (walk_pose != 0) {
 				//s.SetY(s.GetPosition().y+window_scale);
-				ly -= 1*PX;
+				if (!floor)
+					ly -= 1*PX;
+				else if (abs_f(floor_contact->GetManifold()->localNormal.y) > 0.9)
+					ly -= 1*PX;
+				else if (abs_f(floor_contact->GetManifold()->localNormal.y) < 0.8)
+					ly += 1*PX;
 				RATA_DRAW(img::body_dress_walk);
 		}
 		else {

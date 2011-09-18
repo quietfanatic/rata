@@ -13,17 +13,15 @@
 
 ? text
 
-✓ Figure out pixel weirdness
-
 ? Formalize organization of object data
+
+  Fixture properties
 
 ? Rework object creation and the Desc type
 
   Add fixture properties
 
-½ Figure out floor dillemma, generalize walking
-
-  Experiment with slopes
+½ Figure out floor dillemma, generalize walking, slopes, etc.
 
 ✓ Center all actors by their feet
 

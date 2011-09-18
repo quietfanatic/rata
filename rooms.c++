@@ -158,6 +158,8 @@ namespace room {
 		for (uint y=0; y < height; y++)
 		for (uint e=0; e < 4; e++)
 		if (edges[x][y][e].use) {
+			bool flip = (tile(x, y) < 0);
+			Tileinfo& t = tileinfo[flip? -tile(x,y) : tile(x,y)];
 			b2EdgeShape* edge = new b2EdgeShape;
 			edge->Set(edges[x][y][e].v1, edges[x][y][e].v2);
 			if (edges[x][y][e].n1) {
@@ -169,7 +171,7 @@ namespace room {
 				edge->m_vertex3 = edges[x][y][e].n2->v2;
 			}
 			fixdef.shape = edge;
-			fixdef.friction = 0.4;
+			fixdef.friction = t.friction;
 			fixdef.restitution = 0;
 			//fixdef.density = 100.0;
 			tilemap_obj->body->CreateFixture(&fixdef);
