@@ -68,7 +68,7 @@ struct obj::Desc {
 	Object* manifest () const;
 
 	 // Alright, we'll use a C++ constructor...just for default args.
-	Desc (uint16 id_, void* data_=NULL, float x_=0, float y_=0, float xvel_=0, float yvel_=0, int facing_=0, bool temp_=false)
+	Desc (uint16 id_=0, void* data_=NULL, float x_=0, float y_=0, float xvel_=0, float yvel_=0, int facing_=0, bool temp_=false)
 	 :id(id_), data(data_), x(x_), y(y_), xvel(xvel_), yvel(yvel_), facing(facing_), temp(temp_)
 		{ }
 };

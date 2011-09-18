@@ -38,5 +38,5 @@ const int16 r_test3_t [] = {
 obj::Desc r_test3_o [1] = {
 	obj::Desc(obj::rata, NULL, 2.5, 21, 0, 0, 1),
 };
-Room r_test3 = {40, 30, sf::Color(127, 127, 127), &img::bg_metal, r_test3_t, 1, r_test3_o, NULL};
+Room r_test3 = {40, 30, sf::Color(127, 127, 127), 0, r_test3_t, 1, r_test3_o, NULL};
 

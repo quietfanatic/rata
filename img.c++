@@ -30,7 +30,7 @@ namespace img {
 	arm_dress_walk_f,
 	arm_m90,
 	arm_stand,
-	bg_metal,
+	bg0_metal,
 	body_dress_hurtback,
 	body_dress_kneel,
 	body_dress_layback,
@@ -100,6 +100,11 @@ namespace img {
 	testroom_fg,
 	tiles,
 	_COMMA_EATER;
+
+	Image* _bgs [] = {
+		&bg0_metal,
+		NULL
+	};
 }
 
 void load_img () {
@@ -161,9 +166,9 @@ void load_img () {
 	good &= img::arm_stand.sfi.LoadFromFile("img/arm-stand.png"); img::arm_stand.sfi.SetSmooth(0);
 	img::arm_stand.w = 0; img::arm_stand.h = 0;
 	img::arm_stand.x = 32; img::arm_stand.y = 48;
-	good &= img::bg_metal.sfi.LoadFromFile("img/bg-metal;0,0.png"); img::bg_metal.sfi.SetSmooth(0);
-	img::bg_metal.w = 0; img::bg_metal.h = 0;
-	img::bg_metal.x = 0; img::bg_metal.y = 0;
+	good &= img::bg0_metal.sfi.LoadFromFile("img/bg0-metal;0,0.png"); img::bg0_metal.sfi.SetSmooth(0);
+	img::bg0_metal.w = 0; img::bg0_metal.h = 0;
+	img::bg0_metal.x = 0; img::bg0_metal.y = 0;
 	good &= img::body_dress_hurtback.sfi.LoadFromFile("img/body+dress-hurtback.png"); img::body_dress_hurtback.sfi.SetSmooth(0);
 	img::body_dress_hurtback.w = 0; img::body_dress_hurtback.h = 0;
 	img::body_dress_hurtback.x = 32; img::body_dress_hurtback.y = 48;

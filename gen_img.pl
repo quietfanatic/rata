@@ -25,7 +25,22 @@ for (@imgs) {
 	print "\t$id,\n";
 }
 
-print "\t_COMMA_EATER;\n}\n\nvoid load_img () {\n\tbool good = true;\n";
+print "\t_COMMA_EATER;\n\n\timg* _bgs [] = {\n";
+
+my @bgs;
+for (@imgs) {
+	if (/img\/bg(\d+)-/) {
+		@bgs[$1] = $_;
+	}
+}
+for (@bgs) {
+	$_ =~ /^img\/([^;]*)(?:\;(?:\d+x\d+,)?(\d+(?:\.\d*)?),(\d+(?:\.\d*)?))?\.png$/ or die "Error: Weird image filename: $_\n";
+	my $id = $1;
+	$id =~ s/[^a-zA-Z0-9_]/_/g;
+	print "\t\t\&$id,\n";
+}
+
+print "\t\tNULL\n\t};\n}\n\nvoid load_img () {\n\tbool good = true;\n";
 for (@imgs) {
 	$_ =~ /^img\/([^;]*)(?:\;(?:(\d+)x(\d+),)?(\d+(?:\.\d*)?),(\d+(?:\.\d*)?))?\.png$/ or die "Error: Weird image filename: $_\n";
 	my ($id, $w, $h, $x, $y) = ($1, $2, $3, $4, $5);

@@ -108,5 +108,5 @@ obj::Desc r_test2_o [24] = {
 	obj::Desc(obj::patroller, NULL, 29.5, 12),
 	obj::Desc(obj::patroller, NULL, 11.5, 8)
 };
-Room r_test2 = {40, 30, sf::Color(127, 127, 127), &img::bg_metal, r_test2_t, 24, r_test2_o, NULL};
+Room r_test2 = {40, 30, sf::Color(127, 127, 127), 0, r_test2_t, 24, r_test2_o, NULL};
 

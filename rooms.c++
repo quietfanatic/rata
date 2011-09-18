@@ -10,7 +10,7 @@ namespace room {
 		float width;
 		float height;
 		sf::Color bg_color;
-		img::Image* bg_image;
+		int bg_index;
 		const int16* tiles;
 		uint nobjects;
 		const obj::Desc* objects;
@@ -20,6 +20,7 @@ namespace room {
 		void start ();
 		const int16 tile (uint x, uint y);
 		void manifest_tilemap ();
+		void read_from_file(char* filename);
 	};
 
 }
@@ -177,6 +178,27 @@ namespace room {
 			tilemap_obj->body->CreateFixture(&fixdef);
 		}
 	}
+
+	void die (const char* mess) {
+		fprintf(stderr, mess);
+		exit(1);
+	}
+
+	#define READ(to) if (1 != fread(to, sizeof(*to), 1, stdin)) die("Error: ran out of binary input.\n")
+	#define READN(to, size) if (1 != fread(to, size, 1, stdin)) die("Error: ran out of binary input.\n")
+
+	void Room::read_from_file (char* filename) {
+		READ(&width);
+		READ(&height);
+		READ(&bg_color);
+		READ(&bg_index);
+		tiles = new int16 [(int)(width*height)];
+		READN((uint16*)tiles, width*height);
+		READ(&nobjects);
+		objects = new obj::Desc [nobjects];
+		READN((obj::Desc*)objects, nobjects);
+	}
+
 
 
 #include "roomlist.c++"
