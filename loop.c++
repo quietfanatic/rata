@@ -297,9 +297,9 @@ void input_phase () {
 				window_fullscreen = !window_fullscreen;
 				set_video();
 			}
-			if (event.Key.Code == sf::Key::Num1) room::list[room::test1].enter();
-			if (event.Key.Code == sf::Key::Num2) room::list[room::test2].enter();
-			if (event.Key.Code == sf::Key::Num3) room::list[room::test3].enter();
+			if (event.Key.Code == sf::Key::Num1) room::file::test1::room.enter();
+			if (event.Key.Code == sf::Key::Num2) room::file::test2::room.enter();
+			if (event.Key.Code == sf::Key::Num3) room::file::test3::room.enter();
 			if (event.Key.Code >= 400) break;
 			key[event.Key.Code] = 1;
 			break;

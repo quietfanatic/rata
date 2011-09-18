@@ -21,6 +21,7 @@ namespace room {
 		int16 tile (uint x, uint y);
 		void manifest_tilemap ();
 		void read_from_file(FILE* F);
+		void print_to_file(FILE* F);
 	};
 
 }
@@ -248,6 +249,9 @@ namespace room {
 		saved_objects = NULL;
 	}
 
+	//void print_to_file (FILE* F) {
+	//}
+
 
 		/*
 		if (1 != fread(&width, 2, 1, F)) die("Error: ran out of binary input at width.\n");
@@ -267,6 +271,16 @@ namespace room {
 		if (1 != fread(&bg_index, 4, 1, F)) die("Error: ran out of binary input at bg_index.\n");
 		saved_objects = NULL;
 	}*/
+
+
+
+#define BEGIN_ROOM_TILES int16 tiles [] = {
+#define END_ROOM_TILES };
+#define BEGIN_ROOM_OBJECTS obj::Desc objects [] = {
+#define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(id, data, x, y, xvel, yvel, facing, data2),
+#define END_ROOM_OBJECTS obj::Desc()};
+#define ROOM_DEF(w, h, o, r, g, b, a, bg) Room room = {w, h, sf::Color(r, g, b, a), bg, tiles, o, objects, NULL};
+
 
 
 

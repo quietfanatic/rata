@@ -29,7 +29,7 @@ int main () {
 //		printf("Failed to open F\n");
 //	x.read_from_file(F);
 //	x.enter();
-	room::list[room::test1].enter();
+	room::file::test1::room.enter();
 	main_loop();
 	return 0;
 }

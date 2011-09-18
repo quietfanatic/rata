@@ -1,6 +1,5 @@
 
-
-int16 r_test1_t [] = {
+BEGIN_ROOM_TILES
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -16,13 +15,15 @@ int16 r_test1_t [] = {
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-};
-obj::Desc r_test1_o [5] = {
-	obj::Desc(obj::rata, NULL, 1.5, 1, 0, 0, 1),
-	obj::Desc(obj::rat, NULL, 16, 10),
-	obj::Desc(obj::rat, NULL, 12, 10),
-	obj::Desc(obj::rat, NULL, 7.5, 12),
-	obj::Desc(obj::crate, NULL, 8.5, 10)
-};
-Room r_test1 = {20, 15, sf::Color(127, 127, 127), -1, r_test1_t, 5, r_test1_o, NULL};
+END_ROOM_TILES
+
+BEGIN_ROOM_OBJECTS
+	ROOM_OBJECT(obj::rata, 1.5, 1, 0, 0, 1, NULL, 0)
+	ROOM_OBJECT(obj::rat, 16, 10, 0, 0, -1, NULL, 0)
+	ROOM_OBJECT(obj::rat, 12, 10, 0, 0, -1, NULL, 0)
+	ROOM_OBJECT(obj::rat, 7.5, 12, 0, 0, -1, NULL, 0)
+	ROOM_OBJECT(obj::crate, 8.5, 10, 0, 0, 0, NULL, 0)
+END_ROOM_OBJECTS
+
+ROOM_DEF(20, 15, 5, 127, 127, 127, 255, -1)
 
