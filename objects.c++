@@ -65,7 +65,8 @@ struct obj::Desc {
 	float yvel;
 	int facing;
 	void* data;
-	Object* manifest () const;
+	uint32 data2;
+	Object* manifest ();
 
 	 // Alright, we'll use a C++ constructor...just for default args.
 	Desc (uint16 id_=0, void* data_=NULL, float x_=0, float y_=0, float xvel_=0, float yvel_=0, int facing_=0, bool temp_=false)
@@ -96,7 +97,7 @@ namespace cf {
  // INSTANCE STRUCTURES
 
 struct Object {
-	const obj::Desc* desc;
+	obj::Desc* desc;
 	Object* next_depth;
 	Object* next_order;
 	b2Body* body;
@@ -111,7 +112,7 @@ struct Object {
 	
 
 	 // Create a Box2d body for this object
-	void make_body (const obj::Desc* desc, bool dynamic=false, bool bullet=false) {
+	void make_body (obj::Desc* desc, bool dynamic=false, bool bullet=false) {
 		b2BodyDef d;
 		if (dynamic) d.type = b2_dynamicBody;
 		d.position.Set(desc->x, desc->y);
@@ -597,7 +598,7 @@ struct Heart : Object {
 
  // loose end from above
 
-Object* obj::Desc::manifest () const {
+Object* obj::Desc::manifest () {
 	Object* r = obj::def[id].alloc();
 	r->desc = this;
 	r->body = NULL;

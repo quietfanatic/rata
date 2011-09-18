@@ -23,7 +23,13 @@ int main () {
 	obj::Desc(obj::rat, NULL, 7.5, 12).manifest();
 	obj::Desc(obj::crate, NULL, 8.5, 10.5).manifest();
 	*/
-	room::list[room::test2].start();
+	room::Room x;
+//	FILE* F = fopen("rooms/test1.room", "r");
+//	if (F == NULL)
+//		printf("Failed to open F\n");
+//	x.read_from_file(F);
+//	x.enter();
+	room::list[room::test1].enter();
 	main_loop();
 	return 0;
 }

@@ -30,7 +30,7 @@ Directories:
 img  - image files used in game
 res  - used for working images and files
 lib  - required libraries
-
+rooms  - all the rooms in binary format
 
 
 
