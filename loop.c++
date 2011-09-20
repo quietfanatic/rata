@@ -4,6 +4,11 @@ float lastframe = 0;
 
 sf::View window_view = sf::View(sf::FloatRect(0, -240, 320, 0));
 
+void quit_game () {
+	window->Close();
+	throw 0;
+}
+
 void set_video () {
 	if (window_fullscreen) {
 		window->Create(sf::VideoMode(640, 480, 32), "", sf::Style::Fullscreen);
@@ -313,8 +318,7 @@ void input_phase () {
 	switch (event.Type) {
 		case sf::Event::KeyPressed: {
 			if (event.Key.Code == sf::Key::Escape) {
-				window->Close();
-				exit(0);
+				quit_game();
 			}
 			if (event.Key.Code == sf::Key::Equal) debug_mode = !debug_mode;
 			if (event.Key.Code == sf::Key::F11) {
@@ -358,8 +362,7 @@ void input_phase () {
 			break;
 		}
 		case sf::Event::Closed: {
-			window->Close();
-			exit(0);
+			quit_game();
 			break;
 		}
 	}

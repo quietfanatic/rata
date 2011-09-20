@@ -34,7 +34,8 @@ int main () {
 //	}
 	
 	room::file::test2::room.enter();
-	main_loop();
+
+	try { main_loop(); } catch (int x) { printf("Game quit succesfully with result %d.\n", x); }
 	return 0;
 }
 
