@@ -18,7 +18,6 @@ struct Rata : Walking {
 	float distance_walked;  // For drawing
 	float oldxrel;
 	int recoil_frames;
-	int life;
 
 	 // Easy access to bits
 	float aim_center_x () { return x() + 2*PX*facing; }
@@ -72,9 +71,7 @@ struct Rata : Walking {
 	float max_fall_speed () {
 		return 8.0;
 	}
-	virtual int max_life () {
-		return 144;
-	}
+	virtual bool is_damagable () { return true; }
 
 	void before_move () {
 		//floor = get_floor(fix_feet_current());
@@ -260,11 +257,11 @@ struct Rata : Walking {
 		Walking::before_move();
 	};
 
-	virtual void damage (int power) {
+	virtual void damage (int d) {
 		if (!hurting && !flashing) {
-//			Damagable::damage(power);
+			Object::damage(d);
 			take_damage = true;
-			hurting = 6 + power / 2;
+			hurting = 6 + d / 2;
 		}
 	};
 
@@ -315,7 +312,7 @@ struct Rata : Walking {
 		take_damage = false;
 		hurting = 0;
 		flashing = 0;
-		//life = max_life();
+		life = max_life = 144;
 		camera.x = x();
 		camera.y = y();
 		if (camera.x < 10) camera.x = 10;
@@ -328,7 +325,7 @@ struct Rata : Walking {
 		cursor.x = 2.0 * facing;
 		cursor.img = &img::look;
 		rata = this;
-		//lifebar_desc.manifest();
+		lifebar_desc.manifest();
 	}
 	virtual void on_destroy () {
 		rata = NULL;

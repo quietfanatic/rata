@@ -1,15 +1,16 @@
 
 
 
-struct Rat : Damagable {
+struct Rat : Object {
 	int decision_timer;
 	int anim_timer;
 	char* describe () { return "It's a large gray rat that smells like trash.\nDoesn't seem very timid for a rodent."; }
+	bool is_damagable() { return true; }
 	void on_create () {
-		Damagable::on_create();
+		Object::on_create();
 		decision_timer = 0;
 		anim_timer = 0;
-		life = max_life();
+		life = max_life = 48;
 	}
 	void before_move () {
 		if (decision_timer == 0) {
@@ -39,7 +40,7 @@ struct Rat : Damagable {
 	}
 	virtual int touch_damage () { return 12; }
 	virtual void kill () {
-		Damagable::kill();
+		destroy();
 		if (rand() % 4 == 0)
 			(new obj::Desc(
 				obj::heart, NULL, x(), y(), 0, 0, 0, true
@@ -48,10 +49,10 @@ struct Rat : Damagable {
 };
 
 
-struct Patroller : Damagable {
+struct Patroller : Object {
 	virtual char* describe () { return "A small robot is patrolling the area.\nIt has a gun attached.  Best be cautious."; }
 	virtual int update_interval () { return 30; }
-	virtual int max_life () { return 144; }
+	virtual bool is_damagable () { return true; }
 	uint lifetime;
 	bool threat_detected;
 	float threat_x;
@@ -60,7 +61,8 @@ struct Patroller : Damagable {
 	float threat_yvel;
 	int motion_frames;
 	virtual void on_create () {
-		Damagable::on_create();
+		Object::on_create();
+		life = max_life = 144;
 		motion_frames = 0;
 		lifetime = 0;
 		threat_detected = false;

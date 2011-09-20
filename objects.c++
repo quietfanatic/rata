@@ -108,7 +108,8 @@ struct Object {
 	b2Fixture* floor_fix;
 	b2Contact* floor_contact;
 	b2Vec2 floor_normal;
-	bool walking;
+	int life;
+	int max_life;
 	
 
 	 // Create a Box2d body for this object
@@ -224,7 +225,7 @@ struct Object {
 		facing = desc->facing;
 		floor = NULL;
 		floor_contact = NULL;
-		walking = false;
+		life = max_life = 0;
 		subimage = 0;
 //		realtest = 151783;
 	}
@@ -236,27 +237,12 @@ struct Object {
 			draw_image(def()->image, x(), y(), subimage, facing == 1);
 	}
 
-	 // Other overridable functions
-	virtual void record_to (obj::Desc* dest) {
-		if (body) {
-			dest->id = desc->id; 
-			b2Vec2 pos = body->GetPosition();
-			dest->x = pos.x;
-			dest->y = pos.y;
-			b2Vec2 vel = body->GetLinearVelocity();
-			dest->xvel = vel.x;
-			dest->yvel = vel.y;
-			dest->facing = desc->facing;
-			dest->data = desc->data;
-		}
-		else {
-			*dest = *desc;
-		}
-	}
-
 	virtual bool needs_floor () { return false; }
 	virtual bool is_standable () { return true; }
 	virtual bool is_damagable () { return false; }
+	virtual void damage (int d) { life -= d; if (life <= 0) kill(); }
+	virtual void heal (int h) { life += h; if (life > max_life) life = max_life; }
+	virtual void kill () { destroy(); }
 	virtual int touch_damage () { return 0; }
 	virtual int touch_hurt () { return 30; }
 	virtual char* describe () { return "What a mysterious object."; }
@@ -326,32 +312,6 @@ struct Solid : Object {
 
 
 
- // Base class for all damagable objects
-struct Damagable : Object {
-	int life;
-
-	virtual bool is_damagable () { return true; }
-
-	virtual int max_life () { return 48; }
-	virtual int defense () { return 0; }
-
-	virtual void on_create () {
-		Object::on_create();
-		life = max_life();
-	}
-
-	virtual void damage (int power) {
-		life -= MAX(power - defense(), 0);
-		if (life <= 0) kill();
-	}
-	virtual void heal (int amount) {
-		life += amount;
-		if (life > max_life()) life = max_life();
-	}
-	virtual void kill () {
-		destroy();
-	}
-};
 
  // Base class for walking objects
  //  (They need a moving friction joint)
@@ -511,9 +471,10 @@ struct Bullet : Object {
 
 
 
-struct Crate : Damagable {
+struct Crate : Object {
 	virtual char* describe () { return "There's a wooden crate sitting here.\nIt looks like it can be pushed around."; }
-	virtual int max_life () { return 144; }
+	virtual bool is_damagable () { return true; }
+	virtual void on_create () { Object::on_create(); life = max_life = 144; }
 };
 
 struct Mousehole : Object {
@@ -543,7 +504,7 @@ struct Lifebar : Object {
 	virtual void draw () {
 		if (!rata) return destroy();
 		int life = rata->life;
-		for (int i = 0; i < (rata->max_life()+47)/48; i++) {
+		for (int i = 0; i < (rata->max_life+47)/48; i++) {
 			if (life >= i*48 + 48)
 				subimage = 0;
 			else if (life >= i*48 + 36)
@@ -768,7 +729,7 @@ struct myCL : b2ContactListener {
 					obj::hiteffect, &img::hit_damagable,
 					ba->midx, ba->midy, 8, 0, 0, true
 				))->manifest();
-				((Damagable*)b)->damage(48);
+				b->damage(48);
 				ba->destroy_after_draw();
 			}
 			else if (ci->normalImpulses[0] > 10.0
@@ -783,7 +744,7 @@ struct myCL : b2ContactListener {
 					obj::hiteffect, &img::hit_damagable,
 					bb->midx, bb->midy, 8, 0, 0, true
 				))->manifest();
-				((Damagable*)a)->damage(48);
+				a->damage(48);
 				bb->destroy_after_draw();
 			}
 			else if (ci->normalImpulses[0] > 10.0
