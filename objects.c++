@@ -34,7 +34,6 @@ namespace obj {
 		rat,
 		crate,
 		mousehole,
-		lifebar,
 		hiteffect,
 		patroller,
 		heart
@@ -500,32 +499,6 @@ struct Mousehole : Object {
 	}
 };
 
-struct Lifebar : Object {
-	virtual void draw () {
-		if (!rata) return destroy();
-		int life = rata->life;
-		for (int i = 0; i < (rata->max_life+47)/48; i++) {
-			if (life >= i*48 + 48)
-				subimage = 0;
-			else if (life >= i*48 + 36)
-				subimage = 1;
-			else if (life >= i*48 + 24)
-				subimage = 2;
-			else if (life >= i*48 + 12)
-				subimage = 3;
-			else
-				subimage = 4;
-			draw_image(
-				&img::heart,
-				19.5 - (i * 12*PX),
-				14.25,
-				subimage,
-				false, true
-			);
-		}
-	}
-};
-
 struct HitEffect : Object {
 	int timer;
 	uint numsubs;
@@ -653,7 +626,6 @@ const obj::Def obj::def [] = {
 	{"Rat", 1, &rat_fix, 15, 10, obj::ALLOC<Rat>, &img::rat},
 	{"Crate", 1, &crate_fix, 0, 0, obj::ALLOC<Crate>, &img::crate},
 	{"Mousehole", 1, &mousehole_fix, 50, 0, obj::ALLOC<Mousehole>, &img::mousehole},
-	{"Life Bar", 0, NULL, -100, 0, obj::ALLOC<Lifebar>, NULL},
 	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>, NULL},
 	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>, &img::patroller},
 	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, &img::heart},

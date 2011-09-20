@@ -297,8 +297,6 @@ struct Rata : Walking {
 		}
 	};
 
-	static obj::Desc lifebar_desc;
-
 	virtual void on_create () {
 		make_body(desc, true, true);
 			for (uint i = obj::def[desc->id].nfixes; i > 0; i--) {
@@ -325,7 +323,6 @@ struct Rata : Walking {
 		cursor.x = 2.0 * facing;
 		cursor.img = &img::look;
 		rata = this;
-		lifebar_desc.manifest();
 	}
 	virtual void on_destroy () {
 		rata = NULL;
@@ -445,8 +442,6 @@ struct Rata : Walking {
 		}
 	}
 };
-obj::Desc Rata::lifebar_desc = obj::Desc(obj::lifebar);
-
 
 
 
