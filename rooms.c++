@@ -20,8 +20,7 @@ namespace room {
 		void enter ();
 		int16 tile (uint x, uint y);
 		void manifest_tilemap ();
-		void read_from_file(FILE* F);
-		void print_to_file(FILE* F);
+		int print_to_file(FILE* F);
 	};
 
 }
@@ -187,91 +186,31 @@ namespace room {
 
 #define GB bytecount++; if (1 != fread(&b, 1, 1, F)) { fprintf(stderr, "Room load error: ran out of bytes at %d.\n", bytecount); exit(1); }
 
-	void Room::read_from_file (FILE* F) {
-		tiles = new int16 [(int)(width*height)];
-		objects = new obj::Desc [nobjects];
-		int bytecount = -1;
-		uint8 b;
-		GB  width = b<<8;
-		GB  width |= b;
-		GB  height = b<<8;
-		GB  height |= b;
-		printf("Room is %d x %d\n", width, height);
-		for (int i=0; i < width*height; i++) {
-			GB  tiles[i] = b<<8;
-			GB  tiles[i] |= b;
+	int Room::print_to_file (FILE* F) {
+		fprintf(F, "\n\nBEGIN_ROOM_TILES\n");
+		for (uint y=0; y < height; y++) {
+			for (uint x=0; x < width; x++) {
+				fprintf(F, "% 3d", tile(x, y));
+				if (x != width-1) fprintf(F, ",");
+			}
+			if (y != height-1) fprintf(F, ",\n");
 		}
-		GB  nobjects = b<<24;
-		GB  nobjects |= b<<16;
-		GB  nobjects |= b<<8;
-		GB  nobjects |= b;
-		for (int i=0; i < nobjects; i++) {
-			GB  objects[i].id = b<<8;
-			GB  objects[i].id |= b;
-			GB  GB  objects[i].temp = 0;
-			GB  *(uint*)&objects[i].x = b<<24;
-			GB  *(uint*)&objects[i].x |= b<<16;
-			GB  *(uint*)&objects[i].x |= b<<8;
-			GB  *(uint*)&objects[i].x |= b;
-			GB  *(uint*)&objects[i].y = b<<24;
-			GB  *(uint*)&objects[i].y |= b<<16;
-			GB  *(uint*)&objects[i].y |= b<<8;
-			GB  *(uint*)&objects[i].y |= b;
-			GB  *(uint*)&objects[i].xvel = b<<24;
-			GB  *(uint*)&objects[i].xvel |= b<<16;
-			GB  *(uint*)&objects[i].xvel |= b<<8;
-			GB  *(uint*)&objects[i].xvel |= b;
-			GB  *(uint*)&objects[i].yvel = b<<24;
-			GB  *(uint*)&objects[i].yvel |= b<<16;
-			GB  *(uint*)&objects[i].yvel |= b<<8;
-			GB  *(uint*)&objects[i].yvel |= b;
-			GB  *(uint*)&objects[i].facing = b<<24;
-			GB  *(uint*)&objects[i].facing |= b<<16;
-			GB  *(uint*)&objects[i].facing |= b<<8;
-			GB  *(uint*)&objects[i].facing |= b;
-			GB  *(uint*)&objects[i].data = b<<24;
-			GB  *(uint*)&objects[i].data |= b<<16;
-			GB  *(uint*)&objects[i].data |= b<<8;
-			GB  *(uint*)&objects[i].data |= b;
-			GB  objects[i].data2 = b<<24;
-			GB  objects[i].data2 |= b<<16;
-			GB  objects[i].data2 |= b<<8;
-			GB  objects[i].data2 |= b;
+		fprintf(F, "\nEND_ROOM_TILES\n\nBEGIN_ROOM_OBJECTS\n");
+		for (uint i=0; i < nobjects; i++) {
+			fprintf(F, "ROOM_OBJECT(%hu, %f, %f, %f, %f, %d, NULL, %u)\n",
+				objects[i].id,
+				objects[i].x,
+				objects[i].y,
+				objects[i].xvel,
+				objects[i].yvel,
+				objects[i].facing,
+				objects[i].data2
+			);
 		}
-		GB  bg_color.r = b;
-		GB  bg_color.g = b;
-		GB  bg_color.b = b;
-		GB  bg_color.a = b;
-		GB  *(uint*)&bg_index = b<<24;
-		GB  *(uint*)&bg_index |= b<<16;
-		GB  *(uint*)&bg_index |= b<<8;
-		GB  *(uint*)&bg_index |= b;
-		saved_objects = NULL;
+		return 0 <= fprintf(F, "END_ROOM_OBJECTS\n\nROOM_DEF(%hu, %hu, %hu, %hhu, %hhu, %hhu, %hhu, %d)\n\n",
+			width, height, nobjects, bg_color.r, bg_color.g, bg_color.b, bg_color.a, bg_index
+		);
 	}
-
-	//void print_to_file (FILE* F) {
-	//}
-
-
-		/*
-		if (1 != fread(&width, 2, 1, F)) die("Error: ran out of binary input at width.\n");
-		width = (width/256) + 256*(width%256);
-		if (1 != fread(&height, 2, 1, F)) die("Error: ran out of binary input at height.\n");
-		height = (height/256) + 256*(height%256);
-		tiles = new int16 [(int)(width*height)];
-		for (int i=0; i < width*height; i++) {  // Swap byte order
-			int16* ts = (int16*)tiles;  // Unconst
-			ts[i] = (ts[i]/256) + 256*(ts[i]%256);
-		}
-		if (1 != fread((int16*)tiles, width*height*2, 1, F)) die("Error: ran out of binary input in tiles.\n");
-		if (1 != fread(&nobjects, 2, 1, F)) die("Error: ran out of binary input at nobjects.\n");
-		objects = new obj::Desc [nobjects];
-		if (1 != fread((obj::Desc*)objects, nobjects*32, 1, F)) die("Error: ran out of binary input in objects.\n");
-		if (1 != fread(&bg_color, 4, 1, F)) die("Error: ran out of binary input at bg_color.\n");
-		if (1 != fread(&bg_index, 4, 1, F)) die("Error: ran out of binary input at bg_index.\n");
-		saved_objects = NULL;
-	}*/
-
 
 
 #define BEGIN_ROOM_TILES int16 tiles [] = {

@@ -23,13 +23,17 @@ int main () {
 	obj::Desc(obj::rat, NULL, 7.5, 12).manifest();
 	obj::Desc(obj::crate, NULL, 8.5, 10.5).manifest();
 	*/
-	room::Room x;
-//	FILE* F = fopen("rooms/test1.room", "r");
+//	FILE* F = fopen("rooms/outputtest.room.c++", "w");
 //	if (F == NULL)
 //		printf("Failed to open F\n");
-//	x.read_from_file(F);
-//	x.enter();
-	room::file::test1::room.enter();
+//	if (room::file::test1::room.print_to_file(F)) {
+//		printf("Room write succeeded.\n");
+//	}
+//	else {
+//		printf("Room write failed.\n");
+//	}
+	
+	room::file::test2::room.enter();
 	main_loop();
 	return 0;
 }
