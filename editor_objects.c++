@@ -26,7 +26,7 @@ struct TilePicker : Object {
 					&img::tiles,
 					i % (uint)tilepicker_width + 0.5,
 					(720-16)*PX/window_scale - (i / (uint)tilepicker_width) - 0.5,
-					i, selected_tile < 0, true
+					i, flip_tile, true
 				);
 			}
 			window->Draw(sf::Shape::Rectangle(
@@ -43,6 +43,9 @@ struct TilePicker : Object {
 			printf("Click taken.\n");
 			return;
 		}
+		if (button[sf::Mouse::Middle] == 1) {
+			flip_tile = !flip_tile;
+		}
 		if (button[sf::Mouse::Left] == 1) {
 			if (cursor2.x < tilepicker_width) {
 				click_taken = true;
@@ -51,8 +54,7 @@ struct TilePicker : Object {
 					                  + (uint)((720-16)*PX/window_scale - cursor2.y)
 					                  * (uint)tilepicker_width;
 					if (clicked_tile < num_tiles) {
-						if (selected_tile < 0) selected_tile = -clicked_tile;
-						else selected_tile = clicked_tile;
+						selected_tile = clicked_tile;
 						printf("Selected %d.\n", selected_tile);
 					}
 				}
@@ -93,16 +95,28 @@ struct TilemapEditor : Object {
 	}
 	void before_move () {
 		if (click_taken) return;
-		click_taken = true;
 		room::Room* rc = room::current;
 		float x = cursor2.x + window_view.GetRect().Left*PX;
 		float y = cursor2.y - window_view.GetRect().Bottom*PX;
 	//	printf("%f, %f\n", x, y);
-		if (rc && button[sf::Mouse::Left]) {
-			if (x > 0 && x < rc->width)
-			if (y > 0 && y < rc->height) {
+		if (rc)
+		if (x > 0 && x < rc->width)
+		if (y > 0 && y < rc->height) {
+			if (button[sf::Mouse::Left]) {
+				click_taken = true;
 				rc->tiles[(uint)(rc->height - y)*rc->width + (uint)x]
-				 = selected_tile;
+					 = (flip_tile? -selected_tile : selected_tile);
+			}
+			else if (button[sf::Mouse::Right]) {
+				click_taken = true;
+				selected_tile = rc->tiles[(uint)(rc->height - y)*rc->width + (uint)x];
+				if (selected_tile < 0) {
+					flip_tile = true;
+					selected_tile = -selected_tile;
+				}
+				else if (selected_tile > 0) {
+					flip_tile = false;
+				}
 			}
 		}
 	}

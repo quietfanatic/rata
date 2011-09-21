@@ -79,6 +79,7 @@ char* message_pos_next = NULL;
  // Editor stuff
 bool mapeditor = false;
 int16 selected_tile = 0;
+bool flip_tile = false;
 float tilepicker_width = 1.5;
 
 

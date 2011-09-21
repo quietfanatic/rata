@@ -40,7 +40,7 @@ extern Tileinfo tileinfo [];
 //        <nvertexes> is the number of vertexes (the size of <vertexes> below
 //        <vertexes> is the list of vertexes that compose the physical shape of the tile.
 
-uint num_tiles = 9;  // <-- This number must equal the number of unique tiles.
+uint num_tiles = 9;  // <-- This number must equal the number of tiles below
 Tileinfo tileinfo [] = {
 	{"Empty", 0, 0, 0.0, 0,},
 	{"Metal block", 1, 0, 0.4, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
