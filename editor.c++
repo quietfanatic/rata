@@ -26,6 +26,9 @@ int main () {
 	obj::Desc(
 		obj::tilemap_editor
 	).manifest();
+	obj::Desc(
+		obj::tilepicker
+	).manifest();
 
 	load_room(&room::file::test1::room);
 

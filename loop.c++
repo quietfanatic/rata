@@ -319,6 +319,7 @@ void draw_phase () {
 }
 
 void input_phase () {
+	click_taken = false;
 	 // Count frames for each key and button
 	for (uint sym = 0; sym < 400; sym++)
 	if (key[sym] > 0 and key[sym] < 255) key[sym]++;
@@ -372,8 +373,9 @@ void input_phase () {
 				else if (cursor.y < -14) cursor.y = -14;
 			}
 			else {
-				cursor2.x = event.MouseMove.X*PX/window_scale + window_view.GetRect().Left*PX;
-				cursor2.y = -window_view.GetRect().Top*PX - event.MouseMove.Y*PX/window_scale;
+				cursor2.x = event.MouseMove.X*PX/window_scale;
+				cursor2.y = (window_view.GetRect().Bottom - window_view.GetRect().Top)*PX
+				          - event.MouseMove.Y*PX/window_scale;
 			}
 			break;
 		}

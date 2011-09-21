@@ -46,6 +46,7 @@ struct Cursor {
 	img::Image* img;  // Draw this
 } cursor,  // Relative to player
   cursor2;  // Relative to world
+bool click_taken = false;
 
  // Camera state
 struct Camera {
@@ -78,6 +79,7 @@ char* message_pos_next = NULL;
  // Editor stuff
 bool mapeditor = false;
 int16 selected_tile = 0;
+float tilepicker_width = 1.5;
 
 
 #include "util.h"

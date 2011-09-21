@@ -11,12 +11,14 @@ struct Tileinfo {
 	b2Vec2 vertexes [4];
 };
 
+extern uint num_tiles;
 extern Tileinfo tileinfo [];
 #else
 
 
 #define v b2Vec2
 
+uint num_tiles = 9;
 Tileinfo tileinfo [] = {
 	{"Empty", 0, 0, 0.0, 0,},
 	{"Metal block", 1, 0, 0.4, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
