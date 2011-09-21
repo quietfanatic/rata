@@ -114,14 +114,14 @@ namespace room {
 	}
 
 	void Room::manifest_tilemap () {
-		TileEdge edges [(uint)ceil(width)][(uint)ceil(height)][4];
+		TileEdge edges [(uint)ceil(width)][(uint)ceil(height)][TILE_MAX_VERTEXES];
 		for (uint y=0; y < height; y++)
 		for (uint x=0; x < width; x++) {
 			bool flip = (tile(x, y) < 0);
 			Tileinfo& t = tileinfo[flip? -tile(x,y) : tile(x,y)];
 			uint nv = t.nvertexes;
 			 // Generate edges
-			for (uint e=0; e < 4; e++) {
+			for (uint e=0; e < TILE_MAX_VERTEXES; e++) {
 				if (e < nv) {
 					uint n1e = e==0   ? nv-1: e-1;
 					uint n2e = e==nv-1? 0   : e+1;
@@ -138,11 +138,11 @@ namespace room {
 			 // Merge edges
 			for (uint e=0; e < nv; e++) {
 				if (x > 0)
-				for (uint p=0; p < 4; p++)
+				for (uint p=0; p < TILE_MAX_VERTEXES; p++)
 				if (edges[x-1][y][p].use)
 					maybe_merge_edge(&edges[x][y][e], &edges[x-1][y][p]);
 				if (y > 0)
-				for (uint p=0; p < 4; p++)
+				for (uint p=0; p < TILE_MAX_VERTEXES; p++)
 				if (edges[x][y-1][p].use)
 					maybe_merge_edge(&edges[x][y][e], &edges[x][y-1][p]);
 			}
@@ -157,7 +157,7 @@ namespace room {
 		fixdef.filter = cf::solid;
 		for (uint x=0; x < width; x++)
 		for (uint y=0; y < height; y++)
-		for (uint e=0; e < 4; e++)
+		for (uint e=0; e < TILE_MAX_VERTEXES; e++)
 		if (edges[x][y][e].use) {
 			bool flip = (tile(x, y) < 0);
 			Tileinfo& t = tileinfo[flip? -tile(x,y) : tile(x,y)];
