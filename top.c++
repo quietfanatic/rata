@@ -33,16 +33,19 @@ b2World* world;
  // SFML main window
 sf::Image* screen;
 sf::RenderWindow* window;
+sf::View window_view = sf::View(sf::FloatRect(0, -240, 320, 0));
+ // Shading
 bool screen_shade = false;
 sf::Color screen_shade_color = sf::Color(255, 196, 63);
 sf::Blend::Mode screen_shade_blend = sf::Blend::Multiply;
 
  // Cursor state
 struct Cursor {
-	float x;  // Position in game coordinates relative to player
+	float x;
 	float y;
 	img::Image* img;  // Draw this
-} cursor;
+} cursor,  // Relative to player
+  cursor2;  // Relative to world
 
  // Camera state
 struct Camera {
@@ -59,9 +62,10 @@ Object* creation_queue = NULL;
 unsigned char key[400];  // Counts number of frames up to 255
 unsigned char button[10];
 
- // Global frame timer
+ // Time
 uint frame_number = 0;
-
+sf::Clock frameclock;
+float lastframe = 0;
 
  // Game-specific global stuff
 Rata* rata = NULL;
@@ -69,6 +73,11 @@ char* message = NULL;
 char* message_pos = NULL;
 char* message_pos_next = NULL;
 
+
+
+ // Editor stuff
+bool mapeditor = false;
+int16 selected_tile = 0;
 
 
 #include "util.h"

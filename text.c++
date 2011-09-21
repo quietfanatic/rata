@@ -24,7 +24,7 @@ uint letter_width [256] = {
 uint text_width (char* s) {
 	uint r;
 	for (r = 0; *s; s++) {
-		r += letter_width[*s];
+		r += letter_width[(uint8)*s];
 		if (*s == '\n') break;
 	}
 	return r;
@@ -32,7 +32,7 @@ uint text_width (char* s) {
 
 
 
-
+/*
 void render_text (char* text, float x, float y, uint lines=2, bool cam=false) {
 	uint charcount = 0;
 	uint linecount = 0;
@@ -52,7 +52,7 @@ void render_text (char* text, float x, float y, uint lines=2, bool cam=false) {
 	}
 	//printdesc->x, desc->y
 }
-
+*/
 
 
 

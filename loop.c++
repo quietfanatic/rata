@@ -1,8 +1,4 @@
 
-sf::Clock frameclock;
-float lastframe = 0;
-
-sf::View window_view = sf::View(sf::FloatRect(0, -240, 320, 0));
 
 void quit_game () {
 	window->Close();
@@ -138,12 +134,12 @@ void draw_phase () {
 			-(camera.y - 7.5)*UNPX
 		));
 
-		window->SetView(window_view);
 	}
+	window->SetView(window_view);
 	 // Draw background
-	if (room::current->bg_index < 0)
+	if (rc && rc->bg_index < 0)
 		window->Clear(rc->bg_color);
-	else {
+	else if (rc) {
 		float w = img::_bgs[rc->bg_index]->sfi.GetWidth()*PX;
 		float h = img::_bgs[rc->bg_index]->sfi.GetHeight()*PX;
 		float bg_x = MOD(-camera.x/2, w);
@@ -153,23 +149,36 @@ void draw_phase () {
 			draw_image(img::_bgs[rc->bg_index], x, y);
 		}
 	}
+	uint minx, miny, maxx, maxy;
 	 // Draw back tiles
-	uint maxx = MIN(rc->width, ceil(camera.x + 10));
-	uint maxy = MIN(rc->height, rc->height - floor(camera.y - 7.5));
-	for (uint x=MAX(0, floor(camera.x - 10)); x < maxx ; x++)
-	for (uint y=MAX(0, rc->height - ceil(camera.y + 7.5)); y < maxy; y++) {
-	//for (uint x=0; x<width; x++)
-	//for (uint y=0; y<height; y++) {
-		int tile = rc->tile(x, y);
-		bool flip = (tile < 0);
-		if (flip) tile = -tile;
-		if (tileinfo[tile].back) {
-			//printf("Drawing tile %d at %d, %d\n", data[(y*width+x)], x, y);
-			draw_image(
-				&img::tiles,
-				x+.5, rc->height-y-.5,
-				tile, flip
-			);
+	if (rc) {
+//		if (mapeditor) {
+//			minx = miny = 0;
+//			maxx = rc->width;
+//			maxy = rc->height;
+//		}
+//		else {
+			minx = MAX(0, window_view.GetRect().Left*PX);
+			miny = MAX(0, rc->height+window_view.GetRect().Top*PX);
+			maxx = MIN(rc->width, ceil(window_view.GetRect().Right*PX));
+			maxy = MIN(rc->height, ceil(rc->height+window_view.GetRect().Bottom*PX));
+//		}
+//		printf("Drawing tilemap from %d, %d to %d, %d\n", minx, miny, maxx, maxy);
+		for (uint x=minx; x < maxx; x++)
+		for (uint y=miny; y < maxy; y++) {
+		//for (uint x=0; x<width; x++)
+		//for (uint y=0; y<height; y++) {
+			int tile = rc->tile(x, y);
+			bool flip = (tile < 0);
+			if (flip) tile = -tile;
+			if (tileinfo[tile].back) {
+				//printf("Drawing tile %d at %d, %d\n", tile, x, y);
+				draw_image(
+					&img::tiles,
+					x+.5, rc->height-y-.5,
+					tile, flip
+				);
+			}
 		}
 	}
 	 // Draw objects
@@ -186,24 +195,27 @@ void draw_phase () {
 				));
 		}
 	}
+
 	 // Draw front tiles
-	for (uint x=MAX(0, floor(camera.x - 10)); x < maxx ; x++)
-	for (uint y=MAX(0, rc->height - ceil(camera.y + 7.5)); y < maxy; y++) {
-	//for (uint x=0; x<width; x++)
-	//for (uint y=0; y<height; y++) {
-		int tile = rc->tile(x, y);
-		bool flip = (tile < 0);
-		if (flip) tile = -tile;
-		if (tileinfo[tile].front) {
-			//printf("Drawing tile %d at %d, %d\n", data[(y*width+x)], x, y);
-			draw_image(
-				&img::tiles,
-				x+.5, rc->height-y-.5,
-				tile, flip
-			);
+	if (rc) {
+		for (uint x=minx; x < maxx; x++)
+		for (uint y=miny; y < maxy; y++) {
+		//for (uint x=0; x<width; x++)
+		//for (uint y=0; y<height; y++) {
+			int tile = rc->tile(x, y);
+			bool flip = (tile < 0);
+			if (flip) tile = -tile;
+			if (tileinfo[tile].front) {
+				//printf("Drawing tile %d at %d, %d\n", tile, x, y);
+				draw_image(
+					&img::tiles,
+					x+.5, rc->height-y-.5,
+					tile, flip
+				);
+			}
 		}
 	}
-	if (debug_mode) {
+	if (rc && debug_mode) {
 		 // Debug draw tilemap
 		for (b2Fixture* f = room::tilemap_obj->body->GetFixtureList(); f; f = f->GetNext()) {
 			b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
@@ -293,7 +305,7 @@ void draw_phase () {
 				&img::font_proportional, pos, 1,
 				*p, false, true
 			);
-			pos += letter_width[*p]*PX;
+			pos += letter_width[(uint8)*p]*PX;
 		}
 	}
 	//sf::Sprite window_s (window);
@@ -302,7 +314,7 @@ void draw_phase () {
 	window->Display();
 	float time = frameclock.GetElapsedTime();
 	dbg(6, "%f\r", 1/(time - lastframe));
-	fflush(stdout);
+	if (DEBUG >= 6) fflush(stdout);
 	lastframe = time;
 }
 
@@ -359,6 +371,10 @@ void input_phase () {
 				if (cursor.y > 14) cursor.y = 14;
 				else if (cursor.y < -14) cursor.y = -14;
 			}
+			else {
+				cursor2.x = event.MouseMove.X*PX/window_scale + window_view.GetRect().Left*PX;
+				cursor2.y = -window_view.GetRect().Top*PX - event.MouseMove.Y*PX/window_scale;
+			}
 			break;
 		}
 		case sf::Event::Closed: {
@@ -371,11 +387,13 @@ void input_phase () {
 void move_phase () {
 	for (Object* o = objects_by_order; o; o = o->next_order)
 		o->before_move();
-
-	world->Step(1/120.0, 10, 10);
-	world->Step(1/120.0, 10, 10);
-	//world->Step(1/180.0, 10, 10);
-	//world->Step(1/240.0, 10, 10);
+	
+	if (world) {
+		world->Step(1/120.0, 10, 10);
+		world->Step(1/120.0, 10, 10);
+		//world->Step(1/180.0, 10, 10);
+		//world->Step(1/240.0, 10, 10);
+	}
 
 	for (Object* o = objects_by_order; o; o = o->next_order)
 		o->after_move();

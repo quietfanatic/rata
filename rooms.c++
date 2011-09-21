@@ -191,9 +191,9 @@ namespace room {
 		for (uint y=0; y < height; y++) {
 			for (uint x=0; x < width; x++) {
 				fprintf(F, "% 3d", tile(x, y));
-				if (x != width-1) fprintf(F, ",");
+				if (x+1 != width) fprintf(F, ",");
 			}
-			if (y != height-1) fprintf(F, ",\n");
+			if (y+1 != height) fprintf(F, ",\n");
 		}
 		fprintf(F, "\nEND_ROOM_TILES\n\nBEGIN_ROOM_OBJECTS\n");
 		for (uint i=0; i < nobjects; i++) {

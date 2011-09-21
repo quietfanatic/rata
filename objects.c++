@@ -36,7 +36,9 @@ namespace obj {
 		mousehole,
 		hiteffect,
 		patroller,
-		heart
+		heart,
+		tilemap_editor,
+		object_desc
 	};
 	struct Desc;
 	struct Def;
@@ -232,8 +234,14 @@ struct Object {
 	virtual void after_move () { }
 	virtual void on_destroy () { }
 	virtual void draw () {
-		if (def()->image)
-			draw_image(def()->image, x(), y(), subimage, facing == 1);
+		if (def()->image) {
+			if (body) {
+				draw_image(def()->image, x(), y(), subimage, facing == 1);
+			}
+			else {
+				draw_image(def()->image, desc->x, desc->y, subimage, facing == 1);
+			}
+		}
 	}
 
 	virtual bool needs_floor () { return false; }
@@ -527,7 +535,7 @@ struct Heart : Object {
 
 
 #include "enemies.c++"
-
+#include "editor_objects.c++"
 
 
  // loose end from above
@@ -629,6 +637,7 @@ const obj::Def obj::def [] = {
 	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>, NULL},
 	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>, &img::patroller},
 	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, &img::heart},
+	{"Tilemap editor", 0, NULL, -100, 0, obj::ALLOC<TilemapEditor>, NULL},
 
 };
 

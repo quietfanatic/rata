@@ -44,7 +44,10 @@ void draw_image (img::Image* img, float x, float y, int sub=0, bool flip=false, 
 	if (!cam)
 		drawing_sprite.SetPosition(round((x)*UNPX - xpos), round((-y)*UNPX - img->y));
 	else
-		drawing_sprite.SetPosition((camera.x+x-10)*UNPX - xpos, (-(camera.y+y-7.5))*UNPX - img->y);
+		drawing_sprite.SetPosition(
+			window_view.GetRect().Left + x*UNPX - xpos,
+			-window_view.GetRect().Top - y*UNPX - img->y
+		);
 	window->Draw(drawing_sprite);
 };
 
