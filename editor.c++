@@ -31,7 +31,7 @@ int main () {
 	).manifest();
 	obj::Desc(
 		obj::clickable_text,
-		(void*)"Test text",
+		(void*)" Test text ",
 		0, 0, 0, 0, 0, NULL
 	).manifest();
 

@@ -65,14 +65,14 @@ void draw_rect (float l, float t, float r, float b, sf::Color color=sf::Color(31
 	sf::FloatRect vr = window_view.GetRect();
 	if (cam)
 		window->Draw(sf::Shape::Rectangle(
-			vr.Left + l*PX, vr.Bottom - t*PX,
-			vr.Left + r*PX, vr.Bottom - b*PX,
+			vr.Left + l, vr.Top + t,
+			vr.Left + r, vr.Top + b,
 			color
 		));
 	else
 		window->Draw(sf::Shape::Rectangle(
-			l*PX, -t*PX,
-			r*PX, -b*PX,
+			l, t,
+			r, b,
 			color
 		));
 };

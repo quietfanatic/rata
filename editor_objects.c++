@@ -17,9 +17,16 @@ struct TilePicker : Object {
 		if (room::current) {
 			sf::FloatRect vr = window_view.GetRect();
 			draw_rect(
-				vr.Left, vr.Top - 16*PX/window_scale,
-				vr.Left + tilepicker_width, vr.Bottom,
+				vr.Left, vr.Bottom - 16*PX/window_scale,
+				vr.Left + tilepicker_width, vr.Top,
 				room::current->bg_color
+			);
+			draw_rect(
+				vr.Left + tilepicker_width,
+				vr.Bottom - 16*PX/window_scale,
+				vr.Left + tilepicker_width + 1,
+				vr.Top,
+				sf::Color(31, 31, 31, 127)
 			);
 				
 			for (uint i=0; i < num_tiles; i++) {
@@ -47,7 +54,7 @@ struct TilePicker : Object {
 		if (button[sf::Mouse::Middle] == 1) {
 			flip_tile = !flip_tile;
 		}
-		if (button[sf::Mouse::Left] == 1) {
+		if (button[sf::Mouse::Left] == 1 || button[sf::Mouse::Right] == 1) {
 			if (cursor2.x < tilepicker_width) {
 				click_taken = true;
 				if (cursor2.x < (uint)tilepicker_width) {
@@ -69,9 +76,44 @@ struct TilePicker : Object {
 			click_taken = true;
 			tilepicker_width = cursor2.x;
 		}
+		else if (button[sf::Mouse::Left] && cursor2.x < tilepicker_width) {
+			click_taken = true;
+		}
 		else {
 			resizing = false;
-		}	
+		}
+		if (key[sf::Key::W]) {
+			window_view.SetFromRect(sf::FloatRect(
+				window_view.GetRect().Left,
+				window_view.GetRect().Bottom + 2*PX,
+				window_view.GetRect().Right,
+				window_view.GetRect().Top + 2*PX
+			));
+		}
+		if (key[sf::Key::A]) {
+			window_view.SetFromRect(sf::FloatRect(
+				window_view.GetRect().Left - 2*PX,
+				window_view.GetRect().Bottom,
+				window_view.GetRect().Right - 2*PX,
+				window_view.GetRect().Top
+			));
+		}
+		if (key[sf::Key::S]) {
+			window_view.SetFromRect(sf::FloatRect(
+				window_view.GetRect().Left,
+				window_view.GetRect().Bottom - 2*PX,
+				window_view.GetRect().Right,
+				window_view.GetRect().Top - 2*PX
+			));
+		}
+		if (key[sf::Key::D]) {
+			window_view.SetFromRect(sf::FloatRect(
+				window_view.GetRect().Left + 2*PX,
+				window_view.GetRect().Bottom,
+				window_view.GetRect().Right + 2*PX,
+				window_view.GetRect().Top
+			));
+		}
 	}
 };
 
