@@ -3,6 +3,9 @@
 #include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
 #include <stdio.h>
+#ifdef MAPEDITOR
+#include <unordered_map>  // Sadly, we are now relying on the STL.
+#endif
 //#define printf(...) (__VA_ARGS__)
 
 #include "debug.c++"
@@ -75,13 +78,13 @@ char* message_pos = NULL;
 char* message_pos_next = NULL;
 
 
-
+#ifdef MAPEDITOR
  // Editor stuff
 bool mapeditor = false;
 int16 selected_tile = 0;
 bool flip_tile = false;
 float tilepicker_width = 1.5;
-
+#endif
 
 #include "util.h"
 #include "text.c++"

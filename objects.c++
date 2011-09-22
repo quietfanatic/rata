@@ -37,9 +37,28 @@ namespace obj {
 		hiteffect,
 		patroller,
 		heart,
+		clickable_text,
 		tilemap_editor,
 		tilepicker,
 	};
+#ifdef MAPEDITOR
+	char* idname [] {
+		"obj::object",
+		"obj::rata",
+		"obj::solid",
+		"obj::tilemap",
+		"obj::bullet",
+		"obj::rat",
+		"obj::crate",
+		"obj::mousehole",
+		"obj::hiteffect",
+		"obj::patroller",
+		"obj::heart",
+		"obj::clickable_text",
+		"obj::tilemap_editor",
+		"obj::tilepicker"
+	};
+#endif
 	struct Desc;
 	struct Def;
 	extern const Def def [];
@@ -535,8 +554,13 @@ struct Heart : Object {
 
 
 #include "enemies.c++"
+#ifdef MAPEDITOR
 #include "editor_objects.c++"
-
+#else
+typedef Object ClickableText;
+typedef Object TilemapEditor;
+typedef Object TilePicker;
+#endif
 
  // loose end from above
 
@@ -637,6 +661,7 @@ const obj::Def obj::def [] = {
 	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>, NULL},
 	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>, &img::patroller},
 	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, &img::heart},
+	{"Clickable text", 0, NULL, -2000, 2000, obj::ALLOC<ClickableText>, NULL},
 	{"Tilemap editor", 0, NULL, -100, 100, obj::ALLOC<TilemapEditor>, NULL},
 	{"Tile picker", 0, NULL, -1000, 1000, obj::ALLOC<TilePicker>, NULL}
 

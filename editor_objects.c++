@@ -1,5 +1,14 @@
 
 
+struct ClickableText : Object {
+	typedef void(* command_type )();
+	char* message () { return (char*)desc->data; }
+	command_type command () { return (command_type)desc->data2; }
+	void draw () {
+		draw_rect(desc->x, desc->y, desc->x + text_width(message())*PX, desc->y-1);
+		render_text(message(), desc->x, desc->y); 
+	}
+};
 
 
 struct TilePicker : Object {

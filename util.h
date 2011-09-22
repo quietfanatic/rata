@@ -3,7 +3,11 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MOD(a, b) ((a) - (b) * (double)(int)((a)/(b)))
-#define SWAP(a, b) {typeof(a) _t = b; b = a; a = _t;}
+#ifdef MAPEDITOR
+	#define SWAP(a, b) {decltype(a) _t = b; b = a; a = _t;}
+#else
+	#define SWAP(a, b) {typeof(a) _t = b; b = a; a = _t;}
+#endif
 
 #define coords2sf(x, y) (x)/PX, (-(y))/PX
 
@@ -49,6 +53,21 @@ void draw_image (img::Image* img, float x, float y, int sub=0, bool flip=false, 
 			window_view.GetRect().Bottom - y*UNPX - img->y
 		);
 	window->Draw(drawing_sprite);
+};
+void draw_rect (float l, float t, float r, float b, sf::Color color=sf::Color(31, 31, 31, 127), bool cam=false) {
+	sf::FloatRect vr = window_view.GetRect();
+	if (cam)
+		window->Draw(sf::Shape::Rectangle(
+			vr.Left + l*PX, vr.Bottom - t*PX,
+			vr.Left + r*PX, vr.Bottom - b*PX,
+			color
+		));
+	else
+		window->Draw(sf::Shape::Rectangle(
+			l*PX, -t*PX,
+			r*PX, -b*PX,
+			color
+		));
 };
 
 inline float abs_f (float x) { return x>0 ? x : -x; }

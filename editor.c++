@@ -1,4 +1,4 @@
-
+#define MAPEDITOR
 
 #include "top.c++"
 
@@ -28,6 +28,11 @@ int main () {
 	).manifest();
 	obj::Desc(
 		obj::tilepicker
+	).manifest();
+	obj::Desc(
+		obj::clickable_text,
+		(void*)"Test text",
+		0, 0, 0, 0, 0, NULL
 	).manifest();
 
 	load_room(&room::file::test1::room);

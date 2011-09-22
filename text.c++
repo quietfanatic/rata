@@ -32,7 +32,7 @@ uint text_width (char* s) {
 
 
 
-/*
+
 void render_text (char* text, float x, float y, uint lines=2, bool cam=false) {
 	uint charcount = 0;
 	uint linecount = 0;
@@ -43,7 +43,7 @@ void render_text (char* text, float x, float y, uint lines=2, bool cam=false) {
 			charcount = 0;
 		}
 		else {
-			draw_image(&img::font,
+			draw_image(&img::font_proportional,
 				x + charcount*6*PX, y - linecount*8*PX,
 				*text, false, cam
 			);
@@ -52,7 +52,7 @@ void render_text (char* text, float x, float y, uint lines=2, bool cam=false) {
 	}
 	//printdesc->x, desc->y
 }
-*/
+
 
 
 
