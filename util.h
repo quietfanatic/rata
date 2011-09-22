@@ -9,7 +9,7 @@
 	#define SWAP(a, b) {typeof(a) _t = b; b = a; a = _t;}
 #endif
 
-#define coords2sf(x, y) (x)/PX, (-(y))/PX
+#define coords2sf(x, y) x, y
 
 #define ID(x) (x)
 
@@ -33,24 +33,31 @@ void draw_image (img::Image* img, float x, float y, int sub=0, bool flip=false, 
 	
 	sf::IntRect sr;
 	if (img->w == 0 || img->h == 0)
-		sr = sf::IntRect(0, 0, iw, ih);
+		sr = sf::IntRect(0, ih, iw, 0);
 	else
 		sr = sf::IntRect(
 			sub % (iw/img->w) * img->w,
-			sub / (iw/img->w) * img->h,
+			sub / (iw/img->w) * img->h + img->h,
 			sub % (iw/img->w) * img->w + img->w,
-			sub / (iw/img->w) * img->h + img->h
+			sub / (iw/img->w) * img->h
 		);
+	drawing_sprite.SetScale(PX, PX);
 	drawing_sprite.SetImage(img->sfi);
 	drawing_sprite.SetSubRect(sr);
 	drawing_sprite.FlipX(flip);
-	uint xpos = flip && img->w ? img->w - img->x : img->x;
+	drawing_sprite.FlipY(true);
+	uint h = img->h;
+	uint w = img->w;
+	if (h == 0) h = ih;
+	if (w == 0) w = iw;
+	drawing_sprite.SetCenter(flip?w-img->x:img->x, -img->y);
+//	uint xpos = flip && img->w ? img->w - img->x : img->x;
 	if (!cam)
-		drawing_sprite.SetPosition(round((x)*UNPX - xpos), round((-y)*UNPX - img->y));
+		drawing_sprite.SetPosition(round(x*UNPX)*PX, round(y*UNPX)*PX);
 	else
 		drawing_sprite.SetPosition(
-			window_view.GetRect().Left + x*UNPX - xpos,
-			window_view.GetRect().Bottom - y*UNPX - img->y
+			window_view.GetRect().Left + x,
+			window_view.GetRect().Top + y
 		);
 	window->Draw(drawing_sprite);
 };

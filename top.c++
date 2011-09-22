@@ -36,7 +36,7 @@ b2World* world;
  // SFML main window
 sf::Image* screen;
 sf::RenderWindow* window;
-sf::View window_view = sf::View(sf::FloatRect(0, -240, 320, 0));
+sf::View window_view = sf::View(sf::FloatRect(0, 15, 20, 0));
  // Shading
 bool screen_shade = false;
 sf::Color screen_shade_color = sf::Color(255, 196, 63);

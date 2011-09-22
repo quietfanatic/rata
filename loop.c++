@@ -127,12 +127,7 @@ void draw_phase () {
 			if (abs_f(newy - camera.y) < .25*PX) camera.y += .25*PX * sign_f(newy - camera.y);
 			else camera.y = newy;
 		}
-		window_view.SetFromRect(sf::FloatRect(
-			(camera.x - 10)*UNPX,
-			-(camera.y + 7.5)*UNPX,
-			(camera.x + 10)*UNPX,
-			-(camera.y - 7.5)*UNPX
-		));
+		window_view.SetCenter(camera.x, camera.y);
 
 	}
 	window->SetView(window_view);
@@ -140,12 +135,13 @@ void draw_phase () {
 	if (rc && rc->bg_index < 0)
 		window->Clear(rc->bg_color);
 	else if (rc) {
+//		draw_image(img::_bgs[rc->bg_index], camera.x, camera.y);
 		float w = img::_bgs[rc->bg_index]->sfi.GetWidth()*PX;
 		float h = img::_bgs[rc->bg_index]->sfi.GetHeight()*PX;
 		float bg_x = MOD(-camera.x/2, w);
 		float bg_y = MOD(-camera.y/2, h);
-		for (float x = bg_x + camera.x-10; x < bg_x + w + camera.x + 10; x += w)
-		for (float y = bg_y + camera.y-0; y < bg_y + h + camera.y + 15; y += h) {
+		for (float x = bg_x + camera.x - 10; x < camera.x + 10; x += w)
+		for (float y = bg_y + h + camera.y + 7.5; y > camera.y - 7.5; y -= h) {
 			draw_image(img::_bgs[rc->bg_index], x, y);
 		}
 	}
@@ -158,24 +154,24 @@ void draw_phase () {
 //			maxy = rc->height;
 //		}
 //		else {
-			minx = MAX(0, window_view.GetRect().Left*PX);
-			miny = MAX(0, rc->height+window_view.GetRect().Top*PX);
-			maxx = MIN(rc->width, ceil(window_view.GetRect().Right*PX));
-			maxy = MIN(rc->height, ceil(rc->height+window_view.GetRect().Bottom*PX));
+			minx = MAX(0, window_view.GetRect().Left);
+			miny = MAX(0, window_view.GetRect().Top);
+			maxx = MIN(rc->width, ceil(window_view.GetRect().Right));
+			maxy = MIN(rc->height, ceil(window_view.GetRect().Bottom));
 //		}
 //		printf("Drawing tilemap from %d, %d to %d, %d\n", minx, miny, maxx, maxy);
 		for (uint x=minx; x < maxx; x++)
 		for (uint y=miny; y < maxy; y++) {
 		//for (uint x=0; x<width; x++)
 		//for (uint y=0; y<height; y++) {
-			int tile = rc->tile(x, y);
+			int tile = rc->tile(x, rc->height-1-y);
 			bool flip = (tile < 0);
 			if (flip) tile = -tile;
 			if (tileinfo[tile].back) {
 				//printf("Drawing tile %d at %d, %d\n", tile, x, y);
 				draw_image(
 					&img::tiles,
-					x+.5, rc->height-y-.5,
+					x+.5, y+.5,
 					tile, flip
 				);
 			}
@@ -202,14 +198,14 @@ void draw_phase () {
 		for (uint y=miny; y < maxy; y++) {
 		//for (uint x=0; x<width; x++)
 		//for (uint y=0; y<height; y++) {
-			int tile = rc->tile(x, y);
+			int tile = rc->tile(x, rc->height-1-y);
 			bool flip = (tile < 0);
 			if (flip) tile = -tile;
 			if (tileinfo[tile].front) {
 				//printf("Drawing tile %d at %d, %d\n", tile, x, y);
 				draw_image(
 					&img::tiles,
-					x+.5, rc->height-y-.5,
+					x+.5, y+.5,
 					tile, flip
 				);
 			}
@@ -295,8 +291,8 @@ void draw_phase () {
 		if (message_pos_next) w += 8;
 		else w += 6;
 		window->Draw(sf::Shape::Rectangle(
-			camera.x*UNPX - w/2, -camera.y*UNPX + 104,
-			camera.x*UNPX + w/2, -camera.y*UNPX + 120,
+			camera.x - w*PX/2, camera.y - 6.5,
+			camera.x + w*PX/2, camera.y - 7.5,
 			sf::Color(0, 0, 0, 127)
 		));
 		char* p;
