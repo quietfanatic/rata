@@ -21,7 +21,7 @@
 //#define floor(x) ((int)(x))
 
 sf::Sprite drawing_sprite;
-void draw_image (img::Image* img, float x, float y, int sub=0, bool flip=false, bool cam=false) {
+void draw_image (img::Image* img, float x, float y, int sub=0, bool flip=false, bool cam=false, float scale=1.0) {
 	//if (!cam)
 	//if (x < camera.x - 10 - img->w
 	// || y < camera.y - 7.5 - img->h
@@ -41,7 +41,7 @@ void draw_image (img::Image* img, float x, float y, int sub=0, bool flip=false, 
 			sub % (iw/img->w) * img->w + img->w,
 			sub / (iw/img->w) * img->h
 		);
-	drawing_sprite.SetScale(PX, PX);
+	drawing_sprite.SetScale(PX*scale, PX*scale);
 	drawing_sprite.SetImage(img->sfi);
 	drawing_sprite.SetSubRect(sr);
 	drawing_sprite.FlipX(flip);

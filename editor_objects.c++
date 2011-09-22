@@ -5,8 +5,15 @@ struct ClickableText : Object {
 	char* message () { return (char*)desc->data; }
 	command_type command () { return (command_type)desc->data2; }
 	void draw () {
-		draw_rect(desc->x, desc->y, desc->x + text_width(message())*PX, desc->y-1);
-		render_text(message(), desc->x, desc->y); 
+		draw_rect(
+			desc->x,
+			desc->y,
+			desc->x + text_width(message())*PX*2/window_scale,
+			desc->y-1,
+			sf::Color(31, 31, 31, 127),
+			true
+		);
+		render_text(message(), desc->x, desc->y, 1, true, 2/window_scale); 
 	}
 };
 
@@ -17,14 +24,14 @@ struct TilePicker : Object {
 		if (room::current) {
 			sf::FloatRect vr = window_view.GetRect();
 			draw_rect(
-				vr.Left, vr.Bottom - 16*PX/window_scale,
+				vr.Left, vr.Bottom - 32*PX/window_scale,
 				vr.Left + tilepicker_width, vr.Top,
 				room::current->bg_color
 			);
 			draw_rect(
 				vr.Left + tilepicker_width,
-				vr.Bottom - 16*PX/window_scale,
-				vr.Left + tilepicker_width + 1,
+				vr.Bottom - 32*PX/window_scale,
+				vr.Left + tilepicker_width + 4*PX,
 				vr.Top,
 				sf::Color(31, 31, 31, 127)
 			);
@@ -33,15 +40,15 @@ struct TilePicker : Object {
 				draw_image(
 					&img::tiles,
 					i % (uint)tilepicker_width + 0.5,
-					45/window_scale - 16*PX/window_scale - (i / (uint)tilepicker_width) - 0.5,
+					45/window_scale - 32*PX/window_scale - (i / (uint)tilepicker_width) - 0.5,
 					i, flip_tile, true
 				);
 			}
 			window->Draw(sf::Shape::Rectangle(
 				vr.Left + (selected_tile % (uint)tilepicker_width),
-				vr.Bottom - 16*PX/window_scale - (selected_tile / (uint)tilepicker_width),
+				vr.Bottom - 32*PX/window_scale - (selected_tile / (uint)tilepicker_width),
 				vr.Left + (selected_tile % (uint)tilepicker_width) + 1,
-				vr.Bottom - 16*PX/window_scale - (selected_tile / (uint)tilepicker_width) - 1,
+				vr.Bottom - 32*PX/window_scale - (selected_tile / (uint)tilepicker_width) - 1,
 				sf::Color(0,0,0,0), 1*PX, sf::Color(255, 255, 255, 127)
 			));
 		}
@@ -59,7 +66,7 @@ struct TilePicker : Object {
 				click_taken = true;
 				if (cursor2.x < (uint)tilepicker_width) {
 					uint clicked_tile = (uint)cursor2.x
-					                  + (uint)45/window_scale-16*PX/window_scale - cursor2.y
+					                  + (uint)45/window_scale-32*PX/window_scale - cursor2.y
 					                  * (uint)tilepicker_width;
 					if (clicked_tile < num_tiles) {
 						selected_tile = clicked_tile;

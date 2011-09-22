@@ -32,7 +32,7 @@ int main () {
 	obj::Desc(
 		obj::clickable_text,
 		(void*)" Test text ",
-		0, 0, 0, 0, 0, NULL
+		0, 45/window_scale, 0, 0, NULL
 	).manifest();
 
 	load_room(&room::file::test1::room);

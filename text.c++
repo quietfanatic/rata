@@ -33,7 +33,7 @@ uint text_width (char* s) {
 
 
 
-void render_text (char* text, float x, float y, uint lines=2, bool cam=false) {
+void render_text (char* text, float x, float y, uint lines=2, bool cam=false, float scale=1.0) {
 	uint pos = 0;
 	uint linecount = 0;
 	for (;*text != 0 && linecount <= lines; text++) {
@@ -44,8 +44,8 @@ void render_text (char* text, float x, float y, uint lines=2, bool cam=false) {
 		}
 		else {
 			draw_image(&img::font_proportional,
-				x + pos*PX, y - linecount*8*PX,
-				*text, false, cam
+				x + pos*PX*scale, y - linecount*16*PX*scale,
+				*text, false, cam, scale
 			);
 			pos += letter_width[(uint8)*text];
 		}
