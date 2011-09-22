@@ -465,21 +465,21 @@ struct Bullet : Object {
 	void draw () {
 		if (midx == -1/0.0) {
 			window->Draw(sf::Shape::Line(
-				coords2sf(oldx, oldy),
-				coords2sf(x(), y()),
+				oldx, oldy,
+				x(), y(),
 				1*PX, sf::Color(255, 255, 255, 127)
 			));
 		}
 		else {
 			window->Draw(sf::Shape::Line(
-				coords2sf(oldx, oldy),
-				coords2sf(midx, midy),
+				oldx, oldy,
+				midx, midy,
 				1*PX, sf::Color(255, 255, 255, 127)
 			));
 			if (lifetime != -1) {
 				window->Draw(sf::Shape::Line(
-					coords2sf(midx, midy),
-					coords2sf(x(), y()),
+					midx, midy,
+					x(), y(),
 					1*PX, sf::Color(255, 255, 255, 127)
 				));
 			}

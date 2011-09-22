@@ -16,34 +16,26 @@ struct TilePicker : Object {
 	void draw () {
 		if (room::current) {
 			sf::FloatRect vr = window_view.GetRect();
-			window->Draw(sf::Shape::Rectangle(
-				vr.Left, vr.Top + 16/window_scale,
-				vr.Left + tilepicker_width*UNPX,
-				vr.Bottom,
+			draw_rect(
+				vr.Left, vr.Top - 16*PX/window_scale,
+				vr.Left + tilepicker_width, vr.Bottom,
 				room::current->bg_color
-			));
-			window->Draw(sf::Shape::Rectangle(
-				vr.Left + tilepicker_width*UNPX,
-				vr.Top + 16/window_scale,
-				vr.Left + tilepicker_width*UNPX + 4,
-				vr.Bottom,
-				sf::Color(31, 31, 31, 127)
-			));
+			);
 				
 			for (uint i=0; i < num_tiles; i++) {
 				draw_image(
 					&img::tiles,
 					i % (uint)tilepicker_width + 0.5,
-					(720-16)*PX/window_scale - (i / (uint)tilepicker_width) - 0.5,
+					45/window_scale - 16*PX/window_scale - (i / (uint)tilepicker_width) - 0.5,
 					i, flip_tile, true
 				);
 			}
 			window->Draw(sf::Shape::Rectangle(
-				vr.Left + (selected_tile % (uint)tilepicker_width)*UNPX,
-				vr.Top + 16/window_scale + (selected_tile / (uint)tilepicker_width)*UNPX,
-				vr.Left + (selected_tile % (uint)tilepicker_width)*UNPX + 1*UNPX,
-				vr.Top + 16/window_scale + (selected_tile / (uint)tilepicker_width)*UNPX + 1*UNPX,
-				sf::Color(0,0,0,0), 1, sf::Color(255, 255, 255, 127)
+				vr.Left + (selected_tile % (uint)tilepicker_width),
+				vr.Bottom - 16*PX/window_scale - (selected_tile / (uint)tilepicker_width),
+				vr.Left + (selected_tile % (uint)tilepicker_width) + 1,
+				vr.Bottom - 16*PX/window_scale - (selected_tile / (uint)tilepicker_width) - 1,
+				sf::Color(0,0,0,0), 1*PX, sf::Color(255, 255, 255, 127)
 			));
 		}
 	}
@@ -60,7 +52,7 @@ struct TilePicker : Object {
 				click_taken = true;
 				if (cursor2.x < (uint)tilepicker_width) {
 					uint clicked_tile = (uint)cursor2.x
-					                  + (uint)((720-16)*PX/window_scale - cursor2.y)
+					                  + (uint)45/window_scale-16*PX/window_scale - cursor2.y
 					                  * (uint)tilepicker_width;
 					if (clicked_tile < num_tiles) {
 						selected_tile = clicked_tile;
@@ -88,16 +80,16 @@ struct TilePicker : Object {
 struct TilemapEditor : Object {
 	void draw () {
 		if (room::current) {
-			float x = cursor2.x + window_view.GetRect().Left*PX;
-			float y = cursor2.y - window_view.GetRect().Bottom*PX;
+			float x = cursor2.x + window_view.GetRect().Left;
+			float y = cursor2.y + window_view.GetRect().Top;
 			if (x > 0)
 			if (x < room::current->width)
 			if (y > 0)
 			if (y < room::current->height) {
 				window->Draw(sf::Shape::Rectangle(
-					std::floor(x)*UNPX, -std::floor(y)*UNPX,
-					(std::floor(x)+1)*UNPX, -(std::floor(y)+1)*UNPX,
-					sf::Color(0,0,0,0), 1, sf::Color(255, 255, 255, 127)
+					std::floor(x), std::floor(y),
+					(std::floor(x)+1), (std::floor(y)+1),
+					sf::Color(0,0,0,0), 1*PX, sf::Color(255, 255, 255, 127)
 				));
 			}
 		}
@@ -105,8 +97,8 @@ struct TilemapEditor : Object {
 	void before_move () {
 		if (click_taken) return;
 		room::Room* rc = room::current;
-		float x = cursor2.x + window_view.GetRect().Left*PX;
-		float y = cursor2.y - window_view.GetRect().Bottom*PX;
+		float x = cursor2.x + window_view.GetRect().Left;
+		float y = cursor2.y + window_view.GetRect().Top;
 	//	printf("%f, %f\n", x, y);
 		if (rc)
 		if (x > 0 && x < rc->width)

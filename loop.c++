@@ -186,8 +186,8 @@ void draw_phase () {
 		if (debug_mode) {
 			if (o->body)
 				window->Draw(sf::Shape::Rectangle(
-					coords2sf(o->x()-1/16.0, o->y()-1/16.0),
-					coords2sf(o->x()+1/16.0, o->y()+1/16.0), sf::Color(255, 0, 0, 127)
+					o->x()-1/16.0, o->y()-1/16.0,
+					o->x()+1/16.0, o->y()+1/16.0, sf::Color(255, 0, 0, 127)
 				));
 		}
 	}
@@ -220,25 +220,25 @@ void draw_phase () {
 			 && e->m_vertex1.y > camera.y - 8.5
 			 && e->m_vertex1.y < camera.y + 8.5)
 				window->Draw(sf::Shape::Line(
-					e->m_vertex1.x*UNPX, -e->m_vertex1.y*UNPX,
-					e->m_vertex2.x*UNPX, -e->m_vertex2.y*UNPX,
+					e->m_vertex1.x, e->m_vertex1.y,
+					e->m_vertex2.x, e->m_vertex2.y,
 					1.0, sf::Color(0, 255, 0, 127)
 				));
 			/*window->Draw(sf::Shape::Line(
-				e->m_vertex1.x*UNPX, -e->m_vertex1.y*UNPX,
-				e->m_vertex0.x*UNPX+3, -e->m_vertex0.y*UNPX+3,
+				e->m_vertex1.x, -e->m_vertex1.y,
+				e->m_vertex0.x+3*PX, -e->m_vertex0.y+3*PX,
 				1.0, sf::Color(255, 255, 0, 127)
 			));
 			window->Draw(sf::Shape::Line(
-				e->m_vertex3.x*UNPX-3, -e->m_vertex3.y*UNPX-3,
-				e->m_vertex2.x*UNPX, -e->m_vertex2.y*UNPX,
+				e->m_vertex3.x-3*PX, -e->m_vertex3.y-3*PX,
+				e->m_vertex2.x, -e->m_vertex2.y,
 				1.0, sf::Color(0, 0, 255, 127)
 			));*/
 		}
 		 // Debug draw camera
 		window->Draw(sf::Shape::Rectangle(
-			coords2sf(camera.x-0.2, camera.y-0.2),
-			coords2sf(camera.x+0.2, camera.y+0.2),
+			camera.x-0.2, camera.y-0.2,
+			camera.x+0.2, camera.y+0.2,
 			sf::Color(255, 0, 0, 127)
 		));
 	}
@@ -370,8 +370,7 @@ void input_phase () {
 			}
 			else {
 				cursor2.x = event.MouseMove.X*PX/window_scale;
-				cursor2.y = (window_view.GetRect().Bottom - window_view.GetRect().Top)*PX
-				          - event.MouseMove.Y*PX/window_scale;
+				cursor2.y = (window->GetHeight() - event.MouseMove.Y)*PX/window_scale;
 			}
 			break;
 		}

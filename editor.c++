@@ -7,11 +7,11 @@
 
 void load_room (room::Room* newroom) {
 	room::current = newroom;
-	float w = room::current->width/2*UNPX;
-	float h = room::current->height/2*UNPX;
+	float w = room::current->width/2;
+	float h = room::current->height/2;
 	window_view.SetFromRect(sf::FloatRect(
-		-480/window_scale + w, -360/window_scale - h,
-		480/window_scale + w, 360/window_scale - h
+		-30/window_scale + w, 22.5/window_scale + h,
+		30/window_scale + w, -22.5/window_scale + h
 	));
 }
 
