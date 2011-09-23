@@ -1,0 +1,38 @@
+
+
+MAP EDITOR INSTRUCTIONS
+
+
+
+To use the map editor, type ./mapeditor <roomname>
+ where <roomname> is the name of the room you wish to edit.
+
+The editor does not yet support switching rooms in the middle of editing, so
+you must rerun it to change rooms.
+Furthermore, to create a new rooms, the room editor must be recompiled with:
+	perl gen_roomlist.pl > roomlist.c++
+	./build_mapeditor && ./mapeditor <roomname>
+I hope to fix this problem soom.
+
+The editor itself cannot create new rooms either yet.  To do so, you must
+copy the file of an existing room and rename it to "<name>.room.c++", and then
+recompile the editor as above.
+
+
+
+EDITOR CONTROLS:
+L-click on tilepicker: select tile
+L-click on tilemap: Draw tile
+M-click on tilemap: Flip selected tile
+R-click on tilemap: select tile under cursor
+L-click on "Save": Save room to the filename "rooms/<name>.room.c++".
+W, A, S, D:  Move view around
+
+
+
+
+
+
+
+
+

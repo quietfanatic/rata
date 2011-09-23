@@ -1,5 +1,5 @@
 #!/bin/bash
 
-LD_RUN_PATH=lib g++ -std=c++0x -Wall -Wno-write-strings -Wno-switch -Wno-reorder -Wno-format -ggdb lib/libsfml-graphics.so.1.6 lib/libBox2D.so.2.1.0 -o mapeditor editor.c++
+LD_RUN_PATH=lib g++ -Wall -Wno-write-strings -Wno-switch -Wno-reorder -Wno-format -ggdb lib/libsfml-graphics.so.1.6 lib/libBox2D.so.2.1.0 -o mapeditor editor.c++
 
 

@@ -40,9 +40,10 @@ namespace obj {
 		clickable_text,
 		tilemap_editor,
 		tilepicker,
+		editor_menu
 	};
 #ifdef MAPEDITOR
-	char* idname [] {
+	char* idname [] = {
 		"obj::object",
 		"obj::rata",
 		"obj::solid",
@@ -56,7 +57,8 @@ namespace obj {
 		"obj::heart",
 		"obj::clickable_text",
 		"obj::tilemap_editor",
-		"obj::tilepicker"
+		"obj::tilepicker",
+		"obj::editor_menu"
 	};
 #endif
 	struct Desc;
@@ -663,7 +665,8 @@ const obj::Def obj::def [] = {
 	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, &img::heart},
 	{"Clickable text", 0, NULL, -2000, 2000, obj::ALLOC<ClickableText>, NULL},
 	{"Tilemap editor", 0, NULL, -100, 100, obj::ALLOC<TilemapEditor>, NULL},
-	{"Tile picker", 0, NULL, -1000, 1000, obj::ALLOC<TilePicker>, NULL}
+	{"Tile picker", 0, NULL, -1000, 1000, obj::ALLOC<TilePicker>, NULL},
+	{"Editor menu", 0, NULL, -1900, 1900, obj::ALLOC<EditorMenu>, NULL}
 
 };
 

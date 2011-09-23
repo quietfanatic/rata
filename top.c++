@@ -3,9 +3,6 @@
 #include <SFML/Graphics.hpp>
 #include <Box2D/Box2D.h>
 #include <stdio.h>
-#ifdef MAPEDITOR
-#include <unordered_map>  // Sadly, we are now relying on the STL.
-#endif
 //#define printf(...) (__VA_ARGS__)
 
 #include "debug.c++"

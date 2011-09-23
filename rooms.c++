@@ -197,8 +197,8 @@ namespace room {
 		}
 		fprintf(F, "\nEND_ROOM_TILES\n\nBEGIN_ROOM_OBJECTS\n");
 		for (uint i=0; i < nobjects; i++) {
-			fprintf(F, "ROOM_OBJECT(%hu, %f, %f, %f, %f, %d, NULL, %u)\n",
-				objects[i].id,
+			fprintf(F, "ROOM_OBJECT(%s, %f, %f, %f, %f, %d, NULL, %u)\n",
+				obj::idname[objects[i].id],
 				objects[i].x,
 				objects[i].y,
 				objects[i].xvel,

@@ -3,11 +3,7 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MOD(a, b) ((a) - (b) * (double)(int)((a)/(b)))
-#ifdef MAPEDITOR
-	#define SWAP(a, b) {decltype(a) _t = b; b = a; a = _t;}
-#else
-	#define SWAP(a, b) {typeof(a) _t = b; b = a; a = _t;}
-#endif
+#define SWAP(a, b) {typeof(a) _t = b; b = a; a = _t;}
 
 #define coords2sf(x, y) x, y
 

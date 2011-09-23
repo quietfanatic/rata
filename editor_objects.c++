@@ -1,19 +1,43 @@
 
 
+struct EditorMenu : Object {
+	void draw () {
+		draw_rect(
+			0,
+			45/window_scale,
+			60/window_scale,
+			43/window_scale,
+			sf::Color(31, 31, 31, 127),
+			true
+		);
+	}
+};
+
 struct ClickableText : Object {
 	typedef void(* command_type )();
 	char* message () { return (char*)desc->data; }
 	command_type command () { return (command_type)desc->data2; }
 	void draw () {
-		draw_rect(
+		/*draw_rect(
 			desc->x,
 			desc->y,
 			desc->x + text_width(message())*PX*2/window_scale,
 			desc->y-1,
 			sf::Color(31, 31, 31, 127),
 			true
-		);
+		);*/
 		render_text(message(), desc->x, desc->y, 1, true, 2/window_scale); 
+	}
+	void before_move () {
+		if (click_taken) return;
+		if (button[sf::Mouse::Left] == 1)
+		if (cursor2.x > desc->x)
+		if (cursor2.x < desc->x + text_width(message())*PX*2/window_scale)
+		if (cursor2.y < desc->y)
+		if (cursor2.y > desc->y - 1) {
+			click_taken = true;
+			(*command())();
+		}
 	}
 };
 

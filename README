@@ -10,6 +10,9 @@ Instructions:
 	To recompile and run: ./try
 	To recompile (optimized) and run: ./tryopt
 	To reindex images (required if you change any image filenames): perl gen_img.pl > img.c++
+	To use map editor: ./build_mapeditor && ./mapeditor <roomname>
+	    where <roomname> is the name of the room you wish to edit.  The corresponding
+		 filename is "rooms/<roomname>.room.c++".
 	 
 
 
