@@ -562,6 +562,7 @@ struct Heart : Object {
 typedef Object ClickableText;
 typedef Object TilemapEditor;
 typedef Object TilePicker;
+typedef Object EditorMenu;
 #endif
 
  // loose end from above

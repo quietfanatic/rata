@@ -20,7 +20,9 @@ namespace room {
 		void enter ();
 		int16 tile (uint x, uint y);
 		void manifest_tilemap ();
+#ifdef MAPEDITOR
 		int print_to_file(FILE* F);
+#endif
 	};
 
 }
@@ -184,8 +186,7 @@ namespace room {
 		exit(1);
 	}
 
-#define GB bytecount++; if (1 != fread(&b, 1, 1, F)) { fprintf(stderr, "Room load error: ran out of bytes at %d.\n", bytecount); exit(1); }
-
+#ifdef MAPEDITOR
 	int Room::print_to_file (FILE* F) {
 		fprintf(F, "\n\nBEGIN_ROOM_TILES\n");
 		for (uint y=0; y < height; y++) {
@@ -211,7 +212,7 @@ namespace room {
 			width, height, nobjects, bg_color.r, bg_color.g, bg_color.b, bg_color.a, bg_index
 		);
 	}
-
+#endif
 
 #define BEGIN_ROOM_TILES int16 tiles [] = {
 #define END_ROOM_TILES };
