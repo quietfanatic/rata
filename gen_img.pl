@@ -25,7 +25,7 @@ for (@imgs) {
 	print "\t$id,\n";
 }
 
-print "\t_COMMA_EATER;\n\n\timg* _bgs [] = {\n";
+print "\t_COMMA_EATER;\n\n\timg::Image* _bgs [] = {\n";
 
 my @bgs;
 for (@imgs) {

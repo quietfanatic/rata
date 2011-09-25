@@ -6,7 +6,7 @@
 
 // Maximum number of vertexes in a tile's physical shape
 // Feel free to increase this value, but don't make it larger than necessary.
-#define TILE_MAX_VERTEXES 4
+#define TILE_MAX_VERTEXES 8
 
 struct Tileinfo {
 	const char* name;
@@ -40,7 +40,7 @@ extern Tileinfo tileinfo [];
 //        <nvertexes> is the number of vertexes (the size of <vertexes> below
 //        <vertexes> is the list of vertexes that compose the physical shape of the tile.
 
-uint num_tiles = 9;  // <-- This number must equal the number of tiles below
+uint num_tiles = 48;  // <-- This number must equal the number of tiles below
 Tileinfo tileinfo [] = {
 	{"Empty", 0, 0, 0.0, 0,},
 	{"Metal block", 1, 0, 0.4, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
@@ -51,6 +51,49 @@ Tileinfo tileinfo [] = {
 	{"Metal support", 0, 1, 0.0, 0},
 	{"Metal ramp l", 1, 0, 1.5, 3, {v(0, 0), v(1, 0), v(1, 1)}},
 	{"Metal ramp r", 1, 0, 1.5, 3, {v(0, 0), v(1, 0), v(0, 1)}},
+	{"Nothing", 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+
+	{"Dark lab tile ltr", 1, 0, 0.5, 6, {v(0, 0), v(1, 0), v(1, 0.875), v(0.875, 1), v(0.125, 1), v(0, 0.875)}},
+	{"Dark lab tile ltb", 1, 0, 0.5, 6, {v(0.125, 0), v(1, 0), v(1, 1), v(0.125, 1), v(0, 0.875), v(0, 0.125)}},
+	{"Dark lab tile lt+c", 1, 0, 0.5, 5, {v(0, 0), v(1, 0), v(1, 1), v(0.125, 1), v(0.825, 0)}},
+	{"Dark lab tile t+c", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile ilt+c", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile l+ct", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile l+c", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile lt", 1, 0, 0.5, 5, {v(0, 0), v(1, 0), v(1, 1), v(0.125, 1), v(0.825, 0)}},
+	{"Dark lab tile t", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile ilt", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile l", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile bg l", 1, 0, 0, 0,},
+	{"Dark lab tile bg r", 1, 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+
+	{"Dark lab tile lbr", 1, 0, 0.5, 6, {v(0.125, 0), v(0.875, 0), v(1, 0.125), v(1, 1), v(0, 1), v(0, 0.125)}},
+	{"Dark lab tile ltbr", 1, 0, 0.5, 8, {v(0.125, 0), v(0.875, 0), v(1, 0.125), v(1, 0.875), v(0.875, 1), v(0.125, 1), v(0, 0.875), v(0, 0.125)}},
+	{"Dark lab tile lb+c", 1, 0, 0.5, 5, {v(0.125, 0), v(1, 0), v(1, 1), v(0, 1), v(0, 0.125)}},
+	{"Dark lab tile b+c", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile ilb+c", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile l+cb", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile +c", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile lb", 1, 0, 0.5, 5, {v(0.125, 0), v(1, 0), v(1, 1), v(0, 1), v(0, 0.125)}},
+	{"Dark lab tile b", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile ilb", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile", 1, 0, 0.5, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Dark lab tile bg", 1, 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+	{"Nothing", 0, 0, 0,},
+
+
 	{"END OF TILES", 0, 0, 9}
 };
 
