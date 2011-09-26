@@ -90,7 +90,7 @@ struct TilePicker : Object {
 				click_taken = true;
 				if (cursor2.x < (uint)tilepicker_width) {
 					uint clicked_tile = (uint)cursor2.x
-					                  + (uint)(45/window_scale-32*PX/window_scale - cursor2.y)
+					                  + (uint)45/window_scale-32*PX/window_scale - cursor2.y
 					                  * (uint)tilepicker_width;
 					if (clicked_tile < num_tiles) {
 						selected_tile = clicked_tile;

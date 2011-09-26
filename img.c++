@@ -31,7 +31,6 @@ namespace img {
 	arm_m90,
 	arm_stand,
 	bg0_metal,
-	bg1_darklab,
 	body_dress_hurtback,
 	body_dress_kneel,
 	body_dress_layback,
@@ -102,9 +101,8 @@ namespace img {
 	tiles,
 	_COMMA_EATER;
 
-	img::Image* _bgs [] = {
+	Image* _bgs [] = {
 		&bg0_metal,
-		&bg1_darklab,
 		NULL
 	};
 }
@@ -171,9 +169,6 @@ void load_img () {
 	good &= img::bg0_metal.sfi.LoadFromFile("img/bg0-metal;0,0.png"); img::bg0_metal.sfi.SetSmooth(0);
 	img::bg0_metal.w = 0; img::bg0_metal.h = 0;
 	img::bg0_metal.x = 0; img::bg0_metal.y = 0;
-	good &= img::bg1_darklab.sfi.LoadFromFile("img/bg1-darklab;38x38,0,0.png"); img::bg1_darklab.sfi.SetSmooth(0);
-	img::bg1_darklab.w = 38; img::bg1_darklab.h = 38;
-	img::bg1_darklab.x = 0; img::bg1_darklab.y = 0;
 	good &= img::body_dress_hurtback.sfi.LoadFromFile("img/body+dress-hurtback.png"); img::body_dress_hurtback.sfi.SetSmooth(0);
 	img::body_dress_hurtback.w = 0; img::body_dress_hurtback.h = 0;
 	img::body_dress_hurtback.x = 32; img::body_dress_hurtback.y = 48;
