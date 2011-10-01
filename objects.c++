@@ -790,11 +790,11 @@ struct myCL : b2ContactListener {
 			}
 		}
 		if (a->desc->id == obj::heart && b->desc->id == obj::rata) {
-			//rata->heal(48);
+			rata->heal(48);
 			a->destroy();
 		}
 		else if (b->desc->id == obj::heart && a->desc->id == obj::rata) {
-			//rata->heal(48);
+			rata->heal(48);
 			b->destroy();
 		}
 	}
