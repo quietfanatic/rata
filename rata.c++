@@ -329,27 +329,38 @@ struct Rata : Walking {
 	}
 
 	void draw () {
+
+		uint head;
+		uint body;
+		uint arm;
+		uint angle_frame;
+		int walk_pose;
+		float aim_angle;
+		bool flip = facing<0;
+
 		if (flashing % 3 == 2) return;
-		//sf::Sprite s;
-		//s.SetCenter(32,34);
 		float lx = x();
 		float ly = y();
-		bool flip = facing<0;
-		//move_sprite(&s);
-		 // Flip if facing left
-		//if (facing < 0) {
-			//s.FlipX(true);
-			//s.SetCenter(30,34);
-		//}
-		if (hurting) {
-			RATA_DRAW(img::body_dress_hurtback);
-			RATA_DRAW(img::arm_dress_hurtback);
-			RATA_DRAW(img::head_hurtback);
-			RATA_DRAW(img::handgun_hurtback);
-			return;
-		}
-		 // Select body pose
-		int walk_pose;
+
+		 // Select aim angle frame
+		if (facing > 0)
+			aim_angle = aim_direction;
+		else if (aim_direction > 0)
+			aim_angle = M_PI - aim_direction;
+		else
+			aim_angle = -M_PI - aim_direction;
+		if (recoil_frames >= 20) aim_angle += M_PI/8.0;
+		     if (aim_angle > M_PI* 7.0/16.0) angle_frame = 8;
+		else if (aim_angle > M_PI* 5.0/16.0) angle_frame = 7;
+		else if (aim_angle > M_PI* 3.0/16.0) angle_frame = 6;
+		else if (aim_angle > M_PI* 1.0/16.0) angle_frame = 5;
+		else if (aim_angle > M_PI*-1.0/16.0) angle_frame = 4;
+		else if (aim_angle > M_PI*-3.0/16.0) angle_frame = 3;
+		else if (aim_angle > M_PI*-5.0/16.0) angle_frame = 2;
+		else if (aim_angle > M_PI*-7.0/16.0) angle_frame = 1;
+		else                                 angle_frame = 0;
+
+		 // Select walking frame
 		if (floor) {
 			float step_d = MOD(distance_walked, RATA_STEP * 2);
 			if (step_d < 0.01) walk_pose = 0;
@@ -359,7 +370,13 @@ struct Rata : Walking {
 			else walk_pose = 0;
 		}
 		else walk_pose = 1;
-		if (walk_pose != 0) {
+
+		 // Select body pose
+
+		if (hurting) {
+			body = pose::body::hurtbk;
+		}
+		else if (walk_pose != 0) {
 				//s.SetY(s.GetPosition().y+window_scale);
 				if (!floor)
 					ly -= 1*PX;
@@ -367,79 +384,51 @@ struct Rata : Walking {
 					ly -= 1*PX;
 				else if (abs_f(floor_contact->GetManifold()->localNormal.y) < 0.8)
 					ly += 1*PX;
-				RATA_DRAW(img::body_dress_walk);
+				body = pose::body::walk;
 		}
 		else {
-			RATA_DRAW(img::body_dress_stand);
+			body = pose::body::stand;
 		}
-		 // Select aim angle
-		//printf("%f -> ", aim_direction);
-		float aim_angle;
-		if (facing > 0)
-			aim_angle = aim_direction;
-		else if (aim_direction > 0)
-			aim_angle = M_PI - aim_direction;
-		else
-			aim_angle = -M_PI - aim_direction;
-		if (recoil_frames >= 20) aim_angle += M_PI/8.0;
-		//printf("%f\n", aim_angle);
-		if (!aiming) {
+
+		 // Select head pose
+		if (hurting)
+			head = pose::head::hurtbk;
+		else if (floor ? (walk_pose != 0) : (yvel() < -1.0))
+			head = pose::head::angle_walk[angle_frame];
+		else head = pose::head::angle_stand[angle_frame];
+
+
+		 // Select arm pose
+		if (hurting) {
+			arm = pose::arm::m68;
+		}
+		else if (aiming) {
+			arm = pose::arm::angle_m[angle_frame];
+		}
+		else {
 			if (walk_pose == 1) {
-				RATA_DRAW(img::arm_dress_walk_f);
-				RATA_DRAW(img::handgun_walk_f);
+				arm = pose::arm::m23;
 			}
 			else if (walk_pose == -1) {
-				RATA_DRAW(img::arm_dress_walk_b);
-				RATA_DRAW(img::handgun_walk_b);
+				arm = pose::arm::m0;
 			}
 			else {
-				RATA_DRAW(img::arm_dress_stand);
-				RATA_DRAW(img::handgun_stand);
+				arm = pose::arm::e0;
 			}
 		}
-		bool walk_head = floor ? (walk_pose != 0) : (yvel() < -1.0);
-		if (aim_angle > M_PI*5.0/16.0) {
-			if (aiming) { RATA_DRAW(img::arm_dress_m158); }
-			if (walk_head) { RATA_DRAW(img::head_walk_158); }
-			else { RATA_DRAW(img::head_stand_158); }
-			if (aiming) { RATA_DRAW(img::handgun_m158); }
-		}
-		else if (aim_angle > M_PI*3.0/16.0) {
-			if (aiming) { RATA_DRAW(img::arm_dress_m135); }
-			if (walk_head) { RATA_DRAW(img::head_walk_135); }
-			else { RATA_DRAW(img::head_stand_135); }
-			if (aiming) { RATA_DRAW(img::handgun_m135); }
-		}
-		else if (aim_angle > M_PI*1.0/16.0) {
-			if (aiming) { RATA_DRAW(img::arm_dress_m113); }
-			if (walk_head) { RATA_DRAW(img::head_walk_90); }
-			else { RATA_DRAW(img::head_stand_90); }
-			if (aiming) { RATA_DRAW(img::handgun_m113); }
-		}
-		else if (aim_angle > M_PI*-1.0/16.0) {
-			if (aiming) { RATA_DRAW(img::arm_dress_m90); }
-			if (walk_head) { RATA_DRAW(img::head_walk_90); }
-			else { RATA_DRAW(img::head_stand_90); }
-			if (aiming) { RATA_DRAW(img::handgun_m90); }
-		}
-		else if (aim_angle > M_PI*-3.0/16.0) {
-			if (aiming) { RATA_DRAW(img::arm_dress_m68); }
-			if (walk_head) { RATA_DRAW(img::head_walk_68); }
-			else { RATA_DRAW(img::head_stand_68); }
-			if (aiming) { RATA_DRAW(img::handgun_m68); }
-		}
-		else if (aim_angle > M_PI*-5.0/16.0) {
-			if (aiming) { RATA_DRAW(img::arm_dress_m45); }
-			if (walk_head) { RATA_DRAW(img::head_walk_45); }
-			else { RATA_DRAW(img::head_stand_45); }
-			if (aiming) { RATA_DRAW(img::handgun_m45); }
-		}
-		else {
-			if (aiming) { RATA_DRAW(img::arm_dress_m23); }
-			if (walk_head) { RATA_DRAW(img::head_walk_23); }
-			else { RATA_DRAW(img::head_stand_23); }
-			if (aiming) { RATA_DRAW(img::handgun_m23); }
-		}
+
+		 // Now to actually draw.
+
+		draw_image(&img::rata_body, lx, ly, body, flip);
+		draw_image(&img::rata_head,
+			lx + pose::body::headx[body]*facing,
+			ly + pose::body::heady[body],
+		head, flip);
+		draw_image(&img::rata_arm,
+			lx + pose::body::armx[body]*facing,
+			ly + pose::body::army[body],
+		arm, flip);
+
 	}
 };
 

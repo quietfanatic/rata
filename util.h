@@ -17,37 +17,37 @@
 //#define floor(x) ((int)(x))
 
 sf::Sprite drawing_sprite;
-void draw_image (img::Image* img, float x, float y, int sub=0, bool flip=false, bool cam=false, float scale=1.0) {
+void draw_image (img::Image* image, float x, float y, int sub=0, bool flip=false, bool cam=false, float scale=1.0) {
 	//if (!cam)
 	//if (x < camera.x - 10 - img->w
 	// || y < camera.y - 7.5 - img->h
 	// || x > camera.x + 10 + img->w
 	// || y > camera.y + 7.5 + img->h) return;
-	uint iw = img->sfi.GetWidth();
-	uint ih = img->sfi.GetHeight();
-	sub %= img->numsubs();
+	uint iw = image->sfi.GetWidth();
+	uint ih = image->sfi.GetHeight();
+	sub %= image->numsubs();
 	
 	sf::IntRect sr;
-	if (img->w == 0 || img->h == 0)
+	if (image->w == 0 || image->h == 0)
 		sr = sf::IntRect(0, ih, iw, 0);
 	else
 		sr = sf::IntRect(
-			sub % (iw/img->w) * img->w,
-			sub / (iw/img->w) * img->h + img->h,
-			sub % (iw/img->w) * img->w + img->w,
-			sub / (iw/img->w) * img->h
+			sub % (iw/image->w) * image->w,
+			sub / (iw/image->w) * image->h + image->h,
+			sub % (iw/image->w) * image->w + image->w,
+			sub / (iw/image->w) * image->h
 		);
 	drawing_sprite.SetScale(PX*scale, PX*scale);
-	drawing_sprite.SetImage(img->sfi);
+	drawing_sprite.SetImage(image->sfi);
 	drawing_sprite.SetSubRect(sr);
 	drawing_sprite.FlipX(flip);
 	drawing_sprite.FlipY(true);
-	uint h = img->h;
-	uint w = img->w;
+	uint h = image->h;
+	uint w = image->w;
 	if (h == 0) h = ih;
 	if (w == 0) w = iw;
-	drawing_sprite.SetCenter(flip?w-img->x:img->x, -img->y);
-//	uint xpos = flip && img->w ? img->w - img->x : img->x;
+	drawing_sprite.SetCenter(flip?w-image->x:image->x, -image->y);
+//	uint xpos = flip && image->w ? image->w - image->x : image->x;
 	if (!cam)
 		drawing_sprite.SetPosition(round(x*UNPX)*PX, round(y*UNPX)*PX);
 	else
