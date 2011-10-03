@@ -59,11 +59,11 @@ const uint num = 18;
 enum Pose     {     e0,    e23,    e45,    e68,    e90,   e113,   e135,   e158,   e180,
                     m0,    m23,    m45,    m68,    m90,   m113,   m135,   m158,   m180
 };
-float handx[]={   0*PX,   3*PX,   6*PX,   7*PX,   8*PX,   7*PX,   6*PX,   3*PX,   0*PX,
-                 -1*PX,   2*PX,   4*PX,   6*PX,   7*PX,   7*PX,   6*PX,   5*PX,   2*PX
+float handx[]={   0*PX,   3*PX,   5*PX,   7*PX,   8*PX,   7*PX,   5*PX,   3*PX,   0*PX,
+                 -1*PX,   1*PX,   3*PX,   5*PX,   6*PX,   6*PX,   5*PX,   4*PX,   2*PX
 };
 float handy[]={  -8*PX,  -7*PX,  -5*PX,  -3*PX,   0*PX,   3*PX,   5*PX,   7*PX,   8*PX,
-                 -8*PX,  -7*PX,  -6*PX,  -4*PX,  -2*PX,   0*PX,   2*PX,   4*PX,   6*PX
+                 -8*PX,  -6*PX,  -5*PX,  -4*PX,  -2*PX,   1*PX,   3*PX,   5*PX,   6*PX
 };
 		uint angle_e [] = { e0, e23, e45, e68, e90, e113, e135, e158, e180 };
 		uint angle_m [] = { m0, m23, m45, m68, m90, m113, m135, m158, m180 };
