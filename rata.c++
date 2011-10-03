@@ -1,6 +1,5 @@
 #define RATA_STEP 1.0
-#define RATA_DRAW(img) draw_image(&img, lx, ly, 0, flip);
-
+#define MAX_EQUIPS 10
 
 
 struct Rata : Walking {
@@ -18,6 +17,8 @@ struct Rata : Walking {
 	float distance_walked;  // For drawing
 	float oldxrel;
 	int recoil_frames;
+
+	item::Equip* equipment [MAX_EQUIPS];
 
 	 // Easy access to bits
 	float aim_center_x () { return x() + 2*PX*facing; }
@@ -311,6 +312,8 @@ struct Rata : Walking {
 		hurting = 0;
 		flashing = 0;
 		life = max_life = 144;
+		for (uint i=0; i<MAX_EQUIPS; i++) equipment[i] = NULL;
+		equipment[0] = &item::white_dress;
 		camera.x = x();
 		camera.y = y();
 		if (camera.x < 10) camera.x = 10;
@@ -403,7 +406,10 @@ struct Rata : Walking {
 			arm = pose::arm::m68;
 		}
 		else if (aiming) {
-			arm = pose::arm::angle_m[angle_frame];
+			if (aim_distance > 10)
+				arm = pose::arm::angle_e[angle_frame];
+			else
+				arm = pose::arm::angle_m[angle_frame];
 		}
 		else {
 			if (walk_pose == 1) {
@@ -420,14 +426,34 @@ struct Rata : Walking {
 		 // Now to actually draw.
 
 		draw_image(&img::rata_body, lx, ly, body, flip);
+		for (uint i=0; i<MAX_EQUIPS; i++)
+		if (equipment[i])
+		if (equipment[i]->body)
+			draw_image(equipment[i]->body, lx, ly, body, flip);
+
 		draw_image(&img::rata_head,
 			lx + pose::body::headx[body]*facing,
 			ly + pose::body::heady[body],
 		head, flip);
+		for (uint i=0; i<MAX_EQUIPS; i++)
+		if (equipment[i])
+		if (equipment[i]->head)
+			draw_image(equipment[i]->head,
+				lx + pose::body::headx[body]*facing,
+				ly + pose::body::heady[body],
+			head, flip);
+
 		draw_image(&img::rata_arm,
 			lx + pose::body::armx[body]*facing,
 			ly + pose::body::army[body],
 		arm, flip);
+		for (uint i=0; i<MAX_EQUIPS; i++)
+		if (equipment[i])
+		if (equipment[i]->arm)
+			draw_image(equipment[i]->arm,
+				lx + pose::body::armx[body]*facing,
+				ly + pose::body::army[body],
+			head, flip);
 
 	}
 };

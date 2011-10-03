@@ -1,0 +1,81 @@
+#!/bin/bash
+
+mkdir img/rata_tmp
+pushd img/rata_tmp
+
+gimp --no-data --no-fonts --no-interface -b "(sg-save-layer-cmd \"../../res/rata-base.xcf\" \"*\")" -b "(gimp-quit 0)"
+
+montage -geometry +0+0 -background none \
+arm-e0.png \
+arm-e23.png \
+arm-e45.png \
+arm-e68.png \
+arm-e90.png \
+arm-e113.png \
+arm-e135.png \
+arm-e158.png \
+arm-e180.png \
+arm-m0.png \
+arm-m23.png \
+arm-m45.png \
+arm-m68.png \
+arm-m90.png \
+arm-m113.png \
+arm-m135.png \
+arm-m158.png \
+arm-m180.png \
+-depth 8 ../rata-arm\;32x32\,15\,16.png
+
+montage -geometry +0+0 -background none \
+body-stand.png \
+body-walk.png \
+body-tiptoe.png \
+body-kneel.png \
+body-crawl.png \
+body-crawl2.png \
+body-sit.png \
+body-hurtbk.png \
+body-laybk.png \
+body-hurtfd.png \
+body-layfd.png \
+body-grab.png \
+-depth 8 ../rata-body\;32x32\,16\,30.png
+
+montage -geometry +0+0 -background none \
+head-stand-23.png \
+head-stand-45.png \
+head-stand-68.png \
+head-stand-90.png \
+head-stand-135.png \
+head-stand-158.png \
+head-walk-23.png \
+head-walk-45.png \
+head-walk-68.png \
+head-walk-90.png \
+head-walk-135.png \
+head-walk-158.png \
+head-hurtbk.png \
+head-laybk.png \
+-depth 8 ../rata-head\;32x32\,16\,14.png
+
+
+montage -geometry +0+0 -background none \
+dress-body-stand.png \
+dress-body-walk.png \
+dress-body-tiptoe.png \
+dress-body-kneel.png \
+dress-body-crawl.png \
+dress-body-crawl2.png \
+dress-body-sit.png \
+dress-body-hurtbk.png \
+dress-body-laybk.png \
+dress-body-hurtfd.png \
+dress-body-layfd.png \
+dress-body-grab.png \
+-depth 8 ../dress-body\;32x32\,16\,30.png
+
+
+
+
+popd
+rm -rf rata_tmp
