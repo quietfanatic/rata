@@ -78,4 +78,4 @@ dress-body-grab.png \
 
 
 popd
-rm -rf rata_tmp
+rm -rf img/rata_tmp
