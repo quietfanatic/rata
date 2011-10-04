@@ -143,10 +143,13 @@ struct Rata : Walking {
 		if (floor && !take_damage) {
 			if (hurting == 0) sitting = false;
 			if (dead) {
+				floor_friction = ground_decel();
+				ideal_xvel = 0;
 				set_fix_h8();
 			}
 			else if (sitting) {
-				 // Stay there.
+				floor_friction = ground_decel();
+				ideal_xvel = 0;
 				set_fix_21();
 			}
 			else if (hurting < 20) {
