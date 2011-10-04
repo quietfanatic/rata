@@ -32,11 +32,11 @@ namespace item {
 	};
 
 	void fire_handgun ();
-	uint handgun_bulletx [] = {
-		2*PX, 4*PX, 6*PX, 6*PX, 5*PX, 4*PX, 4*PX, 0*PX, -2*PX
+	float handgun_bulletx [] = {
+		2*PX, 3*PX, 5*PX, 5*PX, 5*PX, 4*PX, 3*PX, 0*PX, -2*PX
 	};
-	uint handgun_bullety [] = {
-		-5*PX, -4*PX, -4*PX, 0*PX, 2*PX, 4*PX, 6*PX, 6*PX, 5*PX
+	float handgun_bullety [] = {
+		-5*PX, -4*PX, -3*PX, 0*PX, 2*PX, 3*PX, 5*PX, 5*PX, 5*PX
 	};
 	
 	Equip handgun = {1,1,1,1,1,1,1,1,1, 0,
