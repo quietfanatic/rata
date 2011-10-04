@@ -56,7 +56,9 @@ head-walk-90.png \
 head-walk-135.png \
 head-walk-158.png \
 head-hurtbk.png \
+head-hurtfd.png \
 head-laybk.png \
+head-layfd.png \
 -depth 8 ../rata-head\;32x32\,16\,14.png
 
 

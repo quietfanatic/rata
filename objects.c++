@@ -644,11 +644,18 @@ b2Vec2 rata_poly_21 [] = {
 	b2Vec2(-5.5*PX, 18*PX),
 	b2Vec2(-5.5*PX, 11*PX)
 };
+b2Vec2 rata_poly_h8 [] = {
+	b2Vec2(-8*PX, 0*PX),
+	b2Vec2(8*PX, 0*PX),
+	b2Vec2(8*PX, 8*PX),
+	b2Vec2(-8*PX, 8*PX),
+};
 
 b2FixtureDef rata_fixes [] = {
-	make_fixdef(make_poly(7, rata_poly_27), cf::rata, 0, 0, 1.5),
-	make_fixdef(make_poly(7, rata_poly_25), cf::disabled, 0, 0, 1.5),
-	make_fixdef(make_poly(7, rata_poly_21), cf::rata, 0, 0, 1.5)
+	make_fixdef(make_poly(7, rata_poly_27), cf::rata, 0, 0, 1.2),
+	make_fixdef(make_poly(7, rata_poly_25), cf::disabled, 0, 0, 1.2),
+	make_fixdef(make_poly(7, rata_poly_21), cf::rata, 0, 0, 1.2),
+	make_fixdef(make_poly(4, rata_poly_h8), cf::rata, 0, 0, 1.2)
 };
 
 b2FixtureDef bullet_fix = make_fixdef(make_circle(0.05), cf::bullet, 0, 0.8, 10.0);
@@ -663,7 +670,7 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 const obj::Def obj::def [] = {
 
 	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, NULL},
-	{"Rata", 3, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
+	{"Rata", 4, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
 	{"Solid Object", 0, NULL, 0, 0, obj::ALLOC<Solid>, NULL},
 	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, NULL},
 	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>, NULL},

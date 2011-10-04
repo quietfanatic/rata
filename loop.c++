@@ -277,7 +277,7 @@ void draw_phase () {
 		window->Draw(shade_rect);
 	}
 	 // Draw cursor
-	if (rata) {
+	if (rata && !rata->dead) {
 		window->ShowMouseCursor(false);
 		draw_image(cursor.img, cursor.x + rata->aim_center_x(), cursor.y + rata->aim_center_y());
 	}
@@ -357,7 +357,7 @@ void input_phase () {
 			break;
 		}
 		case sf::Event::MouseMoved: {
-			if (rata && frame_number > 1) {
+			if (rata && !rata->dead && frame_number > 1) {
 				cursor.x += (event.MouseMove.X - window->GetWidth()/2.0)
 					* PX * cursor_scale / window_scale;
 				cursor.y += -(event.MouseMove.Y - window->GetHeight()/2.0)

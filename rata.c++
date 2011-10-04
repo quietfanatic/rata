@@ -12,6 +12,8 @@ struct Rata : Walking {
 	bool take_damage;
 	int hurting;
 	int flashing;
+	bool sitting;
+	bool dead;
 	bool kneeling;
 	float aim_distance;
 	float aim_direction;
@@ -32,27 +34,37 @@ struct Rata : Walking {
 	b2Fixture* fix_27 () { return body->GetFixtureList(); }
 	b2Fixture* fix_25 () { return body->GetFixtureList()->GetNext(); }
 	b2Fixture* fix_21 () { return body->GetFixtureList()->GetNext()->GetNext(); }
+	b2Fixture* fix_h8 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext(); }
 
-	b2Fixture* fix_current () {
-		if (hurting) return fix_27();
-		else if (kneeling) return fix_21();
-		else return fix_25();
-	}
+//	b2Fixture* fix_current () {
+//		if (hurting) return fix_27();
+//		else if (kneeling) return fix_21();
+//		else return fix_25();
+//	}
 
 	void set_fix_27 () {
 		fix_27()->SetFilterData(hurting||flashing ? cf::rata_invincible : cf::rata);
 		fix_25()->SetFilterData(cf::disabled);
 		fix_21()->SetFilterData(cf::disabled);
+		fix_h8()->SetFilterData(cf::disabled);
 	}
 	void set_fix_25 () {
 		fix_27()->SetFilterData(cf::disabled);
 		fix_25()->SetFilterData(hurting||flashing ? cf::rata_invincible : cf::rata);
 		fix_21()->SetFilterData(cf::disabled);
+		fix_h8()->SetFilterData(cf::disabled);
 	}
 	void set_fix_21 () {
 		fix_27()->SetFilterData(cf::disabled);
 		fix_25()->SetFilterData(cf::disabled);
 		fix_21()->SetFilterData(hurting||flashing ? cf::rata_invincible : cf::rata);
+		fix_h8()->SetFilterData(cf::disabled);
+	}
+	void set_fix_h8 () {
+		fix_27()->SetFilterData(cf::disabled);
+		fix_25()->SetFilterData(cf::disabled);
+		fix_21()->SetFilterData(cf::disabled);
+		fix_h8()->SetFilterData(hurting||flashing ? cf::rata_invincible : cf::rata);
 	}
 
 	 // Character stats (affected by items and such)
@@ -88,35 +100,36 @@ struct Rata : Walking {
 	void before_move () {
 		//floor = get_floor(fix_feet_current());
 		 // Aiming
-		aiming = (button[sf::Mouse::Right] > 0 || key[sf::Key::LShift] > 0);
-		if (cursor.x > 0) facing = 1;
-		else if (cursor.x < 0) facing = -1;
-		aim_distance = sqrt(cursor.x*cursor.x + cursor.y*cursor.y);
-		aim_direction = atan2(cursor.y, cursor.x);
-		pointed_object = check_area(
-			aim_center_x() + cursor.x + 1*PX, aim_center_y() + cursor.y + 1*PX,
-			aim_center_x() + cursor.x - 1*PX, aim_center_y() + cursor.y - 1*PX,
-			1|2|4|8|16|32|64
-		);
-		 // Check if we can see where we're pointing
-		if (!aiming) {
-			if (abs_f(cursor.x) < 0.1 && abs_f(cursor.y) < 0.1) {
-				can_see = true;
+		if (!dead) {
+			aiming = (button[sf::Mouse::Right] > 0 || key[sf::Key::LShift] > 0);
+			if (cursor.x > 0) facing = 1;
+			else if (cursor.x < 0) facing = -1;
+			aim_distance = sqrt(cursor.x*cursor.x + cursor.y*cursor.y);
+			aim_direction = atan2(cursor.y, cursor.x);
+			pointed_object = check_area(
+				aim_center_x() + cursor.x + 1*PX, aim_center_y() + cursor.y + 1*PX,
+				aim_center_x() + cursor.x - 1*PX, aim_center_y() + cursor.y - 1*PX,
+				1|2|4|8|16|32|64
+			);
+			 // Check if we can see where we're pointing
+			if (!aiming) {
+				if (abs_f(cursor.x) < 0.1 && abs_f(cursor.y) < 0.1) {
+					can_see = true;
+				}
+				else {
+					Object* seeing = check_line(
+						aim_center_x(), aim_center_y(), aim_center_x()+cursor.x, aim_center_y()+cursor.y
+					);
+					can_see = (seeing == NULL);
+				}
 			}
-			else {
-				Object* seeing = check_line(
-					aim_center_x(), aim_center_y(), aim_center_x()+cursor.x, aim_center_y()+cursor.y
-				);
-				can_see = (seeing == NULL);
+			if (flashing) {
+				flashing--;
 			}
 		}
-		if (flashing) {
-			flashing--;
-		}
-		else if (!hurting && !take_damage) body->GetFixtureList()->SetFilterData(cf::rata);
 		if (take_damage) {
-			if (floor) add_vel(0, 3.0);
-			take_damage = false;
+			if (life <= 0) add_vel(0, 5.0);
+			else if (floor) add_vel(0, 3.0);
 			printf("Ouch!\n");
 			set_fix_25();
 		}
@@ -128,7 +141,15 @@ struct Rata : Walking {
 		}
 		 // Movement
 		if (floor && !take_damage) {
-			if (hurting < 20) {
+			if (hurting == 0) sitting = false;
+			if (dead) {
+				set_fix_h8();
+			}
+			else if (sitting) {
+				 // Stay there.
+				set_fix_21();
+			}
+			else if (hurting < 20) {
 				if (hurting > 0) {
 					hurting = 0;
 					flashing = 60;
@@ -180,9 +201,11 @@ struct Rata : Walking {
 			}
 			else {
 				set_fix_21();
+				sitting = true;
 			}
 		}
 		else {  // Midair
+			sitting = false;
 			 // Left
 			if (key[sf::Key::A] && !key[sf::Key::B]) {
 				float max = -max_air_speed();
@@ -274,18 +297,24 @@ struct Rata : Walking {
 		 // Request debug information
 //		if (key[sf::Key::BackSlash] == 1)
 //			print_debug_all();
+		take_damage = false;
 		Walking::before_move();
-	};
+	}
 
 	virtual void damage (int d) {
 		if (!hurting && !flashing) {
 			Object::damage(d);
 			take_damage = true;
 			floor = NULL;
+			if (life <= 48) d *= 2;
 			hurting = 6 + d / 2;
-			if (life <= 48) hurting *= 2;
 		}
-	};
+	}
+
+	virtual void kill () {
+		dead = true;
+		message = message_pos = message_pos_next = NULL;
+	}
 
 
 
@@ -332,6 +361,7 @@ struct Rata : Walking {
 		take_damage = false;
 		hurting = 0;
 		flashing = 0;
+		sitting = kneeling = dead = false;
 		life = max_life = 144;
 		for (uint i=0; i<MAX_EQUIPS; i++) equipment[i] = NULL;
 		equipment[0] = &item::white_dress;
@@ -374,81 +404,67 @@ struct Rata : Walking {
 		else if (aim_angle > M_PI* 1.0/16.0) angle_frame = 5;
 		else if (aim_angle > M_PI*-1.0/16.0) angle_frame = 4;
 		else if (aim_angle > M_PI*-3.0/16.0) angle_frame = 3;
-		else if (kneeling || aim_angle > M_PI*-5.0/16.0) angle_frame = 2;
+		else if (kneeling
+			  || aim_angle > M_PI*-5.0/16.0) angle_frame = 2;
 		else if (aim_angle > M_PI*-7.0/16.0) angle_frame = 1;
 		else                                 angle_frame = 0;
 
 		 // Select walking frame
 		if (floor) {
 			float step_d = MOD(distance_walked, RATA_STEP * 2);
-			if (distance_walked < 0.01) walk_frame = 0;
-			else if (step_d < RATA_STEP*5/9.0) walk_frame = 1;
-			else if (step_d < RATA_STEP) walk_frame = 2;
+			if      (distance_walked < 0.01)    walk_frame = 0;
+			else if (step_d < RATA_STEP*5/9.0)  walk_frame = 1;
+			else if (step_d < RATA_STEP)        walk_frame = 2;
 			else if (step_d < RATA_STEP*14/9.0) walk_frame = 3;
-			else walk_frame = 2;
+			else                                walk_frame = 2;
 		}
 		else walk_frame = 3;
 
 		 // Select body pose
-
-		if (hurting) {
-			if (floor) bodypose = pose::body::sit;
-			else       bodypose = pose::body::hurtbk;
-		}
-		else if (kneeling) {
-			bodypose = pose::body::kneel;
-		}
-		else if (walk_frame % 2) {
-			bodypose = pose::body::walk;
-		}
-		else {
-			bodypose = pose::body::stand;
-		}
+		if      (dead && floor)  bodypose = pose::body::laybk;
+		else if (sitting)        bodypose = pose::body::sit;
+		else if (hurting)        bodypose = pose::body::hurtbk;
+		else if (kneeling)       bodypose = pose::body::kneel;
+		else if (walk_frame % 2) bodypose = pose::body::walk;
+		else                     bodypose = pose::body::stand;
 
 		 // Select head pose
-		if (hurting) {
-			if (floor) headpose = pose::head::stand_90;
-			else       headpose = pose::head::hurtbk;
-		}
+		if (dead && floor) headpose = pose::head::laybk;
+		else if (sitting)  headpose = pose::head::stand_90;
+		else if (hurting)  headpose = pose::head::hurtbk;
 		else if (floor ? (walk_frame % 2) : (yvel() < -1.0))
-			headpose = pose::head::angle_walk[angle_frame];
-		else headpose = pose::head::angle_stand[angle_frame];
+		                   headpose = pose::head::angle_walk[angle_frame];
+		else               headpose = pose::head::angle_stand[angle_frame];
 
 
 		 // Select arm pose
-		if (hurting) {
-			if (floor) armpose = pose::arm::eb23;
-			else       armpose = pose::arm::m68;
-		}
+		if (dead && floor) armpose = pose::arm::e90;
+		else if (sitting)  armpose = pose::arm::eb23;
+		else if (hurting)  armpose = pose::arm::m68;
 		else if (aiming) {
-			     if (recoil_frames > 20) armpose = pose::arm::angle_recoil[angle_frame];
+			if      (recoil_frames > 20) armpose = pose::arm::angle_recoil[angle_frame];
 			else if (aim_distance > 10)  armpose = pose::arm::angle_e[angle_frame];
 			else                         armpose = pose::arm::angle_m[angle_frame];
 		}
-		else if (kneeling) {
-			armpose = pose::arm::m68;
-		}
+		else if (kneeling) armpose = pose::arm::m68;
 		else {
-			     if (walk_frame == 1) armpose = pose::arm::eb23;
+			if      (walk_frame == 1) armpose = pose::arm::eb23;
 			else if (walk_frame == 2) armpose = pose::arm::e0;
 			else if (walk_frame == 3) armpose = pose::arm::e23;
 			else                      armpose = pose::arm::e0;
 		}
 
 		 // Select hand pose
-		if (hurting) {
-			if (floor) handpose = pose::hand::front;
-			else       handpose = pose::hand::a68;
-		}
+		if (dead && floor) handpose = pose::hand::inside;
+		else if (sitting)  handpose = pose::hand::front;
+		else if (hurting)  handpose = pose::hand::a68;
 		else if (aiming) {
 			if (recoil_frames > 20) handpose = pose::hand::angle_recoil[angle_frame];
 			else                    handpose = pose::hand::angle_a[angle_frame];
 		}
-		else if (kneeling) {
-			handpose = pose::hand::a45;
-		}
+		else if (kneeling) handpose = pose::hand::a45;
 		else {
-			     if (walk_frame == 1) handpose = pose::hand::ab23;
+			if      (walk_frame == 1) handpose = pose::hand::ab23;
 			else if (walk_frame == 2) handpose = pose::hand::a0;
 			else if (walk_frame == 3) handpose = pose::hand::a23;
 			else                      handpose = pose::hand::a0;
