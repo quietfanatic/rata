@@ -478,6 +478,8 @@ struct Rata : Walking {
 		if (equipment[i]->body)
 			draw_image(equipment[i]->body, x(), y(), bodypose, flip);
 
+		if (dead) goto draw_arm;
+		draw_head:
 		draw_image(
 			&img::rata_head,
 			x() + pose::body::headx[bodypose]*facing,
@@ -494,6 +496,8 @@ struct Rata : Walking {
 				headpose, flip
 			);
 
+		if (dead) goto draw_hand;
+		draw_arm:
 		draw_image(
 			&img::rata_arm,
 			x() + pose::body::armx[bodypose]*facing,
@@ -509,7 +513,9 @@ struct Rata : Walking {
 				y() + pose::body::army[bodypose],
 				armpose, flip
 			);
-
+		if (dead) goto draw_head;
+		
+		draw_hand:
 		for (uint i=0; i<MAX_EQUIPS; i++)
 		if (equipment[i])
 		if (equipment[i]->hand)

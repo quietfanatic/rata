@@ -12,7 +12,7 @@ enum Pose     {  stand,   walk, tiptoe,  kneel,  crawl, crawl2,    sit, hurtbk, 
 float armx []={  -1*PX,  -1*PX,  -1*PX,  -1*PX,   0*PX,   0*PX,  -1*PX,  -1*PX,  -5*PX,   0*PX,   0*PX,   0*PX };
 float army []={  14*PX,  13*PX,  15*PX,   8*PX,   0*PX,   0*PX,   8*PX,  14*PX,   1*PX,   0*PX,   0*PX,   0*PX };
 float headx[]={   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,  -11*PX,  0*PX,   0*PX,   0*PX };
-float heady[]={  16*PX,  15*PX,  17*PX,  10*PX,   0*PX,   0*PX,   9*PX,  16*PX,  -2*PX,   0*PX,   0*PX,   0*PX };
+float heady[]={  16*PX,  15*PX,  17*PX,  10*PX,   0*PX,   0*PX,   9*PX,  16*PX,  -1*PX,   0*PX,   0*PX,   0*PX };
 
 
 }
