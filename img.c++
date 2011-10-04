@@ -18,6 +18,7 @@ namespace img {
 	boots_stand,
 	boots_walk,
 	crate,
+	dress_arm,
 	dress_body,
 	font_6x16,
 	font_8x16,
@@ -91,6 +92,9 @@ void load_img () {
 	good &= img::crate.sfi.LoadFromFile("img/crate;8,16.png"); img::crate.sfi.SetSmooth(0);
 	img::crate.w = 0; img::crate.h = 0;
 	img::crate.x = 8; img::crate.y = 16;
+	good &= img::dress_arm.sfi.LoadFromFile("img/dress-arm;32x32,15,16.png"); img::dress_arm.sfi.SetSmooth(0);
+	img::dress_arm.w = 32; img::dress_arm.h = 32;
+	img::dress_arm.x = 15; img::dress_arm.y = 16;
 	good &= img::dress_body.sfi.LoadFromFile("img/dress-body;32x32,16,30.png"); img::dress_body.sfi.SetSmooth(0);
 	img::dress_body.w = 32; img::dress_body.h = 32;
 	img::dress_body.x = 16; img::dress_body.y = 30;

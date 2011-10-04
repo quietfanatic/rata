@@ -75,6 +75,27 @@ dress-body-layfd.png \
 dress-body-grab.png \
 -depth 8 ../dress-body\;32x32\,16\,30.png
 
+montage -geometry +0+0 -background none \
+dress-arm-e0.png \
+dress-arm-e23.png \
+dress-arm-e45.png \
+dress-arm-e68.png \
+dress-arm-e90.png \
+dress-arm-e113.png \
+dress-arm-e135.png \
+dress-arm-e158.png \
+dress-arm-e180.png \
+dress-arm-m0.png \
+dress-arm-m23.png \
+dress-arm-m45.png \
+dress-arm-m68.png \
+dress-arm-m90.png \
+dress-arm-m113.png \
+dress-arm-m135.png \
+dress-arm-m158.png \
+dress-arm-m180.png \
+dress-arm-eb23.png \
+-depth 8 ../dress-arm\;32x32\,15\,16.png
 
 
 

@@ -62,7 +62,7 @@ float handx[]={   0*PX,   3*PX,   5*PX,   7*PX,   8*PX,   7*PX,   5*PX,   3*PX, 
 float handy[]={  -8*PX,  -7*PX,  -5*PX,  -3*PX,   0*PX,   3*PX,   5*PX,   7*PX,   8*PX,
                  -6*PX,  -6*PX,  -5*PX,  -4*PX,  -2*PX,   1*PX,   3*PX,   5*PX,   6*PX,
 				 -7*PX };
-uint angle_e [9] = { e0, e23, e45, e68, e90, e113, e135, e158, m180 };
+uint angle_e [9] = { e0, e23, e45, e68, e90, e113, e135, m158, m180 };
 uint angle_m [9] = { e0, m23, m45, m68, m90, m113, m135, m158, m180 };
 uint angle_recoil [9] = { m23, m45, m68, m90, m113, m135, m158, m180, m180 };
 

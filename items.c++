@@ -26,7 +26,7 @@ namespace item {
 	Equip white_dress = {1,1,1,1,1,1,1,1,1, 4,
 		&img::dress_body,
 		NULL,
-		NULL,
+		&img::dress_arm,
 		NULL,
 		NULL
 	};
