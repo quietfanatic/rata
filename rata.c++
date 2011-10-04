@@ -29,29 +29,30 @@ struct Rata : Walking {
 	 // Easy access to bits
 	float aim_center_x () { return x() + 2*PX*facing; }
 	float aim_center_y () { return y() + 13*PX; }
-	b2Fixture* fix_main () { return body->GetFixtureList(); }
-	b2Fixture* fix_hurt () { return body->GetFixtureList()->GetNext(); }
-	b2Fixture* fix_kneel () { return body->GetFixtureList()->GetNext()->GetNext(); }
+	b2Fixture* fix_27 () { return body->GetFixtureList(); }
+	b2Fixture* fix_25 () { return body->GetFixtureList()->GetNext(); }
+	b2Fixture* fix_21 () { return body->GetFixtureList()->GetNext()->GetNext(); }
 
-	b2Fixture* fix_main_current () {
-		if (hurting) return fix_hurt();
-		else return fix_main();
+	b2Fixture* fix_current () {
+		if (hurting) return fix_27();
+		else if (kneeling) return fix_21();
+		else return fix_25();
 	}
 
-	void set_fix_stand () {
-		fix_main()->SetFilterData(hurting||flashing ? cf::rata_invincible : cf::rata);
-		fix_hurt()->SetFilterData(cf::disabled);
-		fix_kneel()->SetFilterData(cf::disabled);
+	void set_fix_27 () {
+		fix_27()->SetFilterData(hurting||flashing ? cf::rata_invincible : cf::rata);
+		fix_25()->SetFilterData(cf::disabled);
+		fix_21()->SetFilterData(cf::disabled);
 	}
-	void set_fix_kneel () {
-		fix_main()->SetFilterData(cf::disabled);
-		fix_hurt()->SetFilterData(cf::disabled);
-		fix_kneel()->SetFilterData(hurting||flashing ? cf::rata_invincible : cf::rata);
+	void set_fix_25 () {
+		fix_27()->SetFilterData(cf::disabled);
+		fix_25()->SetFilterData(hurting||flashing ? cf::rata_invincible : cf::rata);
+		fix_21()->SetFilterData(cf::disabled);
 	}
-	void set_fix_hurt () {
-		fix_main()->SetFilterData(cf::disabled);
-		fix_hurt()->SetFilterData(cf::rata_invincible);
-		fix_kneel()->SetFilterData(cf::disabled);
+	void set_fix_21 () {
+		fix_27()->SetFilterData(cf::disabled);
+		fix_25()->SetFilterData(cf::disabled);
+		fix_21()->SetFilterData(hurting||flashing ? cf::rata_invincible : cf::rata);
 	}
 
 	 // Character stats (affected by items and such)
@@ -117,7 +118,7 @@ struct Rata : Walking {
 			if (floor) add_vel(0, 3.0);
 			take_damage = false;
 			printf("Ouch!\n");
-			set_fix_hurt();
+			set_fix_25();
 		}
 		else if (hurting) {
 			hurting--;
@@ -138,7 +139,7 @@ struct Rata : Walking {
 				if (key[sf::Key::S] && floor_normal.y > 0.9) {
 					ideal_xvel = 0;
 					floor_friction = ground_decel()*ground_decel();
-					set_fix_kneel();
+					set_fix_21();
 					kneeling = true;
 				}
 				 // Left
@@ -150,7 +151,7 @@ struct Rata : Walking {
 						ideal_xvel = -max_forward_speed();
 					else
 						ideal_xvel = -max_backward_speed();
-					set_fix_stand();
+					set_fix_27();
 				}
 				 // Right
 				else if (key[sf::Key::D] && !key[sf::Key::A]) {
@@ -161,20 +162,20 @@ struct Rata : Walking {
 						ideal_xvel = max_forward_speed();
 					else
 						ideal_xvel = max_backward_speed();
-					set_fix_stand();
+					set_fix_27();
 				}
 				 // Stop
 				else {
 					floor_friction = ground_decel();
 					ideal_xvel = 0;
-					set_fix_stand();
+					set_fix_27();
 				}
 				 // Jump
 				if (key[sf::Key::W] && key[sf::Key::W] == 1) {  // Jump
 					//mutual_impulse(floor, 0, -jump_velocity()*mass());
 					set_vel(xvel(), jump_velocity());
 					float_frames = jump_float_time();
-					set_fix_stand();
+					set_fix_27();
 				}
 			}
 			else {
@@ -191,7 +192,7 @@ struct Rata : Walking {
 						add_vel(-xvel() + max, 0);
 					}
 				}
-				set_fix_stand();
+				set_fix_27();
 			}
 			 // Right
 			else if (key[sf::Key::D]) {
@@ -202,7 +203,7 @@ struct Rata : Walking {
 						add_vel(-xvel() + max, 0);
 					}
 				}
-				set_fix_stand();
+				set_fix_27();
 			}
 			 // Adjust falling speed
 			if (key[sf::Key::W]
