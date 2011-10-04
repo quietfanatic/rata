@@ -24,6 +24,7 @@ arm-m113.png \
 arm-m135.png \
 arm-m158.png \
 arm-m180.png \
+arm-eb23.png \
 -depth 8 ../rata-arm\;32x32\,15\,16.png
 
 montage -geometry +0+0 -background none \

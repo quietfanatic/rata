@@ -37,6 +37,7 @@ namespace img {
 	handgun_stand,
 	handgun_walk_b,
 	handgun_walk_f,
+	handgun,
 	heart,
 	helmet_135,
 	helmet_158,
@@ -147,6 +148,9 @@ void load_img () {
 	good &= img::handgun_walk_f.sfi.LoadFromFile("img/handgun-walk-f.png"); img::handgun_walk_f.sfi.SetSmooth(0);
 	img::handgun_walk_f.w = 0; img::handgun_walk_f.h = 0;
 	img::handgun_walk_f.x = 32; img::handgun_walk_f.y = 48;
+	good &= img::handgun.sfi.LoadFromFile("img/handgun;16x16,8,8.png"); img::handgun.sfi.SetSmooth(0);
+	img::handgun.w = 16; img::handgun.h = 16;
+	img::handgun.x = 8; img::handgun.y = 8;
 	good &= img::heart.sfi.LoadFromFile("img/heart;8x8,4,8.png"); img::heart.sfi.SetSmooth(0);
 	img::heart.w = 8; img::heart.h = 8;
 	img::heart.x = 4; img::heart.y = 8;

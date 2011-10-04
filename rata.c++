@@ -17,6 +17,11 @@ struct Rata : Walking {
 	float distance_walked;  // For drawing
 	float oldxrel;
 	int recoil_frames;
+	uint headpose;  // Pose index
+	uint bodypose;
+	uint armpose;
+	uint handpose;
+	uint angle_frame;  // 0=down, 8=up
 
 	item::Equip* equipment [MAX_EQUIPS];
 
@@ -194,21 +199,15 @@ struct Rata : Walking {
 			if (yvel() < 0.12 && yvel() > -0.12)
 				dbg(2, "%f\n", body->GetPosition().y);
 		}
-		 // Fire weapon
+		 // Use weapon
 		if (aiming
 		 && recoil_frames == 0
 		 && button[sf::Mouse::Left]
 		 && !hurting) {
-			recoil_frames = 30;
-			float bullet_velocity = 120.0;
-			(new obj::Desc(obj::bullet, this,
-				aim_center_x(),
-				aim_center_y(),
-				bullet_velocity * cos(aim_direction),
-				bullet_velocity * sin(aim_direction),
-				0,
-				true
-			))->manifest();
+			for (uint i=0; i<MAX_EQUIPS; i++)
+			if (equipment[i])
+			if (equipment[i]->use)
+				(*equipment[i]->use)();
 		}
 		else if (recoil_frames) recoil_frames--;
 		 // Describe object or advance message
@@ -314,6 +313,7 @@ struct Rata : Walking {
 		life = max_life = 144;
 		for (uint i=0; i<MAX_EQUIPS; i++) equipment[i] = NULL;
 		equipment[0] = &item::white_dress;
+		equipment[1] = &item::handgun;
 		camera.x = x();
 		camera.y = y();
 		if (camera.x < 10) camera.x = 10;
@@ -333,17 +333,11 @@ struct Rata : Walking {
 
 	void draw () {
 
-		uint head;
-		uint body;
-		uint arm;
-		uint angle_frame;
-		int walk_pose;
+		int walk_frame;
 		float aim_angle;
 		bool flip = facing<0;
 
 		if (flashing % 3 == 2) return;
-		float lx = x();
-		float ly = y();
 
 		 // Select aim angle frame
 		if (facing > 0)
@@ -352,7 +346,6 @@ struct Rata : Walking {
 			aim_angle = M_PI - aim_direction;
 		else
 			aim_angle = -M_PI - aim_direction;
-		if (recoil_frames >= 20) aim_angle += M_PI/8.0;
 		     if (aim_angle > M_PI* 7.0/16.0) angle_frame = 8;
 		else if (aim_angle > M_PI* 5.0/16.0) angle_frame = 7;
 		else if (aim_angle > M_PI* 3.0/16.0) angle_frame = 6;
@@ -366,95 +359,116 @@ struct Rata : Walking {
 		 // Select walking frame
 		if (floor) {
 			float step_d = MOD(distance_walked, RATA_STEP * 2);
-			if (step_d < 0.01) walk_pose = 0;
-			else if (step_d < RATA_STEP*5/9.0) walk_pose = 1;
-			else if (step_d < RATA_STEP) walk_pose = 0;
-			else if (step_d < RATA_STEP*14/9.0) walk_pose = -1;
-			else walk_pose = 0;
+			if (distance_walked < 0.01) walk_frame = 0;
+			else if (step_d < RATA_STEP*5/9.0) walk_frame = 1;
+			else if (step_d < RATA_STEP) walk_frame = 2;
+			else if (step_d < RATA_STEP*14/9.0) walk_frame = 3;
+			else walk_frame = 2;
 		}
-		else walk_pose = 1;
+		else walk_frame = 3;
 
 		 // Select body pose
 
 		if (hurting) {
-			body = pose::body::hurtbk;
+			bodypose = pose::body::hurtbk;
 		}
-		else if (walk_pose != 0) {
-				//s.SetY(s.GetPosition().y+window_scale);
-				if (!floor)
-					ly -= 1*PX;
-				else if (abs_f(floor_contact->GetManifold()->localNormal.y) > 0.9)
-					ly -= 1*PX;
-				else if (abs_f(floor_contact->GetManifold()->localNormal.y) < 0.8)
-					ly += 1*PX;
-				body = pose::body::walk;
+		else if (walk_frame % 2) {
+			bodypose = pose::body::walk;
 		}
 		else {
-			body = pose::body::stand;
+			bodypose = pose::body::stand;
 		}
 
 		 // Select head pose
 		if (hurting)
-			head = pose::head::hurtbk;
-		else if (floor ? (walk_pose != 0) : (yvel() < -1.0))
-			head = pose::head::angle_walk[angle_frame];
-		else head = pose::head::angle_stand[angle_frame];
+			headpose = pose::head::hurtbk;
+		else if (floor ? (walk_frame % 2) : (yvel() < -1.0))
+			headpose = pose::head::angle_walk[angle_frame];
+		else headpose = pose::head::angle_stand[angle_frame];
 
 
 		 // Select arm pose
 		if (hurting) {
-			arm = pose::arm::m68;
+			armpose = pose::arm::m68;
 		}
 		else if (aiming) {
-			if (aim_distance > 10)
-				arm = pose::arm::angle_e[angle_frame];
-			else
-				arm = pose::arm::angle_m[angle_frame];
+			     if (recoil_frames > 20) armpose = pose::arm::angle_recoil[angle_frame];
+			else if (aim_distance > 10)  armpose = pose::arm::angle_e[angle_frame];
+			else                         armpose = pose::arm::angle_m[angle_frame];
 		}
 		else {
-			if (walk_pose == 1) {
-				arm = pose::arm::m23;
-			}
-			else if (walk_pose == -1) {
-				arm = pose::arm::m0;
-			}
-			else {
-				arm = pose::arm::e0;
-			}
+			     if (walk_frame == 1) armpose = pose::arm::eb23;
+			else if (walk_frame == 2) armpose = pose::arm::e0;
+			else if (walk_frame == 3) armpose = pose::arm::e23;
+			else                      armpose = pose::arm::e0;
+		}
+
+		 // Select hand pose
+		if (hurting) {
+			handpose = pose::hand::a68;
+		}
+		else if (aiming) {
+			if (recoil_frames > 20) handpose = pose::hand::angle_recoil[angle_frame];
+			else                    handpose = pose::hand::angle_a[angle_frame];
+		}
+		else {
+			     if (walk_frame == 1) handpose = pose::hand::ab23;
+			else if (walk_frame == 2) handpose = pose::hand::a0;
+			else if (walk_frame == 3) handpose = pose::hand::a23;
+			else                      handpose = pose::hand::a0;
 		}
 
 		 // Now to actually draw.
 
-		draw_image(&img::rata_body, lx, ly, body, flip);
+		draw_image(&img::rata_body, x(), y(), bodypose, flip);
 		for (uint i=0; i<MAX_EQUIPS; i++)
 		if (equipment[i])
 		if (equipment[i]->body)
-			draw_image(equipment[i]->body, lx, ly, body, flip);
+			draw_image(equipment[i]->body, x(), y(), bodypose, flip);
 
-		draw_image(&img::rata_head,
-			lx + pose::body::headx[body]*facing,
-			ly + pose::body::heady[body],
-		head, flip);
+		draw_image(
+			&img::rata_head,
+			x() + pose::body::headx[bodypose]*facing,
+			y() + pose::body::heady[bodypose],
+			headpose, flip
+		);
 		for (uint i=0; i<MAX_EQUIPS; i++)
 		if (equipment[i])
 		if (equipment[i]->head)
-			draw_image(equipment[i]->head,
-				lx + pose::body::headx[body]*facing,
-				ly + pose::body::heady[body],
-			head, flip);
+			draw_image(
+				equipment[i]->head,
+				x() + pose::body::headx[bodypose]*facing,
+				y() + pose::body::heady[bodypose],
+				headpose, flip
+			);
 
-		draw_image(&img::rata_arm,
-			lx + pose::body::armx[body]*facing,
-			ly + pose::body::army[body],
-		arm, flip);
+		draw_image(
+			&img::rata_arm,
+			x() + pose::body::armx[bodypose]*facing,
+			y() + pose::body::army[bodypose],
+			armpose, flip
+		);
 		for (uint i=0; i<MAX_EQUIPS; i++)
 		if (equipment[i])
 		if (equipment[i]->arm)
-			draw_image(equipment[i]->arm,
-				lx + pose::body::armx[body]*facing,
-				ly + pose::body::army[body],
-			head, flip);
+			draw_image(
+				equipment[i]->arm,
+				x() + pose::body::armx[bodypose]*facing,
+				y() + pose::body::army[bodypose],
+				armpose, flip
+			);
 
+		for (uint i=0; i<MAX_EQUIPS; i++)
+		if (equipment[i])
+		if (equipment[i]->hand)
+			draw_image(
+				equipment[i]->hand,
+				x() + pose::body::armx[bodypose]*facing
+				   + pose::arm::handx[armpose]*facing,
+				y() + pose::body::army[bodypose]
+				   + pose::arm::handy[armpose],
+				handpose, flip
+			);
 	}
 };
 

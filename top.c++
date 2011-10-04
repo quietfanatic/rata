@@ -86,8 +86,11 @@ float tilepicker_width = 1.5;
 #include "util.h"
 #include "text.c++"
 #include "poses.c++"
+#define DEF_ONLY
 #include "items.c++"
+#undef DEF_ONLY
 #include "objects.c++"
+#include "items.c++"
 #include "tiles.c++"
 #include "rooms.c++"
 #include "loop.c++"

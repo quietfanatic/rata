@@ -1,4 +1,6 @@
 
+#ifdef DEF_ONLY
+
 namespace item {
 
 	struct Equip {
@@ -17,7 +19,7 @@ namespace item {
 		img::Image* head;
 		img::Image* arm;
 		img::Image* hand;
-		void (* fire ) ();
+		void (* use ) ();
 	};
 
 
@@ -28,11 +30,46 @@ namespace item {
 		NULL,
 		NULL
 	};
+
+	void fire_handgun ();
+	uint handgun_bulletx [] = {
+		2*PX, 4*PX, 6*PX, 6*PX, 5*PX, 4*PX, 4*PX, 0*PX, -2*PX
+	};
+	uint handgun_bullety [] = {
+		-5*PX, -4*PX, -4*PX, 0*PX, 2*PX, 4*PX, 6*PX, 6*PX, 5*PX
+	};
+	
+	Equip handgun = {1,1,1,1,1,1,1,1,1, 0,
+		NULL,
+		NULL,
+		NULL,
+		&img::handgun,
+		&fire_handgun
+	};
 }
 
+#else
 
+void item::fire_handgun () {
+	rata->recoil_frames = 30;
+	float bullet_velocity = 120.0;
+	(new obj::Desc(obj::bullet, rata,
+		  rata->x()
+		+ pose::body::armx[rata->bodypose]*rata->facing
+		+ pose::arm::handx[rata->armpose]*rata->facing
+		+ item::handgun_bulletx[rata->handpose]*rata->facing,
+		  rata->y()
+		+ pose::body::army[rata->bodypose]
+		+ pose::arm::handy[rata->armpose]
+		+ item::handgun_bullety[rata->handpose],
+		bullet_velocity * cos(rata->aim_direction),
+		bullet_velocity * sin(rata->aim_direction),
+		0,
+		true
+	))->manifest();
+}
 
-
+#endif
 
 
 
