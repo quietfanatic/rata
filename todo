@@ -19,21 +19,19 @@
 
 ? Rework object creation and the Desc type
 
-  Add fixture properties
-
 ½ Figure out floor dillemma, generalize walking, slopes, etc.
 
 ✓ Center all actors by their feet
 
 ✓ Generate room fixtures from tilemaps
 
-  Rework Rata drawing routine with modularity for poses and items
+✓ Rework Rata drawing routine with modularity for poses and items
 
   More rooms
 
   More enemies
 
-  items, equipment
+¼ items, equipment
 
   story perhaps?
 
