@@ -128,7 +128,7 @@ struct Rata : Walking {
 		}
 		 // Movement
 		if (floor && !take_damage) {
-			if (hurting < 12) {
+			if (hurting < 20) {
 				if (hurting > 0) {
 					hurting = 0;
 					flashing = 60;
@@ -179,7 +179,7 @@ struct Rata : Walking {
 				}
 			}
 			else {
-				 // Do sitting (from hurt) action here.
+				set_fix_21();
 			}
 		}
 		else {  // Midair
@@ -281,7 +281,9 @@ struct Rata : Walking {
 		if (!hurting && !flashing) {
 			Object::damage(d);
 			take_damage = true;
+			floor = NULL;
 			hurting = 6 + d / 2;
+			if (life <= 48) hurting *= 2;
 		}
 	};
 
@@ -390,7 +392,8 @@ struct Rata : Walking {
 		 // Select body pose
 
 		if (hurting) {
-			bodypose = pose::body::hurtbk;
+			if (floor) bodypose = pose::body::sit;
+			else       bodypose = pose::body::hurtbk;
 		}
 		else if (kneeling) {
 			bodypose = pose::body::kneel;
@@ -403,8 +406,10 @@ struct Rata : Walking {
 		}
 
 		 // Select head pose
-		if (hurting)
-			headpose = pose::head::hurtbk;
+		if (hurting) {
+			if (floor) headpose = pose::head::stand_90;
+			else       headpose = pose::head::hurtbk;
+		}
 		else if (floor ? (walk_frame % 2) : (yvel() < -1.0))
 			headpose = pose::head::angle_walk[angle_frame];
 		else headpose = pose::head::angle_stand[angle_frame];
@@ -412,7 +417,8 @@ struct Rata : Walking {
 
 		 // Select arm pose
 		if (hurting) {
-			armpose = pose::arm::m68;
+			if (floor) armpose = pose::arm::eb23;
+			else       armpose = pose::arm::m68;
 		}
 		else if (aiming) {
 			     if (recoil_frames > 20) armpose = pose::arm::angle_recoil[angle_frame];
@@ -431,7 +437,8 @@ struct Rata : Walking {
 
 		 // Select hand pose
 		if (hurting) {
-			handpose = pose::hand::a68;
+			if (floor) handpose = pose::hand::front;
+			else       handpose = pose::hand::a68;
 		}
 		else if (aiming) {
 			if (recoil_frames > 20) handpose = pose::hand::angle_recoil[angle_frame];

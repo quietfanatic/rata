@@ -10,7 +10,7 @@ namespace body {
 const uint num = 12;
 enum Pose     {  stand,   walk, tiptoe,  kneel,  crawl, crawl2,    sit, hurtbk,  laybk, hurtfd,  layfd,   grab };
 float armx []={  -1*PX,  -1*PX,  -1*PX,  -1*PX,   0*PX,   0*PX,  -1*PX,  -1*PX,  -5*PX,   0*PX,   0*PX,   0*PX };
-float army []={  14*PX,  13*PX,  15*PX,   8*PX,   0*PX,   0*PX,   7*PX,  14*PX,   1*PX,   0*PX,   0*PX,   0*PX };
+float army []={  14*PX,  13*PX,  15*PX,   8*PX,   0*PX,   0*PX,   8*PX,  14*PX,   1*PX,   0*PX,   0*PX,   0*PX };
 float headx[]={   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,  -11*PX,  0*PX,   0*PX,   0*PX };
 float heady[]={  16*PX,  15*PX,  17*PX,  10*PX,   0*PX,   0*PX,   9*PX,  16*PX,  -2*PX,   0*PX,   0*PX,   0*PX };
 
@@ -72,7 +72,8 @@ namespace hand {
 
 
 const uint num = 10;
-enum Pose     {     a0,    a23,    a45,    a68,    a90,   a113,   a135,   a158,   a180,   ab23,   inside };
+enum Pose     {     a0,    a23,    a45,    a68,    a90,   a113,   a135,   a158,   a180,   ab23,
+                inside,  front, };
 uint angle_a [9] = { a0, a23, a45, a68, a90, a113, a135, a158, a180 };
 uint angle_recoil [9] = { a23, a45, a68, a90, a113, a135, a158, a180, a180 };
 
