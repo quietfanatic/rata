@@ -12,6 +12,7 @@ struct Rata : Walking {
 	bool take_damage;
 	int hurting;
 	int flashing;
+	bool kneeling;
 	float aim_distance;
 	float aim_direction;
 	float distance_walked;  // For drawing
@@ -30,23 +31,27 @@ struct Rata : Walking {
 	float aim_center_y () { return y() + 13*PX; }
 	b2Fixture* fix_main () { return body->GetFixtureList(); }
 	b2Fixture* fix_hurt () { return body->GetFixtureList()->GetNext(); }
+	b2Fixture* fix_kneel () { return body->GetFixtureList()->GetNext()->GetNext(); }
 
 	b2Fixture* fix_main_current () {
 		if (hurting) return fix_hurt();
 		else return fix_main();
 	}
 
-	void set_fix_normal () {
-		fix_main()->SetFilterData(cf::rata);
+	void set_fix_stand () {
+		fix_main()->SetFilterData(hurting||flashing ? cf::rata_invincible : cf::rata);
 		fix_hurt()->SetFilterData(cf::disabled);
+		fix_kneel()->SetFilterData(cf::disabled);
 	}
-	void set_fix_invincible () {
-		fix_main()->SetFilterData(cf::rata_invincible);
+	void set_fix_kneel () {
+		fix_main()->SetFilterData(cf::disabled);
 		fix_hurt()->SetFilterData(cf::disabled);
+		fix_kneel()->SetFilterData(hurting||flashing ? cf::rata_invincible : cf::rata);
 	}
 	void set_fix_hurt () {
 		fix_main()->SetFilterData(cf::disabled);
 		fix_hurt()->SetFilterData(cf::rata_invincible);
+		fix_kneel()->SetFilterData(cf::disabled);
 	}
 
 	 // Character stats (affected by items and such)
@@ -106,9 +111,6 @@ struct Rata : Walking {
 		}
 		if (flashing) {
 			flashing--;
-			if (flashing <= 0) {
-				set_fix_normal();
-			}
 		}
 		else if (!hurting && !take_damage) body->GetFixtureList()->SetFilterData(cf::rata);
 		if (take_damage) {
@@ -120,7 +122,6 @@ struct Rata : Walking {
 		else if (hurting) {
 			hurting--;
 			if (hurting <= 0) {
-				set_fix_invincible();
 				flashing = 60;
 			}
 		}
@@ -130,10 +131,18 @@ struct Rata : Walking {
 				if (hurting > 0) {
 					hurting = 0;
 					flashing = 60;
-					set_fix_invincible();
 				}
 				oldxrel = x() - floor->x();
-				if (key[sf::Key::A] && !key[sf::Key::D]) {  // Left
+				 // Kneel
+				 kneeling = false;
+				if (key[sf::Key::S] && floor_normal.y > 0.9) {
+					ideal_xvel = 0;
+					floor_friction = ground_decel()*ground_decel();
+					set_fix_kneel();
+					kneeling = true;
+				}
+				 // Left
+				else if (key[sf::Key::A] && !key[sf::Key::D]) {
 					if (xvel() < 0)
 						floor_friction = ground_accel();
 					else floor_friction = ground_decel();
@@ -141,8 +150,10 @@ struct Rata : Walking {
 						ideal_xvel = -max_forward_speed();
 					else
 						ideal_xvel = -max_backward_speed();
+					set_fix_stand();
 				}
-				else if (key[sf::Key::D] && !key[sf::Key::A]) {  // Right
+				 // Right
+				else if (key[sf::Key::D] && !key[sf::Key::A]) {
 					if (xvel() > 0)
 						floor_friction = ground_accel();
 					else floor_friction = ground_decel();
@@ -150,16 +161,20 @@ struct Rata : Walking {
 						ideal_xvel = max_forward_speed();
 					else
 						ideal_xvel = max_backward_speed();
+					set_fix_stand();
 				}
-				else {  // Stop
+				 // Stop
+				else {
 					floor_friction = ground_decel();
 					ideal_xvel = 0;
+					set_fix_stand();
 				}
 				 // Jump
 				if (key[sf::Key::W] && key[sf::Key::W] == 1) {  // Jump
 					//mutual_impulse(floor, 0, -jump_velocity()*mass());
 					set_vel(xvel(), jump_velocity());
 					float_frames = jump_float_time();
+					set_fix_stand();
 				}
 			}
 			else {
@@ -167,7 +182,8 @@ struct Rata : Walking {
 			}
 		}
 		else {  // Midair
-			if (key[sf::Key::A] && !key[sf::Key::B]) {  // Left
+			 // Left
+			if (key[sf::Key::A] && !key[sf::Key::B]) {
 				float max = -max_air_speed();
 				if (xvel() > max) {
 					add_vel(-air_accel(), 0);
@@ -175,8 +191,10 @@ struct Rata : Walking {
 						add_vel(-xvel() + max, 0);
 					}
 				}
+				set_fix_stand();
 			}
-			else if (key[sf::Key::D]) {  // Right
+			 // Right
+			else if (key[sf::Key::D]) {
 				float max = max_air_speed();
 				if (xvel() < max) {
 					add_vel(air_accel(), 0);
@@ -184,6 +202,7 @@ struct Rata : Walking {
 						add_vel(-xvel() + max, 0);
 					}
 				}
+				set_fix_stand();
 			}
 			 // Adjust falling speed
 			if (key[sf::Key::W]
@@ -352,7 +371,7 @@ struct Rata : Walking {
 		else if (aim_angle > M_PI* 1.0/16.0) angle_frame = 5;
 		else if (aim_angle > M_PI*-1.0/16.0) angle_frame = 4;
 		else if (aim_angle > M_PI*-3.0/16.0) angle_frame = 3;
-		else if (aim_angle > M_PI*-5.0/16.0) angle_frame = 2;
+		else if (kneeling || aim_angle > M_PI*-5.0/16.0) angle_frame = 2;
 		else if (aim_angle > M_PI*-7.0/16.0) angle_frame = 1;
 		else                                 angle_frame = 0;
 
@@ -371,6 +390,9 @@ struct Rata : Walking {
 
 		if (hurting) {
 			bodypose = pose::body::hurtbk;
+		}
+		else if (kneeling) {
+			bodypose = pose::body::kneel;
 		}
 		else if (walk_frame % 2) {
 			bodypose = pose::body::walk;
@@ -396,6 +418,9 @@ struct Rata : Walking {
 			else if (aim_distance > 10)  armpose = pose::arm::angle_e[angle_frame];
 			else                         armpose = pose::arm::angle_m[angle_frame];
 		}
+		else if (kneeling) {
+			armpose = pose::arm::m68;
+		}
 		else {
 			     if (walk_frame == 1) armpose = pose::arm::eb23;
 			else if (walk_frame == 2) armpose = pose::arm::e0;
@@ -410,6 +435,9 @@ struct Rata : Walking {
 		else if (aiming) {
 			if (recoil_frames > 20) handpose = pose::hand::angle_recoil[angle_frame];
 			else                    handpose = pose::hand::angle_a[angle_frame];
+		}
+		else if (kneeling) {
+			handpose = pose::hand::a45;
 		}
 		else {
 			     if (walk_frame == 1) handpose = pose::hand::ab23;

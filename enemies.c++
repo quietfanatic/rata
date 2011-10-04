@@ -100,8 +100,8 @@ struct Patroller : Walking {
 				add_vel(-bvx/60, 0);
 			}
 			if ((threat_detected = detect_threat())) {
-				threat_x = rata->aim_center_x();
-				threat_y = rata->aim_center_y();
+				threat_x = rata->x();
+				threat_y = rata->y() + 8*PX;
 				threat_xvel = rata->xvel() * (0.8 + rand()*0.2/RAND_MAX);
 				threat_yvel = rata->yvel() * (0.8 + rand()*0.2/RAND_MAX);
 			}
@@ -117,7 +117,7 @@ struct Patroller : Walking {
 
 	bool detect_threat () {
 		if (rata && (rata->x() - x())*facing > 0) {
-			return !check_line(camera_x(), camera_y(), rata->aim_center_x(), rata->aim_center_y(), 2|32);
+			return !check_line(camera_x(), camera_y(), rata->x(), rata->y() + 8*PX, 2|32);
 		}
 		return false;
 	}

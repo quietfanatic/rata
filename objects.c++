@@ -620,26 +620,35 @@ inline b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction
 b2Vec2 rata_poly_main [] = {
 	b2Vec2(-2.5*PX, 0*PX),
 	b2Vec2(2.5*PX, 0*PX),
-	b2Vec2(5.5*PX, 11*PX),
+	b2Vec2(5.5*PX, 17*PX),
 	b2Vec2(5.5*PX, 24*PX),
 	b2Vec2(0*PX, 27*PX),
 	b2Vec2(-5.5*PX, 24*PX),
-	b2Vec2(-5.5*PX, 11*PX)
+	b2Vec2(-5.5*PX, 17*PX)
 };
 b2Vec2 rata_poly_hurt [] = {
 	b2Vec2(-2.5*PX, 2*PX),
 	b2Vec2(2.5*PX, 2*PX),
-	b2Vec2(5.5*PX, 13*PX),
+	b2Vec2(5.5*PX, 15*PX),
 	b2Vec2(5.5*PX, 22*PX),
-	b2Vec2(2.5*PX, 25*PX),
-	b2Vec2(-2.5*PX, 25*PX),
+	b2Vec2(0*PX, 25*PX),
 	b2Vec2(-5.5*PX, 22*PX),
-	b2Vec2(-5.5*PX, 13*PX)
+	b2Vec2(-5.5*PX, 15*PX)
+};
+b2Vec2 rata_poly_kneel [] = {
+	b2Vec2(-3.5*PX, 0*PX),
+	b2Vec2(3.5*PX, 0*PX),
+	b2Vec2(5.5*PX, 11*PX),
+	b2Vec2(5.5*PX, 18*PX),
+	b2Vec2(0*PX, 21*PX),
+	b2Vec2(-5.5*PX, 18*PX),
+	b2Vec2(-5.5*PX, 11*PX)
 };
 
 b2FixtureDef rata_fixes [] = {
-	make_fixdef(make_poly(7, rata_poly_main), cf::rata, 0, 0, 2.0),
-	make_fixdef(make_poly(8, rata_poly_hurt), cf::disabled, 0, 0, 2.0)
+	make_fixdef(make_poly(7, rata_poly_main), cf::rata, 0, 0, 1.5),
+	make_fixdef(make_poly(7, rata_poly_hurt), cf::disabled, 0, 0, 1.5),
+	make_fixdef(make_poly(7, rata_poly_kneel), cf::rata, 0, 0, 1.5)
 };
 
 b2FixtureDef bullet_fix = make_fixdef(make_circle(0.05), cf::bullet, 0, 0.8, 10.0);
@@ -654,7 +663,7 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 const obj::Def obj::def [] = {
 
 	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, NULL},
-	{"Rata", 2, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
+	{"Rata", 3, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
 	{"Solid Object", 0, NULL, 0, 0, obj::ALLOC<Solid>, NULL},
 	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, NULL},
 	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>, NULL},
