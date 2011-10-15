@@ -55,7 +55,7 @@ namespace arm {
 const uint num = 9;
 enum Pose        {     a0,    a23,    a45,    a68,    a90,   a113,   a135,   a158,   a180 };
 float forearmx[]={   0*PX,   1*PX,   2*PX,   2*PX,   3*PX,   2*PX,   2*PX,   1*PX,   0*PX };
-float forearmy[]={  -3*PX,  -2*PX,  -2*PX,  -1*PX,   0*PX,   1*PX,   2*PX,   2*PX,   8*PX };
+float forearmy[]={  -3*PX,  -2*PX,  -2*PX,  -1*PX,   0*PX,   1*PX,   2*PX,   2*PX,   3*PX };
 
 
 }

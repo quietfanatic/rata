@@ -20,6 +20,7 @@ namespace img {
 	crate,
 	dress_arm,
 	dress_body,
+	dress_forearm,
 	font_6x16,
 	font_8x16,
 	font_proportional,
@@ -99,6 +100,9 @@ void load_img () {
 	good &= img::dress_body.sfi.LoadFromFile("img/dress-body;32x32,16,30.png"); img::dress_body.sfi.SetSmooth(0);
 	img::dress_body.w = 32; img::dress_body.h = 32;
 	img::dress_body.x = 16; img::dress_body.y = 30;
+	good &= img::dress_forearm.sfi.LoadFromFile("img/dress-forearm;32x32,15,19.png"); img::dress_forearm.sfi.SetSmooth(0);
+	img::dress_forearm.w = 32; img::dress_forearm.h = 32;
+	img::dress_forearm.x = 15; img::dress_forearm.y = 19;
 	good &= img::font_6x16.sfi.LoadFromFile("img/font-6x16;0,0.png"); img::font_6x16.sfi.SetSmooth(0);
 	img::font_6x16.w = 0; img::font_6x16.h = 0;
 	img::font_6x16.x = 0; img::font_6x16.y = 0;

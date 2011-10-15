@@ -558,6 +558,12 @@ struct Rata : Walking {
 			y() + army,
 			armpose, armflip
 		);
+		draw_image(
+			&img::rata_forearm,
+			x() + forearmx,
+			y() + forearmy,
+			forearmpose, forearmflip
+		);
 		for (uint i=0; i<MAX_EQUIPS; i++)
 		if (equipment[i])
 		if (equipment[i]->arm)
@@ -567,19 +573,11 @@ struct Rata : Walking {
 				y() + army,
 				armpose, armflip
 			);
-
-		draw_forearm:
-		draw_image(
-			&img::rata_forearm,
-			x() + forearmx,
-			y() + forearmy,
-			forearmpose, forearmflip
-		);
 		for (uint i=0; i<MAX_EQUIPS; i++)
 		if (equipment[i])
 		if (equipment[i]->forearm)
 			draw_image(
-				equipment[i]->arm,
+				equipment[i]->forearm,
 				x() + forearmx,
 				y() + forearmy,
 				forearmpose, forearmflip
