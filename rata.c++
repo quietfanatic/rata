@@ -20,10 +20,8 @@ struct Rata : Walking {
 	float distance_walked;  // For drawing
 	float oldxrel;
 	int recoil_frames;
-	uint headpose;  // Pose index
-	uint bodypose;
-	uint armpose;
-	uint handpose;
+	float handx;
+	float handy;
 	uint angle_frame;  // 0=down, 8=up
 
 	item::Equip* equipment [MAX_EQUIPS];
@@ -390,7 +388,15 @@ struct Rata : Walking {
 
 		int walk_frame;
 		float aim_angle;
+		uint headpose;  // Pose index
+		uint bodypose;
+		int armpose;
+		int forearmpose;
+		int handpose;
 		bool flip = facing<0;
+		bool armflip = flip;
+		bool forearmflip = flip;
+		bool handflip = flip;
 
 		if (flashing % 3 == 2) return;
 
@@ -441,29 +447,62 @@ struct Rata : Walking {
 
 
 		 // Select arm pose
-		if (dead && floor) armpose = pose::arm::e90;
-		else if (sitting)  armpose = pose::arm::eb23;
-		else if (hurting)  armpose = pose::arm::m68;
+		if (dead && floor) armpose = pose::arm::a90;
+		else if (sitting)  armpose = pose::arm::a23, armflip = !flip;
+		else if (hurting)  armpose = pose::arm::a23;
 		else if (aiming) {
-			if      (recoil_frames > 20) armpose = pose::arm::angle_recoil[angle_frame];
-			else if (aim_distance > 10)  armpose = pose::arm::angle_e[angle_frame];
-			else                         armpose = pose::arm::angle_m[angle_frame];
+			if      (recoil_frames > 20) {
+				armpose = angle_frame - 3;
+			}
+
+			else if (aim_distance > 10)  {
+				armpose = angle_frame;
+			}
+			else if (aim_distance > 4)   {
+				armpose = angle_frame - 2;
+				if (angle_frame == 0) armpose = 0;
+			}
+			else                         {
+				armpose = angle_frame - 4;
+				if      (angle_frame == 0) armpose = 0;
+				else if (angle_frame == 1) armpose = -1;
+			}
 		}
-		else if (kneeling) armpose = pose::arm::m68;
+		else if (kneeling) armpose = pose::arm::a23;
 		else {
-			if      (walk_frame == 1) armpose = pose::arm::eb23;
-			else if (walk_frame == 2) armpose = pose::arm::e0;
-			else if (walk_frame == 3) armpose = pose::arm::e23;
-			else                      armpose = pose::arm::e0;
+			if      (walk_frame == 1) armpose = pose::arm::a23, armflip = !flip;
+			else if (walk_frame == 2) armpose = pose::arm::a0;
+			else if (walk_frame == 3) armpose = pose::arm::a23;
+			else                      armpose = pose::arm::a0;
 		}
+		if (armpose < 0) armpose =  -armpose, armflip = !armflip;
+		if (armpose > 9) armpose = 9-armpose, armflip = !armflip;
+
+		 // Select forearm pose
+		if (dead && floor) forearmpose = pose::forearm::a90;
+		else if (sitting)  forearmpose = pose::forearm::a23, forearmflip = !flip;
+		else if (hurting)  forearmpose = pose::forearm::a68;
+		else if (aiming) {
+			if (recoil_frames > 20) forearmpose = angle_frame + 1;
+			else                    forearmpose = angle_frame;
+		}
+		else if (kneeling) forearmpose = pose::forearm::a68;
+		else {
+			if      (walk_frame == 1) forearmpose = pose::forearm::a23, forearmflip = !flip;
+			else if (walk_frame == 2) forearmpose = pose::forearm::a0;
+			else if (walk_frame == 3) forearmpose = pose::forearm::a23;
+			else                      forearmpose = pose::forearm::a0;
+		}
+		if (forearmpose < 0) forearmpose =  -forearmpose, forearmflip = !forearmflip;
+		if (forearmpose > 9) forearmpose = 9-forearmpose, forearmflip = !forearmflip;
 
 		 // Select hand pose
 		if (dead && floor) handpose = pose::hand::inside;
 		else if (sitting)  handpose = pose::hand::front;
 		else if (hurting)  handpose = pose::hand::a68;
 		else if (aiming) {
-			if (recoil_frames > 20) handpose = pose::hand::angle_recoil[angle_frame];
-			else                    handpose = pose::hand::angle_a[angle_frame];
+			if (recoil_frames > 20) handpose = angle_frame + 1;
+			else                    handpose = angle_frame;
 		}
 		else if (kneeling) handpose = pose::hand::a45;
 		else {
@@ -472,6 +511,18 @@ struct Rata : Walking {
 			else if (walk_frame == 3) handpose = pose::hand::a23;
 			else                      handpose = pose::hand::a0;
 		}
+		handflip = forearmflip;
+		
+		 // Get position of various parts.
+		
+		float headx = pose::body::headx[bodypose]*facing;
+		float heady = pose::body::heady[bodypose];
+		float armx = pose::body::armx[bodypose]*facing;
+		float army = pose::body::army[bodypose];
+		float forearmx = armx + pose::arm::forearmx[armpose]*(armflip?-1:1);
+		float forearmy = army + pose::arm::forearmy[armpose];
+		handx = forearmx + pose::forearm::handx[forearmpose]*(handflip?-1:1);
+		handy = forearmy + pose::forearm::handy[forearmpose];
 
 		 // Now to actually draw.
 
@@ -485,8 +536,8 @@ struct Rata : Walking {
 		draw_head:
 		draw_image(
 			&img::rata_head,
-			x() + pose::body::headx[bodypose]*facing,
-			y() + pose::body::heady[bodypose],
+			x() + headx,
+			y() + heady,
 			headpose, flip
 		);
 		for (uint i=0; i<MAX_EQUIPS; i++)
@@ -494,8 +545,8 @@ struct Rata : Walking {
 		if (equipment[i]->head)
 			draw_image(
 				equipment[i]->head,
-				x() + pose::body::headx[bodypose]*facing,
-				y() + pose::body::heady[bodypose],
+				x() + headx,
+				y() + heady,
 				headpose, flip
 			);
 
@@ -503,19 +554,37 @@ struct Rata : Walking {
 		draw_arm:
 		draw_image(
 			&img::rata_arm,
-			x() + pose::body::armx[bodypose]*facing,
-			y() + pose::body::army[bodypose],
-			armpose, flip
+			x() + armx,
+			y() + army,
+			armpose, armflip
 		);
 		for (uint i=0; i<MAX_EQUIPS; i++)
 		if (equipment[i])
 		if (equipment[i]->arm)
 			draw_image(
 				equipment[i]->arm,
-				x() + pose::body::armx[bodypose]*facing,
-				y() + pose::body::army[bodypose],
-				armpose, flip
+				x() + armx,
+				y() + army,
+				armpose, armflip
 			);
+
+		draw_forearm:
+		draw_image(
+			&img::rata_forearm,
+			x() + forearmx,
+			y() + forearmy,
+			forearmpose, forearmflip
+		);
+		for (uint i=0; i<MAX_EQUIPS; i++)
+		if (equipment[i])
+		if (equipment[i]->forearm)
+			draw_image(
+				equipment[i]->arm,
+				x() + forearmx,
+				y() + forearmy,
+				forearmpose, forearmflip
+			);
+
 		if (dead) goto draw_head;
 		
 		draw_hand:
@@ -524,10 +593,8 @@ struct Rata : Walking {
 		if (equipment[i]->hand)
 			draw_image(
 				equipment[i]->hand,
-				x() + pose::body::armx[bodypose]*facing
-				   + pose::arm::handx[armpose]*facing,
-				y() + pose::body::army[bodypose]
-				   + pose::arm::handy[armpose],
+				x() + handx,
+				y() + handy,
 				handpose, flip
 			);
 	}

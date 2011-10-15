@@ -18,6 +18,7 @@ namespace item {
 		img::Image* body;
 		img::Image* head;
 		img::Image* arm;
+		img::Image* forearm;
 		img::Image* hand;
 		void (* use ) ();
 	};
@@ -26,7 +27,8 @@ namespace item {
 	Equip white_dress = {1,1,1,1,1,1,1,1,1, 4,
 		&img::dress_body,
 		NULL,
-		&img::dress_arm,
+		NULL, // &img::dress_arm,
+		NULL,
 		NULL,
 		NULL
 	};
@@ -43,6 +45,7 @@ namespace item {
 		NULL,
 		NULL,
 		NULL,
+		NULL,
 		&img::handgun,
 		&fire_handgun
 	};
@@ -54,14 +57,10 @@ void item::fire_handgun () {
 	rata->recoil_frames = 30;
 	float bullet_velocity = 120.0;
 	(new obj::Desc(obj::bullet, rata,
-		  rata->x()
-		+ pose::body::armx[rata->bodypose]*rata->facing
-		+ pose::arm::handx[rata->armpose]*rata->facing
-		+ item::handgun_bulletx[rata->handpose]*rata->facing,
-		  rata->y()
-		+ pose::body::army[rata->bodypose]
-		+ pose::arm::handy[rata->armpose]
-		+ item::handgun_bullety[rata->handpose],
+		rata->x() + rata->handx
+		          + item::handgun_bulletx[rata->angle_frame]*rata->facing,
+		rata->y() + rata->handy
+		          + item::handgun_bullety[rata->angle_frame],
 		bullet_velocity * cos(rata->aim_direction),
 		bullet_velocity * sin(rata->aim_direction),
 		0,

@@ -53,6 +53,7 @@ namespace img {
 	rat,
 	rata_arm,
 	rata_body,
+	rata_forearm,
 	rata_head,
 	readmore,
 	see,
@@ -197,6 +198,9 @@ void load_img () {
 	good &= img::rata_body.sfi.LoadFromFile("img/rata-body;32x32,16,30.png"); img::rata_body.sfi.SetSmooth(0);
 	img::rata_body.w = 32; img::rata_body.h = 32;
 	img::rata_body.x = 16; img::rata_body.y = 30;
+	good &= img::rata_forearm.sfi.LoadFromFile("img/rata-forearm;32x32,15,19.png"); img::rata_forearm.sfi.SetSmooth(0);
+	img::rata_forearm.w = 32; img::rata_forearm.h = 32;
+	img::rata_forearm.x = 15; img::rata_forearm.y = 19;
 	good &= img::rata_head.sfi.LoadFromFile("img/rata-head;32x32,16,14.png"); img::rata_head.sfi.SetSmooth(0);
 	img::rata_head.w = 32; img::rata_head.h = 32;
 	img::rata_head.x = 16; img::rata_head.y = 14;

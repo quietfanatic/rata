@@ -3,29 +3,31 @@
 mkdir img/rata_tmp
 pushd img/rata_tmp
 
-gimp --no-data --no-fonts --no-interface -b "(sg-save-layer-cmd \"../../res/rata-base.xcf\" \"*\")" -b "(gimp-quit 0)"
+gimp --no-data --no-fonts --no-interface -b "(sg-save-layer-cmd \"../../res/rata-3.xcf\" \"*\")" -b "(gimp-quit 0)"
 
 montage -geometry +0+0 -background none \
-arm-e0.png \
-arm-e23.png \
-arm-e45.png \
-arm-e68.png \
-arm-e90.png \
-arm-e113.png \
-arm-e135.png \
-arm-e158.png \
-arm-e180.png \
-arm-m0.png \
-arm-m23.png \
-arm-m45.png \
-arm-m68.png \
-arm-m90.png \
-arm-m113.png \
-arm-m135.png \
-arm-m158.png \
-arm-m180.png \
-arm-eb23.png \
+arm-0.png \
+arm-23.png \
+arm-45.png \
+arm-68.png \
+arm-90.png \
+arm-113.png \
+arm-135.png \
+arm-158.png \
+arm-180.png \
 -depth 8 ../rata-arm\;32x32\,15\,16.png
+
+montage -geometry +0+0 -background none \
+forearm-0.png \
+forearm-23.png \
+forearm-45.png \
+forearm-68.png \
+forearm-90.png \
+forearm-113.png \
+forearm-135.png \
+forearm-158.png \
+forearm-180.png \
+-depth 8 ../rata-forearm\;32x32\,15\,19.png
 
 montage -geometry +0+0 -background none \
 body-stand.png \
@@ -77,27 +79,17 @@ dress-body-layfd.png \
 dress-body-grab.png \
 -depth 8 ../dress-body\;32x32\,16\,30.png
 
-montage -geometry +0+0 -background none \
-dress-arm-e0.png \
-dress-arm-e23.png \
-dress-arm-e45.png \
-dress-arm-e68.png \
-dress-arm-e90.png \
-dress-arm-e113.png \
-dress-arm-e135.png \
-dress-arm-e158.png \
-dress-arm-e180.png \
-dress-arm-m0.png \
-dress-arm-m23.png \
-dress-arm-m45.png \
-dress-arm-m68.png \
-dress-arm-m90.png \
-dress-arm-m113.png \
-dress-arm-m135.png \
-dress-arm-m158.png \
-dress-arm-m180.png \
-dress-arm-eb23.png \
--depth 8 ../dress-arm\;32x32\,15\,16.png
+#montage -geometry +0+0 -background none \
+#dress-arm-0.png \
+#dress-arm-23.png \
+#dress-arm-45.png \
+#dress-arm-68.png \
+#dress-arm-90.png \
+#dress-arm-113.png \
+#dress-arm-135.png \
+#dress-arm-158.png \
+#dress-arm-180.png \
+#-depth 8 ../dress-arm\;32x32\,15\,16.png
 
 
 
