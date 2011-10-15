@@ -128,10 +128,11 @@ struct Rata : Walking {
 		if (take_damage) {
 			if (life <= 0) add_vel(0, 5.0);
 			else if (floor) add_vel(0, 3.0);
+			floor = NULL;
 			printf("Ouch!\n");
 			set_fix_25();
 		}
-		else if (hurting) {
+		else if (hurting && !dead) {
 			hurting--;
 			if (hurting <= 0) {
 				flashing = 60;
@@ -306,7 +307,6 @@ struct Rata : Walking {
 		if (!hurting && !flashing) {
 			Object::damage(d);
 			take_damage = true;
-			floor = NULL;
 			hurting = 6 + d / 2;
 		}
 	}
@@ -396,6 +396,7 @@ struct Rata : Walking {
 		bool armflip = flip;
 		bool forearmflip = flip;
 		bool handflip = flip;
+		bool deadframe = dead && floor && !take_damage;
 
 		if (flashing % 3 == 2) return;
 
@@ -429,7 +430,7 @@ struct Rata : Walking {
 		else walk_frame = 3;
 
 		 // Select body pose
-		if      (dead && floor)  bodypose = pose::body::laybk;
+		if      (deadframe)  bodypose = pose::body::laybk;
 		else if (sitting)        bodypose = pose::body::sit;
 		else if (hurting)        bodypose = pose::body::hurtbk;
 		else if (kneeling)       bodypose = pose::body::kneel;
@@ -437,7 +438,7 @@ struct Rata : Walking {
 		else                     bodypose = pose::body::stand;
 
 		 // Select head pose
-		if (dead && floor) headpose = pose::head::laybk;
+		if (deadframe) headpose = pose::head::laybk;
 		else if (sitting)  headpose = pose::head::stand_90;
 		else if (hurting)  headpose = pose::head::hurtbk;
 		else if (floor ? (walk_frame % 2) : (yvel() < -1.0))
@@ -446,7 +447,7 @@ struct Rata : Walking {
 
 
 		 // Select arm pose
-		if (dead && floor) armpose = pose::arm::a90;
+		if (deadframe) armpose = pose::arm::a90;
 		else if (sitting)  armpose = pose::arm::a23, armflip = !flip;
 		else if (hurting)  armpose = pose::arm::a23;
 		else if (aiming) {
@@ -467,7 +468,7 @@ struct Rata : Walking {
 				else if (angle_frame == 1) armpose = -1;
 			}
 		}
-		else if (kneeling) armpose = pose::arm::a23;
+		else if (kneeling) armpose = pose::arm::a45;
 		else {
 			if      (walk_frame == 1) armpose = pose::arm::a23, armflip = !flip;
 			else if (walk_frame == 2) armpose = pose::arm::a0;
@@ -478,7 +479,7 @@ struct Rata : Walking {
 		if (armpose > 9) armpose = 9-armpose, armflip = !armflip;
 
 		 // Select forearm pose
-		if (dead && floor) forearmpose = pose::forearm::a90;
+		if (deadframe) forearmpose = pose::forearm::a90;
 		else if (sitting)  forearmpose = pose::forearm::a23, forearmflip = !flip;
 		else if (hurting)  forearmpose = pose::forearm::a68;
 		else if (aiming) {
@@ -496,7 +497,7 @@ struct Rata : Walking {
 		if (forearmpose > 9) forearmpose = 9-forearmpose, forearmflip = !forearmflip;
 
 		 // Select hand pose
-		if (dead && floor) handpose = pose::hand::inside;
+		if (deadframe) handpose = pose::hand::inside;
 		else if (sitting)  handpose = pose::hand::front;
 		else if (hurting)  handpose = pose::hand::a68;
 		else if (aiming) {
@@ -531,7 +532,7 @@ struct Rata : Walking {
 		if (equipment[i]->body)
 			draw_image(equipment[i]->body, x(), y(), bodypose, flip);
 
-		if (dead) goto draw_arm;
+		if (deadframe) goto draw_arm;
 		draw_head:
 		draw_image(
 			&img::rata_head,
@@ -549,7 +550,7 @@ struct Rata : Walking {
 				headpose, flip
 			);
 
-		if (dead) goto draw_hand;
+		if (deadframe) goto draw_hand;
 		draw_arm:
 		draw_image(
 			&img::rata_arm,
@@ -582,7 +583,7 @@ struct Rata : Walking {
 				forearmpose, forearmflip
 			);
 
-		if (dead) goto draw_head;
+		if (deadframe) goto draw_head;
 		
 		draw_hand:
 		for (uint i=0; i<MAX_EQUIPS; i++)
