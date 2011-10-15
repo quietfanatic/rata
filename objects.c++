@@ -781,7 +781,7 @@ struct myCL : b2ContactListener {
 #define DAMAGE_KNOCKBACK 2.0
 		if (a->desc->id == obj::rata) {
 			Rata* r = (Rata*) a;
-			if (!r->hurting && !r->flashing)
+			if (!r->hurt_frames && !r->inv_frames)
 			if (int damage = b->touch_damage()) {
 				r->damage(damage);
 				if (manifold->type == b2Manifold::e_faceA)
@@ -794,7 +794,7 @@ struct myCL : b2ContactListener {
 		}
 		if (b->desc->id == obj::rata) {
 			Rata* r = (Rata*) b;
-			if (!r->hurting && !r->flashing)
+			if (!r->hurt_frames && !r->inv_frames)
 			if (int damage = a->touch_damage()) {
 				r->damage(damage);
 				if (manifold->type == b2Manifold::e_faceB)
