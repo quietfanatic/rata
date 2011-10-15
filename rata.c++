@@ -307,7 +307,6 @@ struct Rata : Walking {
 			Object::damage(d);
 			take_damage = true;
 			floor = NULL;
-			if (life <= 48) d *= 2;
 			hurting = 6 + d / 2;
 		}
 	}
