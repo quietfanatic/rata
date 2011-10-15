@@ -474,8 +474,8 @@ struct Rata : Walking {
 			: walk_frame == 2 ? a0
 			: walk_frame == 3 ? a23
 			:                   a0;
-			if (armpose < 0) armpose =  -armpose, armflip = !armflip;
-			if (armpose > 9) armpose = 9-armpose, armflip = !armflip;
+			if (armpose < a0) armpose = -armpose, armflip = !armflip;
+			if (armpose > a180) armpose = (2*a180)-armpose, armflip = !armflip;
 		}
 
 		 // Select forearm pose
@@ -491,8 +491,8 @@ struct Rata : Walking {
 			: walk_frame == 2 ? a0
 			: walk_frame == 3 ? a23
 			:                   a0;
-			if (forearmpose < 0) forearmpose =  -forearmpose, forearmflip = !forearmflip;
-			if (forearmpose > 9) forearmpose = 9-forearmpose, forearmflip = !forearmflip;
+			if (forearmpose < a0) forearmpose = -forearmpose, forearmflip = !forearmflip;
+			if (forearmpose > a180) forearmpose = (2*a180)-forearmpose, forearmflip = !forearmflip;
 		}
 
 		 // Select hand pose
@@ -504,7 +504,7 @@ struct Rata : Walking {
 			: aiming ? recoil_frames > 20 ? angle_frame + 1
 			         :                      angle_frame
 			: kneeling        ? a45
-			: walk_frame == 1 ? ab23
+			: walk_frame == 1 ? a338
 			: walk_frame == 2 ? a0
 			: walk_frame == 3 ? a23
 			:                   a0;

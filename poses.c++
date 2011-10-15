@@ -73,8 +73,8 @@ namespace hand {
 
 
 const uint num = 10;
-enum Pose     {     a0,    a23,    a45,    a68,    a90,   a113,   a135,   a158,   a180,   ab23,
-                inside,  front, };
+enum Pose     {     a0,    a23,    a45,    a68,    a90,   a113,   a135,   a158,   a180,
+                  a203,   a225,   a248,   a270,   a293,   a315,   a338, inside,  front, };
 
 }
 
