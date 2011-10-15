@@ -124,9 +124,8 @@ struct Rata : Walking {
 	void before_move () {
 		//floor = get_floor(fix_feet_current());
 		 // Aiming
-		if (!dead) {
-			get_aim();
-		}
+		
+		if (!dead) get_aim();
 
 		if (take_damage) {
 			if (life <= 0) add_vel(0, 5.0);
@@ -151,7 +150,6 @@ struct Rata : Walking {
 			else if (hurt_frames < 20) {
 				if (hurt_frames > 0) {
 					hurt_frames = 0;
-					inv_frames = 60;
 				}
 				oldxrel = x() - floor->x();
 				 // Kneel
@@ -203,7 +201,7 @@ struct Rata : Walking {
 				sitting = true;
 			}
 		}
-		else {  // Midair
+		else if (!dead && !hurt_frames) {  // Midair
 			sitting = false;
 			 // Left
 			if (key[sf::Key::A] && !key[sf::Key::B]) {
@@ -240,8 +238,8 @@ struct Rata : Walking {
 			}
 			if (yvel() < 0.12 && yvel() > -0.12)
 				dbg(2, "%f\n", body->GetPosition().y);
-			if (yvel() < -24) hurt_frames += 2;
 		}
+		if (yvel() < -24) hurt_frames += 2;
 		 // Use weapon
 		if (aiming
 		 && recoil_frames == 0
@@ -254,7 +252,7 @@ struct Rata : Walking {
 		}
 		else if (recoil_frames) recoil_frames--;
 		 // Describe object or advance message
-		if (!aiming) {
+		if (!aiming && !dead) {
 			if (button[sf::Mouse::Left] == 1) {
 				if (message) {
 					if (message_pos_next) {
@@ -297,16 +295,10 @@ struct Rata : Walking {
 		 // Request debug information
 //		if (key[sf::Key::BackSlash] == 1)
 //			print_debug_all();
+		if (hurt_frames && !dead) hurt_frames--;
+		if (inv_frames && !dead) inv_frames--;
+		if (adrenaline) adrenaline--;
 		take_damage = false;
-		if (hurt_frames && !dead) {
-			hurt_frames--;
-		}
-		if (inv_frames) {
-			inv_frames--;
-		}
-		if (adrenaline) {
-			adrenaline--;
-		}
 		Walking::before_move();
 	}
 
