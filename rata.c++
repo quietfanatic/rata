@@ -50,30 +50,39 @@ struct Rata : Walking {
 //		else if (kneeling) return fix_21();
 //		else return fix_25();
 //	}
-
-	void set_fix_27 () {
+	void set_fix_inv () {
 		fix_27()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
-		fix_25()->SetFilterData(cf::disabled);
-		fix_21()->SetFilterData(cf::disabled);
-		fix_h7()->SetFilterData(cf::disabled);
+		fix_25()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
+		fix_21()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
+		fix_h7()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
+	}
+	void set_fix_27 () {
+		set_fix_inv();
+		fix_27()->SetSensor(false);
+		fix_25()->SetSensor(true);
+		fix_21()->SetSensor(true);
+		fix_h7()->SetSensor(true);
 	}
 	void set_fix_25 () {
-		fix_27()->SetFilterData(cf::disabled);
-		fix_25()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
-		fix_21()->SetFilterData(cf::disabled);
-		fix_h7()->SetFilterData(cf::disabled);
+		set_fix_inv();
+		fix_27()->SetSensor(true);
+		fix_25()->SetSensor(false);
+		fix_21()->SetSensor(true);
+		fix_h7()->SetSensor(true);
 	}
 	void set_fix_21 () {
-		fix_27()->SetFilterData(cf::disabled);
-		fix_25()->SetFilterData(cf::disabled);
-		fix_21()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
-		fix_h7()->SetFilterData(cf::disabled);
+		set_fix_inv();
+		fix_27()->SetSensor(true);
+		fix_25()->SetSensor(true);
+		fix_21()->SetSensor(false);
+		fix_h7()->SetSensor(true);
 	}
 	void set_fix_h7 () {
-		fix_27()->SetFilterData(cf::disabled);
-		fix_25()->SetFilterData(cf::disabled);
-		fix_21()->SetFilterData(cf::disabled);
-		fix_h7()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
+		set_fix_inv();
+		fix_27()->SetSensor(true);
+		fix_25()->SetSensor(true);
+		fix_21()->SetSensor(true);
+		fix_h7()->SetSensor(false);
 	}
 
 	 // Character stats (affected by items and such)
