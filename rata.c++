@@ -16,6 +16,7 @@ struct Rata : Walking {
 	bool sitting;
 	bool dead;
 	bool kneeling;
+	bool crawling;
 	float aim_distance;
 	float aim_direction;
 	float distance_walked;  // For drawing
@@ -78,6 +79,9 @@ struct Rata : Walking {
 	}
 	float max_backward_speed () {
 		return 4.0;
+	}
+	float max_crawl_speed () {
+		return 2.0;
 	}
 	float air_accel () {
 		return 0.2;
@@ -153,12 +157,23 @@ struct Rata : Walking {
 				}
 				oldxrel = x() - floor->x();
 				 // Kneel
-				 kneeling = false;
+				kneeling = false;
 				if (key[sf::Key::S] && floor_normal.y > 0.9) {
 					ideal_xvel = 0;
 					floor_friction = ground_decel()*ground_decel();
-					set_fix_21();
 					kneeling = true;
+					if (key[sf::Key::A] && !key[sf::Key::D]) {
+						if (!crawling) facing = -1;
+						crawling = true;
+						ideal_xvel = -max_crawl_speed();
+					}
+					else if (key[sf::Key::D] && !key[sf::Key::A]) {
+						if (!crawling) facing = 1;
+						crawling = true;
+						ideal_xvel = max_crawl_speed();
+					}
+					if (crawling) set_fix_h7();
+					else set_fix_21();
 				}
 				 // Left
 				else if (key[sf::Key::A] && !key[sf::Key::D]) {
@@ -195,6 +210,7 @@ struct Rata : Walking {
 					float_frames = jump_float_time();
 					set_fix_27();
 				}
+				if (!kneeling) crawling = false;
 			}
 			else {
 				set_fix_21();
@@ -440,6 +456,8 @@ struct Rata : Walking {
 			  deadframe        ? laybk
 			: sitting          ? sit
 			: hurt_frames      ? hurtbk
+			: crawling ? (walk_frame % 2) ? crawl2
+			           :                    crawl
 			: kneeling         ? kneel
 			: (walk_frame % 2) ? walk
 			:                    stand;
@@ -451,6 +469,7 @@ struct Rata : Walking {
 			  deadframe      ? laybk
 			: sitting        ? stand_90
 			: hurt_frames    ? hurtbk
+			: crawling       ? crawl
 			: walk_frame % 2
 			   && floor      ? angle_walk[angle_frame]
 			: yvel() < -1.0  ? angle_walk[angle_frame]
@@ -463,6 +482,10 @@ struct Rata : Walking {
 			  deadframe       ? a90
 			: sitting         ? -a23
 			: hurt_frames     ? a23
+			: crawling ? walk_frame == 1 ? -a45
+			           : walk_frame == 2 ? a0
+			           : walk_frame == 3 ? a45
+			           :                   a0
 			: aiming ? recoil_frames > 20 ? angle_frame - 3
 			         : aim_distance > 10  ? angle_frame
 			         : aim_distance > 4   ? angle_frame == 0 ? 0
@@ -485,6 +508,7 @@ struct Rata : Walking {
 			  deadframe       ? a90
 			: sitting         ? -a23
 			: hurt_frames     ? a68
+			: crawling        ? a90
 			: aiming ? recoil_frames > 20 ? angle_frame + 1
 			         :                      angle_frame
 			: kneeling        ? a68
@@ -502,6 +526,7 @@ struct Rata : Walking {
 			  deadframe       ? inside
 			: sitting         ? front
 			: hurt_frames     ? a68
+			: crawling        ? inside
 			: aiming ? recoil_frames > 20 ? angle_frame + 1
 			         :                      angle_frame
 			: kneeling        ? a45

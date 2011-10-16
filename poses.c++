@@ -9,10 +9,10 @@ namespace body {
 
 const uint num = 12;
 enum Pose     {  stand,   walk, tiptoe,  kneel,  crawl, crawl2,    sit, hurtbk,  laybk, hurtfd,  layfd,   grab };
-float armx []={  -1*PX,  -1*PX,  -1*PX,  -1*PX,   0*PX,   0*PX,  -1*PX,  -1*PX,  -1*PX,   0*PX,   0*PX,   0*PX };
-float army []={  14*PX,  13*PX,  15*PX,   8*PX,   0*PX,   0*PX,   8*PX,  14*PX,   1*PX,   0*PX,   0*PX,   0*PX };
-float headx[]={   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,   0*PX,  -7*PX,   0*PX,   0*PX,   0*PX };
-float heady[]={  16*PX,  15*PX,  17*PX,  10*PX,   0*PX,   0*PX,   9*PX,  16*PX,  -1*PX,   0*PX,   0*PX,   0*PX };
+float armx []={  -1*PX,  -1*PX,  -1*PX,  -1*PX,   1*PX,   1*PX,  -1*PX,  -1*PX,  -1*PX,   0*PX,   0*PX,   0*PX };
+float army []={  14*PX,  13*PX,  15*PX,   8*PX,   4*PX,   3*PX,   8*PX,  14*PX,   1*PX,   0*PX,   0*PX,   0*PX };
+float headx[]={   0*PX,   0*PX,   0*PX,   0*PX,   3*PX,   3*PX,   0*PX,   0*PX,  -3*PX,   0*PX,   0*PX,   0*PX };
+float heady[]={  16*PX,  15*PX,  17*PX,  10*PX,   5*PX,   4*PX,   9*PX,  16*PX,   2*PX,   0*PX,   0*PX,   0*PX };
 
 
 
@@ -24,7 +24,7 @@ namespace head {
 const uint num = 16;
 enum Pose { stand_23, stand_45, stand_68, stand_90,stand_135,stand_158,
              walk_23,  walk_45,  walk_68,  walk_90, walk_135, walk_158,
-              hurtbk,   hurtfd,    laybk,    layfd,
+               crawl,   hurtbk,   hurtfd,    laybk,    layfd,
 };
 uint angle_stand [9] = {
 	stand_23, // 0
