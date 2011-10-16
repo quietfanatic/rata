@@ -482,7 +482,7 @@ struct Rata : Walking {
 			  deadframe       ? a90
 			: sitting         ? -a23
 			: hurt_frames     ? a23
-			: crawling ? walk_frame == 1 ? -a45
+			: crawling ? walk_frame == 1 ? -a23
 			           : walk_frame == 2 ? a0
 			           : walk_frame == 3 ? a45
 			           :                   a0
