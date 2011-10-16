@@ -100,10 +100,11 @@ struct obj::Desc {
 
 struct FixProp {
 	bool is_standable;
+	bool stands;
 	float damage_factor;
 	int touch_damage;
 	bool damages_enemies;
-} default_FixProp = {true, 0.0, 0, false};
+} default_FixProp = {true, false, 0.0, 0, false};
 
 
 #else
@@ -114,7 +115,7 @@ namespace cf {
 	b2Filter disabled = {0, 0, 0};
 	b2Filter rata = {1, 2|4|8|16|32, 0};
 	b2Filter rata_invincible = {1, 2|8|16|32, 0};
-	b2Filter rata_feet = {1, 2|8|32, 0};
+	b2Filter rata_sensor = {1, 2|32, 0};
 	b2Filter solid = {2, 1|4|8|16|32, 0};
 	b2Filter bullet = {4, 1|2|8|32, 0};
 	b2Filter enemy = {8, 1|2|4|8|32, 0};
@@ -606,14 +607,14 @@ b2CircleShape* make_circle (float rad, b2Vec2 center = b2Vec2(0, 0)) {
 }
 
 
-inline b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction=0, float restitution=0, float density=0, FixProp prop = default_FixProp, bool sensor=false) {
+inline b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction=0, float restitution=0, float density=0, FixProp* prop=NULL, bool sensor=false) {
 	b2FixtureDef r;
 	r.shape = shape;
 	r.friction = friction;
 	r.restitution = restitution;
 	r.density = density;
 	r.filter = filter;
-	r.userData = new FixProp (prop);
+	r.userData = prop?prop:&default_FixProp;
 	r.isSensor = sensor;
 	return r;
 }
@@ -621,9 +622,15 @@ inline b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction
  // OBJECT DEFINITIONS
 
 
-b2Vec2 rata_poly_27 [] = {
+b2Vec2 rata_poly_feet [] = {
 	b2Vec2(-2.5*PX, 0*PX),
 	b2Vec2(2.5*PX, 0*PX),
+	b2Vec2(2.5*PX, 1*PX),
+	b2Vec2(-2.5*PX, 1*PX)
+};
+b2Vec2 rata_poly_27 [] = {
+	b2Vec2(-2.5*PX, 0.1*PX),
+	b2Vec2(2.5*PX, 0.1*PX),
 	b2Vec2(5.5*PX, 17*PX),
 	b2Vec2(5.5*PX, 24*PX),
 	b2Vec2(0*PX, 27*PX),
@@ -631,8 +638,8 @@ b2Vec2 rata_poly_27 [] = {
 	b2Vec2(-5.5*PX, 17*PX)
 };
 b2Vec2 rata_poly_25 [] = {
-	b2Vec2(-2.5*PX, 2*PX),
-	b2Vec2(2.5*PX, 2*PX),
+	b2Vec2(-2.5*PX, 0.1*PX),
+	b2Vec2(2.5*PX, 0.1*PX),
 	b2Vec2(5.5*PX, 15*PX),
 	b2Vec2(5.5*PX, 22*PX),
 	b2Vec2(0*PX, 25*PX),
@@ -640,8 +647,8 @@ b2Vec2 rata_poly_25 [] = {
 	b2Vec2(-5.5*PX, 15*PX)
 };
 b2Vec2 rata_poly_21 [] = {
-	b2Vec2(-2.5*PX, 0*PX),
-	b2Vec2(2.5*PX, 0*PX),
+	b2Vec2(-2.5*PX, 0.1*PX),
+	b2Vec2(2.5*PX, 0.1*PX),
 	b2Vec2(5.5*PX, 11*PX),
 	b2Vec2(5.5*PX, 18*PX),
 	b2Vec2(0*PX, 21*PX),
@@ -649,34 +656,40 @@ b2Vec2 rata_poly_21 [] = {
 	b2Vec2(-5.5*PX, 11*PX)
 };
 b2Vec2 rata_poly_h7 [] = {
-	b2Vec2(-2.5*PX, 0*PX),
-	b2Vec2(2.5*PX, 0*PX),
-	b2Vec2(8*PX, 7*PX),
-	b2Vec2(-8*PX, 7*PX),
+	b2Vec2(-8*PX, 0.1*PX),
+	b2Vec2(8*PX, 0.1*PX),
+	b2Vec2(4*PX, 7*PX),
+	b2Vec2(-4*PX, 7*PX),
 };
 
-FixProp rata_fixprop = {true, 1.0, 0, false};
+FixProp rata_fixprop = {true, false, 1.0, 0, false};
+FixProp rata_fixprop_feet = {false, true, 1.0, 0, false};
 b2FixtureDef rata_fixes [] = {
-	make_fixdef(make_poly(7, rata_poly_27), cf::disabled, 0, 0, 1.2, rata_fixprop),
-	make_fixdef(make_poly(7, rata_poly_25), cf::disabled, 0, 0, 1.2, rata_fixprop),
-	make_fixdef(make_poly(7, rata_poly_21), cf::disabled, 0, 0, 1.2, rata_fixprop),
-	make_fixdef(make_poly(4, rata_poly_h7), cf::disabled, 0, 0, 1.2, rata_fixprop)
+	make_fixdef(make_poly(4, rata_poly_feet), cf::rata, 0, 0, 1.0, &rata_fixprop_feet, false),
+	make_fixdef(make_poly(7, rata_poly_27), cf::rata, 0, 0, 1.0, &rata_fixprop, false),
+	make_fixdef(make_poly(7, rata_poly_25), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
+	make_fixdef(make_poly(7, rata_poly_21), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
+	make_fixdef(make_poly(4, rata_poly_h7), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true)
 };
 
-FixProp bullet_fixprop = {false, 0.0, 0, false};
-b2FixtureDef bullet_fix = make_fixdef(make_circle(0.05), cf::bullet, 0, 0.8, 10.0, bullet_fixprop);
-b2FixtureDef rat_fix = make_fixdef(make_rect(12*PX, 5*PX), cf::enemy, 0, 0, 4.0, {true, 1.0, 12, false});
-b2FixtureDef crate_fix = make_fixdef(make_rect(1, 1, 0.005), cf::movable, 0.4, 0, 4.0, {true, 1.0, 0, false});
+FixProp bullet_fixprop = {false, false, 0.0, 0, false};
+b2FixtureDef bullet_fix = make_fixdef(make_circle(0.05), cf::bullet, 0, 0.8, 10.0, &bullet_fixprop);
+FixProp rat_fixprop = {true, true, 1.0, 12, false};
+b2FixtureDef rat_fix = make_fixdef(make_rect(12*PX, 5*PX), cf::enemy, 0, 0, 4.0, &rat_fixprop);
+FixProp crate_fixprop = {true, false, 1.0, 0, false};
+b2FixtureDef crate_fix = make_fixdef(make_rect(1, 1, 0.005), cf::movable, 0.4, 0, 4.0, &crate_fixprop);
 b2FixtureDef mousehole_fix = make_fixdef(make_rect(14*PX, 10*PX), cf::scenery, 0, 0, 0);
+FixProp patroller_fixprop = {true, true, 1.0, 0, false};
 b2FixtureDef patroller_fixes [] = {
-	make_fixdef(make_rect(14*PX, 12*PX), cf::enemy, 0, 0.1, 6.0, {true, 1.0, 0, false}),
+	make_fixdef(make_rect(14*PX, 12*PX), cf::enemy, 0, 0.1, 6.0, &patroller_fixprop),
 };
-b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.1, {false, 0.0, 0, false});
+FixProp heart_fixprop = {false, false, 0.0, 0, false};
+b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.1, &heart_fixprop);
 
 const obj::Def obj::def [] = {
 
 	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, NULL},
-	{"Rata", 4, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
+	{"Rata", 5, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
 	{"Solid Object", 0, NULL, 0, 0, obj::ALLOC<Solid>, NULL},
 	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, NULL},
 	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>, NULL},
@@ -722,9 +735,9 @@ struct myCL : b2ContactListener {
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
 		FixProp* afp = (FixProp*) contact->GetFixtureA()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
-		FixProp* bfp = (FixProp*) contact->GetFixtureA()->GetUserData();
+		FixProp* bfp = (FixProp*) contact->GetFixtureB()->GetUserData();
 		b2Manifold* manifold = contact->GetManifold();
-		if (afp->is_standable) {
+		if (afp->is_standable && bfp->stands) {
 			if (manifold->type == b2Manifold::e_faceA
 			 && manifold->localNormal.y > 0.7) {
 				b->floor = a;
@@ -740,7 +753,7 @@ struct myCL : b2ContactListener {
 				b->floor_normal = -manifold->localNormal;
 			}
 		}
-		if (bfp->is_standable) {
+		if (bfp->is_standable && afp->stands) {
 			if (manifold->type == b2Manifold::e_faceB
 			 && manifold->localNormal.y > 0.7) {
 				a->floor = b;

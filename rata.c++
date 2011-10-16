@@ -40,48 +40,63 @@ struct Rata : Walking {
 	 // Easy access to bits
 	float aim_center_x () { return x() + 2*PX*facing; }
 	float aim_center_y () { return y() + 13*PX; }
-	b2Fixture* fix_27 () { return body->GetFixtureList(); }
-	b2Fixture* fix_25 () { return body->GetFixtureList()->GetNext(); }
-	b2Fixture* fix_21 () { return body->GetFixtureList()->GetNext()->GetNext(); }
-	b2Fixture* fix_h7 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext(); }
+	b2Fixture* fix_27 () { return body->GetFixtureList()->GetNext(); }
+	b2Fixture* fix_25 () { return body->GetFixtureList()->GetNext()->GetNext(); }
+	b2Fixture* fix_21 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext(); }
+	b2Fixture* fix_h7 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext()->GetNext(); }
 
 //	b2Fixture* fix_current () {
 //		if (hurt_frames) return fix_27();
 //		else if (kneeling) return fix_21();
 //		else return fix_25();
 //	}
-	void set_fix_inv () {
-		fix_27()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
-		fix_25()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
-		fix_21()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
-		fix_h7()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
+	bool check_fix (b2Fixture* fix) {
+		for (b2ContactEdge* ce = body->GetContactList(); ce; ce=ce->next) {
+			b2Contact* c = ce->contact;
+			if (c->GetFixtureA() == fix || c->GetFixtureB() == fix)
+			if (c->IsTouching() && c->IsEnabled())
+				return true;
+		}
+		return false;
 	}
 	void set_fix_27 () {
-		set_fix_inv();
+		fix_27()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
 		fix_27()->SetSensor(false);
+		fix_25()->SetFilterData(cf::rata_sensor);
 		fix_25()->SetSensor(true);
+		fix_21()->SetFilterData(cf::rata_sensor);
 		fix_21()->SetSensor(true);
+		fix_h7()->SetFilterData(cf::rata_sensor);
 		fix_h7()->SetSensor(true);
 	}
 	void set_fix_25 () {
-		set_fix_inv();
+		fix_27()->SetFilterData(cf::rata_sensor);
 		fix_27()->SetSensor(true);
+		fix_25()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
 		fix_25()->SetSensor(false);
+		fix_21()->SetFilterData(cf::rata_sensor);
 		fix_21()->SetSensor(true);
+		fix_h7()->SetFilterData(cf::rata_sensor);
 		fix_h7()->SetSensor(true);
 	}
 	void set_fix_21 () {
-		set_fix_inv();
+		fix_27()->SetFilterData(cf::rata_sensor);
 		fix_27()->SetSensor(true);
+		fix_25()->SetFilterData(cf::rata_sensor);
 		fix_25()->SetSensor(true);
+		fix_21()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
 		fix_21()->SetSensor(false);
+		fix_h7()->SetFilterData(cf::rata_sensor);
 		fix_h7()->SetSensor(true);
 	}
 	void set_fix_h7 () {
-		set_fix_inv();
+		fix_27()->SetFilterData(cf::rata_sensor);
 		fix_27()->SetSensor(true);
+		fix_25()->SetFilterData(cf::rata_sensor);
 		fix_25()->SetSensor(true);
+		fix_21()->SetFilterData(cf::rata_sensor);
 		fix_21()->SetSensor(true);
+		fix_h7()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
 		fix_h7()->SetSensor(false);
 	}
 
@@ -176,10 +191,8 @@ struct Rata : Walking {
 	}
 
 	bool allow_kneel () {
-		if (key[sf::Key::S] && floor_normal.y > 0.9) {
-			return true;
-		}
-		else return false;
+		return (key[sf::Key::S] && floor_normal.y > 0.9)
+		    || ((state == kneeling || state == crawling) && check_fix(fix_27()));
 	}
 
 	bool allow_crawl () {
@@ -305,7 +318,7 @@ struct Rata : Walking {
 				if (!floor) goto no_floor;
 				got_floor:
 				if (allow_kneel()) {
-					if ((!allow_aim()) && allow_crawl()) {
+					if ((check_fix(fix_21()) || !allow_aim()) && allow_crawl()) {
 						state = crawling;
 						set_fix_h7();
 					}
