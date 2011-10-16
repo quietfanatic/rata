@@ -2,7 +2,6 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MOD(a, b) ((a) - (b) * (double)(int)((a)/(b)))
 #define SWAP(a, b) {typeof(a) _t = b; b = a; a = _t;}
 
 #define coords2sf(x, y) x, y
@@ -73,6 +72,10 @@ void draw_rect (float l, float t, float r, float b, sf::Color color=sf::Color(31
 		));
 };
 
+inline float mod_f (float a, float b) {
+	return a >= 0 ? a - b*(double)(int)(a/b)
+	              : a - b*(double)(int)(a/b);
+}
 inline float abs_f (float x) { return x>0 ? x : -x; }
 inline int sign_f (float x) { return (x>0)-(x<0); }
 

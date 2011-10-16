@@ -138,8 +138,8 @@ void draw_phase () {
 //		draw_image(img::_bgs[rc->bg_index], camera.x, camera.y);
 		float w = img::_bgs[rc->bg_index]->sfi.GetWidth()*PX;
 		float h = img::_bgs[rc->bg_index]->sfi.GetHeight()*PX;
-		float bg_x = MOD(-camera.x/2, w);
-		float bg_y = MOD(-camera.y/2, h);
+		float bg_x = mod_f(-camera.x/2, w);
+		float bg_y = mod_f(-camera.y/2, h);
 		for (float x = bg_x + camera.x - 10; x < camera.x + 10; x += w)
 		for (float y = bg_y + h + camera.y + 7.5; y > camera.y - 7.5; y -= h) {
 			draw_image(img::_bgs[rc->bg_index], x, y);
@@ -277,7 +277,7 @@ void draw_phase () {
 		window->Draw(shade_rect);
 	}
 	 // Draw cursor
-	if (rata && !rata->dead) {
+	if (rata && rata->state != Rata::dead) {
 		window->ShowMouseCursor(false);
 		draw_image(cursor.img, cursor.x + rata->aim_center_x(), cursor.y + rata->aim_center_y());
 	}
@@ -357,7 +357,7 @@ void input_phase () {
 			break;
 		}
 		case sf::Event::MouseMoved: {
-			if (rata && !rata->dead && frame_number > 1) {
+			if (rata && rata->state != Rata::dead && frame_number > 1) {
 				cursor.x += (event.MouseMove.X - window->GetWidth()/2.0)
 					* PX * cursor_scale / window_scale;
 				cursor.y += -(event.MouseMove.Y - window->GetHeight()/2.0)
