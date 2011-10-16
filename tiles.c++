@@ -15,7 +15,9 @@ struct Tileinfo {
 	float friction;
 	uint nvertexes;
 	b2Vec2 vertexes [TILE_MAX_VERTEXES];
+	FixProp* prop;
 };
+
 
 extern uint num_tiles;
 extern Tileinfo tileinfo [];
@@ -42,8 +44,8 @@ extern Tileinfo tileinfo [];
 
 uint num_tiles = 9;  // <-- This number must equal the number of tiles below
 Tileinfo tileinfo [] = {
-	{"Empty", 0, 0, 0.0, 0,},
-	{"Metal block", 1, 0, 0.4, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}},
+	{"Empty", 0, 0, 0.0, 0},
+	{"Metal block", 1, 0, 0.4, 4, {v(0, 0), v(1, 0), v(1, 1), v(0, 1)}, NULL},
 	{"Metal support", 0, 1, 0.0, 0},
 	{"Metal support", 0, 1, 0.0, 0},
 	{"Metal support", 0, 1, 0.0, 0},
@@ -51,7 +53,7 @@ Tileinfo tileinfo [] = {
 	{"Metal support", 0, 1, 0.0, 0},
 	{"Metal ramp l", 1, 0, 1.5, 3, {v(0, 0), v(1, 0), v(1, 1)}},
 	{"Metal ramp r", 1, 0, 1.5, 3, {v(0, 0), v(1, 0), v(0, 1)}},
-	{"END OF TILES", 0, 0, 9}
+	{"END OF TILES", 0, 0, 9, NULL}
 };
 
 #undef v

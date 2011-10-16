@@ -5,7 +5,6 @@ struct Rat : Walking {
 	int decision_timer;
 	int anim_timer;
 	char* describe () { return "It's a large gray rat that smells like trash.\nDoesn't seem very timid for a rodent."; }
-	bool is_damagable() { return true; }
 	void on_create () {
 		Object::on_create();
 		Walking::on_create();
@@ -38,7 +37,6 @@ struct Rat : Walking {
 		}
 		Object::draw();
 	}
-	virtual int touch_damage () { return 12; }
 	virtual void kill () {
 		destroy();
 		if (rand() % 4 == 0)
@@ -52,7 +50,6 @@ struct Rat : Walking {
 struct Patroller : Walking {
 	virtual char* describe () { return "A small robot is patrolling the area.\nIt has a gun attached.  Best be cautious."; }
 	virtual int update_interval () { return 30; }
-	virtual bool is_damagable () { return true; }
 	uint lifetime;
 	bool threat_detected;
 	float threat_x;

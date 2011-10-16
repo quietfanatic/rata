@@ -33,7 +33,7 @@ struct Rata : Walking {
 	b2Fixture* fix_27 () { return body->GetFixtureList(); }
 	b2Fixture* fix_25 () { return body->GetFixtureList()->GetNext(); }
 	b2Fixture* fix_21 () { return body->GetFixtureList()->GetNext()->GetNext(); }
-	b2Fixture* fix_h8 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext(); }
+	b2Fixture* fix_h7 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext(); }
 
 //	b2Fixture* fix_current () {
 //		if (hurt_frames) return fix_27();
@@ -45,25 +45,25 @@ struct Rata : Walking {
 		fix_27()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
 		fix_25()->SetFilterData(cf::disabled);
 		fix_21()->SetFilterData(cf::disabled);
-		fix_h8()->SetFilterData(cf::disabled);
+		fix_h7()->SetFilterData(cf::disabled);
 	}
 	void set_fix_25 () {
 		fix_27()->SetFilterData(cf::disabled);
 		fix_25()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
 		fix_21()->SetFilterData(cf::disabled);
-		fix_h8()->SetFilterData(cf::disabled);
+		fix_h7()->SetFilterData(cf::disabled);
 	}
 	void set_fix_21 () {
 		fix_27()->SetFilterData(cf::disabled);
 		fix_25()->SetFilterData(cf::disabled);
 		fix_21()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
-		fix_h8()->SetFilterData(cf::disabled);
+		fix_h7()->SetFilterData(cf::disabled);
 	}
-	void set_fix_h8 () {
+	void set_fix_h7 () {
 		fix_27()->SetFilterData(cf::disabled);
 		fix_25()->SetFilterData(cf::disabled);
 		fix_21()->SetFilterData(cf::disabled);
-		fix_h8()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
+		fix_h7()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
 	}
 
 	 // Character stats (affected by items and such)
@@ -140,7 +140,7 @@ struct Rata : Walking {
 			if (dead) {
 				floor_friction = ground_decel();
 				ideal_xvel = 0;
-				set_fix_h8();
+				set_fix_h7();
 			}
 			else if (sitting) {
 				floor_friction = ground_decel();
@@ -354,6 +354,7 @@ struct Rata : Walking {
 			for (uint i = obj::def[desc->id].nfixes; i > 0; i--) {
 				dbg(4, "Fix %d: 0x%08x\n", i, body->CreateFixture(&(obj::def[desc->id].fixdef[i-1])));
 			}
+		set_fix_27();
 		dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
 		floor = NULL;
 		Walking::on_create();

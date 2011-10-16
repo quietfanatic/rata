@@ -96,6 +96,16 @@ struct obj::Desc {
 		{ }
 };
 
+ // Fixture properties
+
+struct FixProp {
+	bool is_standable;
+	float damage_factor;
+	int touch_damage;
+	bool damages_enemies;
+} default_FixProp = {true, 0.0, 0, false};
+
+
 #else
 
  // Collision filters
@@ -112,7 +122,6 @@ namespace cf {
 	b2Filter movable = {32, 1|2|4|8|16|32, 0};
 	b2Filter scenery = {64, 2, 0};
 };
-
 
 
 
@@ -265,14 +274,9 @@ struct Object {
 		}
 	}
 
-	virtual bool needs_floor () { return false; }
-	virtual bool is_standable () { return true; }
-	virtual bool is_damagable () { return false; }
 	virtual void damage (int d) { life -= d; if (life <= 0) kill(); }
 	virtual void heal (int h) { life += h; if (life > max_life) life = max_life; }
 	virtual void kill () { destroy(); }
-	virtual int touch_damage () { return 0; }
-	virtual int touch_hurt () { return 30; }
 	virtual char* describe () { return "What a mysterious object."; }
 
 	 // Non-overridable
@@ -501,7 +505,6 @@ struct Bullet : Object {
 
 struct Crate : Object {
 	virtual char* describe () { return "There's a wooden crate sitting here.\nIt looks like it can be pushed around."; }
-	virtual bool is_damagable () { return true; }
 	virtual void on_create () { Object::on_create(); life = max_life = 144; }
 };
 
@@ -603,13 +606,14 @@ b2CircleShape* make_circle (float rad, b2Vec2 center = b2Vec2(0, 0)) {
 }
 
 
-inline b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction=0, float restitution=0, float density=0, bool sensor=false) {
+inline b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction=0, float restitution=0, float density=0, FixProp prop = default_FixProp, bool sensor=false) {
 	b2FixtureDef r;
 	r.shape = shape;
 	r.friction = friction;
 	r.restitution = restitution;
 	r.density = density;
 	r.filter = filter;
+	r.userData = new FixProp (prop);
 	r.isSensor = sensor;
 	return r;
 }
@@ -644,28 +648,30 @@ b2Vec2 rata_poly_21 [] = {
 	b2Vec2(-5.5*PX, 18*PX),
 	b2Vec2(-5.5*PX, 11*PX)
 };
-b2Vec2 rata_poly_h8 [] = {
-	b2Vec2(-8*PX, 0*PX),
-	b2Vec2(8*PX, 0*PX),
-	b2Vec2(8*PX, 8*PX),
-	b2Vec2(-8*PX, 8*PX),
+b2Vec2 rata_poly_h7 [] = {
+	b2Vec2(-2.5*PX, 0*PX),
+	b2Vec2(2.5*PX, 0*PX),
+	b2Vec2(8*PX, 7*PX),
+	b2Vec2(-8*PX, 7*PX),
 };
 
+FixProp rata_fixprop = {true, 1.0, 0, false};
 b2FixtureDef rata_fixes [] = {
-	make_fixdef(make_poly(7, rata_poly_27), cf::rata, 0, 0, 1.2),
-	make_fixdef(make_poly(7, rata_poly_25), cf::disabled, 0, 0, 1.2),
-	make_fixdef(make_poly(7, rata_poly_21), cf::rata, 0, 0, 1.2),
-	make_fixdef(make_poly(4, rata_poly_h8), cf::rata, 0, 0, 1.2)
+	make_fixdef(make_poly(7, rata_poly_27), cf::disabled, 0, 0, 1.2, rata_fixprop),
+	make_fixdef(make_poly(7, rata_poly_25), cf::disabled, 0, 0, 1.2, rata_fixprop),
+	make_fixdef(make_poly(7, rata_poly_21), cf::disabled, 0, 0, 1.2, rata_fixprop),
+	make_fixdef(make_poly(4, rata_poly_h7), cf::disabled, 0, 0, 1.2, rata_fixprop)
 };
 
-b2FixtureDef bullet_fix = make_fixdef(make_circle(0.05), cf::bullet, 0, 0.8, 10.0);
-b2FixtureDef rat_fix = make_fixdef(make_rect(12*PX, 5*PX), cf::enemy, 0, 0, 4.0);
-b2FixtureDef crate_fix = make_fixdef(make_rect(1, 1, 0.005), cf::movable, 0.4, 0, 4.0);
+FixProp bullet_fixprop = {false, 0.0, 0, false};
+b2FixtureDef bullet_fix = make_fixdef(make_circle(0.05), cf::bullet, 0, 0.8, 10.0, bullet_fixprop);
+b2FixtureDef rat_fix = make_fixdef(make_rect(12*PX, 5*PX), cf::enemy, 0, 0, 4.0, {true, 1.0, 12, false});
+b2FixtureDef crate_fix = make_fixdef(make_rect(1, 1, 0.005), cf::movable, 0.4, 0, 4.0, {true, 1.0, 0, false});
 b2FixtureDef mousehole_fix = make_fixdef(make_rect(14*PX, 10*PX), cf::scenery, 0, 0, 0);
 b2FixtureDef patroller_fixes [] = {
-	make_fixdef(make_rect(14*PX, 12*PX), cf::enemy, 0, 0.1, 6.0),
+	make_fixdef(make_rect(14*PX, 12*PX), cf::enemy, 0, 0.1, 6.0, {true, 1.0, 0, false}),
 };
-b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.1);
+b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.1, {false, 0.0, 0, false});
 
 const obj::Def obj::def [] = {
 
@@ -714,9 +720,11 @@ struct myCL : b2ContactListener {
 	void PostSolve (b2Contact* contact, const b2ContactImpulse* ci) {
 		//if (!contact->IsTouching()) return;
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
+		FixProp* afp = (FixProp*) contact->GetFixtureA()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
+		FixProp* bfp = (FixProp*) contact->GetFixtureA()->GetUserData();
 		b2Manifold* manifold = contact->GetManifold();
-		if (a->is_standable()) {
+		if (afp->is_standable) {
 			if (manifold->type == b2Manifold::e_faceA
 			 && manifold->localNormal.y > 0.7) {
 				b->floor = a;
@@ -732,7 +740,7 @@ struct myCL : b2ContactListener {
 				b->floor_normal = -manifold->localNormal;
 			}
 		}
-		if (b->is_standable()) {
+		if (bfp->is_standable) {
 			if (manifold->type == b2Manifold::e_faceB
 			 && manifold->localNormal.y > 0.7) {
 				a->floor = b;
@@ -751,12 +759,12 @@ struct myCL : b2ContactListener {
 		if (a->desc->id == obj::bullet) {
 			Bullet* ba = (Bullet*) a;
 			ba->find_hit(contact->GetFixtureB());
-			if (b->is_damagable()) {
+			if (bfp->damage_factor) {
 				(new obj::Desc(
 					obj::hiteffect, &img::hit_damagable,
 					ba->midx, ba->midy, 8, 0, 0, true
 				))->manifest();
-				b->damage(48);
+				b->damage(48*bfp->damage_factor);
 				ba->destroy_after_draw();
 			}
 			else if (ci->normalImpulses[0] > 10.0
@@ -766,12 +774,12 @@ struct myCL : b2ContactListener {
 		if (b->desc->id == obj::bullet) {
 			Bullet* bb = (Bullet*) b;
 			bb->find_hit(contact->GetFixtureA());
-			if (a->is_damagable()) {
+			if (afp->damage_factor) {
 				(new obj::Desc(
 					obj::hiteffect, &img::hit_damagable,
 					bb->midx, bb->midy, 8, 0, 0, true
 				))->manifest();
-				a->damage(48);
+				a->damage(48*afp->damage_factor);
 				bb->destroy_after_draw();
 			}
 			else if (ci->normalImpulses[0] > 10.0
@@ -782,7 +790,7 @@ struct myCL : b2ContactListener {
 		if (a->desc->id == obj::rata) {
 			Rata* r = (Rata*) a;
 			if (!r->hurt_frames && !r->inv_frames)
-			if (int damage = b->touch_damage()) {
+			if (int damage = bfp->touch_damage) {
 				r->damage(damage);
 				if (manifold->type == b2Manifold::e_faceA)
 					r->add_vel(-manifold->localNormal.x*DAMAGE_KNOCKBACK,
@@ -795,7 +803,7 @@ struct myCL : b2ContactListener {
 		if (b->desc->id == obj::rata) {
 			Rata* r = (Rata*) b;
 			if (!r->hurt_frames && !r->inv_frames)
-			if (int damage = a->touch_damage()) {
+			if (int damage = afp->touch_damage) {
 				r->damage(damage);
 				if (manifold->type == b2Manifold::e_faceB)
 					r->add_vel(-manifold->localNormal.x*DAMAGE_KNOCKBACK,

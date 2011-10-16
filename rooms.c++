@@ -177,6 +177,7 @@ namespace room {
 			fixdef.friction = t.friction;
 			fixdef.restitution = 0;
 			//fixdef.density = 100.0;
+			fixdef.userData = t.prop ? t.prop : &default_FixProp;
 			tilemap_obj->body->CreateFixture(&fixdef);
 		}
 	}
