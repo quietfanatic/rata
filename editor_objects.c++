@@ -119,7 +119,29 @@ struct TilePicker : Object {
 				}
 			}
 		}
+	}
+};
 
+
+
+struct TilemapEditor : Object {
+	void draw () {
+		if (room::current) {
+			float x = cursor2.x + window_view.GetRect().Left;
+			float y = cursor2.y + window_view.GetRect().Top;
+			if (x > 0)
+			if (x < room::current->width)
+			if (y > 0)
+			if (y < room::current->height) {
+				window->Draw(sf::Shape::Rectangle(
+					std::floor(x), std::floor(y),
+					(std::floor(x)+1), (std::floor(y)+1),
+					sf::Color(0,0,0,0), 1*PX, sf::Color(255, 255, 255, 127)
+				));
+			}
+		}
+	}
+	void before_move () {
 		 // Move View
 		if (key[sf::Key::W]) {
 			window_view.SetFromRect(sf::FloatRect(
@@ -153,29 +175,7 @@ struct TilePicker : Object {
 				window_view.GetRect().Top
 			));
 		}
-	}
-};
-
-
-
-struct TilemapEditor : Object {
-	void draw () {
-		if (room::current) {
-			float x = cursor2.x + window_view.GetRect().Left;
-			float y = cursor2.y + window_view.GetRect().Top;
-			if (x > 0)
-			if (x < room::current->width)
-			if (y > 0)
-			if (y < room::current->height) {
-				window->Draw(sf::Shape::Rectangle(
-					std::floor(x), std::floor(y),
-					(std::floor(x)+1), (std::floor(y)+1),
-					sf::Color(0,0,0,0), 1*PX, sf::Color(255, 255, 255, 127)
-				));
-			}
-		}
-	}
-	void before_move () {
+		 // Do clicking stuff
 		if (click_taken) return;
 		room::Room* rc = room::current;
 		float x = cursor2.x + window_view.GetRect().Left;
@@ -201,6 +201,7 @@ struct TilemapEditor : Object {
 				}
 			}
 		}
+
 	}
 };
 
