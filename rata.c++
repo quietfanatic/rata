@@ -564,7 +564,7 @@ struct Rata : Walking {
 		: aim_angle > M_PI*-1.0/16.0 ? 4
 		: aim_angle > M_PI*-3.0/16.0 ? 3
 		: aim_angle > M_PI*-5.0/16.0
-		  || kneeling                ? 2
+		  || state == kneeling       ? 2
 		: aim_angle > M_PI*-7.0/16.0 ? 1
 		:                              0;
 
@@ -589,6 +589,7 @@ struct Rata : Walking {
 			: state == kneeling ? kneel
 			: state == crawling ? (walk_frame % 2) ? crawl2
 			                    :                    crawl
+			: state == falling  ? walk
 			: state == hurt_air ? hurtbk
 			: state == hurt     ? hurt_direction == 1 ? crawl : sit
 			: state == dead_air ? hurtbk
@@ -604,6 +605,8 @@ struct Rata : Walking {
 			                    :                    angle_stand[angle_frame]
 			: state == kneeling ? angle_stand[angle_frame]
 			: state == crawling ? crawl
+			: state == falling  ? (yvel() < 0) ? angle_walk[angle_frame]
+			                    :                angle_stand[angle_frame]
 			: state == hurt_air ? hurtbk
 			: state == hurt     ? hurt_direction == 1 ? crawl : hurtbk
 			: state == dead_air ? hurtbk
@@ -631,6 +634,7 @@ struct Rata : Walking {
 			                    : walk_frame == 2 ? a0
 			                    : walk_frame == 3 ? a45
 			                    :                   a0
+			: state == falling  ? a23
 			: state == hurt_air ? a23
 			: state == hurt     ? hurt_direction == 1 ? a0 : -a23
 			: state == dead_air ? a23
@@ -652,6 +656,7 @@ struct Rata : Walking {
 			                    :                   a0
 			: state == kneeling ? a68
 			: state == crawling ? a90
+			: state == falling  ? a23
 			: state == hurt_air ? a68
 			: state == hurt     ? hurt_direction == 1 ? a90 : -a23
 			: state == dead_air ? a68
@@ -673,6 +678,7 @@ struct Rata : Walking {
 			                    :                   a0
 			: state == kneeling ? a45
 			: state == crawling ? inside
+			: state == falling  ? a23
 			: state == hurt_air ? a68
 			: state == hurt     ? hurt_direction == 1 ? inside : front
 			: state == dead_air ? a68

@@ -337,6 +337,7 @@ void input_phase () {
 			if (event.Key.Code == sf::Key::Num1) room::file::test1::room.enter();
 			if (event.Key.Code == sf::Key::Num2) room::file::test2::room.enter();
 			if (event.Key.Code == sf::Key::Num3) room::file::test3::room.enter();
+			if (event.Key.Code == sf::Key::Num4) room::file::test4::room.enter();
 			if (event.Key.Code >= 400) break;
 			key[event.Key.Code] = 1;
 			break;

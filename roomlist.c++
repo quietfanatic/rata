@@ -16,6 +16,9 @@ namespace file {
 	namespace test3 {
 		#include "rooms/test3.room.c++"
 	}
+	namespace test4 {
+		#include "rooms/test4.room.c++"
+	}
 };
 #ifdef MAPEDITOR
 
@@ -32,6 +35,7 @@ struct room_pair {
 	{"test1", &file::test1::room},
 	{"test2", &file::test2::room},
 	{"test3", &file::test3::room},
+	{"test4", &file::test4::room},
 	{NULL, NULL}
 };
 Room* name (char* k) {
