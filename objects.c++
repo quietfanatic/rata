@@ -40,6 +40,7 @@ namespace obj {
 		clickable_text,
 		tilemap_editor,
 		tilepicker,
+		roomsettings,
 		editor_menu
 	};
 #ifdef MAPEDITOR
@@ -702,6 +703,7 @@ const obj::Def obj::def [] = {
 	{"Clickable text", 0, NULL, -2000, 2000, obj::ALLOC<ClickableText>, NULL},
 	{"Tilemap editor", 0, NULL, -100, 100, obj::ALLOC<TilemapEditor>, NULL},
 	{"Tile picker", 0, NULL, -1000, 1000, obj::ALLOC<TilePicker>, NULL},
+	{"Rooms Settings pane", 0, NULL, -1000, 1000, obj::ALLOC<RoomSettings>, NULL},
 	{"Editor menu", 0, NULL, -1900, 1900, obj::ALLOC<EditorMenu>, NULL}
 
 };

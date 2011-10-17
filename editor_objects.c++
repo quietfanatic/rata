@@ -30,6 +30,7 @@ struct ClickableText : Object {
 	}
 	void before_move () {
 		if (click_taken) return;
+		if (command())
 		if (button[sf::Mouse::Left] == 1)
 		if (cursor2.x > desc->x)
 		if (cursor2.x < desc->x + text_width(message())*PX*2/window_scale)
@@ -46,17 +47,16 @@ struct TilePicker : Object {
 	bool resizing;
 	void draw () {
 		if (room::current) {
-			sf::FloatRect vr = window_view.GetRect();
 			draw_rect(
-				vr.Left, vr.Bottom - 32*PX/window_scale,
-				vr.Left + tilepicker_width, vr.Top,
+				viewleft(), viewtop() - 32*PX/window_scale,
+				viewleft() + tilepicker_width, viewbottom(),
 				room::current->bg_color
 			);
 			draw_rect(
-				vr.Left + tilepicker_width,
-				vr.Bottom - 32*PX/window_scale,
-				vr.Left + tilepicker_width + 4*PX,
-				vr.Top,
+				viewleft() + tilepicker_width,
+				viewtop() - 32*PX/window_scale,
+				viewleft() + tilepicker_width + 4*PX,
+				viewbottom(),
 				sf::Color(31, 31, 31, 127)
 			);
 				
@@ -69,17 +69,17 @@ struct TilePicker : Object {
 				);
 			}
 			window->Draw(sf::Shape::Rectangle(
-				vr.Left + (selected_tile % (uint)tilepicker_width),
-				vr.Bottom - 32*PX/window_scale - (selected_tile / (uint)tilepicker_width),
-				vr.Left + (selected_tile % (uint)tilepicker_width) + 1,
-				vr.Bottom - 32*PX/window_scale - (selected_tile / (uint)tilepicker_width) - 1,
+				viewleft() + (selected_tile % (uint)tilepicker_width),
+				viewtop() - 32*PX/window_scale - (selected_tile / (uint)tilepicker_width),
+				viewleft() + (selected_tile % (uint)tilepicker_width) + 1,
+				viewtop() - 32*PX/window_scale - (selected_tile / (uint)tilepicker_width) - 1,
 				sf::Color(0,0,0,0), 1*PX, sf::Color(255, 255, 255, 127)
 			));
 		}
 	}
 	void before_move () {
 		if (click_taken) {
-			printf("Click taken.\n");
+			//printf("Click taken.\n");
 			return;
 		}
 		 // Flip tile
@@ -201,7 +201,40 @@ struct TilemapEditor : Object {
 				}
 			}
 		}
-
 	}
 };
+
+const float roomsettings_width = 4.0;
+struct RoomSettings : Object {
+	void draw () {
+		if (room::current) {
+			draw_rect(
+				viewright() - roomsettings_width, viewtop() - 32*PX/window_scale,
+				viewright(), viewbottom(),
+				room::current->bg_color
+			);
+			draw_rect(
+				viewright() - roomsettings_width - 2*PX,
+				viewtop() - 32*PX/window_scale,
+				viewright() - roomsettings_width,
+				viewbottom(),
+				sf::Color(31, 31, 31, 127)
+			);
+		}
+	}
+	void before_move () {
+		if (click_taken) return;
+		if (button[sf::Mouse::Left] || button[sf::Mouse::Right])
+		if (cursor2.x > viewwidth() - roomsettings_width) click_taken = true;
+	}
+};
+
+
+
+
+
+
+
+
+
 

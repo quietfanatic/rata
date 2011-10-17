@@ -64,6 +64,9 @@ int main (int argc, char** argv) {
 		obj::tilepicker
 	).manifest();
 	obj::Desc(
+		obj::roomsettings
+	).manifest();
+	obj::Desc(
 		obj::editor_menu
 	).manifest();
 	obj::Desc(
@@ -72,6 +75,15 @@ int main (int argc, char** argv) {
 		0, 45/window_scale, 0, 0,
 		0, false,
 		(uint32)(void*)&save_room
+	).manifest();
+	char roomsize_text[32];
+	sprintf(roomsize_text, "Size: %dx%d", room::current->width, room::current->height);
+	Object* roomsize_obj = obj::Desc(
+		obj::clickable_text,
+		(void*)roomsize_text,
+		viewwidth()-4, viewheight()-32*PX/window_scale, 0, 0,
+		0, false,
+		(uint32)NULL
 	).manifest();
 
 
