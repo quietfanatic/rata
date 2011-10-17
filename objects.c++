@@ -567,6 +567,7 @@ struct Heart : Object {
 typedef Object ClickableText;
 typedef Object TilemapEditor;
 typedef Object TilePicker;
+typedef Object RoomSettings;
 typedef Object EditorMenu;
 #endif
 
