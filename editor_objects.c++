@@ -82,37 +82,45 @@ struct TilePicker : Object {
 			printf("Click taken.\n");
 			return;
 		}
+		 // Flip tile
 		if (button[sf::Mouse::Middle] == 1) {
 			flip_tile = !flip_tile;
 		}
-		if (button[sf::Mouse::Left] == 1 || button[sf::Mouse::Right] == 1) {
-			if (cursor2.x < tilepicker_width) {
-				click_taken = true;
-				if (cursor2.x < (uint)tilepicker_width) {
-					uint clicked_tile = (uint)cursor2.x
-					                  + (uint)45/window_scale-32*PX/window_scale - cursor2.y
-					                  * (uint)tilepicker_width;
-					if (clicked_tile < num_tiles) {
-						selected_tile = clicked_tile;
-						printf("Selected %d.\n", selected_tile);
-					}
-				}
-			}
-			else if (cursor2.x < tilepicker_width + 4*PX) {
-				resizing = true;
-				printf("Initiating resize of tile picker.\n");
-			}
-		}
-		else if (button[sf::Mouse::Left] && resizing && cursor2.x >= 1) {
+		 // Continue resizing if doing so
+		if (resizing && button[sf::Mouse::Left]) {
 			click_taken = true;
-			tilepicker_width = cursor2.x;
-		}
-		else if (button[sf::Mouse::Left] && cursor2.x < tilepicker_width) {
-			click_taken = true;
+			if (cursor2.x >= 1)
+				tilepicker_width = cursor2.x;
 		}
 		else {
 			resizing = false;
+			if (cursor2.x < tilepicker_width) {
+				click_taken = true;
+				 // Select tile
+				if (button[sf::Mouse::Left] == 1 || button[sf::Mouse::Right] == 1) {
+					if (cursor2.x < (uint)tilepicker_width) {
+						uint clicked_tile = (uint)cursor2.x
+						                  + (uint)(45/window_scale-32*PX/window_scale - cursor2.y)
+						                  * (uint)tilepicker_width;
+						printf("Click: %f, %f -> %d\n", cursor2.x, cursor2.y, clicked_tile);
+						if (clicked_tile < num_tiles) {
+							selected_tile = clicked_tile;
+							printf("Selected %d.\n", selected_tile);
+						}
+					}
+				}
+			}
+			 // Initiate resize
+			else if (cursor2.x < tilepicker_width + 4*PX) {
+				if (button[sf::Mouse::Left] == 1) {
+					click_taken = true;
+					resizing = true;
+					printf("Initiating resize of tile picker.\n");
+				}
+			}
 		}
+
+		 // Move View
 		if (key[sf::Key::W]) {
 			window_view.SetFromRect(sf::FloatRect(
 				window_view.GetRect().Left,
