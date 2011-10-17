@@ -736,6 +736,7 @@ void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Man
 	else if (manifold->type == b2Manifold::e_faceB)
 		a->add_vel(-manifold->localNormal.x*DAMAGE_KNOCKBACK,
 		           -manifold->localNormal.y*DAMAGE_KNOCKBACK);
+	if (a->floor) a->add_vel(0, 3.0);
 }
 
 

@@ -22,6 +22,7 @@ struct Rata : Walking {
 	int hurt_frames;
 	int inv_frames;
 	int adrenaline;
+	int hurt_direction;
 	int hurt_id [2];
 	 // Aiming
 	bool aiming;
@@ -379,18 +380,17 @@ struct Rata : Walking {
 			case ouch: {
 				body->SetGravityScale(1.0);
 				float_frames = 0;
-				printf("Ouch!\n");
 				if (life <= 0) {
 					add_vel(0, 5.0);
 					goto dead_no_floor;
 				}
 				else {
-					if (floor) add_vel(0, 3.0);
 					goto hurt_no_floor;
 				}
 				break;
 			}
 			case hurt_air: {
+				hurt_direction = sign_f(xvel())*facing;
 				if (floor) {
 					if (hurt_frames < 20) goto got_floor;
 					else goto hurt_floor;
@@ -406,8 +406,8 @@ struct Rata : Walking {
 			}
 			case hurt: {
 				if (!floor) goto hurt_no_floor;
-				hurt_floor:
 				if (hurt_frames == 0) goto got_floor;
+				hurt_floor:
 				state = hurt;
 				floor_friction = ground_decel();
 				ideal_xvel = 0;
@@ -454,9 +454,10 @@ struct Rata : Walking {
 		if (!hurt_frames && !inv_frames) {
 			Object::damage(d);
 			state = ouch;
-			hurt_frames = 6 + d / (2 + adrenaline/60.0);
+			hurt_frames = (20 + d) / (2 + adrenaline/60.0);
 			inv_frames = 50;
 			adrenaline += 5*d;
+			printf("Hurt status: %d, %d, %d\n", hurt_frames, inv_frames, adrenaline);
 		}
 	}
 
@@ -589,7 +590,7 @@ struct Rata : Walking {
 			: state == crawling ? (walk_frame % 2) ? crawl2
 			                    :                    crawl
 			: state == hurt_air ? hurtbk
-			: state == hurt     ? sit
+			: state == hurt     ? hurt_direction == 1 ? crawl : sit
 			: state == dead_air ? hurtbk
 			: state == dead     ? laybk
 			:                     walk;
@@ -604,7 +605,7 @@ struct Rata : Walking {
 			: state == kneeling ? angle_stand[angle_frame]
 			: state == crawling ? crawl
 			: state == hurt_air ? hurtbk
-			: state == hurt     ? hurtbk
+			: state == hurt     ? hurt_direction == 1 ? crawl : hurtbk
 			: state == dead_air ? hurtbk
 			: state == dead     ? laybk
 			:                     stand_90;
@@ -631,7 +632,7 @@ struct Rata : Walking {
 			                    : walk_frame == 3 ? a45
 			                    :                   a0
 			: state == hurt_air ? a23
-			: state == hurt     ? -a23
+			: state == hurt     ? hurt_direction == 1 ? a0 : -a23
 			: state == dead_air ? a23
 			: state == dead     ? a90
 			:                     a0;
@@ -652,7 +653,7 @@ struct Rata : Walking {
 			: state == kneeling ? a68
 			: state == crawling ? a90
 			: state == hurt_air ? a68
-			: state == hurt     ? -a23
+			: state == hurt     ? hurt_direction == 1 ? a90 : -a23
 			: state == dead_air ? a68
 			: state == dead     ? a90
 			:                     a0;
@@ -673,7 +674,7 @@ struct Rata : Walking {
 			: state == kneeling ? a45
 			: state == crawling ? inside
 			: state == hurt_air ? a68
-			: state == hurt     ? front
+			: state == hurt     ? hurt_direction == 1 ? inside : front
 			: state == dead_air ? a68
 			: state == dead     ? inside
 			:                     a0;
