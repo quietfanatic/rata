@@ -22,6 +22,7 @@ struct Rata : Walking {
 	int hurt_frames;
 	int inv_frames;
 	int adrenaline;
+	int hurt_id [2];
 	 // Aiming
 	bool aiming;
 	bool can_see;
@@ -59,8 +60,11 @@ struct Rata : Walking {
 		}
 		return false;
 	}
+	bool bullet_inv () {
+		return hurt_id[0] == obj::bullet || hurt_id[1] == obj::bullet;
+	}
 	void set_fix_27 () {
-		fix_27()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
+		fix_27()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		fix_27()->SetSensor(false);
 		fix_25()->SetFilterData(cf::rata_sensor);
 		fix_25()->SetSensor(true);
@@ -72,7 +76,7 @@ struct Rata : Walking {
 	void set_fix_25 () {
 		fix_27()->SetFilterData(cf::rata_sensor);
 		fix_27()->SetSensor(true);
-		fix_25()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
+		fix_25()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		fix_25()->SetSensor(false);
 		fix_21()->SetFilterData(cf::rata_sensor);
 		fix_21()->SetSensor(true);
@@ -84,7 +88,7 @@ struct Rata : Walking {
 		fix_27()->SetSensor(true);
 		fix_25()->SetFilterData(cf::rata_sensor);
 		fix_25()->SetSensor(true);
-		fix_21()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
+		fix_21()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		fix_21()->SetSensor(false);
 		fix_h7()->SetFilterData(cf::rata_sensor);
 		fix_h7()->SetSensor(true);
@@ -96,7 +100,7 @@ struct Rata : Walking {
 		fix_25()->SetSensor(true);
 		fix_21()->SetFilterData(cf::rata_sensor);
 		fix_21()->SetSensor(true);
-		fix_h7()->SetFilterData(inv_frames ? cf::rata_invincible : cf::rata);
+		fix_h7()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		fix_h7()->SetSensor(false);
 	}
 
@@ -306,6 +310,7 @@ struct Rata : Walking {
 		if (recoil_frames) recoil_frames--;
 		if (hurt_frames) hurt_frames--;
 		if (inv_frames) inv_frames--;
+		else hurt_id[0] = hurt_id[1] = -1;
 		if (adrenaline) adrenaline--;
 	}
 
@@ -357,6 +362,7 @@ struct Rata : Walking {
 			}
 			case falling: {
 				if (floor) {
+					body->SetGravityScale(1.0);
 					float_frames = 0;
 					goto got_floor;
 				}
@@ -371,6 +377,7 @@ struct Rata : Walking {
 				break;
 			}
 			case ouch: {
+				body->SetGravityScale(1.0);
 				float_frames = 0;
 				printf("Ouch!\n");
 				if (life <= 0) {
@@ -448,7 +455,7 @@ struct Rata : Walking {
 			Object::damage(d);
 			state = ouch;
 			hurt_frames = 6 + d / (2 + adrenaline/60.0);
-			inv_frames = hurt_frames + 20;
+			inv_frames = 50;
 			adrenaline += 5*d;
 		}
 	}
@@ -501,6 +508,7 @@ struct Rata : Walking {
 		hurt_frames = 0;
 		inv_frames = 0;
 		adrenaline = 0;
+		hurt_id[0] = hurt_id[1] = -1;
 		state = falling;
 		life = max_life = 144;
 		for (uint i=0; i<MAX_EQUIPS; i++) equipment[i] = NULL;

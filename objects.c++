@@ -674,7 +674,7 @@ b2FixtureDef rata_fixes [] = {
 	make_fixdef(make_poly(4, rata_poly_h7), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true)
 };
 
-FixProp bullet_fixprop = {false, false, 0.0, 0, false};
+FixProp bullet_fixprop = {false, false, 0.0, 48, true};
 b2FixtureDef bullet_fix = make_fixdef(make_circle(0.05), cf::bullet, 0, 0.8, 10.0, &bullet_fixprop);
 FixProp rat_fixprop = {true, true, 1.0, 12, false};
 b2FixtureDef rat_fix = make_fixdef(make_rect(12*PX, 5*PX), cf::enemy, 0, 0, 4.0, &rat_fixprop);
@@ -708,6 +708,35 @@ const obj::Def obj::def [] = {
 	{"Editor menu", 0, NULL, -1900, 1900, obj::ALLOC<EditorMenu>, NULL}
 
 };
+
+
+
+#define DAMAGE_KNOCKBACK 2.0
+void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Manifold* manifold) {
+	if (a->desc->id == obj::rata) {
+		if (rata->hurt_id[0] == b->desc->id
+		 || rata->hurt_id[1] == b->desc->id) return;
+		rata->hurt_id[1] = rata->hurt_id[0];
+		rata->hurt_id[0] = b->desc->id;
+	}
+	else if (!bfp->damages_enemies) return;
+	
+	a->damage(bfp->touch_damage * afp->damage_factor);
+
+	if (b->desc->id == obj::bullet) {
+		(new obj::Desc(
+			obj::hiteffect, &img::hit_damagable,
+			((Bullet*)b)->midx, ((Bullet*)b)->midy, 8, 0, 0, true
+		))->manifest();
+		((Bullet*)b)->destroy_after_draw();
+	}
+	else if (manifold->type == b2Manifold::e_faceA)
+		a->add_vel(manifold->localNormal.x*DAMAGE_KNOCKBACK,
+		           manifold->localNormal.y*DAMAGE_KNOCKBACK);
+	else if (manifold->type == b2Manifold::e_faceB)
+		a->add_vel(-manifold->localNormal.x*DAMAGE_KNOCKBACK,
+		           -manifold->localNormal.y*DAMAGE_KNOCKBACK);
+}
 
 
 struct myCL : b2ContactListener {
@@ -775,60 +804,21 @@ struct myCL : b2ContactListener {
 		if (a->desc->id == obj::bullet) {
 			Bullet* ba = (Bullet*) a;
 			ba->find_hit(contact->GetFixtureB());
-			if (bfp->damage_factor) {
-				(new obj::Desc(
-					obj::hiteffect, &img::hit_damagable,
-					ba->midx, ba->midy, 8, 0, 0, true
-				))->manifest();
-				b->damage(48*bfp->damage_factor);
-				ba->destroy_after_draw();
-			}
-			else if (ci->normalImpulses[0] > 10.0
+			if (ci->normalImpulses[0] > 10.0
 			      || ci->normalImpulses[0] < -10.0) ba->destroy_after_draw();
 			else if (ba->speed() < 100) ba->destroy_after_draw();
 		}
 		if (b->desc->id == obj::bullet) {
 			Bullet* bb = (Bullet*) b;
 			bb->find_hit(contact->GetFixtureA());
-			if (afp->damage_factor) {
-				(new obj::Desc(
-					obj::hiteffect, &img::hit_damagable,
-					bb->midx, bb->midy, 8, 0, 0, true
-				))->manifest();
-				a->damage(48*afp->damage_factor);
-				bb->destroy_after_draw();
-			}
-			else if (ci->normalImpulses[0] > 10.0
+			if (ci->normalImpulses[0] > 10.0
 			      || ci->normalImpulses[0] < -10.0) bb->destroy_after_draw();
 			else if (bb->speed() < 100) bb->destroy_after_draw();
 		}
-#define DAMAGE_KNOCKBACK 2.0
-		if (a->desc->id == obj::rata) {
-			Rata* r = (Rata*) a;
-			if (!r->hurt_frames && !r->inv_frames)
-			if (int damage = bfp->touch_damage) {
-				r->damage(damage);
-				if (manifold->type == b2Manifold::e_faceA)
-					r->add_vel(-manifold->localNormal.x*DAMAGE_KNOCKBACK,
-					           -manifold->localNormal.y*DAMAGE_KNOCKBACK);
-				else if (manifold->type == b2Manifold::e_faceB)
-					r->add_vel(manifold->localNormal.x*DAMAGE_KNOCKBACK,
-					           manifold->localNormal.y*DAMAGE_KNOCKBACK);
-			}
-		}
-		if (b->desc->id == obj::rata) {
-			Rata* r = (Rata*) b;
-			if (!r->hurt_frames && !r->inv_frames)
-			if (int damage = afp->touch_damage) {
-				r->damage(damage);
-				if (manifold->type == b2Manifold::e_faceB)
-					r->add_vel(-manifold->localNormal.x*DAMAGE_KNOCKBACK,
-					           -manifold->localNormal.y*DAMAGE_KNOCKBACK);
-				else if (manifold->type == b2Manifold::e_faceA)
-					r->add_vel(manifold->localNormal.x*DAMAGE_KNOCKBACK,
-					           manifold->localNormal.y*DAMAGE_KNOCKBACK);
-			}
-		}
+		if (bfp->touch_damage && afp->damage_factor)
+			apply_touch_damage(a, b, afp, bfp, manifold);
+		if (afp->touch_damage && bfp->damage_factor)
+			apply_touch_damage(b, a, bfp, afp, manifold);
 		if (a->desc->id == obj::heart && b->desc->id == obj::rata) {
 			rata->heal(48);
 			a->destroy();
