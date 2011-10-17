@@ -34,6 +34,14 @@ b2World* world;
 sf::Image* screen;
 sf::RenderWindow* window;
 sf::View window_view = sf::View(sf::FloatRect(0, 15, 20, 0));
+float viewleft () { return window_view.GetRect().Left; }
+float viewright () { return window_view.GetRect().Right; }
+ // For some reason it gets top and bottom confused.
+float viewtop () { return window_view.GetRect().Bottom; }
+float viewbottom () { return window_view.GetRect().Top; }
+float viewwidth () { return viewright() - viewleft(); }
+float viewheight () { return viewtop() - viewbottom(); }
+
  // Shading
 bool screen_shade = false;
 sf::Color screen_shade_color = sf::Color(255, 196, 63);

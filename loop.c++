@@ -140,8 +140,8 @@ void draw_phase () {
 		float h = img::_bgs[rc->bg_index]->sfi.GetHeight()*PX;
 		float bg_x = mod_f(-camera.x/2, w);
 		float bg_y = mod_f(-camera.y/2, h);
-		for (float x = bg_x + camera.x - 10; x < camera.x + 10; x += w)
-		for (float y = bg_y + h + camera.y + 7.5; y > camera.y - 7.5; y -= h) {
+		for (float x = bg_x + viewleft(); x < viewright(); x += w)
+		for (float y = bg_y + h + viewtop(); y > viewbottom(); y -= h) {
 			draw_image(img::_bgs[rc->bg_index], x, y);
 		}
 	}
@@ -154,10 +154,10 @@ void draw_phase () {
 //			maxy = rc->height;
 //		}
 //		else {
-			minx = MAX(0, window_view.GetRect().Left);
-			miny = MAX(0, window_view.GetRect().Top);
-			maxx = MIN(rc->width, ceil(window_view.GetRect().Right));
-			maxy = MIN(rc->height, ceil(window_view.GetRect().Bottom));
+			minx = MAX(0, viewleft());
+			miny = MAX(0, viewbottom());
+			maxx = MIN(rc->width, ceil(viewright()));
+			maxy = MIN(rc->height, ceil(viewtop()));
 //		}
 //		printf("Drawing tilemap from %d, %d to %d, %d\n", minx, miny, maxx, maxy);
 		for (uint x=minx; x < maxx; x++)
@@ -215,10 +215,10 @@ void draw_phase () {
 		 // Debug draw tilemap
 		for (b2Fixture* f = room::tilemap_obj->body->GetFixtureList(); f; f = f->GetNext()) {
 			b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
-			if (e->m_vertex1.x > camera.x - 11
-			 && e->m_vertex1.x < camera.x + 11
-			 && e->m_vertex1.y > camera.y - 8.5
-			 && e->m_vertex1.y < camera.y + 8.5)
+			if (e->m_vertex1.x > viewleft() - 1
+			 && e->m_vertex1.x < viewright() + 1
+			 && e->m_vertex1.y > viewbottom() - 1
+			 && e->m_vertex1.y < viewtop() + 1)
 				window->Draw(sf::Shape::Line(
 					e->m_vertex1.x, e->m_vertex1.y,
 					e->m_vertex2.x, e->m_vertex2.y,
@@ -277,7 +277,7 @@ void draw_phase () {
 		window->Draw(shade_rect);
 	}
 	 // Draw cursor
-	if (rata && rata->state != Rata::dead) {
+	if (rata && rata->state != Rata::dead && rata->state != Rata::dead_air) {
 		window->ShowMouseCursor(false);
 		draw_image(cursor.img, cursor.x + rata->aim_center_x(), cursor.y + rata->aim_center_y());
 	}
@@ -287,7 +287,7 @@ void draw_phase () {
 	 // Draw text message
 	if (message) {
 		float w = text_width(message_pos);
-		float pos = 10 - w*PX/2;
+		float pos = viewwidth()/2 - w*PX/2;
 		if (message_pos_next) w += 8;
 		else w += 6;
 		window->Draw(sf::Shape::Rectangle(
@@ -357,7 +357,7 @@ void input_phase () {
 			break;
 		}
 		case sf::Event::MouseMoved: {
-			if (rata && rata->state != Rata::dead && frame_number > 1) {
+			if (rata && rata->state != Rata::dead && rata->state != Rata::dead_air && frame_number > 1) {
 				cursor.x += (event.MouseMove.X - window->GetWidth()/2.0)
 					* PX * cursor_scale / window_scale;
 				cursor.y += -(event.MouseMove.Y - window->GetHeight()/2.0)
