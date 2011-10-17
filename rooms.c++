@@ -4,6 +4,7 @@
 namespace room {
 	struct Room;
 	Room* current = NULL;
+	int entrance = -1;
 	bool transition = false;
 	Object* tilemap_obj = NULL;
 	struct Room {
@@ -17,7 +18,7 @@ namespace room {
 		obj::Desc* saved_objects;
 
 		void leave ();
-		void enter ();
+		void enter (int entrance = -1);
 		int16 tile (uint x, uint y);
 		void manifest_tilemap ();
 #ifdef MAPEDITOR
@@ -91,7 +92,9 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 
 namespace room {
 
-	void Room::enter () {
+	void Room::enter (int entrance_) {
+		camera_jump = true;
+		entrance = entrance_;
 		if (current) current->leave();
 		current = this;
 		if (!saved_objects) {
@@ -107,7 +110,8 @@ namespace room {
 	void Room::leave () {
 		transition = true;
 		for (Object* o = objects_by_depth; o; o = o->next_depth) {
-			o->destroy();
+			if (o->desc->id != obj::rata)
+				o->destroy();
 		}
 	}
 

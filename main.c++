@@ -32,8 +32,11 @@ int main () {
 //	else {
 //		printf("Room write failed.\n");
 //	}
-	
-	room::file::test2::room.enter();
+	rata = (Rata*)obj::Desc(
+		obj::rata, NULL,
+		10, 10
+	).manifest();
+	room::file::test2::room.enter(0);
 
 	try { main_loop(); } catch (int x) { printf("Game quit succesfully with result %d.\n", x); }
 	return 0;

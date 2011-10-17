@@ -5,7 +5,7 @@
 struct Rata : Walking {
 	 // Character state
 	enum State {
-		standing,
+		standing = 1,
 		walking,
 		kneeling,
 		crawling,
@@ -510,18 +510,13 @@ struct Rata : Walking {
 		inv_frames = 0;
 		adrenaline = 0;
 		hurt_id[0] = hurt_id[1] = -1;
-		state = falling;
+		if (desc->data) state = (State)(uint)desc->data;
+		else state = falling;
 		life = max_life = 144;
 		for (uint i=0; i<MAX_EQUIPS; i++) equipment[i] = NULL;
 		equipment[0] = &item::white_dress;
 		equipment[1] = &item::handgun;
-		camera.x = x();
-		camera.y = y();
-		if (camera.x < 10) camera.x = 10;
-		if (camera.x > room::current->width - 10) camera.x = room::current->width - 10;
-		if (camera.y < 7.5) camera.y = 7.5;
-		if (camera.y > room::current->height - 7.5) camera.y = room::current->height - 7.5;
-		facing = desc->facing || 1;
+		facing = desc->facing ? desc->facing : 1;
 		printf("FACING = %d\n", facing);
 		cursor.x = 2.0 * facing;
 		cursor.y = 0;

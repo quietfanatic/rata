@@ -62,6 +62,7 @@ struct Camera {
 	float x;
 	float y;
 } camera;
+bool camera_jump = false;
 
  // Global object lists
 Object* objects_by_depth = NULL;  // Objects are linked list

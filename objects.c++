@@ -28,6 +28,7 @@ namespace obj {
 	enum ID {
 		object,
 		rata,
+		entrance,
 		solid,
 		tilemap,
 		bullet,
@@ -47,6 +48,7 @@ namespace obj {
 	char* idname [] = {
 		"obj::object",
 		"obj::rata",
+		"obj::entrance",
 		"obj::solid",
 		"obj::tilemap",
 		"obj::bullet",
@@ -307,6 +309,9 @@ struct Object {
 	float yvelrel(Object* other) {
 		return yvel() - other->yvel();
 	}
+	void set_pos(float x, float y) {
+		body->SetTransform(b2Vec2(x, y), 0);
+	}
 	void set_vel(float x, float y) {
 		body->SetLinearVelocity(b2Vec2(x, y));
 	}
@@ -410,6 +415,28 @@ struct Walking : Object {
 
 
 #include "rata.c++"
+
+
+struct Entrance : Object {
+	void on_create () {
+		if (room::entrance == (int)desc->data2) {
+			if (rata->body) {
+				rata->set_pos(desc->x, desc->y-0.1);
+				if (desc->data) rata->state = (Rata::State)(uint)desc->data;
+				if (desc->facing) rata->facing = desc->facing;
+			}
+			else {
+				rata->desc->x = desc->x;
+				rata->desc->y = desc->y-0.1;
+				if (desc->data) rata->desc->data = desc->data;
+				if (desc->facing) rata->desc->facing = desc->facing;
+			}
+		}
+		destroy();
+	}
+};
+
+
 
 struct Tilemap : Object {
 	void on_create () { };
@@ -692,6 +719,7 @@ const obj::Def obj::def [] = {
 
 	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, NULL},
 	{"Rata", 5, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
+	{"Entrance", 0, NULL, -1000, -1000, obj::ALLOC<Entrance>, NULL},
 	{"Solid Object", 0, NULL, 0, 0, obj::ALLOC<Solid>, NULL},
 	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, NULL},
 	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>, NULL},

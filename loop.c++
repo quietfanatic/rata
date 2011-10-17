@@ -115,17 +115,24 @@ void draw_phase () {
 		if (focusy > rc->height-7.5) focusy = rc->height-7.5;
 		 // To look smooth in a pixelated environment,
 		 //  we need a minimum speed.
-		if (abs_f(focusx - camera.x) < .25*PX) camera.x = focusx;
-		else {
-			float newx = (9*camera.x + focusx) / 10;
-			if (abs_f(newx - camera.x) < .25*PX) camera.x += .25*PX * sign_f(newx - camera.x);
-			else camera.x = newx;
+		if (camera_jump) {
+			camera.x = focusx;
+			camera.y = focusy;
+			camera_jump = false;
 		}
-		if (abs_f(focusy - camera.y) < .25*PX) camera.y = focusy;
 		else {
-			float newy = (9*camera.y + focusy) / 10;
-			if (abs_f(newy - camera.y) < .25*PX) camera.y += .25*PX * sign_f(newy - camera.y);
-			else camera.y = newy;
+			if (abs_f(focusx - camera.x) < .25*PX) camera.x = focusx;
+			else {
+				float newx = (9*camera.x + focusx) / 10;
+				if (abs_f(newx - camera.x) < .25*PX) camera.x += .25*PX * sign_f(newx - camera.x);
+				else camera.x = newx;
+			}
+			if (abs_f(focusy - camera.y) < .25*PX) camera.y = focusy;
+			else {
+				float newy = (9*camera.y + focusy) / 10;
+				if (abs_f(newy - camera.y) < .25*PX) camera.y += .25*PX * sign_f(newy - camera.y);
+				else camera.y = newy;
+			}
 		}
 		window_view.SetCenter(camera.x, camera.y);
 
@@ -334,10 +341,10 @@ void input_phase () {
 				window_fullscreen = !window_fullscreen;
 				set_video();
 			}
-			if (event.Key.Code == sf::Key::Num1) room::file::test1::room.enter();
-			if (event.Key.Code == sf::Key::Num2) room::file::test2::room.enter();
-			if (event.Key.Code == sf::Key::Num3) room::file::test3::room.enter();
-			if (event.Key.Code == sf::Key::Num4) room::file::test4::room.enter();
+			if (event.Key.Code == sf::Key::Num1) room::file::test1::room.enter(0);
+			if (event.Key.Code == sf::Key::Num2) room::file::test2::room.enter(0);
+			if (event.Key.Code == sf::Key::Num3) room::file::test3::room.enter(0);
+			if (event.Key.Code == sf::Key::Num4) room::file::test4::room.enter(0);
 			if (event.Key.Code >= 400) break;
 			key[event.Key.Code] = 1;
 			break;
