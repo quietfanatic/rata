@@ -454,6 +454,7 @@ struct Rata : Walking {
 	}
 
 	virtual void kill () {
+		trap_cursor = false;
 		message = message_pos = message_pos_next = NULL;
 	}
 
@@ -511,11 +512,12 @@ struct Rata : Walking {
 		if (camera.x > room::current->width - 10) camera.x = room::current->width - 10;
 		if (camera.y < 7.5) camera.y = 7.5;
 		if (camera.y > room::current->height - 7.5) camera.y = room::current->height - 7.5;
-		cursor.y = 0;
 		facing = desc->facing || 1;
 		printf("FACING = %d\n", facing);
 		cursor.x = 2.0 * facing;
+		cursor.y = 0;
 		cursor.img = &img::look;
+		trap_cursor = true;
 		rata = this;
 	}
 	virtual void on_destroy () {

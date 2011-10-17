@@ -55,6 +55,7 @@ struct Cursor {
 } cursor,  // Relative to player
   cursor2;  // Relative to world
 bool click_taken = false;
+bool trap_cursor = false;
 
  // Camera state
 struct Camera {
