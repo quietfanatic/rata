@@ -26,7 +26,7 @@ struct ClickableText : Object {
 			sf::Color(31, 31, 31, 127),
 			true
 		);*/
-		render_text(message(), desc->x, desc->y, 1, true, 2/window_scale); 
+		render_text(message(), desc->x, desc->y, 1, true, false, 2/window_scale); 
 	}
 	void before_move () {
 		if (click_taken) return;

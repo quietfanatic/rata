@@ -858,14 +858,14 @@ struct Rata : Walking {
 		
 		 // Draw action message
 		const char* m =
-		  action == action_equip ? "Equip"
+		  action == action_equip ? "EQUIP"
 		:                          NULL;
 		if (m) {
-			float w = text_width((char*)m)*PX;
+			float w = text_width_small((char*)m)*PX;
 			float mx = x() - w/2;
 			float my = y() + 3;
-			draw_rect(mx-1*PX, my, mx + w+2*PX, my - 1, sf::Color(31, 31, 31, 127));
-			render_text((char*)m, mx, my, 1);
+			draw_rect(mx-2*PX, my, mx + w+1*PX, my - 7*PX, sf::Color(31, 31, 31, 127));
+			render_text((char*)m, mx, my, 1, false, true);
 		}
 		action = -1;
 		action_distance = 10000000;

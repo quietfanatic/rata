@@ -24,6 +24,7 @@ namespace img {
 	font_6x16,
 	font_8x16,
 	font_proportional,
+	font_small,
 	font,
 	handgun_hurtback,
 	handgun_kneel,
@@ -112,6 +113,9 @@ void load_img () {
 	good &= img::font_proportional.sfi.LoadFromFile("img/font-proportional;8x16,0,0.png"); img::font_proportional.sfi.SetSmooth(0);
 	img::font_proportional.w = 8; img::font_proportional.h = 16;
 	img::font_proportional.x = 0; img::font_proportional.y = 0;
+	good &= img::font_small.sfi.LoadFromFile("img/font-small;8x8,0,0.png"); img::font_small.sfi.SetSmooth(0);
+	img::font_small.w = 8; img::font_small.h = 8;
+	img::font_small.x = 0; img::font_small.y = 0;
 	good &= img::font.sfi.LoadFromFile("img/font;0,0.png"); img::font.sfi.SetSmooth(0);
 	img::font.w = 0; img::font.h = 0;
 	img::font.x = 0; img::font.y = 0;

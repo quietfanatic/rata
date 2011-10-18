@@ -66,8 +66,8 @@ void draw_rect (float l, float t, float r, float b, sf::Color color=sf::Color(31
 		));
 	else
 		window->Draw(sf::Shape::Rectangle(
-			l, t,
-			r, b,
+			round(l*UNPX)*PX, round(t*UNPX)*PX,
+			round(r*UNPX)*PX, round(b*UNPX)*PX,
 			color
 		));
 };
