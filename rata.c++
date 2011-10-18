@@ -720,7 +720,7 @@ struct Rata : Walking {
 			                    : walk_frame == 3 ? a23
 			                    :                   a0
 			: state == kneeling ? a45
-			: state == crawling ? walk_frame == 1 ? -a23
+			: state == crawling ? walk_frame == 1 ? -a45
 			                    : walk_frame == 2 ? a0
 			                    : walk_frame == 3 ? a45
 			                    :                   a0

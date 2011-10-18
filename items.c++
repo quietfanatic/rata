@@ -60,7 +60,7 @@ namespace item {
 	Equip handgun = {
 		hand, -1,
 		1,1,1,1,1,1,1,1,1, 0,
-		&img::handgun, pose::hand::inside, pose::hand::a45,
+		&img::handgun, 19, pose::hand::a45,
 		NULL,
 		NULL,
 		NULL,
