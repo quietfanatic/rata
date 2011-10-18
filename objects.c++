@@ -29,6 +29,7 @@ namespace obj {
 		object,
 		rata,
 		entrance,
+		exit,
 		solid,
 		tilemap,
 		bullet,
@@ -49,6 +50,7 @@ namespace obj {
 		"obj::object",
 		"obj::rata",
 		"obj::entrance",
+		"obj::exit",
 		"obj::solid",
 		"obj::tilemap",
 		"obj::bullet",
@@ -436,6 +438,15 @@ struct Entrance : Object {
 	}
 };
 
+struct Exit : Object {
+	void after_move () {
+		if (rata->x() > desc->x)
+		if (rata->x() < desc->x + desc->xvel)
+		if (rata->y() > desc->y)
+		if (rata->y() < desc->y + desc->yvel)
+			((Room*)desc->data)->enter(desc->data2);
+	}
+};
 
 
 struct Tilemap : Object {
@@ -720,6 +731,7 @@ const obj::Def obj::def [] = {
 	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, NULL},
 	{"Rata", 5, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
 	{"Entrance", 0, NULL, -1000, -1000, obj::ALLOC<Entrance>, NULL},
+	{"Exit", 0, NULL, -100, -100, obj::ALLOC<Exit>, NULL},
 	{"Solid Object", 0, NULL, 0, 0, obj::ALLOC<Solid>, NULL},
 	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, NULL},
 	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>, NULL},

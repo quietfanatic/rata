@@ -1,4 +1,5 @@
 
+BEGIN_ROOM
 
 BEGIN_ROOM_TILES
   1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
@@ -25,7 +26,13 @@ END_ROOM_TILES
 
 BEGIN_ROOM_OBJECTS
 ROOM_OBJECT(obj::entrance, 1.500000, 11.000000, 0.000000, 0.000000, 0, NULL, 0)
+ROOM_OBJECT(obj::entrance, 29.500000, 9.000000, 0.000000, 0.000000, 0, NULL, 1)
+ROOM_OBJECT(obj::exit, -1.000000, 10.000000, 1.000000, 4.000000, 0, &room::file::test4::room, 1)
+ROOM_OBJECT(obj::exit, -1.000000, 0.000000, 1.000000, 4.000000, 0, &room::file::test4::room, 1)
+ROOM_OBJECT(obj::exit, 30.000000, 8.000000, 1.000000, 4.000000, 0, &room::file::test4::room, 0)
 END_ROOM_OBJECTS
 
-ROOM_DEF(30, 20, 1, 127, 127, 127, 255, 0)
+ROOM_DEF(30, 20, 5, 127, 127, 127, 255, 0)
+
+END_ROOM
 

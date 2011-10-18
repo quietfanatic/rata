@@ -193,7 +193,7 @@ namespace room {
 
 #ifdef MAPEDITOR
 	int Room::print_to_file (FILE* F) {
-		fprintf(F, "\n\nBEGIN_ROOM_TILES\n");
+		fprintf(F, "\n\nBEGIN_ROOM\n\nBEGIN_ROOM_TILES\n");
 		for (uint y=0; y < height; y++) {
 			for (uint x=0; x < width; x++) {
 				fprintf(F, "% 3d", tile(x, y));
@@ -213,19 +213,20 @@ namespace room {
 				objects[i].data2
 			);
 		}
-		return 0 <= fprintf(F, "END_ROOM_OBJECTS\n\nROOM_DEF(%hu, %hu, %hu, %hhu, %hhu, %hhu, %hhu, %d)\n\n",
+		return 0 <= fprintf(F, "END_ROOM_OBJECTS\n\nROOM_DEF(%hu, %hu, %hu, %hhu, %hhu, %hhu, %hhu, %d)\n\nEND_ROOM\n\n",
 			width, height, nobjects, bg_color.r, bg_color.g, bg_color.b, bg_color.a, bg_index
 		);
 	}
 #endif
 
+#define BEGIN_ROOM extern Room room;
 #define BEGIN_ROOM_TILES int16 tiles [] = {
 #define END_ROOM_TILES };
 #define BEGIN_ROOM_OBJECTS obj::Desc objects [] = {
-#define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(id, data, x, y, xvel, yvel, facing, data2),
+#define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(id, data, x, y, xvel, yvel, facing, false, data2),
 #define END_ROOM_OBJECTS obj::Desc()};
 #define ROOM_DEF(w, h, o, r, g, b, a, bg) Room room = {w, h, sf::Color(r, g, b, a), bg, tiles, o, objects, NULL};
-
+#define END_ROOM
 
 
 
