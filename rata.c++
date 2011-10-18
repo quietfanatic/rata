@@ -477,22 +477,27 @@ struct Rata : Walking {
 		}
 		else distance_walked = 0;
 		 // Constrain cursor to room
+		 /*
+		if (cursor.x > 2)
 		if (cursor.x + aim_center_x() > room::current->width) {
 			cursor.y *= (room::current->width - aim_center_x()) / cursor.x;
 			cursor.x = room::current->width - aim_center_x();
 		}
+		if (cursor.x < -2)
 		if (cursor.x + aim_center_x() < 0) {
 			cursor.y *= (-aim_center_x()) / cursor.x;
 			cursor.x = -aim_center_x();
 		}
+		if (cursor.y > 2)
 		if (cursor.y + aim_center_y() > room::current->height) {
 			cursor.x *= (room::current->height - aim_center_y()) / cursor.y;
 			cursor.y = room::current->height - aim_center_y();
 		}
+		if (cursor.y < -2)
 		if (cursor.y + aim_center_y() < 0) {
 			cursor.x *= (-aim_center_y()) / cursor.y;
 			cursor.y = -aim_center_y();
-		}
+		} */
 	};
 
 	virtual void on_create () {

@@ -286,7 +286,25 @@ void draw_phase () {
 	 // Draw cursor
 	if (trap_cursor) {
 		window->ShowMouseCursor(false);
-		draw_image(cursor.img, cursor.x + rata->aim_center_x(), cursor.y + rata->aim_center_y());
+		float cx = cursor.x;
+		float cy = cursor.y;
+		if (cx + rata->aim_center_x() > viewright()) {
+			cy *= (viewright() - rata->aim_center_x()) / cx;
+			cx = viewright() - rata->aim_center_x();
+		}
+		if (cx + rata->aim_center_x() < viewleft()) {
+			cy *= (viewleft() - rata->aim_center_x()) / cx;
+			cx = viewleft() - rata->aim_center_x();
+		}
+		if (cy + rata->aim_center_y() > viewtop()) {
+			cx *= (viewtop() - rata->aim_center_y()) / cy;
+			cy = viewtop() - rata->aim_center_y();
+		}
+		if (cy + rata->aim_center_y() < viewbottom()) {
+			cx *= (viewbottom() - rata->aim_center_y()) / cy;
+			cy = viewbottom() - rata->aim_center_y();
+		}
+		draw_image(cursor.img, cx + rata->aim_center_x(), cy + rata->aim_center_y());
 	}
 	else {
 		window->ShowMouseCursor(true);
