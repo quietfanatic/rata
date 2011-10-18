@@ -214,7 +214,7 @@ struct Rata : Walking {
 		}
 		else {
 			ideal_xvel = 0;
-			return state == crawling || abs_f(xvel()) >= 0.01;
+			return false;
 		};
 	}
 	
@@ -316,6 +316,7 @@ struct Rata : Walking {
 	}
 
 	void before_move () {
+		aiming = false;
 		switch (state) {
 			case standing:
 			case walking:
@@ -324,11 +325,12 @@ struct Rata : Walking {
 				if (!floor) goto no_floor;
 				got_floor:
 				if (allow_kneel()) {
-					if ((check_fix(fix_21()) || !allow_aim()) && allow_crawl()) {
+					if (allow_crawl() || (state == crawling && (check_fix(fix_21()) || !allow_aim()))) {
 						state = crawling;
 						set_fix_h7();
 					}
 					else {
+						if (state != crawling) allow_aim();
 						state = kneeling;
 						floor_friction = ground_decel();
 						ideal_xvel = 0;
