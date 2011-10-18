@@ -433,13 +433,7 @@ void Item::draw () {
 	}
 }
 void Item::before_move () {
-	if (rata->x() > desc->x - 0.5)
-	if (rata->x() < desc->x + 0.5)
-	if (rata->y() > desc->y - 0.5)
-	if (rata->y() < desc->y + 0.5)
-	if (key[sf::Key::Space] == 1) {
-		rata->pick_up_equip(this);
-	}
+	rata->propose_action(Rata::action_equip, this, desc->x, desc->y, 1);
 }
 
 
@@ -765,7 +759,7 @@ const obj::Def obj::def [] = {
 	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>, NULL},
 	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>, &img::patroller},
 	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, &img::heart},
-	{"Item", 0, NULL, -5, -10, obj::ALLOC<Item>, NULL},
+	{"Item", 0, NULL, -5, 150, obj::ALLOC<Item>, NULL},
 	{"Clickable text", 0, NULL, -2000, 2000, obj::ALLOC<ClickableText>, NULL},
 	{"Tilemap editor", 0, NULL, -100, 100, obj::ALLOC<TilemapEditor>, NULL},
 	{"Tile picker", 0, NULL, -1000, 1000, obj::ALLOC<TilePicker>, NULL},

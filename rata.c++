@@ -40,11 +40,31 @@ struct Rata : Walking {
 	uint inventory_amount;
 	obj::Desc* inventory [10];
 	obj::Desc* equipment [item::num_slots];
-	item::Equip* equip_info (uint i) {
-		return equipment[i] ? (item::Equip*)equipment[i]->data : NULL;
+	 // Actions
+	float action_distance;
+	void* action_arg;
+	enum Action {
+		action_equip
+	};
+	int action;
+	void propose_action (int act, void* arg, float xp, float yp, float radius) {
+		if (y() > yp - radius)
+		if (y() < yp + radius)
+		if (x() > xp - radius)
+		if (x() < xp + radius) {
+			float dist = abs_f(x() - xp);
+			if (dist < action_distance || dist < 0.2) {
+				action = act;
+				action_arg = arg;
+				action_distance = dist;
+			}
+		}
 	}
 
 	 // Easy access to bits
+	item::Equip* equip_info (uint i) {
+		return equipment[i] ? (item::Equip*)equipment[i]->data : NULL;
+	}
 	float aim_center_x () { return x() + 2*PX*facing; }
 	float aim_center_y () { return y() + 13*PX; }
 	b2Fixture* fix_27 () { return body->GetFixtureList()->GetNext(); }
@@ -316,6 +336,17 @@ struct Rata : Walking {
 		}
 	}
 
+	void allow_action () {
+		if (key[sf::Key::Space] == 1)
+		switch (action) {
+			case action_equip: {
+				pick_up_equip((Item*)action_arg);
+				break;
+			}
+			default: { }
+		}
+	}
+
 	void allow_examine () {
 		if (!aiming) {
 			if (abs_f(cursor.x) < 0.1 && abs_f(cursor.y) < 0.1) {
@@ -411,6 +442,7 @@ struct Rata : Walking {
 					}
 					set_fix_27();
 				}
+				allow_action();
 				allow_examine();
 				decrement_counters();
 				break;
@@ -426,6 +458,7 @@ struct Rata : Walking {
 				allow_aim();
 				allow_airmove();
 				allow_use();
+				allow_action();
 				allow_examine();
 				decrement_counters();
 				set_fix_27();
@@ -599,6 +632,9 @@ struct Rata : Walking {
 		bool flip = facing<0;
 		bool armflip = flip;
 		bool forearmflip = flip;
+		
+		action = -1;
+		action_distance = 10000000;
 
 		//if (inv_frames % 3 == 2) return;
 
