@@ -39,6 +39,7 @@ namespace obj {
 		hiteffect,
 		patroller,
 		heart,
+		item,
 		clickable_text,
 		tilemap_editor,
 		tilepicker,
@@ -60,6 +61,7 @@ namespace obj {
 		"obj::hiteffect",
 		"obj::patroller",
 		"obj::heart",
+		"obj::item",
 		"obj::clickable_text",
 		"obj::tilemap_editor",
 		"obj::tilepicker",
@@ -416,7 +418,29 @@ struct Walking : Object {
 };
 
 
+struct Item : Object {
+	void draw ();
+	void before_move ();
+};
+
+
 #include "rata.c++"
+
+void Item::draw () {
+	if (desc->data) {
+		item::Equip* info = (item::Equip*)desc->data;
+		draw_image(info->appearance, desc->x, desc->y, info->world_frame);
+	}
+}
+void Item::before_move () {
+	if (rata->x() > desc->x - 0.5)
+	if (rata->x() < desc->x + 0.5)
+	if (rata->y() > desc->y - 0.5)
+	if (rata->y() < desc->y + 0.5)
+	if (key[sf::Key::Space] == 1) {
+		rata->pick_up_equip(this);
+	}
+}
 
 
 struct Entrance : Object {
@@ -741,6 +765,7 @@ const obj::Def obj::def [] = {
 	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>, NULL},
 	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>, &img::patroller},
 	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, &img::heart},
+	{"Item", 0, NULL, -5, -10, obj::ALLOC<Item>, NULL},
 	{"Clickable text", 0, NULL, -2000, 2000, obj::ALLOC<ClickableText>, NULL},
 	{"Tilemap editor", 0, NULL, -100, 100, obj::ALLOC<TilemapEditor>, NULL},
 	{"Tile picker", 0, NULL, -1000, 1000, obj::ALLOC<TilePicker>, NULL},

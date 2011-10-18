@@ -1,5 +1,5 @@
 #define RATA_STEP 1.0
-#define MAX_EQUIPS 10
+#define MAX_INVENTORY 10
 
 
 struct Rata : Walking {
@@ -37,7 +37,12 @@ struct Rata : Walking {
 	float handy;
 	uint angle_frame;  // 0=down, 8=up
 	 // Equipment
-	item::Equip* equipment [MAX_EQUIPS];
+	uint inventory_amount;
+	obj::Desc* inventory [10];
+	obj::Desc* equipment [item::num_slots];
+	item::Equip* equip_info (uint i) {
+		return equipment[i] ? (item::Equip*)equipment[i]->data : NULL;
+	}
 
 	 // Easy access to bits
 	float aim_center_x () { return x() + 2*PX*facing; }
@@ -103,6 +108,55 @@ struct Rata : Walking {
 		fix_21()->SetSensor(true);
 		fix_h7()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		fix_h7()->SetSensor(false);
+	}
+
+	 // Equipment and inventory management
+
+	void spawn_item (obj::Desc* itemdesc) {
+		itemdesc->x = x();
+		itemdesc->y = y();
+		itemdesc->facing = facing;
+		itemdesc->manifest();
+	}
+	void add_to_inventory (obj::Desc* itemdesc) {
+		for (uint i=0; i < MAX_INVENTORY; i++) {
+			if (inventory[i] == 0) {
+				inventory[i] = itemdesc;
+				inventory_amount++;
+				return;
+			}
+		} // No room
+		spawn_item(itemdesc);
+	}	
+	void pick_up (Item* itemobj) {
+		itemobj->destroy();
+		add_to_inventory(itemobj->desc);
+	}
+	void drop (uint i) {
+		spawn_item(inventory[i]);
+		for (; i < MAX_INVENTORY - 1; i++) {
+			inventory[i] = inventory[i+1];
+		}
+		inventory[MAX_INVENTORY] = NULL;
+	}
+	void unequip_drop (obj::Desc* itemdesc) {
+		if (itemdesc == NULL) return;
+		int slot = ((item::Equip*)itemdesc->data)->slot;
+		equipment[slot] = NULL;
+		int otherslot = ((item::Equip*)itemdesc->data)->otherslot;
+		if (otherslot > 0) equipment[otherslot] = NULL;
+		spawn_item(itemdesc);
+	}
+	void pick_up_equip (Item* itemobj) {
+		itemobj->destroy();
+		int slot = ((item::Equip*)itemobj->desc->data)->slot;
+		if (equipment[slot])
+			unequip_drop(equipment[slot]);
+		int otherslot = ((item::Equip*)itemobj->desc->data)->otherslot;
+		if (otherslot > 0 && equipment[otherslot])
+			unequip_drop(equipment[otherslot]);
+		equipment[slot] = itemobj->desc;
+		if (otherslot > 0) equipment[otherslot] = itemobj->desc;
 	}
 
 	 // Character stats (affected by items and such)
@@ -255,12 +309,10 @@ struct Rata : Walking {
 	void allow_use () {
 		if (aiming
 		 && recoil_frames == 0
-		 && button[sf::Mouse::Left]
-		 && !hurt_frames) {
-			for (uint i=0; i<MAX_EQUIPS; i++)
-			if (equipment[i])
-			if (equipment[i]->use)
-				(*equipment[i]->use)();
+		 && button[sf::Mouse::Left]) {
+			if (equip_info(item::hand))
+			if (equip_info(item::hand)->use)
+				(*equip_info(item::hand)->use)();
 		}
 	}
 
@@ -520,9 +572,9 @@ struct Rata : Walking {
 		if (desc->data) state = (State)(uint)desc->data;
 		else state = falling;
 		life = max_life = 144;
-		for (uint i=0; i<MAX_EQUIPS; i++) equipment[i] = NULL;
-		equipment[0] = &item::white_dress;
-		equipment[1] = &item::handgun;
+		inventory_amount = 0;
+		for (uint i=0; i<item::num_slots; i++) equipment[i] = NULL;
+		for (uint i=0; i<MAX_INVENTORY; i++) inventory[i] = NULL;
 		facing = desc->facing ? desc->facing : 1;
 		printf("FACING = %d\n", facing);
 		cursor.x = 2.0 * facing;
@@ -702,10 +754,10 @@ struct Rata : Walking {
 		 // Now to actually draw.
 
 		draw_image(&img::rata_body, x(), y(), bodypose, flip);
-		for (uint i=0; i<MAX_EQUIPS; i++)
-		if (equipment[i])
-		if (equipment[i]->body)
-			draw_image(equipment[i]->body, x(), y(), bodypose, flip);
+		for (uint i=0; i<item::num_slots; i++)
+		if (equip_info(i))
+		if (equip_info(i)->body)
+			draw_image(equip_info(i)->body, x(), y(), bodypose, flip);
 
 		if (state == dead) goto draw_arm;
 		draw_head:
@@ -715,11 +767,11 @@ struct Rata : Walking {
 			y() + heady,
 			headpose, flip
 		);
-		for (uint i=0; i<MAX_EQUIPS; i++)
-		if (equipment[i])
-		if (equipment[i]->head)
+		for (uint i=0; i<item::num_slots; i++)
+		if (equip_info(i))
+		if (equip_info(i)->head)
 			draw_image(
-				equipment[i]->head,
+				equip_info(i)->head,
 				x() + headx,
 				y() + heady,
 				headpose, flip
@@ -739,20 +791,20 @@ struct Rata : Walking {
 			y() + forearmy,
 			forearmpose, forearmflip
 		);
-		for (uint i=0; i<MAX_EQUIPS; i++)
-		if (equipment[i])
-		if (equipment[i]->arm)
+		for (uint i=0; i<item::num_slots; i++)
+		if (equip_info(i))
+		if (equip_info(i)->arm)
 			draw_image(
-				equipment[i]->arm,
+				equip_info(i)->arm,
 				x() + armx,
 				y() + army,
 				armpose, armflip
 			);
-		for (uint i=0; i<MAX_EQUIPS; i++)
-		if (equipment[i])
-		if (equipment[i]->forearm)
+		for (uint i=0; i<item::num_slots; i++)
+		if (equip_info(i))
+		if (equip_info(i)->forearm)
 			draw_image(
-				equipment[i]->forearm,
+				equip_info(i)->forearm,
 				x() + forearmx,
 				y() + forearmy,
 				forearmpose, forearmflip
@@ -761,11 +813,11 @@ struct Rata : Walking {
 		if (state == dead) goto draw_head;
 		
 		draw_hand:
-		for (uint i=0; i<MAX_EQUIPS; i++)
-		if (equipment[i])
-		if (equipment[i]->hand)
+		for (uint i=0; i<item::num_slots; i++)
+		if (equip_info(i))
+		if (equip_info(i)->hand)
 			draw_image(
-				equipment[i]->hand,
+				equip_info(i)->hand,
 				x() + handx,
 				y() + handy,
 				handpose, flip

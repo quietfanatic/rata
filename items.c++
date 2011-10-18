@@ -2,8 +2,18 @@
 #ifdef DEF_ONLY
 
 namespace item {
+	enum Slot {
+		feet,
+		body,
+		head,
+		arm,
+		hand,
+		num_slots
+	};
 
 	struct Equip {
+		uint slot;
+		uint otherslot;
 		float ground_accel;
 		float ground_decel;
 		float max_forward_speed;
@@ -14,7 +24,10 @@ namespace item {
 		float jump_float_time;
 		float damage_mult;
 		uint capacity;
-	
+		
+		img::Image* appearance;
+		uint world_frame;
+		uint inventory_frame;
 		img::Image* body;
 		img::Image* head;
 		img::Image* arm;
@@ -24,7 +37,10 @@ namespace item {
 	};
 
 
-	Equip white_dress = {1,1,1,1,1,1,1,1,1, 4,
+	Equip white_dress = {
+		body, -1,
+		1,1,1,1,1,1,1,1,1, 4,
+		&img::dress_body, pose::body::laybk, pose::body::stand,
 		&img::dress_body,
 		NULL,
 		&img::dress_arm,
@@ -41,7 +57,10 @@ namespace item {
 		-5*PX, -4*PX, -3*PX, 0*PX, 2*PX, 3*PX, 5*PX, 5*PX, 5*PX
 	};
 	
-	Equip handgun = {1,1,1,1,1,1,1,1,1, 0,
+	Equip handgun = {
+		hand, -1,
+		1,1,1,1,1,1,1,1,1, 0,
+		&img::handgun, pose::hand::inside, pose::hand::a45,
 		NULL,
 		NULL,
 		NULL,
