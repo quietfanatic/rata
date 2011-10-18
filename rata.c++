@@ -633,9 +633,6 @@ struct Rata : Walking {
 		bool armflip = flip;
 		bool forearmflip = flip;
 		
-		action = -1;
-		action_distance = 10000000;
-
 		//if (inv_frames % 3 == 2) return;
 
 		 // Select aim angle frame
@@ -858,6 +855,21 @@ struct Rata : Walking {
 				y() + handy,
 				handpose, flip
 			);
+		
+		 // Draw action message
+		const char* m =
+		  action == action_equip ? "Equip"
+		:                          NULL;
+		if (m) {
+			float w = text_width((char*)m)*PX;
+			float mx = x() - w/2;
+			float my = y() + 3;
+			draw_rect(mx-1*PX, my, mx + w+2*PX, my - 1, sf::Color(31, 31, 31, 127));
+			render_text((char*)m, mx, my, 1);
+		}
+		action = -1;
+		action_distance = 10000000;
+
 	}
 };
 
