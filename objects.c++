@@ -30,6 +30,7 @@ namespace obj {
 		rata,
 		entrance,
 		exit,
+		door,
 		solid,
 		tilemap,
 		bullet,
@@ -52,6 +53,7 @@ namespace obj {
 		"obj::rata",
 		"obj::entrance",
 		"obj::exit",
+		"obj::door",
 		"obj::solid",
 		"obj::tilemap",
 		"obj::bullet",
@@ -433,7 +435,8 @@ void Item::draw () {
 	}
 }
 void Item::before_move () {
-	rata->propose_action(Rata::action_equip, this, desc->x, desc->y, 1);
+	if (rata->floor)
+		rata->propose_action(Rata::action_equip, this, desc->x, desc->y, 1);
 }
 
 
@@ -463,6 +466,13 @@ struct Exit : Object {
 		if (rata->y() > desc->y)
 		if (rata->y() < desc->y + desc->yvel)
 			((Room*)desc->data)->enter(desc->data2);
+	}
+};
+
+struct Door : Object {
+	void before_move () {
+		if (rata->floor)
+			rata->propose_action(Rata::action_enter, this, desc->x, desc->y, desc->xvel);
 	}
 };
 
@@ -750,6 +760,7 @@ const obj::Def obj::def [] = {
 	{"Rata", 5, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
 	{"Entrance", 0, NULL, -1000, -1000, obj::ALLOC<Entrance>, NULL},
 	{"Exit", 0, NULL, -100, -100, obj::ALLOC<Exit>, NULL},
+	{"Door", 0, NULL, -100, 200, obj::ALLOC<Door>, NULL},
 	{"Solid Object", 0, NULL, 0, 0, obj::ALLOC<Solid>, NULL},
 	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, NULL},
 	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>, NULL},

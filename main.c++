@@ -36,7 +36,7 @@ int main () {
 		obj::rata, NULL,
 		10, 10
 	).manifest();
-	room::file::test2::room.enter(0);
+	room::file::roompicker::room.enter(0);
 
 	try { main_loop(); } catch (int x) { printf("Game quit succesfully with result %d.\n", x); }
 	return 0;

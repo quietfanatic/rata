@@ -110,8 +110,10 @@ namespace room {
 	void Room::leave () {
 		transition = true;
 		for (Object* o = objects_by_depth; o; o = o->next_depth) {
-			if (o->desc->id != obj::rata)
+			if (o->desc->id != obj::rata) {
+				printf("Leaving behind 0x%08x.\n", o);
 				o->destroy();
+			}
 		}
 	}
 
@@ -219,7 +221,7 @@ namespace room {
 	}
 #endif
 
-#define BEGIN_ROOM extern Room room;
+#define BEGIN_ROOM
 #define BEGIN_ROOM_TILES int16 tiles [] = {
 #define END_ROOM_TILES };
 #define BEGIN_ROOM_OBJECTS obj::Desc objects [] = {

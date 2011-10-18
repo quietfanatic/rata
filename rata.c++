@@ -44,7 +44,8 @@ struct Rata : Walking {
 	float action_distance;
 	void* action_arg;
 	enum Action {
-		action_equip
+		action_equip,
+		action_enter,
 	};
 	int action;
 	void propose_action (int act, void* arg, float xp, float yp, float radius) {
@@ -343,6 +344,11 @@ struct Rata : Walking {
 				pick_up_equip((Item*)action_arg);
 				break;
 			}
+			case action_enter: {
+				obj::Desc* d = ((Object*)action_arg)->desc;
+				((Room*)d->data)->enter(d->data2);
+				break;
+			}
 			default: { }
 		}
 	}
@@ -505,7 +511,7 @@ struct Rata : Walking {
 				break;
 			}
 			case dead_air: {
-				if (floor) goto dead_floor;
+				if (floor && floor_normal.y > 0.9) goto dead_floor;
 				dead_no_floor:
 				state = dead_air;
 				set_fix_25();
@@ -859,6 +865,7 @@ struct Rata : Walking {
 		 // Draw action message
 		const char* m =
 		  action == action_equip ? "EQUIP"
+		: action == action_enter ? "ENTER"
 		:                          NULL;
 		if (m) {
 			float w = text_width_small((char*)m)*PX;

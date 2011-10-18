@@ -1,11 +1,21 @@
 
 
 namespace file {
+	namespace edit1 { extern Room room; }
+	namespace edit2 { extern Room room; }
+	namespace roompicker { extern Room room; }
+	namespace test1 { extern Room room; }
+	namespace test2 { extern Room room; }
+	namespace test3 { extern Room room; }
+	namespace test4 { extern Room room; }
 	namespace edit1 {
 		#include "rooms/edit1.room.c++"
 	}
 	namespace edit2 {
 		#include "rooms/edit2.room.c++"
+	}
+	namespace roompicker {
+		#include "rooms/roompicker.room.c++"
 	}
 	namespace test1 {
 		#include "rooms/test1.room.c++"
@@ -32,6 +42,7 @@ struct room_pair {
 } list [] = {
 	{"edit1", &file::edit1::room},
 	{"edit2", &file::edit2::room},
+	{"roompicker", &file::roompicker::room},
 	{"test1", &file::test1::room},
 	{"test2", &file::test2::room},
 	{"test3", &file::test3::room},
