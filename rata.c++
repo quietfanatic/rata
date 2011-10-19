@@ -332,8 +332,9 @@ struct Rata : Walking {
 		 && recoil_frames == 0
 		 && button[sf::Mouse::Left]) {
 			if (equip_info(item::hand))
-			if (equip_info(item::hand)->use)
+			if (equip_info(item::hand)->use) {
 				(*equip_info(item::hand)->use)();
+			}
 		}
 	}
 
@@ -592,7 +593,6 @@ struct Rata : Walking {
 			cursor.y = -aim_center_y();
 		} */
 	};
-
 	virtual void on_create () {
 		make_body(desc, true, true);
 			for (uint i = obj::def[desc->id].nfixes; i > 0; i--) {

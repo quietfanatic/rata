@@ -3,6 +3,7 @@
 
 int main () {
 	load_img();
+	load_snd();
 	main_init();
 
 	/*
