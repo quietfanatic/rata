@@ -7,13 +7,11 @@ namespace snd {
 	struct Sound {
 		sf::SoundBuffer sfsb;
 		sf::Sound sfs;
-		void play () {
-			sfs.Play();
-		}
 		void stop () {
 			sfs.Stop();
 		}
-		void play (float pitch) {
+		void play (float pitch=1.0, float volume=100.0) {
+			sfs.SetVolume(volume);
 			sfs.SetPitch(pitch);
 			sfs.Play();
 		}

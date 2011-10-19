@@ -878,6 +878,7 @@ struct myCL : b2ContactListener {
 			if (ci->normalImpulses[0] > 10.0
 			      || ci->normalImpulses[0] < -10.0) ba->destroy_after_draw();
 			else if (ba->speed() < 100) ba->destroy_after_draw();
+			else snd::ricochet.play(0.7+rand()*0.3/RAND_MAX, 50);
 		}
 		if (b->desc->id == obj::bullet) {
 			Bullet* bb = (Bullet*) b;
@@ -885,6 +886,7 @@ struct myCL : b2ContactListener {
 			if (ci->normalImpulses[0] > 10.0
 			      || ci->normalImpulses[0] < -10.0) bb->destroy_after_draw();
 			else if (bb->speed() < 100) bb->destroy_after_draw();
+			else snd::ricochet.play(0.7+rand()*0.3/RAND_MAX, 50);
 		}
 		if (bfp->touch_damage && afp->damage_factor)
 			apply_touch_damage(a, b, afp, bfp, manifold);
