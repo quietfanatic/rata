@@ -553,6 +553,7 @@ struct Rata : Walking {
 			adrenaline += 5*d;
 			printf("Hurt status: %d, %d, %d\n", hurt_frames, inv_frames, adrenaline);
 		}
+		snd::hurt.play();
 	}
 
 	virtual void kill () {
@@ -614,6 +615,7 @@ struct Rata : Walking {
 		inventory_amount = 0;
 		for (uint i=0; i<item::num_slots; i++) equipment[i] = NULL;
 		for (uint i=0; i<MAX_INVENTORY; i++) inventory[i] = NULL;
+		equipment[item::body] = new obj::Desc(obj::item, &item::white_dress);
 		facing = desc->facing ? desc->facing : 1;
 		printf("FACING = %d\n", facing);
 		cursor.x = 2.0 * facing;

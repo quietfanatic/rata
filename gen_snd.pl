@@ -20,9 +20,9 @@ namespace snd {
 	}
 END
 
-my @imgs = grep /\.flac$/ && ! /^snd\/\!/, glob 'snd/*';
+my @imgs = grep /\.(?:flac|ogg)$/ && ! /^snd\/\!/, glob 'snd/*';
 for (@imgs) {
-	$_ =~ /^snd\/(.*?)\.flac$/ or die "Error: Weird sound filename: $_\n";
+	$_ =~ /^snd\/(.*?)\.(?:flac|ogg)$/ or die "Error: Weird sound filename: $_\n";
 	my $id = $1;
 	$id =~ s/[^a-zA-Z0-9_]/_/g;
 	print "\t$id,\n";
@@ -30,7 +30,7 @@ for (@imgs) {
 
 print "\t_COMMA_EATER;\n\n}\n\nvoid load_snd () {\n\tbool good = true;\n";
 for (@imgs) {
-	$_ =~ /^snd\/(.*?).flac$/ or die "Error: Weird sound filename: $_\n";
+	$_ =~ /^snd\/(.*?).(?:flac|ogg)$/ or die "Error: Weird sound filename: $_\n";
 	my $id = $1;
 	$id =~ s/[^a-zA-Z0-9_]/_/g;
 	print "\tgood &= snd::$id.sfsb.LoadFromFile(\"$_\");\n\tsnd::$id.sfs.SetBuffer(snd::$id.sfsb);\n";

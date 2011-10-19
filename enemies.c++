@@ -39,6 +39,7 @@ struct Rat : Walking {
 	}
 	virtual void kill () {
 		destroy();
+		snd::squeak.play();
 		if (rand() % 4 == 0)
 			(new obj::Desc(
 				obj::heart, NULL, x(), y(), 0, 0, 0, true
@@ -94,6 +95,7 @@ struct Patroller : Walking {
 				(new obj::Desc(obj::bullet, this,
 					x(), y()+0.5, bvx, bvy, 0, true
 				))->manifest();
+				snd::gunshot.play();
 				add_vel(-bvx/60, 0);
 			}
 			if ((threat_detected = detect_threat())) {
