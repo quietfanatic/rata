@@ -527,7 +527,10 @@ struct Rata : Walking {
 			case hurt_air: {
 				hurt_direction = sign_f(xvel())*facing;
 				if (floor) {
-					if (hurt_frames < 20) goto got_floor;
+					if (hurt_frames < 20) {
+						snd::step.play(1.2, 8*-oldyvel/2.0);
+						goto got_floor;
+					}
 					else {
 						snd::fall.play(0.9, 6*-oldyvel/2.0);
 						goto hurt_floor;
