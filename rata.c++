@@ -216,10 +216,11 @@ struct Rata : Walking {
 
 
 	 // Actions that can be taken
-	bool allow_aim () {
-		aiming = (button[sf::Mouse::Right] > 0 || key[sf::Key::LShift] > 0);
+	void allow_turn () {
 		if (cursor.x > 0) facing = 1;
 		else if (cursor.x < 0) facing = -1;
+	}
+	void allow_look () {
 		aim_distance = sqrt(cursor.x*cursor.x + cursor.y*cursor.y);
 		aim_direction = atan2(cursor.y, cursor.x);
 		pointed_object = check_area(
@@ -227,6 +228,9 @@ struct Rata : Walking {
 			aim_center_x() + cursor.x - 1*PX, aim_center_y() + cursor.y - 1*PX,
 			1|2|4|8|16|32|64
 		);
+	}
+	bool allow_aim () {
+		aiming = (button[sf::Mouse::Right] > 0 || key[sf::Key::LShift] > 0);
 		return aiming;
 	}
 
@@ -356,9 +360,12 @@ struct Rata : Walking {
 	}
 
 	void allow_examine () {
-		if (!aiming) {
+		if (!button[sf::Mouse::Right] && !key[sf::Key::LShift]) {
 			if (abs_f(cursor.x) < 0.1 && abs_f(cursor.y) < 0.1) {
 				can_see = true;
+			}
+			else if (cursor.x*facing < 0) {
+				can_see = false;
 			}
 			else {
 				Object* seeing = check_line(
@@ -400,7 +407,17 @@ struct Rata : Walking {
 
 	void decrement_counters () {
 		if (recoil_frames) recoil_frames--;
-		if (hurt_frames) hurt_frames--;
+		if (yvel() < -20.0) {
+			hurt_frames++;
+			state = hurt_air;
+		}
+		if (hurt_frames) {
+			if (yvel() < -10.0)
+				hurt_frames++;
+			else
+				hurt_frames--;
+		}
+		if (hurt_frames > 120) hurt_frames = 120;
 		if (inv_frames) inv_frames--;
 		else hurt_id[0] = hurt_id[1] = -1;
 		if (adrenaline) adrenaline--;
@@ -416,12 +433,28 @@ struct Rata : Walking {
 				if (!floor) goto no_floor;
 				got_floor:
 				if (allow_kneel()) {
-					if (allow_crawl() || (state == crawling && (check_fix(fix_21()) || !allow_aim()))) {
+					if (allow_crawl()) {
 						state = crawling;
-						set_fix_h7();
+					}
+					if (state == crawling) {
+						if (check_fix(fix_21())) {
+							allow_look();
+							set_fix_h7();
+						}
+						else {
+							allow_turn();
+							allow_look();
+							if (allow_aim()) goto kneel;
+							else {
+								set_fix_h7();
+							}
+						}
 					}
 					else {
-						if (state != crawling) allow_aim();
+						allow_turn();
+						allow_look();
+						allow_aim();
+						kneel:
 						state = kneeling;
 						floor_friction = ground_decel();
 						ideal_xvel = 0;
@@ -431,11 +464,15 @@ struct Rata : Walking {
 				}
 				else if (allow_jump()) {
 					state = falling;
+					allow_turn();
+					allow_look();
 					allow_aim();
 					allow_airmove();
 					set_fix_27();
 				}
 				else {
+					allow_turn();
+					allow_look();
 					allow_aim();
 					if (allow_walk()) {
 						state = walking;
@@ -463,6 +500,8 @@ struct Rata : Walking {
 				}
 				no_floor:
 				state = falling;
+				allow_turn();
+				allow_look();
 				allow_aim();
 				allow_airmove();
 				allow_use();
@@ -475,8 +514,9 @@ struct Rata : Walking {
 			case ouch: {
 				body->SetGravityScale(1.0);
 				float_frames = 0;
+				if (yvel() < 1.0) add_vel(0, 3.0);
 				if (life <= 0) {
-					add_vel(0, 5.0);
+					impulse(0, 5.0);
 					goto dead_no_floor;
 				}
 				else {
@@ -489,14 +529,14 @@ struct Rata : Walking {
 				if (floor) {
 					if (hurt_frames < 20) goto got_floor;
 					else {
-						snd::fall.play(0.9, 8*-oldyvel/2.0);
+						snd::fall.play(0.9, 6*-oldyvel/2.0);
 						goto hurt_floor;
 					}
 				}
 				hurt_no_floor:
 				if (hurt_frames == 0) goto no_floor;
 				state = hurt_air;
-				allow_aim();
+				allow_look();
 				allow_examine();
 				decrement_counters();
 				set_fix_25();
@@ -509,7 +549,7 @@ struct Rata : Walking {
 				state = hurt;
 				floor_friction = ground_decel();
 				ideal_xvel = 0;
-				allow_aim();
+				allow_look();
 				allow_examine();
 				decrement_counters();
 				set_fix_21();
@@ -517,7 +557,7 @@ struct Rata : Walking {
 			}
 			case dead_air: {
 				if (floor && floor_normal.y > 0.9) {
-					snd::fall.play(0.9, 8*-oldyvel/2.0);
+					snd::fall.play(0.9, 6*-oldyvel/2.0);
 					goto dead_floor;
 				}
 				dead_no_floor:

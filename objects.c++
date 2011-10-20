@@ -325,7 +325,9 @@ struct Object {
 		b2Vec2 oldvel = body->GetLinearVelocity();
 		body->SetLinearVelocity(b2Vec2(oldvel.x+x, oldvel.y+y));
 	}
-	
+	void impulse (float x, float y) {
+		body->ApplyLinearImpulse(b2Vec2(x, y), body->GetPosition());
+	}
 	void mutual_impulse(Object* other, float x, float y) {
 		float m = body->GetMass();
 		float om = other->body->GetMass();
@@ -782,7 +784,7 @@ const obj::Def obj::def [] = {
 
 
 
-#define DAMAGE_KNOCKBACK 2.0
+#define DAMAGE_KNOCKBACK 12.0
 void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Manifold* manifold) {
 	if (a->life <= 0) return;
 	if (a->desc->id == obj::rata) {
@@ -803,12 +805,11 @@ void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Man
 		((Bullet*)b)->destroy_after_draw();
 	}
 	else if (manifold->type == b2Manifold::e_faceA)
-		a->add_vel(manifold->localNormal.x*DAMAGE_KNOCKBACK,
+		a->impulse(manifold->localNormal.x*DAMAGE_KNOCKBACK,
 		           manifold->localNormal.y*DAMAGE_KNOCKBACK);
 	else if (manifold->type == b2Manifold::e_faceB)
-		a->add_vel(-manifold->localNormal.x*DAMAGE_KNOCKBACK,
+		a->impulse(-manifold->localNormal.x*DAMAGE_KNOCKBACK,
 		           -manifold->localNormal.y*DAMAGE_KNOCKBACK);
-	if (a->floor) a->add_vel(0, 3.0);
 }
 
 
