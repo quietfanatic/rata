@@ -441,7 +441,8 @@ struct Rata : Walking {
 				if (!floor) goto no_floor;
 				got_floor:
 				if (allow_kneel()) {
-					if (allow_crawl()) {
+					bool c = allow_crawl();
+					if (c) {
 						state = crawling;
 					}
 					if (state == crawling) {
@@ -452,7 +453,7 @@ struct Rata : Walking {
 						else {
 							allow_turn();
 							allow_look();
-							if (allow_aim()) goto kneel;
+							if (!c && allow_aim()) goto kneel;
 							else {
 								set_fix_h7();
 							}
