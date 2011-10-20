@@ -79,4 +79,9 @@ inline float mod_f (float a, float b) {
 inline float abs_f (float x) { return x>0 ? x : -x; }
 inline int sign_f (float x) { return (x>0)-(x<0); }
 
+inline float dither (float c, float err) {
+	return c - err + rand()*2.0*err/RAND_MAX;
+}
+
+
 

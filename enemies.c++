@@ -117,18 +117,15 @@ struct Patroller : AI {
 	}
 	void decision () {
 		if (threat_detected) {
-			float bullet_velocity = 120.0;
-			float aim_direction = atan2(
-				prediction.y - y(),
-				prediction.x - x()
-			) - 0.2 + rand()*0.4/RAND_MAX;
-			float bvx = bullet_velocity * cos(aim_direction);
-			float bvy = bullet_velocity * sin(aim_direction);
-			(new obj::Desc(obj::bullet, this,
-				x(), y()+0.5, bvx, bvy, 0, true
-			))->manifest();
+			Bullet* b = fire_bullet(
+				x(), y()+0.5,
+				atan2(
+					prediction.y - y(),
+					prediction.x - x()
+				) - 0.2 + rand()*0.4/RAND_MAX
+			);
 			snd::gunshot.play(1.0, 70);
-			add_vel(-bvx/60, 0);
+			add_vel(-b->desc->xvel/60, 0);
 		}
 		threat_detected = (rata->x() - x())*facing > 0
 		               && see_threat();

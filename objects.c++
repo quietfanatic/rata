@@ -341,6 +341,19 @@ struct Object {
 		}
 	}
 
+	Bullet* fire_bullet(float bx, float by, float bd, float bv = 120, int power = 48) {
+		return (Bullet*)(new obj::Desc(
+			obj::bullet, this,
+			bx, by, bv*cos(bd), bv*sin(bd), 1, true
+		))->manifest();
+	}
+	Bullet* fire_bullet_to(float bx, float by, float tx, float ty, float bv = 120, int power = 48) {
+		return (Bullet*)(new obj::Desc(
+			obj::bullet, this,
+			bx, by, bv*((bx+by)/by), bv*((bx+by)/bx), 0, true
+		))->manifest();
+	}
+
 	 // Get def, id
 	const uint16 id () { return desc->id; }
 	const obj::Def* def () { return &obj::def[id()]; }
