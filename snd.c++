@@ -21,6 +21,13 @@ namespace snd {
 
 }
 
+namespace bgm {
+	sf::Music
+	life,
+	_COMMA_EATER;
+
+}
+
 void load_snd () {
 	bool good = true;
 	good &= snd::gunshot.sfsb.LoadFromFile("snd/gunshot.flac");
@@ -33,6 +40,7 @@ void load_snd () {
 	snd::squeak.sfs.SetBuffer(snd::squeak.sfsb);
 	good &= snd::step.sfsb.LoadFromFile("snd/step.ogg");
 	snd::step.sfs.SetBuffer(snd::step.sfsb);
+	good &= bgm::life.OpenFromFile("bgm/life.ogg"); bgm::life.SetLoop(true);
 	if (!good) fprintf(stderr, "Error: At least one sound failed to load!\n");
 }
 
