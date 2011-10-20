@@ -20,6 +20,7 @@ Controls:
               A :  move left
               D :  move right
               W :  jump
+          Space :  action (enter, pick up, etc.)
      Move Mouse :  look around
         L-click :  examine
 R-click/L-Shift :  aim weapon
