@@ -459,7 +459,7 @@ struct Rata : Walking {
 				if (floor) {
 					body->SetGravityScale(1.0);
 					float_frames = 0;
-					snd::step.play(1.2, 10*-oldyvel);
+					snd::step.play(1.2, 8*-oldyvel);
 					goto got_floor;
 				}
 				no_floor:
@@ -580,7 +580,7 @@ struct Rata : Walking {
 					float oldstep = mod_f(olddist, RATA_STEP);
 					float step = mod_f(distance_walked, RATA_STEP);
 					if (oldstep < 0.4 && step >= 0.4)
-						snd::step.play(0.9+rand()*0.2/RAND_MAX, 8*abs_f(xvel())*(1.0+rand()*0.2/RAND_MAX));
+						snd::step.play(0.9+rand()*0.2/RAND_MAX, 6*abs_f(xvel())*(1.0+rand()*0.2/RAND_MAX));
 				}
 			}
 		}

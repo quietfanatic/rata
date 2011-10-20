@@ -13,6 +13,7 @@ namespace snd {
 		}
 	}
 	gunshot,
+	hit,
 	hurt,
 	ricochet,
 	squeak,
@@ -32,6 +33,8 @@ void load_snd () {
 	bool good = true;
 	good &= snd::gunshot.sfsb.LoadFromFile("snd/gunshot.flac");
 	snd::gunshot.sfs.SetBuffer(snd::gunshot.sfsb);
+	good &= snd::hit.sfsb.LoadFromFile("snd/hit.ogg");
+	snd::hit.sfs.SetBuffer(snd::hit.sfsb);
 	good &= snd::hurt.sfsb.LoadFromFile("snd/hurt.ogg");
 	snd::hurt.sfs.SetBuffer(snd::hurt.sfsb);
 	good &= snd::ricochet.sfsb.LoadFromFile("snd/ricochet.ogg");

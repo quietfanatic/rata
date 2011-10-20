@@ -120,5 +120,10 @@ struct Patroller : Walking {
 		}
 		return false;
 	}
+
+	void damage (int d) {
+		Object::damage(d);
+		snd::hit.play(0.8);
+	}
 };
 
