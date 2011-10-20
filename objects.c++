@@ -797,7 +797,7 @@ void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Man
 	if (b->desc->id == obj::bullet) {
 		(new obj::Desc(
 			obj::hiteffect, &img::hit_damagable,
-			((Bullet*)b)->midx, ((Bullet*)b)->midy, 8, 0, 0, true
+			((Bullet*)b)->midx, ((Bullet*)b)->midy, 11, 0, 0, true
 		))->manifest();
 		((Bullet*)b)->destroy_after_draw();
 	}
