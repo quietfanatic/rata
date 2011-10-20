@@ -86,17 +86,13 @@ namespace item {
 
 void item::fire_handgun () {
 	rata->recoil_frames = 30;
-	float bullet_velocity = 120.0;
-	(new obj::Desc(obj::bullet, rata,
+	rata->fire_bullet(
 		rata->x() + rata->handx
 		          + item::handgun_bulletx[rata->angle_frame]*rata->facing,
 		rata->y() + rata->handy
 		          + item::handgun_bullety[rata->angle_frame],
-		bullet_velocity * cos(rata->aim_direction),
-		bullet_velocity * sin(rata->aim_direction),
-		0,
-		true
-	))->manifest();
+		rata->aim_direction
+	);
 	snd::gunshot.play(1.0, 80);
 }
 
