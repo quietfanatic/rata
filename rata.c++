@@ -237,7 +237,7 @@ struct Rata : Walking {
 				floor_friction = ground_accel();
 			else floor_friction = ground_decel();
 			if (facing < 0)
-				ideal_xvel = -max_forward_speed();
+				ideal_xvel = !aiming ? -max_forward_speed() : -max_backward_speed();
 			else
 				ideal_xvel = -max_backward_speed();
 		}
@@ -247,7 +247,7 @@ struct Rata : Walking {
 				floor_friction = ground_accel();
 			else floor_friction = ground_decel();
 			if (facing > 0)
-				ideal_xvel = max_forward_speed();
+				ideal_xvel = !aiming ? max_forward_speed() : max_backward_speed();
 			else
 				ideal_xvel = max_backward_speed();
 		}
@@ -436,15 +436,14 @@ struct Rata : Walking {
 					set_fix_27();
 				}
 				else {
+					allow_aim();
 					if (allow_walk()) {
 						state = walking;
-						allow_aim();
 						allow_use();
 						set_fix_27();
 					}
 					else {
 						state = standing;
-						allow_aim();
 						allow_use();
 						set_fix_27();
 					}
