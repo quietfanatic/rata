@@ -18,6 +18,7 @@ namespace snd {
 	ricochet,
 	squeak,
 	step,
+	woodhit,
 	_COMMA_EATER;
 
 }
@@ -43,6 +44,8 @@ void load_snd () {
 	snd::squeak.sfs.SetBuffer(snd::squeak.sfsb);
 	good &= snd::step.sfsb.LoadFromFile("snd/step.ogg");
 	snd::step.sfs.SetBuffer(snd::step.sfsb);
+	good &= snd::woodhit.sfsb.LoadFromFile("snd/woodhit.ogg");
+	snd::woodhit.sfs.SetBuffer(snd::woodhit.sfsb);
 	good &= bgm::life.OpenFromFile("bgm/life.ogg"); bgm::life.SetLoop(true);
 	if (!good) fprintf(stderr, "Error: At least one sound failed to load!\n");
 }
