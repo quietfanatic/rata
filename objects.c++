@@ -348,10 +348,7 @@ struct Object {
 		))->manifest();
 	}
 	Bullet* fire_bullet_to(float bx, float by, float tx, float ty, float bv = 120, int power = 48) {
-		return (Bullet*)(new obj::Desc(
-			obj::bullet, this,
-			bx, by, bv*((bx+by)/by), bv*((bx+by)/bx), 0, true
-		))->manifest();
+		return fire_bullet(bx, by, atan2(ty-by, tx-bx), bv, power);
 	}
 
 	 // Get def, id

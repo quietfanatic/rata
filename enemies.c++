@@ -117,12 +117,10 @@ struct Patroller : AI {
 	}
 	void decision () {
 		if (threat_detected) {
-			Bullet* b = fire_bullet(
+			Bullet* b = fire_bullet_to(
 				x(), y()+0.5,
-				atan2(
-					prediction.y - y(),
-					prediction.x - x()
-				) - 0.2 + rand()*0.4/RAND_MAX
+				prediction.x,
+				prediction.y
 			);
 			snd::gunshot.play(1.0, 70);
 			add_vel(-b->desc->xvel/60, 0);
