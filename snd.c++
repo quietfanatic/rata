@@ -12,6 +12,7 @@ namespace snd {
 			sfs.Play();
 		}
 	}
+	fall,
 	gunshot,
 	hit,
 	hurt,
@@ -32,6 +33,8 @@ namespace bgm {
 
 void load_snd () {
 	bool good = true;
+	good &= snd::fall.sfsb.LoadFromFile("snd/fall.ogg");
+	snd::fall.sfs.SetBuffer(snd::fall.sfsb);
 	good &= snd::gunshot.sfsb.LoadFromFile("snd/gunshot.flac");
 	snd::gunshot.sfs.SetBuffer(snd::gunshot.sfsb);
 	good &= snd::hit.sfsb.LoadFromFile("snd/hit.ogg");

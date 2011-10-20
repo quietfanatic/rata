@@ -488,7 +488,10 @@ struct Rata : Walking {
 				hurt_direction = sign_f(xvel())*facing;
 				if (floor) {
 					if (hurt_frames < 20) goto got_floor;
-					else goto hurt_floor;
+					else {
+						snd::fall.play(0.9, 6*-oldyvel);
+						goto hurt_floor;
+					}
 				}
 				hurt_no_floor:
 				if (hurt_frames == 0) goto no_floor;
@@ -513,7 +516,10 @@ struct Rata : Walking {
 				break;
 			}
 			case dead_air: {
-				if (floor && floor_normal.y > 0.9) goto dead_floor;
+				if (floor && floor_normal.y > 0.9) {
+					snd::fall.play(0.9, 6*-oldyvel);
+					goto dead_floor;
+				}
 				dead_no_floor:
 				state = dead_air;
 				set_fix_25();

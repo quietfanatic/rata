@@ -784,6 +784,7 @@ const obj::Def obj::def [] = {
 
 #define DAMAGE_KNOCKBACK 2.0
 void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Manifold* manifold) {
+	if (a->life <= 0) return;
 	if (a->desc->id == obj::rata) {
 		if (rata->hurt_id[0] == b->desc->id
 		 || rata->hurt_id[1] == b->desc->id) return;
