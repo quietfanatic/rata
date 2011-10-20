@@ -894,6 +894,15 @@ struct Rata : Walking {
 				dy + heady,
 				headpose, flip
 			);
+		for (uint i=0; i<item::num_slots; i++)
+		if (equip_info(i))
+		if (equip_info(i)->helmet)
+			draw_image(
+				equip_info(i)->helmet,
+				dx + headx + pose::head::helmetx[headpose] * flip,
+				dy + heady + pose::head::helmety[headpose],
+				pose::head::helmetf[headpose], flip
+			);
 
 		if (state == dead) goto draw_hand;
 		draw_arm:

@@ -119,6 +119,15 @@ boots-body-layfd.png \
 boots-body-grab.png \
 -depth 8 ../boots\;32x32\,16\,30.png
 
+montage -geometry +0+0 -background none \
+helmet-23.png \
+helmet-45.png \
+helmet-90.png \
+helmet-135.png \
+helmet-158.png \
+helmet-laybk.png \
+-depth 8 ../helmet\;17x17\,8.5\,8.5.png
+
 
 popd
 rm -rf img/rata_tmp

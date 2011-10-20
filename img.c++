@@ -48,6 +48,7 @@ namespace img {
 	helmet_23,
 	helmet_45,
 	helmet_90,
+	helmet,
 	hit_damagable,
 	look,
 	mousehole,
@@ -186,6 +187,9 @@ void load_img () {
 	good &= img::helmet_90.sfi.LoadFromFile("img/helmet-90.png"); img::helmet_90.sfi.SetSmooth(0);
 	img::helmet_90.w = 0; img::helmet_90.h = 0;
 	img::helmet_90.x = 32; img::helmet_90.y = 48;
+	good &= img::helmet.sfi.LoadFromFile("img/helmet;17x17,8.5,8.5.png"); img::helmet.sfi.SetSmooth(0);
+	img::helmet.w = 17; img::helmet.h = 17;
+	img::helmet.x = 8.5; img::helmet.y = 8.5;
 	good &= img::hit_damagable.sfi.LoadFromFile("img/hit-damagable;16x16,8,8.png"); img::hit_damagable.sfi.SetSmooth(0);
 	img::hit_damagable.w = 16; img::hit_damagable.h = 16;
 	img::hit_damagable.x = 8; img::hit_damagable.y = 8;

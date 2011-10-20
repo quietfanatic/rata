@@ -22,9 +22,25 @@ namespace head {
 
 
 const uint num = 16;
-enum Pose { stand_23, stand_45, stand_68, stand_90,stand_135,stand_158,
-             walk_23,  walk_45,  walk_68,  walk_90, walk_135, walk_158,
-               crawl,   hurtbk,   hurtfd,    laybk,    layfd,
+enum Pose        { stand_23, stand_45, stand_68, stand_90,stand_135,stand_158,
+                    walk_23,  walk_45,  walk_68,  walk_90, walk_135, walk_158,
+                      crawl,   hurtbk,   hurtfd,    laybk,    layfd,
+};
+float helmetx []={  -0.5*PX,  -0.5*PX,  -0.5*PX,  -0.5*PX,  -0.5*PX,  -1.5*PX,
+                    -0.5*PX,  -0.5*PX,  -0.5*PX,  -0.5*PX,  -0.5*PX,  -1.5*PX,
+                     0.5*PX,  -0.5*PX,  -0.5*PX,  -9.5*PX,     0*PX,
+};
+float helmety []={   6.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,
+                     6.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,
+                     6.5*PX,   6.5*PX,   6.5*PX,  -0.5*PX,     0*PX,
+};
+float helmeta []={        0,        0,        0,        0,        0,        0,
+                          0,        0,        0,        0,        0,        0,
+                          0,        0,        0,        0,        0,
+};
+uint8 helmetf []={        0,        1,        2,        2,        3,        4,
+                          0,        1,        2,        2,        3,        4,
+                          0,        0,        0,        5,        0,
 };
 uint angle_stand [9] = {
 	stand_23, // 0

@@ -30,6 +30,7 @@ namespace item {
 		uint inventory_frame;
 		img::Image* body;
 		img::Image* head;
+		img::Image* helmet;
 		img::Image* arm;
 		img::Image* forearm;
 		img::Image* hand;
@@ -42,6 +43,7 @@ namespace item {
 		1,1,1,1,1,1,1,1,1, 4,
 		&img::dress_body, pose::body::laybk, pose::body::stand,
 		&img::dress_body,
+		NULL,
 		NULL,
 		&img::dress_arm,
 		&img::dress_forearm,
@@ -65,6 +67,7 @@ namespace item {
 		NULL,
 		NULL,
 		NULL,
+		NULL,
 		&img::handgun,
 		&fire_handgun
 	};
@@ -75,6 +78,20 @@ namespace item {
 		&img::boots, pose::body::stand, pose::body::stand,
 		&img::boots,
 		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL
+	};
+
+	Equip helmet = {
+		head, -1,
+		1,1,1,1,1,1,1,1,1, 0,
+		&img::helmet, 0, 2,
+		NULL,
+		NULL,
+		&img::helmet,
 		NULL,
 		NULL,
 		NULL,
