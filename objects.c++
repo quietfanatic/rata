@@ -206,11 +206,15 @@ struct Object {
 	 // Find one object (by default solid) along the line in world coords
 	struct LineChecker : public b2RayCastCallback {
 		b2Fixture* hit;
+		float dist;
 		uint16 cat;
 		float32 ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
 			if (fix->GetFilterData().categoryBits & cat) {
-				hit = fix;
-				return f;
+				if (f < dist) {
+					hit = fix;
+					dist = f;
+				}
+				return dist;
 			}
 			return 1;
 		}
@@ -220,6 +224,7 @@ struct Object {
 		LineChecker checker;
 		checker.hit = NULL;
 		checker.cat = cat;
+		checker.dist = 1;
 		world->RayCast(&checker, b2Vec2(x1, y1), b2Vec2(x2, y2));
 		if (checker.hit) {
 			return (Object*)checker.hit->GetBody()->GetUserData();

@@ -25,14 +25,30 @@ struct AI : Walking {
 	}
 
 	bool clear_to_point (float x, float y) {
-		return check_line(eyex(), eyey(), x, y);
+		return !check_line(eyex(), eyey(), x, y);
 	}
-
+	
+	 // Sight and seeing
+	bool see_rata_at (float x, float y) {
+		return check_line(eyex(), eyey(), x, y, 1|2|32) == rata;
+	}
 	bool see_rata () {
-		return !check_line(eyex(), eyey(), rata->x(), rata->y()+0.8, 2|32);
+		return see_rata_at(rata->x(), rata->y()+0.8)
+		    || see_rata_at(rata->x(), rata->y()+1.6)
+		    || see_rata_at(rata->x(), rata->y()+0.2);
+	}
+	b2Vec2 see_rata_pos () {
+		return see_rata_at(rata->x(), rata->y()+0.8) ? b2Vec2(rata->x(), rata->y()+0.8)
+		     : see_rata_at(rata->x(), rata->y()+1.6) ? b2Vec2(rata->x(), rata->y()+1.6)
+		     : see_rata_at(rata->x(), rata->y()+0.2) ? b2Vec2(rata->x(), rata->y()+0.2)
+		     : b2Vec2(0/0.0, 0/0.0);
+	}
+	b2Vec2 predict_pos_from (float x, float y, Object* threat = rata) {
+		return b2Vec2(x + threat->xvel() * decision_timer/FPS,
+		              y + threat->yvel() * decision_timer/FPS);
 	}
 
-	b2Vec2 predict_threat_pos (Object* threat = rata) {
+	b2Vec2 predict_pos (Object* threat = rata) {
 		return b2Vec2(threat->x() + threat->xvel() * decision_timer/FPS,
 		              threat->y() + threat->yvel() * decision_timer/FPS);
 	}
@@ -101,12 +117,12 @@ struct Patroller : AI {
 		ideal_xvel = 3.0*facing;
 	}
 	virtual void before_move () {
-		bool see_floor = clear_to_point(x()+0.7*facing, y()-0.3);
 		if (threat_detected) {
 			ideal_xvel = 0.0;
 		}
-		else {
-			if (!see_floor) {
+		else if (floor) {
+			if (clear_to_point(x()+0.7*facing, y()-0.3)
+			 || !clear_to_point(x()+0.7*facing, y()+0.3)) {
 				facing = -facing;
 			}
 			ideal_xvel = 3.0*facing;
@@ -126,10 +142,14 @@ struct Patroller : AI {
 			snd::gunshot.play(1.0, 70);
 			add_vel(-b->desc->xvel/60, 0);
 		}
-		threat_detected = (rata->x() - x())*facing > 0
-		               && see_rata();
-		if (threat_detected)
-			prediction = predict_threat_pos();
+		b2Vec2 ratapos;
+		threat_detected = (rata->x() - x())*facing > 0;
+		if (threat_detected) {
+			ratapos = see_rata_pos();
+			if (ratapos.x == ratapos.x)
+				prediction = predict_pos();
+			else threat_detected = false;
+		}
 	}
 	virtual void draw () {
 		motion_frames %= 60;
