@@ -69,6 +69,7 @@ struct Rata : Walking {
 	}
 	float aim_center_x () { return x() + 2*PX*facing; }
 	float aim_center_y () { return y() + 13*PX; }
+	b2Fixture* fix_feet () { return body->GetFixtureList(); }
 	b2Fixture* fix_27 () { return body->GetFixtureList()->GetNext(); }
 	b2Fixture* fix_25 () { return body->GetFixtureList()->GetNext()->GetNext(); }
 	b2Fixture* fix_21 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext(); }
@@ -89,9 +90,13 @@ struct Rata : Walking {
 		return false;
 	}
 	bool bullet_inv () {
-		return hurt_id[0] == obj::bullet || hurt_id[1] == obj::bullet;
+		return state == dead
+		    || state == dead_air
+		    || hurt_id[0] == obj::bullet
+		    || hurt_id[1] == obj::bullet;
 	}
 	void set_fix_27 () {
+		fix_feet()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		fix_27()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		fix_27()->SetSensor(false);
 		fix_25()->SetFilterData(cf::rata_sensor);
@@ -102,6 +107,7 @@ struct Rata : Walking {
 		fix_h7()->SetSensor(true);
 	}
 	void set_fix_25 () {
+		fix_feet()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		fix_27()->SetFilterData(cf::rata_sensor);
 		fix_27()->SetSensor(true);
 		fix_25()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
@@ -112,6 +118,7 @@ struct Rata : Walking {
 		fix_h7()->SetSensor(true);
 	}
 	void set_fix_21 () {
+		fix_feet()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		fix_27()->SetFilterData(cf::rata_sensor);
 		fix_27()->SetSensor(true);
 		fix_25()->SetFilterData(cf::rata_sensor);
@@ -122,6 +129,7 @@ struct Rata : Walking {
 		fix_h7()->SetSensor(true);
 	}
 	void set_fix_h7 () {
+		fix_feet()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		fix_27()->SetFilterData(cf::rata_sensor);
 		fix_27()->SetSensor(true);
 		fix_25()->SetFilterData(cf::rata_sensor);
