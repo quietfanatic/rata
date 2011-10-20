@@ -571,13 +571,17 @@ struct Rata : Walking {
 //		printf("%08x's floor is: %08x\n", this, floor);
 //		floor = get_floor(fix_feet_current());
 		if (floor && (state == walking || state == crawling)) {
-			float olddist = distance_walked;
-			distance_walked += ((x() - floor->x()) - oldxrel)*facing;
-			if (state == walking) {
-				float oldstep = mod_f(olddist, RATA_STEP);
-				float step = mod_f(distance_walked, RATA_STEP);
-				if (oldstep < 0.4 && step >= 0.4)
-					snd::step.play(1.0, 10*abs_f(xvel()));
+			if (abs_f(xvel()) < 0.01)
+				distance_walked = 0;
+			else {
+				float olddist = distance_walked;
+				distance_walked += ((x() - floor->x()) - oldxrel)*sign_f(xvel());
+				if (state == walking) {
+					float oldstep = mod_f(olddist, RATA_STEP);
+					float step = mod_f(distance_walked, RATA_STEP);
+					if (oldstep < 0.4 && step >= 0.4)
+						snd::step.play(0.9+rand()*0.2/RAND_MAX, 8*abs_f(xvel())*(1.0+rand()*0.2/RAND_MAX));
+				}
 			}
 		}
 		else distance_walked = 0;
@@ -679,7 +683,8 @@ struct Rata : Walking {
 			float step_d = mod_f(distance_walked, RATA_STEP * 2);
 			if (step_d < 0) step_d += RATA_STEP*2;
 			walk_frame =
-			  step_d < RATA_STEP*5/9.0  ? 1
+			  abs_f(xvel()) < 0.01      ? 4
+			: step_d < RATA_STEP*5/9.0  ? 1
 			: step_d < RATA_STEP        ? 2
 			: step_d < RATA_STEP*14/9.0 ? 3
 			:                             4;
@@ -736,9 +741,9 @@ struct Rata : Walking {
 			                    : walk_frame == 3 ? a23
 			                    :                   a0
 			: state == kneeling ? a45
-			: state == crawling ? walk_frame == 1 ? -a45
+			: state == crawling ? walk_frame == 1 ? a45
 			                    : walk_frame == 2 ? a0
-			                    : walk_frame == 3 ? a45
+			                    : walk_frame == 3 ? -a45
 			                    :                   a0
 			: state == falling  ? a23
 			: state == hurt_air ? a23
