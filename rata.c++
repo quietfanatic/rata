@@ -489,7 +489,7 @@ struct Rata : Walking {
 				if (floor) {
 					if (hurt_frames < 20) goto got_floor;
 					else {
-						snd::fall.play(0.9, 6*-oldyvel);
+						snd::fall.play(0.9, 8*-oldyvel/2.0);
 						goto hurt_floor;
 					}
 				}
@@ -517,7 +517,7 @@ struct Rata : Walking {
 			}
 			case dead_air: {
 				if (floor && floor_normal.y > 0.9) {
-					snd::fall.play(0.9, 6*-oldyvel);
+					snd::fall.play(0.9, 8*-oldyvel/2.0);
 					goto dead_floor;
 				}
 				dead_no_floor:
@@ -561,7 +561,7 @@ struct Rata : Walking {
 			adrenaline += 5*d;
 			printf("Hurt status: %d, %d, %d\n", hurt_frames, inv_frames, adrenaline);
 		}
-		snd::hurt.play();
+		snd::hurt.play(1.0 - 0.1*d/24, 40 + d);
 	}
 
 	virtual void kill () {
