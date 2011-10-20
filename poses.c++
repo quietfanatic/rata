@@ -32,7 +32,7 @@ float helmetx []={  -0.5*PX,  -0.5*PX,  -0.5*PX,  -0.5*PX,  -0.5*PX,  -1.5*PX,
 };
 float helmety []={   6.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,
                      6.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,
-                     6.5*PX,   6.5*PX,   6.5*PX,  -0.5*PX,     0*PX,
+                     6.5*PX,   6.5*PX,   6.5*PX,   0.5*PX,     0*PX,
 };
 float helmeta []={        0,        0,        0,        0,        0,        0,
                           0,        0,        0,        0,        0,        0,

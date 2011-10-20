@@ -50,8 +50,8 @@ void draw_image (img::Image* image, float x, float y, int sub=0, bool flip=false
 //	uint xpos = flip && image->w ? image->w - image->x : image->x;
 	if (!cam)
 		drawing_sprite.SetPosition(
-			xpx*PX,
-			ypx*PX
+			(round(xpx)-.5)*PX,
+			(round(ypx)-.5)*PX
 		);
 	else
 		drawing_sprite.SetPosition(
