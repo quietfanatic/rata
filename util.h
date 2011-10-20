@@ -45,14 +45,18 @@ void draw_image (img::Image* image, float x, float y, int sub=0, bool flip=false
 	uint w = image->w;
 	if (h == 0) h = ih;
 	if (w == 0) w = iw;
-	drawing_sprite.SetCenter(flip?w-image->x:image->x, -image->y);
+	float xpx = x*UNPX - (flip ? w-image->x : image->x);
+	float ypx = y*UNPX + image->y;
 //	uint xpos = flip && image->w ? image->w - image->x : image->x;
 	if (!cam)
-		drawing_sprite.SetPosition((round(x*UNPX)-.5)*PX, (round(y*UNPX)-.5)*PX);
+		drawing_sprite.SetPosition(
+			xpx*PX,
+			ypx*PX
+		);
 	else
 		drawing_sprite.SetPosition(
-			window_view.GetRect().Left + x,
-			window_view.GetRect().Top + y
+			window_view.GetRect().Left + xpx,
+			window_view.GetRect().Top + ypx
 		);
 	window->Draw(drawing_sprite);
 };

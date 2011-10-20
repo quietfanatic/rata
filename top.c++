@@ -9,7 +9,7 @@
 #include "debug.c++"
 
 
-#define PX (1/16.0)
+#define PX (1.0/16.0)
 #define FPS 60.0
 
 #include "img.c++"

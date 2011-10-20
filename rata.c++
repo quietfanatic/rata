@@ -899,7 +899,7 @@ struct Rata : Walking {
 		if (equip_info(i)->helmet)
 			draw_image(
 				equip_info(i)->helmet,
-				dx + headx + pose::head::helmetx[headpose] * flip,
+				dx + headx + pose::head::helmetx[headpose] * facing,
 				dy + heady + pose::head::helmety[headpose],
 				pose::head::helmetf[headpose], flip
 			);
