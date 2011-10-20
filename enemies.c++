@@ -28,8 +28,8 @@ struct AI : Walking {
 		return check_line(eyex(), eyey(), x, y);
 	}
 
-	bool see_threat (Object* threat = rata) {
-		return !check_line(eyex(), eyey(), threat->x(), threat->y(), 2|32);
+	bool see_rata () {
+		return !check_line(eyex(), eyey(), rata->x(), rata->y()+0.8, 2|32);
 	}
 
 	b2Vec2 predict_threat_pos (Object* threat = rata) {
@@ -120,13 +120,14 @@ struct Patroller : AI {
 			Bullet* b = fire_bullet_to(
 				x(), y()+0.5,
 				prediction.x,
-				prediction.y
+				prediction.y + 1,
+				120, 48, 0.1
 			);
 			snd::gunshot.play(1.0, 70);
 			add_vel(-b->desc->xvel/60, 0);
 		}
 		threat_detected = (rata->x() - x())*facing > 0
-		               && see_threat();
+		               && see_rata();
 		if (threat_detected)
 			prediction = predict_threat_pos();
 	}

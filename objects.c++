@@ -341,14 +341,15 @@ struct Object {
 		}
 	}
 
-	Bullet* fire_bullet(float bx, float by, float bd, float bv = 120, int power = 48) {
+	Bullet* fire_bullet(float bx, float by, float bd, float bv = 120, int power = 48, float bs=0.01) {
+		bd = dither(bd, bs);
 		return (Bullet*)(new obj::Desc(
 			obj::bullet, this,
 			bx, by, bv*cos(bd), bv*sin(bd), 1, true
 		))->manifest();
 	}
-	Bullet* fire_bullet_to(float bx, float by, float tx, float ty, float bv = 120, int power = 48) {
-		return fire_bullet(bx, by, atan2(ty-by, tx-bx), bv, power);
+	Bullet* fire_bullet_to(float bx, float by, float tx, float ty, float bv = 120, int power = 48, float bs=0.01) {
+		return fire_bullet(bx, by, atan2(ty-by, tx-bx), bv, power, bs);
 	}
 
 	 // Get def, id
