@@ -32,9 +32,10 @@ ROOM_OBJECT(obj::exit, -1.000000, 0.000000, 1.000000, 4.000000, 0, &room::file::
 ROOM_OBJECT(obj::exit, 30.000000, 8.000000, 1.000000, 4.000000, 0, &room::file::test4::room, 0)
 ROOM_OBJECT(obj::item, 20.000000, 1.0, 0, 0, 0, &item::handgun, 0)
 ROOM_OBJECT(obj::item, 28.000000, 1.0, 0, 0, 0, &item::white_dress, 0)
+ROOM_OBJECT(obj::item, 25.000000, 1.0, 0, 0, 0, &item::boots, 0)
 END_ROOM_OBJECTS
 
-ROOM_DEF(30, 20, 7, 127, 127, 127, 255, 0)
+ROOM_DEF(30, 20, 8, 127, 127, 127, 255, 0)
 
 END_ROOM
 

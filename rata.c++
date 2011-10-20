@@ -660,6 +660,10 @@ struct Rata : Walking {
 		bool flip = facing<0;
 		bool armflip = flip;
 		bool forearmflip = flip;
+		float dx = x();
+		float dy = y();
+		if (equip_info(item::feet))
+		if (state == standing || state == walking) dy += 1*PX;
 		
 		//if (inv_frames % 3 == 2) return;
 
@@ -815,18 +819,18 @@ struct Rata : Walking {
 
 		 // Now to actually draw.
 
-		draw_image(&img::rata_body, x(), y(), bodypose, flip);
+		draw_image(&img::rata_body, dx, dy, bodypose, flip);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
 		if (equip_info(i)->body)
-			draw_image(equip_info(i)->body, x(), y(), bodypose, flip);
+			draw_image(equip_info(i)->body, dx, dy, bodypose, flip);
 
 		if (state == dead) goto draw_arm;
 		draw_head:
 		draw_image(
 			&img::rata_head,
-			x() + headx,
-			y() + heady,
+			dx + headx,
+			dy + heady,
 			headpose, flip
 		);
 		for (uint i=0; i<item::num_slots; i++)
@@ -834,8 +838,8 @@ struct Rata : Walking {
 		if (equip_info(i)->head)
 			draw_image(
 				equip_info(i)->head,
-				x() + headx,
-				y() + heady,
+				dx + headx,
+				dy + heady,
 				headpose, flip
 			);
 
@@ -843,14 +847,14 @@ struct Rata : Walking {
 		draw_arm:
 		draw_image(
 			&img::rata_arm,
-			x() + armx,
-			y() + army,
+			dx + armx,
+			dy + army,
 			armpose, armflip
 		);
 		draw_image(
 			&img::rata_forearm,
-			x() + forearmx,
-			y() + forearmy,
+			dx + forearmx,
+			dy + forearmy,
 			forearmpose, forearmflip
 		);
 		for (uint i=0; i<item::num_slots; i++)
@@ -858,8 +862,8 @@ struct Rata : Walking {
 		if (equip_info(i)->arm)
 			draw_image(
 				equip_info(i)->arm,
-				x() + armx,
-				y() + army,
+				dx + armx,
+				dy + army,
 				armpose, armflip
 			);
 		for (uint i=0; i<item::num_slots; i++)
@@ -867,8 +871,8 @@ struct Rata : Walking {
 		if (equip_info(i)->forearm)
 			draw_image(
 				equip_info(i)->forearm,
-				x() + forearmx,
-				y() + forearmy,
+				dx + forearmx,
+				dy + forearmy,
 				forearmpose, forearmflip
 			);
 
@@ -880,8 +884,8 @@ struct Rata : Walking {
 		if (equip_info(i)->hand)
 			draw_image(
 				equip_info(i)->hand,
-				x() + handx,
-				y() + handy,
+				dx + handx,
+				dy + handy,
 				handpose, flip
 			);
 		
@@ -892,8 +896,8 @@ struct Rata : Walking {
 		:                          NULL;
 		if (m) {
 			float w = text_width_small((char*)m)*PX;
-			float mx = x() - w/2;
-			float my = y() + 3;
+			float mx = dx - w/2;
+			float my = dy + 3;
 			draw_rect(mx-2*PX, my, mx + w+1*PX, my - 7*PX, sf::Color(31, 31, 31, 127));
 			render_text((char*)m, mx, my, 1, false, true);
 		}

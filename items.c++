@@ -68,6 +68,18 @@ namespace item {
 		&img::handgun,
 		&fire_handgun
 	};
+
+	Equip boots = {
+		feet, -1,
+		1,1,1,1,1,1,1,1,1, 0,
+		&img::boots, pose::body::stand, pose::body::stand,
+		&img::boots,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL
+	};
 }
 
 #else
