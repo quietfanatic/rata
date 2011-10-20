@@ -85,7 +85,7 @@ void item::fire_handgun () {
 		0,
 		true
 	))->manifest();
-	snd::gunshot.play();
+	snd::gunshot.play(1.0, 80);
 }
 
 #endif

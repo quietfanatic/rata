@@ -38,7 +38,7 @@ int main () {
 		10, 10
 	).manifest();
 	room::file::roompicker::room.enter(0);
-	bgm::life.SetVolume(60);
+	bgm::life.SetVolume(80);
 	bgm::life.Play();
 	try { main_loop(); } catch (int x) { printf("Game quit succesfully with result %d.\n", x); }
 	return 0;

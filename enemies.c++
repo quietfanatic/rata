@@ -95,7 +95,7 @@ struct Patroller : Walking {
 				(new obj::Desc(obj::bullet, this,
 					x(), y()+0.5, bvx, bvy, 0, true
 				))->manifest();
-				snd::gunshot.play();
+				snd::gunshot.play(1.0, 70);
 				add_vel(-bvx/60, 0);
 			}
 			if ((threat_detected = detect_threat())) {
