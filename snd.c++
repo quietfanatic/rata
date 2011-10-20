@@ -16,6 +16,7 @@ namespace snd {
 	hurt,
 	ricochet,
 	squeak,
+	step,
 	_COMMA_EATER;
 
 }
@@ -30,6 +31,8 @@ void load_snd () {
 	snd::ricochet.sfs.SetBuffer(snd::ricochet.sfsb);
 	good &= snd::squeak.sfsb.LoadFromFile("snd/squeak.ogg");
 	snd::squeak.sfs.SetBuffer(snd::squeak.sfsb);
+	good &= snd::step.sfsb.LoadFromFile("snd/step.ogg");
+	snd::step.sfs.SetBuffer(snd::step.sfsb);
 	if (!good) fprintf(stderr, "Error: At least one sound failed to load!\n");
 }
 

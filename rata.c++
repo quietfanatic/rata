@@ -36,6 +36,7 @@ struct Rata : Walking {
 	float handx;
 	float handy;
 	uint angle_frame;  // 0=down, 8=up
+	float oldyvel;
 	 // Equipment
 	uint inventory_amount;
 	obj::Desc* inventory [10];
@@ -458,6 +459,7 @@ struct Rata : Walking {
 				if (floor) {
 					body->SetGravityScale(1.0);
 					float_frames = 0;
+					snd::step.play(1.2, 10*-oldyvel);
 					goto got_floor;
 				}
 				no_floor:
@@ -530,6 +532,7 @@ struct Rata : Walking {
 		}
 
 		if (floor) oldxrel = x() - floor->x();
+		oldyvel = yvel();
 
 		 // Select cursor image
 		if (aiming) cursor.img = &img::target;
@@ -568,7 +571,14 @@ struct Rata : Walking {
 //		printf("%08x's floor is: %08x\n", this, floor);
 //		floor = get_floor(fix_feet_current());
 		if (floor && (state == walking || state == crawling)) {
+			float olddist = distance_walked;
 			distance_walked += ((x() - floor->x()) - oldxrel)*facing;
+			if (state == walking) {
+				float oldstep = mod_f(olddist, RATA_STEP);
+				float step = mod_f(distance_walked, RATA_STEP);
+				if (oldstep < 0.4 && step >= 0.4)
+					snd::step.play(1.0, 10*abs_f(xvel()));
+			}
 		}
 		else distance_walked = 0;
 		 // Constrain cursor to room
@@ -622,6 +632,7 @@ struct Rata : Walking {
 		cursor.y = 0;
 		cursor.img = &img::look;
 		trap_cursor = true;
+		oldyvel = 0.0;
 		rata = this;
 	}
 	virtual void on_destroy () {
