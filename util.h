@@ -48,7 +48,7 @@ void draw_image (img::Image* image, float x, float y, int sub=0, bool flip=false
 	drawing_sprite.SetCenter(flip?w-image->x:image->x, -image->y);
 //	uint xpos = flip && image->w ? image->w - image->x : image->x;
 	if (!cam)
-		drawing_sprite.SetPosition(round(x*UNPX)*PX, round(y*UNPX)*PX);
+		drawing_sprite.SetPosition((round(x*UNPX)-.5)*PX, (round(y*UNPX)-.5)*PX);
 	else
 		drawing_sprite.SetPosition(
 			window_view.GetRect().Left + x,
