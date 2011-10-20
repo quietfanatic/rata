@@ -20,6 +20,13 @@ struct Solid;
 struct Bullet;
 
 
+struct Data {
+	uint x;
+	template <class T> Data(T x_) :x(*(uint*)&x_) { }
+	template <class T> operator T () { return *(T*)&x; }
+	bool operator == (Data o) { return x == o.x; }
+};
+
 
 // All object-related things are in the obj:: namespace except for the 
 // structs representing active instances.
@@ -95,8 +102,8 @@ struct obj::Desc {
 	float xvel;
 	float yvel;
 	int facing;
-	void* data;
-	uint32 data2;
+	Data data;
+	Data data2;
 	Object* manifest ();
 
 	 // Alright, we'll use a C++ constructor...just for default args.
