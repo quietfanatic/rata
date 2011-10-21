@@ -44,7 +44,10 @@ struct Rata : Walking {
 	b2Fixture* fix_25;
 	b2Fixture* fix_21;
 	b2Fixture* fix_h7;
-	b2Fixture* fix_helmetr90;
+	b2Fixture* fix_helmet_stand;
+	b2Fixture* fix_helmet_kneel;
+	b2Fixture* fix_helmet_crawl_r;
+	b2Fixture* fix_helmet_crawl_l;
 	 // Equipment
 	uint inventory_amount;
 	obj::Desc* inventory [10];
@@ -111,8 +114,6 @@ struct Rata : Walking {
 		fix_21->SetSensor(true);
 		fix_h7->SetFilterData(cf::rata_sensor);
 		fix_h7->SetSensor(true);
-		//printf("helmet: %d\n", wearing_helmet());
-		fix_helmetr90->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
 	}
 	void set_fix_25 () {
 		fix_feet->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
@@ -147,6 +148,37 @@ struct Rata : Walking {
 		fix_h7->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		fix_h7->SetSensor(false);
 	}
+	void set_helmet_stand () {
+		fix_helmet_stand->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
+		fix_helmet_kneel->SetFilterData(cf::disabled);
+		fix_helmet_crawl_r->SetFilterData(cf::disabled);
+		fix_helmet_crawl_l->SetFilterData(cf::disabled);
+	}
+	void set_helmet_kneel () {
+		fix_helmet_stand->SetFilterData(cf::disabled);
+		fix_helmet_kneel->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
+		fix_helmet_crawl_r->SetFilterData(cf::disabled);
+		fix_helmet_crawl_l->SetFilterData(cf::disabled);
+	}
+	void set_helmet_crawl_r () {
+		fix_helmet_stand->SetFilterData(cf::disabled);
+		fix_helmet_kneel->SetFilterData(cf::disabled);
+		fix_helmet_crawl_r->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
+		fix_helmet_crawl_l->SetFilterData(cf::disabled);
+	}
+	void set_helmet_crawl_l () {
+		fix_helmet_stand->SetFilterData(cf::disabled);
+		fix_helmet_kneel->SetFilterData(cf::disabled);
+		fix_helmet_crawl_r->SetFilterData(cf::disabled);
+		fix_helmet_crawl_l->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
+	}
+	void set_helmet_none () {
+		fix_helmet_stand->SetFilterData(cf::disabled);
+		fix_helmet_kneel->SetFilterData(cf::disabled);
+		fix_helmet_crawl_r->SetFilterData(cf::disabled);
+		fix_helmet_crawl_l->SetFilterData(cf::disabled);
+	}
+
 
 	 // Equipment and inventory management
 
@@ -470,6 +502,9 @@ struct Rata : Walking {
 						}
 						allow_look();
 						set_fix_h7();
+						if (facing > 0)
+							set_helmet_crawl_r();
+						else set_helmet_crawl_l();
 					}
 					else if (state == crawling) {
 						if (check_fix(fix_21)) {
@@ -479,6 +514,9 @@ struct Rata : Walking {
 							allow_aim();
 							allow_use();
 							set_fix_h7();
+							if (facing > 0)
+								set_helmet_crawl_r();
+							else set_helmet_crawl_l();
 						}
 						else {
 							allow_turn();
@@ -491,6 +529,9 @@ struct Rata : Walking {
 								else allow_use();
 							}
 							set_fix_h7();
+							if (facing > 0)
+								set_helmet_crawl_r();
+							else set_helmet_crawl_l();
 						}
 					}
 					else {
@@ -505,6 +546,7 @@ struct Rata : Walking {
 						ideal_xvel = 0;
 						allow_use();
 						set_fix_21();
+						set_helmet_kneel();
 					}
 				}
 				else if (allow_jump()) {
@@ -516,6 +558,7 @@ struct Rata : Walking {
 					allow_aim();
 					allow_airmove();
 					set_fix_27();
+					set_helmet_stand();
 				}
 				else {
 					allow_turn();
@@ -526,14 +569,13 @@ struct Rata : Walking {
 					if (allow_walk()) {
 						state = walking;
 						allow_use();
-						set_fix_27();
 					}
 					else {
 						state = standing;
 						allow_use();
-						set_fix_27();
 					}
 					set_fix_27();
+					set_helmet_stand();
 				}
 				allow_action();
 				allow_examine();
@@ -560,6 +602,7 @@ struct Rata : Walking {
 				allow_examine();
 				decrement_counters();
 				set_fix_27();
+				set_helmet_stand();
 				break;
 			}
 			case ouch: {
@@ -594,6 +637,7 @@ struct Rata : Walking {
 				allow_examine();
 				decrement_counters();
 				set_fix_25();
+				set_helmet_stand();
 				break;
 			}
 			case hurt: {
@@ -607,6 +651,7 @@ struct Rata : Walking {
 				allow_examine();
 				decrement_counters();
 				set_fix_21();
+				set_helmet_kneel();
 				break;
 			}
 			case dead_air: {
@@ -617,6 +662,7 @@ struct Rata : Walking {
 				dead_no_floor:
 				state = dead_air;
 				set_fix_25();
+				set_helmet_stand();
 				break;
 			}
 			case dead: {
@@ -626,6 +672,7 @@ struct Rata : Walking {
 				floor_friction = ground_decel();
 				ideal_xvel = 0;
 				set_fix_h7();
+				set_helmet_none();
 				break;
 			}	
 		}
@@ -717,7 +764,10 @@ struct Rata : Walking {
 		fix_25 = fix_27->GetNext();
 		fix_21 = fix_25->GetNext();
 		fix_h7 = fix_21->GetNext();
-		fix_helmetr90 = fix_h7->GetNext();
+		fix_helmet_stand = fix_h7->GetNext();
+		fix_helmet_kneel = fix_helmet_stand->GetNext();
+		fix_helmet_crawl_r = fix_helmet_kneel->GetNext();
+		fix_helmet_crawl_l = fix_helmet_crawl_r->GetNext();
 		set_fix_27();
 		dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
 		floor = NULL;
