@@ -175,26 +175,28 @@ struct Flyer : AI {
 		//body->SetLinearDamping(0.2);
 		dest = b2Vec2(x(), y());
 		prediction = b2Vec2(0/0.0, 0/0.0);
+		oldpos = prediction;
 	}
 	void before_move () {
 		float accel = 8.0;
 		float destdir = atan2(dest.y - y(), dest.x - x());
-		float destdist = dest.Length();
-		b2Vec2 destnorm = b2Vec2(dest.x-x(), dest.y-y());
-		destnorm.Normalize();
-		float relv = dot(body->GetLinearVelocity(), destnorm);
-		bool offtrack = (relv < body->GetLinearVelocity().Length() - 0.4);
+		b2Vec2 reldest = b2Vec2(dest.x-x(), dest.y-y());
+		float destdist = reldest.Length();
+		reldest.Normalize();
+		float relv = dot(body->GetLinearVelocity(), reldest);
+		bool offtrack = (relv < body->GetLinearVelocity().Length() - 0.1);
 		// We have: p, v, a.  We need d.
 		// d = p + vt + att/2; since v = at, t = v/a
 		// d = p + vv/a + vv/a/2;
 		// d = p + 3vv/2a
 		// Weird, but that's what the math says.
 		float stopdist = 1.5 * relv*relv/accel;
+		//printf("%f <= %f == %d\n", stopdist, destdist, stopdist<=destdist);
 		if (offtrack) {
 			destdir = atan2(-yvel(), -xvel());
 		}
-		destdir = dither(destdir, 0.02);
-		if (relv < 0 || stopdist < destdist) {
+		//destdir = dither(destdir, 0.01);
+		if (offtrack || stopdist <= destdist) {
 			body->ApplyForceToCenter(b2Vec2(
 				accel*cos(destdir),
 				accel*sin(destdir)
@@ -227,7 +229,7 @@ struct Flyer : AI {
 		}
 		 // Predict
 		if (ratapos.IsValid()) {
-			printf("Saw Rata at height %f\n", ratapos.y - rata->y());
+			//printf("Saw Rata at height %f\n", ratapos.y - rata->y());
 			prediction = predict_pos_from(ratapos.x, ratapos.y);
 			oldpos = ratapos;
 		}
