@@ -55,8 +55,8 @@ void draw_image (img::Image* image, float x, float y, int sub=0, bool flip=false
 		);
 	else
 		drawing_sprite.SetPosition(
-			window_view.GetRect().Left + xpx,
-			window_view.GetRect().Top + ypx
+			window_view.GetRect().Left + xpx*PX,
+			window_view.GetRect().Top + ypx*PX
 		);
 	window->Draw(drawing_sprite);
 };
