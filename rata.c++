@@ -471,9 +471,10 @@ struct Rata : Walking {
 						if (check_fix(fix_21)) {
 							allow_look();
 							if (!c) {
-								min_aim = -1*M_PI/8;
+								min_aim = -1*M_PI/16;
 								max_aim = 1*M_PI/8;
 								allow_aim();
+								allow_use();
 							}
 							set_fix_h7();
 						}
@@ -483,9 +484,7 @@ struct Rata : Walking {
 							min_aim = -1*M_PI/4;
 							max_aim = wearing_helmet() ? 3*M_PI/8 : M_PI/2;
 							if (!c && allow_aim()) goto kneel;
-							else {
-								set_fix_h7();
-							}
+							else set_fix_h7();
 						}
 					}
 					else {
@@ -831,7 +830,8 @@ struct Rata : Walking {
 		 // Select arm pose
 		{ using namespace pose::arm;
 			armpose =
-			  aiming ? recoil_frames > 20 ? angle_frame - 3
+			  aiming && state == crawling ? a23 
+			: aiming ? recoil_frames > 20 ? angle_frame - 3
 			         : aim_distance > 10  ? angle_frame
 			         : aim_distance > 4   ? angle_frame == 0 ? 0
 			                              :                    angle_frame - 2
