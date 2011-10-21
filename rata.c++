@@ -24,6 +24,8 @@ struct Rata : Walking {
 	int adrenaline;
 	int hurt_direction;
 	int hurt_id [2];
+	float min_aim;
+	float max_aim;
 	 // Aiming
 	bool aiming;
 	bool can_see;
@@ -245,6 +247,20 @@ struct Rata : Walking {
 	}
 	bool allow_aim () {
 		aiming = (button[sf::Mouse::Right] > 0 || key[sf::Key::LShift] > 0);
+		if (aiming) {
+			if (facing > 0) {
+				if (aim_direction > max_aim)
+					aim_direction = max_aim;
+				else if (aim_direction < min_aim)
+					aim_direction = min_aim;
+			}
+			else {
+				if (flip_angle(aim_direction) > max_aim)
+					aim_direction = flip_angle(max_aim);
+				else if (flip_angle(aim_direction) < min_aim)
+					aim_direction = flip_angle(min_aim);
+			}
+		}
 		return aiming;
 	}
 
@@ -454,11 +470,18 @@ struct Rata : Walking {
 					if (state == crawling) {
 						if (check_fix(fix_21)) {
 							allow_look();
+							if (!c) {
+								min_aim = -1*M_PI/8;
+								max_aim = 1*M_PI/8;
+								allow_aim();
+							}
 							set_fix_h7();
 						}
 						else {
 							allow_turn();
 							allow_look();
+							min_aim = -1*M_PI/4;
+							max_aim = wearing_helmet() ? 3*M_PI/8 : M_PI/2;
 							if (!c && allow_aim()) goto kneel;
 							else {
 								set_fix_h7();
@@ -468,6 +491,8 @@ struct Rata : Walking {
 					else {
 						allow_turn();
 						allow_look();
+						min_aim = -1*M_PI/4;
+						max_aim = wearing_helmet() ? 3*M_PI/8 : M_PI/2;
 						allow_aim();
 						kneel:
 						state = kneeling;
@@ -481,6 +506,8 @@ struct Rata : Walking {
 					state = falling;
 					allow_turn();
 					allow_look();
+					min_aim = -M_PI;
+					max_aim = wearing_helmet() ? 3*M_PI/8 : M_PI/2;
 					allow_aim();
 					allow_airmove();
 					set_fix_27();
@@ -488,6 +515,8 @@ struct Rata : Walking {
 				else {
 					allow_turn();
 					allow_look();
+					min_aim = -3*M_PI/8;
+					max_aim = wearing_helmet() ? 3*M_PI/8 : M_PI/2;
 					allow_aim();
 					if (allow_walk()) {
 						state = walking;
@@ -517,6 +546,8 @@ struct Rata : Walking {
 				state = falling;
 				allow_turn();
 				allow_look();
+				min_aim = -M_PI;
+				max_aim = wearing_helmet() ? 3*M_PI/8 : M_PI/2;
 				allow_aim();
 				allow_airmove();
 				allow_use();
@@ -746,8 +777,7 @@ struct Rata : Walking {
 		: aim_angle > M_PI* 1.0/16.0 ? 5
 		: aim_angle > M_PI*-1.0/16.0 ? 4
 		: aim_angle > M_PI*-3.0/16.0 ? 3
-		: aim_angle > M_PI*-5.0/16.0
-		  || state == kneeling       ? 2
+		: aim_angle > M_PI*-5.0/16.0 ? 2
 		: aim_angle > M_PI*-7.0/16.0 ? 1
 		:                              0;
 

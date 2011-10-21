@@ -87,5 +87,9 @@ inline float dither (float c, float err) {
 	return c - err + rand()*2.0*err/RAND_MAX;
 }
 
+inline float flip_angle (float a) {
+	return a<0 ? -M_PI-a : M_PI-a;
+}
+
 
 
