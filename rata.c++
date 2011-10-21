@@ -463,19 +463,21 @@ struct Rata : Walking {
 				if (!floor) goto no_floor;
 				got_floor:
 				if (allow_kneel()) {
-					bool c = allow_crawl();
-					if (c) {
+					if (allow_crawl()) {
 						state = crawling;
+						if (check_fix(fix_21)) {
+							allow_turn();
+						}
+						allow_look();
+						set_fix_h7();
 					}
-					if (state == crawling) {
+					else if (state == crawling) {
 						if (check_fix(fix_21)) {
 							allow_look();
-							if (!c) {
-								min_aim = -1*M_PI/16;
-								max_aim = 1*M_PI/8;
-								allow_aim();
-								allow_use();
-							}
+							min_aim = -1*M_PI/16;
+							max_aim = 1*M_PI/8;
+							allow_aim();
+							allow_use();
 							set_fix_h7();
 						}
 						else {
@@ -483,8 +485,12 @@ struct Rata : Walking {
 							allow_look();
 							min_aim = -1*M_PI/4;
 							max_aim = wearing_helmet() ? 3*M_PI/8 : M_PI/2;
-							if (!c && allow_aim()) goto kneel;
-							else set_fix_h7();
+							if (allow_aim()) {
+								float aim = facing>0 ? aim_direction : flip_angle(aim_direction);
+								if (aim > 1*M_PI/8 || aim < -1*M_PI/16) goto kneel;
+								else allow_use();
+							}
+							set_fix_h7();
 						}
 					}
 					else {
