@@ -37,6 +37,12 @@ struct Rata : Walking {
 	float handy;
 	uint angle_frame;  // 0=down, 8=up
 	float oldyvel;
+	b2Fixture* fix_feet;
+	b2Fixture* fix_27;
+	b2Fixture* fix_25;
+	b2Fixture* fix_21;
+	b2Fixture* fix_h7;
+	b2Fixture* fix_helmetr90;
 	 // Equipment
 	uint inventory_amount;
 	obj::Desc* inventory [10];
@@ -72,12 +78,6 @@ struct Rata : Walking {
 	}
 	float aim_center_x () { return x() + 2*PX*facing; }
 	float aim_center_y () { return y() + 13*PX; }
-	b2Fixture* fix_feet () { return body->GetFixtureList(); }
-	b2Fixture* fix_27 () { return body->GetFixtureList()->GetNext(); }
-	b2Fixture* fix_25 () { return body->GetFixtureList()->GetNext()->GetNext(); }
-	b2Fixture* fix_21 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext(); }
-	b2Fixture* fix_h7 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext()->GetNext(); }
-	b2Fixture* fix_helmetr90 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext()->GetNext()->GetNext(); }
 
 //	b2Fixture* fix_current () {
 //		if (hurt_frames) return fix_27();
@@ -100,50 +100,50 @@ struct Rata : Walking {
 		    || hurt_id[1] == obj::bullet;
 	}
 	void set_fix_27 () {
-		fix_feet()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_27()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_27()->SetSensor(false);
-		fix_25()->SetFilterData(cf::rata_sensor);
-		fix_25()->SetSensor(true);
-		fix_21()->SetFilterData(cf::rata_sensor);
-		fix_21()->SetSensor(true);
-		fix_h7()->SetFilterData(cf::rata_sensor);
-		fix_h7()->SetSensor(true);
+		fix_feet->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
+		fix_27->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
+		fix_27->SetSensor(false);
+		fix_25->SetFilterData(cf::rata_sensor);
+		fix_25->SetSensor(true);
+		fix_21->SetFilterData(cf::rata_sensor);
+		fix_21->SetSensor(true);
+		fix_h7->SetFilterData(cf::rata_sensor);
+		fix_h7->SetSensor(true);
 		//printf("helmet: %d\n", wearing_helmet());
-		fix_helmetr90()->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
+		fix_helmetr90->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
 	}
 	void set_fix_25 () {
-		fix_feet()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_27()->SetFilterData(cf::rata_sensor);
-		fix_27()->SetSensor(true);
-		fix_25()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_25()->SetSensor(false);
-		fix_21()->SetFilterData(cf::rata_sensor);
-		fix_21()->SetSensor(true);
-		fix_h7()->SetFilterData(cf::rata_sensor);
-		fix_h7()->SetSensor(true);
+		fix_feet->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
+		fix_27->SetFilterData(cf::rata_sensor);
+		fix_27->SetSensor(true);
+		fix_25->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
+		fix_25->SetSensor(false);
+		fix_21->SetFilterData(cf::rata_sensor);
+		fix_21->SetSensor(true);
+		fix_h7->SetFilterData(cf::rata_sensor);
+		fix_h7->SetSensor(true);
 	}
 	void set_fix_21 () {
-		fix_feet()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_27()->SetFilterData(cf::rata_sensor);
-		fix_27()->SetSensor(true);
-		fix_25()->SetFilterData(cf::rata_sensor);
-		fix_25()->SetSensor(true);
-		fix_21()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_21()->SetSensor(false);
-		fix_h7()->SetFilterData(cf::rata_sensor);
-		fix_h7()->SetSensor(true);
+		fix_feet->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
+		fix_27->SetFilterData(cf::rata_sensor);
+		fix_27->SetSensor(true);
+		fix_25->SetFilterData(cf::rata_sensor);
+		fix_25->SetSensor(true);
+		fix_21->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
+		fix_21->SetSensor(false);
+		fix_h7->SetFilterData(cf::rata_sensor);
+		fix_h7->SetSensor(true);
 	}
 	void set_fix_h7 () {
-		fix_feet()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_27()->SetFilterData(cf::rata_sensor);
-		fix_27()->SetSensor(true);
-		fix_25()->SetFilterData(cf::rata_sensor);
-		fix_25()->SetSensor(true);
-		fix_21()->SetFilterData(cf::rata_sensor);
-		fix_21()->SetSensor(true);
-		fix_h7()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_h7()->SetSensor(false);
+		fix_feet->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
+		fix_27->SetFilterData(cf::rata_sensor);
+		fix_27->SetSensor(true);
+		fix_25->SetFilterData(cf::rata_sensor);
+		fix_25->SetSensor(true);
+		fix_21->SetFilterData(cf::rata_sensor);
+		fix_21->SetSensor(true);
+		fix_h7->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
+		fix_h7->SetSensor(false);
 	}
 
 	 // Equipment and inventory management
@@ -291,7 +291,7 @@ struct Rata : Walking {
 
 	bool allow_kneel () {
 		return (key[sf::Key::S] && floor_normal.y > 0.9)
-		    || ((state == kneeling || state == crawling) && check_fix(fix_27()));
+		    || ((state == kneeling || state == crawling) && check_fix(fix_27));
 	}
 
 	bool allow_crawl () {
@@ -452,7 +452,7 @@ struct Rata : Walking {
 						state = crawling;
 					}
 					if (state == crawling) {
-						if (check_fix(fix_21())) {
+						if (check_fix(fix_21)) {
 							allow_look();
 							set_fix_h7();
 						}
@@ -676,6 +676,12 @@ struct Rata : Walking {
 			for (uint i = obj::def[desc->id].nfixes; i > 0; i--) {
 				dbg(4, "Fix %d: 0x%08x\n", i, body->CreateFixture(&(obj::def[desc->id].fixdef[i-1])));
 			}
+		fix_feet = body->GetFixtureList();
+		fix_27 = fix_feet->GetNext();
+		fix_25 = fix_27->GetNext();
+		fix_21 = fix_25->GetNext();
+		fix_h7 = fix_21->GetNext();
+		fix_helmetr90 = fix_h7->GetNext();
 		set_fix_27();
 		dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
 		floor = NULL;
