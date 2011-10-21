@@ -785,7 +785,7 @@ b2FixtureDef patroller_fixes [] = {
 	make_fixdef(make_rect(14*PX, 12*PX), cf::enemy, 0, 0.1, 6.0, &patroller_fixprop),
 };
 FixProp flyer_fixprop = {false, false, 1.0, 12, false};
-b2FixtureDef flyer_fix = make_fixdef(make_circle(6*PX), cf::enemy, 0, 0, 4.0, &flyer_fixprop);
+b2FixtureDef flyer_fix = make_fixdef(make_circle(6*PX), cf::enemy, 0, 0, 6.0, &flyer_fixprop);
 FixProp heart_fixprop = {false, false, 0.0, 0, false};
 b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.1, &heart_fixprop);
 

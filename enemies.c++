@@ -164,11 +164,47 @@ struct Patroller : AI {
 
 struct Flyer : AI {
 	uint motion_frames;
+	float destx;
+	float desty;
 	void on_create () {
 		AI::on_create();
-		body->SetGravityScale(0.0);
 		life = max_life = 96;
 		motion_frames = 0;
+		body->SetGravityScale(0.0);
+		//body->SetLinearDamping(0.2);
+		destx = x();
+		desty = y();
+	}
+	void before_move () {
+		float accel = 6.0;
+		float destdir = atan2(desty - y(), destx - x());
+		float destdist = pythag(destx-x(), desty-y());
+		b2Vec2 destnorm = b2Vec2(destx-x(), desty-y());
+		destnorm.Normalize();
+		float relv = dot(body->GetLinearVelocity(), destnorm);
+		bool offtrack = (relv < body->GetLinearVelocity().Length() - 0.1);
+		// We have: p, v, a.  We need d.
+		// d = p + vt + att/2; since v = at, t = v/a
+		// d = p + vv/a + vv/a/2;
+		// d = p + 3vv/2a
+		// Weird, but that's what the math says.
+		float stopdist = 1.5 * relv*relv/accel;
+		if (offtrack) {
+			destdir = atan2(-yvel(), -xvel());
+		}
+		if (relv < 0 || stopdist < destdist) {
+			body->ApplyForceToCenter(b2Vec2(
+				accel*cos(destdir),
+				accel*sin(destdir)
+			));
+		}
+		else {
+			body->ApplyForceToCenter(b2Vec2(
+				-accel*cos(destdir),
+				-accel*sin(destdir)
+			));
+		}
+		AI::before_move();
 	}
 	void draw () {
 		motion_frames++;

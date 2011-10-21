@@ -96,5 +96,11 @@ inline bool gt_angle (float a, float b) {
 	else return a > b || a < b-M_PI;
 }
 
+inline float pythag (float x, float y) {
+	return sqrt(x*x + y*y);
+}
 
+inline float dot (b2Vec2 a, b2Vec2 b) {
+	return a.x*b.x + a.y*b.y;
+}
 

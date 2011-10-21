@@ -412,7 +412,9 @@ void move_phase () {
 		o->before_move();
 	
 	if (world) {
+		world->SetAutoClearForces(false);
 		world->Step(1/120.0, 10, 10);
+		world->SetAutoClearForces(true);
 		world->Step(1/120.0, 10, 10);
 		//world->Step(1/180.0, 10, 10);
 		//world->Step(1/240.0, 10, 10);
