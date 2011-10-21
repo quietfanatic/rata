@@ -499,7 +499,7 @@ struct Rata : Walking {
 				if (allow_kneel()) {
 					if (allow_crawl()) {
 						state = crawling;
-						if (check_fix(fix_21)) {
+						if (!check_fix(fix_21)) {
 							allow_turn();
 						}
 						allow_look();

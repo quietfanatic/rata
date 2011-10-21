@@ -765,10 +765,10 @@ b2FixtureDef rata_fixes [] = {
 	make_fixdef(make_poly(7, rata_poly_25), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
 	make_fixdef(make_poly(7, rata_poly_21), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
 	make_fixdef(make_poly(4, rata_poly_h7), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
-	make_fixdef(make_circle(7.5*PX, 0*PX, 23.5*PX), cf::rata, 0, 0, 0.0, &rata_fixprop_helmet, false),
-	make_fixdef(make_circle(7.5*PX, 0*PX, 16.5*PX), cf::rata, 0, 0, 0.0, &rata_fixprop_helmet, false),
-	make_fixdef(make_circle(7.5*PX, 4.5*PX, 11.5*PX), cf::rata, 0, 0, 0.0, &rata_fixprop_helmet, false),
-	make_fixdef(make_circle(7.5*PX, -4.5*PX, 11.5*PX), cf::rata, 0, 0, 0.0, &rata_fixprop_helmet, false)
+	make_fixdef(make_circle(7*PX, 0*PX, 23.5*PX), cf::rata, 0, 0, 0.0, &rata_fixprop_helmet, false),
+	make_fixdef(make_circle(7*PX, 0*PX, 16.5*PX), cf::rata, 0, 0, 0.0, &rata_fixprop_helmet, false),
+	make_fixdef(make_circle(7*PX, 4.5*PX, 11.5*PX), cf::rata, 0, 0, 0.0, &rata_fixprop_helmet, false),
+	make_fixdef(make_circle(7*PX, -4.5*PX, 11.5*PX), cf::rata, 0, 0, 0.0, &rata_fixprop_helmet, false)
 };
 
 FixProp bullet_fixprop = {false, false, 0.0, 48, true};
