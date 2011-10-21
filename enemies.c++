@@ -184,7 +184,7 @@ struct Flyer : AI {
 		float destdist = reldest.Length();
 		reldest.Normalize();
 		float relv = dot(body->GetLinearVelocity(), reldest);
-		bool offtrack = (relv < body->GetLinearVelocity().Length() - 0.1);
+		bool offtrack = (relv < body->GetLinearVelocity().Length() - 1.0);
 		// We have: p, v, a.  We need d.
 		// d = p + vt + att/2; since v = at, t = v/a
 		// d = p + vv/a + vv/a/2;
@@ -230,6 +230,7 @@ struct Flyer : AI {
 		 // Predict
 		if (ratapos.IsValid()) {
 			//printf("Saw Rata at height %f\n", ratapos.y - rata->y());
+			dest = b2Vec2(x(), y());
 			prediction = predict_pos_from(ratapos.x, ratapos.y);
 			oldpos = ratapos;
 		}
