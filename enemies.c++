@@ -164,22 +164,23 @@ struct Patroller : AI {
 
 struct Flyer : AI {
 	uint motion_frames;
-	float destx;
-	float desty;
+	b2Vec2 dest;
+	b2Vec2 oldpos;
+	b2Vec2 prediction;
 	void on_create () {
 		AI::on_create();
 		life = max_life = 96;
 		motion_frames = 0;
 		body->SetGravityScale(0.0);
 		//body->SetLinearDamping(0.2);
-		destx = x();
-		desty = y();
+		dest = b2Vec2(x(), y());
+		prediction = b2Vec2(0/0.0, 0/0.0);
 	}
 	void before_move () {
 		float accel = 6.0;
-		float destdir = atan2(desty - y(), destx - x());
-		float destdist = pythag(destx-x(), desty-y());
-		b2Vec2 destnorm = b2Vec2(destx-x(), desty-y());
+		float destdir = atan2(dest.y - y(), dest.x - x());
+		float destdist = dest.Length();
+		b2Vec2 destnorm = b2Vec2(dest.x-x(), dest.y-y());
 		destnorm.Normalize();
 		float relv = dot(body->GetLinearVelocity(), destnorm);
 		bool offtrack = (relv < body->GetLinearVelocity().Length() - 0.1);
@@ -205,6 +206,33 @@ struct Flyer : AI {
 			));
 		}
 		AI::before_move();
+	}
+	int update_interval () { return 40; }
+	void decision () {
+		b2Vec2 ratapos = see_rata_pos();
+		 // Fire
+		if (prediction.IsValid()) {
+			Bullet* b = fire_bullet_to(
+				x(), y(),
+				prediction.x,
+				prediction.y + 1,
+				120, 48, 0.1
+			);
+			snd::gunshot.play(1.0, 70);
+			add_vel(-b->desc->xvel/120, -b->desc->yvel/120);
+		}
+		 // Predict
+		if (ratapos.IsValid()) {
+			prediction = predict_pos_from(ratapos.x, ratapos.y);
+			oldpos = ratapos;
+		}
+		else {
+			prediction = b2Vec2(0/0.0, 0/0.0);
+			 // Chase
+			if (oldpos.IsValid()) {
+				dest = oldpos;
+			}
+		}
 	}
 	void draw () {
 		motion_frames++;
