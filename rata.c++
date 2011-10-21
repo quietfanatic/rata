@@ -67,6 +67,9 @@ struct Rata : Walking {
 	item::Equip* equip_info (uint i) {
 		return equipment[i] ? (item::Equip*)equipment[i]->data : NULL;
 	}
+	bool wearing_helmet () {
+		return equip_info(item::head) == &item::helmet;
+	}
 	float aim_center_x () { return x() + 2*PX*facing; }
 	float aim_center_y () { return y() + 13*PX; }
 	b2Fixture* fix_feet () { return body->GetFixtureList(); }
@@ -74,6 +77,7 @@ struct Rata : Walking {
 	b2Fixture* fix_25 () { return body->GetFixtureList()->GetNext()->GetNext(); }
 	b2Fixture* fix_21 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext(); }
 	b2Fixture* fix_h7 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext()->GetNext(); }
+	b2Fixture* fix_helmetr90 () { return body->GetFixtureList()->GetNext()->GetNext()->GetNext()->GetNext()->GetNext(); }
 
 //	b2Fixture* fix_current () {
 //		if (hurt_frames) return fix_27();
@@ -105,6 +109,8 @@ struct Rata : Walking {
 		fix_21()->SetSensor(true);
 		fix_h7()->SetFilterData(cf::rata_sensor);
 		fix_h7()->SetSensor(true);
+		//printf("helmet: %d\n", wearing_helmet());
+		fix_helmetr90()->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
 	}
 	void set_fix_25 () {
 		fix_feet()->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);

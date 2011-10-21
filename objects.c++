@@ -755,15 +755,27 @@ b2Vec2 rata_poly_h7 [] = {
 	b2Vec2(4*PX, 7*PX),
 	b2Vec2(-4*PX, 7*PX),
 };
+b2Vec2 rata_poly_helmetr90 [] = {
+	b2Vec2(0.492878634224473, 1.55014758328137),
+	b2Vec2(0.411845940179308, 1.74237984636006),
+	b2Vec2(0.255431552478743, 1.88041636251729),
+	b2Vec2(0.0546152589034518, 1.93691730682137),
+	b2Vec2(-0.150828810753763, 1.90069197431425),
+	b2Vec2(-0.320209938891125, 1.77891523637353),
+	b2Vec2(-0.419980115757818, 1.59570646944203),
+	b2Vec2(-0.430378634224473, 1.38735241671863),
+};
 
 FixProp rata_fixprop = {true, false, 1.0, 0, false};
 FixProp rata_fixprop_feet = {false, true, 1.0, 0, false};
+FixProp rata_fixprop_helmet = {true, true, 0.0, 0, false};
 b2FixtureDef rata_fixes [] = {
 	make_fixdef(make_poly(4, rata_poly_feet), cf::rata, 0, 0, 1.0, &rata_fixprop_feet, false),
 	make_fixdef(make_poly(7, rata_poly_27), cf::rata, 0, 0, 1.0, &rata_fixprop, false),
 	make_fixdef(make_poly(7, rata_poly_25), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
 	make_fixdef(make_poly(7, rata_poly_21), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
-	make_fixdef(make_poly(4, rata_poly_h7), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true)
+	make_fixdef(make_poly(4, rata_poly_h7), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
+	make_fixdef(make_poly(8, rata_poly_helmetr90), cf::disabled, 0, 0, 0.1, &rata_fixprop_helmet, false)
 };
 
 FixProp bullet_fixprop = {false, false, 0.0, 48, true};
@@ -783,7 +795,7 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 const obj::Def obj::def [] = {
 
 	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, NULL},
-	{"Rata", 5, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
+	{"Rata", 6, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
 	{"Entrance", 0, NULL, -1000, -1000, obj::ALLOC<Entrance>, NULL},
 	{"Exit", 0, NULL, -100, -100, obj::ALLOC<Exit>, NULL},
 	{"Door", 0, NULL, -100, 200, obj::ALLOC<Door>, NULL},
