@@ -34,7 +34,7 @@ ROOM_OBJECT(obj::item, 20.000000, 1.000000, 0, 0, 0, &item::handgun, 0)
 ROOM_OBJECT(obj::item, 28.000000, 1.000000, 0, 0, 0, &item::white_dress, 0)
 ROOM_OBJECT(obj::item, 25.000000, 1.000000, 0, 0, 0, &item::boots, 0)
 ROOM_OBJECT(obj::item, 27.000000, 14.000000, 0, 0, 0, &item::helmet, 0)
-ROOM_OBJECT(obj::flyer, 24.500000, 4.500000, 0, 0, 0, NULL, 0)
+ROOM_OBJECT(obj::flyer, 16.500000, 4.500000, 0, 0, 0, NULL, 0)
 END_ROOM_OBJECTS
 
 ROOM_DEF(30, 20, 10, 127, 127, 127, 255, 0)

@@ -696,14 +696,12 @@ struct Rata : Walking {
 	}
 
 	virtual void damage (int d) {
-		if (!hurt_frames && !inv_frames) {
-			Object::damage(d);
-			state = ouch;
-			hurt_frames = (20 + d) / (2 + adrenaline/60.0);
-			inv_frames = 50;
-			adrenaline += 5*d;
-			printf("Hurt status: %d, %d, %d\n", hurt_frames, inv_frames, adrenaline);
-		}
+		Object::damage(d);
+		state = ouch;
+		hurt_frames = (20 + d) / (2 + adrenaline/60.0);
+		inv_frames = 50;
+		adrenaline += 5*d;
+		printf("Hurt status: %d, %d, %d\n", hurt_frames, inv_frames, adrenaline);
 		snd::hurt.play(1.0 - 0.1*d/24, 40 + d);
 	}
 
