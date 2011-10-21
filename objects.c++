@@ -758,7 +758,7 @@ b2Vec2 rata_poly_h7 [] = {
 
 FixProp rata_fixprop = {true, false, 1.0, 0, false};
 FixProp rata_fixprop_feet = {false, true, 1.0, 0, false};
-FixProp rata_fixprop_helmet = {true, true, 0.0, 0, false};
+FixProp rata_fixprop_helmet = {true, true, 1.0, 0, false};
 b2FixtureDef rata_fixes [] = {
 	make_fixdef(make_poly(4, rata_poly_feet), cf::rata, 0, 0, 1.0, &rata_fixprop_feet, false),
 	make_fixdef(make_poly(7, rata_poly_27), cf::rata, 0, 0, 1.0, &rata_fixprop, false),
@@ -814,6 +814,15 @@ const obj::Def obj::def [] = {
 
 #define DAMAGE_KNOCKBACK 12.0
 void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Manifold* manifold) {
+	if (afp == &rata_fixprop_helmet) {
+		b2Vec2 norm = manifold->localNormal;
+		float angle = atan2(norm.y, norm.x);
+		printf("Normal: %f, %f\n", norm.y, norm.x);
+		printf("gt_angle(%f, %f) = %d\n", rata->helmet_angle, angle, gt_angle(rata->helmet_angle, angle));
+		if (gt_angle(rata->helmet_angle, angle))
+			return;
+	}
+
 	if (a->life <= 0) return;
 	if (a->desc->id == obj::rata) {
 		if (rata->hurt_id[0] == b->desc->id

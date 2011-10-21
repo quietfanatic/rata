@@ -34,9 +34,9 @@ float helmety []={   6.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,
                      6.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,
                      6.5*PX,   6.5*PX,   6.5*PX,   0.5*PX,     0*PX,
 };
-float helmeta []={        0,        0,        0,        0,        0,        0,
-                          0,        0,        0,        0,        0,        0,
-                          0,        0,        0,        0,        0,
+float helmeta []={ -M_PI/18,        0,  M_PI/18,  M_PI/18,   M_PI/8,   M_PI/4,
+                   -M_PI/18,        0,  M_PI/18,  M_PI/18,   M_PI/8,   M_PI/4,
+                          0, -M_PI/18,        0,        0,        0,
 };
 uint8 helmetf []={        0,        1,        2,        2,        3,        4,
                           0,        1,        2,        2,        3,        4,

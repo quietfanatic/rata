@@ -90,6 +90,11 @@ inline float dither (float c, float err) {
 inline float flip_angle (float a) {
 	return a<0 ? -M_PI-a : M_PI-a;
 }
+inline bool gt_angle (float a, float b) {
+	if (b < 0)
+		return a > b && a < b+M_PI;
+	else return a > b || a < b-M_PI;
+}
 
 
 

@@ -39,6 +39,8 @@ struct Rata : Walking {
 	float handy;
 	uint angle_frame;  // 0=down, 8=up
 	float oldyvel;
+	float helmet_angle;
+	 // Fixtures
 	b2Fixture* fix_feet;
 	b2Fixture* fix_27;
 	b2Fixture* fix_25;
@@ -881,6 +883,7 @@ struct Rata : Walking {
 			: state == dead_air ? hurtbk
 			: state == dead     ? laybk
 			:                     stand_90;
+			helmet_angle = helmeta[headpose];
 		}
 
 		 // Select arm pose
