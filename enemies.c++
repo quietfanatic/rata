@@ -177,13 +177,13 @@ struct Flyer : AI {
 		prediction = b2Vec2(0/0.0, 0/0.0);
 	}
 	void before_move () {
-		float accel = 6.0;
+		float accel = 8.0;
 		float destdir = atan2(dest.y - y(), dest.x - x());
 		float destdist = dest.Length();
 		b2Vec2 destnorm = b2Vec2(dest.x-x(), dest.y-y());
 		destnorm.Normalize();
 		float relv = dot(body->GetLinearVelocity(), destnorm);
-		bool offtrack = (relv < body->GetLinearVelocity().Length() - 0.1);
+		bool offtrack = (relv < body->GetLinearVelocity().Length() - 0.4);
 		// We have: p, v, a.  We need d.
 		// d = p + vt + att/2; since v = at, t = v/a
 		// d = p + vv/a + vv/a/2;
@@ -193,6 +193,7 @@ struct Flyer : AI {
 		if (offtrack) {
 			destdir = atan2(-yvel(), -xvel());
 		}
+		destdir = dither(destdir, 0.02);
 		if (relv < 0 || stopdist < destdist) {
 			body->ApplyForceToCenter(b2Vec2(
 				accel*cos(destdir),
@@ -207,6 +208,9 @@ struct Flyer : AI {
 		}
 		AI::before_move();
 	}
+
+	float eyex () { return x(); }
+	float eyey () { return y(); }
 	int update_interval () { return 40; }
 	void decision () {
 		b2Vec2 ratapos = see_rata_pos();
@@ -215,7 +219,7 @@ struct Flyer : AI {
 			Bullet* b = fire_bullet_to(
 				x(), y(),
 				prediction.x,
-				prediction.y + 1,
+				prediction.y,
 				120, 48, 0.1
 			);
 			snd::gunshot.play(1.0, 70);
@@ -223,6 +227,7 @@ struct Flyer : AI {
 		}
 		 // Predict
 		if (ratapos.IsValid()) {
+			printf("Saw Rata at height %f\n", ratapos.y - rata->y());
 			prediction = predict_pos_from(ratapos.x, ratapos.y);
 			oldpos = ratapos;
 		}
@@ -239,6 +244,10 @@ struct Flyer : AI {
 		motion_frames %= 4;
 		subimage = (motion_frames < 2);
 		Object::draw();
+	}
+	void damage (int d) {
+		Object::damage(d);
+		snd::hit.play(0.8);
 	}
 };
 
