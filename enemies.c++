@@ -99,14 +99,13 @@ struct Rat : AI {
 
 struct Patroller : AI {
 	virtual char* describe () { return "A small robot is patrolling the area.\nIt has a gun attached.  Best be cautious."; }
-	uint lifetime;
+	uint motion_frames;
 	bool threat_detected;
 	float threat_x;
 	float threat_y;
 	float threat_xvel;
 	float threat_yvel;
 	b2Vec2 prediction;
-	int motion_frames;
 	virtual void on_create () {
 		AI::on_create();
 		life = max_life = 144;
@@ -162,4 +161,21 @@ struct Patroller : AI {
 		snd::hit.play(0.8);
 	}
 };
+
+struct Flyer : AI {
+	uint motion_frames;
+	void on_create () {
+		AI::on_create();
+		body->SetGravityScale(0.0);
+		life = max_life = 96;
+		motion_frames = 0;
+	}
+	void draw () {
+		motion_frames++;
+		motion_frames %= 4;
+		subimage = (motion_frames < 2);
+		Object::draw();
+	}
+};
+
 

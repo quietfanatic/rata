@@ -46,6 +46,7 @@ namespace obj {
 		mousehole,
 		hiteffect,
 		patroller,
+		flyer,
 		heart,
 		item,
 		clickable_text,
@@ -69,6 +70,7 @@ namespace obj {
 		"obj::mousehole",
 		"obj::hiteffect",
 		"obj::patroller",
+		"obj::flyer",
 		"obj::heart",
 		"obj::item",
 		"obj::clickable_text",
@@ -782,6 +784,8 @@ FixProp patroller_fixprop = {true, true, 1.0, 0, false};
 b2FixtureDef patroller_fixes [] = {
 	make_fixdef(make_rect(14*PX, 12*PX), cf::enemy, 0, 0.1, 6.0, &patroller_fixprop),
 };
+FixProp flyer_fixprop = {false, false, 1.0, 12, false};
+b2FixtureDef flyer_fix = make_fixdef(make_circle(6*PX), cf::enemy, 0, 0, 4.0, &flyer_fixprop);
 FixProp heart_fixprop = {false, false, 0.0, 0, false};
 b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.1, &heart_fixprop);
 
@@ -800,6 +804,7 @@ const obj::Def obj::def [] = {
 	{"Mousehole", 1, &mousehole_fix, 50, 0, obj::ALLOC<Mousehole>, &img::mousehole},
 	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>, NULL},
 	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>, &img::patroller},
+	{"Flyer", 1, &flyer_fix, 20, 20, obj::ALLOC<Flyer>, &img::flyer},
 	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, &img::heart},
 	{"Item", 0, NULL, -5, 150, obj::ALLOC<Item>, NULL},
 	{"Clickable text", 0, NULL, -2000, 2000, obj::ALLOC<ClickableText>, NULL},
