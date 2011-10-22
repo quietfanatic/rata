@@ -42,10 +42,12 @@ struct Rata : Walking {
 	float helmet_angle;
 	 // Fixtures
 	b2Fixture* fix_feet;
+	b2Fixture* fix_current;
 	b2Fixture* fix_27;
 	b2Fixture* fix_25;
 	b2Fixture* fix_21;
 	b2Fixture* fix_h7;
+	b2Fixture* fix_helmet_current;
 	b2Fixture* fix_helmet_stand;
 	b2Fixture* fix_helmet_kneel;
 	b2Fixture* fix_helmet_crawl_r;
@@ -106,79 +108,29 @@ struct Rata : Walking {
 		    || hurt_id[0] == obj::bullet
 		    || hurt_id[1] == obj::bullet;
 	}
-	void set_fix_27 () {
+	void set_fix (b2Fixture* fix) {
 		fix_feet->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_27->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_27->SetSensor(false);
-		fix_25->SetFilterData(cf::rata_sensor);
-		fix_25->SetSensor(true);
-		fix_21->SetFilterData(cf::rata_sensor);
-		fix_21->SetSensor(true);
-		fix_h7->SetFilterData(cf::rata_sensor);
-		fix_h7->SetSensor(true);
+		if (fix_current && fix_current != fix) {
+			fix_current->SetFilterData(cf::rata_sensor);
+			fix_current->SetSensor(true);
+		}
+		else {
+			fix->SetSensor(false);
+		}
+		fix_current = fix;
+		fix->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 	}
-	void set_fix_25 () {
-		fix_feet->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_27->SetFilterData(cf::rata_sensor);
-		fix_27->SetSensor(true);
-		fix_25->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_25->SetSensor(false);
-		fix_21->SetFilterData(cf::rata_sensor);
-		fix_21->SetSensor(true);
-		fix_h7->SetFilterData(cf::rata_sensor);
-		fix_h7->SetSensor(true);
-	}
-	void set_fix_21 () {
-		fix_feet->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_27->SetFilterData(cf::rata_sensor);
-		fix_27->SetSensor(true);
-		fix_25->SetFilterData(cf::rata_sensor);
-		fix_25->SetSensor(true);
-		fix_21->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_21->SetSensor(false);
-		fix_h7->SetFilterData(cf::rata_sensor);
-		fix_h7->SetSensor(true);
-	}
-	void set_fix_h7 () {
-		fix_feet->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_27->SetFilterData(cf::rata_sensor);
-		fix_27->SetSensor(true);
-		fix_25->SetFilterData(cf::rata_sensor);
-		fix_25->SetSensor(true);
-		fix_21->SetFilterData(cf::rata_sensor);
-		fix_21->SetSensor(true);
-		fix_h7->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		fix_h7->SetSensor(false);
-	}
-	void set_helmet_stand () {
-		fix_helmet_stand->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
-		fix_helmet_kneel->SetFilterData(cf::disabled);
-		fix_helmet_crawl_r->SetFilterData(cf::disabled);
-		fix_helmet_crawl_l->SetFilterData(cf::disabled);
-	}
-	void set_helmet_kneel () {
-		fix_helmet_stand->SetFilterData(cf::disabled);
-		fix_helmet_kneel->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
-		fix_helmet_crawl_r->SetFilterData(cf::disabled);
-		fix_helmet_crawl_l->SetFilterData(cf::disabled);
-	}
-	void set_helmet_crawl_r () {
-		fix_helmet_stand->SetFilterData(cf::disabled);
-		fix_helmet_kneel->SetFilterData(cf::disabled);
-		fix_helmet_crawl_r->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
-		fix_helmet_crawl_l->SetFilterData(cf::disabled);
-	}
-	void set_helmet_crawl_l () {
-		fix_helmet_stand->SetFilterData(cf::disabled);
-		fix_helmet_kneel->SetFilterData(cf::disabled);
-		fix_helmet_crawl_r->SetFilterData(cf::disabled);
-		fix_helmet_crawl_l->SetFilterData(wearing_helmet() ? cf::rata : cf::disabled);
-	}
-	void set_helmet_none () {
-		fix_helmet_stand->SetFilterData(cf::disabled);
-		fix_helmet_kneel->SetFilterData(cf::disabled);
-		fix_helmet_crawl_r->SetFilterData(cf::disabled);
-		fix_helmet_crawl_l->SetFilterData(cf::disabled);
+	void set_helmet (b2Fixture* fix) {
+		if (fix && wearing_helmet()) {
+			if (fix_helmet_current && fix_helmet_current != fix) {
+				fix_helmet_current->SetFilterData(cf::disabled);
+			}
+			fix->SetFilterData(cf::rata);
+		}
+		else if (fix_helmet_current) {
+			fix_helmet_current->SetFilterData(cf::disabled);
+		}
+		fix_helmet_current = fix;
 	}
 
 
@@ -332,7 +284,6 @@ struct Rata : Walking {
 			//mutual_impulse(floor, 0, -jump_velocity()*mass());
 			set_vel(xvel(), jump_velocity());
 			float_frames = jump_float_time();
-			set_fix_27();
 			state = falling;
 			return true;
 		}
@@ -503,10 +454,10 @@ struct Rata : Walking {
 							allow_turn();
 						}
 						allow_look();
-						set_fix_h7();
+						set_fix(fix_h7);
 						if (facing > 0)
-							set_helmet_crawl_r();
-						else set_helmet_crawl_l();
+							set_helmet(fix_helmet_crawl_r);
+						else set_helmet(fix_helmet_crawl_l);
 					}
 					else if (state == crawling) {
 						if (check_fix(fix_21)) {
@@ -515,10 +466,10 @@ struct Rata : Walking {
 							max_aim = 1*M_PI/8;
 							allow_aim();
 							allow_use();
-							set_fix_h7();
+							set_fix(fix_h7);
 							if (facing > 0)
-								set_helmet_crawl_r();
-							else set_helmet_crawl_l();
+								set_helmet(fix_helmet_crawl_r);
+							else set_helmet(fix_helmet_crawl_l);
 						}
 						else {
 							allow_turn();
@@ -530,10 +481,10 @@ struct Rata : Walking {
 								if (aim > 1*M_PI/8 || aim < -1*M_PI/16) goto kneel;
 								else allow_use();
 							}
-							set_fix_h7();
+							set_fix(fix_h7);
 							if (facing > 0)
-								set_helmet_crawl_r();
-							else set_helmet_crawl_l();
+								set_helmet(fix_helmet_crawl_r);
+							else set_helmet(fix_helmet_crawl_l);
 						}
 					}
 					else {
@@ -547,8 +498,8 @@ struct Rata : Walking {
 						floor_friction = ground_decel();
 						ideal_xvel = 0;
 						allow_use();
-						set_fix_21();
-						set_helmet_kneel();
+						set_fix(fix_21);
+						set_helmet(fix_helmet_kneel);
 					}
 				}
 				else if (allow_jump()) {
@@ -559,8 +510,8 @@ struct Rata : Walking {
 					max_aim = wearing_helmet() ? 3*M_PI/8 : M_PI/2;
 					allow_aim();
 					allow_airmove();
-					set_fix_27();
-					set_helmet_stand();
+					set_fix(fix_27);
+					set_helmet(fix_helmet_stand);
 				}
 				else {
 					allow_turn();
@@ -576,8 +527,8 @@ struct Rata : Walking {
 						state = standing;
 						allow_use();
 					}
-					set_fix_27();
-					set_helmet_stand();
+					set_fix(fix_27);
+					set_helmet(fix_helmet_stand);
 				}
 				allow_action();
 				allow_examine();
@@ -603,8 +554,8 @@ struct Rata : Walking {
 				allow_action();
 				allow_examine();
 				decrement_counters();
-				set_fix_27();
-				set_helmet_stand();
+				set_fix(fix_27);
+				set_helmet(fix_helmet_stand);
 				break;
 			}
 			case ouch: {
@@ -638,8 +589,8 @@ struct Rata : Walking {
 				allow_look();
 				allow_examine();
 				decrement_counters();
-				set_fix_25();
-				set_helmet_stand();
+				set_fix(fix_25);
+				set_helmet(fix_helmet_stand);
 				break;
 			}
 			case hurt: {
@@ -652,8 +603,8 @@ struct Rata : Walking {
 				allow_look();
 				allow_examine();
 				decrement_counters();
-				set_fix_21();
-				set_helmet_kneel();
+				set_fix(fix_21);
+				set_helmet(fix_helmet_kneel);
 				break;
 			}
 			case dead_air: {
@@ -663,8 +614,8 @@ struct Rata : Walking {
 				}
 				dead_no_floor:
 				state = dead_air;
-				set_fix_25();
-				set_helmet_stand();
+				set_fix(fix_25);
+				set_helmet(fix_helmet_stand);
 				break;
 			}
 			case dead: {
@@ -673,8 +624,8 @@ struct Rata : Walking {
 				state = dead;
 				floor_friction = ground_decel();
 				ideal_xvel = 0;
-				set_fix_h7();
-				set_helmet_none();
+				set_fix(fix_h7);
+				set_helmet(NULL);
 				break;
 			}	
 		}
@@ -768,7 +719,8 @@ struct Rata : Walking {
 		fix_helmet_kneel = fix_helmet_stand->GetNext();
 		fix_helmet_crawl_r = fix_helmet_kneel->GetNext();
 		fix_helmet_crawl_l = fix_helmet_crawl_r->GetNext();
-		set_fix_27();
+		fix_current = fix_helmet_current = NULL;
+		set_fix(fix_27);
 		dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
 		floor = NULL;
 		Walking::on_create();
