@@ -757,16 +757,23 @@ b2Vec2 rata_poly_h7 [] = {
 	b2Vec2(4*PX, 7*PX),
 	b2Vec2(-4*PX, 7*PX),
 };
+b2Vec2 rata_poly_sensor_21 [] = {
+	b2Vec2(-2.5*PX, 0.1*PX),
+	b2Vec2(2.5*PX, 0.1*PX),
+	b2Vec2(2.5*PX, 21*PX),
+	b2Vec2(-2.5*PX, 21*PX),
+};
 
 FixProp rata_fixprop = {true, false, 1.0, 0, false};
 FixProp rata_fixprop_feet = {false, true, 1.0, 0, false};
 FixProp rata_fixprop_helmet = {true, true, 1.0, 0, false};
 b2FixtureDef rata_fixes [] = {
 	make_fixdef(make_poly(4, rata_poly_feet), cf::rata, 0, 0, 1.0, &rata_fixprop_feet, false),
-	make_fixdef(make_poly(7, rata_poly_27), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
-	make_fixdef(make_poly(7, rata_poly_25), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
-	make_fixdef(make_poly(7, rata_poly_21), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
-	make_fixdef(make_poly(4, rata_poly_h7), cf::rata_sensor, 0, 0, 1.0, &rata_fixprop, true),
+	make_fixdef(make_poly(7, rata_poly_27), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
+	make_fixdef(make_poly(7, rata_poly_25), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
+	make_fixdef(make_poly(7, rata_poly_21), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
+	make_fixdef(make_poly(4, rata_poly_h7), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
+	make_fixdef(make_poly(4, rata_poly_sensor_21), cf::rata_sensor, 0, 0, 0.0, &rata_fixprop, true),
 	make_fixdef(make_circle(7*PX, 0*PX, 23.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),
 	make_fixdef(make_circle(7*PX, 0*PX, 16.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),
 	make_fixdef(make_circle(7*PX, 4.5*PX, 11.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),

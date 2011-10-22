@@ -47,6 +47,7 @@ struct Rata : Walking {
 	b2Fixture* fix_25;
 	b2Fixture* fix_21;
 	b2Fixture* fix_h7;
+	b2Fixture* fix_sensor_21;
 	b2Fixture* fix_helmet_current;
 	b2Fixture* fix_helmet_stand;
 	b2Fixture* fix_helmet_kneel;
@@ -111,11 +112,7 @@ struct Rata : Walking {
 	void set_fix (b2Fixture* fix) {
 		fix_feet->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		if (fix_current && fix_current != fix) {
-			fix_current->SetFilterData(cf::rata_sensor);
-			fix_current->SetSensor(true);
-		}
-		else {
-			fix->SetSensor(false);
+			fix_current->SetFilterData(cf::disabled);
 		}
 		fix_current = fix;
 		fix->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
@@ -292,7 +289,7 @@ struct Rata : Walking {
 
 	bool allow_kneel () {
 		return (key[sf::Key::S] && floor_normal.y > 0.9)
-		    || ((state == kneeling || state == crawling) && check_fix(fix_27));
+		    || (state == crawling && check_fix(fix_sensor_21));
 	}
 
 	bool allow_crawl () {
@@ -450,7 +447,7 @@ struct Rata : Walking {
 				if (allow_kneel()) {
 					if (allow_crawl()) {
 						state = crawling;
-						if (!check_fix(fix_21)) {
+						if (!check_fix(fix_sensor_21)) {
 							allow_turn();
 						}
 						allow_look();
@@ -460,7 +457,7 @@ struct Rata : Walking {
 						else set_helmet(fix_helmet_crawl_l);
 					}
 					else if (state == crawling) {
-						if (check_fix(fix_21)) {
+						if (check_fix(fix_sensor_21)) {
 							allow_look();
 							min_aim = -1*M_PI/16;
 							max_aim = 1*M_PI/8;
@@ -715,7 +712,8 @@ struct Rata : Walking {
 		fix_25 = fix_27->GetNext();
 		fix_21 = fix_25->GetNext();
 		fix_h7 = fix_21->GetNext();
-		fix_helmet_stand = fix_h7->GetNext();
+		fix_sensor_21 = fix_h7->GetNext();
+		fix_helmet_stand = fix_sensor_21->GetNext();
 		fix_helmet_kneel = fix_helmet_stand->GetNext();
 		fix_helmet_crawl_r = fix_helmet_kneel->GetNext();
 		fix_helmet_crawl_l = fix_helmet_crawl_r->GetNext();
