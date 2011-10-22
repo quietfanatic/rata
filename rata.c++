@@ -466,24 +466,26 @@ struct Rata : Walking {
 						if (check_fix(fix_sensor_21)) {
 							allow_look();
 							if (check_fix(facing>0 ? fix_sensor_floor_r : fix_sensor_floor_l))
-								min_aim = -1*M_PI/16;
+								min_aim = -1*M_PI/17;
 							else
 								min_aim = -3*M_PI/8;
 							max_aim = 1*M_PI/8;
 							allow_aim();
 							allow_use();
-							if (facing > 0)
-								set_fix(fix_crawl_r),
+							if (facing > 0) {
+								set_fix(fix_crawl_r);
 								set_helmet(fix_helmet_crawl_r);
-							else
-								set_fix(fix_crawl_l),
+							}
+							else {
+								set_fix(fix_crawl_l);
 								set_helmet(fix_helmet_crawl_l);
+							}
 						}
 						else {
 							allow_turn();
 							allow_look();
 							if (check_fix(facing>0 ? fix_sensor_floor_r : fix_sensor_floor_l))
-								min_aim = -1*M_PI/16;
+								min_aim = -1*M_PI/17;
 							else
 								min_aim = -3*M_PI/8;
 							max_aim = wearing_helmet() ? 3*M_PI/8 : M_PI/2;
@@ -492,12 +494,14 @@ struct Rata : Walking {
 								if (aim > 1*M_PI/8) goto kneel;
 								else allow_use();
 							}
-							if (facing > 0)
-								set_fix(fix_crawl_r),
+							if (facing > 0) {
+								set_fix(fix_crawl_r);
 								set_helmet(fix_helmet_crawl_r);
-							else
-								set_fix(fix_crawl_l),
+							}
+							else {
+								set_fix(fix_crawl_l);
 								set_helmet(fix_helmet_crawl_l);
+							}
 						}
 					}
 					else {

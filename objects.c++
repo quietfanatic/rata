@@ -778,16 +778,16 @@ b2Vec2 rata_poly_sensor_21 [] = {
 	b2Vec2(-2.5*PX, 21*PX),
 };
 b2Vec2 rata_poly_sensor_floor_r [] = {
-	b2Vec2(2*PX, -4*PX),
-	b2Vec2(10*PX, -4*PX),
-	b2Vec2(10*PX, 4*PX),
-	b2Vec2(2*PX, 4*PX),
+	b2Vec2(4*PX, -4*PX),
+	b2Vec2(12*PX, -4*PX),
+	b2Vec2(12*PX, 4*PX),
+	b2Vec2(4*PX, 4*PX),
 };
 b2Vec2 rata_poly_sensor_floor_l [] = {
-	b2Vec2(-2*PX, 4*PX),
-	b2Vec2(-10*PX, 4*PX),
-	b2Vec2(-10*PX, -4*PX),
-	b2Vec2(-2*PX, -4*PX),
+	b2Vec2(-4*PX, 4*PX),
+	b2Vec2(-12*PX, 4*PX),
+	b2Vec2(-12*PX, -4*PX),
+	b2Vec2(-4*PX, -4*PX),
 };
 
 FixProp rata_fixprop = {true, false, 1.0, 0, false};
@@ -829,7 +829,7 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 const obj::Def obj::def [] = {
 
 	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, NULL},
-	{"Rata", 13, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
+	{"Rata", 14, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
 	{"Entrance", 0, NULL, -1000, -1000, obj::ALLOC<Entrance>, NULL},
 	{"Exit", 0, NULL, -100, -100, obj::ALLOC<Exit>, NULL},
 	{"Door", 0, NULL, -100, 200, obj::ALLOC<Door>, NULL},
