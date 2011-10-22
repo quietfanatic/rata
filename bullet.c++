@@ -13,8 +13,8 @@ struct RBullet {
 	void move ();
 	void draw ();
 };
-RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power = 48, float mass = 2.0);
-inline RBullet* fire_rbullet_to (Object* owner, b2Vec2 pos, b2Vec2 to, float vel, int power = 48, float mass = 2.0);
+RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power = 48, float mass = 0.2);
+inline RBullet* fire_rbullet_to (Object* owner, b2Vec2 pos, b2Vec2 to, float vel, int power = 48, float mass = 0.2);
 #else
 
 RBullet::RBullet () :lifetime(-1) { }
@@ -34,6 +34,8 @@ void RBullet::move () {
 		 // This is how you bounce.
 		float velnorm = dot(vel, coll.norm);
 		vel = vel - 2 * velnorm * coll.norm;
+		coll.hit->GetBody()->ApplyLinearImpulse(mass*FPS*velnorm*coll.norm, pos1);
+		 // We've ended up with a somewhat more than 100% elastic collision, but oh well.
 		FixProp* fp = (FixProp*) coll.hit->GetUserData();
 		if (fp->damage_factor) {
 			Object* o = (Object*)coll.hit->GetBody()->GetUserData();
