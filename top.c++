@@ -17,6 +17,7 @@
 
 #define DEF_ONLY
 #include "objects.c++"
+#include "bullet.c++"
 #include "rooms.c++"
 #include "tiles.c++"
 #undef DEF_ONLY
