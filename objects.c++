@@ -131,15 +131,15 @@ struct FixProp {
 
 namespace cf {
 	b2Filter disabled = {0, 0, 0};
-	b2Filter rata = {1, 2|4|8|16|32, 0};
-	b2Filter rata_invincible = {1, 2|8|16|32, 0};
-	b2Filter rata_sensor = {1, 2|32, 0};
-	b2Filter solid = {2, 1|4|8|16|32, 0};
+	b2Filter rata = {1, 2|4|8|16|32|256, 0};
+	b2Filter solid = {2, 1|4|8|16|32|128|256, 0};
 	b2Filter bullet = {4, 1|2|8|32, 0};
-	b2Filter enemy = {8, 1|2|4|8|32, 0};
-	b2Filter pickup = {16, 1|2|32, 0};
-	b2Filter movable = {32, 1|2|4|8|16|32, 0};
+	b2Filter enemy = {8, 1|2|4|8|32|128|256, 0};
+	b2Filter pickup = {16, 1|2|32|128, 0};
+	b2Filter movable = {32, 1|2|4|8|16|32|128|256, 0};
 	b2Filter scenery = {64, 2, 0};
+	b2Filter rata_invincible = {128, 2|8|16|32|256, 0};
+	b2Filter sensor = {256, 2|32, 0};
 };
 
 
@@ -216,6 +216,7 @@ struct Object {
 			if (fix->GetFilterData().categoryBits & cat)
 			if (fix->GetBody()->GetUserData() != owner)
 			if (!((Object*)fix->GetBody()->GetUserData())->doomed) {
+				dbg(6, "raytrace hit with cf %u, %u.\n", fix->GetFilterData().categoryBits, cat);
 				if (f < frac) {
 					hit = fix;
 					frac = f;
@@ -797,16 +798,16 @@ FixProp rata_fixprop = {true, false, 1.0, 0, false};
 FixProp rata_fixprop_feet = {false, true, 1.0, 0, false};
 FixProp rata_fixprop_helmet = {true, true, 1.0, 0, false};
 b2FixtureDef rata_fixes [] = {
-	make_fixdef(make_poly(4, rata_poly_feet), cf::rata, 0, 0, 1.0, &rata_fixprop_feet, false),
+	make_fixdef(make_poly(4, rata_poly_feet), cf::disabled, 0, 0, 1.0, &rata_fixprop_feet, false),
 	make_fixdef(make_poly(7, rata_poly_27), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
 	make_fixdef(make_poly(7, rata_poly_25), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
 	make_fixdef(make_poly(7, rata_poly_21), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
 	make_fixdef(make_poly(4, rata_poly_h7), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
 	make_fixdef(make_poly(5, rata_poly_crawl_r), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
 	make_fixdef(make_poly(5, rata_poly_crawl_l), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
-	make_fixdef(make_poly(4, rata_poly_sensor_21), cf::rata_sensor, 0, 0, 0.0, &rata_fixprop, true),
-	make_fixdef(make_poly(4, rata_poly_sensor_floor_r), cf::rata_sensor, 0, 0, 0.0, &rata_fixprop, true),
-	make_fixdef(make_poly(4, rata_poly_sensor_floor_l), cf::rata_sensor, 0, 0, 0.0, &rata_fixprop, true),
+	make_fixdef(make_poly(4, rata_poly_sensor_21), cf::sensor, 0, 0, 0.0, &rata_fixprop, true),
+	make_fixdef(make_poly(4, rata_poly_sensor_floor_r), cf::sensor, 0, 0, 0.0, &rata_fixprop, true),
+	make_fixdef(make_poly(4, rata_poly_sensor_floor_l), cf::sensor, 0, 0, 0.0, &rata_fixprop, true),
 	make_fixdef(make_circle(7*PX, 0*PX, 23.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),
 	make_fixdef(make_circle(7*PX, 0*PX, 16.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),
 	make_fixdef(make_circle(7*PX, 4.5*PX, 11.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),

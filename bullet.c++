@@ -26,11 +26,10 @@ void RBullet::move () {
 	lifetime++;
 	pos0 = pos2;
 	pos2 = pos1 = b2Vec2(-1/0.0, -1/0.0);
-
 	Object::LineChecker coll = Object::check_line(pos0.x, pos0.y, pos0.x+vel.x, pos0.y+vel.y, cf::bullet.maskBits, owner);
 
 	if (coll.hit) {
-		dbg(3, "Bullet hit.\n");
+		dbg(3, "Bullet hit %08x, cf %u.\n", coll.hit->GetBody()->GetUserData(), coll.hit->GetFilterData().categoryBits);
 		pos1 = pos0 + coll.frac * vel;
 		 // This is how you bounce.
 		float velnorm = dot(vel, coll.norm);

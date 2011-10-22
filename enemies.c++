@@ -30,7 +30,7 @@ struct AI : Walking {
 	
 	 // Sight and seeing
 	bool see_rata_at (float x, float y) {
-		LineChecker r = check_line(eyex(), eyey(), x, y, 1|2|32);
+		LineChecker r = check_line(eyex(), eyey(), x, y, 1|2|32|128);
 		return r.hit && r.hit->GetBody()->GetUserData() == rata;
 	}
 	bool see_rata () {

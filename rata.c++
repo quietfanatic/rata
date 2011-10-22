@@ -126,7 +126,7 @@ struct Rata : Walking {
 			if (fix_helmet_current && fix_helmet_current != fix) {
 				fix_helmet_current->SetFilterData(cf::disabled);
 			}
-			fix->SetFilterData(cf::rata);
+			fix->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 		}
 		else if (fix_helmet_current) {
 			fix_helmet_current->SetFilterData(cf::disabled);
