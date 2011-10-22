@@ -25,12 +25,13 @@ struct AI : Walking {
 	}
 
 	bool clear_to_point (float x, float y) {
-		return !check_line(eyex(), eyey(), x, y);
+		return !check_line(eyex(), eyey(), x, y).hit;
 	}
 	
 	 // Sight and seeing
 	bool see_rata_at (float x, float y) {
-		return check_line(eyex(), eyey(), x, y, 1|2|32) == rata;
+		LineChecker r = check_line(eyex(), eyey(), x, y, 1|2|32);
+		return r.hit && r.hit->GetBody()->GetUserData() == rata;
 	}
 	bool see_rata () {
 		return see_rata_at(rata->x(), rata->y()+0.8)

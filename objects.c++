@@ -210,6 +210,7 @@ struct Object {
 		b2Fixture* hit;
 		float dist;
 		uint16 cat;
+		b2Vec2 normal;
 		float32 ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
 			if (fix->GetFilterData().categoryBits & cat) {
 				if (f < dist) {
@@ -222,16 +223,13 @@ struct Object {
 		}
 	};
 
-	Object* check_line (float x1, float y1, float x2, float y2, uint16 cat = cf::solid.categoryBits) {
+	inline LineChecker check_line (float x1, float y1, float x2, float y2, uint16 cat = cf::solid.categoryBits) {
 		LineChecker checker;
 		checker.hit = NULL;
 		checker.cat = cat;
 		checker.dist = 1;
 		world->RayCast(&checker, b2Vec2(x1, y1), b2Vec2(x2, y2));
-		if (checker.hit) {
-			return (Object*)checker.hit->GetBody()->GetUserData();
-		}
-		else return NULL;
+		return checker;
 	}
 	 // Get contacts of a fixture
 	Object* get_touching (b2Fixture* fix) {

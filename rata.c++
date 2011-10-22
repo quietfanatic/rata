@@ -384,9 +384,9 @@ struct Rata : Walking {
 				can_see = false;
 			}
 			else {
-				Object* seeing = check_line(
+				b2Fixture* seeing = check_line(
 					aim_center_x(), aim_center_y(), aim_center_x()+cursor.x, aim_center_y()+cursor.y
-				);
+				).hit;
 				can_see = (seeing == NULL);
 			}
 			if (button[sf::Mouse::Left] == 1) {
