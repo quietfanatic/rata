@@ -879,7 +879,7 @@ struct myCL : b2ContactListener {
 		}
 	}
 	void PostSolve (b2Contact* contact, const b2ContactImpulse* ci) {
-		//if (!contact->IsTouching()) return;
+		if (!contact->IsTouching()) return;
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
 		FixProp* afp = (FixProp*) contact->GetFixtureA()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
