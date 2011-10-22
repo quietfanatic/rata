@@ -13,6 +13,8 @@ struct RBullet {
 	void move ();
 	void draw ();
 };
+RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power = 48, float mass = 2.0);
+inline RBullet* fire_rbullet_to (Object* owner, b2Vec2 pos, b2Vec2 to, float vel, int power = 48, float mass = 2.0);
 #else
 
 RBullet::RBullet () :lifetime(-1) { }
@@ -94,7 +96,7 @@ void RBullet::draw () {
 }
 RBullet bullets[MAX_BULLETS];
 
-RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power = 48, float mass = 2) {
+RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power, float mass) {
 	for (uint i=0; i < MAX_BULLETS; i++) {
 		if (bullets[i].lifetime < 0) {
 			bullets[i].pos2 = pos;
@@ -109,7 +111,11 @@ RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power = 48, fl
 	}
 	return NULL;
 }
-
+inline RBullet* fire_rbullet_to (Object* owner, b2Vec2 pos, b2Vec2 to, float vel, int power, float mass) {
+	b2Vec2 rel = to - pos;
+	rel.Normalize();
+	return fire_rbullet(owner, pos, vel * rel, power, mass);
+}
 
 #endif
 

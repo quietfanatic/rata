@@ -134,14 +134,14 @@ struct Patroller : AI {
 	}
 	void decision () {
 		if (threat_detected) {
-			Bullet* b = fire_bullet_to(
-				x(), y()+0.5,
-				prediction.x,
-				prediction.y + 1,
-				120, 48, 0.1
+			RBullet* b = fire_rbullet_to(
+				this,
+				b2Vec2(x(), y()+0.5),
+				b2Vec2(prediction.x, prediction.y + 1),
+				120, 48
 			);
 			snd::gunshot.play(1.0, 70);
-			add_vel(-b->desc->xvel/60, 0);
+			add_vel(-b->vel.x*FPS/60, 0);
 		}
 		b2Vec2 ratapos;
 		threat_detected = (rata->x() - x())*facing > 0;
@@ -221,14 +221,14 @@ struct Flyer : AI {
 		b2Vec2 ratapos = see_rata_pos();
 		 // Fire
 		if (prediction.IsValid()) {
-			Bullet* b = fire_bullet_to(
-				x(), y(),
-				prediction.x,
-				prediction.y,
-				120, 48, 0.1
+			RBullet* b = fire_rbullet_to(
+				this,
+				b2Vec2(x(), y()),
+				b2Vec2(prediction.x, prediction.y),
+				120, 48
 			);
 			snd::gunshot.play(1.0, 70);
-			add_vel(-b->desc->xvel/120, -b->desc->yvel/120);
+			add_vel(-b->vel.x*FPS/120, -b->vel.y*FPS/120);
 		}
 		 // Predict
 		if (ratapos.IsValid()) {
