@@ -14,7 +14,8 @@ struct RBullet {
 	void draw ();
 };
 RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power = 48, float mass = 0.2);
-inline RBullet* fire_rbullet_to (Object* owner, b2Vec2 pos, b2Vec2 to, float vel, int power = 48, float mass = 0.2);
+inline RBullet* fire_rbullet (Object* owner, b2Vec2 pos, float angle, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
+inline RBullet* fire_rbullet_to (Object* owner, b2Vec2 pos, b2Vec2 to, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
 #else
 
 RBullet::RBullet () :lifetime(-1) { }
@@ -114,10 +115,13 @@ RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power, float m
 	}
 	return NULL;
 }
-inline RBullet* fire_rbullet_to (Object* owner, b2Vec2 pos, b2Vec2 to, float vel, int power, float mass) {
+inline RBullet* fire_rbullet_dir (Object* owner, b2Vec2 pos, float angle, float vel, int power, float spread, float mass) {
+	angle = dither(angle, spread);
+	return fire_rbullet(owner, pos, b2Vec2(vel*cos(angle), vel*sin(angle)), power, mass);
+}
+inline RBullet* fire_rbullet_to (Object* owner, b2Vec2 pos, b2Vec2 to, float vel, int power, float spread, float mass) {
 	b2Vec2 rel = to - pos;
-	rel.Normalize();
-	return fire_rbullet(owner, pos, vel * rel, power, mass);
+	return fire_rbullet_dir(owner, pos, atan2(rel.y, rel.x), vel, power, spread, mass);
 }
 
 #endif

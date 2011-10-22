@@ -138,7 +138,7 @@ struct Patroller : AI {
 				this,
 				b2Vec2(x(), y()+0.5),
 				b2Vec2(prediction.x, prediction.y + 1),
-				120, 48
+				120, 48, 0.1
 			);
 			snd::gunshot.play(1.0, 70);
 			add_vel(-b->vel.x*FPS/60, 0);
@@ -225,7 +225,7 @@ struct Flyer : AI {
 				this,
 				b2Vec2(x(), y()),
 				b2Vec2(prediction.x, prediction.y),
-				120, 48
+				120, 48, 0.1
 			);
 			snd::gunshot.play(1.0, 70);
 			add_vel(-b->vel.x*FPS/120, -b->vel.y*FPS/120);
