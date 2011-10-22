@@ -110,16 +110,15 @@ void item::fire_handgun () {
 	//	          + item::handgun_bullety[rata->angle_frame],
 	//	rata->aim_direction
 	//);
-	fire_rbullet(
+	fire_rbullet_dir(
 		rata,
 		b2Vec2(rata->x() + rata->handx
 		                 + item::handgun_bulletx[rata->angle_frame]*rata->facing,
 		       rata->y() + rata->handy
 		                 + item::handgun_bullety[rata->angle_frame]
 		),
-		b2Vec2(120*cos(rata->aim_direction),
-		       120*sin(rata->aim_direction)
-		)
+		rata->aim_direction,
+		120
 	);
 	snd::gunshot.play(1.0, 80);
 }

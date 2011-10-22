@@ -14,7 +14,7 @@ struct RBullet {
 	void draw ();
 };
 RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power = 48, float mass = 0.2);
-inline RBullet* fire_rbullet (Object* owner, b2Vec2 pos, float angle, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
+inline RBullet* fire_rbullet_dir (Object* owner, b2Vec2 pos, float angle, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
 inline RBullet* fire_rbullet_to (Object* owner, b2Vec2 pos, b2Vec2 to, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
 #else
 
