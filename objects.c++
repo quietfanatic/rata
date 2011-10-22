@@ -857,7 +857,7 @@ void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Man
 
 struct myCL : b2ContactListener {
 	void PreSolve (b2Contact* contact, const b2Manifold* oldmanifold) {
-		if (!contact->IsTouching()) return;
+		if (!contact->IsTouching() || !contact->IsEnabled()) return;
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
 		//b2Manifold* manifold = contact->GetManifold();

@@ -114,6 +114,7 @@ struct Patroller : AI {
 		if (!facing) facing = -1;
 		floor_friction = 3.0;
 		ideal_xvel = 3.0*facing;
+		decision_timer = rand()%30;
 	}
 	virtual void before_move () {
 		if (threat_detected) {
@@ -176,6 +177,7 @@ struct Flyer : AI {
 		dest = b2Vec2(x(), y());
 		prediction = b2Vec2(0/0.0, 0/0.0);
 		oldpos = prediction;
+		decision_timer = rand()%40;
 	}
 	void before_move () {
 		float accel = 8.0;
