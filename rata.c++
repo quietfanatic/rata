@@ -47,6 +47,8 @@ struct Rata : Walking {
 	b2Fixture* fix_25;
 	b2Fixture* fix_21;
 	b2Fixture* fix_h7;
+	b2Fixture* fix_crawl_r;
+	b2Fixture* fix_crawl_l;
 	b2Fixture* fix_sensor_21;
 	b2Fixture* fix_helmet_current;
 	b2Fixture* fix_helmet_stand;
@@ -451,10 +453,12 @@ struct Rata : Walking {
 							allow_turn();
 						}
 						allow_look();
-						set_fix(fix_h7);
 						if (facing > 0)
+							set_fix(fix_crawl_r),
 							set_helmet(fix_helmet_crawl_r);
-						else set_helmet(fix_helmet_crawl_l);
+						else
+							set_fix(fix_crawl_l),
+							set_helmet(fix_helmet_crawl_l);
 					}
 					else if (state == crawling) {
 						if (check_fix(fix_sensor_21)) {
@@ -463,10 +467,12 @@ struct Rata : Walking {
 							max_aim = 1*M_PI/8;
 							allow_aim();
 							allow_use();
-							set_fix(fix_h7);
 							if (facing > 0)
+								set_fix(fix_crawl_r),
 								set_helmet(fix_helmet_crawl_r);
-							else set_helmet(fix_helmet_crawl_l);
+							else
+								set_fix(fix_crawl_l),
+								set_helmet(fix_helmet_crawl_l);
 						}
 						else {
 							allow_turn();
@@ -478,10 +484,12 @@ struct Rata : Walking {
 								if (aim > 1*M_PI/8 || aim < -1*M_PI/16) goto kneel;
 								else allow_use();
 							}
-							set_fix(fix_h7);
 							if (facing > 0)
+								set_fix(fix_crawl_r),
 								set_helmet(fix_helmet_crawl_r);
-							else set_helmet(fix_helmet_crawl_l);
+							else
+								set_fix(fix_crawl_l),
+								set_helmet(fix_helmet_crawl_l);
 						}
 					}
 					else {
@@ -712,7 +720,9 @@ struct Rata : Walking {
 		fix_25 = fix_27->GetNext();
 		fix_21 = fix_25->GetNext();
 		fix_h7 = fix_21->GetNext();
-		fix_sensor_21 = fix_h7->GetNext();
+		fix_crawl_r = fix_h7->GetNext();
+		fix_crawl_l = fix_crawl_r->GetNext();
+		fix_sensor_21 = fix_crawl_l->GetNext();
 		fix_helmet_stand = fix_sensor_21->GetNext();
 		fix_helmet_kneel = fix_helmet_stand->GetNext();
 		fix_helmet_crawl_r = fix_helmet_kneel->GetNext();
