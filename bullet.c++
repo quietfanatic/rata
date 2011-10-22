@@ -49,8 +49,10 @@ struct RBullet {
 			}
 			else {
 				just_bounce:
-				if (velnorm > -1)
+				if (velnorm > -1) {
+					snd::ricochet.play(0.7+rand()*0.3/RAND_MAX, 50);
 					pos2 = pos1 + (1-coll.frac) * vel;
+				}
 			}
 		}
 		else {
