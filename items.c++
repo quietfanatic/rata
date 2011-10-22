@@ -103,12 +103,23 @@ namespace item {
 
 void item::fire_handgun () {
 	rata->recoil_frames = 30;
-	rata->fire_bullet(
-		rata->x() + rata->handx
-		          + item::handgun_bulletx[rata->angle_frame]*rata->facing,
-		rata->y() + rata->handy
-		          + item::handgun_bullety[rata->angle_frame],
-		rata->aim_direction
+	//rata->fire_bullet(
+	//	rata->x() + rata->handx
+	//	          + item::handgun_bulletx[rata->angle_frame]*rata->facing,
+	//	rata->y() + rata->handy
+	//	          + item::handgun_bullety[rata->angle_frame],
+	//	rata->aim_direction
+	//);
+	fire_rbullet(
+		rata,
+		b2Vec2(rata->x() + rata->handx
+		                 + item::handgun_bulletx[rata->angle_frame]*rata->facing,
+		       rata->y() + rata->handy
+		                 + item::handgun_bullety[rata->angle_frame]
+		),
+		b2Vec2(120*cos(rata->aim_direction),
+		       120*sin(rata->aim_direction)
+		)
 	);
 	snd::gunshot.play(1.0, 80);
 }

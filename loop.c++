@@ -198,6 +198,10 @@ void draw_phase () {
 				));
 		}
 	}
+	 // Draw bullets
+	for (uint i=0; i < MAX_BULLETS; i++) {
+		bullets[i].draw();
+	}
 
 	 // Draw front tiles
 	if (rc) {
@@ -410,7 +414,9 @@ void input_phase () {
 void move_phase () {
 	for (Object* o = objects_by_order; o; o = o->next_order)
 		o->before_move();
-	
+
+	for (uint i=0; i < MAX_BULLETS; i++)
+		bullets[i].move();
 	if (world) {
 		world->SetAutoClearForces(false);
 		world->Step(1/120.0, 10, 10);

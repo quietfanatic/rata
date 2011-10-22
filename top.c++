@@ -70,6 +70,7 @@ bool camera_jump = false;
 Object* objects_by_depth = NULL;  // Objects are linked list
 Object* objects_by_order = NULL;
 Object* creation_queue = NULL;
+#define MAX_BULLETS 10
 
  // Input state
 unsigned char key[400];  // Counts number of frames up to 255
@@ -102,6 +103,7 @@ float tilepicker_width = 1.5;
 #include "items.c++"
 #undef DEF_ONLY
 #include "objects.c++"
+#include "bullet.c++"
 #include "items.c++"
 #include "tiles.c++"
 #include "rooms.c++"

@@ -207,27 +207,32 @@ struct Object {
 
 	 // Find one object (by default solid) along the line in world coords
 	struct LineChecker : public b2RayCastCallback {
-		b2Fixture* hit;
-		float dist;
+		Object* owner;
 		uint16 cat;
-		b2Vec2 normal;
+		float frac;
+		b2Fixture* hit;
+		b2Vec2 norm;
 		float32 ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
-			if (fix->GetFilterData().categoryBits & cat) {
-				if (f < dist) {
+			if (fix->GetFilterData().categoryBits & cat)
+			if (fix->GetBody()->GetUserData() != owner)
+			if (!((Object*)fix->GetBody()->GetUserData())->doomed) {
+				if (f < frac) {
 					hit = fix;
-					dist = f;
+					frac = f;
+					norm = n;
 				}
-				return dist;
+				return frac;
 			}
 			return 1;
 		}
 	};
 
-	inline LineChecker check_line (float x1, float y1, float x2, float y2, uint16 cat = cf::solid.categoryBits) {
+	static inline LineChecker check_line (float x1, float y1, float x2, float y2, uint16 cat = cf::solid.categoryBits, Object* owner = NULL) {
 		LineChecker checker;
-		checker.hit = NULL;
+		checker.owner = owner;
 		checker.cat = cat;
-		checker.dist = 1;
+		checker.frac = 1;
+		checker.hit = NULL;
 		world->RayCast(&checker, b2Vec2(x1, y1), b2Vec2(x2, y2));
 		return checker;
 	}
