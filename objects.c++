@@ -765,17 +765,29 @@ b2Vec2 rata_poly_crawl_r [] = {
 	b2Vec2(4*PX, 14*PX),
 };
 b2Vec2 rata_poly_crawl_l [] = {
-	b2Vec2(11*PX, 0.1*PX),
 	b2Vec2(-4*PX, 14*PX),
 	b2Vec2(-10*PX, 11*PX),
 	b2Vec2(-10*PX, 4*PX),
 	b2Vec2(-6*PX, 0.1*PX),
+	b2Vec2(11*PX, 0.1*PX),
 };
 b2Vec2 rata_poly_sensor_21 [] = {
 	b2Vec2(-2.5*PX, 0.1*PX),
 	b2Vec2(2.5*PX, 0.1*PX),
 	b2Vec2(2.5*PX, 21*PX),
 	b2Vec2(-2.5*PX, 21*PX),
+};
+b2Vec2 rata_poly_sensor_floor_r [] = {
+	b2Vec2(2*PX, -4*PX),
+	b2Vec2(10*PX, -4*PX),
+	b2Vec2(10*PX, 4*PX),
+	b2Vec2(2*PX, 4*PX),
+};
+b2Vec2 rata_poly_sensor_floor_l [] = {
+	b2Vec2(-2*PX, 4*PX),
+	b2Vec2(-10*PX, 4*PX),
+	b2Vec2(-10*PX, -4*PX),
+	b2Vec2(-2*PX, -4*PX),
 };
 
 FixProp rata_fixprop = {true, false, 1.0, 0, false};
@@ -790,6 +802,8 @@ b2FixtureDef rata_fixes [] = {
 	make_fixdef(make_poly(5, rata_poly_crawl_r), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
 	make_fixdef(make_poly(5, rata_poly_crawl_l), cf::disabled, 0, 0, 1.0, &rata_fixprop, false),
 	make_fixdef(make_poly(4, rata_poly_sensor_21), cf::rata_sensor, 0, 0, 0.0, &rata_fixprop, true),
+	make_fixdef(make_poly(4, rata_poly_sensor_floor_r), cf::rata_sensor, 0, 0, 0.0, &rata_fixprop, true),
+	make_fixdef(make_poly(4, rata_poly_sensor_floor_l), cf::rata_sensor, 0, 0, 0.0, &rata_fixprop, true),
 	make_fixdef(make_circle(7*PX, 0*PX, 23.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),
 	make_fixdef(make_circle(7*PX, 0*PX, 16.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),
 	make_fixdef(make_circle(7*PX, 4.5*PX, 11.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),
@@ -815,7 +829,7 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 const obj::Def obj::def [] = {
 
 	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, NULL},
-	{"Rata", 11, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
+	{"Rata", 13, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
 	{"Entrance", 0, NULL, -1000, -1000, obj::ALLOC<Entrance>, NULL},
 	{"Exit", 0, NULL, -100, -100, obj::ALLOC<Exit>, NULL},
 	{"Door", 0, NULL, -100, 200, obj::ALLOC<Door>, NULL},

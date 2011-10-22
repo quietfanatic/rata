@@ -50,6 +50,8 @@ struct Rata : Walking {
 	b2Fixture* fix_crawl_r;
 	b2Fixture* fix_crawl_l;
 	b2Fixture* fix_sensor_21;
+	b2Fixture* fix_sensor_floor_r;
+	b2Fixture* fix_sensor_floor_l;
 	b2Fixture* fix_helmet_current;
 	b2Fixture* fix_helmet_stand;
 	b2Fixture* fix_helmet_kneel;
@@ -463,7 +465,10 @@ struct Rata : Walking {
 					else if (state == crawling) {
 						if (check_fix(fix_sensor_21)) {
 							allow_look();
-							min_aim = -1*M_PI/16;
+							if (check_fix(facing>0 ? fix_sensor_floor_r : fix_sensor_floor_l))
+								min_aim = -1*M_PI/16;
+							else
+								min_aim = -3*M_PI/8;
 							max_aim = 1*M_PI/8;
 							allow_aim();
 							allow_use();
@@ -477,11 +482,14 @@ struct Rata : Walking {
 						else {
 							allow_turn();
 							allow_look();
-							min_aim = -1*M_PI/4;
+							if (check_fix(facing>0 ? fix_sensor_floor_r : fix_sensor_floor_l))
+								min_aim = -1*M_PI/16;
+							else
+								min_aim = -3*M_PI/8;
 							max_aim = wearing_helmet() ? 3*M_PI/8 : M_PI/2;
 							if (allow_aim()) {
 								float aim = facing>0 ? aim_direction : flip_angle(aim_direction);
-								if (aim > 1*M_PI/8 || aim < -1*M_PI/16) goto kneel;
+								if (aim > 1*M_PI/8) goto kneel;
 								else allow_use();
 							}
 							if (facing > 0)
@@ -495,7 +503,10 @@ struct Rata : Walking {
 					else {
 						allow_turn();
 						allow_look();
-						min_aim = -1*M_PI/4;
+						if (check_fix(facing>0 ? fix_sensor_floor_r : fix_sensor_floor_l))
+							min_aim = -1*M_PI/4;
+						else
+							min_aim = -3*M_PI/8;
 						max_aim = wearing_helmet() ? 3*M_PI/8 : M_PI/2;
 						allow_aim();
 						kneel:
@@ -723,7 +734,9 @@ struct Rata : Walking {
 		fix_crawl_r = fix_h7->GetNext();
 		fix_crawl_l = fix_crawl_r->GetNext();
 		fix_sensor_21 = fix_crawl_l->GetNext();
-		fix_helmet_stand = fix_sensor_21->GetNext();
+		fix_sensor_floor_r = fix_sensor_21->GetNext();
+		fix_sensor_floor_l = fix_sensor_floor_r->GetNext();
+		fix_helmet_stand = fix_sensor_floor_l->GetNext();
 		fix_helmet_kneel = fix_helmet_stand->GetNext();
 		fix_helmet_crawl_r = fix_helmet_kneel->GetNext();
 		fix_helmet_crawl_l = fix_helmet_crawl_r->GetNext();
