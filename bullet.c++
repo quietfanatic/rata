@@ -41,7 +41,8 @@ void RBullet::move () {
 			Object* o = (Object*)coll.hit->GetBody()->GetUserData();
 			if (fp == &rata_fixprop_helmet) {
 				float ang = atan2(coll.norm.y, coll.norm.x);
-				if (gt_angle(rata->helmet_angle, ang))
+				dbg(4, "Helmet strike: %f,%f; %f > %f == %d\n", coll.norm.x, coll.norm.y, ang, rata->helmet_angle, gt_angle(ang, rata->helmet_angle));
+				if (gt_angle(ang, rata->helmet_angle))
 					goto just_bounce;
 			}
 			if (o->desc->id == obj::rata) {
