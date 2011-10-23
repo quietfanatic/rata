@@ -111,7 +111,6 @@ namespace room {
 		transition = true;
 		for (Object* o = objects_by_depth; o; o = o->next_depth) {
 			if (o->desc->id != obj::rata) {
-				printf("Leaving behind 0x%08x.\n", o);
 				o->destroy();
 			}
 		}

@@ -769,8 +769,8 @@ void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Man
 	if (afp == &rata_fixprop_helmet) {
 		Vec norm = manifold->localNormal;
 		float angle = ang(norm);
-		printf("Normal: %f, %f\n", norm.y, norm.x);
-		printf("gt_angle(%f, %f) = %d\n", rata->helmet_angle, angle, gt_angle(rata->helmet_angle, angle));
+		//printf("Normal: %f, %f\n", norm.y, norm.x);
+		//printf("gt_angle(%f, %f) = %d\n", rata->helmet_angle, angle, gt_angle(rata->helmet_angle, angle));
 		if (gt_angle(rata->helmet_angle, angle))
 			return;
 	}
