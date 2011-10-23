@@ -135,13 +135,11 @@ namespace room {
 				if (e < nv) {
 					uint n1e = e==0   ? nv-1: e-1;
 					uint n2e = e==nv-1? 0   : e+1;
-					edges[x][y][e] = {
-						true,
-						&edges[x][y][n1e],
-						t.vertexes[e] + Vec(x, height-y-1),
-						t.vertexes[n2e] + Vec(x, height-y-1),
-						&edges[x][y][n2e]
-					};
+					edges[x][y][e].use = true;
+					edges[x][y][e].n1 = &edges[x][y][n1e];
+					edges[x][y][e].v1 = t.vertexes[e] + Vec(x, height-y-1);
+					edges[x][y][e].v2 = t.vertexes[n2e] + Vec(x, height-y-1);
+					edges[x][y][e].n2 = &edges[x][y][n2e];
 				}
 				else edges[x][y][e].use = false;
 			}

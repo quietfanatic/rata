@@ -256,12 +256,12 @@ struct Object {
 			if (c->IsEnabled() && c->IsTouching()) {
 				if (c->GetFixtureA() == fix) {
 					Object* other = (Object*)c->GetFixtureB()->GetBody()->GetUserData();
-					if (yvelrel(other) <= 0.4)
+					//if (yvelrel(other) <= 0.4)
 						r = other;
 				}
 				else if (c->GetFixtureB() == fix) {
 					Object* other = (Object*)c->GetFixtureA()->GetBody()->GetUserData();
-					if (yvelrel(other) <= 0.4)
+					//if (yvelrel(other) <= 0.4)
 						r = other;
 				}
 			}
@@ -332,6 +332,9 @@ struct Object {
 	}
 	float yvelrel(Object* other) {
 		return yvel() - other->yvel();
+	}
+	Vec velrel(Object* other) {
+		return vel() - other->vel();
 	}
 	inline void set_pos(Vec p) {
 		body->SetTransform(p, 0);
