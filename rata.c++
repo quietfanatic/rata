@@ -34,8 +34,7 @@ struct Rata : Walking {
 	 // For animation
 	float distance_walked;
 	float oldxrel;
-	float handx;
-	float handy;
+	Vec hand_pos;
 	uint angle_frame;  // 0=down, 8=up
 	float oldyvel;
 	float helmet_angle;
@@ -68,12 +67,12 @@ struct Rata : Walking {
 		action_enter,
 	};
 	int action;
-	void propose_action (int act, void* arg, float xp, float yp, float radius) {
-		if (y() > yp - radius)
-		if (y() < yp + radius)
-		if (x() > xp - radius)
-		if (x() < xp + radius) {
-			float dist = abs_f(x() - xp);
+	void propose_action (int act, void* arg, Vec p, float radius) {
+		if (y() > p.y - radius)
+		if (y() < p.y + radius)
+		if (x() > p.x - radius)
+		if (x() < p.x + radius) {
+			float dist = abs_f(x() - p.x);
 			if (dist < action_distance || dist < 0.2) {
 				action = act;
 				action_arg = arg;
@@ -89,8 +88,7 @@ struct Rata : Walking {
 	bool wearing_helmet () {
 		return equip_info(item::head) == &item::helmet;
 	}
-	float aim_center_x () { return x() + 2*PX*facing; }
-	float aim_center_y () { return y() + 13*PX; }
+	Vec aim_center () { return pos() + Vec(2*PX*facing, 13*PX); }
 
 //	b2Fixture* fix_current () {
 //		if (hurt_frames) return fix_27();
@@ -226,8 +224,8 @@ struct Rata : Walking {
 		aim_distance = sqrt(cursor.x*cursor.x + cursor.y*cursor.y);
 		aim_direction = atan2(cursor.y, cursor.x);
 		pointed_object = check_area(
-			aim_center_x() + cursor.x + 1*PX, aim_center_y() + cursor.y + 1*PX,
-			aim_center_x() + cursor.x - 1*PX, aim_center_y() + cursor.y - 1*PX,
+			aim_center().x + cursor.x + 1*PX, aim_center().y + cursor.y + 1*PX,
+			aim_center().x + cursor.x - 1*PX, aim_center().y + cursor.y - 1*PX,
 			1|2|4|8|16|32|64
 		);
 	}
@@ -384,7 +382,7 @@ struct Rata : Walking {
 			}
 			else {
 				b2Fixture* seeing = check_line(
-					Vec(aim_center_x(), aim_center_y()), Vec(aim_center_x()+cursor.x, aim_center_y()+cursor.y)
+					aim_center(), aim_center() + Vec(cursor.x, cursor.y)
 				).hit;
 				can_see = (seeing == NULL);
 			}
@@ -702,28 +700,6 @@ struct Rata : Walking {
 			}
 		}
 		else distance_walked = 0;
-		 // Constrain cursor to room
-		 /*
-		if (cursor.x > 2)
-		if (cursor.x + aim_center_x() > room::current->width) {
-			cursor.y *= (room::current->width - aim_center_x()) / cursor.x;
-			cursor.x = room::current->width - aim_center_x();
-		}
-		if (cursor.x < -2)
-		if (cursor.x + aim_center_x() < 0) {
-			cursor.y *= (-aim_center_x()) / cursor.x;
-			cursor.x = -aim_center_x();
-		}
-		if (cursor.y > 2)
-		if (cursor.y + aim_center_y() > room::current->height) {
-			cursor.x *= (room::current->height - aim_center_y()) / cursor.y;
-			cursor.y = room::current->height - aim_center_y();
-		}
-		if (cursor.y < -2)
-		if (cursor.y + aim_center_y() < 0) {
-			cursor.x *= (-aim_center_y()) / cursor.y;
-			cursor.y = -aim_center_y();
-		} */
 	};
 	virtual void on_create () {
 		make_body(desc, true, true);
@@ -943,8 +919,10 @@ struct Rata : Walking {
 		float army = pose::body::army[bodypose];
 		float forearmx = armx + pose::arm::forearmx[armpose]*(armflip?-1:1);
 		float forearmy = army + pose::arm::forearmy[armpose];
-		handx = forearmx + pose::forearm::handx[forearmpose]*(forearmflip?-1:1);
-		handy = forearmy + pose::forearm::handy[forearmpose];
+		hand_pos = Vec(
+			forearmx + pose::forearm::handx[forearmpose]*(forearmflip?-1:1),
+			forearmy + pose::forearm::handy[forearmpose]
+		);
 
 		 // Now to actually draw.
 
@@ -1022,8 +1000,8 @@ struct Rata : Walking {
 		if (equip_info(i)->hand)
 			draw_image(
 				equip_info(i)->hand,
-				dx + handx,
-				dy + handy,
+				dx + hand_pos.x,
+				dy + hand_pos.y,
 				handpose, flip
 			);
 		

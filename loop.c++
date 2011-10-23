@@ -107,8 +107,8 @@ void draw_tiles_front () {
 void draw_phase () {
 	Room* rc = room::current;
 	if (rata) {
-		float focusx = rata->aim_center_x() + cursor.x/2.0;
-		float focusy = rata->aim_center_y() + cursor.y/2.0;
+		float focusx = rata->aim_center().x + cursor.x/2.0;
+		float focusy = rata->aim_center().y + cursor.y/2.0;
 		if (focusx < 10) focusx = 10;
 		if (focusy < 7.5) focusy = 7.5;
 		if (focusx > rc->width-10) focusx = rc->width-10;
@@ -290,25 +290,27 @@ void draw_phase () {
 	 // Draw cursor
 	if (trap_cursor) {
 		window->ShowMouseCursor(false);
+		float ax = rata->aim_center().x;
+		float ay = rata->aim_center().y;
 		float cx = cursor.x;
 		float cy = cursor.y;
-		if (cx + rata->aim_center_x() > viewright()) {
-			cy *= (viewright() - rata->aim_center_x()) / cx;
-			cx = viewright() - rata->aim_center_x();
+		if (cx+ax > viewright()) {
+			cy *= (viewright() - ax) / cx;
+			cx = viewright() - ax;
 		}
-		if (cx + rata->aim_center_x() < viewleft()) {
-			cy *= (viewleft() - rata->aim_center_x()) / cx;
-			cx = viewleft() - rata->aim_center_x();
+		if (cx+ax < viewleft()) {
+			cy *= (viewleft() - ax) / cx;
+			cx = viewleft() - ax;
 		}
-		if (cy + rata->aim_center_y() > viewtop()) {
-			cx *= (viewtop() - rata->aim_center_y()) / cy;
-			cy = viewtop() - rata->aim_center_y();
+		if (cy+ay > viewtop()) {
+			cx *= (viewtop() - ay) / cy;
+			cy = viewtop() - ay;
 		}
-		if (cy + rata->aim_center_y() < viewbottom()) {
-			cx *= (viewbottom() - rata->aim_center_y()) / cy;
-			cy = viewbottom() - rata->aim_center_y();
+		if (cy+ay < viewbottom()) {
+			cx *= (viewbottom() - ay) / cy;
+			cy = viewbottom() - ay;
 		}
-		draw_image(cursor.img, cx + rata->aim_center_x(), cy + rata->aim_center_y());
+		draw_image(cursor.img, cx+ax, cy+ay);
 	}
 	else {
 		window->ShowMouseCursor(true);

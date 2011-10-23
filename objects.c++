@@ -457,7 +457,7 @@ void Item::draw () {
 }
 void Item::before_move () {
 	if (rata->floor)
-		rata->propose_action(Rata::action_equip, this, desc->x, desc->y, 1);
+		rata->propose_action(Rata::action_equip, this, Vec(desc->x, desc->y), 1);
 }
 
 
@@ -493,7 +493,7 @@ struct Exit : Object {
 struct Door : Object {
 	void before_move () {
 		if (rata->floor)
-			rata->propose_action(Rata::action_enter, this, desc->x, desc->y, desc->xvel);
+			rata->propose_action(Rata::action_enter, this, Vec(desc->x, desc->y), desc->xvel);
 	}
 };
 
