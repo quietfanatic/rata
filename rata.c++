@@ -135,6 +135,7 @@ struct Rata : Walking {
 	 // Equipment and inventory management
 
 	void spawn_item (obj::Desc* itemdesc) {
+		itemdesc->id = obj::item;
 		itemdesc->pos = pos();
 		itemdesc->facing = facing;
 		itemdesc->manifest();
@@ -151,6 +152,7 @@ struct Rata : Walking {
 	}	
 	void pick_up (Item* itemobj) {
 		itemobj->destroy();
+		itemobj->desc->id = -1;
 		add_to_inventory(itemobj->desc);
 	}
 	void drop (uint i) {
@@ -170,6 +172,7 @@ struct Rata : Walking {
 	}
 	void pick_up_equip (Item* itemobj) {
 		itemobj->destroy();
+		itemobj->desc->id = -1;
 		int slot = ((item::Equip*)itemobj->desc->data)->slot;
 		if (equipment[slot])
 			unequip_drop(equipment[slot]);

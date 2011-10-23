@@ -97,6 +97,7 @@ struct obj::Def {
 };
 
 struct obj::Desc {
+	int16 room;
 	int16 id;
 	bool temp;
 	Vec pos;
@@ -107,8 +108,8 @@ struct obj::Desc {
 	Object* manifest ();
 
 	 // Alright, we'll use a C++ constructor...just for default args.
-	Desc (uint16 id_=0, void* data_=NULL, Vec pos_=Vec(0, 0), Vec vel_=Vec(0, 0), int facing_=0, bool temp_=false, uint32 data2_=0)
-	 :id(id_), data(data_), pos(pos_), vel(vel_), facing(facing_), temp(temp_), data2(data2_)
+	Desc (uint16 id_=0, void* data_=NULL, Vec pos_=Vec(0, 0), Vec vel_=Vec(0, 0), int facing_=0, bool temp_=false, uint32 data2_=0, int16 room_=-1)
+	 :id(id_), data(data_), pos(pos_), vel(vel_), facing(facing_), temp(temp_), data2(data2_), room(room_)
 		{ }
 };
 
