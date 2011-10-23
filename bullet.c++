@@ -25,10 +25,11 @@ void RBullet::move () {
 	if (lifetime == 2) owner = NULL;
 	lifetime++;
 	pos0 = pos2;
-	pos2 = pos1 = b2Vec2(-1/0.0, -1/0.0);
-	Object::LineChecker coll = Object::check_line(pos0.x, pos0.y, pos0.x+vel.x, pos0.y+vel.y, cf::bullet.maskBits, owner);
-
-	if (coll.hit) {
+	pos1 = b2Vec2(-1/0.0, -1/0.0);
+	pos2 = pos0 + vel;
+	Object::LineChecker coll;
+	coll = Object::check_line(pos0.x, pos0.y, pos2.x, pos2.y, cf::bullet.maskBits, owner);
+	while (coll.hit) {
 		dbg(3, "Bullet hit %08x, cf %u.\n", coll.hit->GetBody()->GetUserData(), coll.hit->GetFilterData().categoryBits);
 		pos1 = pos0 + coll.frac * vel;
 		 // This is how you bounce.
@@ -57,17 +58,21 @@ void RBullet::move () {
 				pos1.x, pos1.y, 11, 0, 0, true
 			))->manifest();
 			no_damage: { }
+			coll.hit = NULL;
+			pos2 = b2Vec2(-1/0.0, -1/0.0);
 		}
 		else {
 			just_bounce:
 			if (velnorm > -1) {
 				snd::ricochet.play(0.7+rand()*0.3/RAND_MAX, 50);
 				pos2 = pos1 + (1-coll.frac) * vel;
+				coll = Object::check_line(pos1.x, pos1.y, pos2.x, pos2.y, cf::bullet.maskBits, (Object*)coll.hit->GetBody()->GetUserData());
+			}
+			else {
+				coll.hit = NULL;
+				pos2 = b2Vec2(-1/0.0, -1/0.0);
 			}
 		}
-	}
-	else {
-		pos2 = pos0 + vel;
 	}
 	vel.y -= 30/FPS/FPS;
 }
