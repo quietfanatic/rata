@@ -367,7 +367,7 @@ struct Rata : Walking {
 			}
 			case action_enter: {
 				obj::Desc* d = ((Object*)action_arg)->desc;
-				((Room*)d->data)->enter(d->data2);
+				room::list[(uint)d->data]->enter(d->data2);
 				break;
 			}
 			default: { }

@@ -22,10 +22,10 @@ END_ROOM_TILES
 
 BEGIN_ROOM_OBJECTS
 ROOM_OBJECT(obj::entrance, 1.500000, 1.000000, 0.000000, 0.000000, 0, 0, 0)
-ROOM_OBJECT(obj::door, 8.500000, 1.000000, 0.500000, 0.000000, 0, &room::file::test1::room, 0)
-ROOM_OBJECT(obj::door, 10.500000, 1.000000, 0.500000, 0.000000, 0, &room::file::test2::room, 0)
-ROOM_OBJECT(obj::door, 12.500000, 1.000000, 0.500000, 0.000000, 0, &room::file::test3::room, 0)
-ROOM_OBJECT(obj::door, 14.500000, 1.000000, 0.500000, 0.000000, 0, &room::file::test4::room, 0)
+ROOM_OBJECT(obj::door, 8.500000, 1.000000, 0.500000, 0.000000, 0, room::test1, 0)
+ROOM_OBJECT(obj::door, 10.500000, 1.000000, 0.500000, 0.000000, 0, room::test2, 0)
+ROOM_OBJECT(obj::door, 12.500000, 1.000000, 0.500000, 0.000000, 0, room::test3, 0)
+ROOM_OBJECT(obj::door, 14.500000, 1.000000, 0.500000, 0.000000, 0, room::test4, 0)
 ROOM_OBJECT(obj::item, 14.500000, 5.000000, 0.000000, 0.000000, 0, item::handgun, 0)
 END_ROOM_OBJECTS
 

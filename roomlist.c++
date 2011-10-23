@@ -1,5 +1,17 @@
 
 
+enum ID {
+	roompicker,
+	test1,
+	test2,
+	test3,
+	test4,
+	edit1,
+	edit2,
+	lotsodanger,
+	n_rooms
+};
+
 namespace file {
 	namespace roompicker { extern Room room; }
 	namespace test1 { extern Room room; }
@@ -35,7 +47,6 @@ namespace file {
 	}
 };
 
-uint n_rooms = 8;
 Room* list [] = {
 	&file::roompicker::room,
 	&file::test1::room,
