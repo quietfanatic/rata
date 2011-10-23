@@ -180,7 +180,7 @@ struct Rata : Walking {
 		if (otherslot > 0 && equipment[otherslot])
 			unequip_drop(equipment[otherslot]);
 		equipment[slot] = itemobj->desc;
-		itemobj->desc->room = -200 - slot;
+		itemobj->desc->room = -200;
 		if (otherslot > 0) equipment[otherslot] = itemobj->desc;
 	}
 

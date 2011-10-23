@@ -94,7 +94,7 @@ struct obj::Desc {
 	int16 id;
 	Vec pos;
 	Vec vel;
-	int facing;
+	int32 facing;
 	uint32 data;
 	uint32 data2;
 	Object* manifest ();

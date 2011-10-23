@@ -368,6 +368,7 @@ void input_phase () {
 			if (event.Key.Code == sf::Key::Num2) enter_room(room::test2, 0);
 			if (event.Key.Code == sf::Key::Num3) enter_room(room::test3, 0);
 			if (event.Key.Code == sf::Key::Num4) enter_room(room::test4, 0);
+			if (event.Key.Code == sf::Key::Num0) save_save();
 			if (event.Key.Code >= 400) break;
 			key[event.Key.Code] = 1;
 			break;
