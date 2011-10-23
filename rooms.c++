@@ -160,7 +160,7 @@ namespace room {
 		 // Transform to b2Fixtures
 		tilemap_obj = (new obj::Desc(
 			obj::tilemap, NULL,
-			0, 0, 0, 0, 0, true
+			Vec(0, 0), Vec(0, 0), 0, true
 		))->manifest();
 		tilemap_obj->make_body(tilemap_obj->desc, false, false);
 		b2FixtureDef fixdef;
@@ -227,7 +227,7 @@ namespace room {
 #define BEGIN_ROOM_TILES int16 tiles [] = {
 #define END_ROOM_TILES };
 #define BEGIN_ROOM_OBJECTS obj::Desc objects [] = {
-#define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(id, data, x, y, xvel, yvel, facing, false, data2),
+#define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(id, data, Vec(x, y), Vec(xvel, yvel), facing, false, data2),
 #define END_ROOM_OBJECTS obj::Desc()};
 #define ROOM_DEF(w, h, o, r, g, b, a, bg) Room room = {w, h, sf::Color(r, g, b, a), bg, tiles, o, objects, NULL};
 #define END_ROOM

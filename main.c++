@@ -35,7 +35,7 @@ int main () {
 //	}
 	rata = (Rata*)obj::Desc(
 		obj::rata, NULL,
-		10, 10
+		Vec(10, 10)
 	).manifest();
 	room::file::roompicker::room.enter(0);
 	bgm::life.SetVolume(80);

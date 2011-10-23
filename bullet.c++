@@ -55,7 +55,7 @@ void RBullet::move () {
 			o->damage(power * fp->damage_factor);
 			(new obj::Desc(
 				obj::hiteffect, &img::hit_damagable,
-				pos1.x, pos1.y, 11, 0, 0, true
+				pos1, Vec(11, 0), 0, true
 			))->manifest();
 			no_damage: { }
 			coll.hit = NULL;

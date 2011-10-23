@@ -99,18 +99,16 @@ struct obj::Def {
 struct obj::Desc {
 	uint16 id;
 	bool temp;
-	float x;
-	float y;
-	float xvel;
-	float yvel;
+	Vec pos;
+	Vec vel;
 	int facing;
 	Data data;
 	Data data2;
 	Object* manifest ();
 
 	 // Alright, we'll use a C++ constructor...just for default args.
-	Desc (uint16 id_=0, void* data_=NULL, float x_=0, float y_=0, float xvel_=0, float yvel_=0, int facing_=0, bool temp_=false, uint32 data2_=0)
-	 :id(id_), data(data_), x(x_), y(y_), xvel(xvel_), yvel(yvel_), facing(facing_), temp(temp_), data2(data2_)
+	Desc (uint16 id_=0, void* data_=NULL, Vec pos_=Vec(0, 0), Vec vel_=Vec(0, 0), int facing_=0, bool temp_=false, uint32 data2_=0)
+	 :id(id_), data(data_), pos(pos_), vel(vel_), facing(facing_), temp(temp_), data2(data2_)
 		{ }
 };
 
@@ -166,8 +164,8 @@ struct Object {
 	void make_body (obj::Desc* desc, bool dynamic=false, bool bullet=false) {
 		b2BodyDef d;
 		if (dynamic) d.type = b2_dynamicBody;
-		d.position.Set(desc->x, desc->y);
-		d.linearVelocity.Set(desc->xvel, desc->yvel);
+		d.position = desc->pos;
+		d.linearVelocity = desc->vel;
 		d.fixedRotation = true;
 		d.userData = this;
 		d.gravityScale = 1.0;
@@ -297,7 +295,7 @@ struct Object {
 				draw_image(def()->image, pos(), subimage, facing == 1);
 			}
 			else {
-				draw_image(def()->image, Vec(desc->x, desc->y), subimage, facing == 1);
+				draw_image(def()->image, desc->pos, subimage, facing == 1);
 			}
 		}
 	}
@@ -326,7 +324,8 @@ struct Object {
 	Vec pos() { return body->GetPosition(); }
 	float xvel() { return body->GetLinearVelocity().x; }
 	float yvel() { return body->GetLinearVelocity().y; }
-	float speed() { return xvel()*xvel() + yvel()*yvel(); }
+	Vec vel() { return body->GetLinearVelocity(); }
+	//float speed() { return xvel()*xvel() + yvel()*yvel(); }
 	float mass() { return body->GetMass(); }
 	float xvelrel(Object* other) {
 		return xvel() - other->xvel();
@@ -334,29 +333,29 @@ struct Object {
 	float yvelrel(Object* other) {
 		return yvel() - other->yvel();
 	}
-	void set_pos(float x, float y) {
-		body->SetTransform(b2Vec2(x, y), 0);
+	inline void set_pos(Vec p) {
+		body->SetTransform(p, 0);
 	}
-	void set_vel(float x, float y) {
-		body->SetLinearVelocity(b2Vec2(x, y));
+	inline void set_vel(Vec v) {
+		body->SetLinearVelocity(v);
 	}
-	void add_vel(float x, float y) {
-		b2Vec2 oldvel = body->GetLinearVelocity();
-		body->SetLinearVelocity(b2Vec2(oldvel.x+x, oldvel.y+y));
+	inline void add_vel(Vec v) {
+		Vec oldvel = body->GetLinearVelocity();
+		body->SetLinearVelocity(oldvel + v);
 	}
-	void impulse (float x, float y) {
-		body->ApplyLinearImpulse(b2Vec2(x, y), body->GetPosition());
+	void impulse (Vec i) {
+		body->ApplyLinearImpulse(i, body->GetPosition());
 	}
-	void mutual_impulse(Object* other, float x, float y) {
+	void mutual_impulse(Object* other, Vec i) {
 		float m = body->GetMass();
 		float om = other->body->GetMass();
 		if (m == 0 || m == 1/0.0)
-			other->body->ApplyLinearImpulse(b2Vec2(x, y), other->body->GetPosition());
+			other->body->ApplyLinearImpulse(i, other->body->GetPosition());
 		if (om == 0 || om == 1/0.0)
-			body->ApplyLinearImpulse(b2Vec2(-x, -y), body->GetPosition());
+			body->ApplyLinearImpulse(-i, body->GetPosition());
 		else {
-			other->body->ApplyLinearImpulse(b2Vec2(x*m/(m+om), y*m/(m+om)), other->body->GetPosition());
-			body->ApplyLinearImpulse(b2Vec2(-x*om/(m+om), -y*om/(m+om)), other->body->GetPosition());
+			other->body->ApplyLinearImpulse(i * m/(m+om), other->body->GetPosition());
+			body->ApplyLinearImpulse(-i * om/(m+om), other->body->GetPosition());
 		}
 	}
 
@@ -390,7 +389,7 @@ struct Walking : Object {
 		 // Create friction body
 		b2BodyDef fricdef;
 		fricdef.type = b2_kinematicBody;
-		fricdef.position.Set(desc->x, desc->y);
+		fricdef.position = desc->pos;
 		friction_body = world->CreateBody(&fricdef);
 		 // Create joint
 		b2FrictionJointDef fjd;
@@ -452,12 +451,12 @@ struct Item : Object {
 void Item::draw () {
 	if (desc->data) {
 		item::Equip* info = (item::Equip*)desc->data;
-		draw_image(info->appearance, Vec(desc->x, desc->y), info->world_frame);
+		draw_image(info->appearance, desc->pos, info->world_frame);
 	}
 }
 void Item::before_move () {
 	if (rata->floor)
-		rata->propose_action(Rata::action_equip, this, Vec(desc->x, desc->y), 1);
+		rata->propose_action(Rata::action_equip, this, desc->pos, 1);
 }
 
 
@@ -465,13 +464,12 @@ struct Entrance : Object {
 	void on_create () {
 		if (room::entrance == (int)desc->data2) {
 			if (rata->body) {
-				rata->set_pos(desc->x, desc->y-0.1);
+				rata->set_pos(desc->pos);
 				if (desc->data) rata->state = (Rata::State)(uint)desc->data;
 				if (desc->facing) rata->facing = desc->facing;
 			}
 			else {
-				rata->desc->x = desc->x;
-				rata->desc->y = desc->y-0.1;
+				rata->desc->pos = desc->pos;
 				if (desc->data) rata->desc->data = desc->data;
 				if (desc->facing) rata->desc->facing = desc->facing;
 			}
@@ -482,10 +480,10 @@ struct Entrance : Object {
 
 struct Exit : Object {
 	void after_move () {
-		if (rata->x() > desc->x)
-		if (rata->x() < desc->x + desc->xvel)
-		if (rata->y() > desc->y)
-		if (rata->y() < desc->y + desc->yvel)
+		if (rata->x() > desc->pos.x)
+		if (rata->x() < desc->pos.x + desc->vel.x)
+		if (rata->y() > desc->pos.y)
+		if (rata->y() < desc->pos.y + desc->vel.y)
 			((Room*)desc->data)->enter(desc->data2);
 	}
 };
@@ -493,7 +491,7 @@ struct Exit : Object {
 struct Door : Object {
 	void before_move () {
 		if (rata->floor)
-			rata->propose_action(Rata::action_enter, this, Vec(desc->x, desc->y), desc->xvel);
+			rata->propose_action(Rata::action_enter, this, desc->pos, desc->vel.x);
 	}
 };
 
@@ -523,10 +521,10 @@ struct Mousehole : Object {
 		timer--;
 		if (timer <= 0) {
 			timer = 300 + rand() % 1200;
-			if (rata && abs_f(rata->x() - desc->x) < 3.0 && abs_f(rata->y() - desc->y)) {
+			if (rata && abs_f(rata->x() - desc->pos.x) < 3.0 && abs_f(rata->y() - desc->pos.y)) {
 				return;
 			}
-			(new obj::Desc (obj::rat, NULL, desc->x, desc->y, 0, 0, 0, true))->manifest();
+			(new obj::Desc (obj::rat, NULL, desc->pos, Vec(0, 0), 0, true))->manifest();
 		}
 	}
 	virtual void on_create () {
@@ -542,7 +540,7 @@ struct HitEffect : Object {
 	uint fpsub;
 	virtual void on_create () {
 		Object::on_create();
-		timer = desc->xvel;
+		timer = desc->vel.x;
 		//img::Image* image = ((img::Image*)desc->data);
 		img::Image* image = &img::hit_damagable;
 		numsubs = image->numsubs();
@@ -552,7 +550,7 @@ struct HitEffect : Object {
 		//img::Image* image = ((img::Image*)desc->data);
 		img::Image* image = &img::hit_damagable;
 		uint sub = numsubs - timer / numsubs - 1;
-		draw_image(image, Vec(desc->x, desc->y), sub);
+		draw_image(image, desc->pos, sub);
 		timer--;
 		if (timer == 0) destroy();
 	}
@@ -786,11 +784,9 @@ void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Man
 	a->damage(bfp->touch_damage * afp->damage_factor);
 
 	if (manifold->type == b2Manifold::e_faceA)
-		a->impulse(manifold->localNormal.x*DAMAGE_KNOCKBACK,
-		           manifold->localNormal.y*DAMAGE_KNOCKBACK);
+		a->impulse(manifold->localNormal*DAMAGE_KNOCKBACK);
 	else if (manifold->type == b2Manifold::e_faceB)
-		a->impulse(-manifold->localNormal.x*DAMAGE_KNOCKBACK,
-		           -manifold->localNormal.y*DAMAGE_KNOCKBACK);
+		a->impulse(-manifold->localNormal*DAMAGE_KNOCKBACK);
 }
 
 

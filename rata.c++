@@ -135,8 +135,7 @@ struct Rata : Walking {
 	 // Equipment and inventory management
 
 	void spawn_item (obj::Desc* itemdesc) {
-		itemdesc->x = x();
-		itemdesc->y = y();
+		itemdesc->pos = pos();
 		itemdesc->facing = facing;
 		itemdesc->manifest();
 	}
@@ -280,7 +279,7 @@ struct Rata : Walking {
 	bool allow_jump () {
 		if (key[sf::Key::W] && key[sf::Key::W] == 1) {  // Jump
 			//mutual_impulse(floor, 0, -jump_velocity()*mass());
-			set_vel(xvel(), jump_velocity());
+			set_vel(Vec(vel().x, jump_velocity()));
 			float_frames = jump_float_time();
 			state = falling;
 			return true;
@@ -316,9 +315,9 @@ struct Rata : Walking {
 		if (key[sf::Key::A] && !key[sf::Key::B]) {
 			float max = -max_air_speed();
 			if (xvel() > max) {
-				add_vel(-air_accel(), 0);
+				add_vel(Vec(-air_accel(), 0));
 				if (xvel() < max) {
-					add_vel(-xvel() + max, 0);
+					add_vel(Vec(-xvel() + max, 0));
 				}
 			}
 		}
@@ -326,9 +325,9 @@ struct Rata : Walking {
 		else if (key[sf::Key::D]) {
 			float max = max_air_speed();
 			if (xvel() < max) {
-				add_vel(air_accel(), 0);
+				add_vel(Vec(air_accel(), 0));
 				if (xvel() > max) {
-					add_vel(-xvel() + max, 0);
+					add_vel(Vec(-xvel() + max, 0));
 				}
 			}
 		}
@@ -578,9 +577,9 @@ struct Rata : Walking {
 			case ouch: {
 				body->SetGravityScale(1.0);
 				float_frames = 0;
-				if (yvel() < 1.0) add_vel(0, 3.0);
+				if (yvel() < 1.0) add_vel(Vec(0, 3.0));
 				if (life <= 0) {
-					impulse(0, 5.0);
+					impulse(Vec(0, 5.0));
 					goto dead_no_floor;
 				}
 				else {

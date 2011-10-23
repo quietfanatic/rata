@@ -91,7 +91,7 @@ struct Rat : AI {
 		snd::squeak.play();
 		if (rand() % 4 == 0)
 			(new obj::Desc(
-				obj::heart, NULL, x(), y(), 0, 0, 0, true
+				obj::heart, NULL, pos(), Vec(0, 0), 0, true
 			))->manifest();
 	}
 };
@@ -138,7 +138,7 @@ struct Patroller : AI {
 				120, 48, 0.1
 			);
 			snd::gunshot.play(1.0, 70);
-			add_vel(-b->vel.x*FPS/60, 0);
+			add_vel(Vec(-b->vel.x*FPS/60, 0));
 		}
 		Vec ratapos;
 		threat_detected = (rata->x() - x())*facing > 0;
@@ -223,7 +223,7 @@ struct Flyer : AI {
 				120, 48, 0.1
 			);
 			snd::gunshot.play(1.0, 70);
-			add_vel(-b->vel.x*FPS/120, -b->vel.y*FPS/120);
+			add_vel(-b->vel*FPS/120);
 		}
 		 // Predict
 		if (defined(ratapos)) {
