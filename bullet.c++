@@ -56,7 +56,7 @@ void RBullet::move () {
 			(new obj::Desc(-2, 
 				obj::hiteffect,
 				pos1, Vec(11, 0), 0,
-				&img::hit_damagable
+				(uint)&img::hit_damagable
 			))->manifest();
 			no_damage: { }
 			coll.hit = NULL;
