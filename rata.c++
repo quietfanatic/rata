@@ -83,7 +83,7 @@ struct Rata : Walking {
 
 	 // Easy access to bits
 	item::Def* equip_info (uint i) {
-		return equipment[i] ? &item::def[(uint)equipment[i]->data] : NULL;
+		return equipment[i] ? &item::def[equipment[i]->data] : NULL;
 	}
 	bool wearing_helmet () {
 		return equip_info(item::head) == &item::def[item::helmet];
@@ -164,19 +164,19 @@ struct Rata : Walking {
 	}
 	void unequip_drop (obj::Desc* itemdesc) {
 		if (itemdesc == NULL) return;
-		int slot = item::def[(uint)itemdesc->data].slot;
+		int slot = item::def[itemdesc->data].slot;
 		equipment[slot] = NULL;
-		int otherslot = item::def[(uint)itemdesc->data].otherslot;
+		int otherslot = item::def[itemdesc->data].otherslot;
 		if (otherslot > 0) equipment[otherslot] = NULL;
 		spawn_item(itemdesc);
 	}
 	void pick_up_equip (Item* itemobj) {
 		itemobj->destroy();
 		itemobj->desc->room = room::inventory;
-		int slot = item::def[(uint)itemobj->desc->data].slot;
+		int slot = item::def[itemobj->desc->data].slot;
 		if (equipment[slot])
 			unequip_drop(equipment[slot]);
-		int otherslot = item::def[(uint)itemobj->desc->data].otherslot;
+		int otherslot = item::def[itemobj->desc->data].otherslot;
 		if (otherslot > 0 && equipment[otherslot])
 			unequip_drop(equipment[otherslot]);
 		equipment[slot] = itemobj->desc;
@@ -367,7 +367,7 @@ struct Rata : Walking {
 			}
 			case action_enter: {
 				obj::Desc* d = ((Object*)action_arg)->desc;
-				room::list[(uint)d->data]->enter(d->data2);
+				room::list[d->data]->enter(d->data2);
 				break;
 			}
 			default: { }
@@ -733,7 +733,7 @@ struct Rata : Walking {
 		inv_frames = 0;
 		adrenaline = 0;
 		hurt_id[0] = hurt_id[1] = -1;
-		if (desc->data) state = (State)(uint)desc->data;
+		if (desc->data) state = desc->data;
 		else state = falling;
 		life = max_life = 144;
 		inventory_amount = 0;

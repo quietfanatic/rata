@@ -446,7 +446,7 @@ struct Item : Object {
 
 void Item::draw () {
 	if (desc->data) {
-		item::Def* info = &item::def[(uint)desc->data];
+		item::Def* info = &item::def[desc->data];
 		draw_image(info->appearance, desc->pos, info->world_frame);
 	}
 }
@@ -458,10 +458,10 @@ void Item::before_move () {
 
 struct Entrance : Object {
 	void on_create () {
-		if (room::entrance == (int)desc->data2) {
+		if (room::entrance == desc->data2) {
 			if (rata->body) {
 				rata->set_pos(desc->pos);
-				if (desc->data) rata->state = (Rata::State)(uint)desc->data;
+				if (desc->data) rata->state = (Rata::State)desc->data;
 				if (desc->facing) rata->facing = desc->facing;
 			}
 			else {
@@ -480,7 +480,7 @@ struct Exit : Object {
 		if (rata->x() < desc->pos.x + desc->vel.x)
 		if (rata->y() > desc->pos.y)
 		if (rata->y() < desc->pos.y + desc->vel.y)
-			room::list[(uint)desc->data]->enter(desc->data2);
+			room::list[desc->data]->enter(desc->data2);
 	}
 };
 
