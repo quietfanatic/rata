@@ -90,9 +90,7 @@ struct Rat : AI {
 		Object::kill();
 		snd::squeak.play();
 		if (rand() % 4 == 0)
-			(new obj::Desc(
-				obj::heart, NULL, pos(), Vec(0, 0), 0, true
-			))->manifest();
+			(new obj::Desc(-2, obj::heart, pos()))->manifest();
 	}
 };
 

@@ -99,7 +99,6 @@ struct obj::Def {
 struct obj::Desc {
 	int16 room;
 	int16 id;
-	bool temp;
 	Vec pos;
 	Vec vel;
 	int facing;
@@ -108,8 +107,8 @@ struct obj::Desc {
 	Object* manifest ();
 
 	 // Alright, we'll use a C++ constructor...just for default args.
-	Desc (uint16 id_=0, void* data_=NULL, Vec pos_=Vec(0, 0), Vec vel_=Vec(0, 0), int facing_=0, bool temp_=false, uint32 data2_=0, int16 room_=-1)
-	 :id(id_), data(data_), pos(pos_), vel(vel_), facing(facing_), temp(temp_), data2(data2_), room(room_)
+	Desc (uint16 room=-1, uint16 id=0, Vec pos=Vec(0, 0), Vec vel=Vec(0, 0), int facing=0, Data data=0, Data data2=0)
+	 :room(room), id(id), pos(pos), vel(vel), facing(facing), data(data), data2(data2)
 		{ }
 };
 
@@ -528,7 +527,7 @@ struct Mousehole : Object {
 			if (rata && abs_f(rata->x() - desc->pos.x) < 3.0 && abs_f(rata->y() - desc->pos.y)) {
 				return;
 			}
-			(new obj::Desc (obj::rat, NULL, desc->pos, Vec(0, 0), 0, true))->manifest();
+			(new obj::Desc (-2, obj::rat, desc->pos))->manifest();
 		}
 	}
 	virtual void on_create () {

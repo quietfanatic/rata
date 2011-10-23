@@ -53,9 +53,10 @@ void RBullet::move () {
 				rata->hurt_id[0] = obj::bullet;
 			}
 			o->damage(power * fp->damage_factor);
-			(new obj::Desc(
-				obj::hiteffect, &img::hit_damagable,
-				pos1, Vec(11, 0), 0, true
+			(new obj::Desc(-2, 
+				obj::hiteffect,
+				pos1, Vec(11, 0), 0,
+				&img::hit_damagable
 			))->manifest();
 			no_damage: { }
 			coll.hit = NULL;

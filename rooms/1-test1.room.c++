@@ -18,11 +18,11 @@ BEGIN_ROOM_TILES
 END_ROOM_TILES
 
 BEGIN_ROOM_OBJECTS
-	ROOM_OBJECT(obj::entrance, 1.5, 1, 0, 0, 0, NULL, 0)
-	ROOM_OBJECT(obj::rat, 16, 10, 0, 0, -1, NULL, 0)
-	ROOM_OBJECT(obj::rat, 12, 10, 0, 0, -1, NULL, 0)
-	ROOM_OBJECT(obj::rat, 7.5, 12, 0, 0, -1, NULL, 0)
-	ROOM_OBJECT(obj::crate, 8.5, 10, 0, 0, 0, NULL, 0)
+	ROOM_OBJECT(obj::entrance, 1.5, 1, 0, 0, 0, 0, 0)
+	ROOM_OBJECT(obj::rat, 16, 10, 0, 0, -1, 0, 0)
+	ROOM_OBJECT(obj::rat, 12, 10, 0, 0, -1, 0, 0)
+	ROOM_OBJECT(obj::rat, 7.5, 12, 0, 0, -1, 0, 0)
+	ROOM_OBJECT(obj::crate, 8.5, 10, 0, 0, 0, 0, 0)
 END_ROOM_OBJECTS
 
 ROOM_DEF(20, 15, 5, 127, 127, 127, 255, -1)

@@ -89,7 +89,7 @@ void destroy_phase () {
 			if (doomed->body) {
 				world->DestroyBody(doomed->body);
 			}
-			if (doomed->desc->temp) delete doomed->desc;
+			if (doomed->desc->room == -2) delete doomed->desc;
 			delete doomed;
 		}  // Need to ensure we don't leave any dead pointers
 		else { o = &(*o)->next_order; }

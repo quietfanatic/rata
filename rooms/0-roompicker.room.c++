@@ -21,7 +21,7 @@ BEGIN_ROOM_TILES
 END_ROOM_TILES
 
 BEGIN_ROOM_OBJECTS
-ROOM_OBJECT(obj::entrance, 1.500000, 1.000000, 0.000000, 0.000000, 0, NULL, 0)
+ROOM_OBJECT(obj::entrance, 1.500000, 1.000000, 0.000000, 0.000000, 0, 0, 0)
 ROOM_OBJECT(obj::door, 8.500000, 1.000000, 0.500000, 0.000000, 0, &room::file::test1::room, 0)
 ROOM_OBJECT(obj::door, 10.500000, 1.000000, 0.500000, 0.000000, 0, &room::file::test2::room, 0)
 ROOM_OBJECT(obj::door, 12.500000, 1.000000, 0.500000, 0.000000, 0, &room::file::test3::room, 0)

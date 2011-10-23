@@ -6,6 +6,7 @@
 #include <stdio.h>
 //#define printf(...) (__VA_ARGS__)
 
+
 #include "debug.c++"
 #include "vec.h"
 
