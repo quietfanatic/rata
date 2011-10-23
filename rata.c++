@@ -1,4 +1,3 @@
-#define RATA_STEP 1.0
 #define MAX_INVENTORY 10
 
 
@@ -687,6 +686,7 @@ struct Rata : Walking {
 	void after_move () {
 //		printf("%08x's floor is: %08x\n", this, floor);
 //		floor = get_floor(fix_feet_current());
+		float step = state == crawling ? 0.8 : 1.0;
 		if (floor && (state == walking || state == crawling)) {
 			if (abs_f(xvel()) < 0.01)
 				distance_walked = 0;
@@ -694,9 +694,9 @@ struct Rata : Walking {
 				float olddist = distance_walked;
 				distance_walked += ((x() - floor->x()) - oldxrel)*sign_f(xvel());
 				if (state == walking) {
-					float oldstep = mod_f(olddist, RATA_STEP);
-					float step = mod_f(distance_walked, RATA_STEP);
-					if (oldstep < 0.4 && step >= 0.4)
+					float oldstep = mod_f(olddist, step);
+					float step_d = mod_f(distance_walked, step);
+					if (oldstep < 0.4 && step_d >= 0.4)
 						snd::step.play(0.9+rand()*0.2/RAND_MAX, 6*abs_f(xvel())*(1.0+rand()*0.2/RAND_MAX));
 				}
 			}
@@ -777,6 +777,7 @@ struct Rata : Walking {
 
 	void draw () {
 
+		float step = state == crawling ? 0.8 : 1.0;
 		int walk_frame;
 		float aim_angle;
 		uint headpose;  // Pose index
@@ -815,14 +816,14 @@ struct Rata : Walking {
 
 		 // Select walking frame
 		if (floor) {
-			float step_d = mod_f(distance_walked, RATA_STEP * 2);
-			if (step_d < 0) step_d += RATA_STEP*2;
+			float step_d = mod_f(distance_walked, step * 2);
+			if (step_d < 0) step_d += step*2;
 			walk_frame =
-			  abs_f(xvel()) < 0.01      ? 4
-			: step_d < RATA_STEP*5/9.0  ? 1
-			: step_d < RATA_STEP        ? 2
-			: step_d < RATA_STEP*14/9.0 ? 3
-			:                             4;
+			  abs_f(xvel()) < 0.01 ? 4
+			: step_d < step*5/9.0  ? 1
+			: step_d < step        ? 2
+			: step_d < step*14/9.0 ? 3
+			:                        4;
 		}
 		else walk_frame = 3;
 
