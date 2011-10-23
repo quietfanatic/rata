@@ -1,57 +1,39 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
 
-my @rooms = grep /\.room\.c\+\+/, glob 'rooms/*';
 
-print <<'END';
-
-
-enum ID {
-END
-
-for (@rooms) {
+my @rooms = map {
 	$_ =~ /rooms\/\d+-(.*?)\.room\.c\+\+/ or die "Error: Weird room filename: $_\n";
 	my $id = $1;
 	$id =~ s/[^a-zA-Z0-9_]/_/g;
-	print "\t$id,\n";
-}
+	{
+		file => $_,
+		id => $id,
+	}
+} grep {
+	/\.room\.c\+\+/
+} glob 'rooms/*';
 
-print <<'END';
+print <<"END";
+
+
+enum ID {
+${\(join ",\n", map "\t$_->{id}", @rooms)},
 	n_rooms
 };
 
 namespace file {
-END
-
-for (@rooms) {
-	$_ =~ /rooms\/\d+-(.*?)\.room\.c\+\+/ or die "Error: Weird room filename: $_\n";
-	my $id = $1;
-	$id =~ s/[^a-zA-Z0-9_]/_/g;
-	print "\tnamespace $id { extern Room room; }\n";
+${\(join "\n", map "\tnamespace $_->{id} { extern Room room; }", @rooms)}
+${\(join "\n", map "\tnamespace $_->{id} {\n\t\t#include \"$_->{file}\"\n\t}", @rooms)}
 }
-for (@rooms) {
-	$_ =~ /rooms\/\d+-(.*?)\.room\.c\+\+/ or die "Error: Weird room filename: $_\n";
-	my $id = $1;
-	$id =~ s/[^a-zA-Z0-9_]/_/g;
-	print "\tnamespace $id {\n\t\t#include \"$_\"\n\t}\n";
-}
-my $count = 0+@rooms;
-print <<'END';
-};
 
 Room* list [] = {
-END
-
-for (@rooms) {
-	$_ =~ /rooms\/\d+-(.*?)\.room\.c\+\+/ or die "Error: Weird room filename: $_\n";
-	my $id = $1;
-	$id =~ s/[^a-zA-Z0-9_]/_/g;
-	print "\t&file::${id}::room,\n";
-}
-
-print <<'END';
+${\(join ",\n", map "\t&file::$_->{id}::room", @rooms)}
 };
+
+
 END
-
-
 
 
 

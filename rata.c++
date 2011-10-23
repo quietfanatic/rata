@@ -14,7 +14,8 @@ struct Rata : Walking {
 		hurt,
 		dead_air,
 		dead
-	} state;
+	};
+	uint state;
 	 // Timers
 	int float_frames;
 	int recoil_frames;

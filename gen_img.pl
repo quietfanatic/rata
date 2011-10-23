@@ -1,7 +1,26 @@
 #!/usr/bin/perl
+use strict;
+use warnings;
+
+my @imgs = map {
+	/^img\/([^;]*)(?:\;(?:(\d+)x(\d+),)?(\d+(?:\.\d*)?),(\d+(?:\.\d*)?))?\.png$/ or die "Error: Weird image filename: $_\n";
+	my ($id, $w, $h, $x, $y) = ($1, $2, $3, $4, $5);
+	$id =~ s/[^a-zA-Z0-9_]/_/g;
+	+{
+		file => $_,
+		id => $id,
+		w => $w // 0,
+		h => $h // 0,
+		x => $x // 0,
+		y => $y // 0, 
+	}
+} grep {
+	/\.png$/
+} glob 'img/*';
 
 
-print <<'END';
+
+print <<"END";
 
 namespace img {
 	struct Image {
@@ -15,40 +34,19 @@ namespace img {
 			else return (sfi.GetWidth() / w) * (sfi.GetHeight() / h);
 		}
 	}
-END
+${\(join ",\n", map "\t$_->{id}", @imgs)};
 
-my @imgs = grep /\.png$/ && ! /^img\/\!/, glob 'img/*';
-for (@imgs) {
-	$_ =~ /^img\/([^;]*)(?:\;(?:\d+x\d+,)?(\d+(?:\.\d*)?),(\d+(?:\.\d*)?))?\.png$/ or die "Error: Weird image filename: $_\n";
-	my $id = $1;
-	$id =~ s/[^a-zA-Z0-9_]/_/g;
-	print "\t$id,\n";
-}
+	img::Image* _bgs [] = {
+${\(join ",\n", map "\t\t&$_->{id}", grep {$_->{id} =~ /bg(?:\d+)/} @imgs)}
+	};
 
-print "\t_COMMA_EATER;\n\n\timg::Image* _bgs [] = {\n";
-
-my @bgs;
-for (@imgs) {
-	if (/img\/bg(\d+)-/) {
-		@bgs[$1] = $_;
+	void load_img () {
+		bool good = true;
+${\(join "\n", map "\t\tgood &= img::$_->{id}.sfi.LoadFromFile(\"$_->{file}\"); img::$_->{id}.sfi.SetSmooth(0);\n\t\timg::$_->{id}.w = $_->{w}; img::$_->{id}.h = $_->{h}; img::$_->{id}.x = $_->{x}; img::$_->{id}.y = $_->{y};", @imgs)}
+		if (!good) fprintf(stderr, "Error: At least one image failed to load!\\n");
 	}
 }
-for (@bgs) {
-	$_ =~ /^img\/([^;]*)(?:\;(?:\d+x\d+,)?(\d+(?:\.\d*)?),(\d+(?:\.\d*)?))?\.png$/ or die "Error: Weird image filename: $_\n";
-	my $id = $1;
-	$id =~ s/[^a-zA-Z0-9_]/_/g;
-	print "\t\t\&$id,\n";
-}
-
-print "\t\tNULL\n\t};\n}\n\nvoid load_img () {\n\tbool good = true;\n";
-for (@imgs) {
-	$_ =~ /^img\/([^;]*)(?:\;(?:(\d+)x(\d+),)?(\d+(?:\.\d*)?),(\d+(?:\.\d*)?))?\.png$/ or die "Error: Weird image filename: $_\n";
-	my ($id, $w, $h, $x, $y) = ($1, $2, $3, $4, $5);
-	$id =~ s/[^a-zA-Z0-9_]/_/g;
-	$w //= 0; $h //= 0; $x //= 32; $y //= 48;  # center of Rata images
-	print "\tgood &= img::$id.sfi.LoadFromFile(\"$_\"); img::$id.sfi.SetSmooth(0);\n\timg::$id.w = $w; img::$id.h = $h;\n\timg::$id.x = $x; img::$id.y = $y;\n";
-}
 
 
-print "\tif (!good) fprintf(stderr, \"Error: At least one image failed to load!\\n\");\n}\n\n\n\n";
+END
 

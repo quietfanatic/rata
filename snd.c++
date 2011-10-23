@@ -19,39 +19,38 @@ namespace snd {
 	ricochet,
 	squeak,
 	step,
-	woodhit,
-	_COMMA_EATER;
-
+	woodhit;
 }
 
 namespace bgm {
 	sf::Music
 	life,
-	_COMMA_EATER;
-
+	safe,
+	theme;
 }
 
 void load_snd () {
 	bool good = true;
-	good &= snd::fall.sfsb.LoadFromFile("snd/fall.ogg");
+	good &= snd::fall.sfsb.LoadFromFile("snd/fall.ogg"); 
 	snd::fall.sfs.SetBuffer(snd::fall.sfsb);
-	good &= snd::gunshot.sfsb.LoadFromFile("snd/gunshot.flac");
+	good &= snd::gunshot.sfsb.LoadFromFile("snd/gunshot.flac"); 
 	snd::gunshot.sfs.SetBuffer(snd::gunshot.sfsb);
-	good &= snd::hit.sfsb.LoadFromFile("snd/hit.ogg");
+	good &= snd::hit.sfsb.LoadFromFile("snd/hit.ogg"); 
 	snd::hit.sfs.SetBuffer(snd::hit.sfsb);
-	good &= snd::hurt.sfsb.LoadFromFile("snd/hurt.ogg");
+	good &= snd::hurt.sfsb.LoadFromFile("snd/hurt.ogg"); 
 	snd::hurt.sfs.SetBuffer(snd::hurt.sfsb);
-	good &= snd::ricochet.sfsb.LoadFromFile("snd/ricochet.ogg");
+	good &= snd::ricochet.sfsb.LoadFromFile("snd/ricochet.ogg"); 
 	snd::ricochet.sfs.SetBuffer(snd::ricochet.sfsb);
-	good &= snd::squeak.sfsb.LoadFromFile("snd/squeak.ogg");
+	good &= snd::squeak.sfsb.LoadFromFile("snd/squeak.ogg"); 
 	snd::squeak.sfs.SetBuffer(snd::squeak.sfsb);
-	good &= snd::step.sfsb.LoadFromFile("snd/step.ogg");
+	good &= snd::step.sfsb.LoadFromFile("snd/step.ogg"); 
 	snd::step.sfs.SetBuffer(snd::step.sfsb);
-	good &= snd::woodhit.sfsb.LoadFromFile("snd/woodhit.ogg");
+	good &= snd::woodhit.sfsb.LoadFromFile("snd/woodhit.ogg"); 
 	snd::woodhit.sfs.SetBuffer(snd::woodhit.sfsb);
 	good &= bgm::life.OpenFromFile("bgm/life.ogg"); bgm::life.SetLoop(true);
-	if (!good) fprintf(stderr, "Error: At least one sound failed to load!\n");
+	good &= bgm::safe.OpenFromFile("bgm/safe.ogg"); bgm::safe.SetLoop(true);
+	good &= bgm::theme.OpenFromFile("bgm/theme.ogg"); bgm::theme.SetLoop(true);
+	if (!good) fprintf(stderr, "Error: At least one sound or bgm failed to load!\n");
 }
-
 
 

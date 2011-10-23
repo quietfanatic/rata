@@ -45,7 +45,7 @@ namespace file {
 	namespace lotsodanger {
 		#include "rooms/7-lotsodanger.room.c++"
 	}
-};
+}
 
 Room* list [] = {
 	&file::roompicker::room,
@@ -55,5 +55,7 @@ Room* list [] = {
 	&file::test4::room,
 	&file::edit1::room,
 	&file::edit2::room,
-	&file::lotsodanger::room,
+	&file::lotsodanger::room
 };
+
+

@@ -458,7 +458,7 @@ void Item::before_move () {
 
 struct Entrance : Object {
 	void on_create () {
-		if (room::entrance == desc->data2) {
+		if (room::entrance == (int)desc->data2) {
 			if (rata->body) {
 				rata->set_pos(desc->pos);
 				if (desc->data) rata->state = (Rata::State)desc->data;
