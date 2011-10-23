@@ -69,6 +69,7 @@ void RBullet::move () {
 	else {
 		pos2 = pos0 + vel;
 	}
+	vel.y -= 30/FPS/FPS;
 }
 void RBullet::draw () {
 	if (lifetime < 0) return;
