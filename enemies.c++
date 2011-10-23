@@ -42,7 +42,7 @@ struct AI : Walking {
 		return see_rata_at(rata->x(), rata->y()+0.8) ? Vec(rata->x(), rata->y()+0.8)
 		     : see_rata_at(rata->x(), rata->y()+1.6) ? Vec(rata->x(), rata->y()+1.6)
 		     : see_rata_at(rata->x(), rata->y()+0.2) ? Vec(rata->x(), rata->y()+0.2)
-		     : Vec(0/0.0, 0/0.0);
+		     : Vec::undef;
 	}
 	Vec predict_pos_from (float x, float y, Object* threat = rata) {
 		return Vec(x + threat->xvel() * decision_timer/FPS,
@@ -176,7 +176,7 @@ struct Flyer : AI {
 		body->SetGravityScale(0.0);
 		//body->SetLinearDamping(0.2);
 		dest = Vec(x(), y());
-		prediction = Vec(0/0.0, 0/0.0);
+		prediction = Vec::undef;
 		oldpos = prediction;
 		decision_timer = rand()%40;
 	}
@@ -237,7 +237,7 @@ struct Flyer : AI {
 			oldpos = ratapos;
 		}
 		else {
-			prediction = Vec(0/0.0, 0/0.0);
+			prediction = Vec::undef;
 			 // Chase
 			if (defined(oldpos)) {
 				dest = oldpos;

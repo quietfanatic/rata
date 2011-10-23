@@ -11,7 +11,10 @@ struct Vec {
 	inline Vec (sf::Vector2<float> v) :x(v.x), y(v.y) { }
 	operator const b2Vec2 () const { return b2Vec2(x, y); }
 	operator const sf::Vector2<float> () const { return sf::Vector2<float>(x, y); }
+
+	static const Vec undef;
 };
+const Vec Vec::undef = Vec(0/0.0, 0/0.0);
 
 
 static const inline Vec operator - (Vec a) { return Vec(-a.x, -a.y); }
