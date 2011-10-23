@@ -228,13 +228,13 @@ struct Object {
 		}
 	};
 
-	static inline LineChecker check_line (float x1, float y1, float x2, float y2, uint16 cat = cf::solid.categoryBits, Object* owner = NULL) {
+	static inline LineChecker check_line (Vec from, Vec to, uint16 cat = cf::solid.categoryBits, Object* owner = NULL) {
 		LineChecker checker;
 		checker.owner = owner;
 		checker.cat = cat;
 		checker.frac = 1;
 		checker.hit = NULL;
-		world->RayCast(&checker, b2Vec2(x1, y1), b2Vec2(x2, y2));
+		world->RayCast(&checker, from, to);
 		return checker;
 	}
 	 // Get contacts of a fixture

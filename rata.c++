@@ -384,7 +384,7 @@ struct Rata : Walking {
 			}
 			else {
 				b2Fixture* seeing = check_line(
-					aim_center_x(), aim_center_y(), aim_center_x()+cursor.x, aim_center_y()+cursor.y
+					Vec(aim_center_x(), aim_center_y()), Vec(aim_center_x()+cursor.x, aim_center_y()+cursor.y)
 				).hit;
 				can_see = (seeing == NULL);
 			}

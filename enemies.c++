@@ -24,12 +24,12 @@ struct AI : Walking {
 	}
 
 	bool clear_to_point (Vec p) {
-		return !check_line(eye().x, eye().y, p.x, p.y).hit;
+		return !check_line(eye(), p).hit;
 	}
 	
 	 // Sight and seeing
 	bool see_rata_at (Vec p) {
-		LineChecker r = check_line(eye().x, eye().y, p.x, p.y, 1|2|32|128);
+		LineChecker r = check_line(eye(), p, 1|2|32|128);
 		return r.hit && r.hit->GetBody()->GetUserData() == rata;
 	}
 	bool see_rata () {
