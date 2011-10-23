@@ -7,7 +7,7 @@
 //#define printf(...) (__VA_ARGS__)
 
 #include "debug.c++"
-
+#include "vec.h"
 
 #define PX (1.0/16.0)
 #define FPS 60.0

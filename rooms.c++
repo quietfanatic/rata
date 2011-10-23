@@ -31,7 +31,7 @@ typedef room::Room Room;
 
 #else
 
-b2EdgeShape* make_edge (b2Vec2 v0, b2Vec2 v1, b2Vec2 v2, b2Vec2 v3) {
+b2EdgeShape* make_edge (Vec v0, Vec v1, Vec v2, Vec v3) {
 	b2EdgeShape* r = new b2EdgeShape;
 	r->Set(v1, v2);
 	r->m_hasVertex0 = r->m_hasVertex3 = 1;
@@ -43,7 +43,7 @@ b2EdgeShape* make_edge (b2Vec2 v0, b2Vec2 v1, b2Vec2 v2, b2Vec2 v3) {
 inline bool about_eq (float a, float b) {
 	return a < b+0.001 && b < a+0.001;
 }
-inline bool vec_eq (b2Vec2 a, b2Vec2 b) {
+inline bool vec_eq (Vec a, Vec b) {
 	return about_eq(a.x, b.x) && about_eq(a.y, b.y);
 }
 int edge_cmp (TileEdge* a, TileEdge* b) {
@@ -138,8 +138,8 @@ namespace room {
 					edges[x][y][e] = {
 						true,
 						&edges[x][y][n1e],
-						t.vertexes[e] + b2Vec2(x, height-y-1),
-						t.vertexes[n2e] + b2Vec2(x, height-y-1),
+						t.vertexes[e] + Vec(x, height-y-1),
+						t.vertexes[n2e] + Vec(x, height-y-1),
 						&edges[x][y][n2e]
 					};
 				}

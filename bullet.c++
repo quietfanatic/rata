@@ -3,19 +3,19 @@
 struct RBullet {
 	int power;
 	float mass;
-	b2Vec2 pos0;
-	b2Vec2 pos1;
-	b2Vec2 pos2;
-	b2Vec2 vel;  // Measured in blocks per FRAME not second.
+	Vec pos0;
+	Vec pos1;
+	Vec pos2;
+	Vec vel;  // Measured in blocks per FRAME not second.
 	Object* owner;
 	int lifetime;
 	RBullet ();
 	void move ();
 	void draw ();
 };
-RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power = 48, float mass = 0.2);
-inline RBullet* fire_rbullet_dir (Object* owner, b2Vec2 pos, float angle, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
-inline RBullet* fire_rbullet_to (Object* owner, b2Vec2 pos, b2Vec2 to, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
+RBullet* fire_rbullet (Object* owner, Vec pos, Vec vel, int power = 48, float mass = 0.2);
+inline RBullet* fire_rbullet_dir (Object* owner, Vec pos, float angle, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
+inline RBullet* fire_rbullet_to (Object* owner, Vec pos, Vec to, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
 #else
 
 RBullet::RBullet () :lifetime(-1) { }
@@ -25,7 +25,7 @@ void RBullet::move () {
 	if (lifetime == 2) owner = NULL;
 	lifetime++;
 	pos0 = pos2;
-	pos1 = b2Vec2(-1/0.0, -1/0.0);
+	pos1 = Vec(-1/0.0, -1/0.0);
 	pos2 = pos0 + vel;
 	Object::LineChecker coll;
 	coll = Object::check_line(pos0.x, pos0.y, pos2.x, pos2.y, cf::bullet.maskBits, owner);
@@ -34,16 +34,16 @@ void RBullet::move () {
 		pos1 = pos0 + coll.frac * vel;
 		 // This is how you bounce.
 		float velnorm = dot(vel, coll.norm);
-		vel = vel - 2 * velnorm * coll.norm;
+		vel -= 2 * velnorm * coll.norm;
 		coll.hit->GetBody()->ApplyLinearImpulse(mass*FPS*velnorm*coll.norm, pos1);
 		 // We've ended up with a somewhat more than 100% elastic collision, but oh well.
 		FixProp* fp = (FixProp*) coll.hit->GetUserData();
 		if (fp->damage_factor) {
 			Object* o = (Object*)coll.hit->GetBody()->GetUserData();
 			if (fp == &rata_fixprop_helmet) {
-				float ang = atan2(coll.norm.y, coll.norm.x);
-				dbg(4, "Helmet strike: %f,%f; %f > %f == %d\n", coll.norm.x, coll.norm.y, ang, rata->helmet_angle, gt_angle(ang, rata->helmet_angle));
-				if (gt_angle(ang, rata->helmet_angle))
+				float angle = ang(coll.norm);
+				dbg(4, "Helmet strike: %f,%f; %f > %f == %d\n", coll.norm.x, coll.norm.y, angle, rata->helmet_angle, gt_angle(angle, rata->helmet_angle));
+				if (gt_angle(angle, rata->helmet_angle))
 					goto just_bounce;
 			}
 			if (o->desc->id == obj::rata) {
@@ -59,7 +59,7 @@ void RBullet::move () {
 			))->manifest();
 			no_damage: { }
 			coll.hit = NULL;
-			pos2 = b2Vec2(-1/0.0, -1/0.0);
+			pos2 = Vec(-1/0.0, -1/0.0);
 		}
 		else {
 			just_bounce:
@@ -70,7 +70,7 @@ void RBullet::move () {
 			}
 			else {
 				coll.hit = NULL;
-				pos2 = b2Vec2(-1/0.0, -1/0.0);
+				pos2 = Vec(-1/0.0, -1/0.0);
 			}
 		}
 	}
@@ -105,7 +105,7 @@ void RBullet::draw () {
 }
 RBullet bullets[MAX_BULLETS];
 
-RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power, float mass) {
+RBullet* fire_rbullet (Object* owner, Vec pos, Vec vel, int power, float mass) {
 	uint oldest = 0;
 	float oldesttime = -1;
 	for (uint i=0; i < MAX_BULLETS; i++) {
@@ -133,13 +133,12 @@ RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power, float m
 	dbg(3, "Rewriting bullet %d\n", oldest);
 	return &bullets[oldest];
 }
-inline RBullet* fire_rbullet_dir (Object* owner, b2Vec2 pos, float angle, float vel, int power, float spread, float mass) {
+inline RBullet* fire_rbullet_dir (Object* owner, Vec pos, float angle, float vel, int power, float spread, float mass) {
 	angle = dither(angle, spread);
-	return fire_rbullet(owner, pos, b2Vec2(vel*cos(angle), vel*sin(angle)), power, mass);
+	return fire_rbullet(owner, pos, Vec(vel*cos(angle), vel*sin(angle)), power, mass);
 }
-inline RBullet* fire_rbullet_to (Object* owner, b2Vec2 pos, b2Vec2 to, float vel, int power, float spread, float mass) {
-	b2Vec2 rel = to - pos;
-	return fire_rbullet_dir(owner, pos, atan2(rel.y, rel.x), vel, power, spread, mass);
+inline RBullet* fire_rbullet_to (Object* owner, Vec pos, Vec to, float vel, int power, float spread, float mass) {
+	return fire_rbullet_dir(owner, pos, ang(to - pos), vel, power, spread, mass);
 }
 
 #endif

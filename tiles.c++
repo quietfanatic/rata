@@ -14,7 +14,7 @@ struct Tileinfo {
 	bool back;
 	float friction;
 	uint nvertexes;
-	b2Vec2 vertexes [TILE_MAX_VERTEXES];
+	Vec vertexes [TILE_MAX_VERTEXES];
 	FixProp* prop;
 };
 
@@ -24,7 +24,7 @@ extern Tileinfo tileinfo [];
 #else
 
 
-#define v b2Vec2
+#define v Vec
 
 
 
@@ -74,8 +74,8 @@ Here is our tile-to-object algorithm.
 struct TileEdge {
 	bool use;
 	TileEdge* n1;
-	b2Vec2 v1;
-	b2Vec2 v2;
+	Vec v1;
+	Vec v2;
 	TileEdge* n2;
 };
 

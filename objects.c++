@@ -157,7 +157,7 @@ struct Object {
 	Object* floor;
 	b2Fixture* floor_fix;
 	b2Contact* floor_contact;
-	b2Vec2 floor_normal;
+	Vec floor_normal;
 	int life;
 	int max_life;
 	
@@ -211,7 +211,7 @@ struct Object {
 		uint16 cat;
 		float frac;
 		b2Fixture* hit;
-		b2Vec2 norm;
+		Vec norm;
 		float32 ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
 			if (fix->GetFilterData().categoryBits & cat)
 			if (fix->GetBody()->GetUserData() != owner)
@@ -590,26 +590,26 @@ Object* obj::Desc::manifest () {
  // Some utilities for this file
 
 
-b2PolygonShape* make_poly (uint n, b2Vec2* vs, float radius = 0.01) {
+b2PolygonShape* make_poly (uint n, Vec* vs, float radius = 0.01) {
 	b2PolygonShape* r = new b2PolygonShape;
-	r->Set(vs, n);
+	r->Set((b2Vec2*)vs, n);
 	r->m_radius = radius;
 	return r;
 }
 
 b2PolygonShape* make_rect (float w, float h, float radius = 0.01) {
-	return make_poly(4, (b2Vec2[]){
-		b2Vec2(-w/2, 0),
-		b2Vec2(w/2, 0),
-		b2Vec2(w/2, h),
-		b2Vec2(-w/2, h)
+	return make_poly(4, (Vec[]){
+		Vec(-w/2, 0),
+		Vec(w/2, 0),
+		Vec(w/2, h),
+		Vec(-w/2, h)
 	}, radius);
 }
 
 b2CircleShape* make_circle (float rad, float x = 0, float y = 0) {
 	b2CircleShape* r = new b2CircleShape;
 	r->m_radius = rad;
-	r->m_p = b2Vec2(x, y);
+	r->m_p = Vec(x, y);
 	return r;
 }
 
@@ -629,76 +629,76 @@ inline b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction
  // OBJECT DEFINITIONS
 
 
-b2Vec2 rata_poly_feet [] = {
-	b2Vec2(-2.5*PX, 0*PX),
-	b2Vec2(2.5*PX, 0*PX),
-	b2Vec2(2.5*PX, 1*PX),
-	b2Vec2(-2.5*PX, 1*PX)
+Vec rata_poly_feet [] = {
+	Vec(-2.5*PX, 0*PX),
+	Vec(2.5*PX, 0*PX),
+	Vec(2.5*PX, 1*PX),
+	Vec(-2.5*PX, 1*PX)
 };
-b2Vec2 rata_poly_27 [] = {
-	b2Vec2(-2.5*PX, 0.1*PX),
-	b2Vec2(2.5*PX, 0.1*PX),
-	b2Vec2(5.5*PX, 17*PX),
-	b2Vec2(5.5*PX, 24*PX),
-	b2Vec2(0*PX, 27*PX),
-	b2Vec2(-5.5*PX, 24*PX),
-	b2Vec2(-5.5*PX, 17*PX)
+Vec rata_poly_27 [] = {
+	Vec(-2.5*PX, 0.1*PX),
+	Vec(2.5*PX, 0.1*PX),
+	Vec(5.5*PX, 17*PX),
+	Vec(5.5*PX, 24*PX),
+	Vec(0*PX, 27*PX),
+	Vec(-5.5*PX, 24*PX),
+	Vec(-5.5*PX, 17*PX)
 };
-b2Vec2 rata_poly_25 [] = {
-	b2Vec2(-2.5*PX, 0.1*PX),
-	b2Vec2(2.5*PX, 0.1*PX),
-	b2Vec2(5.5*PX, 15*PX),
-	b2Vec2(5.5*PX, 22*PX),
-	b2Vec2(0*PX, 25*PX),
-	b2Vec2(-5.5*PX, 22*PX),
-	b2Vec2(-5.5*PX, 15*PX)
+Vec rata_poly_25 [] = {
+	Vec(-2.5*PX, 0.1*PX),
+	Vec(2.5*PX, 0.1*PX),
+	Vec(5.5*PX, 15*PX),
+	Vec(5.5*PX, 22*PX),
+	Vec(0*PX, 25*PX),
+	Vec(-5.5*PX, 22*PX),
+	Vec(-5.5*PX, 15*PX)
 };
-b2Vec2 rata_poly_21 [] = {
-	b2Vec2(-2.5*PX, 0.1*PX),
-	b2Vec2(2.5*PX, 0.1*PX),
-	b2Vec2(5.5*PX, 11*PX),
-	b2Vec2(5.5*PX, 18*PX),
-	b2Vec2(0*PX, 21*PX),
-	b2Vec2(-5.5*PX, 18*PX),
-	b2Vec2(-5.5*PX, 11*PX)
+Vec rata_poly_21 [] = {
+	Vec(-2.5*PX, 0.1*PX),
+	Vec(2.5*PX, 0.1*PX),
+	Vec(5.5*PX, 11*PX),
+	Vec(5.5*PX, 18*PX),
+	Vec(0*PX, 21*PX),
+	Vec(-5.5*PX, 18*PX),
+	Vec(-5.5*PX, 11*PX)
 };
-b2Vec2 rata_poly_h7 [] = {
-	b2Vec2(-8*PX, 0.1*PX),
-	b2Vec2(8*PX, 0.1*PX),
-	b2Vec2(4*PX, 7*PX),
-	b2Vec2(-4*PX, 7*PX),
+Vec rata_poly_h7 [] = {
+	Vec(-8*PX, 0.1*PX),
+	Vec(8*PX, 0.1*PX),
+	Vec(4*PX, 7*PX),
+	Vec(-4*PX, 7*PX),
 };
-b2Vec2 rata_poly_crawl_r [] = {
-	b2Vec2(-11*PX, 0.1*PX),
-	b2Vec2(6*PX, 0.1*PX),
-	b2Vec2(10*PX, 4*PX),
-	b2Vec2(10*PX, 11*PX),
-	b2Vec2(4*PX, 14*PX),
+Vec rata_poly_crawl_r [] = {
+	Vec(-11*PX, 0.1*PX),
+	Vec(6*PX, 0.1*PX),
+	Vec(10*PX, 4*PX),
+	Vec(10*PX, 11*PX),
+	Vec(4*PX, 14*PX),
 };
-b2Vec2 rata_poly_crawl_l [] = {
-	b2Vec2(-4*PX, 14*PX),
-	b2Vec2(-10*PX, 11*PX),
-	b2Vec2(-10*PX, 4*PX),
-	b2Vec2(-6*PX, 0.1*PX),
-	b2Vec2(11*PX, 0.1*PX),
+Vec rata_poly_crawl_l [] = {
+	Vec(-4*PX, 14*PX),
+	Vec(-10*PX, 11*PX),
+	Vec(-10*PX, 4*PX),
+	Vec(-6*PX, 0.1*PX),
+	Vec(11*PX, 0.1*PX),
 };
-b2Vec2 rata_poly_sensor_21 [] = {
-	b2Vec2(-2.5*PX, 0.1*PX),
-	b2Vec2(2.5*PX, 0.1*PX),
-	b2Vec2(2.5*PX, 21*PX),
-	b2Vec2(-2.5*PX, 21*PX),
+Vec rata_poly_sensor_21 [] = {
+	Vec(-2.5*PX, 0.1*PX),
+	Vec(2.5*PX, 0.1*PX),
+	Vec(2.5*PX, 21*PX),
+	Vec(-2.5*PX, 21*PX),
 };
-b2Vec2 rata_poly_sensor_floor_r [] = {
-	b2Vec2(4*PX, -4*PX),
-	b2Vec2(12*PX, -4*PX),
-	b2Vec2(12*PX, 4*PX),
-	b2Vec2(4*PX, 4*PX),
+Vec rata_poly_sensor_floor_r [] = {
+	Vec(4*PX, -4*PX),
+	Vec(12*PX, -4*PX),
+	Vec(12*PX, 4*PX),
+	Vec(4*PX, 4*PX),
 };
-b2Vec2 rata_poly_sensor_floor_l [] = {
-	b2Vec2(-4*PX, 4*PX),
-	b2Vec2(-12*PX, 4*PX),
-	b2Vec2(-12*PX, -4*PX),
-	b2Vec2(-4*PX, -4*PX),
+Vec rata_poly_sensor_floor_l [] = {
+	Vec(-4*PX, 4*PX),
+	Vec(-12*PX, 4*PX),
+	Vec(-12*PX, -4*PX),
+	Vec(-4*PX, -4*PX),
 };
 
 FixProp rata_fixprop = {true, false, 1.0, 0, false};
@@ -768,8 +768,8 @@ const obj::Def obj::def [] = {
 #define DAMAGE_KNOCKBACK 12.0
 void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Manifold* manifold) {
 	if (afp == &rata_fixprop_helmet) {
-		b2Vec2 norm = manifold->localNormal;
-		float angle = atan2(norm.y, norm.x);
+		Vec norm = manifold->localNormal;
+		float angle = ang(norm);
 		printf("Normal: %f, %f\n", norm.y, norm.x);
 		printf("gt_angle(%f, %f) = %d\n", rata->helmet_angle, angle, gt_angle(rata->helmet_angle, angle));
 		if (gt_angle(rata->helmet_angle, angle))

@@ -38,19 +38,19 @@ struct AI : Walking {
 		    || see_rata_at(rata->x(), rata->y()+1.6)
 		    || see_rata_at(rata->x(), rata->y()+0.2);
 	}
-	b2Vec2 see_rata_pos () {
-		return see_rata_at(rata->x(), rata->y()+0.8) ? b2Vec2(rata->x(), rata->y()+0.8)
-		     : see_rata_at(rata->x(), rata->y()+1.6) ? b2Vec2(rata->x(), rata->y()+1.6)
-		     : see_rata_at(rata->x(), rata->y()+0.2) ? b2Vec2(rata->x(), rata->y()+0.2)
-		     : b2Vec2(0/0.0, 0/0.0);
+	Vec see_rata_pos () {
+		return see_rata_at(rata->x(), rata->y()+0.8) ? Vec(rata->x(), rata->y()+0.8)
+		     : see_rata_at(rata->x(), rata->y()+1.6) ? Vec(rata->x(), rata->y()+1.6)
+		     : see_rata_at(rata->x(), rata->y()+0.2) ? Vec(rata->x(), rata->y()+0.2)
+		     : Vec(0/0.0, 0/0.0);
 	}
-	b2Vec2 predict_pos_from (float x, float y, Object* threat = rata) {
-		return b2Vec2(x + threat->xvel() * decision_timer/FPS,
+	Vec predict_pos_from (float x, float y, Object* threat = rata) {
+		return Vec(x + threat->xvel() * decision_timer/FPS,
 		              y + threat->yvel() * decision_timer/FPS);
 	}
 
-	b2Vec2 predict_pos (Object* threat = rata) {
-		return b2Vec2(threat->x() + threat->xvel() * decision_timer/FPS,
+	Vec predict_pos (Object* threat = rata) {
+		return Vec(threat->x() + threat->xvel() * decision_timer/FPS,
 		              threat->y() + threat->yvel() * decision_timer/FPS);
 	}
 };
@@ -106,7 +106,7 @@ struct Patroller : AI {
 	float threat_y;
 	float threat_xvel;
 	float threat_yvel;
-	b2Vec2 prediction;
+	Vec prediction;
 	virtual void on_create () {
 		AI::on_create();
 		life = max_life = 144;
@@ -136,14 +136,14 @@ struct Patroller : AI {
 		if (threat_detected) {
 			RBullet* b = fire_rbullet_to(
 				this,
-				b2Vec2(x(), y()+0.5),
-				b2Vec2(prediction.x, prediction.y + 1),
+				Vec(x(), y()+0.5),
+				Vec(prediction.x, prediction.y + 1),
 				120, 48, 0.1
 			);
 			snd::gunshot.play(1.0, 70);
 			add_vel(-b->vel.x*FPS/60, 0);
 		}
-		b2Vec2 ratapos;
+		Vec ratapos;
 		threat_detected = (rata->x() - x())*facing > 0;
 		if (threat_detected) {
 			ratapos = see_rata_pos();
@@ -166,28 +166,27 @@ struct Patroller : AI {
 
 struct Flyer : AI {
 	uint motion_frames;
-	b2Vec2 dest;
-	b2Vec2 oldpos;
-	b2Vec2 prediction;
+	Vec dest;
+	Vec oldpos;
+	Vec prediction;
 	void on_create () {
 		AI::on_create();
 		life = max_life = 96;
 		motion_frames = 0;
 		body->SetGravityScale(0.0);
 		//body->SetLinearDamping(0.2);
-		dest = b2Vec2(x(), y());
-		prediction = b2Vec2(0/0.0, 0/0.0);
+		dest = Vec(x(), y());
+		prediction = Vec(0/0.0, 0/0.0);
 		oldpos = prediction;
 		decision_timer = rand()%40;
 	}
 	void before_move () {
 		float accel = 8.0;
 		float destdir = atan2(dest.y - y(), dest.x - x());
-		b2Vec2 reldest = b2Vec2(dest.x-x(), dest.y-y());
-		float destdist = reldest.Length();
-		reldest.Normalize();
-		float relv = dot(body->GetLinearVelocity(), reldest);
-		bool offtrack = (relv < body->GetLinearVelocity().Length() - 1.0);
+		Vec reldest = Vec(dest.x-x(), dest.y-y());
+		float destdist = mag(reldest);
+		float relv = dot(body->GetLinearVelocity(), norm(reldest));
+		bool offtrack = (relv < mag(body->GetLinearVelocity()) - 1.0);
 		// We have: p, v, a.  We need d.
 		// d = p + vt + att/2; since v = at, t = v/a
 		// d = p + vv/a + vv/a/2;
@@ -200,13 +199,13 @@ struct Flyer : AI {
 		}
 		//destdir = dither(destdir, 0.01);
 		if (offtrack || stopdist <= destdist) {
-			body->ApplyForceToCenter(b2Vec2(
+			body->ApplyForceToCenter(Vec(
 				accel*cos(destdir),
 				accel*sin(destdir)
 			));
 		}
 		else {
-			body->ApplyForceToCenter(b2Vec2(
+			body->ApplyForceToCenter(Vec(
 				-accel*cos(destdir),
 				-accel*sin(destdir)
 			));
@@ -218,29 +217,29 @@ struct Flyer : AI {
 	float eyey () { return y(); }
 	int update_interval () { return 40; }
 	void decision () {
-		b2Vec2 ratapos = see_rata_pos();
+		Vec ratapos = see_rata_pos();
 		 // Fire
-		if (prediction.IsValid()) {
+		if (defined(prediction)) {
 			RBullet* b = fire_rbullet_to(
 				this,
-				b2Vec2(x(), y()),
-				b2Vec2(prediction.x, prediction.y),
+				Vec(x(), y()),
+				Vec(prediction.x, prediction.y),
 				120, 48, 0.1
 			);
 			snd::gunshot.play(1.0, 70);
 			add_vel(-b->vel.x*FPS/120, -b->vel.y*FPS/120);
 		}
 		 // Predict
-		if (ratapos.IsValid()) {
+		if (defined(ratapos)) {
 			//printf("Saw Rata at height %f\n", ratapos.y - rata->y());
-			dest = b2Vec2(x(), y());
+			dest = Vec(x(), y());
 			prediction = predict_pos_from(ratapos.x, ratapos.y);
 			oldpos = ratapos;
 		}
 		else {
-			prediction = b2Vec2(0/0.0, 0/0.0);
+			prediction = Vec(0/0.0, 0/0.0);
 			 // Chase
-			if (oldpos.IsValid()) {
+			if (defined(oldpos)) {
 				dest = oldpos;
 			}
 		}
