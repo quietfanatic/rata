@@ -100,6 +100,8 @@ void RBullet::draw () {
 RBullet bullets[MAX_BULLETS];
 
 RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power, float mass) {
+	uint oldest = 0;
+	float oldesttime = -1;
 	for (uint i=0; i < MAX_BULLETS; i++) {
 		if (bullets[i].lifetime < 0) {
 			bullets[i].pos2 = pos;
@@ -108,11 +110,22 @@ RBullet* fire_rbullet (Object* owner, b2Vec2 pos, b2Vec2 vel, int power, float m
 			bullets[i].mass = mass;
 			bullets[i].owner = owner;
 			bullets[i].lifetime = 0;
-			printf("Creating bullet %d\n", i);
+			dbg(3, "Creating bullet %d\n", i);
 			return &bullets[i];
 		}
+		else if (bullets[i].lifetime > oldesttime) {
+			oldest = i;
+			oldesttime = bullets[i].lifetime;
+		}
 	}
-	return NULL;
+	bullets[oldest].pos2 = pos;
+	bullets[oldest].vel = (1/FPS)*vel;
+	bullets[oldest].power = power;
+	bullets[oldest].mass = mass;
+	bullets[oldest].owner = owner;
+	bullets[oldest].lifetime = 0;
+	dbg(3, "Rewriting bullet %d\n", oldest);
+	return &bullets[oldest];
 }
 inline RBullet* fire_rbullet_dir (Object* owner, b2Vec2 pos, float angle, float vel, int power, float spread, float mass) {
 	angle = dither(angle, spread);
