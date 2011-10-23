@@ -172,7 +172,7 @@ struct Rata : Walking {
 	}
 	void pick_up_equip (Item* itemobj) {
 		itemobj->destroy();
-		itemobj->desc->id = -1;
+		itemobj->desc->room = room::inventory;
 		int slot = item::def[(uint)itemobj->desc->data].slot;
 		if (equipment[slot])
 			unequip_drop(equipment[slot]);
