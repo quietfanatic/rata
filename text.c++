@@ -72,7 +72,7 @@ void render_text (char* text, float x, float y, uint lines=2, bool cam=false, bo
 		}
 		else {
 			draw_image(font,
-				x + pos*PX*scale, y - linecount*lineheight*PX*scale,
+				Vec(x + pos*PX*scale, y - linecount*lineheight*PX*scale),
 				*text, false, cam, scale
 			);
 			if (small)

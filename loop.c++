@@ -149,7 +149,7 @@ void draw_phase () {
 		float bg_y = mod_f(-camera.y/2, h);
 		for (float x = bg_x + viewleft(); x < viewright(); x += w)
 		for (float y = bg_y + h + viewtop(); y > viewbottom(); y -= h) {
-			draw_image(img::_bgs[rc->bg_index], x, y);
+			draw_image(img::_bgs[rc->bg_index], Vec(x, y));
 		}
 	}
 	uint minx, miny, maxx, maxy;
@@ -178,7 +178,7 @@ void draw_phase () {
 				//printf("Drawing tile %d at %d, %d\n", tile, x, y);
 				draw_image(
 					&img::tiles,
-					x+.5, y+.5,
+					Vec(x+.5, y+.5),
 					tile, flip
 				);
 			}
@@ -216,7 +216,7 @@ void draw_phase () {
 				//printf("Drawing tile %d at %d, %d\n", tile, x, y);
 				draw_image(
 					&img::tiles,
-					x+.5, y+.5,
+					Vec(x+.5, y+.5),
 					tile, flip
 				);
 			}
@@ -270,8 +270,7 @@ void draw_phase () {
 				subimage = 4;
 			draw_image(
 				&img::heart,
-				19.5 - (i * 12*PX),
-				14.25,
+				Vec(19.5 - (i * 12*PX), 14.25),
 				subimage,
 				false, true
 			);
@@ -310,7 +309,7 @@ void draw_phase () {
 			cx *= (viewbottom() - ay) / cy;
 			cy = viewbottom() - ay;
 		}
-		draw_image(cursor.img, cx+ax, cy+ay);
+		draw_image(cursor.img, Vec(cx+ax, cy+ay));
 	}
 	else {
 		window->ShowMouseCursor(true);
@@ -329,7 +328,7 @@ void draw_phase () {
 		char* p;
 		for (p = message_pos; message_pos_next ? (p < message_pos_next) : (*p); p++) {
 			draw_image(
-				&img::font_proportional, pos, 1,
+				&img::font_proportional, Vec(pos, 1),
 				*p, false, true
 			);
 			pos += letter_width[(uint8)*p]*PX;

@@ -294,10 +294,10 @@ struct Object {
 	virtual void draw () {
 		if (def()->image) {
 			if (body) {
-				draw_image(def()->image, x(), y(), subimage, facing == 1);
+				draw_image(def()->image, pos(), subimage, facing == 1);
 			}
 			else {
-				draw_image(def()->image, desc->x, desc->y, subimage, facing == 1);
+				draw_image(def()->image, Vec(desc->x, desc->y), subimage, facing == 1);
 			}
 		}
 	}
@@ -452,7 +452,7 @@ struct Item : Object {
 void Item::draw () {
 	if (desc->data) {
 		item::Equip* info = (item::Equip*)desc->data;
-		draw_image(info->appearance, desc->x, desc->y, info->world_frame);
+		draw_image(info->appearance, Vec(desc->x, desc->y), info->world_frame);
 	}
 }
 void Item::before_move () {
@@ -519,9 +519,6 @@ struct Crate : Object {
 struct Mousehole : Object {
 	int timer;
 	virtual char* describe () { return "A large metal pipe is coming out of the ground.\nFor ventilation, perhaps?\nIt's big enough for a rat to crawl through.\nMaybe that's where they're coming from."; }
-	virtual void draw () {
-		draw_image(&img::mousehole, desc->x, desc->y);
-	}
 	virtual void before_move () {
 		timer--;
 		if (timer <= 0) {
@@ -555,7 +552,7 @@ struct HitEffect : Object {
 		//img::Image* image = ((img::Image*)desc->data);
 		img::Image* image = &img::hit_damagable;
 		uint sub = numsubs - timer / numsubs - 1;
-		draw_image(image, desc->x, desc->y, sub);
+		draw_image(image, Vec(desc->x, desc->y), sub);
 		timer--;
 		if (timer == 0) destroy();
 	}
