@@ -146,6 +146,7 @@ struct Rata : Walking {
 			if (inventory[i] == 0) {
 				inventory[i] = itemdesc;
 				inventory_amount++;
+				itemdesc->room = -100 - i;
 				return;
 			}
 		} // No room
@@ -153,7 +154,6 @@ struct Rata : Walking {
 	}	
 	void pick_up (Item* itemobj) {
 		itemobj->destroy();
-		itemobj->desc->room = room::inventory;
 		add_to_inventory(itemobj->desc);
 	}
 	void drop (uint i) {
@@ -173,7 +173,6 @@ struct Rata : Walking {
 	}
 	void pick_up_equip (Item* itemobj) {
 		itemobj->destroy();
-		itemobj->desc->room = room::inventory;
 		int slot = item::def[itemobj->desc->data].slot;
 		if (equipment[slot])
 			unequip_drop(equipment[slot]);
@@ -181,6 +180,7 @@ struct Rata : Walking {
 		if (otherslot > 0 && equipment[otherslot])
 			unequip_drop(equipment[otherslot]);
 		equipment[slot] = itemobj->desc;
+		itemobj->desc->room = -200 - slot;
 		if (otherslot > 0) equipment[otherslot] = itemobj->desc;
 	}
 
@@ -738,9 +738,8 @@ struct Rata : Walking {
 		else state = falling;
 		life = max_life = 144;
 		inventory_amount = 0;
-		for (uint i=0; i<item::num_slots; i++) equipment[i] = NULL;
-		for (uint i=0; i<MAX_INVENTORY; i++) inventory[i] = NULL;
-		equipment[item::body] = new obj::Desc(-2, obj::item, Vec(0, 0), Vec(0, 0), 0, item::white_dress);
+		for (uint i=0; i<MAX_INVENTORY; i++)
+			if (inventory[i]) inventory_amount++;
 		facing = desc->facing ? desc->facing : 1;
 		cursor.x = 2.0 * facing;
 		cursor.y = 0;

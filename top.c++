@@ -103,12 +103,14 @@ float tilepicker_width = 1.5;
 #include "poses.c++"
 #define DEF_ONLY
 #include "items.c++"
+#include "save.c++"
 #undef DEF_ONLY
 #include "objects.c++"
 #include "bullet.c++"
 #include "items.c++"
 #include "tiles.c++"
 #include "rooms.c++"
+#include "save.c++"
 #include "loop.c++"
 
 

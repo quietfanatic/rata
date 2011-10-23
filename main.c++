@@ -11,6 +11,8 @@ int main () {
 		Vec(10, 10)
 	).manifest();
 
+	load_save();
+
 	room::file::roompicker::room.enter(0);
 	bgm::life.SetVolume(80);
 	bgm::life.Play();
