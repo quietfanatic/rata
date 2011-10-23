@@ -359,17 +359,6 @@ struct Object {
 		}
 	}
 
-	Bullet* fire_bullet(float bx, float by, float bd, float bv = 120, int power = 48, float bs=0.01) {
-		bd = dither(bd, bs);
-		return (Bullet*)(new obj::Desc(
-			obj::bullet, this,
-			bx, by, bv*cos(bd), bv*sin(bd), 1, true
-		))->manifest();
-	}
-	Bullet* fire_bullet_to(float bx, float by, float tx, float ty, float bv = 120, int power = 48, float bs=0.01) {
-		return fire_bullet(bx, by, atan2(ty-by, tx-bx), bv, power, bs);
-	}
-
 	 // Get def, id
 	const uint16 id () { return desc->id; }
 	const obj::Def* def () { return &obj::def[id()]; }
@@ -516,88 +505,6 @@ struct Tilemap : Object {
 
 
 struct Bullet : Object {
-	float oldx;
-	float oldy;
-	float midx;
-	float midy;
-	float oldxvel;
-	float oldyvel;
-	int lifetime;
-
-	void on_create () {
-		make_body(desc, true, true);
-		for (uint i = obj::def[desc->id].nfixes; i > 0; i--) {
-			dbg(4, "Fix %d: 0x%08x\n", i, body->CreateFixture(&(obj::def[desc->id].fixdef[i-1])));
-		}
-		dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
-		oldx = x();
-		oldy = y();
-		midx = -1/0.0;
-		midy = -1/0.0;
-		lifetime = 0;
-	}
-
-	void before_move () {
-		oldx = x();
-		oldy = y();
-		midx = -1/0.0;
-		midy = -1/0.0;
-		oldxvel = xvel();
-		oldyvel = yvel();
-		lifetime++;
-	}
-
-	void find_hit (b2Fixture* other) {
-		b2RayCastOutput out;
-		b2RayCastInput in;
-		in.p1 = b2Vec2(oldx, oldy);
-		in.p2 = b2Vec2(oldx+oldxvel, oldy+oldyvel);
-		in.maxFraction = 1.0;
-
-		bool hit = other->RayCast(
-			&out,
-			in,
-			0	
-		);
-		dbg(3, "hit: %d\n", hit);
-		if (hit) {
-			midx = oldx + out.fraction * oldxvel;
-			midy = oldy + out.fraction * oldyvel;
-		}
-		else { midx = x(); midy = y(); }
-	}
-
-	void draw () {
-		if (midx == -1/0.0) {
-			window->Draw(sf::Shape::Line(
-				oldx, oldy,
-				x(), y(),
-				1*PX, sf::Color(255, 255, 255, 127)
-			));
-		}
-		else {
-			window->Draw(sf::Shape::Line(
-				oldx, oldy,
-				midx, midy,
-				1*PX, sf::Color(255, 255, 255, 127)
-			));
-			if (lifetime != -1) {
-				window->Draw(sf::Shape::Line(
-					midx, midy,
-					x(), y(),
-					1*PX, sf::Color(255, 255, 255, 127)
-				));
-			}
-		}
-
-		if (lifetime == -1) {
-			destroy();
-		}
-	}
-
-	void destroy_after_draw () {
-		lifetime = -1;
-	}
 };
 
 
@@ -880,14 +787,7 @@ void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Man
 	
 	a->damage(bfp->touch_damage * afp->damage_factor);
 
-	if (b->desc->id == obj::bullet) {
-		(new obj::Desc(
-			obj::hiteffect, &img::hit_damagable,
-			((Bullet*)b)->midx, ((Bullet*)b)->midy, 11, 0, 0, true
-		))->manifest();
-		((Bullet*)b)->destroy_after_draw();
-	}
-	else if (manifold->type == b2Manifold::e_faceA)
+	if (manifold->type == b2Manifold::e_faceA)
 		a->impulse(manifold->localNormal.x*DAMAGE_KNOCKBACK,
 		           manifold->localNormal.y*DAMAGE_KNOCKBACK);
 	else if (manifold->type == b2Manifold::e_faceB)
@@ -904,20 +804,6 @@ struct myCL : b2ContactListener {
 		//b2Manifold* manifold = contact->GetManifold();
 		if (a->doomed or b->doomed)
 			return contact->SetEnabled(false);
-		if (a->desc->id == obj::bullet) {
-			Bullet* ba = (Bullet*) a;
-			if (ba->lifetime == -1
-			 || (ba->lifetime < 2 && ba->desc->data == b)) {
-				return contact->SetEnabled(false);
-			}
-		}
-		if (b->desc->id == obj::bullet) {
-			Bullet* bb = (Bullet*) b;
-			if (bb->lifetime == -1
-			 || (bb->lifetime < 2 && bb->desc->data == a)) {
-				return contact->SetEnabled(false);
-			}
-		}
 	}
 	void PostSolve (b2Contact* contact, const b2ContactImpulse* ci) {
 		if (!contact->IsTouching()) return;
@@ -957,22 +843,6 @@ struct myCL : b2ContactListener {
 				a->floor_contact = contact;
 				a->floor_normal = -manifold->localNormal;
 			}
-		}
-		if (a->desc->id == obj::bullet) {
-			Bullet* ba = (Bullet*) a;
-			ba->find_hit(contact->GetFixtureB());
-			if (ci->normalImpulses[0] > 10.0
-			      || ci->normalImpulses[0] < -10.0) ba->destroy_after_draw();
-			else if (ba->speed() < 100) ba->destroy_after_draw();
-			else snd::ricochet.play(0.7+rand()*0.3/RAND_MAX, 50);
-		}
-		if (b->desc->id == obj::bullet) {
-			Bullet* bb = (Bullet*) b;
-			bb->find_hit(contact->GetFixtureA());
-			if (ci->normalImpulses[0] > 10.0
-			      || ci->normalImpulses[0] < -10.0) bb->destroy_after_draw();
-			else if (bb->speed() < 100) bb->destroy_after_draw();
-			else snd::ricochet.play(0.7+rand()*0.3/RAND_MAX, 50);
 		}
 		if (bfp->touch_damage && afp->damage_factor)
 			apply_touch_damage(a, b, afp, bfp, manifold);
