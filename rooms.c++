@@ -115,6 +115,8 @@ namespace room {
 				o->destroy();
 			}
 		}
+		for (uint i=0; i < MAX_BULLETS; i++)
+			bullets[i].lifetime = -1;
 	}
 
 	int16 Room::tile (uint x, uint y) {
