@@ -6,8 +6,7 @@ struct AI : Walking {
 	int decision_timer;
 	virtual int update_start () { return 0; }
 	virtual int update_interval () { return 30; }
-	virtual float eyex () { return x(); }
-	virtual float eyey () { return y() + 1; }
+	virtual Vec eye () { return Vec(x(), y()+1); }
 	virtual void decision () { }
 
 	void on_create () {
@@ -24,34 +23,34 @@ struct AI : Walking {
 		Walking::before_move();
 	}
 
-	bool clear_to_point (float x, float y) {
-		return !check_line(eyex(), eyey(), x, y).hit;
+	bool clear_to_point (Vec p) {
+		return !check_line(eye().x, eye().y, p.x, p.y).hit;
 	}
 	
 	 // Sight and seeing
-	bool see_rata_at (float x, float y) {
-		LineChecker r = check_line(eyex(), eyey(), x, y, 1|2|32|128);
+	bool see_rata_at (Vec p) {
+		LineChecker r = check_line(eye().x, eye().y, p.x, p.y, 1|2|32|128);
 		return r.hit && r.hit->GetBody()->GetUserData() == rata;
 	}
 	bool see_rata () {
-		return see_rata_at(rata->x(), rata->y()+0.8)
-		    || see_rata_at(rata->x(), rata->y()+1.6)
-		    || see_rata_at(rata->x(), rata->y()+0.2);
+		return see_rata_at(rata->pos() + Vec(0, 0.8))
+		    || see_rata_at(rata->pos() + Vec(0, 1.6))
+		    || see_rata_at(rata->pos() + Vec(0, 0.2));
 	}
 	Vec see_rata_pos () {
-		return see_rata_at(rata->x(), rata->y()+0.8) ? Vec(rata->x(), rata->y()+0.8)
-		     : see_rata_at(rata->x(), rata->y()+1.6) ? Vec(rata->x(), rata->y()+1.6)
-		     : see_rata_at(rata->x(), rata->y()+0.2) ? Vec(rata->x(), rata->y()+0.2)
+		return see_rata_at(rata->pos() + Vec(0, 0.8)) ? rata->pos() + Vec(0, 0.8)
+		     : see_rata_at(rata->pos() + Vec(0, 1.6)) ? rata->pos() + Vec(0, 1.6)
+		     : see_rata_at(rata->pos() + Vec(0, 0.2)) ? rata->pos() + Vec(0, 0.2)
 		     : Vec::undef;
 	}
-	Vec predict_pos_from (float x, float y, Object* threat = rata) {
-		return Vec(x + threat->xvel() * decision_timer/FPS,
-		              y + threat->yvel() * decision_timer/FPS);
+	Vec predict_pos_from (Vec p, Object* threat = rata) {
+		return Vec(p.x + threat->xvel() * decision_timer/FPS,
+		           p.y + threat->yvel() * decision_timer/FPS);
 	}
 
 	Vec predict_pos (Object* threat = rata) {
 		return Vec(threat->x() + threat->xvel() * decision_timer/FPS,
-		              threat->y() + threat->yvel() * decision_timer/FPS);
+		           threat->y() + threat->yvel() * decision_timer/FPS);
 	}
 };
 
@@ -102,10 +101,8 @@ struct Patroller : AI {
 	virtual char* describe () { return "A small robot is patrolling the area.\nIt has a gun attached.  Best be cautious."; }
 	uint motion_frames;
 	bool threat_detected;
-	float threat_x;
-	float threat_y;
-	float threat_xvel;
-	float threat_yvel;
+	Vec threat_pos;
+	Vec threat_vel;
 	Vec prediction;
 	virtual void on_create () {
 		AI::on_create();
@@ -122,8 +119,8 @@ struct Patroller : AI {
 			ideal_xvel = 0.0;
 		}
 		else if (floor) {
-			if (clear_to_point(x()+0.7*facing, y()-0.3)
-			 || !clear_to_point(x()+0.7*facing, y()+0.3)) {
+			if (clear_to_point(Vec(x()+0.7*facing, y()-0.3))
+			 || !clear_to_point(Vec(x()+0.7*facing, y()+0.3))) {
 				facing = -facing;
 			}
 			ideal_xvel = 3.0*facing;
@@ -147,7 +144,7 @@ struct Patroller : AI {
 		threat_detected = (rata->x() - x())*facing > 0;
 		if (threat_detected) {
 			ratapos = see_rata_pos();
-			if (ratapos.x == ratapos.x)
+			if (defined(ratapos))
 				prediction = predict_pos();
 			else threat_detected = false;
 		}
@@ -213,8 +210,7 @@ struct Flyer : AI {
 		AI::before_move();
 	}
 
-	float eyex () { return x(); }
-	float eyey () { return y(); }
+	Vec eye () { return Vec(x(), y()); }
 	int update_interval () { return 40; }
 	void decision () {
 		Vec ratapos = see_rata_pos();
@@ -233,7 +229,7 @@ struct Flyer : AI {
 		if (defined(ratapos)) {
 			//printf("Saw Rata at height %f\n", ratapos.y - rata->y());
 			dest = Vec(x(), y());
-			prediction = predict_pos_from(ratapos.x, ratapos.y);
+			prediction = predict_pos_from(ratapos);
 			oldpos = ratapos;
 		}
 		else {

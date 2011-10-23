@@ -323,6 +323,7 @@ struct Object {
 	 // Wrap b2Body
 	float x() { return body->GetPosition().x; }
 	float y() { return body->GetPosition().y; }
+	Vec pos() { return body->GetPosition(); }
 	float xvel() { return body->GetLinearVelocity().x; }
 	float yvel() { return body->GetLinearVelocity().y; }
 	float speed() { return xvel()*xvel() + yvel()*yvel(); }
