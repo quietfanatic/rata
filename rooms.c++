@@ -4,6 +4,7 @@
 namespace room {
 	struct Room;
 	Room* current = NULL;
+	int currenti = -1;
 	int entrance = -1;
 	bool transition = false;
 	Object* tilemap_obj = NULL;
@@ -25,7 +26,12 @@ namespace room {
 		int print_to_file(FILE* F);
 #endif
 	};
-
+	enum Location {
+		wherever = -1,
+		temp = -2,
+		inventory = -3,		
+	};
+	extern Room* list [];
 }
 typedef room::Room Room;
 
@@ -90,8 +96,12 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 
 
 
-namespace room {
+void enter_room(int roomi, int entrance) {
+	room::currenti = roomi;
+	room::list[roomi]->enter();
+}
 
+namespace room {
 	void Room::enter (int entrance_) {
 		camera_jump = true;
 		entrance = entrance_;

@@ -82,11 +82,11 @@ struct Rata : Walking {
 	}
 
 	 // Easy access to bits
-	item::Equip* equip_info (uint i) {
-		return equipment[i] ? (item::Equip*)equipment[i]->data : NULL;
+	item::Def* equip_info (uint i) {
+		return equipment[i] ? &item::def[(uint)equipment[i]->data] : NULL;
 	}
 	bool wearing_helmet () {
-		return equip_info(item::head) == &item::helmet;
+		return equip_info(item::head) == &item::def[item::helmet];
 	}
 	Vec aim_center () { return pos() + Vec(2*PX*facing, 13*PX); }
 
@@ -135,7 +135,7 @@ struct Rata : Walking {
 	 // Equipment and inventory management
 
 	void spawn_item (obj::Desc* itemdesc) {
-		itemdesc->id = obj::item;
+		itemdesc->room = room::currenti;
 		itemdesc->pos = pos();
 		itemdesc->facing = facing;
 		itemdesc->manifest();
@@ -152,7 +152,7 @@ struct Rata : Walking {
 	}	
 	void pick_up (Item* itemobj) {
 		itemobj->destroy();
-		itemobj->desc->id = -1;
+		itemobj->desc->room = room::inventory;
 		add_to_inventory(itemobj->desc);
 	}
 	void drop (uint i) {
@@ -164,19 +164,19 @@ struct Rata : Walking {
 	}
 	void unequip_drop (obj::Desc* itemdesc) {
 		if (itemdesc == NULL) return;
-		int slot = ((item::Equip*)itemdesc->data)->slot;
+		int slot = item::def[(uint)itemdesc->data].slot;
 		equipment[slot] = NULL;
-		int otherslot = ((item::Equip*)itemdesc->data)->otherslot;
+		int otherslot = item::def[(uint)itemdesc->data].otherslot;
 		if (otherslot > 0) equipment[otherslot] = NULL;
 		spawn_item(itemdesc);
 	}
 	void pick_up_equip (Item* itemobj) {
 		itemobj->destroy();
 		itemobj->desc->id = -1;
-		int slot = ((item::Equip*)itemobj->desc->data)->slot;
+		int slot = item::def[(uint)itemobj->desc->data].slot;
 		if (equipment[slot])
 			unequip_drop(equipment[slot]);
-		int otherslot = ((item::Equip*)itemobj->desc->data)->otherslot;
+		int otherslot = item::def[(uint)itemobj->desc->data].otherslot;
 		if (otherslot > 0 && equipment[otherslot])
 			unequip_drop(equipment[otherslot]);
 		equipment[slot] = itemobj->desc;
@@ -739,7 +739,7 @@ struct Rata : Walking {
 		inventory_amount = 0;
 		for (uint i=0; i<item::num_slots; i++) equipment[i] = NULL;
 		for (uint i=0; i<MAX_INVENTORY; i++) inventory[i] = NULL;
-		equipment[item::body] = new obj::Desc(-2, obj::item, Vec(0, 0), Vec(0, 0), 0, &item::white_dress);
+		equipment[item::body] = new obj::Desc(-2, obj::item, Vec(0, 0), Vec(0, 0), 0, item::white_dress);
 		facing = desc->facing ? desc->facing : 1;
 		cursor.x = 2.0 * facing;
 		cursor.y = 0;

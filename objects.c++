@@ -453,7 +453,7 @@ struct Item : Object {
 
 void Item::draw () {
 	if (desc->data) {
-		item::Equip* info = (item::Equip*)desc->data;
+		item::Def* info = &item::def[(uint)desc->data];
 		draw_image(info->appearance, desc->pos, info->world_frame);
 	}
 }
