@@ -97,7 +97,7 @@ struct obj::Def {
 };
 
 struct obj::Desc {
-	uint16 id;
+	int16 id;
 	bool temp;
 	Vec pos;
 	Vec vel;
@@ -302,7 +302,7 @@ struct Object {
 
 	virtual void damage (int d) { life -= d; if (life <= 0) kill(); }
 	virtual void heal (int h) { life += h; if (life > max_life) life = max_life; }
-	virtual void kill () { destroy(); }
+	virtual void kill () { destroy(); desc->id = -1; }
 	virtual char* describe () { return "What a mysterious object."; }
 
 	 // Non-overridable

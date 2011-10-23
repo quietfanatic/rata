@@ -103,7 +103,8 @@ namespace room {
 		}
 		manifest_tilemap();
 		for (uint i = 0; i < nobjects; i++) {
-			saved_objects[i].manifest();
+			if (saved_objects[i].id > 0)
+				saved_objects[i].manifest();
 		}
 	}
 

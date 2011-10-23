@@ -87,7 +87,7 @@ struct Rat : AI {
 		Object::draw();
 	}
 	virtual void kill () {
-		destroy();
+		Object::kill();
 		snd::squeak.play();
 		if (rand() % 4 == 0)
 			(new obj::Desc(
