@@ -35,6 +35,8 @@ namespace room {
 }
 typedef room::Room Room;
 
+void enter_room (int id, int entrance);
+
 #else
 
 b2EdgeShape* make_edge (Vec v0, Vec v1, Vec v2, Vec v3) {
@@ -98,7 +100,7 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 
 void enter_room(int roomi, int entrance) {
 	room::currenti = roomi;
-	room::list[roomi]->enter();
+	room::list[roomi]->enter(entrance);
 }
 
 namespace room {
@@ -112,10 +114,13 @@ namespace room {
 			memcpy((void*)saved_objects, (void*)objects, nobjects*sizeof(obj::Desc));
 		}
 		manifest_tilemap();
-		for (uint i = 0; i < nobjects; i++) {
-			if (saved_objects[i].id > 0)
-				saved_objects[i].manifest();
-		}
+		for (uint i = 0; i < nobjects; i++)
+		if (saved_objects[i].id > 0)
+			saved_objects[i].manifest();
+		for (uint i=0; i < n_saved_things; i++)
+		if (saved_things[i].room == currenti)
+		if (saved_things[i].id > 0)
+			saved_things[i].manifest();
 	}
 
 	void Room::leave () {

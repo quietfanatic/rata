@@ -480,7 +480,7 @@ struct Exit : Object {
 		if (rata->x() < desc->pos.x + desc->vel.x)
 		if (rata->y() > desc->pos.y)
 		if (rata->y() < desc->pos.y + desc->vel.y)
-			room::list[desc->data]->enter(desc->data2);
+			enter_room(desc->data, desc->data2);
 	}
 };
 

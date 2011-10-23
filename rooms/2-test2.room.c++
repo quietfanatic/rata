@@ -35,8 +35,6 @@ END_ROOM_TILES
 
 BEGIN_ROOM_OBJECTS
 	ROOM_OBJECT(obj::entrance, 2.5, 21, 0, 0, 0, 0, 0)
-	ROOM_OBJECT(obj::item, 8.5, 21, 0, 0, 0, item::white_dress, 0)
-	ROOM_OBJECT(obj::item, 38.5, 17, 0, 0, 0, item::handgun, 0)
 	ROOM_OBJECT(obj::rat, 13, 21, 0, 0, 1, 0, 0)
 	ROOM_OBJECT(obj::rat, 17, 21, 0, 0, 1, 0, 0)
 	ROOM_OBJECT(obj::rat, 29, 21, 0, 0, 1, 0, 0)
@@ -59,5 +57,5 @@ BEGIN_ROOM_OBJECTS
 	ROOM_OBJECT(obj::patroller, 29.5, 12, 0, 0, 1, 0, 0)
 	ROOM_OBJECT(obj::patroller, 11.5, 8, 0, 0, 1, 0, 0)
 END_ROOM_OBJECTS
-ROOM_DEF(40, 30, 24, 127, 127, 127, 255, 0)
+ROOM_DEF(40, 30, 22, 127, 127, 127, 255, 0)
 

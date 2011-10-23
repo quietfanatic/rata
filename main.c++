@@ -13,7 +13,7 @@ int main () {
 
 	load_save();
 
-	room::file::roompicker::room.enter(0);
+	enter_room(room::roompicker, 0);
 	bgm::life.SetVolume(80);
 	bgm::life.Play();
 	try { main_loop(); } catch (int x) { printf("Game quit succesfully with result %d.\n", x); }
