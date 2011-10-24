@@ -160,6 +160,7 @@ struct Patroller : AI {
 };
 
 struct Flyer : AI {
+	virtual char* describe () { return "An armed flying robot, small and deadly.\x80\nThat propellor lets it travel anywhere it wants to."; }
 	uint motion_frames;
 	Vec dest;
 	Vec oldpos;
