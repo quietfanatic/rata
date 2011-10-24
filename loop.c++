@@ -97,11 +97,28 @@ void destroy_phase () {
 }
 
 
-void draw_tiles_back () {
+void draw_tiles (bool front) {
+	if (room::current) {
+		uint minx = MAX(0, viewleft());
+		uint miny = MAX(0, viewbottom());
+		uint maxx = MIN(room::current->width, ceil(viewright()));
+		uint maxy = MIN(room::current->height, ceil(viewtop()));
+		for (uint x=minx; x < maxx; x++)
+		for (uint y=miny; y < maxy; y++) {
+			int tile = room::current->tile(x, room::current->height-1-y);
+			bool flip = (tile < 0);
+			if (flip) tile = -tile;
+			if (front ? tileinfo[tile].front : tileinfo[tile].back) {
+				draw_image(
+					&img::tiles,
+					Vec(x+.5, y+.5),
+					tile, flip
+				);
+			}
+		}
+	}
 }
 
-void draw_tiles_front () {
-}
 
 
 void draw_phase () {
@@ -152,43 +169,23 @@ void draw_phase () {
 			draw_image(img::_bgs[rc->bg_index], Vec(x, y));
 		}
 	}
-	uint minx, miny, maxx, maxy;
-	 // Draw back tiles
-	if (rc) {
-//		if (mapeditor) {
-//			minx = miny = 0;
-//			maxx = rc->width;
-//			maxy = rc->height;
-//		}
-//		else {
-			minx = MAX(0, viewleft());
-			miny = MAX(0, viewbottom());
-			maxx = MIN(rc->width, ceil(viewright()));
-			maxy = MIN(rc->height, ceil(viewtop()));
-//		}
-//		printf("Drawing tilemap from %d, %d to %d, %d\n", minx, miny, maxx, maxy);
-		for (uint x=minx; x < maxx; x++)
-		for (uint y=miny; y < maxy; y++) {
-		//for (uint x=0; x<width; x++)
-		//for (uint y=0; y<height; y++) {
-			int tile = rc->tile(x, rc->height-1-y);
-			bool flip = (tile < 0);
-			if (flip) tile = -tile;
-			if (tileinfo[tile].back) {
-				//printf("Drawing tile %d at %d, %d\n", tile, x, y);
-				draw_image(
-					&img::tiles,
-					Vec(x+.5, y+.5),
-					tile, flip
-				);
-			}
-		}
-	}
+	float olddepth = 1/0.0;
 	 // Draw objects
 	for (Object* o = objects_by_depth; o; o = o->next_depth) {
-		//if (o->realtest != 151783) printf("Error: junk object detected\n");
 		dbg(8, "Drawing 0x%08x\n", o);
+		 // Back tiles
+		if (olddepth > 500 && obj::def[o->id()].depth <= 500)
+			draw_tiles(false);
+		 // Bullets
+		if (olddepth > -200 && obj::def[o->id()].depth <= -200)
+		for (uint i=0; i < MAX_BULLETS; i++) {
+			bullets[i].draw();
+		}
+		 // Front tiles
+		if (olddepth > -500 && obj::def[o->id()].depth <= -500)
+			draw_tiles(true);
 		o->draw();
+		olddepth = obj::def[o->id()].depth;
 		 // Debug draw
 		if (debug_mode) {
 			if (o->body)
@@ -198,30 +195,18 @@ void draw_phase () {
 				));
 		}
 	}
-	 // Draw bullets
+	 // Back tiles
+	if (olddepth > 500)
+		draw_tiles(false);
+	 // Bullets
+	if (olddepth > -200)
 	for (uint i=0; i < MAX_BULLETS; i++) {
 		bullets[i].draw();
 	}
+	 // Front tiles
+	if (olddepth > -500)
+		draw_tiles(true);
 
-	 // Draw front tiles
-	if (rc) {
-		for (uint x=minx; x < maxx; x++)
-		for (uint y=miny; y < maxy; y++) {
-		//for (uint x=0; x<width; x++)
-		//for (uint y=0; y<height; y++) {
-			int tile = rc->tile(x, rc->height-1-y);
-			bool flip = (tile < 0);
-			if (flip) tile = -tile;
-			if (tileinfo[tile].front) {
-				//printf("Drawing tile %d at %d, %d\n", tile, x, y);
-				draw_image(
-					&img::tiles,
-					Vec(x+.5, y+.5),
-					tile, flip
-				);
-			}
-		}
-	}
 	if (rc && debug_mode) {
 		 // Debug draw tilemap
 		for (b2Fixture* f = room::tilemap_obj->body->GetFixtureList(); f; f = f->GetNext()) {
