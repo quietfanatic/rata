@@ -221,12 +221,13 @@ struct Flyer : AI {
 				120, 48, 0.1
 			);
 			snd::gunshot.play(1.0, 70);
-			add_vel(-b->vel*FPS/120);
+			add_vel(-b->vel*FPS/60);
 		}
 		 // Predict
 		if (defined(ratapos)) {
 			//printf("Saw Rata at height %f\n", ratapos.y - rata->y());
-			dest = Vec(x(), y());
+			if (!defined(prediction))
+				dest = Vec(x(), y());
 			prediction = predict_pos_from(ratapos);
 			oldpos = ratapos;
 		}
