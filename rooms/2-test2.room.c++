@@ -57,5 +57,5 @@ BEGIN_ROOM_OBJECTS
 	ROOM_OBJECT(obj::patroller, 29.5, 12, 0, 0, 1, 0, 0)
 	ROOM_OBJECT(obj::patroller, 11.5, 8, 0, 0, 1, 0, 0)
 END_ROOM_OBJECTS
-ROOM_DEF(40, 30, 22, 127, 127, 127, 255, 0)
+ROOM_DEF(40, 30, 22, 127, 127, 127, 255, 0, 1)
 

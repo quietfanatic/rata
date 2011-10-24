@@ -38,16 +38,16 @@ namespace snd {
 
 namespace bgm {
 	enum {
+		theme,
 		life,
 		safe,
-		theme,
 		n_bgms
 	};
 
 	char* name [n_bgms] = {
-		"bgm/life.ogg",
-		"bgm/safe.ogg",
-		"bgm/theme.ogg"
+		"bgm/0-theme.ogg",
+		"bgm/1-life.ogg",
+		"bgm/2-safe.ogg"
 	};
 	sf::Music music;
 }

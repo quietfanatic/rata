@@ -13,7 +13,7 @@ my @snds = map {
 	/\.(?:flac|ogg)$/
 } glob 'snd/*';
 my @bgms = map {
-	$_ =~ /^bgm\/(.*?)\.(?:flac|ogg)$/ or die "Error: Weird sound filename: $_\n";
+	$_ =~ /^bgm\/\d+-(.*?)\.(?:flac|ogg)$/ or die "Error: Weird sound filename: $_\n";
 	my $id = $1;
 	$id =~ s/[^a-zA-Z0-9_]/_/g;
 	{

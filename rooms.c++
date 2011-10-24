@@ -12,7 +12,8 @@ namespace room {
 		uint16 width;
 		uint16 height;
 		sf::Color bg_color;
-		int bg_index;
+		int16 bg;
+		int16 bgm;
 		int16* tiles;
 		uint32 nobjects;
 		obj::Desc* objects;
@@ -121,6 +122,12 @@ namespace room {
 		if (saved_things[i].room == currenti)
 		if (saved_things[i].id > 0)
 			saved_things[i].manifest();
+		if (bgm > -1) {
+			bgm::music.OpenFromFile(bgm::name[bgm]);
+			bgm::music.SetLoop(true);
+			bgm::music.SetVolume(80);
+			bgm::music.Play();
+		}
 	}
 
 	void Room::leave () {
@@ -230,8 +237,8 @@ namespace room {
 				objects[i].data2
 			);
 		}
-		return 0 <= fprintf(F, "END_ROOM_OBJECTS\n\nROOM_DEF(%hu, %hu, %hu, %hhu, %hhu, %hhu, %hhu, %d)\n\nEND_ROOM\n\n",
-			width, height, nobjects, bg_color.r, bg_color.g, bg_color.b, bg_color.a, bg_index
+		return 0 <= fprintf(F, "END_ROOM_OBJECTS\n\nROOM_DEF(%hu, %hu, %hu, %hhu, %hhu, %hhu, %hhu, %d, %d)\n\nEND_ROOM\n\n",
+			width, height, nobjects, bg_color.r, bg_color.g, bg_color.b, bg_color.a, bg, bgm
 		);
 	}
 #endif
@@ -242,7 +249,7 @@ namespace room {
 #define BEGIN_ROOM_OBJECTS obj::Desc objects [] = {
 #define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(-1, id, Vec(x, y), Vec(xvel, yvel), facing, data, data2),
 #define END_ROOM_OBJECTS obj::Desc()};
-#define ROOM_DEF(w, h, o, r, g, b, a, bg) Room room = {w, h, sf::Color(r, g, b, a), bg, tiles, o, objects, NULL};
+#define ROOM_DEF(w, h, o, r, g, b, a, bg, bgm) Room room = {w, h, sf::Color(r, g, b, a), bg, bgm, tiles, o, objects, NULL};
 #define END_ROOM
 
 

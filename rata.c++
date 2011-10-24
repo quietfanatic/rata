@@ -929,7 +929,7 @@ struct Rata : Walking {
 		draw_image(img::rata_body, p, bodypose, flip);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->body > 0)
+		if (equip_info(i)->body > -1)
 			draw_image(equip_info(i)->body, p, bodypose, flip);
 
 		if (state == dead) goto draw_arm;
@@ -941,7 +941,7 @@ struct Rata : Walking {
 		);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->head > 0)
+		if (equip_info(i)->head > -1)
 			draw_image(
 				equip_info(i)->head,
 				p + headp,
@@ -949,7 +949,7 @@ struct Rata : Walking {
 			);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->helmet > 0)
+		if (equip_info(i)->helmet > -1)
 			draw_image(
 				equip_info(i)->helmet,
 				p + helmetp,
@@ -970,7 +970,7 @@ struct Rata : Walking {
 		);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->arm > 0)
+		if (equip_info(i)->arm > -1)
 			draw_image(
 				equip_info(i)->arm,
 				p + armp,
@@ -978,7 +978,7 @@ struct Rata : Walking {
 			);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->forearm > 0)
+		if (equip_info(i)->forearm > -1)
 			draw_image(
 				equip_info(i)->forearm,
 				p + forearmp,
@@ -990,7 +990,7 @@ struct Rata : Walking {
 		draw_hand:
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->hand > 0)
+		if (equip_info(i)->hand > -1)
 			draw_image(
 				equip_info(i)->hand,
 				p + hand_pos,

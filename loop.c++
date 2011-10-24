@@ -156,17 +156,17 @@ void draw_phase () {
 	}
 	window->SetView(window_view);
 	 // Draw background
-	if (rc && rc->bg_index < 0)
+	if (rc && rc->bg < 0)
 		window->Clear(rc->bg_color);
 	else if (rc) {
 //		draw_image(img::_bgs[rc->bg_index], camera.x, camera.y);
-		float w = img::def[rc->bg_index].sfi.GetWidth()*PX;
-		float h = img::def[rc->bg_index].sfi.GetHeight()*PX;
+		float w = img::def[rc->bg].sfi.GetWidth()*PX;
+		float h = img::def[rc->bg].sfi.GetHeight()*PX;
 		float bg_x = mod_f(-camera.x/2, w);
 		float bg_y = mod_f(-camera.y/2, h);
 		for (float x = bg_x + viewleft(); x < viewright(); x += w)
 		for (float y = bg_y + h + viewtop(); y > viewbottom(); y -= h) {
-			draw_image(rc->bg_index, Vec(x, y));
+			draw_image(rc->bg, Vec(x, y));
 		}
 	}
 	float olddepth = 1/0.0;
