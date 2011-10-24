@@ -385,7 +385,7 @@ struct Rata : Walking {
 			}
 			else {
 				b2Fixture* seeing = check_line(
-					aim_center(), aim_center() + Vec(cursor.x, cursor.y)
+					aim_center(), aim_center() + Vec(cursor.x, cursor.y), cf::sight_barrier.maskBits
 				).hit;
 				can_see = (seeing == NULL);
 			}
@@ -405,7 +405,7 @@ struct Rata : Walking {
 						message = message_pos = NULL;
 					}
 				}
-				else if (pointed_object && pointed_object->desc->id != obj::tilemap) {
+				else if (can_see && pointed_object && pointed_object->desc->id != obj::tilemap) {
 					message = pointed_object->describe();
 					message_pos = message;
 					message_pos_next = NULL;

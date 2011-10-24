@@ -131,6 +131,7 @@ namespace cf {
 	b2Filter scenery = {64, 2, 0};
 	b2Filter rata_invincible = {128, 2|8|16|32|256, 0};
 	b2Filter sensor = {256, 2|32, 0};
+	b2Filter sight_barrier = {512, 0, 0};
 };
 
 
