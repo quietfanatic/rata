@@ -654,14 +654,14 @@ struct Rata : Walking {
 		oldyvel = yvel();
 
 		 // Select cursor image
-		if (aiming) cursor.img = &img::target;
-		else if (message) cursor.img = &img::readmore;
+		if (aiming) cursor.img = img::target;
+		else if (message) cursor.img = img::readmore;
 		else if (can_see) {
 			if (pointed_object && pointed_object->desc->id != obj::tilemap)
-				cursor.img = &img::see;
-			else cursor.img = &img::look;
+				cursor.img = img::see;
+			else cursor.img = img::look;
 		}
-		else cursor.img = &img::nolook;
+		else cursor.img = img::nolook;
 
 		Walking::before_move();
 	}
@@ -743,7 +743,7 @@ struct Rata : Walking {
 		facing = desc->facing ? desc->facing : 1;
 		cursor.x = 2.0 * facing;
 		cursor.y = 0;
-		cursor.img = &img::look;
+		cursor.img = img::look;
 		trap_cursor = true;
 		oldyvel = 0.0;
 		rata = this;
@@ -926,22 +926,22 @@ struct Rata : Walking {
 
 		 // Now to actually draw.
 
-		draw_image(&img::rata_body, p, bodypose, flip);
+		draw_image(img::rata_body, p, bodypose, flip);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->body)
+		if (equip_info(i)->body > 0)
 			draw_image(equip_info(i)->body, p, bodypose, flip);
 
 		if (state == dead) goto draw_arm;
 		draw_head:
 		draw_image(
-			&img::rata_head,
+			img::rata_head,
 			p + headp,
 			headpose, flip
 		);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->head)
+		if (equip_info(i)->head > 0)
 			draw_image(
 				equip_info(i)->head,
 				p + headp,
@@ -949,7 +949,7 @@ struct Rata : Walking {
 			);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->helmet)
+		if (equip_info(i)->helmet > 0)
 			draw_image(
 				equip_info(i)->helmet,
 				p + helmetp,
@@ -959,18 +959,18 @@ struct Rata : Walking {
 		if (state == dead) goto draw_hand;
 		draw_arm:
 		draw_image(
-			&img::rata_arm,
+			img::rata_arm,
 			p + armp,
 			armpose, armflip
 		);
 		draw_image(
-			&img::rata_forearm,
+			img::rata_forearm,
 			p + forearmp,
 			forearmpose, forearmflip
 		);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->arm)
+		if (equip_info(i)->arm > 0)
 			draw_image(
 				equip_info(i)->arm,
 				p + armp,
@@ -978,7 +978,7 @@ struct Rata : Walking {
 			);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->forearm)
+		if (equip_info(i)->forearm > 0)
 			draw_image(
 				equip_info(i)->forearm,
 				p + forearmp,
@@ -990,7 +990,7 @@ struct Rata : Walking {
 		draw_hand:
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
-		if (equip_info(i)->hand)
+		if (equip_info(i)->hand > 0)
 			draw_image(
 				equip_info(i)->hand,
 				p + hand_pos,

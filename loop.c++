@@ -110,7 +110,7 @@ void draw_tiles (bool front) {
 			if (flip) tile = -tile;
 			if (front ? tileinfo[tile].front : tileinfo[tile].back) {
 				draw_image(
-					&img::tiles,
+					img::tiles,
 					Vec(x+.5, y+.5),
 					tile, flip
 				);
@@ -160,13 +160,13 @@ void draw_phase () {
 		window->Clear(rc->bg_color);
 	else if (rc) {
 //		draw_image(img::_bgs[rc->bg_index], camera.x, camera.y);
-		float w = img::_bgs[rc->bg_index]->sfi.GetWidth()*PX;
-		float h = img::_bgs[rc->bg_index]->sfi.GetHeight()*PX;
+		float w = img::def[rc->bg_index].sfi.GetWidth()*PX;
+		float h = img::def[rc->bg_index].sfi.GetHeight()*PX;
 		float bg_x = mod_f(-camera.x/2, w);
 		float bg_y = mod_f(-camera.y/2, h);
 		for (float x = bg_x + viewleft(); x < viewright(); x += w)
 		for (float y = bg_y + h + viewtop(); y > viewbottom(); y -= h) {
-			draw_image(img::_bgs[rc->bg_index], Vec(x, y));
+			draw_image(rc->bg_index, Vec(x, y));
 		}
 	}
 	float olddepth = 1/0.0;
@@ -254,7 +254,7 @@ void draw_phase () {
 			else
 				subimage = 4;
 			draw_image(
-				&img::heart,
+				img::heart,
 				Vec(19.5 - (i * 12*PX), 14.25),
 				subimage,
 				false, true

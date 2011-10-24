@@ -2,7 +2,7 @@
 
 
 int main () {
-	img::load_img();
+	load_img();
 	load_snd();
 	main_init();
 

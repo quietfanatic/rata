@@ -86,7 +86,7 @@ struct obj::Def {
 	float depth;
 	float order;
 	Object* (& alloc) ();
-	img::Image* image;
+	int16 image;
 };
 
 struct obj::Desc {
@@ -538,14 +538,12 @@ struct HitEffect : Object {
 	virtual void on_create () {
 		Object::on_create();
 		timer = desc->vel.x;
-		//img::Image* image = ((img::Image*)desc->data);
-		img::Image* image = &img::hit_damagable;
-		numsubs = image->numsubs();
+		int16 image = img::hit_damagable;
+		numsubs = img::def[image].numsubs();
 		fpsub = (timer+numsubs-1) / numsubs;
 	}
 	virtual void draw () {
-		//img::Image* image = ((img::Image*)desc->data);
-		img::Image* image = &img::hit_damagable;
+		int16 image = img::hit_damagable;
 		uint sub = numsubs - timer / numsubs - 1;
 		draw_image(image, desc->pos, sub);
 		timer--;
@@ -732,27 +730,27 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 
 const obj::Def obj::def [] = {
 
-	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, NULL},
-	{"Rata", 14, rata_fixes, 10, 100, obj::ALLOC<Rata>, NULL},
-	{"Entrance", 0, NULL, -1000, -1000, obj::ALLOC<Entrance>, NULL},
-	{"Exit", 0, NULL, -100, -100, obj::ALLOC<Exit>, NULL},
-	{"Door", 0, NULL, -100, 200, obj::ALLOC<Door>, NULL},
-	{"Solid Object", 0, NULL, 0, 0, obj::ALLOC<Solid>, NULL},
-	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, NULL},
-	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>, NULL},
-	{"Rat", 1, &rat_fix, 15, 10, obj::ALLOC<Rat>, &img::rat},
-	{"Crate", 1, &crate_fix, 0, 0, obj::ALLOC<Crate>, &img::crate},
-	{"Mousehole", 1, &mousehole_fix, 50, 0, obj::ALLOC<Mousehole>, &img::mousehole},
-	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>, NULL},
-	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>, &img::patroller},
-	{"Flyer", 1, &flyer_fix, 20, 20, obj::ALLOC<Flyer>, &img::flyer},
-	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, &img::heart},
-	{"Item", 0, NULL, -5, 150, obj::ALLOC<Item>, NULL},
-	{"Clickable text", 0, NULL, -2000, 2000, obj::ALLOC<ClickableText>, NULL},
-	{"Tilemap editor", 0, NULL, -100, 100, obj::ALLOC<TilemapEditor>, NULL},
-	{"Tile picker", 0, NULL, -1000, 1000, obj::ALLOC<TilePicker>, NULL},
-	{"Rooms Settings pane", 0, NULL, -1000, 1000, obj::ALLOC<RoomSettings>, NULL},
-	{"Editor menu", 0, NULL, -1900, 1900, obj::ALLOC<EditorMenu>, NULL}
+	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, -1},
+	{"Rata", 14, rata_fixes, 10, 100, obj::ALLOC<Rata>, -1},
+	{"Entrance", 0, NULL, -1000, -1000, obj::ALLOC<Entrance>, -1},
+	{"Exit", 0, NULL, -100, -100, obj::ALLOC<Exit>, -1},
+	{"Door", 0, NULL, -100, 200, obj::ALLOC<Door>, -1},
+	{"Solid Object", 0, NULL, 0, 0, obj::ALLOC<Solid>, -1},
+	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, -1},
+	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>, -1},
+	{"Rat", 1, &rat_fix, 15, 10, obj::ALLOC<Rat>, img::rat},
+	{"Crate", 1, &crate_fix, 0, 0, obj::ALLOC<Crate>, img::crate},
+	{"Mousehole", 1, &mousehole_fix, 50, 0, obj::ALLOC<Mousehole>, img::mousehole},
+	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>, -1},
+	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>, img::patroller},
+	{"Flyer", 1, &flyer_fix, 20, 20, obj::ALLOC<Flyer>, img::flyer},
+	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, img::heart},
+	{"Item", 0, NULL, -5, 150, obj::ALLOC<Item>, -1},
+	{"Clickable text", 0, NULL, -2000, 2000, obj::ALLOC<ClickableText>, -1},
+	{"Tilemap editor", 0, NULL, -100, 100, obj::ALLOC<TilemapEditor>, -1},
+	{"Tile picker", 0, NULL, -1000, 1000, obj::ALLOC<TilePicker>, -1},
+	{"Rooms Settings pane", 0, NULL, -1000, 1000, obj::ALLOC<RoomSettings>, -1},
+	{"Editor menu", 0, NULL, -1900, 1900, obj::ALLOC<EditorMenu>, -1}
 
 };
 

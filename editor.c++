@@ -37,7 +37,7 @@ int main (int argc, char** argv) {
 	}
 	mapeditor = true;
 	uint room_no = atof(argv[1]);
-	img::load_img();
+	load_img();
 	if (room_no > room::n_rooms) {
 		printf("Error: No room numer %u\n", room_no);
 		return 1;

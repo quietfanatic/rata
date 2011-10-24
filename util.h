@@ -16,7 +16,9 @@
 //#define floor(x) ((int)(x))
 
 sf::Sprite drawing_sprite;
-void draw_image (img::Image* image, Vec p, int sub=0, bool flip=false, bool cam=false, float scale=1.0) {
+void draw_image (int16 imagei, Vec p, int sub=0, bool flip=false, bool cam=false, float scale=1.0) {
+	if (imagei < 0) return;
+	img::Image* image = &img::def[imagei];
 	//if (!cam)
 	//if (x < camera.x - 10 - img->w
 	// || y < camera.y - 7.5 - img->h

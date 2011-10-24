@@ -55,7 +55,7 @@ sf::Blend::Mode screen_shade_blend = sf::Blend::Multiply;
 struct Cursor {
 	float x;
 	float y;
-	img::Image* img;  // Draw this
+	int16 img;  // Draw this
 } cursor,  // Relative to player
   cursor2;  // Relative to world
 bool click_taken = false;

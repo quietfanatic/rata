@@ -74,7 +74,7 @@ void render_text (char* text, Vec p, uint lines=1, bool small=false, bool border
 	if (border) draw_rect(start, p.y, start + width + lmargin+rmargin, p.y - lines*lineheight, sf::Color(31, 31, 31, 127), cam);
 
 	float pos = start+lmargin;
-	img::Image* font = small ? &img::font_small : &img::font_proportional;
+	int16 font = small ? img::font_small : img::font_proportional;
 	for (;*text != 0 && linecount <= lines; text++) {
 		//printf("%c;%d;%d;", *text, *text%16, *text/16);
 		if (*text == '\n') {

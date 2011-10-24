@@ -19,18 +19,18 @@ namespace item {
 
 	struct Def {
 		char* name;
-		uint slot;
-		uint otherslot;
+		int8 slot;
+		int8 otherslot;
 		
-		img::Image* appearance;
-		uint world_frame;
-		uint inventory_frame;
-		img::Image* body;
-		img::Image* head;
-		img::Image* helmet;
-		img::Image* arm;
-		img::Image* forearm;
-		img::Image* hand;
+		int16 appearance;
+		uint16 world_frame;
+		uint16 inventory_frame;
+		int16 body;
+		int16 head;
+		int16 helmet;
+		int16 arm;
+		int16 forearm;
+		int16 hand;
 		void (* use ) ();
 	};
 
@@ -41,23 +41,27 @@ namespace item {
 	Def def [] = {
 		{	"White dress",
 			body, -1,
-			&img::dress_body, pose::body::laybk, pose::body::stand,
-			&img::dress_body, NULL, NULL, &img::dress_arm, &img::dress_forearm, NULL, NULL
+			img::dress_body, pose::body::laybk, pose::body::stand,
+			img::dress_body, -1, -1, img::dress_arm, img::dress_forearm, -1,
+			NULL
 		},
 		{	"Handgun",	
 			hand, -1,
-			&img::handgun, 19, pose::hand::a45,
-			NULL, NULL, NULL, NULL, NULL, &img::handgun, &fire_handgun
+			img::handgun, 19, pose::hand::a45,
+			-1, -1, -1, -1, -1, img::handgun,
+			&fire_handgun
 		},
 		{	"Boots",
 			feet, -1,
-			&img::boots, pose::body::stand, pose::body::stand,
-			&img::boots, NULL, NULL, NULL, NULL, NULL, NULL
+			img::boots, pose::body::stand, pose::body::stand,
+			img::boots, -1, -1, -1, -1, -1,
+			NULL
 		},
 		{	"Helmet",
 			head, -1,
-			&img::helmet, 0, 2,
-			NULL, NULL, &img::helmet, NULL, NULL, NULL, NULL
+			img::helmet, 0, 2,
+			-1, -1, img::helmet, -1, -1, -1,
+			NULL
 		},
 	};
 }
