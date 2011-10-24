@@ -61,11 +61,10 @@ void draw_image (img::Image* image, Vec p, int sub=0, bool flip=false, bool cam=
 	window->Draw(drawing_sprite);
 };
 void draw_rect (float l, float t, float r, float b, sf::Color color=sf::Color(31, 31, 31, 127), bool cam=false) {
-	sf::FloatRect vr = window_view.GetRect();
 	if (cam)
 		window->Draw(sf::Shape::Rectangle(
-			vr.Left + l, vr.Top + t,
-			vr.Left + r, vr.Top + b,
+			viewleft() + l, viewbottom() + t,
+			viewleft() + r, viewbottom() + b,
 			color
 		));
 	else
@@ -76,28 +75,25 @@ void draw_rect (float l, float t, float r, float b, sf::Color color=sf::Color(31
 		));
 };
 
-inline float mod_f (float a, float b) {
+static inline float mod_f (float a, float b) {
 	return a >= 0 ? a - b*(double)(int)(a/b)
 	              : a - b*(double)(int)(a/b);
 }
-inline float abs_f (float x) { return x>0 ? x : -x; }
-inline int sign_f (float x) { return (x>0)-(x<0); }
+static inline float abs_f (float x) { return x>0 ? x : -x; }
+static inline int sign_f (float x) { return (x>0)-(x<0); }
 
-inline float dither (float c, float err) {
+static inline float dither (float c, float err) {
 	return c - err + rand()*2.0*err/RAND_MAX;
 }
 
-inline float flip_angle (float a) {
+static inline float flip_angle (float a) {
 	return a<0 ? -M_PI-a : M_PI-a;
 }
-inline bool gt_angle (float a, float b) {
+static inline bool gt_angle (float a, float b) {
 	if (b < 0)
 		return a > b && a < b+M_PI;
 	else return a > b || a < b-M_PI;
 }
 
-inline float pythag (float x, float y) {
-	return sqrt(x*x + y*y);
-}
 
 
