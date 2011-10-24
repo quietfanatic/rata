@@ -59,7 +59,7 @@ struct AI : Walking {
 
 struct Rat : AI {
 	int anim_timer;
-	char* describe () { return "It's a large gray rat that smells like trash.\nDoesn't seem very timid for a rodent."; }
+	char* describe () { return "It's a large gray rat that smells like trash.\x80\nDoesn't seem very timid for a rodent."; }
 	void on_create () {
 		AI::on_create();
 		if (!facing) facing = -1;
@@ -96,7 +96,7 @@ struct Rat : AI {
 
 
 struct Patroller : AI {
-	virtual char* describe () { return "A small robot is patrolling the area.\nIt has a gun attached.  Best be cautious."; }
+	virtual char* describe () { return "A small robot is patrolling the area.\x80\nIt has a gun attached.  Best be cautious."; }
 	uint motion_frames;
 	bool threat_detected;
 	Vec threat_pos;

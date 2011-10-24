@@ -1003,11 +1003,7 @@ struct Rata : Walking {
 		: action == action_enter ? "ENTER"
 		:                          NULL;
 		if (m) {
-			float w = text_width_small((char*)m)*PX;
-			float mx = p.x - w/2;
-			float my = p.y + 3;
-			draw_rect(mx-2*PX, my, mx + w+1*PX, my - 7*PX, sf::Color(31, 31, 31, 127));
-			render_text((char*)m, mx, my, 1, false, true);
+			render_text((char*)m, pos() + Vec(0, 3), 1, true, true, 0);
 		}
 		action = -1;
 		action_distance = 10000000;

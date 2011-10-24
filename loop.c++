@@ -316,23 +316,7 @@ void draw_phase () {
 	}
 	 // Draw text message
 	if (message) {
-		float w = text_width(message_pos);
-		float pos = viewwidth()/2 - w*PX/2;
-		if (message_pos_next) w += 8;
-		else w += 6;
-		window->Draw(sf::Shape::Rectangle(
-			camera.x - w*PX/2, camera.y - 6.5,
-			camera.x + w*PX/2, camera.y - 7.5,
-			sf::Color(0, 0, 0, 127)
-		));
-		char* p;
-		for (p = message_pos; message_pos_next ? (p < message_pos_next) : (*p); p++) {
-			draw_image(
-				&img::font_proportional, Vec(pos, 1),
-				*p, false, true
-			);
-			pos += letter_width[(uint8)*p]*PX;
-		}
+		render_text(message_pos, Vec(10, 1), 1, false, true, 0, true);
 	}
 	//sf::Sprite window_s (window);
 	//window_s.SetScale(window_scale, window_scale);

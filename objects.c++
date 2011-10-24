@@ -505,14 +505,14 @@ struct Bullet : Object {
 
 
 struct Crate : Object {
-	virtual char* describe () { return "There's a wooden crate sitting here.\nIt looks like it can be pushed around."; }
+	virtual char* describe () { return "There's a wooden crate sitting here.\x80\nIt looks like it can be pushed around."; }
 	virtual void on_create () { Object::on_create(); life = max_life = 144; }
 	virtual void damage (int d) { Object::damage(d); snd::woodhit.play(); }
 };
 
 struct Mousehole : Object {
 	int timer;
-	virtual char* describe () { return "A large metal pipe is coming out of the ground.\nFor ventilation, perhaps?\nIt's big enough for a rat to crawl through.\nMaybe that's where they're coming from."; }
+	virtual char* describe () { return "A large metal pipe is coming out of the ground.\x80\nFor ventilation, perhaps?\x80\nIt's big enough for a rat to crawl through.\x80\nMaybe that's where they're coming from."; }
 	virtual void before_move () {
 		timer--;
 		if (timer <= 0) {
@@ -553,7 +553,7 @@ struct HitEffect : Object {
 };
 
 struct Heart : Object {
-	virtual char* describe () { return "Just as rats live off the refuse of humans,\nYou too can live off of the rats.\nPick this up to restore one heart."; }
+	virtual char* describe () { return "Just as rats live off the refuse of humans,\x80\nYou too can live off of the rats.\x80\nPick this up to restore one heart."; }
 };
 
 
