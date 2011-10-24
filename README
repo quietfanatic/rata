@@ -10,9 +10,9 @@ Instructions:
 	To recompile and run: ./try
 	To recompile (optimized) and run: ./tryopt
 	To reindex images (required if you change any image filenames): perl gen_img.pl > img.c++
-	To use map editor: ./build_mapeditor && ./mapeditor <roomname>
-	    where <roomname> is the name of the room you wish to edit.  The corresponding
-		 filename is "rooms/<roomname>.room.c++".
+	To use map editor: ./build_mapeditor && ./mapeditor <roomnumber>
+	    where <roomnumber> is the number of the room you wish to edit.  The corresponding
+		 filename is "rooms/<roomnumber>-<roomname>.room.c++".
 	 
 
 
@@ -20,6 +20,7 @@ Controls:
               A :  move left
               D :  move right
               W :  jump
+              S :  kneel, crawl
           Space :  action (enter, pick up, etc.)
      Move Mouse :  look around
         L-click :  examine
@@ -32,6 +33,8 @@ R-click/L-Shift :  aim weapon
 Directories:
 
 img  - image files used in game
+snd  - sound effects
+bgm  - background music
 res  - used for working images and files
 lib  - required libraries
 rooms  - all the rooms in text format

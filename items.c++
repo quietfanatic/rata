@@ -42,46 +42,22 @@ namespace item {
 		{	"White dress",
 			body, -1,
 			&img::dress_body, pose::body::laybk, pose::body::stand,
-			&img::dress_body,
-			NULL,
-			NULL,
-			&img::dress_arm,
-			&img::dress_forearm,
-			NULL,
-			NULL
+			&img::dress_body, NULL, NULL, &img::dress_arm, &img::dress_forearm, NULL, NULL
 		},
 		{	"Handgun",	
 			hand, -1,
 			&img::handgun, 19, pose::hand::a45,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			&img::handgun,
-			&fire_handgun
+			NULL, NULL, NULL, NULL, NULL, &img::handgun, &fire_handgun
 		},
 		{	"Boots",
 			feet, -1,
 			&img::boots, pose::body::stand, pose::body::stand,
-			&img::boots,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL
+			&img::boots, NULL, NULL, NULL, NULL, NULL, NULL
 		},
 		{	"Helmet",
 			head, -1,
 			&img::helmet, 0, 2,
-			NULL,
-			NULL,
-			&img::helmet,
-			NULL,
-			NULL,
-			NULL,
-			NULL
+			NULL, NULL, &img::helmet, NULL, NULL, NULL, NULL
 		},
 	};
 }

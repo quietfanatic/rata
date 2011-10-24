@@ -1,5 +1,30 @@
 
 
+struct Clickable : Object {
+	virtual bool click () { return false; }
+	virtual bool drag () { return false; }
+
+	void before_move () {
+		if (dragging == this) {
+			click_taken = true;
+			if (!drag()) dragging = NULL;
+		}
+		else
+		if (!dragging)
+		if (!click_taken)
+		if (button[sf::Mouse::Left] || button[sf::Mouse::Middle] || button[sf::Mouse::Right])
+		if (cursor2.x >= desc->pos.x)
+		if (cursor2.y >= desc->pos.y)
+		if (cursor2.x <= desc->pos.x + desc->vel.x)
+		if (cursor2.y <= desc->pos.y + desc->vel.y)
+		if (click())
+			click_taken = true;
+	}
+};
+
+
+
+
 struct EditorMenu : Object {
 	void draw () {
 		draw_rect(
@@ -13,49 +38,36 @@ struct EditorMenu : Object {
 	}
 };
 
-struct ClickableText : Object {
+struct ClickableText : Clickable {
 	typedef void(* command_type )();
 	char* message () { return (char*)desc->data; }
 	command_type command () { return (command_type)desc->data2; }
 	void draw () {
-		/*draw_rect(
-			desc->x,
-			desc->y,
-			desc->x + text_width(message())*PX*2/window_scale,
-			desc->y-1,
-			sf::Color(31, 31, 31, 127),
-			true
-		);*/
-		render_text(message(), desc->x, desc->y, 1, true, false, 2/window_scale); 
+		render_text(message(), desc->pos + Vec(0, 1), 1, false, false, 1, true); 
 	}
-	void before_move () {
-		if (click_taken) return;
-		if (command())
-		if (button[sf::Mouse::Left] == 1)
-		if (cursor2.x > desc->x)
-		if (cursor2.x < desc->x + text_width(message())*PX*2/window_scale)
-		if (cursor2.y < desc->y)
-		if (cursor2.y > desc->y - 1) {
-			click_taken = true;
+	bool click () {
+		if (button[sf::Mouse::Left] == 1) {
 			(*command())();
+			return true;
 		}
+		else return false;
 	}
 };
 
 
-struct TilePicker : Object {
-	bool resizing;
+struct TilePicker : Clickable {
+	float width () { return desc->vel.x - 3.9*PX; }
 	void draw () {
 		if (room::current) {
 			draw_rect(
 				viewleft(), viewtop() - 32*PX/window_scale,
-				viewleft() + tilepicker_width, viewbottom(),
+				viewleft() + width(), viewbottom(),
 				room::current->bg_color
 			);
 			draw_rect(
-				viewleft() + tilepicker_width,
+				viewleft() + width(),
 				viewtop() - 32*PX/window_scale,
-				viewleft() + tilepicker_width + 4*PX,
+				viewleft() + desc->vel.x,
 				viewbottom(),
 				sf::Color(31, 31, 31, 127)
 			);
@@ -63,68 +75,62 @@ struct TilePicker : Object {
 			for (uint i=0; i < num_tiles; i++) {
 				draw_image(
 					&img::tiles,
-					i % (uint)tilepicker_width + 0.5,
-					45/window_scale - 32*PX/window_scale - (i / (uint)tilepicker_width) - 0.5,
+					Vec(i % (uint)width() + 0.5,
+					    45/window_scale - 32*PX/window_scale - (i / (uint)width()) - 0.5),
 					i, flip_tile, true
 				);
 			}
 			window->Draw(sf::Shape::Rectangle(
-				viewleft() + (selected_tile % (uint)tilepicker_width),
-				viewtop() - 32*PX/window_scale - (selected_tile / (uint)tilepicker_width),
-				viewleft() + (selected_tile % (uint)tilepicker_width) + 1,
-				viewtop() - 32*PX/window_scale - (selected_tile / (uint)tilepicker_width) - 1,
+				viewleft() + (selected_tile % (uint)width()),
+				viewtop() - 32*PX/window_scale - (selected_tile / (uint)width()),
+				viewleft() + (selected_tile % (uint)width()) + 1,
+				viewtop() - 32*PX/window_scale - (selected_tile / (uint)width()) - 1,
 				sf::Color(0,0,0,0), 1*PX, sf::Color(255, 255, 255, 127)
 			));
 		}
 	}
-	void before_move () {
-		if (click_taken) {
-			//printf("Click taken.\n");
-			return;
-		}
-		 // Flip tile
+
+	bool click () {
 		if (button[sf::Mouse::Middle] == 1) {
 			flip_tile = !flip_tile;
+			return true;
 		}
-		 // Continue resizing if doing so
-		if (resizing && button[sf::Mouse::Left]) {
-			click_taken = true;
-			if (cursor2.x >= 1)
-				tilepicker_width = cursor2.x;
-		}
-		else {
-			resizing = false;
-			if (cursor2.x < tilepicker_width) {
-				click_taken = true;
+		if (button[sf::Mouse::Left] == 1 || button[sf::Mouse::Right] == 1) {
+			if (cursor2.x < (uint)width()) {
 				 // Select tile
-				if (button[sf::Mouse::Left] == 1 || button[sf::Mouse::Right] == 1) {
-					if (cursor2.x < (uint)tilepicker_width) {
-						uint clicked_tile = (uint)cursor2.x
-						                  + (uint)(45/window_scale-32*PX/window_scale - cursor2.y)
-						                  * (uint)tilepicker_width;
-						printf("Click: %f, %f -> %d\n", cursor2.x, cursor2.y, clicked_tile);
-						if (clicked_tile < num_tiles) {
-							selected_tile = clicked_tile;
-							printf("Selected %d.\n", selected_tile);
-						}
-					}
+				uint clicked_tile = (uint)cursor2.x
+				                  + (uint)(45/window_scale-32*PX/window_scale - cursor2.y)
+				                  * (uint)width();
+				printf("Click: %f, %f -> %d\n", cursor2.x, cursor2.y, clicked_tile);
+				if (clicked_tile < num_tiles) {
+					selected_tile = clicked_tile;
+					printf("Selected %d.\n", selected_tile);
 				}
+				return true;
 			}
 			 // Initiate resize
-			else if (cursor2.x < tilepicker_width + 4*PX) {
-				if (button[sf::Mouse::Left] == 1) {
-					click_taken = true;
-					resizing = true;
-					printf("Initiating resize of tile picker.\n");
-				}
+			else {
+				dragging = this;
+				printf("Initiating resize of tile picker.\n");
+				return true;
 			}
 		}
+		else return false;
+	}
+
+	bool drag () {
+		if (button[sf::Mouse::Left]) {
+			if (cursor2.x >= 1+2*PX)
+				desc->vel.x = cursor2.x + 2*PX;
+			return true;
+		}
+		else return false;
 	}
 };
 
 
 
-struct TilemapEditor : Object {
+struct TilemapEditor : Clickable {
 	void draw () {
 		if (room::current) {
 			float x = cursor2.x + window_view.GetRect().Left;
@@ -175,13 +181,17 @@ struct TilemapEditor : Object {
 				window_view.GetRect().Top
 			));
 		}
-		 // Do clicking stuff
-		if (click_taken) return;
+		Clickable::before_move();
+	}
+	bool click () {
 		room::Room* rc = room::current;
 		float x = cursor2.x + window_view.GetRect().Left;
 		float y = cursor2.y + window_view.GetRect().Top;
-	//	printf("%f, %f\n", x, y);
-		if (rc)
+		if (button[sf::Mouse::Middle] == 1) {
+			flip_tile = !flip_tile;
+			return true;
+		}
+		else if (rc)
 		if (x > 0 && x < rc->width)
 		if (y > 0 && y < rc->height) {
 			if (button[sf::Mouse::Left]) {
@@ -200,32 +210,28 @@ struct TilemapEditor : Object {
 					flip_tile = false;
 				}
 			}
+			return true;
 		}
+		return false;
 	}
 };
 
-const float roomsettings_width = 4.0;
-struct RoomSettings : Object {
+struct RoomSettings : Clickable {
 	void draw () {
 		if (room::current) {
 			draw_rect(
-				viewright() - roomsettings_width, viewtop() - 32*PX/window_scale,
+				viewright() - desc->vel.x, viewtop() - 32*PX/window_scale,
 				viewright(), viewbottom(),
 				room::current->bg_color
 			);
 			draw_rect(
-				viewright() - roomsettings_width - 2*PX,
+				viewright() - desc->vel.x-2*PX,
 				viewtop() - 32*PX/window_scale,
-				viewright() - roomsettings_width,
+				viewright() - desc->vel.x,
 				viewbottom(),
 				sf::Color(31, 31, 31, 127)
 			);
 		}
-	}
-	void before_move () {
-		if (click_taken) return;
-		if (button[sf::Mouse::Left] || button[sf::Mouse::Right])
-		if (cursor2.x > viewwidth() - roomsettings_width) click_taken = true;
 	}
 };
 

@@ -58,4 +58,16 @@ Room* list [] = {
 	&file::lotsodanger::room
 };
 
+#ifdef MAPEDITOR
+char* filename [] = {
+	"rooms/0-roompicker.room.c++",
+	"rooms/1-test1.room.c++",
+	"rooms/2-test2.room.c++",
+	"rooms/3-test3.room.c++",
+	"rooms/4-test4.room.c++",
+	"rooms/5-edit1.room.c++",
+	"rooms/6-edit2.room.c++",
+	"rooms/7-lotsodanger.room.c++"
+};
+#endif
 

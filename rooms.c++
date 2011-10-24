@@ -219,13 +219,14 @@ namespace room {
 		}
 		fprintf(F, "\nEND_ROOM_TILES\n\nBEGIN_ROOM_OBJECTS\n");
 		for (uint i=0; i < nobjects; i++) {
-			fprintf(F, "ROOM_OBJECT(%s, %f, %f, %f, %f, %d, NULL, %u)\n",
+			fprintf(F, "ROOM_OBJECT(%s, %f, %f, %f, %f, %d, %u, %u)\n",
 				obj::idname[objects[i].id],
-				objects[i].x,
-				objects[i].y,
-				objects[i].xvel,
-				objects[i].yvel,
+				objects[i].pos.x,
+				objects[i].pos.y,
+				objects[i].vel.x,
+				objects[i].vel.y,
 				objects[i].facing,
+				objects[i].data,
 				objects[i].data2
 			);
 		}

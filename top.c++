@@ -60,6 +60,7 @@ struct Cursor {
   cursor2;  // Relative to world
 bool click_taken = false;
 bool trap_cursor = false;
+Object* dragging = NULL;
 
  // Camera state
 struct Camera {
@@ -95,7 +96,6 @@ char* message_pos_next = NULL;
 bool mapeditor = false;
 int16 selected_tile = 0;
 bool flip_tile = false;
-float tilepicker_width = 1.5;
 #endif
 
 #include "util.h"

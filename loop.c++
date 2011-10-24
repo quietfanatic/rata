@@ -398,8 +398,10 @@ void input_phase () {
 };
 
 void move_phase () {
+	click_taken = false;
 	for (Object* o = objects_by_order; o; o = o->next_order)
 		o->before_move();
+	if (!click_taken) dragging = NULL;
 
 	for (uint i=0; i < MAX_BULLETS; i++)
 		bullets[i].move();

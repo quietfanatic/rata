@@ -32,6 +32,11 @@ Room* list [] = {
 ${\(join ",\n", map "\t&file::$_->{id}::room", @rooms)}
 };
 
+#ifdef MAPEDITOR
+char* filename [] = {
+${\(join ",\n", map "\t\"$_->{file}\"", @rooms)}
+};
+#endif
 
 END
 
