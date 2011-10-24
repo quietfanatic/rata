@@ -14,8 +14,9 @@ int main () {
 	load_save();
 
 	enter_room(room::roompicker, 0);
-	bgm::life.SetVolume(80);
-	bgm::life.Play();
+	bgm::music.OpenFromFile(bgm::name[bgm::life]);
+	bgm::music.SetVolume(80);
+	bgm::music.Play();
 	try { main_loop(); } catch (int x) { printf("Game quit succesfully with result %d.\n", x); }
 	return 0;
 }

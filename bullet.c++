@@ -65,7 +65,7 @@ void RBullet::move () {
 		else {
 			just_bounce:
 			if (velnorm > -1) {
-				snd::ricochet.play(0.7+rand()*0.3/RAND_MAX, 50);
+				snd::def[snd::ricochet].play(0.7+rand()*0.3/RAND_MAX, 50);
 				pos2 = pos1 + (1-coll.frac) * vel;
 				coll = Object::check_line(pos1, pos2, cf::bullet.maskBits, (Object*)coll.hit->GetBody()->GetUserData());
 			}

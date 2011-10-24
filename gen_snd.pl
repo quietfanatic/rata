@@ -30,6 +30,7 @@ namespace snd {
 	struct Sound {
 		sf::SoundBuffer sfsb;
 		sf::Sound sfs;
+		const char* file;
 		void stop () {
 			sfs.Stop();
 		}
@@ -38,20 +39,34 @@ namespace snd {
 			sfs.SetPitch(pitch);
 			sfs.Play();
 		}
-	}
-${\(join ",\n", map "\t$_->{id}", @snds)};
+	};
+	enum {
+${\(join "\n", map "\t\t$_->{id},", @snds)}
+		n_snds
+	};
+	Sound def [n_snds] = {
+${\(join ",\n", map "\t\t{sf::SoundBuffer(), sf::Sound(), \"$_->{file}\"}", @snds)}
+	};
 }
 
 namespace bgm {
-	sf::Music
-${\(join ",\n", map "\t$_->{id}", @bgms)};
+	enum {
+${\(join "\n", map "\t\t$_->{id},", @bgms)}
+		n_bgms
+	};
+
+	char* name [n_bgms] = {
+${\(join ",\n", map "\t\t\"$_->{file}\"", @bgms)}
+	};
+	sf::Music music;
 }
 
 void load_snd () {
-	bool good = true;
-${\(join "\n", map "\tgood &= snd::$_->{id}.sfsb.LoadFromFile(\"$_->{file}\"); \n\tsnd::$_->{id}.sfs.SetBuffer(snd::$_->{id}.sfsb);", @snds)}
-${\(join "\n", map "\tgood &= bgm::$_->{id}.OpenFromFile(\"$_->{file}\"); bgm::$_->{id}.SetLoop(true);", @bgms)}
-	if (!good) fprintf(stderr, "Error: At least one sound or bgm failed to load!\\n");
+	for (uint i=0; i < snd::n_snds; i++) {
+		if (!snd::def[i].sfsb.LoadFromFile(snd::def[i].file))
+			printf("Error: Failed to load sound %s.\\n", snd::def[i].file);
+		snd::def[i].sfs.SetBuffer(snd::def[i].sfsb);
+	}
 }
 
 

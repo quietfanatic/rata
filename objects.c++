@@ -508,7 +508,7 @@ struct Bullet : Object {
 struct Crate : Object {
 	virtual char* describe () { return "There's a wooden crate sitting here.\x80\nIt looks like it can be pushed around."; }
 	virtual void on_create () { Object::on_create(); life = max_life = 144; }
-	virtual void damage (int d) { Object::damage(d); snd::woodhit.play(); }
+	virtual void damage (int d) { Object::damage(d); snd::def[snd::woodhit].play(); }
 };
 
 struct Mousehole : Object {

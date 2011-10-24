@@ -91,7 +91,7 @@ void item::fire_handgun () {
 		rata->aim_direction,
 		120
 	);
-	snd::gunshot.play(1.0, 80);
+	snd::def[snd::gunshot].play(1.0, 80);
 }
 
 #endif

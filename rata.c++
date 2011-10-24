@@ -559,7 +559,7 @@ struct Rata : Walking {
 				if (floor) {
 					body->SetGravityScale(1.0);
 					float_frames = 0;
-					snd::step.play(1.2, 8*-oldyvel);
+					snd::def[snd::step].play(1.2, 8*-oldyvel);
 					goto got_floor;
 				}
 				no_floor:
@@ -595,11 +595,11 @@ struct Rata : Walking {
 				hurt_direction = sign_f(xvel())*facing;
 				if (floor) {
 					if (hurt_frames < 20) {
-						snd::step.play(1.2, 8*-oldyvel/2.0);
+						snd::def[snd::step].play(1.2, 8*-oldyvel/2.0);
 						goto got_floor;
 					}
 					else {
-						snd::fall.play(0.9, 6*-oldyvel/2.0);
+						snd::def[snd::fall].play(0.9, 6*-oldyvel/2.0);
 						goto hurt_floor;
 					}
 				}
@@ -629,7 +629,7 @@ struct Rata : Walking {
 			}
 			case dead_air: {
 				if (floor && floor_normal.y > 0.9) {
-					snd::fall.play(0.9, 6*-oldyvel/2.0);
+					snd::def[snd::fall].play(0.9, 6*-oldyvel/2.0);
 					goto dead_floor;
 				}
 				dead_no_floor:
@@ -673,7 +673,7 @@ struct Rata : Walking {
 		inv_frames = 50;
 		adrenaline += 5*d;
 		//printf("Hurt status: %d, %d, %d\n", hurt_frames, inv_frames, adrenaline);
-		snd::hurt.play(1.0 - 0.1*d/24, 40 + d);
+		snd::def[snd::hurt].play(1.0 - 0.1*d/24, 40 + d);
 	}
 
 	virtual void kill () {
@@ -698,7 +698,7 @@ struct Rata : Walking {
 					float oldstep = mod_f(olddist, step);
 					float step_d = mod_f(distance_walked, step);
 					if (oldstep < 0.4 && step_d >= 0.4)
-						snd::step.play(0.9+rand()*0.2/RAND_MAX, 6*abs_f(xvel())*(1.0+rand()*0.2/RAND_MAX));
+						snd::def[snd::step].play(0.9+rand()*0.2/RAND_MAX, 6*abs_f(xvel())*(1.0+rand()*0.2/RAND_MAX));
 				}
 			}
 		}

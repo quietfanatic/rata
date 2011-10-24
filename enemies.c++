@@ -88,7 +88,7 @@ struct Rat : AI {
 	}
 	virtual void kill () {
 		Object::kill();
-		snd::squeak.play();
+		snd::def[snd::squeak].play();
 		if (rand() % 4 == 0)
 			(new obj::Desc(-2, obj::heart, pos()))->manifest();
 	}
@@ -135,7 +135,7 @@ struct Patroller : AI {
 				Vec(prediction.x, prediction.y + 1),
 				120, 48, 0.1
 			);
-			snd::gunshot.play(1.0, 70);
+			snd::def[snd::gunshot].play(1.0, 70);
 			add_vel(Vec(-b->vel.x*FPS/60, 0));
 		}
 		Vec ratapos;
@@ -155,7 +155,7 @@ struct Patroller : AI {
 
 	void damage (int d) {
 		Object::damage(d);
-		snd::hit.play(0.8);
+		snd::def[snd::hit].play(0.8);
 	}
 };
 
@@ -221,7 +221,7 @@ struct Flyer : AI {
 				Vec(prediction.x, prediction.y),
 				120, 48, 0.1
 			);
-			snd::gunshot.play(1.0, 70);
+			snd::def[snd::gunshot].play(1.0, 70);
 			add_vel(-b->vel*FPS/60);
 		}
 		 // Predict
@@ -248,7 +248,7 @@ struct Flyer : AI {
 	}
 	void damage (int d) {
 		Object::damage(d);
-		snd::hit.play(0.8);
+		snd::def[snd::hit].play(0.8);
 	}
 };
 

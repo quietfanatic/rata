@@ -3,6 +3,7 @@ namespace snd {
 	struct Sound {
 		sf::SoundBuffer sfsb;
 		sf::Sound sfs;
+		const char* file;
 		void stop () {
 			sfs.Stop();
 		}
@@ -11,46 +12,52 @@ namespace snd {
 			sfs.SetPitch(pitch);
 			sfs.Play();
 		}
-	}
-	fall,
-	gunshot,
-	hit,
-	hurt,
-	ricochet,
-	squeak,
-	step,
-	woodhit;
+	};
+	enum {
+		fall,
+		gunshot,
+		hit,
+		hurt,
+		ricochet,
+		squeak,
+		step,
+		woodhit,
+		n_snds
+	};
+	Sound def [n_snds] = {
+		{sf::SoundBuffer(), sf::Sound(), "snd/fall.ogg"},
+		{sf::SoundBuffer(), sf::Sound(), "snd/gunshot.flac"},
+		{sf::SoundBuffer(), sf::Sound(), "snd/hit.ogg"},
+		{sf::SoundBuffer(), sf::Sound(), "snd/hurt.ogg"},
+		{sf::SoundBuffer(), sf::Sound(), "snd/ricochet.ogg"},
+		{sf::SoundBuffer(), sf::Sound(), "snd/squeak.ogg"},
+		{sf::SoundBuffer(), sf::Sound(), "snd/step.ogg"},
+		{sf::SoundBuffer(), sf::Sound(), "snd/woodhit.ogg"}
+	};
 }
 
 namespace bgm {
-	sf::Music
-	life,
-	safe,
-	theme;
+	enum {
+		life,
+		safe,
+		theme,
+		n_bgms
+	};
+
+	char* name [n_bgms] = {
+		"bgm/life.ogg",
+		"bgm/safe.ogg",
+		"bgm/theme.ogg"
+	};
+	sf::Music music;
 }
 
 void load_snd () {
-	bool good = true;
-	good &= snd::fall.sfsb.LoadFromFile("snd/fall.ogg"); 
-	snd::fall.sfs.SetBuffer(snd::fall.sfsb);
-	good &= snd::gunshot.sfsb.LoadFromFile("snd/gunshot.flac"); 
-	snd::gunshot.sfs.SetBuffer(snd::gunshot.sfsb);
-	good &= snd::hit.sfsb.LoadFromFile("snd/hit.ogg"); 
-	snd::hit.sfs.SetBuffer(snd::hit.sfsb);
-	good &= snd::hurt.sfsb.LoadFromFile("snd/hurt.ogg"); 
-	snd::hurt.sfs.SetBuffer(snd::hurt.sfsb);
-	good &= snd::ricochet.sfsb.LoadFromFile("snd/ricochet.ogg"); 
-	snd::ricochet.sfs.SetBuffer(snd::ricochet.sfsb);
-	good &= snd::squeak.sfsb.LoadFromFile("snd/squeak.ogg"); 
-	snd::squeak.sfs.SetBuffer(snd::squeak.sfsb);
-	good &= snd::step.sfsb.LoadFromFile("snd/step.ogg"); 
-	snd::step.sfs.SetBuffer(snd::step.sfsb);
-	good &= snd::woodhit.sfsb.LoadFromFile("snd/woodhit.ogg"); 
-	snd::woodhit.sfs.SetBuffer(snd::woodhit.sfsb);
-	good &= bgm::life.OpenFromFile("bgm/life.ogg"); bgm::life.SetLoop(true);
-	good &= bgm::safe.OpenFromFile("bgm/safe.ogg"); bgm::safe.SetLoop(true);
-	good &= bgm::theme.OpenFromFile("bgm/theme.ogg"); bgm::theme.SetLoop(true);
-	if (!good) fprintf(stderr, "Error: At least one sound or bgm failed to load!\n");
+	for (uint i=0; i < snd::n_snds; i++) {
+		if (!snd::def[i].sfsb.LoadFromFile(snd::def[i].file))
+			printf("Error: Failed to load sound %s.\n", snd::def[i].file);
+		snd::def[i].sfs.SetBuffer(snd::def[i].sfsb);
+	}
 }
 
 
