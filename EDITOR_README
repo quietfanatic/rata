@@ -4,19 +4,22 @@ MAP EDITOR INSTRUCTIONS
 
 
 
-To use the map editor, type ./mapeditor <roomname>
- where <roomname> is the name of the room you wish to edit.
+To use the map editor, type ./mapeditor <roomnumber>
+ where <roomnumber> is the number of the room you wish to edit.
 
 The editor does not yet support switching rooms in the middle of editing, so
 you must rerun it to change rooms.
 Furthermore, to create a new rooms, the room editor must be recompiled with:
 	perl gen_roomlist.pl > roomlist.c++
-	./build_mapeditor && ./mapeditor <roomname>
+	./build_mapeditor && ./mapeditor <roomnumber>
 I hope to fix this problem soom.
 
 The editor itself cannot create new rooms either yet.  To do so, you must
-copy the file of an existing room and rename it to "<name>.room.c++", and then
-recompile the editor as above.
+copy the file of an existing room and rename it to "<number>-<name>.room.c++",
+and then recompile the editor as above.
+
+Also not supported are objects.  The room's objects must be tweaked by hand.
+Fortunately, this is easier than tweaking tiles by hand.
 
 
 
