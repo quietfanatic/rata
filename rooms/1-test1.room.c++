@@ -1,5 +1,9 @@
 
-BEGIN_ROOM_TILES
+ROOM_BEGIN
+
+ROOM_WIDTH(20)
+ROOM_HEIGHT(15)
+ROOM_TILES(
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -14,16 +18,21 @@ BEGIN_ROOM_TILES
 	1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1,
 	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-END_ROOM_TILES
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+)
 
-BEGIN_ROOM_OBJECTS
+ROOM_NOBJECTS(5)
+ROOM_OBJECTS(
 	ROOM_OBJECT(obj::entrance, 1.5, 1, 0, 0, 0, 0, 0)
 	ROOM_OBJECT(obj::rat, 16, 10, 0, 0, -1, 0, 0)
 	ROOM_OBJECT(obj::rat, 12, 10, 0, 0, -1, 0, 0)
 	ROOM_OBJECT(obj::rat, 7.5, 12, 0, 0, -1, 0, 0)
 	ROOM_OBJECT(obj::crate, 8.5, 10, 0, 0, 0, 0, 0)
-END_ROOM_OBJECTS
+)
 
-ROOM_DEF(20, 15, 5, 127, 127, 127, 255, -1, 2)
+ROOM_COLOR(127, 127, 127, 255)
+ROOM_BG(-1)
+ROOM_BGM(2)
+
+ROOM_END
 

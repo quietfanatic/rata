@@ -9,14 +9,14 @@ namespace room {
 	bool transition = false;
 	Object* tilemap_obj = NULL;
 	struct Room {
-		uint16 width;
-		uint16 height;
-		sf::Color bg_color;
-		int16 bg;
-		int16 bgm;
-		int16* tiles;
-		uint32 nobjects;
-		obj::Desc* objects;
+		const uint16 width;
+		const uint16 height;
+		const sf::Color bg_color;
+		const int16 bg;
+		const int16 bgm;
+		const int16* tiles;
+		const uint32 nobjects;
+		const obj::Desc* objects;
 		obj::Desc* saved_objects;
 
 		void leave ();
@@ -244,14 +244,17 @@ namespace room {
 	}
 #endif
 
-#define BEGIN_ROOM
-#define BEGIN_ROOM_TILES int16 tiles [] = {
-#define END_ROOM_TILES };
-#define BEGIN_ROOM_OBJECTS obj::Desc objects [] = {
+#define ROOM_BEGIN
+#define ROOM_WIDTH(...) static const uint16 width = __VA_ARGS__;
+#define ROOM_HEIGHT(...) static const uint16 height = __VA_ARGS__;
+#define ROOM_TILES(...) const int16 tiles [width * height] = {__VA_ARGS__};
+#define ROOM_NOBJECTS(...) static const uint nobjects = __VA_ARGS__;
+#define ROOM_OBJECTS(...) const obj::Desc objects [nobjects] = {__VA_ARGS__};
 #define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(-1, id, Vec(x, y), Vec(xvel, yvel), facing, data, data2),
-#define END_ROOM_OBJECTS obj::Desc()};
-#define ROOM_DEF(w, h, o, r, g, b, a, bg, bgm) Room room = {w, h, sf::Color(r, g, b, a), bg, bgm, tiles, o, objects, NULL};
-#define END_ROOM
+#define ROOM_COLOR(...) static const sf::Color color = sf::Color(__VA_ARGS__);
+#define ROOM_BG(...) static const uint16 bg = __VA_ARGS__;
+#define ROOM_BGM(...) static const uint16 bgm = __VA_ARGS__;
+#define ROOM_END Room room = {width, height, color, bg, bgm, tiles, nobjects, objects, NULL};
 
 
 

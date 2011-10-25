@@ -1,7 +1,9 @@
 
-BEGIN_ROOM
+ROOM_BEGIN
 
-BEGIN_ROOM_TILES
+ROOM_WIDTH(30)
+ROOM_HEIGHT(20)
+ROOM_TILES(
   1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
   1,  0,  0, -4, -2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,
   1,  0, -4, -3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,
@@ -22,18 +24,21 @@ BEGIN_ROOM_TILES
   0,  0,  0,  0,  0,  6,  0,  0,  0,  6,  0,  0,  0,  6,  0,  0,  0,  0,  0,  6,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,
   0,  0,  0,  0,  0,  6,  0,  0,  0,  6,  0,  0,  0,  6,  0,  0,  0,  0,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,
   1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1
-END_ROOM_TILES
+)
 
-BEGIN_ROOM_OBJECTS
-ROOM_OBJECT(obj::entrance, 1.500000, 11.000000, 0.000000, 0.000000, 0, 0, 0)
-ROOM_OBJECT(obj::entrance, 29.500000, 9.000000, 0.000000, 0.000000, 0, 0, 1)
-ROOM_OBJECT(obj::exit, -1.000000, 10.000000, 1.000000, 4.000000, 0, room::test4, 1)
-ROOM_OBJECT(obj::exit, -1.000000, 0.000000, 1.000000, 4.000000, 0, room::test4, 1)
-ROOM_OBJECT(obj::exit, 30.000000, 8.000000, 1.000000, 4.000000, 0, room::lotsodanger, 0)
-ROOM_OBJECT(obj::flyer, 16.500000, 4.500000, 0, 0, 0, 0, 0)
-END_ROOM_OBJECTS
+ROOM_NOBJECTS(6)
+ROOM_OBJECTS(
+	ROOM_OBJECT(obj::entrance, 1.500000, 11.000000, 0.000000, 0.000000, 0, 0, 0)
+	ROOM_OBJECT(obj::entrance, 29.500000, 9.000000, 0.000000, 0.000000, 0, 0, 1)
+	ROOM_OBJECT(obj::exit, -1.000000, 10.000000, 1.000000, 4.000000, 0, room::test4, 1)
+	ROOM_OBJECT(obj::exit, -1.000000, 0.000000, 1.000000, 4.000000, 0, room::test4, 1)
+	ROOM_OBJECT(obj::exit, 30.000000, 8.000000, 1.000000, 4.000000, 0, room::lotsodanger, 0)
+	ROOM_OBJECT(obj::flyer, 16.500000, 4.500000, 0, 0, 0, 0, 0)
+)
 
-ROOM_DEF(30, 20, 6, 127, 127, 127, 255, 0, 1)
+ROOM_COLOR(127, 127, 127, 255)
+ROOM_BG(0)
+ROOM_BGM(1)
 
-END_ROOM
+ROOM_END
 
