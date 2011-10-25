@@ -16,6 +16,14 @@ struct Rata : Walking {
 		dead
 	};
 	uint state;
+	 // Control
+	bool control_left;
+	bool control_right;
+	bool control_jump;
+	bool control_kneel;
+	bool control_action;
+	bool control_aim;
+	bool control_click;
 	 // Timers
 	int float_frames;
 	int recoil_frames;
@@ -24,9 +32,9 @@ struct Rata : Walking {
 	int adrenaline;
 	int hurt_direction;
 	int hurt_id [2];
+	 // Aiming
 	float min_aim;
 	float max_aim;
-	 // Aiming
 	bool aiming;
 	bool can_see;
 	Object* pointed_object;
@@ -216,7 +224,16 @@ struct Rata : Walking {
 		return 8.0;
 	}
 
-
+	 // controls
+	void read_controls () {
+		control_left = key[sf::Key::A];
+		control_right = key[sf::Key::D];
+		control_jump = key[sf::Key::W] && ((!floor) || key[sf::Key::W] < 3);
+		control_kneel = key[sf::Key::S];
+		control_action = key[sf::Key::Space] == 1;
+		control_aim = button[sf::Mouse::Right] || key[sf::Key::LShift];
+		control_click = button[sf::Mouse::Left];
+	}
 
 	 // Actions that can be taken
 	void allow_turn () {
@@ -233,7 +250,7 @@ struct Rata : Walking {
 		);
 	}
 	bool allow_aim () {
-		aiming = (button[sf::Mouse::Right] > 0 || key[sf::Key::LShift] > 0);
+		aiming = control_aim;
 		if (aiming) {
 			if (facing > 0) {
 				if (aim_direction > max_aim)
@@ -253,7 +270,7 @@ struct Rata : Walking {
 
 	bool allow_walk () {
 		 // Left
-		if (key[sf::Key::A] && !key[sf::Key::D]) {
+		if (control_left && !control_right) {
 			if (xvel() < 0)
 				floor_friction = ground_accel();
 			else floor_friction = ground_decel();
@@ -263,7 +280,7 @@ struct Rata : Walking {
 				ideal_xvel = -max_backward_speed();
 		}
 		 // Right
-		else if (key[sf::Key::D] && !key[sf::Key::A]) {
+		else if (control_right && !control_left) {
 			if (xvel() > 0)
 				floor_friction = ground_accel();
 			else floor_friction = ground_decel();
@@ -281,7 +298,7 @@ struct Rata : Walking {
 	}
 
 	bool allow_jump () {
-		if (key[sf::Key::W] && key[sf::Key::W] == 1) {  // Jump
+		if (control_jump) {  // Jump
 			//mutual_impulse(floor, 0, -jump_velocity()*mass());
 			set_vel(Vec(vel().x, jump_velocity()));
 			float_frames = jump_float_time();
@@ -292,18 +309,18 @@ struct Rata : Walking {
 	}
 
 	bool allow_kneel () {
-		return (key[sf::Key::S] && floor_normal.y > 0.9)
+		return (control_kneel && floor_normal.y > 0.9)
 		    || (state == crawling && check_fix(fix_sensor_21));
 	}
 
 	bool allow_crawl () {
 		floor_friction = ground_decel()*ground_decel();
-		if (key[sf::Key::A] && !key[sf::Key::D]) {
+		if (control_left && !control_right) {
 			if (!crawling) facing = -1;
 			ideal_xvel = -max_crawl_speed();
 			return true;
 		}
-		else if (key[sf::Key::D] && !key[sf::Key::A]) {
+		else if (control_right && !control_left) {
 			if (!crawling) facing = 1;
 			ideal_xvel = max_crawl_speed();
 			return true;
@@ -316,7 +333,7 @@ struct Rata : Walking {
 	
 	void allow_airmove () {
 		 // Left
-		if (key[sf::Key::A] && !key[sf::Key::B]) {
+		if (control_left && !control_right) {
 			float max = -max_air_speed();
 			if (xvel() > max) {
 				add_vel(Vec(-air_accel(), 0));
@@ -326,7 +343,7 @@ struct Rata : Walking {
 			}
 		}
 		 // Right
-		else if (key[sf::Key::D]) {
+		else if (control_right && !control_left) {
 			float max = max_air_speed();
 			if (xvel() < max) {
 				add_vel(Vec(air_accel(), 0));
@@ -336,9 +353,7 @@ struct Rata : Walking {
 			}
 		}
 		 // Adjust falling speed
-		if (key[sf::Key::W]
-			&& float_frames
-		) {
+		if (control_jump && float_frames) {
 				body->SetGravityScale((jump_float_time()-float_frames)/jump_float_time());
 				float_frames--;
 		}
@@ -351,7 +366,7 @@ struct Rata : Walking {
 	void allow_use () {
 		if (aiming
 		 && recoil_frames == 0
-		 && button[sf::Mouse::Left]) {
+		 && control_click) {
 			if (equip_info(item::hand))
 			if (equip_info(item::hand)->use) {
 				(*equip_info(item::hand)->use)();
@@ -360,7 +375,7 @@ struct Rata : Walking {
 	}
 
 	void allow_action () {
-		if (key[sf::Key::Space] == 1)
+		if (control_action)
 		switch (action) {
 			case action_equip: {
 				pick_up_equip((Item*)action_arg);
@@ -376,7 +391,7 @@ struct Rata : Walking {
 	}
 
 	void allow_examine () {
-		if (!button[sf::Mouse::Right] && !key[sf::Key::LShift]) {
+		if (!aiming) {
 			if (abs_f(cursor.x) < 0.1 && abs_f(cursor.y) < 0.1) {
 				can_see = true;
 			}
@@ -389,7 +404,7 @@ struct Rata : Walking {
 				).hit;
 				can_see = (seeing == NULL);
 			}
-			if (button[sf::Mouse::Left] == 1) {
+			if (control_click) {
 				if (message) {
 					if (message_pos_next) {
 						message_pos = message_pos_next;
@@ -440,6 +455,7 @@ struct Rata : Walking {
 	}
 
 	void before_move () {
+		read_controls();
 		aiming = false;
 		switch (state) {
 			case standing:
