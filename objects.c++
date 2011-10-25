@@ -200,15 +200,15 @@ struct Object {
 	 // Find one object (by default solid) along the line in world coords
 	struct LineChecker : public b2RayCastCallback {
 		Object* owner;
-		uint16 cat;
+		uint16 mask;
 		float frac;
 		b2Fixture* hit;
 		Vec norm;
 		float32 ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
-			if (fix->GetFilterData().categoryBits & cat)
+			if (fix->GetFilterData().categoryBits & mask)
 			if (fix->GetBody()->GetUserData() != owner)
 			if (!((Object*)fix->GetBody()->GetUserData())->doomed) {
-				dbg(6, "raytrace hit with cf %u, %u.\n", fix->GetFilterData().categoryBits, cat);
+				dbg(6, "raytrace hit with cf %u, %u.\n", fix->GetFilterData().categoryBits, mask);
 				if (f < frac) {
 					hit = fix;
 					frac = f;
@@ -219,15 +219,35 @@ struct Object {
 			return 1;
 		}
 	};
+	struct LineLooker : public b2RayCastCallback {
+		uint16 mask;
+		bool seen;
+		float32 ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
+			if (fix->GetFilterData().categoryBits & mask) {
+				seen = true;
+				return 0;
+			}
+			else {
+				return -1;
+			}
+		}
+	};
 
-	static inline LineChecker check_line (Vec from, Vec to, uint16 cat = cf::solid.categoryBits, Object* owner = NULL) {
+	static inline LineChecker check_line (Vec from, Vec to, uint16 mask = cf::solid.categoryBits, Object* owner = NULL) {
 		LineChecker checker;
 		checker.owner = owner;
-		checker.cat = cat;
+		checker.mask = mask;
 		checker.frac = 1;
 		checker.hit = NULL;
 		world->RayCast(&checker, from, to);
 		return checker;
+	}
+	static inline bool look_line (Vec from, Vec to, uint16 mask = cf::solid.categoryBits) {
+		LineLooker looker;
+		looker.mask = mask;
+		looker.seen = false;
+		world->RayCast(&looker, from, to);
+		return looker.seen;
 	}
 	 // Get contacts of a fixture
 	Object* get_touching (b2Fixture* fix) {
