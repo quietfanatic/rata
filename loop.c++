@@ -157,9 +157,8 @@ void draw_phase () {
 	window->SetView(window_view);
 	 // Draw background
 	if (rc && rc->bg < 0)
-		window->Clear(rc->bg_color);
+		window->Clear(rc->color);
 	else if (rc) {
-//		draw_image(img::_bgs[rc->bg_index], camera.x, camera.y);
 		float w = img::def[rc->bg].sfi.GetWidth()*PX;
 		float h = img::def[rc->bg].sfi.GetHeight()*PX;
 		float bg_x = mod_f(-camera.x/2, w);

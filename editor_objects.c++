@@ -62,7 +62,7 @@ struct TilePicker : Clickable {
 			draw_rect(
 				viewleft(), viewtop() - 32*PX/window_scale,
 				viewleft() + width(), viewbottom(),
-				room::current->bg_color
+				room::current->color
 			);
 			draw_rect(
 				viewleft() + width(),
@@ -74,7 +74,7 @@ struct TilePicker : Clickable {
 				
 			for (uint i=0; i < num_tiles; i++) {
 				draw_image(
-					&img::tiles,
+					img::tiles,
 					Vec(i % (uint)width() + 0.5,
 					    45/window_scale - 32*PX/window_scale - (i / (uint)width()) - 0.5),
 					i, flip_tile, true
@@ -222,7 +222,7 @@ struct RoomSettings : Clickable {
 			draw_rect(
 				viewright() - desc->vel.x, viewtop() - 32*PX/window_scale,
 				viewright(), viewbottom(),
-				room::current->bg_color
+				room::current->color
 			);
 			draw_rect(
 				viewright() - desc->vel.x-2*PX,

@@ -1,6 +1,12 @@
 
 #ifdef DEF_ONLY
 
+#ifdef MAPEDITOR
+#define roomconst
+#else
+#define roomconst const
+#endif
+
 namespace room {
 	struct Room;
 	Room* current = NULL;
@@ -9,14 +15,14 @@ namespace room {
 	bool transition = false;
 	Object* tilemap_obj = NULL;
 	struct Room {
-		const uint16 width;
-		const uint16 height;
-		const sf::Color bg_color;
-		const int16 bg;
-		const int16 bgm;
-		const int16* tiles;
-		const uint32 nobjects;
-		const obj::Desc* objects;
+		roomconst uint16 width;
+		roomconst uint16 height;
+		roomconst sf::Color color;
+		roomconst int16 bg;
+		roomconst int16 bgm;
+		roomconst int16* tiles;
+		roomconst uint32 nobjects;
+		roomconst obj::Desc* objects;
 		obj::Desc* saved_objects;
 
 		void leave ();
@@ -217,17 +223,27 @@ namespace room {
 
 #ifdef MAPEDITOR
 	int Room::print_to_file (FILE* F) {
-		fprintf(F, "\n\nBEGIN_ROOM\n\nBEGIN_ROOM_TILES\n");
+		fprintf(F,
+			"\n\n"
+			"ROOM_BEGIN\n\n"
+			"ROOM_WIDTH(%hu)\n"
+			"ROOM_HEIGHT(%hu)\n"
+			"ROOM_TILES(\n", width, height
+		);
+
 		for (uint y=0; y < height; y++) {
 			for (uint x=0; x < width; x++) {
-				fprintf(F, "% 3d", tile(x, y));
-				if (x+1 != width) fprintf(F, ",");
+				fprintf(F, "% 3d,", tile(x, y));
 			}
-			if (y+1 != height) fprintf(F, ",\n");
+			fprintf(F, "\n");
 		}
-		fprintf(F, "\nEND_ROOM_TILES\n\nBEGIN_ROOM_OBJECTS\n");
+		fprintf(F,
+			")\n\n"
+			"ROOM_NOBJECTS(%hu)\n"
+			"ROOM_OBJECTS(\n", nobjects
+		);
 		for (uint i=0; i < nobjects; i++) {
-			fprintf(F, "ROOM_OBJECT(%s, %f, %f, %f, %f, %d, %u, %u)\n",
+			fprintf(F, "\tROOM_OBJECT(%s, %f, %f, %f, %f, %d, %u, %u)\n",
 				obj::idname[objects[i].id],
 				objects[i].pos.x,
 				objects[i].pos.y,
@@ -238,8 +254,14 @@ namespace room {
 				objects[i].data2
 			);
 		}
-		return 0 <= fprintf(F, "END_ROOM_OBJECTS\n\nROOM_DEF(%hu, %hu, %hu, %hhu, %hhu, %hhu, %hhu, %d, %d)\n\nEND_ROOM\n\n",
-			width, height, nobjects, bg_color.r, bg_color.g, bg_color.b, bg_color.a, bg, bgm
+		return 0<=fprintf(F,
+			")\n\n"
+			"ROOM_COLOR(%hhu, %hhu, %hhu, %hhu)\n"
+			"ROOM_BG(%hd)\n"
+			"ROOM_BGM(%hd)\n\n"
+			"ROOM_END\n\n",
+			color.r, color.g, color.b, color.a,
+			bg, bgm
 		);
 	}
 #endif
@@ -247,9 +269,9 @@ namespace room {
 #define ROOM_BEGIN
 #define ROOM_WIDTH(...) static const uint16 width = __VA_ARGS__;
 #define ROOM_HEIGHT(...) static const uint16 height = __VA_ARGS__;
-#define ROOM_TILES(...) const int16 tiles [width * height] = {__VA_ARGS__};
+#define ROOM_TILES(...) roomconst int16 tiles [width * height] = {__VA_ARGS__};
 #define ROOM_NOBJECTS(...) static const uint nobjects = __VA_ARGS__;
-#define ROOM_OBJECTS(...) const obj::Desc objects [nobjects] = {__VA_ARGS__};
+#define ROOM_OBJECTS(...) roomconst obj::Desc objects [nobjects] = {__VA_ARGS__};
 #define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(-1, id, Vec(x, y), Vec(xvel, yvel), facing, data, data2),
 #define ROOM_COLOR(...) static const sf::Color color = sf::Color(__VA_ARGS__);
 #define ROOM_BG(...) static const uint16 bg = __VA_ARGS__;
