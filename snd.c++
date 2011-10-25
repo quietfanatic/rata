@@ -50,6 +50,7 @@ namespace bgm {
 		"bgm/2-safe.ogg"
 	};
 	sf::Music music;
+	int16 current = -1;
 }
 
 void load_snd () {

@@ -122,7 +122,8 @@ namespace room {
 		if (saved_things[i].room == currenti)
 		if (saved_things[i].id > 0)
 			saved_things[i].manifest();
-		if (bgm > -1) {
+		if (bgm > -1 && bgm != bgm::current) {
+			bgm::current = bgm;
 			bgm::music.OpenFromFile(bgm::name[bgm]);
 			bgm::music.SetLoop(true);
 			bgm::music.SetVolume(80);

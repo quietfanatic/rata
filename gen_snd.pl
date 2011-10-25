@@ -59,6 +59,7 @@ ${\(join "\n", map "\t\t$_->{id},", @bgms)}
 ${\(join ",\n", map "\t\t\"$_->{file}\"", @bgms)}
 	};
 	sf::Music music;
+	int16 current = -1;
 }
 
 void load_snd () {
