@@ -232,7 +232,7 @@ struct Rata : Walking {
 		control_kneel = key[sf::Key::S];
 		control_action = key[sf::Key::Space] == 1;
 		control_aim = button[sf::Mouse::Right] || key[sf::Key::LShift];
-		control_click = button[sf::Mouse::Left];
+		control_click = control_aim ? button[sf::Mouse::Left] : button[sf::Mouse::Left] == 1;
 		if (key[sf::Key::BackSlash] == 1) {
 			map::debug_print();
 			for (Object* o = objects_by_order; o; o = o->next_order)
