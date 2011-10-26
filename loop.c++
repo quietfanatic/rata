@@ -185,14 +185,6 @@ void draw_phase () {
 			draw_tiles(true);
 		o->draw();
 		olddepth = obj::def[o->id()].depth;
-		 // Debug draw
-		if (debug_mode) {
-			if (o->body)
-				window->Draw(sf::Shape::Rectangle(
-					o->x()-1/16.0, o->y()-1/16.0,
-					o->x()+1/16.0, o->y()+1/16.0, sf::Color(255, 0, 0, 127)
-				));
-		}
 	}
 	 // Back tiles
 	if (olddepth > 500)
@@ -206,48 +198,80 @@ void draw_phase () {
 	if (olddepth > -500)
 		draw_tiles(true);
 
-	if (rc && debug_mode) {
-		 // Debug draw tilemap
-		for (b2Fixture* f = room::tilemap_obj->body->GetFixtureList(); f; f = f->GetNext()) {
-			b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
-			if (e->m_vertex1.x > viewleft() - 1
-			 && e->m_vertex1.x < viewright() + 1
-			 && e->m_vertex1.y > viewbottom() - 1
-			 && e->m_vertex1.y < viewtop() + 1)
-				window->Draw(sf::Shape::Line(
-					e->m_vertex1.x, e->m_vertex1.y,
-					e->m_vertex2.x, e->m_vertex2.y,
-					1.0*PX, sf::Color(0, 255, 0, 127)
-				));
-			if (rata->x() + cursor.x > e->m_vertex1.x - 1.0)
-			if (rata->x() + cursor.x < e->m_vertex1.x + 1.0)
-			if (rata->y() + cursor.y+1 > e->m_vertex1.y - 1.0)
-			if (rata->y() + cursor.y+1 < e->m_vertex1.y + 1.0) {
-				window->Draw(sf::Shape::Line(
-					e->m_vertex1.x, e->m_vertex1.y,
-					e->m_vertex0.x+3*PX, e->m_vertex0.y+3*PX,
-					1.0*PX, sf::Color(255, 255, 0, 127)
-				));
-				//printf("(% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f)\n",
-				//	e->m_vertex0.x, e->m_vertex0.y, e->m_vertex1.x, e->m_vertex1.y, 
-				//	e->m_vertex2.x, e->m_vertex2.y, e->m_vertex3.x, e->m_vertex3.y);
+	 // DEBUG DRAWING
+	if (debug_mode)
+	for (Object* o=objects_by_depth; o; o = o->next_depth) {
+		if (o->body)
+		for (b2Fixture* f = o->body->GetFixtureList(); f; f = f->GetNext())
+		if (f->GetFilterData().categoryBits)
+		switch (f->GetType()) {
+			case (b2Shape::e_edge): {
+				b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
+				if (e->m_vertex1.x > viewleft() - 1
+				 && e->m_vertex1.x < viewright() + 1
+				 && e->m_vertex1.y > viewbottom() - 1
+				 && e->m_vertex1.y < viewtop() + 1)
+					window->Draw(sf::Shape::Line(
+						e->m_vertex1.x, e->m_vertex1.y,
+						e->m_vertex2.x, e->m_vertex2.y,
+						1.0*PX, sf::Color(0, 255, 0, 127)
+					));
+				if (rata->x() + cursor.x > e->m_vertex1.x - 1.0)
+				if (rata->x() + cursor.x < e->m_vertex1.x + 1.0)
+				if (rata->y() + cursor.y+1 > e->m_vertex1.y - 1.0)
+				if (rata->y() + cursor.y+1 < e->m_vertex1.y + 1.0) {
+					window->Draw(sf::Shape::Line(
+						e->m_vertex1.x, e->m_vertex1.y,
+						e->m_vertex0.x+3*PX, e->m_vertex0.y+3*PX,
+						1.0*PX, sf::Color(255, 255, 0, 127)
+					));
+					//printf("(% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f)\n",
+					//	e->m_vertex0.x, e->m_vertex0.y, e->m_vertex1.x, e->m_vertex1.y, 
+					//	e->m_vertex2.x, e->m_vertex2.y, e->m_vertex3.x, e->m_vertex3.y);
+				}
+				if (rata->x() + cursor.x > e->m_vertex2.x - 1)
+				if (rata->x() + cursor.x < e->m_vertex2.x + 1)
+				if (rata->y() + cursor.y+1 > e->m_vertex2.y - 1)
+				if (rata->y() + cursor.y+1 < e->m_vertex2.y + 1)
+					window->Draw(sf::Shape::Line(
+						e->m_vertex3.x-3*PX, e->m_vertex3.y-3*PX,
+						e->m_vertex2.x, e->m_vertex2.y,
+						1.0*PX, sf::Color(0, 0, 255, 127)
+					));
+				break;
 			}
-			if (rata->x() + cursor.x > e->m_vertex2.x - 1)
-			if (rata->x() + cursor.x < e->m_vertex2.x + 1)
-			if (rata->y() + cursor.y+1 > e->m_vertex2.y - 1)
-			if (rata->y() + cursor.y+1 < e->m_vertex2.y + 1)
-				window->Draw(sf::Shape::Line(
-					e->m_vertex3.x-3*PX, e->m_vertex3.y-3*PX,
-					e->m_vertex2.x, e->m_vertex2.y,
-					1.0*PX, sf::Color(0, 0, 255, 127)
-				));
+			case (b2Shape::e_polygon): {
+				b2PolygonShape* p = (b2PolygonShape*)f->GetShape();
+				sf::Color color = f->GetFilterData().categoryBits == 256 ? sf::Color(0, 0, 255, 32) : sf::Color(0, 0, 255, 127);
+				sf::Shape draw_shape;
+				draw_shape.EnableFill(false);
+				draw_shape.EnableOutline(true);
+				draw_shape.SetOutlineWidth(1.0*PX);
+				for (int i=0; i < p->m_vertexCount; i++) {
+					draw_shape.AddPoint(p->m_vertices[i].x, p->m_vertices[i].y, sf::Color(0, 0, 0, 0), color);
+				}
+				draw_shape.SetPosition(o->pos());
+				window->Draw(draw_shape);
+				break;
+			}
+			case (b2Shape::e_circle): {
+				b2CircleShape* c = (b2CircleShape*)f->GetShape();
+				sf::Color color = f->GetFilterData().categoryBits == 256 ? sf::Color(0, 0, 255, 32) : sf::Color(0, 0, 255, 127);
+				sf::Shape draw_shape = sf::Shape::Circle(c->m_p.x+o->x(), c->m_p.y+o->y(), c->m_radius, sf::Color(0, 0, 0, 0), 1.0*PX, color);
+				draw_shape.EnableFill(false);
+				draw_shape.EnableOutline(true);
+				window->Draw(draw_shape);
+				break;
+			}
+			default: { }
 		}
-		 // Debug draw camera
-		window->Draw(sf::Shape::Rectangle(
-			camera.x-0.2, camera.y-0.2,
-			camera.x+0.2, camera.y+0.2,
-			sf::Color(255, 0, 0, 127)
-		));
+		else {  // Debug draw an object without a b2Body
+			window->Draw(sf::Shape::Line(
+				o->desc->pos.x, o->desc->pos.y,
+				o->desc->pos.x + o->desc->vel.x, o->desc->pos.y + o->desc->vel.y,
+				1.0*PX, sf::Color(255, 0, 0, 127)
+			));
+		};
 	}
 	 // Draw lifebar
 	if (rata) {
