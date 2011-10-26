@@ -108,7 +108,7 @@ void draw_tiles (bool front) {
 			int tile = room::current->tile(x, room::current->height-1-y);
 			bool flip = (tile < 0);
 			if (flip) tile = -tile;
-			if (front ? tileinfo[tile].front : tileinfo[tile].back) {
+			if (front ? tile::def[tile].front : tile::def[tile].back) {
 				draw_image(
 					img::tiles,
 					Vec(x+.5, y+.5),

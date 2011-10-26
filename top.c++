@@ -108,7 +108,6 @@ bool flip_tile = false;
 #include "objects.c++"
 #include "bullet.c++"
 #include "items.c++"
-#include "tiles.c++"
 #include "rooms.c++"
 #include "save.c++"
 #include "loop.c++"
