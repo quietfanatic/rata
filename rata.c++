@@ -233,6 +233,11 @@ struct Rata : Walking {
 		control_action = key[sf::Key::Space] == 1;
 		control_aim = button[sf::Mouse::Right] || key[sf::Key::LShift];
 		control_click = button[sf::Mouse::Left];
+		if (key[sf::Key::BackSlash] == 1) {
+			map::debug_print();
+			for (Object* o = objects_by_order; o; o = o->next_order)
+				o->debug_print();
+		}
 	}
 
 	 // Actions that can be taken

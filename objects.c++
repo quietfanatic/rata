@@ -380,6 +380,13 @@ struct Object {
 	const uint16 id () { return desc->id; }
 	const obj::Def* def () { return &obj::def[id()]; }
 
+	 // debug
+	virtual void debug_print () {
+		Vec p = body ? pos() : desc->pos;
+		Vec v = body ? vel() : desc->vel;
+		printf("%16s: (% 8.4f, % 8.4f) @ (% 8.4f, % 8.4f) % d; %d %d\n",
+			def()->name, p.x, p.y, v.x, v.y, facing, desc->data, desc->data2);
+	}
 };
 
 struct Solid : Object {

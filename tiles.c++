@@ -81,6 +81,15 @@ namespace map {
 		}
 	}
 
+	void debug_print () {
+		for (uint y=0; y < height; y++) {
+			for (uint x=0; x < width; x++) {
+				putchar(MIN('0' + world[height-y-1][x].height, '~'));
+			}
+			putchar('\n');
+		}
+	}
+
 }
 
 
