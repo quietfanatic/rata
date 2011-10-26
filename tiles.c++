@@ -9,7 +9,7 @@ namespace tile {
 	static const uint max_vertexes = 4;
 	struct Def {
 		const char* name;
-		int16 nature;
+		int8 nature;
 		bool front;
 		bool back;
 		float friction;
@@ -18,9 +18,10 @@ namespace tile {
 		FixProp* prop;
 	};
 	enum {
-		empty,
-		solid,
-		unknown
+		empty = ' ',
+		platform = '_',
+		solid = '#',
+		unknown = '.',
 	};
 
 	static const uint num_tiles = 9;
@@ -42,10 +43,17 @@ namespace map {
 
 	struct Tile {
 		int16 id;
-		int16 height;  // above standable ground, in tiles
-		 // height is -1 if solid, -2 if unknown
-		Tile () :id(1), height(-2) { }
+		int16 nature;
+		Tile () :id(1), nature(tile::unknown) { }
 	};
+
+	struct Platform {
+		int8 left_x;
+		int8 left_y;
+		int8 right_x;
+		int8 right_y;
+	};
+
 	static const uint width = 128;
 	static const uint height = 128;
 
@@ -65,18 +73,12 @@ namespace map {
 		for (uint y=0; y < r->height; y++)
 		for (uint x=0; x < r->width; x++) {
 			world[y][x].id = r->tile(x, r->height-y-1);
-			switch (tile::def[world[y][x].id].nature) {
-				case tile::unknown: {
-					world[y][x].height = -2; break;
-				}
-				case tile::solid: {
-					world[y][x].height = -1; break;
-				}
-				case tile::empty: {
-					int lower = at(x, y-1).height;
-					world[y][x].height = (lower == -2 ? -2 : lower+1);
-					break;
-				}
+			world[y][x].nature = tile::def[abs(world[y][x].id)].nature;
+			if (world[y][x].nature == tile::empty) {
+				if (world[y-1][x].nature == tile::solid)
+					world[y][x].nature = tile::platform;
+				else if (world[y-1][x].nature == tile::unknown)
+					world[y][x].nature = tile::unknown;
 			}
 		}
 	}
@@ -84,7 +86,7 @@ namespace map {
 	void debug_print () {
 		for (uint y=0; y < height; y++) {
 			for (uint x=0; x < width; x++) {
-				putchar(MIN('0' + world[height-y-1][x].height, '~'));
+				putchar(world[height-y-1][x].nature);
 			}
 			putchar('\n');
 		}
