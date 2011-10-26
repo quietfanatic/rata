@@ -28,7 +28,7 @@ namespace room {
 		void leave ();
 		void enter (int entrance = -1);
 		int16 tile (uint x, uint y);
-		void manifest_tilemap ();
+		void manifest_geometry ();
 #ifdef MAPEDITOR
 		int print_to_file(FILE* F);
 #endif
@@ -46,7 +46,7 @@ void enter_room (int id, int entrance);
 
 #else
 
- // TILEMAP GENERATION
+ // STATIC GEOMETRY GENERATION
 
 /*
 
@@ -144,7 +144,9 @@ namespace room {
 			saved_objects = (obj::Desc*)malloc(nobjects*sizeof(obj::Desc));
 			memcpy((void*)saved_objects, (void*)objects, nobjects*sizeof(obj::Desc));
 		}
-		manifest_tilemap();
+		manifest_geometry();
+		map::clear();
+		map::load_room(current);
 		for (uint i = 0; i < nobjects; i++)
 		if (saved_objects[i].id > 0)
 			saved_objects[i].manifest();
@@ -173,10 +175,10 @@ namespace room {
 	}
 
 	int16 Room::tile (uint x, uint y) {
-		return tiles[y * (uint)ceil(width) + x];
+		return tiles[y * width + x];
 	}
 
-	void Room::manifest_tilemap () {
+	void Room::manifest_geometry () {
 		TileEdge edges [(uint)ceil(width)][(uint)ceil(height)][tile::max_vertexes];
 		for (uint y=0; y < height; y++)
 		for (uint x=0; x < width; x++) {
