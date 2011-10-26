@@ -46,6 +46,30 @@ void enter_room (int id, int entrance);
 
 #else
 
+ // TILEMAP GENERATION
+
+/*
+
+Here is our tile-to-object algorithm.
+- Each tile starts out with a number of edges (four for a plain solid tile).
+- Those edge will have recorded not only their endpoints, but also those edges
+   to which they are attached (for a plain solid tile, cyclicly in a square).
+- The edges will be sorted by position.
+- Any two edges that are deemed close enough will be cancelled out, with their
+   neighbors becoming attached to each other.
+
+*/
+
+struct TileEdge {
+	bool use;
+	TileEdge* n1;
+	Vec v1;
+	Vec v2;
+	TileEdge* n2;
+};
+
+
+
 b2EdgeShape* make_edge (Vec v0, Vec v1, Vec v2, Vec v3) {
 	b2EdgeShape* r = new b2EdgeShape;
 	r->Set(v1, v2);
