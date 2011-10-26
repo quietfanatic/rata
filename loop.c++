@@ -99,13 +99,13 @@ void destroy_phase () {
 
 void draw_tiles (bool front) {
 	if (room::current) {
-		uint minx = MAX(0, viewleft());
-		uint miny = MAX(0, viewbottom());
-		uint maxx = MIN(room::current->width, ceil(viewright()));
-		uint maxy = MIN(room::current->height, ceil(viewtop()));
+		uint minx = viewleft();
+		uint miny = viewbottom();
+		uint maxx = ceil(viewright());
+		uint maxy = ceil(viewtop());
 		for (uint x=minx; x < maxx; x++)
 		for (uint y=miny; y < maxy; y++) {
-			int tile = room::current->tile(x, room::current->height-1-y);
+			int tile = map::at(x, y).id;
 			bool flip = (tile < 0);
 			if (flip) tile = -tile;
 			if (front ? tile::def[tile].front : tile::def[tile].back) {
