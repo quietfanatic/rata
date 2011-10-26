@@ -9,9 +9,11 @@
 
 #include "debug.c++"
 #include "vec.h"
+#include "math.h"
 
-#define PX (1.0/16.0)
-#define FPS 60.0
+static const float UNPX = 16.0;
+static const float PX  = 1/UNPX;
+static const float FPS = 60.0;
 
 #include "img.c++"
 #include "snd.c++"
@@ -73,7 +75,7 @@ bool camera_jump = false;
 Object* objects_by_depth = NULL;  // Objects are linked list
 Object* objects_by_order = NULL;
 Object* creation_queue = NULL;
-#define MAX_BULLETS 10
+static const uint MAX_BULLETS = 10;
 
  // Input state
 unsigned char key[400];  // Counts number of frames up to 255
@@ -98,7 +100,7 @@ int16 selected_tile = 0;
 bool flip_tile = false;
 #endif
 
-#include "util.h"
+#include "drawing.c++"
 #include "text.c++"
 #include "poses.c++"
 #define DEF_ONLY
