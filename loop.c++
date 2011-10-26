@@ -217,18 +217,30 @@ void draw_phase () {
 				window->Draw(sf::Shape::Line(
 					e->m_vertex1.x, e->m_vertex1.y,
 					e->m_vertex2.x, e->m_vertex2.y,
-					1.0, sf::Color(0, 255, 0, 127)
+					1.0*PX, sf::Color(0, 255, 0, 127)
 				));
-			/*window->Draw(sf::Shape::Line(
-				e->m_vertex1.x, -e->m_vertex1.y,
-				e->m_vertex0.x+3*PX, -e->m_vertex0.y+3*PX,
-				1.0, sf::Color(255, 255, 0, 127)
-			));
-			window->Draw(sf::Shape::Line(
-				e->m_vertex3.x-3*PX, -e->m_vertex3.y-3*PX,
-				e->m_vertex2.x, -e->m_vertex2.y,
-				1.0, sf::Color(0, 0, 255, 127)
-			));*/
+			if (rata->x() + cursor.x > e->m_vertex1.x - 1.0)
+			if (rata->x() + cursor.x < e->m_vertex1.x + 1.0)
+			if (rata->y() + cursor.y+1 > e->m_vertex1.y - 1.0)
+			if (rata->y() + cursor.y+1 < e->m_vertex1.y + 1.0) {
+				window->Draw(sf::Shape::Line(
+					e->m_vertex1.x, e->m_vertex1.y,
+					e->m_vertex0.x+3*PX, e->m_vertex0.y+3*PX,
+					1.0*PX, sf::Color(255, 255, 0, 127)
+				));
+				//printf("(% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f)\n",
+				//	e->m_vertex0.x, e->m_vertex0.y, e->m_vertex1.x, e->m_vertex1.y, 
+				//	e->m_vertex2.x, e->m_vertex2.y, e->m_vertex3.x, e->m_vertex3.y);
+			}
+			if (rata->x() + cursor.x > e->m_vertex2.x - 1)
+			if (rata->x() + cursor.x < e->m_vertex2.x + 1)
+			if (rata->y() + cursor.y+1 > e->m_vertex2.y - 1)
+			if (rata->y() + cursor.y+1 < e->m_vertex2.y + 1)
+				window->Draw(sf::Shape::Line(
+					e->m_vertex3.x-3*PX, e->m_vertex3.y-3*PX,
+					e->m_vertex2.x, e->m_vertex2.y,
+					1.0*PX, sf::Color(0, 0, 255, 127)
+				));
 		}
 		 // Debug draw camera
 		window->Draw(sf::Shape::Rectangle(

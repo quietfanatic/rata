@@ -188,8 +188,8 @@ namespace room {
 			 // Generate edges
 			for (uint e=0; e < tile::max_vertexes; e++) {
 				if (e < nv) {
-					uint n1e = e==0   ? nv-1: e-1;
-					uint n2e = e==nv-1? 0   : e+1;
+					uint n1e = (nv+e - 1) % nv;
+					uint n2e = (nv+e + 1) % nv;
 					edges[x][y][e].use = true;
 					edges[x][y][e].n1 = &edges[x][y][n1e];
 					edges[x][y][e].v1 = t.vertexes[e] + Vec(x, height-y-1);

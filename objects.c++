@@ -384,8 +384,8 @@ struct Object {
 	virtual void debug_print () {
 		Vec p = body ? pos() : desc->pos;
 		Vec v = body ? vel() : desc->vel;
-		printf("%16s: (% 8.4f, % 8.4f) @ (% 8.4f, % 8.4f) % d; %d %d\n",
-			def()->name, p.x, p.y, v.x, v.y, facing, desc->data, desc->data2);
+		printf("%08x %12s: (% 8.4f, % 8.4f) @ (% 8.4f, % 8.4f) % d; %d %d\n",
+			this, def()->name, p.x, p.y, v.x, v.y, facing, desc->data, desc->data2);
 	}
 };
 
@@ -828,6 +828,10 @@ struct myCL : b2ContactListener {
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
 		FixProp* bfp = (FixProp*) contact->GetFixtureB()->GetUserData();
 		b2Manifold* manifold = contact->GetManifold();
+		dbg(6, "COLL: %08x %08x @ (% 7.4f, % 7.4f) [% 8.4f, % 8.4f], [% 8.4f, % 8.4f]\n",
+			a, b, manifold->localNormal.x, manifold->localNormal.y,
+			ci->normalImpulses[0], ci->tangentImpulses[1],
+			ci->normalImpulses[1], ci->tangentImpulses[1]);
 		if (afp->is_standable && bfp->stands) {
 			if (manifold->type == b2Manifold::e_faceA
 			 && manifold->localNormal.y > 0.7) {
