@@ -62,6 +62,8 @@ namespace map {
 		inline Pos right () const { return Pos(x+1, y); }
 		inline Pos down () const { return Pos(x, y-1); }
 		inline Pos up () const { return Pos(x, y+1); }
+
+		inline bool operator == (Pos p) { return x == p.x && y == p.y; }
 	};
 
 
@@ -74,8 +76,7 @@ namespace map {
 	}
 
 	Pos get_platform (Pos p) {
-		if (at(p).nature == tile::unknown) return p;
-		while (at(p).nature != tile::platform) {
+		while (at(p).nature != tile::platform && at(p).nature != tile::unknown) {
 			p = p.down();
 		}
 		return p;
@@ -94,8 +95,7 @@ namespace map {
 		return p.left();
 	}
 	static inline bool same_platform (Pos a, Pos b) {
-		b = get_end_left(b);
-		return a.x >= b.x && a.y == b.y;
+		return get_end_left(a) == get_end_left(b);
 	}
 
 

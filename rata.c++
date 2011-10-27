@@ -241,10 +241,17 @@ struct Rata : Walking {
 		 || control_action || control_aim) auto_control = false;
 		else if (control_goto) {
 			printf("Calculating route...\n");
+			destination = map::get_platform(aim_center() + Vec(cursor.x, cursor.y));
 			auto_control = true;
 		}
 		if (auto_control) {
-			//printf("Auto controlling...\n");
+			map::Pos plat = map::get_platform(pos());
+			if (map::same_platform(plat, destination)) {
+				if (destination.x < plat.x)
+					control_left = true;
+				else if (plat.x < destination.x)
+					control_right = true;
+			}
 		}
 		 // Dump debug info
 		if (key[sf::Key::BackSlash] == 1) {
