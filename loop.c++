@@ -30,7 +30,7 @@ void main_init () {
 	set_video();
 	 // box2d
 	world = new b2World(
-		b2Vec2(0.0, -30.0),  // grav
+		b2Vec2(0.0, gravity),  // grav
 		true  // allow sleep
 	);
 	world->SetContactListener(new myCL);
@@ -242,7 +242,7 @@ void draw_phase () {
 			}
 			case (b2Shape::e_polygon): {
 				b2PolygonShape* p = (b2PolygonShape*)f->GetShape();
-				sf::Color color = f->GetFilterData().categoryBits == 256 ? sf::Color(0, 0, 255, 32) : sf::Color(0, 0, 255, 127);
+				sf::Color color = f->GetFilterData().categoryBits == 256 ? sf::Color(0, 0, 255, 32) : sf::Color(0, 255, 0, 127);
 				sf::Shape draw_shape;
 				draw_shape.EnableFill(false);
 				draw_shape.EnableOutline(true);
@@ -256,8 +256,8 @@ void draw_phase () {
 			}
 			case (b2Shape::e_circle): {
 				b2CircleShape* c = (b2CircleShape*)f->GetShape();
-				sf::Color color = f->GetFilterData().categoryBits == 256 ? sf::Color(0, 0, 255, 32) : sf::Color(0, 0, 255, 127);
-				sf::Shape draw_shape = sf::Shape::Circle(c->m_p.x+o->x(), c->m_p.y+o->y(), c->m_radius, sf::Color(0, 0, 0, 0), 1.0*PX, color);
+				sf::Color color = f->GetFilterData().categoryBits == 256 ? sf::Color(0, 0, 255, 32) : sf::Color(0, 255, 0, 127);
+				sf::Shape draw_shape = sf::Shape::Circle(Vec(c->m_p)+o->pos(), c->m_radius, sf::Color(0, 0, 0, 0), 1.0*PX, color);
 				draw_shape.EnableFill(false);
 				draw_shape.EnableOutline(true);
 				window->Draw(draw_shape);
@@ -267,12 +267,29 @@ void draw_phase () {
 		}
 		else {  // Debug draw an object without a b2Body
 			window->Draw(sf::Shape::Line(
-				o->desc->pos.x, o->desc->pos.y,
-				o->desc->pos.x + o->desc->vel.x, o->desc->pos.y + o->desc->vel.y,
+				o->desc->pos, o->desc->pos + o->desc->vel,
 				1.0*PX, sf::Color(255, 0, 0, 127)
 			));
 		};
+		 // Debug draw rata path.
+		if (mag2(rata->pos() - oldratapos) > 0.2) {
+			debug_path[debug_path_pos % debug_path_size] = rata->pos();
+			uint8 whiteshift = rata->float_frames * 255.0 / rata->jump_float_time();
+			debug_path_color[debug_path_pos % debug_path_size] =
+				whiteshift ? sf::Color(255, whiteshift, whiteshift, 127) : sf::Color(0, 0, 255, 127);
+			oldratapos = rata->pos();
+			debug_path_pos++;
+		}
+
+		uint i = debug_path_pos>=debug_path_size ? debug_path_pos-debug_path_size+2 : 1;
+		for (; i < debug_path_pos; i++) {
+			window->Draw(sf::Shape::Line(
+				debug_path[(i-1) % debug_path_size], debug_path[i % debug_path_size],
+				1.0*PX, debug_path_color[i % debug_path_size]
+			));
+		}
 	}
+	else { debug_path_pos = 0; }
 	 // Draw lifebar
 	if (rata) {
 		int life = rata->life;
@@ -372,6 +389,8 @@ void input_phase () {
 			if (event.Key.Code == sf::Key::Num2) enter_room(room::test2, 0);
 			if (event.Key.Code == sf::Key::Num3) enter_room(room::test3, 0);
 			if (event.Key.Code == sf::Key::Num4) enter_room(room::test4, 0);
+			if (event.Key.Code == sf::Key::Num5) enter_room(room::edit1, 0);
+			if (event.Key.Code == sf::Key::Num6) enter_room(room::empty, 0);
 			if (event.Key.Code == sf::Key::Num0) save_save();
 			if (event.Key.Code >= 400) break;
 			key[event.Key.Code] = 1;
@@ -427,9 +446,9 @@ void move_phase () {
 		bullets[i].move();
 	if (world) {
 		world->SetAutoClearForces(false);
-		world->Step(1/120.0, 10, 10);
+		//world->Step(1/120.0, 10, 10);
 		world->SetAutoClearForces(true);
-		world->Step(1/120.0, 10, 10);
+		world->Step(1/60.0, 10, 10);
 		//world->Step(1/180.0, 10, 10);
 		//world->Step(1/240.0, 10, 10);
 	}

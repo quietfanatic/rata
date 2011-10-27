@@ -1,0 +1,46 @@
+
+
+
+
+
+
+PHYSICS
+
+
+The jump physics is fairly complicated, due to the "float frames" affecting gravity.
+
+A normal jump is a parabola.
+	h(t) = jump_vel*t + (gravity/2)*t²
+
+A jump with one second of float time is a cubic function instead of quadratic.
+	h(t) = jump_vel*t + (gravity/6)*t³
+...for one second.  After that it's
+	h(t) = h(1) + v(1)*(t-1) + (gravity/2)*(t-1)²
+		where v(t) = jump_vel + (gravity/2)*t²
+
+To test if a point is reachable by a jump:
+	h((dest.x - pos.x) / vel.x) < (dest.y - pox.y)
+
+For arbitrary float time (in seconds):
+	h(t) | t <= float_time = jump_vel*t + (gravity/float_time/6)*t³
+	h(t) | t > float_time
+	 = h(float_time) + (jump_vel + (gravity/2)*float_time²)*(t-float_time) + (gravity/2)*(t-float_time)²
+	 = jump_vel*float_time + (gravity/float_time/6)*float_time³ + ...
+	 = (jump_vel*float_time + (gravity/6)*float_time²)
+	 + (jump_vel + (gravity/2)*float_time²)*(t-float_time)
+	 + (gravity/2)*(t-float_time)²
+
+bool can_reach_with_jump(Vec from, Vec vel, Vec to, float float_time) {
+	float t = (to.x - from.x) / vel.x;
+	float height = 
+	  t <= float_time
+	    ?   vel.y                  * t
+	      + (gravity/float_time/6) * t*t*t
+	    :   vel.y*float_time
+		  + (gravity/6)*float_time*float_time
+	      + (vel.y + gravity/2*float_time*float_time) * (t-float_time)
+	      + (gravity/2)                               * (t-float_time)*(t-float_time);
+	return (to.y - from.y) < height;
+}
+
+

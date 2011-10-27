@@ -98,6 +98,20 @@ namespace map {
 		return get_end_left(a) == get_end_left(b);
 	}
 
+	 // Check if a point can be reached via jump (no obstacles)
+	 // See notes
+	bool can_reach_with_jump(Vec from, Vec vel, Vec to, float float_time) {
+		float t = (to.x - from.x) / vel.x;
+		float height = 
+		  t <= float_time
+		    ?   vel.y                  * t
+		      + (gravity/float_time/6) * t*t*t
+		    :   vel.y*float_time
+			  + (gravity/6)*float_time*float_time
+		      + (vel.y + gravity/2*float_time*float_time) * (t-float_time)
+		      + (gravity/2)                               * (t-float_time)*(t-float_time);
+		return (to.y - from.y) < height;
+	}
 
 
 

@@ -101,6 +101,7 @@ struct Rata : Walking {
 		return equip_info(item::head) == &item::def[item::helmet];
 	}
 	Vec aim_center () { return pos() + Vec(2*PX*facing, 13*PX); }
+	Vec cursor_pos () { return aim_center() + Vec(cursor.x, cursor.y); }
 
 //	b2Fixture* fix_current () {
 //		if (hurt_frames) return fix_27();
@@ -221,7 +222,7 @@ struct Rata : Walking {
 		return 10.0;
 	}
 	float jump_float_time () {
-		return 60;
+		return 1.0;
 	}
 	float max_fall_speed () {
 		return 8.0;
@@ -327,7 +328,7 @@ struct Rata : Walking {
 		if (control_jump) {  // Jump
 			//mutual_impulse(floor, 0, -jump_velocity()*mass());
 			set_vel(Vec(vel().x, jump_velocity()));
-			float_frames = jump_float_time();
+			float_frames = jump_float_time()*FPS;
 			state = falling;
 			return true;
 		}
@@ -380,7 +381,7 @@ struct Rata : Walking {
 		}
 		 // Adjust falling speed
 		if (control_jump && float_frames) {
-				body->SetGravityScale((jump_float_time()-float_frames)/jump_float_time());
+				body->SetGravityScale((jump_float_time()-float_frames/FPS)/jump_float_time());
 				float_frames--;
 		}
 		else {
@@ -426,7 +427,7 @@ struct Rata : Walking {
 			}
 			else {
 				b2Fixture* seeing = check_line(
-					aim_center(), aim_center() + Vec(cursor.x, cursor.y), cf::sight_barrier.maskBits
+					aim_center(), cursor_pos(), cf::sight_barrier.maskBits
 				).hit;
 				can_see = (seeing == NULL);
 			}
@@ -696,12 +697,19 @@ struct Rata : Walking {
 		oldyvel = yvel();
 
 		 // Select cursor image
-		if (aiming) cursor.img = img::target;
-		else if (message) cursor.img = img::readmore;
-		else if (can_see) {
-			if (pointed_object && pointed_object->desc->id != obj::tilemap)
+		//if (aiming) cursor.img = img::target;
+		//else if (message) cursor.img = img::readmore;
+		//else if (can_see) {
+		//	if (pointed_object && pointed_object->desc->id != obj::tilemap)
+		//		cursor.img = img::see;
+		//	else cursor.img = img::look;
+		//}
+		 // Test can_reach_with_jump
+		if (floor) {
+			if (map::can_reach_with_jump(pos(), Vec(6.0, jump_velocity()), cursor_pos(), jump_float_time())) {
 				cursor.img = img::see;
-			else cursor.img = img::look;
+			}
+			else cursor.img = img::nolook;
 		}
 		else cursor.img = img::nolook;
 

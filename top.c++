@@ -15,6 +15,8 @@ static const float UNPX = 16.0;
 static const float PX  = 1/UNPX;
 static const float FPS = 60.0;
 
+float gravity = -30;
+
 #include "img.c++"
 #include "snd.c++"
 
@@ -52,6 +54,12 @@ float viewheight () { return viewtop() - viewbottom(); }
 bool screen_shade = false;
 sf::Color screen_shade_color = sf::Color(255, 196, 63);
 sf::Blend::Mode screen_shade_blend = sf::Blend::Multiply;
+ // Debug draw Rata path.
+static const uint debug_path_size = 120;
+Vec debug_path [debug_path_size];
+sf::Color debug_path_color [debug_path_size];
+uint debug_path_pos;
+Vec oldratapos;
 
  // Cursor state
 struct Cursor {

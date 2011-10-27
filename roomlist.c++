@@ -7,7 +7,7 @@ enum ID {
 	test3,
 	test4,
 	edit1,
-	edit2,
+	empty,
 	lotsodanger,
 	n_rooms
 };
@@ -19,7 +19,7 @@ namespace file {
 	namespace test3 { extern Room room; }
 	namespace test4 { extern Room room; }
 	namespace edit1 { extern Room room; }
-	namespace edit2 { extern Room room; }
+	namespace empty { extern Room room; }
 	namespace lotsodanger { extern Room room; }
 	namespace roompicker {
 		#include "rooms/0-roompicker.room.c++"
@@ -39,8 +39,8 @@ namespace file {
 	namespace edit1 {
 		#include "rooms/5-edit1.room.c++"
 	}
-	namespace edit2 {
-		#include "rooms/6-edit2.room.c++"
+	namespace empty {
+		#include "rooms/6-empty.room.c++"
 	}
 	namespace lotsodanger {
 		#include "rooms/7-lotsodanger.room.c++"
@@ -54,7 +54,7 @@ Room* list [] = {
 	&file::test3::room,
 	&file::test4::room,
 	&file::edit1::room,
-	&file::edit2::room,
+	&file::empty::room,
 	&file::lotsodanger::room
 };
 
@@ -66,7 +66,7 @@ char* filename [] = {
 	"rooms/3-test3.room.c++",
 	"rooms/4-test4.room.c++",
 	"rooms/5-edit1.room.c++",
-	"rooms/6-edit2.room.c++",
+	"rooms/6-empty.room.c++",
 	"rooms/7-lotsodanger.room.c++"
 };
 #endif
