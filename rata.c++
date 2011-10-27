@@ -17,6 +17,8 @@ struct Rata : Walking {
 	};
 	uint state;
 	 // Control
+	bool auto_control;
+	map::Pos destination;
 	bool control_left;
 	bool control_right;
 	bool control_jump;
@@ -24,6 +26,7 @@ struct Rata : Walking {
 	bool control_action;
 	bool control_aim;
 	bool control_click;
+	bool control_goto;
 	 // Timers
 	int float_frames;
 	int recoil_frames;
@@ -233,6 +236,17 @@ struct Rata : Walking {
 		control_action = key[sf::Key::Space] == 1;
 		control_aim = button[sf::Mouse::Right] || key[sf::Key::LShift];
 		control_click = control_aim ? button[sf::Mouse::Left] : button[sf::Mouse::Left] == 1;
+		control_goto = button[sf::Mouse::Middle] == 1;
+		if (control_left || control_right || control_jump || control_kneel
+		 || control_action || control_aim) auto_control = false;
+		else if (control_goto) {
+			printf("Calculating route...\n");
+			auto_control = true;
+		}
+		if (auto_control) {
+			//printf("Auto controlling...\n");
+		}
+		 // Dump debug info
 		if (key[sf::Key::BackSlash] == 1) {
 			map::debug_print();
 			for (Object* o = objects_by_order; o; o = o->next_order)

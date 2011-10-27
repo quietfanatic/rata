@@ -54,7 +54,8 @@ namespace map {
 	struct Pos {
 		uint8 x;
 		uint8 y;
-
+		
+		Pos () { }
 		Pos(uint8 x, uint8 y) :x(x % width), y(y % height) { }
 		Pos(Vec v) :x((uint8)v.x % width), y((uint8)v.y % height) { }
 		inline Pos left () const { return Pos(x-1, y); }
