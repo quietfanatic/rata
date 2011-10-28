@@ -697,20 +697,20 @@ struct Rata : Walking {
 		oldyvel = yvel();
 
 		 // Select cursor image
-		//if (aiming) cursor.img = img::target;
-		//else if (message) cursor.img = img::readmore;
-		//else if (can_see) {
-		//	if (pointed_object && pointed_object->desc->id != obj::tilemap)
-		//		cursor.img = img::see;
-		//	else cursor.img = img::look;
-		//}
-		 // Test can_reach_with_jump
-		if (floor) {
-			if (map::can_reach_with_jump(pos(), Vec(6.0, jump_velocity()), cursor_pos(), jump_float_time())) {
+		if (aiming) cursor.img = img::target;
+		else if (message) cursor.img = img::readmore;
+		else if (can_see) {
+			if (pointed_object && pointed_object->desc->id != obj::tilemap)
 				cursor.img = img::see;
-			}
-			else cursor.img = img::nolook;
+			else cursor.img = img::look;
 		}
+		 // Test can_reach_with_jump
+		//if (floor) {
+		//	if (map::can_reach_with_jump(pos(), Vec(6.0, jump_velocity()), cursor_pos(), jump_float_time())) {
+		//		cursor.img = img::see;
+		//	}
+		//	else cursor.img = img::nolook;
+		//}
 		else cursor.img = img::nolook;
 
 		Walking::before_move();
