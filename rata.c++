@@ -854,11 +854,11 @@ struct Rata : Walking {
 			float step_d = mod_f(distance_walked, step * 2);
 			if (step_d < 0) step_d += step*2;
 			walk_frame =
-			  abs_f(xvel()) < 0.01 ? 4
+			  abs_f(xvel()) < 0.01 ? 0
 			: step_d < step*5/9.0  ? 1
 			: step_d < step        ? 2
 			: step_d < step*14/9.0 ? 3
-			:                        4;
+			:                        0;
 		}
 		else walk_frame = 3;
 
@@ -891,17 +891,9 @@ struct Rata : Walking {
 					handpose = angle_frame + (recoil_frames > 20);
 				}
 				else {
-					armpose =
-					  walk_frame == 1 ? -arm::a23
-					: walk_frame == 2 ? arm::a0
-					: walk_frame == 3 ? arm::a23
-					:                   arm::a0;
+					armpose = (int[4]){arm::a0, -arm::a23, arm::a0, arm::a23} [walk_frame];
 					forearmpose = armpose;
-					handpose =
-					  walk_frame == 1 ? hand::a338
-					: walk_frame == 2 ? hand::a0
-					: walk_frame == 3 ? hand::a23
-					:                   hand::a0;
+					handpose = (int[4]){hand::a0, hand::a338, hand::a0, hand::a23} [walk_frame];
 				}
 				break;
 			}
@@ -930,11 +922,7 @@ struct Rata : Walking {
 					handpose = angle_frame + (recoil_frames > 20);
 				}
 				else {
-					armpose = 
-					  walk_frame == 1 ? arm::a45
-					: walk_frame == 2 ? arm::a0
-					: walk_frame == 3 ? -arm::a45
-					:                   arm::a0;
+					armpose = (int[4]){arm::a0, arm::a45, arm::a0, -arm::a45} [walk_frame];
 					forearmpose = forearm::a90;
 					handpose = hand::inside;
 				}
