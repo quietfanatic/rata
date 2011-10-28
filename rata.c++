@@ -802,6 +802,15 @@ struct Rata : Walking {
 		rata = NULL;
 	}
 
+	uint get_armpose_by_aim () {
+		using namespace pose;
+		return
+		  recoil_frames > 20 ? arm::angle_near[angle_frame + 1]
+		: aim_distance > 10  ? arm::angle_far[angle_frame]
+		: aim_distance > 4   ? arm::angle_mid[angle_frame]
+		:                     arm::angle_near[angle_frame];
+	}
+
 	void draw () {
 
 		float step = state == crawling ? 0.8 : 1.0;
@@ -853,118 +862,149 @@ struct Rata : Walking {
 		}
 		else walk_frame = 3;
 
-		 // Select body pose
-		{ using namespace pose::body;
-			bodypose =
-			  state == standing ? stand
-			: state == walking  ? (walk_frame % 2) ? walk
-			                    :                    stand
-			: state == kneeling ? kneel
-			: state == crawling ? (walk_frame % 2) ? crawl2
-			                    :                    crawl
-			: state == falling  ? walk
-			: state == hurt_air ? hurtbk
-			: state == hurt     ? hurt_direction == 1 ? crawl : sit
-			: state == dead_air ? hurtbk
-			: state == dead     ? laybk
-			:                     walk;
-		}
+		using namespace pose;
 
-		 // Select head pose
-		{ using namespace pose::head;
-			headpose =
-			  state == standing ? angle_stand[angle_frame]
-			: state == walking  ? (walk_frame % 2) ? angle_walk[angle_frame]
-			                    :                    angle_stand[angle_frame]
-			: state == kneeling ? angle_stand[angle_frame]
-			: state == crawling ? crawl
-			: state == falling  ? (yvel() < 0) ? angle_walk[angle_frame]
-			                    :                angle_stand[angle_frame]
-			: state == hurt_air ? hurtbk
-			: state == hurt     ? hurt_direction == 1 ? crawl : hurtbk
-			: state == dead_air ? hurtbk
-			: state == dead     ? laybk
-			:                     stand_90;
-			helmet_angle = helmeta[headpose];
+		switch (state) {
+			case standing: {
+				bodypose = body::stand;
+				headpose = head::angle_stand[angle_frame];
+				if (aiming) {
+					armpose = get_armpose_by_aim();
+					forearmpose = angle_frame + (recoil_frames > 20);
+					handpose = angle_frame + (recoil_frames > 20);
+				}
+				else {
+					armpose = arm::a0;
+					forearmpose = forearm::a0;
+					handpose = hand::a0;
+				}
+				break;
+			}
+			case walking: {
+				bodypose = (walk_frame % 2) ? body::walk
+				                            : body::stand;
+				headpose = (walk_frame % 2) ? head::angle_walk[angle_frame]
+				                            : head::angle_stand[angle_frame];
+				if (aiming) {
+					armpose = get_armpose_by_aim();
+					forearmpose = angle_frame + (recoil_frames > 20);
+					handpose = angle_frame + (recoil_frames > 20);
+				}
+				else {
+					armpose =
+					  walk_frame == 1 ? -arm::a23
+					: walk_frame == 2 ? arm::a0
+					: walk_frame == 3 ? arm::a23
+					:                   arm::a0;
+					forearmpose = armpose;
+					handpose =
+					  walk_frame == 1 ? hand::a338
+					: walk_frame == 2 ? hand::a0
+					: walk_frame == 3 ? hand::a23
+					:                   hand::a0;
+				}
+				break;
+			}
+			case kneeling: {
+				bodypose = body::kneel;
+				headpose = head::angle_stand[angle_frame];
+				if (aiming) {
+					armpose = get_armpose_by_aim();
+					forearmpose = angle_frame + (recoil_frames > 20);
+					handpose = angle_frame + (recoil_frames > 20);
+				}
+				else {
+					armpose = arm::a45;
+					forearmpose = forearm::a68;
+					handpose = hand::a45;
+				}
+				break;
+			}
+			case crawling: {
+				bodypose = (walk_frame % 2) ? body::crawl2
+				                            : body::crawl;
+				headpose = head::crawl;
+				if (aiming) {
+					armpose = arm::a23;
+					forearmpose = angle_frame + (recoil_frames > 20);
+					handpose = angle_frame + (recoil_frames > 20);
+				}
+				else {
+					armpose = 
+					  walk_frame == 1 ? arm::a45
+					: walk_frame == 2 ? arm::a0
+					: walk_frame == 3 ? -arm::a45
+					:                   arm::a0;
+					forearmpose = forearm::a90;
+					handpose = hand::inside;
+				}
+				break;
+			}
+			case falling: {
+				bodypose = body::walk;
+				headpose = (yvel() < 0) ? head::angle_walk[angle_frame]
+				                        : head::angle_stand[angle_frame];
+				if (aiming) {
+					armpose = get_armpose_by_aim();
+					forearmpose = angle_frame + (recoil_frames > 20);
+					handpose = angle_frame + (recoil_frames > 20);
+				}
+				else {
+					armpose = -arm::a23;
+					forearmpose = forearm::a45;
+					handpose = hand::a45;
+				}
+				break;
+			}
+			case ouch:
+			case hurt_air:
+			case dead_air: {
+				bodypose = body::hurtbk;
+				headpose = head::hurtbk;
+				armpose = arm::a23;
+				forearmpose = forearm::a68;
+				handpose = hand::a68;
+				break;
+			}
+			case hurt: {
+				if (hurt_direction == 1) {
+					bodypose = body::crawl;
+					headpose = head::crawl;
+					armpose = arm::a0;
+					forearmpose = forearm::a90;
+					handpose = hand::inside;
+				}
+				else {
+					bodypose = body::sit;
+					headpose = head::hurtbk;
+					armpose = -arm::a23;
+					forearmpose = -forearm::a23;
+					handpose = hand::front;
+				}
+				break;
+			}
+			case dead: {
+				bodypose = body::laybk;
+				headpose = head::laybk;
+				armpose = arm::a90;
+				forearmpose = forearm::a90;
+				handpose = hand::a90;
+				break;
+			}
+			default: {
+				printf("Warning: Bad state %d encountered.\n", state);
+				break;
+			}
 		}
-
-		 // Select arm pose
-		{ using namespace pose::arm;
-			armpose =
-			  aiming && state == crawling ? a23 
-			: aiming ? recoil_frames > 20 ? angle_frame - 3
-			         : aim_distance > 10  ? angle_frame
-			         : aim_distance > 4   ? angle_frame == 0 ? 0
-			                              :                    angle_frame - 2
-			         :                      angle_frame == 0 ? 0
-			                              : angle_frame == 1 ? -1
-			                              :                    angle_frame - 4
-			: state == standing ? a0
-			: state == walking  ? walk_frame == 1 ? -a23
-			                    : walk_frame == 2 ? a0
-			                    : walk_frame == 3 ? a23
-			                    :                   a0
-			: state == kneeling ? a45
-			: state == crawling ? walk_frame == 1 ? a45
-			                    : walk_frame == 2 ? a0
-			                    : walk_frame == 3 ? -a45
-			                    :                   a0
-			: state == falling  ? a23
-			: state == hurt_air ? a23
-			: state == hurt     ? hurt_direction == 1 ? a0 : -a23
-			: state == dead_air ? a23
-			: state == dead     ? a90
-			:                     a0;
-			if (armpose < a0) armpose = -armpose, armflip = !armflip;
-			if (armpose > a180) armpose = (2*a180)-armpose, armflip = !armflip;
-		}
-
-		 // Select forearm pose
-		{ using namespace pose::forearm;
-			forearmpose =
-			  aiming ? recoil_frames > 20 ? angle_frame + 1
-			         :                      angle_frame
-			: state == standing ? a0
-			: state == walking  ? walk_frame == 1 ? -a23
-			                    : walk_frame == 2 ? a0
-			                    : walk_frame == 3 ? a23
-			                    :                   a0
-			: state == kneeling ? a68
-			: state == crawling ? a90
-			: state == falling  ? a23
-			: state == hurt_air ? a68
-			: state == hurt     ? hurt_direction == 1 ? a90 : -a23
-			: state == dead_air ? a68
-			: state == dead     ? a90
-			:                     a0;
-			if (forearmpose < a0) forearmpose = -forearmpose, forearmflip = !forearmflip;
-			if (forearmpose > a180) forearmpose = (2*a180)-forearmpose, forearmflip = !forearmflip;
-		}
-
-		 // Select hand pose
-		{ using namespace pose::hand;
-			handpose =
-			  aiming ? recoil_frames > 20 ? angle_frame + 1
-			         :                      angle_frame
-			: state == standing ? a0
-			: state == walking  ? walk_frame == 1 ? a338
-			                    : walk_frame == 2 ? a0
-			                    : walk_frame == 3 ? a23
-			                    :                   a0
-			: state == kneeling ? a45
-			: state == crawling ? inside
-			: state == falling  ? a23
-			: state == hurt_air ? a68
-			: state == hurt     ? hurt_direction == 1 ? inside : front
-			: state == dead_air ? a68
-			: state == dead     ? inside
-			:                     a0;
-		}
+		helmet_angle = head::helmeta[headpose];
+		if (    armpose < arm::a0  )     armpose =              -    armpose,     armflip = !    armflip;
+		if (    armpose > arm::a180)     armpose = (2*arm::a180)-    armpose,     armflip = !    armflip;
+		if (forearmpose < arm::a0  ) forearmpose =              -forearmpose, forearmflip = !forearmflip;
+		if (forearmpose > arm::a180) forearmpose = (2*arm::a180)-forearmpose, forearmflip = !forearmflip;
 		
-		 // Get position of various parts.
-		
+		 // Get offsets
 		Vec headp = Vec(pose::body::headx[bodypose]*facing,
-		                  pose::body::heady[bodypose]);
+		                pose::body::heady[bodypose]);
 		Vec helmetp = headp + Vec(pose::head::helmetx[headpose] * facing,
 		                          pose::head::helmety[headpose]);
 		Vec armp = Vec(pose::body::armx[bodypose]*facing,

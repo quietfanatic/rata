@@ -43,26 +43,10 @@ uint8 helmetf []={        0,        1,        2,        2,        3,        4,
                           1,        0,        0,        5,        0,
 };
 uint angle_stand [9] = {
-	stand_23, // 0
-	stand_23, // 23
-	stand_45, // 45
-	stand_68, // 68
-	stand_90, // 90
-	stand_90, // 113
-	stand_135, // 135
-	stand_158, // 158
-	stand_158 // 180
+	stand_23, stand_23, stand_45, stand_68, stand_90, stand_90, stand_135, stand_158, stand_158
 };
 uint angle_walk [9] = {
-	walk_23, // 0
-	walk_23, // 23
-	walk_45, // 45
-	walk_68, // 68
-	walk_90, // 90
-	walk_90, // 113
-	walk_135, // 135
-	walk_158, // 158
-	walk_158 // 180
+	 walk_23,  walk_23,  walk_45,  walk_68,  walk_90,  walk_90,  walk_135,  walk_158,  walk_158
 };
 
 
@@ -75,6 +59,9 @@ enum Pose        {     a0,    a23,    a45,    a68,    a90,   a113,   a135,   a15
 float forearmx[]={   0*PX,   1*PX,   2*PX,   3*PX,   3*PX,   3*PX,   2*PX,   1*PX,   0*PX };
 float forearmy[]={  -3*PX,  -3*PX,  -2*PX,  -1*PX,   0*PX,   1*PX,   2*PX,   3*PX,   3*PX };
 
+int angle_far  [9]={ a0,  a23,  a45,  a68, a90, a113, a135, a158, a180 };
+int angle_mid  [9]={ a0, -a23,   a0,  a23, a45,  a68,  a90, a113, a135 };
+int angle_near [9]={ a0, -a23, -a45, -a23,  a0,  a23,  a45,  a68,  a90 };
 
 }
 namespace forearm {
