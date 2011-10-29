@@ -121,7 +121,14 @@ struct TileLayer : Object {
 		}
 	}
 };
-struct BulletLayer : Object { };
+
+struct BulletLayer : Object {
+	void draw () {
+		for (uint i=0; i < MAX_BULLETS; i++) {
+			bullets[i].draw();
+		}
+	}
+};
 
 
 struct Shade : Object {

@@ -83,6 +83,8 @@ Object* objects_by_depth = NULL;  // Objects are linked list
 Object* objects_by_order = NULL;
 Object* creation_queue = NULL;
 static const uint MAX_BULLETS = 10;
+RBullet bullets[MAX_BULLETS];
+
 
  // Input state
 unsigned char key[400];  // Counts number of frames up to 255

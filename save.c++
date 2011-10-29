@@ -4,7 +4,7 @@
 
 const uint SAVEFILE_VERSION = 3;
 
-const uint n_saved_things = 13;
+const uint n_saved_things = 14;
 extern obj::Desc saved_things [n_saved_things];
 
 #else
@@ -12,6 +12,7 @@ extern obj::Desc saved_things [n_saved_things];
 obj::Desc saved_things [n_saved_things] = {
 	obj::Desc(room::everywhere, obj::rata, Vec(10,10)),
 	obj::Desc(room::everywhere, obj::tiles_back, Vec(0,0), Vec(0,0), 0),
+	obj::Desc(room::everywhere, obj::bullet_layer),
 	obj::Desc(room::everywhere, obj::tiles_front, Vec(0,0), Vec(0,0), 1),
 	obj::Desc(room::everywhere, obj::lifebar),
 	obj::Desc(room::everywhere, obj::shade, Vec(0,0), Vec(20,15), -1, 0x0f0f0f4f),

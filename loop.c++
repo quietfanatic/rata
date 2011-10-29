@@ -153,23 +153,11 @@ void draw_phase () {
 			draw_image(rc->bg, Vec(x, y));
 		}
 	}
-	float olddepth = 1/0.0;
 	 // Draw objects
 	for (Object* o = objects_by_depth; o; o = o->next_depth) {
 		dbg(8, "Drawing 0x%08x\n", o);
-		 // Bullets
-		if (olddepth > -200 && obj::def[o->id()].depth <= -200)
-		for (uint i=0; i < MAX_BULLETS; i++) {
-			bullets[i].draw();
-		}
 
 		o->draw();
-		olddepth = obj::def[o->id()].depth;
-	}
-	 // Bullets
-	if (olddepth > -200)
-	for (uint i=0; i < MAX_BULLETS; i++) {
-		bullets[i].draw();
 	}
 
 	 // DEBUG DRAWING

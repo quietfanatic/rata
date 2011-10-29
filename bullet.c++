@@ -106,7 +106,6 @@ void RBullet::draw () {
 		}
 	}
 }
-RBullet bullets[MAX_BULLETS];
 
 RBullet* fire_rbullet (Object* owner, Vec pos, Vec vel, int power, float mass) {
 	uint oldest = 0;
