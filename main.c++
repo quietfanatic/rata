@@ -10,6 +10,9 @@ int main () {
 		-1, obj::rata,
 		Vec(10, 10)
 	).manifest();
+	obj::Desc(
+		-1, obj::lifebar
+	).manifest();
 
 	load_save();
 

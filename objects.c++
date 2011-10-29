@@ -44,10 +44,10 @@ namespace obj {
 		item,
 		 // For drawing
 		tiles_back,
-		tiles_front,
 		bullet_layer,
-		lifebar,
+		tiles_front,
 		shade,
+		lifebar,
 		 // For editor
 		clickable_text,
 		tilemap_editor,
@@ -73,6 +73,11 @@ namespace obj {
 		"obj::flyer",
 		"obj::heart",
 		"obj::item",
+		"obj::tiles_back",
+		"obj::bullet_layer",
+		"obj::tiles_front",
+		"obj::shade",
+		"obj::lifebar",
 		"obj::clickable_text",
 		"obj::tilemap_editor",
 		"obj::tilepicker",
@@ -490,7 +495,6 @@ void Item::before_move () {
 		rata->propose_action(Rata::action_equip, this, desc->pos, 1);
 }
 
-
 struct Entrance : Object {
 	void on_create () {
 		if (room::entrance == (int)desc->data2) {
@@ -528,8 +532,7 @@ struct Door : Object {
 
 
 struct Tilemap : Object {
-	void on_create () { };
-	bool is_standable () { return true; }
+	void on_create () { }
 };
 
 
@@ -600,6 +603,9 @@ typedef Object TilePicker;
 typedef Object RoomSettings;
 typedef Object EditorMenu;
 #endif
+#include "misc.c++"
+
+
 
  // loose end from above
 
@@ -780,6 +786,11 @@ const obj::Def obj::def [] = {
 	{"Flyer", 1, &flyer_fix, 20, 20, obj::ALLOC<Flyer>, img::flyer},
 	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, img::heart},
 	{"Item", 0, NULL, -5, 150, obj::ALLOC<Item>, -1},
+	{"Back Tiles", 0, NULL, 500, 0, obj::ALLOC<TileLayer>, -1},
+	{"Bullet Layer", 0, NULL, -200, 0, obj::ALLOC<BulletLayer>, -1},
+	{"Front Tiles", 0, NULL, -500, 0, obj::ALLOC<TileLayer>, -1},
+	{"Shade", 0, NULL, -3000, 0, obj::ALLOC<Shade>, -1},
+	{"Lifebar", 0, NULL, -4000, 0, obj::ALLOC<Lifebar>, -1},
 	{"Clickable text", 0, NULL, -2000, 2000, obj::ALLOC<ClickableText>, -1},
 	{"Tilemap editor", 0, NULL, -100, 100, obj::ALLOC<TilemapEditor>, -1},
 	{"Tile picker", 0, NULL, -1000, 1000, obj::ALLOC<TilePicker>, -1},
