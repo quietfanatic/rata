@@ -32,15 +32,16 @@ struct AI : Walking {
 		return !look_line(eye(), p, 2|32);
 	}
 	bool see_rata () {
-		return see_rata_at(rata->pos() + Vec(0, 0.8))
-		    || see_rata_at(rata->pos() + Vec(0, 1.6))
-		    || see_rata_at(rata->pos() + Vec(0, 0.2));
+		for (uint i=0; i < n_sight_points; i++)
+		if (see_rata_at(rata->pos() + rata->sight_points[i]))
+			return true;
+		return false;
 	}
 	Vec see_rata_pos () {
-		return see_rata_at(rata->pos() + Vec(0, 0.8)) ? rata->pos() + Vec(0, 0.8)
-		     : see_rata_at(rata->pos() + Vec(0, 1.6)) ? rata->pos() + Vec(0, 1.6)
-		     : see_rata_at(rata->pos() + Vec(0, 0.2)) ? rata->pos() + Vec(0, 0.2)
-		     : Vec::undef;
+		for (uint i=0; i < n_sight_points; i++)
+		if (see_rata_at(rata->pos() + rata->sight_points[i]))
+			return rata->pos() + rata->sight_points[i];
+		return Vec::undef;
 	}
 	Vec predict_pos_from (Vec p, Object* threat = rata) {
 		return Vec(p.x + threat->xvel() * decision_timer/FPS,

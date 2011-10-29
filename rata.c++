@@ -1,6 +1,13 @@
 #define MAX_INVENTORY 10
 
 
+static const uint n_sight_points = 3;
+const Vec sight_points_stand [n_sight_points] = {Vec(0, 13*PX), Vec(0, 25*PX), Vec(0, 2*PX)};
+const Vec sight_points_kneel [n_sight_points] = {Vec(0, 10*PX), Vec(0, 19*PX), Vec(0, 2*PX)};
+const Vec sight_points_crawl_r [n_sight_points] = {Vec(0, 6*PX), Vec(7*PX, 13*PX), Vec(-8*PX, 2*PX)};
+const Vec sight_points_crawl_l [n_sight_points] = {Vec(0, 6*PX), Vec(-7*PX, 13*PX), Vec(8*PX, 2*PX)};
+
+
 struct Rata : Walking {
 	 // Character state
 	enum State {
@@ -43,13 +50,14 @@ struct Rata : Walking {
 	Object* pointed_object;
 	float aim_distance;
 	float aim_direction;
-	 // For animation
+	 // For animation and movement
 	float distance_walked;
 	float oldxrel;
 	Vec hand_pos;
 	uint angle_frame;  // 0=down, 8=up
 	float oldyvel;
 	float helmet_angle;
+	const Vec* sight_points;
 	 // Fixtures
 	b2Fixture* fix_feet;
 	b2Fixture* fix_current;
@@ -498,12 +506,16 @@ struct Rata : Walking {
 							allow_turn();
 						}
 						allow_look();
-						if (facing > 0)
-							set_fix(fix_crawl_r),
+						if (facing > 0) {
+							set_fix(fix_crawl_r);
 							set_helmet(fix_helmet_crawl_r);
-						else
-							set_fix(fix_crawl_l),
+							sight_points = sight_points_crawl_r;
+						}
+						else {
+							set_fix(fix_crawl_l);
 							set_helmet(fix_helmet_crawl_l);
+							sight_points = sight_points_crawl_l;
+						}
 					}
 					else if (state == crawling) {
 						if (check_fix(fix_sensor_21)) {
@@ -518,10 +530,12 @@ struct Rata : Walking {
 							if (facing > 0) {
 								set_fix(fix_crawl_r);
 								set_helmet(fix_helmet_crawl_r);
+								sight_points = sight_points_crawl_r;
 							}
 							else {
 								set_fix(fix_crawl_l);
 								set_helmet(fix_helmet_crawl_l);
+								sight_points = sight_points_crawl_l;
 							}
 						}
 						else {
@@ -540,10 +554,12 @@ struct Rata : Walking {
 							if (facing > 0) {
 								set_fix(fix_crawl_r);
 								set_helmet(fix_helmet_crawl_r);
+								sight_points = sight_points_crawl_r;
 							}
 							else {
 								set_fix(fix_crawl_l);
 								set_helmet(fix_helmet_crawl_l);
+								sight_points = sight_points_crawl_l;
 							}
 						}
 					}
@@ -563,6 +579,7 @@ struct Rata : Walking {
 						allow_use();
 						set_fix(fix_21);
 						set_helmet(fix_helmet_kneel);
+						sight_points = sight_points_kneel;
 					}
 				}
 				else if (allow_jump()) {
@@ -575,6 +592,7 @@ struct Rata : Walking {
 					allow_airmove();
 					set_fix(fix_27);
 					set_helmet(fix_helmet_stand);
+					sight_points = sight_points_stand;
 				}
 				else {
 					allow_turn();
@@ -592,6 +610,7 @@ struct Rata : Walking {
 					}
 					set_fix(fix_27);
 					set_helmet(fix_helmet_stand);
+					sight_points = sight_points_stand;
 				}
 				allow_action();
 				allow_examine();
@@ -619,6 +638,7 @@ struct Rata : Walking {
 				decrement_counters();
 				set_fix(fix_27);
 				set_helmet(fix_helmet_stand);
+				sight_points = sight_points_stand;
 				break;
 			}
 			case ouch: {
@@ -654,6 +674,7 @@ struct Rata : Walking {
 				decrement_counters();
 				set_fix(fix_25);
 				set_helmet(fix_helmet_stand);
+				sight_points = sight_points_kneel;
 				break;
 			}
 			case hurt: {
@@ -668,6 +689,7 @@ struct Rata : Walking {
 				decrement_counters();
 				set_fix(fix_21);
 				set_helmet(fix_helmet_kneel);
+				sight_points = sight_points_kneel;
 				break;
 			}
 			case dead_air: {
