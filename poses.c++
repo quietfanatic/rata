@@ -4,6 +4,24 @@
 namespace pose {
 
 
+enum Common {
+	a0,
+	a23,
+	a45,
+	a68,
+	a90,
+	a113,
+	a135,
+	a158,
+	a180,
+	a203,
+	a225,
+	a248,
+	a270,
+	a293,
+	a315,
+	a338
+};
 
 
 struct Body {
@@ -99,19 +117,32 @@ const uint Head::angle_walk [9] = {
 
 
 
-namespace arm {
+struct Arm {
+	static const int angle_far [9];
+	static const int angle_mid [9];
+	static const int angle_near [9];
+	Vec forearm;
+	Arm (float x, float y) :forearm(Vec(x*PX, y*PX)) { }
+};
+
+const Arm arm [9] = {
+	Arm(0, -3),
+	Arm(1, -3),
+	Arm(2, -2),
+	Arm(3, -1),
+	Arm(3,  0),
+	Arm(3,  1),
+	Arm(2,  2),
+	Arm(1,  3),
+	Arm(0,  3),
+};
+
+const int Arm::angle_far  [9]={ a0,  a23,  a45,  a68, a90, a113, a135, a158, a180 };
+const int Arm::angle_mid  [9]={ a0, -a23,   a0,  a23, a45,  a68,  a90, a113, a135 };
+const int Arm::angle_near [9]={ a0, -a23, -a45, -a23,  a0,  a23,  a45,  a68,  a90 };
 
 
-const uint num = 9;
-enum Pose        {     a0,    a23,    a45,    a68,    a90,   a113,   a135,   a158,   a180 };
-float forearmx[]={   0*PX,   1*PX,   2*PX,   3*PX,   3*PX,   3*PX,   2*PX,   1*PX,   0*PX };
-float forearmy[]={  -3*PX,  -3*PX,  -2*PX,  -1*PX,   0*PX,   1*PX,   2*PX,   3*PX,   3*PX };
 
-int angle_far  [9]={ a0,  a23,  a45,  a68, a90, a113, a135, a158, a180 };
-int angle_mid  [9]={ a0, -a23,   a0,  a23, a45,  a68,  a90, a113, a135 };
-int angle_near [9]={ a0, -a23, -a45, -a23,  a0,  a23,  a45,  a68,  a90 };
-
-}
 namespace forearm {
 
 
