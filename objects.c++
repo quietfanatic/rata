@@ -42,6 +42,13 @@ namespace obj {
 		flyer,
 		heart,
 		item,
+		 // For drawing
+		tiles_back,
+		tiles_front,
+		bullet_layer,
+		lifebar,
+		shade,
+		 // For editor
 		clickable_text,
 		tilemap_editor,
 		tilepicker,

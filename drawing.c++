@@ -1,6 +1,18 @@
 
 
 
+ // Just let me use hexadecimal colors, okay?
+struct Color {
+	uint32 x;
+	Color (uint32 x) :x(x) { }
+	Color (sf::Color c) :x(c.r<<24 | c.g<<16 | c.b<<8 | c.a) { }
+	operator sf::Color () {
+		return sf::Color(x>>24, x>>16, x>>8, x);
+	}
+};
+
+
+
 sf::Sprite drawing_sprite;
 void draw_image (int16 imagei, Vec p, int sub=0, bool flip=false, bool cam=false, float scale=1.0) {
 	if (imagei < 0) return;
@@ -48,7 +60,7 @@ void draw_image (int16 imagei, Vec p, int sub=0, bool flip=false, bool cam=false
 		);
 	window->Draw(drawing_sprite);
 };
-void draw_rect (float l, float t, float r, float b, sf::Color color=sf::Color(31, 31, 31, 127), bool cam=false) {
+void draw_rect (float l, float t, float r, float b, Color color=0x4f4f4f7f, bool cam=false) {
 	if (cam)
 		window->Draw(sf::Shape::Rectangle(
 			viewleft() + l, viewbottom() + t,
