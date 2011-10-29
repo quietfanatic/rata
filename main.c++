@@ -7,11 +7,11 @@ int main () {
 	main_init();
 
 	rata = (Rata*)obj::Desc(
-		-1, obj::rata,
+		room::everywhere, obj::rata,
 		Vec(10, 10)
 	).manifest();
 	obj::Desc(
-		-1, obj::lifebar
+		room::everywhere, obj::lifebar
 	).manifest();
 
 	load_save();

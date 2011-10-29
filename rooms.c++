@@ -36,7 +36,8 @@ namespace room {
 	enum Location {
 		wherever = -1,
 		temp = -2,
-		inventory = -3,		
+		inventory = -3,
+		everywhere = -4
 	};
 	extern Room* list [];
 }
@@ -166,7 +167,7 @@ namespace room {
 	void Room::leave () {
 		transition = true;
 		for (Object* o = objects_by_depth; o; o = o->next_depth) {
-			if (o->desc->id != obj::rata) {
+			if (o->desc->room != everywhere) {
 				o->destroy();
 			}
 		}
