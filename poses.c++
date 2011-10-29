@@ -118,6 +118,7 @@ const uint Head::angle_walk [9] = {
 
 
 struct Arm {
+	static const uint num = 9;
 	static const int angle_far [9];
 	static const int angle_mid [9];
 	static const int angle_near [9];
@@ -125,7 +126,7 @@ struct Arm {
 	Arm (float x, float y) :forearm(Vec(x*PX, y*PX)) { }
 };
 
-const Arm arm [9] = {
+const Arm arm [Arm::num] = {
 	Arm(0, -3),
 	Arm(1, -3),
 	Arm(2, -2),
@@ -143,24 +144,48 @@ const int Arm::angle_near [9]={ a0, -a23, -a45, -a23,  a0,  a23,  a45,  a68,  a9
 
 
 
-namespace forearm {
+struct Forearm {
+	static const uint num = 9;
+	Vec hand;
+	Forearm (float x, float y) :hand(Vec(x*PX, y*PX)) { }
+};
+
+const Forearm forearm [Forearm::num] = {
+	Forearm(0, -5),
+	Forearm(2, -4),
+	Forearm(3, -3),
+	Forearm(4, -2),
+	Forearm(5,  0),
+	Forearm(4,  2),
+	Forearm(3,  3),
+	Forearm(2,  4),
+	Forearm(0,  5),
+};
 
 
-const uint num = 9;
-enum Pose     {     a0,    a23,    a45,    a68,    a90,   a113,   a135,   a158,   a180 };
-float handx[]={   0*PX,   2*PX,   3*PX,   4*PX,   5*PX,   4*PX,   3*PX,   2*PX,   0*PX };
-float handy[]={  -5*PX,  -4*PX,  -3*PX,  -2*PX,   0*PX,   2*PX,   3*PX,   4*PX,   5*PX };
-
-
-}
-namespace hand {
-
-
-const uint num = 10;
-enum Pose     {     a0,    a23,    a45,    a68,    a90,   a113,   a135,   a158,   a180,
-                  a203,   a225,   a248,   a270,   a293,   a315,   a338, inside,  front, };
-
-}
+struct Hand {
+	static const uint num = 18;
+	enum Pose {
+		a0,
+		a23,
+		a45,
+		a68,
+		a90,
+		a113,
+		a135,
+		a158,
+		a180,
+		a203,
+		a225,
+		a248,
+		a270,
+		a293,
+		a315,
+		a338,
+		inside,
+		front
+	};
+};
 
 
 }

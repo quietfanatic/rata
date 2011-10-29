@@ -946,7 +946,7 @@ struct Rata : Walking {
 				else {
 					armpose = (int[4]){ a0, a45, a0, -a45 }[walk_frame];
 					forearmpose = a90;
-					handpose = hand::inside;
+					handpose = Hand::inside;
 				}
 				break;
 			}
@@ -982,14 +982,14 @@ struct Rata : Walking {
 					headpose = Head::crawl;
 					armpose = a0;
 					forearmpose = a90;
-					handpose = hand::inside;
+					handpose = Hand::inside;
 				}
 				else {
 					bodypose = Body::sit;
 					headpose = Head::hurtbk;
 					armpose = -a23;
 					forearmpose = -a23;
-					handpose = hand::front;
+					handpose = Hand::front;
 				}
 				break;
 			}
@@ -1013,12 +1013,11 @@ struct Rata : Walking {
 		if (forearmpose > a180) forearmpose = (2*a180)-forearmpose, forearmflip = !forearmflip;
 		
 		 // Get offsets
-		Vec headp =     pose::body[ bodypose ].head   .scalex(facing);
-		Vec helmetp = headp + head[ headpose ].helmet .scalex(facing);
-		Vec armp =      pose::body[ bodypose ].arm    .scalex(facing);
-		Vec forearmp =  armp + arm[ armpose  ].forearm.scalex(armflip?-1:1);
-		hand_pos = forearmp + Vec(pose::forearm::handx[forearmpose]*(forearmflip?-1:1),
-		                          pose::forearm::handy[forearmpose]);
+		Vec headp =        pose::body[   bodypose].head   .scalex(facing);
+		Vec helmetp =    headp + head[   headpose].helmet .scalex(facing);
+		Vec armp =         pose::body[   bodypose].arm    .scalex(facing);
+		Vec forearmp =     armp + arm[    armpose].forearm.scalex(armflip?-1:1);
+		hand_pos = forearmp + forearm[forearmpose].hand   .scalex(forearmflip?-1:1);
 
 		 // Now to actually draw.
 

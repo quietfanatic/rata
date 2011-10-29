@@ -47,7 +47,7 @@ namespace item {
 		},
 		{	"Handgun",	
 			hand, -1,
-			img::handgun, 19, pose::hand::a45,
+			img::handgun, 19, pose::a45,
 			-1, -1, -1, -1, -1, img::handgun,
 			&fire_handgun
 		},
