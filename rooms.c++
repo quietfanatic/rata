@@ -71,13 +71,13 @@ struct TileEdge {
 
 
 
-b2EdgeShape* make_edge (Vec v0, Vec v1, Vec v2, Vec v3) {
-	b2EdgeShape* r = new b2EdgeShape;
-	r->Set(v1, v2);
-	r->m_hasVertex0 = r->m_hasVertex3 = 1;
-	r->m_vertex0 = v0; r->m_vertex3 = v3;
-	return r;
-}
+//b2EdgeShape make_edge (Vec v0, Vec v1, Vec v2, Vec v3) {
+//	b2EdgeShape* r = new b2EdgeShape;
+//	r->Set(v1, v2);
+//	r->m_hasVertex0 = r->m_hasVertex3 = 1;
+//	r->m_vertex0 = v0; r->m_vertex3 = v3;
+//	return r;
+//}
 
 
 inline bool about_eq (float a, float b) {
@@ -224,17 +224,17 @@ namespace room {
 		if (edges[x][y][e].use) {
 			bool flip = (tile(x, y) < 0);
 			const tile::Def& t = tile::def[flip? -tile(x,y) : tile(x,y)];
-			b2EdgeShape* edge = new b2EdgeShape;
-			edge->Set(edges[x][y][e].v1, edges[x][y][e].v2);
+			b2EdgeShape edge;
+			edge.Set(edges[x][y][e].v1, edges[x][y][e].v2);
 			if (edges[x][y][e].n1) {
-				edge->m_hasVertex0 = true;
-				edge->m_vertex0 = edges[x][y][e].n1->v1;
+				edge.m_hasVertex0 = true;
+				edge.m_vertex0 = edges[x][y][e].n1->v1;
 			}
 			if (edges[x][y][e].n2) {
-				edge->m_hasVertex3 = true;
-				edge->m_vertex3 = edges[x][y][e].n2->v2;
+				edge.m_hasVertex3 = true;
+				edge.m_vertex3 = edges[x][y][e].n2->v2;
 			}
-			fixdef.shape = edge;
+			fixdef.shape = &edge;
 			fixdef.friction = t.friction;
 			fixdef.restitution = 0;
 			//fixdef.density = 100.0;
