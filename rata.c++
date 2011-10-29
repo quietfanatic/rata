@@ -23,6 +23,14 @@ struct Rata : Walking {
 		dead
 	};
 	uint state;
+	struct Pose {
+		int8 body;
+		int8 head;
+		int8 helmet;
+		int8 arm;
+		int8 forearm;
+		int8 hand;
+	} pose;
 	 // Control
 	bool auto_control;
 	map::Pos destination;
@@ -824,7 +832,7 @@ struct Rata : Walking {
 		rata = NULL;
 	}
 
-	uint get_armpose_by_aim () {
+	uint pose_arm_by_aim () {
 		using namespace pose;
 		return
 		  recoil_frames > 20 ? Arm::angle_near[angle_frame + 1]
@@ -838,11 +846,6 @@ struct Rata : Walking {
 		float step = state == crawling ? 0.8 : 1.0;
 		int walk_frame;
 		float aim_angle;
-		uint headpose;  // Pose index
-		uint bodypose;
-		int armpose;
-		int forearmpose;
-		int handpose;
 		bool flip = facing<0;
 		bool armflip = flip;
 		bool forearmflip = flip;
@@ -888,117 +891,117 @@ struct Rata : Walking {
 
 		switch (state) {
 			case standing: {
-				bodypose = Body::stand;
-				headpose = Head::angle_stand[angle_frame];
+				pose.body = Body::stand;
+				pose.head = Head::angle_stand[angle_frame];
 				if (aiming) {
-					armpose = get_armpose_by_aim();
-					forearmpose = angle_frame + (recoil_frames > 20);
-					handpose = angle_frame + (recoil_frames > 20);
+					pose.arm = pose_arm_by_aim();
+					pose.forearm = angle_frame + (recoil_frames > 20);
+					pose.hand = angle_frame + (recoil_frames > 20);
 				}
 				else {
-					armpose = a0;
-					forearmpose = a0;
-					handpose = a0;
+					pose.arm = a0;
+					pose.forearm = a0;
+					pose.hand = a0;
 				}
 				break;
 			}
 			case walking: {
-				bodypose = (walk_frame % 2) ? Body::walk
+				pose.body = (walk_frame % 2) ? Body::walk
 				                            : Body::stand;
-				headpose = (walk_frame % 2) ? Head::angle_walk[angle_frame]
+				pose.head = (walk_frame % 2) ? Head::angle_walk[angle_frame]
 				                            : Head::angle_stand[angle_frame];
 				if (aiming) {
-					armpose = get_armpose_by_aim();
-					forearmpose = angle_frame + (recoil_frames > 20);
-					handpose = angle_frame + (recoil_frames > 20);
+					pose.arm = pose_arm_by_aim();
+					pose.forearm = angle_frame + (recoil_frames > 20);
+					pose.hand = angle_frame + (recoil_frames > 20);
 				}
 				else {
-					armpose = (int[4]){ a0, -a23, a0, a23 }[walk_frame];
-					forearmpose = armpose;
-					handpose = (int[4]){ a0, a338, a0, a23 }[walk_frame];
+					pose.arm = (int[4]){ a0, -a23, a0, a23 }[walk_frame];
+					pose.forearm = pose.arm;
+					pose.hand = (int[4]){ a0, a338, a0, a23 }[walk_frame];
 				}
 				break;
 			}
 			case kneeling: {
-				bodypose = Body::kneel;
-				headpose = Head::angle_stand[angle_frame];
+				pose.body = Body::kneel;
+				pose.head = Head::angle_stand[angle_frame];
 				if (aiming) {
-					armpose = get_armpose_by_aim();
-					forearmpose = angle_frame + (recoil_frames > 20);
-					handpose = angle_frame + (recoil_frames > 20);
+					pose.arm = pose_arm_by_aim();
+					pose.forearm = angle_frame + (recoil_frames > 20);
+					pose.hand = angle_frame + (recoil_frames > 20);
 				}
 				else {
-					armpose = a45;
-					forearmpose = a68;
-					handpose = a45;
+					pose.arm = a45;
+					pose.forearm = a68;
+					pose.hand = a45;
 				}
 				break;
 			}
 			case crawling: {
-				bodypose = (walk_frame % 2) ? Body::crawl2
+				pose.body = (walk_frame % 2) ? Body::crawl2
 				                            : Body::crawl;
-				headpose = Head::crawl;
+				pose.head = Head::crawl;
 				if (aiming) {
-					armpose = a23;
-					forearmpose = angle_frame + (recoil_frames > 20);
-					handpose = angle_frame + (recoil_frames > 20);
+					pose.arm = a23;
+					pose.forearm = angle_frame + (recoil_frames > 20);
+					pose.hand = angle_frame + (recoil_frames > 20);
 				}
 				else {
-					armpose = (int[4]){ a0, a45, a0, -a45 }[walk_frame];
-					forearmpose = a90;
-					handpose = Hand::inside;
+					pose.arm = (int[4]){ a0, a45, a0, -a45 }[walk_frame];
+					pose.forearm = a90;
+					pose.hand = Hand::inside;
 				}
 				break;
 			}
 			case falling: {
-				bodypose = Body::walk;
-				headpose = (yvel() < 0) ? Head::angle_walk[angle_frame]
+				pose.body = Body::walk;
+				pose.head = (yvel() < 0) ? Head::angle_walk[angle_frame]
 				                        : Head::angle_stand[angle_frame];
 				if (aiming) {
-					armpose = get_armpose_by_aim();
-					forearmpose = angle_frame + (recoil_frames > 20);
-					handpose = angle_frame + (recoil_frames > 20);
+					pose.arm = pose_arm_by_aim();
+					pose.forearm = angle_frame + (recoil_frames > 20);
+					pose.hand = angle_frame + (recoil_frames > 20);
 				}
 				else {
-					armpose = -a23;
-					forearmpose = a45;
-					handpose = a45;
+					pose.arm = -a23;
+					pose.forearm = a45;
+					pose.hand = a45;
 				}
 				break;
 			}
 			case ouch:
 			case hurt_air:
 			case dead_air: {
-				bodypose = Body::hurtbk;
-				headpose = Head::hurtbk;
-				armpose = a23;
-				forearmpose = a68;
-				handpose = a68;
+				pose.body = Body::hurtbk;
+				pose.head = Head::hurtbk;
+				pose.arm = a23;
+				pose.forearm = a68;
+				pose.hand = a68;
 				break;
 			}
 			case hurt: {
 				if (hurt_direction == 1) {
-					bodypose = Body::crawl;
-					headpose = Head::crawl;
-					armpose = a0;
-					forearmpose = a90;
-					handpose = Hand::inside;
+					pose.body = Body::crawl;
+					pose.head = Head::crawl;
+					pose.arm = a0;
+					pose.forearm = a90;
+					pose.hand = Hand::inside;
 				}
 				else {
-					bodypose = Body::sit;
-					headpose = Head::hurtbk;
-					armpose = -a23;
-					forearmpose = -a23;
-					handpose = Hand::front;
+					pose.body = Body::sit;
+					pose.head = Head::hurtbk;
+					pose.arm = -a23;
+					pose.forearm = -a23;
+					pose.hand = Hand::front;
 				}
 				break;
 			}
 			case dead: {
-				bodypose = Body::laybk;
-				headpose = Head::laybk;
-				armpose = a90;
-				forearmpose = a90;
-				handpose = a90;
+				pose.body = Body::laybk;
+				pose.head = Head::laybk;
+				pose.arm = a90;
+				pose.forearm = a90;
+				pose.hand = a90;
 				break;
 			}
 			default: {
@@ -1006,33 +1009,33 @@ struct Rata : Walking {
 				break;
 			}
 		}
-		helmet_angle = head[headpose].helmeta;
-		if (    armpose < a0  )     armpose =         -    armpose,     armflip = !    armflip;
-		if (    armpose > a180)     armpose = (2*a180)-    armpose,     armflip = !    armflip;
-		if (forearmpose < a0  ) forearmpose =         -forearmpose, forearmflip = !forearmflip;
-		if (forearmpose > a180) forearmpose = (2*a180)-forearmpose, forearmflip = !forearmflip;
+		helmet_angle = head[pose.head].helmeta;
+		if (    pose.arm < a0  )     pose.arm =         -    pose.arm,     armflip = !    armflip;
+		if (    pose.arm > a180)     pose.arm = (2*a180)-    pose.arm,     armflip = !    armflip;
+		if (pose.forearm < a0  ) pose.forearm =         -pose.forearm, forearmflip = !forearmflip;
+		if (pose.forearm > a180) pose.forearm = (2*a180)-pose.forearm, forearmflip = !forearmflip;
 		
 		 // Get offsets
-		Vec headp =        pose::body[   bodypose].head   .scalex(facing);
-		Vec helmetp =    headp + head[   headpose].helmet .scalex(facing);
-		Vec armp =         pose::body[   bodypose].arm    .scalex(facing);
-		Vec forearmp =     armp + arm[    armpose].forearm.scalex(armflip?-1:1);
-		hand_pos = forearmp + forearm[forearmpose].hand   .scalex(forearmflip?-1:1);
+		Vec headp =        pose::body[   pose.body].head   .scalex(facing);
+		Vec helmetp =    headp + head[   pose.head].helmet .scalex(facing);
+		Vec armp =         pose::body[   pose.body].arm    .scalex(facing);
+		Vec forearmp =     armp + arm[    pose.arm].forearm.scalex(armflip?-1:1);
+		hand_pos = forearmp + forearm[pose.forearm].hand   .scalex(forearmflip?-1:1);
 
 		 // Now to actually draw.
 
-		draw_image(img::rata_body, p, bodypose, flip);
+		draw_image(img::rata_body, p, pose.body, flip);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
 		if (equip_info(i)->body > -1)
-			draw_image(equip_info(i)->body, p, bodypose, flip);
+			draw_image(equip_info(i)->body, p, pose.body, flip);
 
 		if (state == dead) goto draw_arm;
 		draw_head:
 		draw_image(
 			img::rata_head,
 			p + headp,
-			headpose, flip
+			pose.head, flip
 		);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
@@ -1040,7 +1043,7 @@ struct Rata : Walking {
 			draw_image(
 				equip_info(i)->head,
 				p + headp,
-				headpose, flip
+				pose.head, flip
 			);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
@@ -1048,7 +1051,7 @@ struct Rata : Walking {
 			draw_image(
 				equip_info(i)->helmet,
 				p + helmetp,
-				pose::head[headpose].helmetf, flip
+				pose::head[pose.head].helmetf, flip
 			);
 
 		if (state == dead) goto draw_hand;
@@ -1056,12 +1059,12 @@ struct Rata : Walking {
 		draw_image(
 			img::rata_arm,
 			p + armp,
-			armpose, armflip
+			pose.arm, armflip
 		);
 		draw_image(
 			img::rata_forearm,
 			p + forearmp,
-			forearmpose, forearmflip
+			pose.forearm, forearmflip
 		);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
@@ -1069,7 +1072,7 @@ struct Rata : Walking {
 			draw_image(
 				equip_info(i)->arm,
 				p + armp,
-				armpose, armflip
+				pose.arm, armflip
 			);
 		for (uint i=0; i<item::num_slots; i++)
 		if (equip_info(i))
@@ -1077,7 +1080,7 @@ struct Rata : Walking {
 			draw_image(
 				equip_info(i)->forearm,
 				p + forearmp,
-				forearmpose, forearmflip
+				pose.forearm, forearmflip
 			);
 
 		if (state == dead) goto draw_head;
@@ -1089,7 +1092,7 @@ struct Rata : Walking {
 			draw_image(
 				equip_info(i)->hand,
 				p + hand_pos,
-				handpose, flip
+				pose.hand, flip
 			);
 		
 		 // Draw action message
