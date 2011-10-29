@@ -36,7 +36,7 @@ namespace room {
 	enum Location {
 		wherever = -1,
 		temp = -2,
-		inventory = -3,
+		equipment = -3,
 		everywhere = -4
 	};
 	extern Room* list [];

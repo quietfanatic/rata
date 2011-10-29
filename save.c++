@@ -2,15 +2,18 @@
 
 #ifdef DEF_ONLY
 
-const uint SAVEFILE_VERSION = 1;
+const uint SAVEFILE_VERSION = 2;
 
-const uint n_saved_things = 8;
+const uint n_saved_things = 11;
 extern obj::Desc saved_things [n_saved_things];
 
 #else
 
 obj::Desc saved_things [n_saved_things] = {
-	obj::Desc(-200, obj::item, Vec(0,0), Vec(0,0), 0, item::white_dress),
+	obj::Desc(room::everywhere, obj::rata, Vec(10,10)),
+	obj::Desc(room::everywhere, obj::lifebar),
+	obj::Desc(room::everywhere, obj::shade, Vec(0,0), Vec(20,15), -1, 0x0f0f0f4f),
+	obj::Desc(room::equipment, obj::item, Vec(0,0), Vec(0,0), 0, item::white_dress),
 	obj::Desc(room::roompicker, obj::item, Vec(14.5, 5.0), Vec(0,0), 0, item::handgun),
 	obj::Desc(room::test2, obj::item, Vec(8.5, 21.0), Vec(0,0), 0, item::white_dress),
 	obj::Desc(room::test2, obj::item, Vec(38.5, 17.0), Vec(0,0), 0, item::handgun),
@@ -71,7 +74,10 @@ void load_save () {
 		printf("Could not open save file; creating new game.\n");
 	}
 	for (uint i=0; i < n_saved_things; i++) {
-		if (saved_things[i].room == -200) {
+		if (saved_things[i].room == room::everywhere) {
+			saved_things[i].manifest();
+		}
+		else if (saved_things[i].room == room::equipment) {
 			if (item::def[saved_things[i].data].slot >= 0)
 				rata->equipment[item::def[saved_things[i].data].slot] = &saved_things[i];
 			if (item::def[saved_things[i].data].otherslot >= 0)

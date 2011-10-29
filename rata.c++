@@ -208,7 +208,7 @@ struct Rata : Walking {
 		if (otherslot > 0 && equipment[otherslot])
 			unequip_drop(equipment[otherslot]);
 		equipment[slot] = itemobj->desc;
-		itemobj->desc->room = -200;
+		itemobj->desc->room = room::equipment;
 		if (otherslot > 0) equipment[otherslot] = itemobj->desc;
 	}
 
@@ -784,6 +784,7 @@ struct Rata : Walking {
 		}
 		else distance_walked = 0;
 	};
+	Rata () : Walking() { rata = this; }
 	virtual void on_create () {
 		make_body(desc, true, true);
 			for (uint i = obj::def[desc->id].nfixes; i > 0; i--) {
@@ -826,7 +827,6 @@ struct Rata : Walking {
 		cursor.img = img::look;
 		trap_cursor = true;
 		oldyvel = 0.0;
-		rata = this;
 	}
 	virtual void on_destroy () {
 		rata = NULL;

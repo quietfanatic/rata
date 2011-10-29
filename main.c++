@@ -6,19 +6,6 @@ int main () {
 	load_snd();
 	main_init();
 
-	rata = (Rata*)obj::Desc(
-		room::everywhere, obj::rata,
-		Vec(10, 10)
-	).manifest();
-	obj::Desc(
-		room::everywhere, obj::lifebar
-	).manifest();
-	obj::Desc(
-		room::everywhere, obj::shade,
-		Vec(0, 0), Vec(20, 15),
-		-1, 0x0f0f0f4f
-	).manifest();
-
 	load_save();
 
 	enter_room(room::roompicker, 0);
