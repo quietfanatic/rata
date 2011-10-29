@@ -43,39 +43,62 @@ const Body body [Body::num] = {
 };
 
 
-namespace head {
+struct Head {
+	enum Pose {
+		stand_23,
+		stand_45,
+		stand_68,
+		stand_90,
+		stand_135,
+		stand_158,
+        walk_23,
+		walk_45,
+		walk_68,
+		walk_90,
+		walk_135,
+		walk_158,
+        crawl,
+		hurtbk,
+		hurtfd,
+		laybk,
+		layfd,
+		num
+	};
+	static const uint angle_stand [9];
+	static const uint angle_walk [9];
+	Vec helmet; float helmeta; uint8 helmetf;
+	Head (float x, float y, float a, uint8 f)
+	 :helmet(Vec(x*PX, y*PX)), helmeta(a), helmetf(f) { }
+};
 
-
-const uint num = 16;
-enum Pose        { stand_23, stand_45, stand_68, stand_90,stand_135,stand_158,
-                    walk_23,  walk_45,  walk_68,  walk_90, walk_135, walk_158,
-                      crawl,   hurtbk,   hurtfd,    laybk,    layfd,
+const Head head [Head::num] = {
+	Head( -0.5, 6.5, -pi/18, 0),  // stand_23
+	Head( -0.5, 7.5,      0, 1),  // stand_45
+	Head( -0.5, 7.5,  pi/18, 2),  // stand_68
+	Head( -0.5, 7.5,  pi/18, 2),  // stand_90
+	Head( -0.5, 7.5,  pi/ 8, 3),  // stand_135
+	Head( -1.5, 7.5,  pi/ 4, 4),  // stand_158
+	Head( -0.5, 6.5, -pi/18, 0),  // walk_23
+	Head( -0.5, 7.5,      0, 1),  // walk_45
+	Head( -0.5, 7.5,  pi/18, 2),  // walk_68
+	Head( -0.5, 7.5,  pi/18, 2),  // walk_90
+	Head( -0.5, 7.5,  pi/ 8, 3),  // walk_135
+	Head( -1.5, 7.5,  pi/ 4, 4),  // walk_158
+	Head(  0.5, 6.5,      0, 1),  // crawl
+	Head( -0.5, 6.5, -pi/18, 0),  // hurtbk
+	Head( -0.5, 6.5,      0, 0),  // hurtfd
+	Head( -9.5, 0.5, -pi/ 2, 5),  // laybk
+	Head(  0.0, 0.0,      0, 0),  // layfd
 };
-float helmetx []={  -0.5*PX,  -0.5*PX,  -0.5*PX,  -0.5*PX,  -0.5*PX,  -1.5*PX,
-                    -0.5*PX,  -0.5*PX,  -0.5*PX,  -0.5*PX,  -0.5*PX,  -1.5*PX,
-                     0.5*PX,  -0.5*PX,  -0.5*PX,  -9.5*PX,     0*PX,
-};
-float helmety []={   6.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,
-                     6.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,   7.5*PX,
-                     6.5*PX,   6.5*PX,   6.5*PX,   0.5*PX,     0*PX,
-};
-float helmeta []={ -M_PI/18,        0,  M_PI/18,  M_PI/18,   M_PI/8,   M_PI/4,
-                   -M_PI/18,        0,  M_PI/18,  M_PI/18,   M_PI/8,   M_PI/4,
-                          0, -M_PI/18,        0,        0,        0,
-};
-uint8 helmetf []={        0,        1,        2,        2,        3,        4,
-                          0,        1,        2,        2,        3,        4,
-                          1,        0,        0,        5,        0,
-};
-uint angle_stand [9] = {
+const uint Head::angle_stand [9] = {
 	stand_23, stand_23, stand_45, stand_68, stand_90, stand_90, stand_135, stand_158, stand_158
 };
-uint angle_walk [9] = {
+const uint Head::angle_walk [9] = {
 	 walk_23,  walk_23,  walk_45,  walk_68,  walk_90,  walk_90,  walk_135,  walk_158,  walk_158
 };
 
 
-}
+
 namespace arm {
 
 

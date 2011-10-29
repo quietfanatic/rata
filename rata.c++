@@ -889,7 +889,7 @@ struct Rata : Walking {
 		switch (state) {
 			case standing: {
 				bodypose = Body::stand;
-				headpose = head::angle_stand[angle_frame];
+				headpose = Head::angle_stand[angle_frame];
 				if (aiming) {
 					armpose = get_armpose_by_aim();
 					forearmpose = angle_frame + (recoil_frames > 20);
@@ -905,8 +905,8 @@ struct Rata : Walking {
 			case walking: {
 				bodypose = (walk_frame % 2) ? Body::walk
 				                            : Body::stand;
-				headpose = (walk_frame % 2) ? head::angle_walk[angle_frame]
-				                            : head::angle_stand[angle_frame];
+				headpose = (walk_frame % 2) ? Head::angle_walk[angle_frame]
+				                            : Head::angle_stand[angle_frame];
 				if (aiming) {
 					armpose = get_armpose_by_aim();
 					forearmpose = angle_frame + (recoil_frames > 20);
@@ -921,7 +921,7 @@ struct Rata : Walking {
 			}
 			case kneeling: {
 				bodypose = Body::kneel;
-				headpose = head::angle_stand[angle_frame];
+				headpose = Head::angle_stand[angle_frame];
 				if (aiming) {
 					armpose = get_armpose_by_aim();
 					forearmpose = angle_frame + (recoil_frames > 20);
@@ -937,7 +937,7 @@ struct Rata : Walking {
 			case crawling: {
 				bodypose = (walk_frame % 2) ? Body::crawl2
 				                            : Body::crawl;
-				headpose = head::crawl;
+				headpose = Head::crawl;
 				if (aiming) {
 					armpose = arm::a23;
 					forearmpose = angle_frame + (recoil_frames > 20);
@@ -952,8 +952,8 @@ struct Rata : Walking {
 			}
 			case falling: {
 				bodypose = Body::walk;
-				headpose = (yvel() < 0) ? head::angle_walk[angle_frame]
-				                        : head::angle_stand[angle_frame];
+				headpose = (yvel() < 0) ? Head::angle_walk[angle_frame]
+				                        : Head::angle_stand[angle_frame];
 				if (aiming) {
 					armpose = get_armpose_by_aim();
 					forearmpose = angle_frame + (recoil_frames > 20);
@@ -970,7 +970,7 @@ struct Rata : Walking {
 			case hurt_air:
 			case dead_air: {
 				bodypose = Body::hurtbk;
-				headpose = head::hurtbk;
+				headpose = Head::hurtbk;
 				armpose = arm::a23;
 				forearmpose = forearm::a68;
 				handpose = hand::a68;
@@ -979,14 +979,14 @@ struct Rata : Walking {
 			case hurt: {
 				if (hurt_direction == 1) {
 					bodypose = Body::crawl;
-					headpose = head::crawl;
+					headpose = Head::crawl;
 					armpose = arm::a0;
 					forearmpose = forearm::a90;
 					handpose = hand::inside;
 				}
 				else {
 					bodypose = Body::sit;
-					headpose = head::hurtbk;
+					headpose = Head::hurtbk;
 					armpose = -arm::a23;
 					forearmpose = -forearm::a23;
 					handpose = hand::front;
@@ -995,7 +995,7 @@ struct Rata : Walking {
 			}
 			case dead: {
 				bodypose = Body::laybk;
-				headpose = head::laybk;
+				headpose = Head::laybk;
 				armpose = arm::a90;
 				forearmpose = forearm::a90;
 				handpose = hand::a90;
@@ -1006,7 +1006,7 @@ struct Rata : Walking {
 				break;
 			}
 		}
-		helmet_angle = head::helmeta[headpose];
+		helmet_angle = head[headpose].helmeta;
 		if (    armpose < arm::a0  )     armpose =              -    armpose,     armflip = !    armflip;
 		if (    armpose > arm::a180)     armpose = (2*arm::a180)-    armpose,     armflip = !    armflip;
 		if (forearmpose < arm::a0  ) forearmpose =              -forearmpose, forearmflip = !forearmflip;
@@ -1014,8 +1014,7 @@ struct Rata : Walking {
 		
 		 // Get offsets
 		Vec headp = pose::body[bodypose].head.scalex(facing);
-		Vec helmetp = headp + Vec(pose::head::helmetx[headpose] * facing,
-		                          pose::head::helmety[headpose]);
+		Vec helmetp = headp + head[headpose].helmet.scalex(facing);
 		Vec armp = pose::body[bodypose].arm.scalex(facing);
 		Vec forearmp = armp + Vec(pose::arm::forearmx[armpose]*(armflip?-1:1),
 		                          pose::arm::forearmy[armpose]);
@@ -1051,7 +1050,7 @@ struct Rata : Walking {
 			draw_image(
 				equip_info(i)->helmet,
 				p + helmetp,
-				pose::head::helmetf[headpose], flip
+				pose::head[headpose].helmetf, flip
 			);
 
 		if (state == dead) goto draw_hand;

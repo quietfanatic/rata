@@ -14,6 +14,7 @@
 static const float UNPX = 16.0;
 static const float PX  = 1/UNPX;
 static const float FPS = 60.0;
+static const double pi = M_PI;
 
 float gravity = -30;
 
