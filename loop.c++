@@ -106,30 +106,6 @@ void destroy_phase () {
 }
 
 
-void draw_tiles (bool front) {
-	if (room::current) {
-		uint minx = viewleft();
-		uint miny = viewbottom();
-		uint maxx = ceil(viewright());
-		uint maxy = ceil(viewtop());
-		for (uint x=minx; x < maxx; x++)
-		for (uint y=miny; y < maxy; y++) {
-			int tile = map::at(x, y).id;
-			bool flip = (tile < 0);
-			if (flip) tile = -tile;
-			if (front ? tile::def[tile].front : tile::def[tile].back) {
-				draw_image(
-					img::tiles,
-					Vec(x+.5, y+.5),
-					tile, flip
-				);
-			}
-		}
-	}
-}
-
-
-
 void draw_phase () {
 	Room* rc = room::current;
 	if (rata) {
@@ -181,32 +157,20 @@ void draw_phase () {
 	 // Draw objects
 	for (Object* o = objects_by_depth; o; o = o->next_depth) {
 		dbg(8, "Drawing 0x%08x\n", o);
-		 // Back tiles
-		if (olddepth > 500 && obj::def[o->id()].depth <= 500)
-			draw_tiles(false);
 		 // Bullets
 		if (olddepth > -200 && obj::def[o->id()].depth <= -200)
 		for (uint i=0; i < MAX_BULLETS; i++) {
 			bullets[i].draw();
 		}
-		 // Front tiles
-		if (olddepth > -500 && obj::def[o->id()].depth <= -500)
-			draw_tiles(true);
 
 		o->draw();
 		olddepth = obj::def[o->id()].depth;
 	}
-	 // Back tiles
-	if (olddepth > 500)
-		draw_tiles(false);
 	 // Bullets
 	if (olddepth > -200)
 	for (uint i=0; i < MAX_BULLETS; i++) {
 		bullets[i].draw();
 	}
-	 // Front tiles
-	if (olddepth > -500)
-		draw_tiles(true);
 
 	 // DEBUG DRAWING
 	if (debug_mode)

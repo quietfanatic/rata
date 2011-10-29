@@ -2,15 +2,17 @@
 
 #ifdef DEF_ONLY
 
-const uint SAVEFILE_VERSION = 2;
+const uint SAVEFILE_VERSION = 3;
 
-const uint n_saved_things = 11;
+const uint n_saved_things = 13;
 extern obj::Desc saved_things [n_saved_things];
 
 #else
 
 obj::Desc saved_things [n_saved_things] = {
 	obj::Desc(room::everywhere, obj::rata, Vec(10,10)),
+	obj::Desc(room::everywhere, obj::tiles_back, Vec(0,0), Vec(0,0), 0),
+	obj::Desc(room::everywhere, obj::tiles_front, Vec(0,0), Vec(0,0), 1),
 	obj::Desc(room::everywhere, obj::lifebar),
 	obj::Desc(room::everywhere, obj::shade, Vec(0,0), Vec(20,15), -1, 0x0f0f0f4f),
 	obj::Desc(room::equipment, obj::item, Vec(0,0), Vec(0,0), 0, item::white_dress),

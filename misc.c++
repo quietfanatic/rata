@@ -97,8 +97,32 @@ struct Heart : Object {
 	virtual char* describe () { return "Just as rats live off the refuse of humans,\x80\nYou too can live off of the rats.\x80\nPick this up to restore one heart."; }
 };
 
-struct TileLayer : Object { };
+
+struct TileLayer : Object {
+	void draw () {
+		if (room::current) {
+			uint minx = viewleft();
+			uint miny = viewbottom();
+			uint maxx = ceil(viewright());
+			uint maxy = ceil(viewtop());
+			for (uint x=minx; x < maxx; x++)
+			for (uint y=miny; y < maxy; y++) {
+				int tile = map::at(x, y).id;
+				bool flip = (tile < 0);
+				if (flip) tile = -tile;
+				if (desc->facing ? tile::def[tile].front : tile::def[tile].back) {
+					draw_image(
+						img::tiles,
+						Vec(x+.5, y+.5),
+						tile, flip
+					);
+				}
+			}
+		}
+	}
+};
 struct BulletLayer : Object { };
+
 
 struct Shade : Object {
 	void draw () {
