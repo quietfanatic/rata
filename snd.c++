@@ -16,6 +16,7 @@ namespace snd {
 	enum {
 		fall,
 		gunshot,
+		helmethit2,
 		hit,
 		hurt,
 		ricochet,
@@ -27,6 +28,7 @@ namespace snd {
 	Sound def [n_snds] = {
 		{sf::SoundBuffer(), sf::Sound(), "snd/fall.ogg"},
 		{sf::SoundBuffer(), sf::Sound(), "snd/gunshot.flac"},
+		{sf::SoundBuffer(), sf::Sound(), "snd/helmethit2.flac"},
 		{sf::SoundBuffer(), sf::Sound(), "snd/hit.ogg"},
 		{sf::SoundBuffer(), sf::Sound(), "snd/hurt.ogg"},
 		{sf::SoundBuffer(), sf::Sound(), "snd/ricochet.ogg"},

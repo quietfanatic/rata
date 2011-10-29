@@ -43,8 +43,10 @@ void RBullet::move () {
 			if (fp == &rata_fixprop_helmet) {
 				float angle = ang(coll.norm);
 				dbg(4, "Helmet strike: %f,%f; %f > %f == %d\n", coll.norm.x, coll.norm.y, angle, rata->helmet_angle, gt_angle(angle, rata->helmet_angle));
-				if (gt_angle(angle, rata->helmet_angle))
+				if (gt_angle(angle, rata->helmet_angle)) {
+					snd::def[snd::helmethit2].play(dither(1.0, 0.02));
 					goto just_bounce;
+				}
 			}
 			if (o->desc->id == obj::rata) {
 				if (rata->hurt_id[0] == obj::bullet
