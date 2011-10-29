@@ -102,11 +102,13 @@ struct BulletLayer : Object { };
 
 struct Shade : Object {
 	void draw () {
-		draw_rect(
-			desc->pos.x, desc->pos.y,
-			desc->pos.x + desc->vel.x, desc->pos.y + desc->vel.y,
-			desc->data, !desc->facing
-		);
+		if (facing > -1 || paused) {
+			draw_rect(
+				desc->pos.x, desc->pos.y,
+				desc->pos.x + desc->vel.x, desc->pos.y + desc->vel.y,
+				desc->data, desc->facing <= 0
+			);
+		}
 	}
 };
 

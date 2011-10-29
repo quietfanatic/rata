@@ -13,6 +13,11 @@ int main () {
 	obj::Desc(
 		room::everywhere, obj::lifebar
 	).manifest();
+	obj::Desc(
+		room::everywhere, obj::shade,
+		Vec(0, 0), Vec(20, 15),
+		-1, 0x0f0f0f4f
+	).manifest();
 
 	load_save();
 

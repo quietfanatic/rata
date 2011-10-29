@@ -53,10 +53,6 @@ float viewbottom () { return window_view.GetRect().Top; }
 float viewwidth () { return viewright() - viewleft(); }
 float viewheight () { return viewtop() - viewbottom(); }
 
- // Shading
-bool screen_shade = false;
-Color screen_shade_color = 0x0000004f;
-sf::Blend::Mode screen_shade_blend = sf::Blend::Alpha;
  // Debug draw Rata path.
 static const uint debug_path_size = 120;
 Vec debug_path [debug_path_size];

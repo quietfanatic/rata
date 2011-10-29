@@ -41,11 +41,9 @@ void main_init () {
 void toggle_pause () {
 	if (paused) {
 		paused = false;
-		screen_shade = false;
 	}
 	else {
 		paused = true;
-		screen_shade = true;
 	}
 };
 
@@ -194,17 +192,7 @@ void draw_phase () {
 		 // Front tiles
 		if (olddepth > -500 && obj::def[o->id()].depth <= -500)
 			draw_tiles(true);
-		 // Draw screen shade
-		if (screen_shade)
-		if (olddepth > -3000 && obj::def[o->id()].depth <= -3000) {
-			sf::Shape shade_rect = sf::Shape::Rectangle(
-				viewleft(), viewtop(),
-				viewright(), viewbottom(),
-				screen_shade_color
-			);
-			shade_rect.SetBlendMode(screen_shade_blend);
-			window->Draw(shade_rect);
-		}
+
 		o->draw();
 		olddepth = obj::def[o->id()].depth;
 	}
@@ -219,17 +207,6 @@ void draw_phase () {
 	 // Front tiles
 	if (olddepth > -500)
 		draw_tiles(true);
-	 // Draw screen shade
-	if (screen_shade)
-	if (olddepth > -3000) {
-		sf::Shape shade_rect = sf::Shape::Rectangle(
-			viewleft(), viewtop(),
-			viewright(), viewbottom(),
-			screen_shade_color
-		);
-		shade_rect.SetBlendMode(screen_shade_blend);
-		window->Draw(shade_rect);
-	}
 
 	 // DEBUG DRAWING
 	if (debug_mode)
