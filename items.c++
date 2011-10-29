@@ -41,7 +41,7 @@ namespace item {
 	Def def [] = {
 		{	"White dress",
 			body, -1,
-			img::dress_body, pose::body::laybk, pose::body::stand,
+			img::dress_body, pose::Body::laybk, pose::Body::stand,
 			img::dress_body, -1, -1, img::dress_arm, img::dress_forearm, -1,
 			NULL
 		},
@@ -53,7 +53,7 @@ namespace item {
 		},
 		{	"Boots",
 			feet, -1,
-			img::boots, pose::body::stand, pose::body::stand,
+			img::boots, pose::Body::stand, pose::Body::stand,
 			img::boots, -1, -1, -1, -1, -1,
 			NULL
 		},

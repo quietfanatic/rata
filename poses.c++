@@ -4,20 +4,45 @@
 namespace pose {
 
 
-namespace body {
 
 
-const uint num = 12;
-enum Pose     {  stand,   walk, tiptoe,  kneel,  crawl, crawl2,    sit, hurtbk,  laybk, hurtfd,  layfd,   grab };
-float armx []={  -1*PX,  -1*PX,  -1*PX,  -1*PX,   1*PX,   1*PX,  -1*PX,  -1*PX,  -1*PX,   0*PX,   0*PX,   0*PX };
-float army []={  14*PX,  13*PX,  15*PX,   8*PX,   4*PX,   3*PX,   8*PX,  14*PX,   1*PX,   0*PX,   0*PX,   0*PX };
-float headx[]={   0*PX,   0*PX,   0*PX,   0*PX,   3*PX,   3*PX,   0*PX,   0*PX,  -3*PX,   0*PX,   0*PX,   0*PX };
-float heady[]={  16*PX,  15*PX,  17*PX,  10*PX,   5*PX,   4*PX,   9*PX,  16*PX,   2*PX,   0*PX,   0*PX,   0*PX };
+struct Body {
+	enum Pose {
+		stand,
+		walk,
+		tiptoe,
+		kneel,
+		crawl,
+		crawl2,
+		sit,
+		hurtbk,
+		laybk,
+		hurtfd,
+		layfd,
+		grab,
+		num
+	};
+	Vec arm; Vec head;
+	Body (float armx, float army, float headx, float heady)
+	 :arm(Vec(armx*PX, army*PX)), head(Vec(headx*PX, heady*PX)) { }
+};
+
+const Body body [Body::num] = {
+	Body( -1, 14,    0, 16 ),  // stand
+	Body( -1, 13,    0, 15 ),  // walk
+	Body( -1, 15,    0, 17 ),  // tiptoe
+	Body( -1,  8,    0, 10 ),  // kneel
+	Body(  1,  4,    3,  5 ),  // crawl
+	Body(  1,  3,    3,  4 ),  // crawl2
+	Body( -1,  8,    0,  9 ),  // sit
+	Body( -1, 14,    0, 16 ),  // hurtbk
+	Body( -1,  1,   -3,  2 ),  // laybk
+	Body(  0,  0,    0,  0 ),  // hurtfd
+	Body(  0,  0,    0,  0 ),  // layfd
+	Body(  0,  0,    0,  0 ),  // grab
+};
 
 
-
-
-}
 namespace head {
 
 

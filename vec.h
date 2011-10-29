@@ -12,6 +12,9 @@ struct Vec {
 	operator const b2Vec2 () const { return b2Vec2(x, y); }
 	operator const sf::Vector2<float> () const { return sf::Vector2<float>(x, y); }
 
+	inline Vec scalex (float s) const { return Vec(s*x, y); }
+	inline Vec scaley (float s) const { return Vec(x, s*y); }
+
 	static const Vec undef;
 };
 const Vec Vec::undef = Vec(0/0.0, 0/0.0);

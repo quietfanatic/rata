@@ -888,7 +888,7 @@ struct Rata : Walking {
 
 		switch (state) {
 			case standing: {
-				bodypose = body::stand;
+				bodypose = Body::stand;
 				headpose = head::angle_stand[angle_frame];
 				if (aiming) {
 					armpose = get_armpose_by_aim();
@@ -903,8 +903,8 @@ struct Rata : Walking {
 				break;
 			}
 			case walking: {
-				bodypose = (walk_frame % 2) ? body::walk
-				                            : body::stand;
+				bodypose = (walk_frame % 2) ? Body::walk
+				                            : Body::stand;
 				headpose = (walk_frame % 2) ? head::angle_walk[angle_frame]
 				                            : head::angle_stand[angle_frame];
 				if (aiming) {
@@ -920,7 +920,7 @@ struct Rata : Walking {
 				break;
 			}
 			case kneeling: {
-				bodypose = body::kneel;
+				bodypose = Body::kneel;
 				headpose = head::angle_stand[angle_frame];
 				if (aiming) {
 					armpose = get_armpose_by_aim();
@@ -935,8 +935,8 @@ struct Rata : Walking {
 				break;
 			}
 			case crawling: {
-				bodypose = (walk_frame % 2) ? body::crawl2
-				                            : body::crawl;
+				bodypose = (walk_frame % 2) ? Body::crawl2
+				                            : Body::crawl;
 				headpose = head::crawl;
 				if (aiming) {
 					armpose = arm::a23;
@@ -951,7 +951,7 @@ struct Rata : Walking {
 				break;
 			}
 			case falling: {
-				bodypose = body::walk;
+				bodypose = Body::walk;
 				headpose = (yvel() < 0) ? head::angle_walk[angle_frame]
 				                        : head::angle_stand[angle_frame];
 				if (aiming) {
@@ -969,7 +969,7 @@ struct Rata : Walking {
 			case ouch:
 			case hurt_air:
 			case dead_air: {
-				bodypose = body::hurtbk;
+				bodypose = Body::hurtbk;
 				headpose = head::hurtbk;
 				armpose = arm::a23;
 				forearmpose = forearm::a68;
@@ -978,14 +978,14 @@ struct Rata : Walking {
 			}
 			case hurt: {
 				if (hurt_direction == 1) {
-					bodypose = body::crawl;
+					bodypose = Body::crawl;
 					headpose = head::crawl;
 					armpose = arm::a0;
 					forearmpose = forearm::a90;
 					handpose = hand::inside;
 				}
 				else {
-					bodypose = body::sit;
+					bodypose = Body::sit;
 					headpose = head::hurtbk;
 					armpose = -arm::a23;
 					forearmpose = -forearm::a23;
@@ -994,7 +994,7 @@ struct Rata : Walking {
 				break;
 			}
 			case dead: {
-				bodypose = body::laybk;
+				bodypose = Body::laybk;
 				headpose = head::laybk;
 				armpose = arm::a90;
 				forearmpose = forearm::a90;
@@ -1013,12 +1013,10 @@ struct Rata : Walking {
 		if (forearmpose > arm::a180) forearmpose = (2*arm::a180)-forearmpose, forearmflip = !forearmflip;
 		
 		 // Get offsets
-		Vec headp = Vec(pose::body::headx[bodypose]*facing,
-		                pose::body::heady[bodypose]);
+		Vec headp = pose::body[bodypose].head.scalex(facing);
 		Vec helmetp = headp + Vec(pose::head::helmetx[headpose] * facing,
 		                          pose::head::helmety[headpose]);
-		Vec armp = Vec(pose::body::armx[bodypose]*facing,
-		               pose::body::army[bodypose]);
+		Vec armp = pose::body[bodypose].arm.scalex(facing);
 		Vec forearmp = armp + Vec(pose::arm::forearmx[armpose]*(armflip?-1:1),
 		                          pose::arm::forearmy[armpose]);
 		hand_pos = forearmp + Vec(pose::forearm::handx[forearmpose]*(forearmflip?-1:1),
