@@ -38,6 +38,7 @@ bool debug_mode = false;  // Toggle to see object positions and such
 
  // Physical world for box2d
 b2World* world;
+bool paused = false;
 
  // SFML main window
 sf::Image* screen;
@@ -53,8 +54,8 @@ float viewheight () { return viewtop() - viewbottom(); }
 
  // Shading
 bool screen_shade = false;
-sf::Color screen_shade_color = sf::Color(255, 196, 63);
-sf::Blend::Mode screen_shade_blend = sf::Blend::Multiply;
+sf::Color screen_shade_color = sf::Color(0, 0, 0, 63);
+sf::Blend::Mode screen_shade_blend = sf::Blend::Alpha;
  // Debug draw Rata path.
 static const uint debug_path_size = 120;
 Vec debug_path [debug_path_size];

@@ -38,6 +38,17 @@ void main_init () {
 	//room::testroom.start();	
 }
 
+void toggle_pause () {
+	if (paused) {
+		paused = false;
+		screen_shade = false;
+	}
+	else {
+		paused = true;
+		screen_shade = true;
+	}
+};
+
 
 
 void create_phase () {
@@ -183,6 +194,17 @@ void draw_phase () {
 		 // Front tiles
 		if (olddepth > -500 && obj::def[o->id()].depth <= -500)
 			draw_tiles(true);
+		 // Draw screen shade
+		if (screen_shade)
+		if (olddepth > -3000 && obj::def[o->id()].depth <= -3000) {
+			sf::Shape shade_rect = sf::Shape::Rectangle(
+				viewleft(), viewtop(),
+				viewright(), viewbottom(),
+				screen_shade_color
+			);
+			shade_rect.SetBlendMode(screen_shade_blend);
+			window->Draw(shade_rect);
+		}
 		o->draw();
 		olddepth = obj::def[o->id()].depth;
 	}
@@ -197,6 +219,17 @@ void draw_phase () {
 	 // Front tiles
 	if (olddepth > -500)
 		draw_tiles(true);
+	 // Draw screen shade
+	if (screen_shade)
+	if (olddepth > -3000) {
+		sf::Shape shade_rect = sf::Shape::Rectangle(
+			viewleft(), viewtop(),
+			viewright(), viewbottom(),
+			screen_shade_color
+		);
+		shade_rect.SetBlendMode(screen_shade_blend);
+		window->Draw(shade_rect);
+	}
 
 	 // DEBUG DRAWING
 	if (debug_mode)
@@ -313,16 +346,6 @@ void draw_phase () {
 			);
 		}
 	}
-	 // Draw screen shade
-	if (screen_shade) {
-		sf::Shape shade_rect = sf::Shape::Rectangle(
-			camera.x*UNPX - 160, -camera.y*UNPX - 120,
-			camera.x*UNPX + 160, -camera.y*UNPX + 120,
-			screen_shade_color
-		);
-		shade_rect.SetBlendMode(screen_shade_blend);
-		window->Draw(shade_rect);
-	}
 	 // Draw cursor
 	if (trap_cursor) {
 		window->ShowMouseCursor(false);
@@ -392,6 +415,7 @@ void input_phase () {
 			if (event.Key.Code == sf::Key::Num5) enter_room(room::edit1, 0);
 			if (event.Key.Code == sf::Key::Num6) enter_room(room::empty, 0);
 			if (event.Key.Code == sf::Key::Num0) save_save();
+			if (event.Key.Code == sf::Key::P) toggle_pause();
 			if (event.Key.Code >= 400) break;
 			key[event.Key.Code] = 1;
 			break;
@@ -444,11 +468,11 @@ void move_phase () {
 
 	for (uint i=0; i < MAX_BULLETS; i++)
 		bullets[i].move();
-	if (world) {
+	if (world && !paused) {
 		world->SetAutoClearForces(false);
-		//world->Step(1/120.0, 10, 10);
+		world->Step(1/120.0, 10, 10);
 		world->SetAutoClearForces(true);
-		world->Step(1/60.0, 10, 10);
+		world->Step(1/120.0, 10, 10);
 		//world->Step(1/180.0, 10, 10);
 		//world->Step(1/240.0, 10, 10);
 	}
