@@ -247,7 +247,7 @@ void draw_phase () {
 					window->Draw(sf::Shape::Line(
 						e->m_vertex1.x, e->m_vertex1.y,
 						e->m_vertex2.x, e->m_vertex2.y,
-						1.0*PX, sf::Color(0, 255, 0, 127)
+						1.0*PX, Color(0x00ff007f)
 					));
 				if (rata->x() + cursor.x > e->m_vertex1.x - 1.0)
 				if (rata->x() + cursor.x < e->m_vertex1.x + 1.0)
@@ -256,7 +256,7 @@ void draw_phase () {
 					window->Draw(sf::Shape::Line(
 						e->m_vertex1.x, e->m_vertex1.y,
 						e->m_vertex0.x+3*PX, e->m_vertex0.y+3*PX,
-						1.0*PX, sf::Color(255, 255, 0, 127)
+						1.0*PX, Color(0x00ff007f)
 					));
 					//printf("(% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f)\n",
 					//	e->m_vertex0.x, e->m_vertex0.y, e->m_vertex1.x, e->m_vertex1.y, 
@@ -269,19 +269,19 @@ void draw_phase () {
 					window->Draw(sf::Shape::Line(
 						e->m_vertex3.x-3*PX, e->m_vertex3.y-3*PX,
 						e->m_vertex2.x, e->m_vertex2.y,
-						1.0*PX, sf::Color(0, 0, 255, 127)
+						1.0*PX, Color(0x0000ff7f)
 					));
 				break;
 			}
 			case (b2Shape::e_polygon): {
 				b2PolygonShape* p = (b2PolygonShape*)f->GetShape();
-				sf::Color color = f->GetFilterData().categoryBits == 256 ? sf::Color(0, 0, 255, 32) : sf::Color(0, 255, 0, 127);
+				Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
 				sf::Shape draw_shape;
 				draw_shape.EnableFill(false);
 				draw_shape.EnableOutline(true);
 				draw_shape.SetOutlineWidth(1.0*PX);
 				for (int i=0; i < p->m_vertexCount; i++) {
-					draw_shape.AddPoint(p->m_vertices[i].x, p->m_vertices[i].y, sf::Color(0, 0, 0, 0), color);
+					draw_shape.AddPoint(p->m_vertices[i].x, p->m_vertices[i].y, Color(0), color);
 				}
 				draw_shape.SetPosition(o->pos());
 				window->Draw(draw_shape);
@@ -289,8 +289,8 @@ void draw_phase () {
 			}
 			case (b2Shape::e_circle): {
 				b2CircleShape* c = (b2CircleShape*)f->GetShape();
-				sf::Color color = f->GetFilterData().categoryBits == 256 ? sf::Color(0, 0, 255, 32) : sf::Color(0, 255, 0, 127);
-				sf::Shape draw_shape = sf::Shape::Circle(Vec(c->m_p)+o->pos(), c->m_radius, sf::Color(0, 0, 0, 0), 1.0*PX, color);
+				Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
+				sf::Shape draw_shape = sf::Shape::Circle(Vec(c->m_p)+o->pos(), c->m_radius, Color(0), 1.0*PX, color);
 				draw_shape.EnableFill(false);
 				draw_shape.EnableOutline(true);
 				window->Draw(draw_shape);
@@ -301,15 +301,15 @@ void draw_phase () {
 		else {  // Debug draw an object without a b2Body
 			window->Draw(sf::Shape::Line(
 				o->desc->pos, o->desc->pos + o->desc->vel,
-				1.0*PX, sf::Color(255, 0, 0, 127)
+				1.0*PX, Color(0xff00007f)
 			));
 		};
 		 // Debug draw rata path.
 		if (mag2(rata->pos() - oldratapos) > 0.2) {
 			debug_path[debug_path_pos % debug_path_size] = rata->pos();
-			uint8 whiteshift = rata->float_frames * 255.0 / rata->jump_float_time();
+			uint8 whiteshift = rata->float_frames * 255.0 / (rata->jump_float_time()*FPS);
 			debug_path_color[debug_path_pos % debug_path_size] =
-				whiteshift ? sf::Color(255, whiteshift, whiteshift, 127) : sf::Color(0, 0, 255, 127);
+				whiteshift ? Color(255, whiteshift, whiteshift, 127) : 0x0000ff7f;
 			oldratapos = rata->pos();
 			debug_path_pos++;
 		}

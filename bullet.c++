@@ -85,20 +85,20 @@ void RBullet::draw () {
 		window->Draw(sf::Shape::Line(
 			pos0.x, pos0.y,
 			pos2.x, pos2.y,
-			1*PX, sf::Color(255, 255, 255, 127)
+			1*PX, Color(0xffffff7f)
 		));
 	}
 	else {
 		window->Draw(sf::Shape::Line(
 			pos0.x, pos0.y,
 			pos1.x, pos1.y,
-			1*PX, sf::Color(255, 255, 255, 127)
+			1*PX, Color(0xffffff7f)
 		));
 		if (pos2.x != -1/0.0) {
 			window->Draw(sf::Shape::Line(
 				pos1.x, pos1.y,
 				pos2.x, pos2.y,
-				1*PX, sf::Color(255, 255, 255, 127)
+				1*PX, Color(0xffffff7f)
 			));
 		}
 		else {

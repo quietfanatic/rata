@@ -32,7 +32,7 @@ struct EditorMenu : Object {
 			45/window_scale,
 			60/window_scale,
 			43/window_scale,
-			sf::Color(31, 31, 31, 127),
+			0x2f2f2f7f,
 			true
 		);
 	}
@@ -69,7 +69,7 @@ struct TilePicker : Clickable {
 				viewtop() - 32*PX/window_scale,
 				viewleft() + desc->vel.x,
 				viewbottom(),
-				sf::Color(31, 31, 31, 127)
+				0x2f2f2f7f
 			);
 				
 			for (uint i=0; i < num_tiles; i++) {
@@ -85,7 +85,7 @@ struct TilePicker : Clickable {
 				viewtop() - 32*PX/window_scale - (selected_tile / (uint)width()),
 				viewleft() + (selected_tile % (uint)width()) + 1,
 				viewtop() - 32*PX/window_scale - (selected_tile / (uint)width()) - 1,
-				sf::Color(0,0,0,0), 1*PX, sf::Color(255, 255, 255, 127)
+				Color(0), 1*PX, Color(0xffffff7f)
 			));
 		}
 	}
@@ -142,7 +142,7 @@ struct TilemapEditor : Clickable {
 				window->Draw(sf::Shape::Rectangle(
 					std::floor(x), std::floor(y),
 					(std::floor(x)+1), (std::floor(y)+1),
-					sf::Color(0,0,0,0), 1*PX, sf::Color(255, 255, 255, 127)
+					Color(0), 1*PX, Color(0xffffff7f)
 				));
 			}
 		}
@@ -229,7 +229,7 @@ struct RoomSettings : Clickable {
 				viewtop() - 32*PX/window_scale,
 				viewright() - desc->vel.x,
 				viewbottom(),
-				sf::Color(31, 31, 31, 127)
+				0x2f2f2f7f
 			);
 		}
 	}

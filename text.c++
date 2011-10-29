@@ -71,7 +71,7 @@ void render_text (char* text, Vec p, uint lines=1, bool small=false, bool border
 	  align > 0 ? p.x
 	: align < 0 ? p.x - width
 	:             p.x - width/2;
-	if (border) draw_rect(start, p.y, start + width + lmargin+rmargin, p.y - lines*lineheight, sf::Color(31, 31, 31, 127), cam);
+	if (border) draw_rect(start, p.y, start + width + lmargin+rmargin, p.y - lines*lineheight, 0x2f2f2f7f, cam);
 
 	float pos = start+lmargin;
 	int16 font = small ? img::font_small : img::font_proportional;

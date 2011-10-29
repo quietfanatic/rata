@@ -17,7 +17,7 @@ namespace room {
 	struct Room {
 		roomconst uint16 width;
 		roomconst uint16 height;
-		roomconst sf::Color color;
+		roomconst Color color;
 		roomconst int16 bg;
 		roomconst int16 bgm;
 		roomconst int16* tiles;
@@ -299,7 +299,7 @@ namespace room {
 #define ROOM_NOBJECTS(...) static const uint nobjects = __VA_ARGS__;
 #define ROOM_OBJECTS(...) roomconst obj::Desc objects [nobjects] = {__VA_ARGS__};
 #define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(-1, id, Vec(x, y), Vec(xvel, yvel), facing, data, data2),
-#define ROOM_COLOR(...) static const sf::Color color = sf::Color(__VA_ARGS__);
+#define ROOM_COLOR(...) static const Color color = Color(__VA_ARGS__);
 #define ROOM_BG(...) static const uint16 bg = __VA_ARGS__;
 #define ROOM_BGM(...) static const uint16 bgm = __VA_ARGS__;
 #define ROOM_END Room room = {width, height, color, bg, bgm, tiles, nobjects, objects, NULL};

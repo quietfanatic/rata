@@ -22,6 +22,7 @@ float gravity = -30;
 #include "snd.c++"
 
 #define DEF_ONLY
+#include "drawing.c++"
 #include "objects.c++"
 #include "bullet.c++"
 #include "rooms.c++"
@@ -54,12 +55,12 @@ float viewheight () { return viewtop() - viewbottom(); }
 
  // Shading
 bool screen_shade = false;
-sf::Color screen_shade_color = sf::Color(0, 0, 0, 63);
+Color screen_shade_color = 0x0000004f;
 sf::Blend::Mode screen_shade_blend = sf::Blend::Alpha;
  // Debug draw Rata path.
 static const uint debug_path_size = 120;
 Vec debug_path [debug_path_size];
-sf::Color debug_path_color [debug_path_size];
+Color debug_path_color [debug_path_size];
 uint debug_path_pos;
 Vec oldratapos;
 
