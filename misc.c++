@@ -1,6 +1,6 @@
 
 
-struct Entrance : Object {
+struct Entrance : Actor {
 	void on_create () {
 		if (room::entrance == (int)desc->data2) {
 			if (rata->body) {
@@ -18,7 +18,7 @@ struct Entrance : Object {
 	}
 };
 
-struct Exit : Object {
+struct Exit : Actor {
 	void after_move () {
 		if (rata->x() > desc->pos.x)
 		if (rata->x() < desc->pos.x + desc->vel.x)
@@ -28,7 +28,7 @@ struct Exit : Object {
 	}
 };
 
-struct Door : Object {
+struct Door : Actor {
 	void before_move () {
 		if (rata->floor)
 			rata->propose_action(Rata::action_enter, this, desc->pos, desc->vel.x);
@@ -42,7 +42,7 @@ struct Tilemap : Object {
 
 
 
-struct Bullet : Object {
+struct Bullet : Actor {
 };
 
 
@@ -73,12 +73,11 @@ struct Mousehole : Object {
 	}
 };
 
-struct HitEffect : Object {
+struct HitEffect : Actor {
 	int timer;
 	uint numsubs;
 	uint fpsub;
 	virtual void on_create () {
-		Object::on_create();
 		timer = desc->vel.x;
 		int16 image = img::hit_damagable;
 		numsubs = img::def[image].numsubs();
@@ -98,7 +97,7 @@ struct Heart : Object {
 };
 
 
-struct TileLayer : Object {
+struct TileLayer : Actor {
 	void draw () {
 		if (room::current) {
 			uint minx = viewleft();
@@ -122,7 +121,7 @@ struct TileLayer : Object {
 	}
 };
 
-struct BulletLayer : Object {
+struct BulletLayer : Actor {
 	void draw () {
 		for (uint i=0; i < MAX_BULLETS; i++) {
 			bullets[i].draw();
@@ -131,9 +130,9 @@ struct BulletLayer : Object {
 };
 
 
-struct Shade : Object {
+struct Shade : Actor {
 	void draw () {
-		if (facing > -1 || paused) {
+		if (desc->facing > -1 || paused) {
 			draw_rect(
 				desc->pos.x, desc->pos.y,
 				desc->pos.x + desc->vel.x, desc->pos.y + desc->vel.y,
@@ -144,7 +143,7 @@ struct Shade : Object {
 };
 
 
-struct Lifebar : Object {
+struct Lifebar : Actor {
 	void draw () {
 		if (rata) {
 			int life = rata->life;

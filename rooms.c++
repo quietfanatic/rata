@@ -13,7 +13,7 @@ namespace room {
 	int currenti = -1;
 	int entrance = -1;
 	bool transition = false;
-	Object* tilemap_obj = NULL;
+	Tilemap* tilemap_obj = NULL;
 	struct Room {
 		roomconst uint16 width;
 		roomconst uint16 height;
@@ -166,9 +166,9 @@ namespace room {
 
 	void Room::leave () {
 		transition = true;
-		for (Object* o = objects_by_depth; o; o = o->next_depth) {
-			if (o->desc->room != everywhere) {
-				o->destroy();
+		for (Actor* a = actors_by_depth; a; a = a->next_depth) {
+			if (a->desc->room != everywhere) {
+				a->destroy();
 			}
 		}
 		for (uint i=0; i < MAX_BULLETS; i++)
@@ -212,7 +212,7 @@ namespace room {
 			}
 		}
 		 // Transform to b2Fixtures
-		tilemap_obj = (new obj::Desc(
+		tilemap_obj = (Tilemap*)(new obj::Desc(
 			-2, obj::tilemap
 		))->manifest();
 		tilemap_obj->make_body(tilemap_obj->desc, false, false);

@@ -273,8 +273,8 @@ struct Rata : Walking {
 		 // Dump debug info
 		if (key[sf::Key::BackSlash] == 1) {
 			map::debug_print();
-			for (Object* o = objects_by_order; o; o = o->next_order)
-				o->debug_print();
+			for (Actor* a = actors_by_order; a; a = a->next_order)
+				a->debug_print();
 		}
 	}
 

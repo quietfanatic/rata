@@ -79,9 +79,9 @@ struct Camera {
 bool camera_jump = false;
 
  // Global object lists
-Object* objects_by_depth = NULL;  // Objects are linked list
-Object* objects_by_order = NULL;
-Object* creation_queue = NULL;
+Actor* actors_by_depth = NULL;  // Actors are linked list
+Actor* actors_by_order = NULL;
+Actor* creation_queue = NULL;
 static const uint MAX_BULLETS = 10;
 RBullet bullets[MAX_BULLETS];
 

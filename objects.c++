@@ -13,6 +13,7 @@
 
 #ifdef DEF_ONLY
 
+struct Actor;
 struct Object;
 struct Rata;
 struct Tilemap;
@@ -87,17 +88,17 @@ namespace obj {
 	struct Desc;
 	struct Def;
 	extern const Def def [];
-	template <class T> Object* ALLOC () { return new T; }
+	template <class T> Actor* ALLOC () { return new T; }
 }
 
 
 struct obj::Def {
 	const char* name;
-	uint nfixes;
+	int nfixes;
 	b2FixtureDef* fixdef;
 	float depth;
 	float order;
-	Object* (& alloc) ();
+	Actor* (& alloc) ();
 	int16 image;
 };
 
@@ -109,12 +110,41 @@ struct obj::Desc {
 	int32 facing;
 	uint32 data;
 	uint32 data2;
-	Object* manifest ();
+	Actor* manifest ();
 
-	 // Alright, we'll use a C++ constructor...just for default args.
 	Desc (uint16 room=-1, uint16 id=0, Vec pos=Vec(0, 0), Vec vel=Vec(0, 0), int facing=0, uint32 data=0, uint32 data2=0)
 	 :room(room), id(id), pos(pos), vel(vel), facing(facing), data(data), data2(data2)
 		{ }
+};
+
+ // Most "things" in the game world are this.
+struct Actor {
+	obj::Desc* desc;
+	Actor* next_depth;
+	Actor* next_order;
+	bool doomed;
+	virtual void on_create () { }
+	virtual void before_move () { }
+	virtual void after_move () { }
+	virtual void on_destroy () { }
+	virtual void draw () { }
+
+	bool has_body () {
+		return obj::def[desc->id].nfixes > -1;
+	}
+
+	void create ();
+	void destroy ();
+
+	 // debug
+	virtual void debug_print () {
+		printf("%08x %12s: (% 8.4f, % 8.4f) @ (% 8.4f, % 8.4f) % d; %d %d\n",
+			this, obj::def[desc->id].name,
+			desc->pos.x, desc->pos.y,
+			desc->vel.x, desc->vel.y,
+			desc->facing, desc->data, desc->data2
+		);
+	}
 };
 
  // Fixture properties
@@ -129,6 +159,18 @@ struct FixProp {
 
 
 #else
+
+void Actor::create () {
+	next_depth = creation_queue;
+	creation_queue = this;
+	next_order = NULL;
+	doomed = false;
+	dbg(2, "Creating 0x%08x\n", this);
+}
+void Actor::destroy () {
+	doomed = true;
+	dbg(2, "Destroying 0x%08x\n", this);
+}
 
  // Collision filters
 
@@ -150,12 +192,8 @@ namespace cf {
 
  // INSTANCE STRUCTURES
 
-struct Object {
-	obj::Desc* desc;
-	Object* next_depth;
-	Object* next_order;
+struct Object : Actor {
 	b2Body* body;
-	bool doomed;
 	int facing;  // 1 = right, -1 = left
 	uint subimage;
 	Object* floor;
@@ -296,10 +334,10 @@ struct Object {
 	}
 
 	 // Events
-	virtual void on_create () {
+	void on_create () {
 		if (obj::def[desc->id].nfixes) {
 			make_body(desc, true);
-			for (uint i = obj::def[desc->id].nfixes; i > 0; i--) {
+			for (int i = obj::def[desc->id].nfixes; i > 0; i--) {
 				dbg(4, "Fix %d: 0x%08x\n", i, body->CreateFixture(&(obj::def[desc->id].fixdef[i-1])));
 			}
 			dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
@@ -312,10 +350,10 @@ struct Object {
 		subimage = 0;
 //		realtest = 151783;
 	}
-	virtual void before_move () { }
-	virtual void after_move () { }
-	virtual void on_destroy () { }
-	virtual void draw () {
+	void before_move () { }
+	void after_move () { }
+	void on_destroy () { }
+	void draw () {
 		if (def()->image) {
 			if (body) {
 				draw_image(def()->image, pos(), subimage, facing == 1);
@@ -331,18 +369,6 @@ struct Object {
 	virtual void kill () { destroy(); desc->id = -1; }
 	virtual char* describe () { return "What a mysterious object."; }
 
-	 // Non-overridable
-	void create () {
-		next_depth = creation_queue;
-		creation_queue = this;
-		next_order = NULL;
-		doomed = false;
-		dbg(2, "Creating 0x%08x\n", this);
-	}
-	void destroy () {
-		doomed = true;
-		dbg(2, "Destroying 0x%08x\n", this);
-	}
 
 	 // Wrap b2Body
 	float x() { return body->GetPosition().x; }
@@ -393,11 +419,12 @@ struct Object {
 	const obj::Def* def () { return &obj::def[id()]; }
 
 	 // debug
-	virtual void debug_print () {
-		Vec p = body ? pos() : desc->pos;
-		Vec v = body ? vel() : desc->vel;
+	void debug_print () {
 		printf("%08x %12s: (% 8.4f, % 8.4f) @ (% 8.4f, % 8.4f) % d; %d %d\n",
-			this, def()->name, p.x, p.y, v.x, v.y, facing, desc->data, desc->data2);
+			this, def()->name,
+			pos().x, pos().y, vel().x, vel().y,
+			facing, desc->data, desc->data2
+		);
 	}
 };
 
@@ -514,10 +541,12 @@ typedef Object EditorMenu;
 
  // loose end from above
 
-Object* obj::Desc::manifest () {
-	Object* r = obj::def[id].alloc();
+Actor* obj::Desc::manifest () {
+	Actor* r = obj::def[id].alloc();
 	r->desc = this;
-	r->body = NULL;
+	if (r->has_body()) {
+		((Object*)r)->body = NULL;
+	}
 	r->create();
 	return r;
 }
@@ -675,32 +704,32 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 
 const obj::Def obj::def [] = {
 
-	{"Object", 0, NULL, 0, 0, obj::ALLOC<Object>, -1},
+	{"Object", -1, NULL, 0, 0, obj::ALLOC<Object>, -1},
 	{"Rata", 14, rata_fixes, 10, 100, obj::ALLOC<Rata>, -1},
-	{"Entrance", 0, NULL, -1000, -1000, obj::ALLOC<Entrance>, -1},
-	{"Exit", 0, NULL, -100, -100, obj::ALLOC<Exit>, -1},
-	{"Door", 0, NULL, -100, 200, obj::ALLOC<Door>, -1},
-	{"Solid Object", 0, NULL, 0, 0, obj::ALLOC<Solid>, -1},
+	{"Entrance", -1, NULL, -1000, -1000, obj::ALLOC<Entrance>, -1},
+	{"Exit", -1, NULL, -100, -100, obj::ALLOC<Exit>, -1},
+	{"Door", -1, NULL, -100, 200, obj::ALLOC<Door>, -1},
+	{"Solid Object", -1, NULL, 0, 0, obj::ALLOC<Solid>, -1},
 	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, -1},
 	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>, -1},
 	{"Rat", 1, &rat_fix, 15, 10, obj::ALLOC<Rat>, img::rat},
 	{"Crate", 1, &crate_fix, 0, 0, obj::ALLOC<Crate>, img::crate},
 	{"Mousehole", 1, &mousehole_fix, 50, 0, obj::ALLOC<Mousehole>, img::mousehole},
-	{"Hit Effect", 0, NULL, -90, 0, obj::ALLOC<HitEffect>, -1},
+	{"Hit Effect", -1, NULL, -90, 0, obj::ALLOC<HitEffect>, -1},
 	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>, img::patroller},
 	{"Flyer", 1, &flyer_fix, 20, 20, obj::ALLOC<Flyer>, img::flyer},
 	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, img::heart},
-	{"Item", 0, NULL, -5, 150, obj::ALLOC<Item>, -1},
-	{"Back Tiles", 0, NULL, 500, 0, obj::ALLOC<TileLayer>, -1},
-	{"Bullet Layer", 0, NULL, -200, 0, obj::ALLOC<BulletLayer>, -1},
-	{"Front Tiles", 0, NULL, -500, 0, obj::ALLOC<TileLayer>, -1},
-	{"Shade", 0, NULL, -3000, 0, obj::ALLOC<Shade>, -1},
-	{"Lifebar", 0, NULL, -4000, 0, obj::ALLOC<Lifebar>, -1},
-	{"Clickable text", 0, NULL, -2000, 2000, obj::ALLOC<ClickableText>, -1},
-	{"Tilemap editor", 0, NULL, -100, 100, obj::ALLOC<TilemapEditor>, -1},
-	{"Tile picker", 0, NULL, -1000, 1000, obj::ALLOC<TilePicker>, -1},
-	{"Rooms Settings pane", 0, NULL, -1000, 1000, obj::ALLOC<RoomSettings>, -1},
-	{"Editor menu", 0, NULL, -1900, 1900, obj::ALLOC<EditorMenu>, -1}
+	{"Item", -1, NULL, -5, 150, obj::ALLOC<Item>, -1},
+	{"Back Tiles", -1, NULL, 500, 0, obj::ALLOC<TileLayer>, -1},
+	{"Bullet Layer", -1, NULL, -200, 0, obj::ALLOC<BulletLayer>, -1},
+	{"Front Tiles", -1, NULL, -500, 0, obj::ALLOC<TileLayer>, -1},
+	{"Shade", -1, NULL, -3000, 0, obj::ALLOC<Shade>, -1},
+	{"Lifebar", -1, NULL, -4000, 0, obj::ALLOC<Lifebar>, -1},
+	{"Clickable text", -1, NULL, -2000, 2000, obj::ALLOC<ClickableText>, -1},
+	{"Tilemap editor", -1, NULL, -100, 100, obj::ALLOC<TilemapEditor>, -1},
+	{"Tile picker", -1, NULL, -1000, 1000, obj::ALLOC<TilePicker>, -1},
+	{"Rooms Settings pane", -1, NULL, -1000, 1000, obj::ALLOC<RoomSettings>, -1},
+	{"Editor menu", -1, NULL, -1900, 1900, obj::ALLOC<EditorMenu>, -1}
 
 };
 

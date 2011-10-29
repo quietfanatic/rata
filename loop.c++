@@ -51,31 +51,31 @@ void toggle_pause () {
 
 void create_phase () {
 	 // We must repeat if an object creates a new object in on_create()
-	while (Object* tq = creation_queue) {
+	while (Actor* tq = creation_queue) {
 		creation_queue = NULL;
-		for (Object* next; tq; tq = next) {
-			Object* c = tq;
+		for (Actor* next; tq; tq = next) {
+			Actor* c = tq;
 			next = c->next_depth;
-			Object** o;
-			for (o = &objects_by_depth; *o; o = &(*o)->next_depth) {
-				if (obj::def[c->desc->id].depth > obj::def[(*o)->desc->id].depth) {
-					c->next_depth = *o;
-					*o = c;
+			Actor** a;
+			for (a = &actors_by_depth; *a; a = &(*a)->next_depth) {
+				if (obj::def[c->desc->id].depth > obj::def[(*a)->desc->id].depth) {
+					c->next_depth = *a;
+					*a = c;
 					goto done_depth;
 				}
 			}  // Least deep object
 			c->next_depth = NULL;
-			*o = c;
+			*a = c;
 			done_depth:
-			for (o = &objects_by_order; *o; o = &(*o)->next_order) {
-				if (obj::def[c->desc->id].order > obj::def[(*o)->desc->id].order) {
-					c->next_order = *o;
-					*o = c;
+			for (a = &actors_by_order; *a; a = &(*a)->next_order) {
+				if (obj::def[c->desc->id].order > obj::def[(*a)->desc->id].order) {
+					c->next_order = *a;
+					*a = c;
 					goto done_order;
 				}
 			}  // Least deep object
 			c->next_order = NULL;
-			*o = c;
+			*a = c;
 			done_order:
 			c->on_create();
 	//		if (c->realtest != 151783) printf("Error: junk object detected\n");
@@ -84,24 +84,24 @@ void create_phase () {
 }
 
 void destroy_phase () {
-	for (Object** o = &objects_by_depth; *o;) {
-		if ((*o)->doomed) {
-			*o = (*o)->next_depth;
+	for (Actor** a = &actors_by_depth; *a;) {
+		if ((*a)->doomed) {
+			*a = (*a)->next_depth;
 		}
-		else { o = &(*o)->next_depth; }
+		else { a = &(*a)->next_depth; }
 	}
-	for (Object** o = &objects_by_order; *o;) {
-		if ((*o)->doomed) {
-			Object* doomed = *o;
+	for (Actor** a = &actors_by_order; *a;) {
+		if ((*a)->doomed) {
+			Actor* doomed = *a;
 			doomed->on_destroy();
-			*o = doomed->next_order;
-			if (doomed->body) {
-				world->DestroyBody(doomed->body);
+			*a = doomed->next_order;
+			if (doomed->has_body()) {
+				world->DestroyBody(((Object*)doomed)->body);
 			}
 			if (doomed->desc->room == -2) delete doomed->desc;
 			delete doomed;
 		}  // Need to ensure we don't leave any dead pointers
-		else { o = &(*o)->next_order; }
+		else { a = &(*a)->next_order; }
 	}
 }
 
@@ -153,83 +153,85 @@ void draw_phase () {
 			draw_image(rc->bg, Vec(x, y));
 		}
 	}
-	 // Draw objects
-	for (Object* o = objects_by_depth; o; o = o->next_depth) {
-		dbg(8, "Drawing 0x%08x\n", o);
+	 // Draw actors
+	for (Actor* a = actors_by_depth; a; a = a->next_depth) {
+		dbg(8, "Drawing 0x%08x\n", a);
 
-		o->draw();
+		a->draw();
 	}
 
 	 // DEBUG DRAWING
 	if (debug_mode)
-	for (Object* o=objects_by_depth; o; o = o->next_depth) {
-		if (o->body)
-		for (b2Fixture* f = o->body->GetFixtureList(); f; f = f->GetNext())
-		if (f->GetFilterData().categoryBits)
-		switch (f->GetType()) {
-			case (b2Shape::e_edge): {
-				b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
-				if (e->m_vertex1.x > viewleft() - 1
-				 && e->m_vertex1.x < viewright() + 1
-				 && e->m_vertex1.y > viewbottom() - 1
-				 && e->m_vertex1.y < viewtop() + 1)
-					window->Draw(sf::Shape::Line(
-						e->m_vertex1.x, e->m_vertex1.y,
-						e->m_vertex2.x, e->m_vertex2.y,
-						1.0*PX, Color(0x00ff007f)
-					));
-				if (rata->x() + cursor.x > e->m_vertex1.x - 1.0)
-				if (rata->x() + cursor.x < e->m_vertex1.x + 1.0)
-				if (rata->y() + cursor.y+1 > e->m_vertex1.y - 1.0)
-				if (rata->y() + cursor.y+1 < e->m_vertex1.y + 1.0) {
-					window->Draw(sf::Shape::Line(
-						e->m_vertex1.x, e->m_vertex1.y,
-						e->m_vertex0.x+3*PX, e->m_vertex0.y+3*PX,
-						1.0*PX, Color(0x00ff007f)
-					));
-					//printf("(% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f)\n",
-					//	e->m_vertex0.x, e->m_vertex0.y, e->m_vertex1.x, e->m_vertex1.y, 
-					//	e->m_vertex2.x, e->m_vertex2.y, e->m_vertex3.x, e->m_vertex3.y);
+	for (Actor* a=actors_by_depth; a; a = a->next_depth) {
+		if (a->has_body()) {
+			Object* o = (Object*) a;
+			for (b2Fixture* f = o->body->GetFixtureList(); f; f = f->GetNext())
+			if (f->GetFilterData().categoryBits)
+			switch (f->GetType()) {
+				case (b2Shape::e_edge): {
+					b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
+					if (e->m_vertex1.x > viewleft() - 1
+					 && e->m_vertex1.x < viewright() + 1
+					 && e->m_vertex1.y > viewbottom() - 1
+					 && e->m_vertex1.y < viewtop() + 1)
+						window->Draw(sf::Shape::Line(
+							e->m_vertex1.x, e->m_vertex1.y,
+							e->m_vertex2.x, e->m_vertex2.y,
+							1.0*PX, Color(0x00ff007f)
+						));
+					if (rata->x() + cursor.x > e->m_vertex1.x - 1.0)
+					if (rata->x() + cursor.x < e->m_vertex1.x + 1.0)
+					if (rata->y() + cursor.y+1 > e->m_vertex1.y - 1.0)
+					if (rata->y() + cursor.y+1 < e->m_vertex1.y + 1.0) {
+						window->Draw(sf::Shape::Line(
+							e->m_vertex1.x, e->m_vertex1.y,
+							e->m_vertex0.x+3*PX, e->m_vertex0.y+3*PX,
+							1.0*PX, Color(0x00ff007f)
+						));
+						//printf("(% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f)\n",
+						//	e->m_vertex0.x, e->m_vertex0.y, e->m_vertex1.x, e->m_vertex1.y, 
+						//	e->m_vertex2.x, e->m_vertex2.y, e->m_vertex3.x, e->m_vertex3.y);
+					}
+					if (rata->x() + cursor.x > e->m_vertex2.x - 1)
+					if (rata->x() + cursor.x < e->m_vertex2.x + 1)
+					if (rata->y() + cursor.y+1 > e->m_vertex2.y - 1)
+					if (rata->y() + cursor.y+1 < e->m_vertex2.y + 1)
+						window->Draw(sf::Shape::Line(
+							e->m_vertex3.x-3*PX, e->m_vertex3.y-3*PX,
+							e->m_vertex2.x, e->m_vertex2.y,
+							1.0*PX, Color(0x0000ff7f)
+						));
+					break;
 				}
-				if (rata->x() + cursor.x > e->m_vertex2.x - 1)
-				if (rata->x() + cursor.x < e->m_vertex2.x + 1)
-				if (rata->y() + cursor.y+1 > e->m_vertex2.y - 1)
-				if (rata->y() + cursor.y+1 < e->m_vertex2.y + 1)
-					window->Draw(sf::Shape::Line(
-						e->m_vertex3.x-3*PX, e->m_vertex3.y-3*PX,
-						e->m_vertex2.x, e->m_vertex2.y,
-						1.0*PX, Color(0x0000ff7f)
-					));
-				break;
-			}
-			case (b2Shape::e_polygon): {
-				b2PolygonShape* p = (b2PolygonShape*)f->GetShape();
-				Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
-				sf::Shape draw_shape;
-				draw_shape.EnableFill(false);
-				draw_shape.EnableOutline(true);
-				draw_shape.SetOutlineWidth(1.0*PX);
-				for (int i=0; i < p->m_vertexCount; i++) {
-					draw_shape.AddPoint(p->m_vertices[i].x, p->m_vertices[i].y, Color(0), color);
+				case (b2Shape::e_polygon): {
+					b2PolygonShape* p = (b2PolygonShape*)f->GetShape();
+					Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
+					sf::Shape draw_shape;
+					draw_shape.EnableFill(false);
+					draw_shape.EnableOutline(true);
+					draw_shape.SetOutlineWidth(1.0*PX);
+					for (int i=0; i < p->m_vertexCount; i++) {
+						draw_shape.AddPoint(p->m_vertices[i].x, p->m_vertices[i].y, Color(0), color);
+					}
+					draw_shape.SetPosition(o->pos());
+					window->Draw(draw_shape);
+					break;
 				}
-				draw_shape.SetPosition(o->pos());
-				window->Draw(draw_shape);
-				break;
+				case (b2Shape::e_circle): {
+					b2CircleShape* c = (b2CircleShape*)f->GetShape();
+					Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
+					sf::Shape draw_shape = sf::Shape::Circle(Vec(c->m_p)+o->pos(), c->m_radius, Color(0), 1.0*PX, color);
+					draw_shape.EnableFill(false);
+					draw_shape.EnableOutline(true);
+					window->Draw(draw_shape);
+					break;
+				}
+				default: { }
 			}
-			case (b2Shape::e_circle): {
-				b2CircleShape* c = (b2CircleShape*)f->GetShape();
-				Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
-				sf::Shape draw_shape = sf::Shape::Circle(Vec(c->m_p)+o->pos(), c->m_radius, Color(0), 1.0*PX, color);
-				draw_shape.EnableFill(false);
-				draw_shape.EnableOutline(true);
-				window->Draw(draw_shape);
-				break;
-			}
-			default: { }
 		}
 		else {  // Debug draw an object without a b2Body
 			window->Draw(sf::Shape::Line(
-				o->desc->pos, o->desc->pos + o->desc->vel,
+				a->desc->pos, a->desc->pos + a->desc->vel,
 				1.0*PX, Color(0xff00007f)
 			));
 		};
@@ -368,8 +370,8 @@ void input_phase () {
 
 void move_phase () {
 	click_taken = false;
-	for (Object* o = objects_by_order; o; o = o->next_order)
-		o->before_move();
+	for (Actor* a = actors_by_order; a; a = a->next_order)
+		a->before_move();
 	if (!click_taken) dragging = NULL;
 
 	for (uint i=0; i < MAX_BULLETS; i++)
@@ -383,8 +385,8 @@ void move_phase () {
 		//world->Step(1/240.0, 10, 10);
 	}
 
-	for (Object* o = objects_by_order; o; o = o->next_order)
-		o->after_move();
+	for (Actor* a = actors_by_order; a; a = a->next_order)
+		a->after_move();
 }
 
 
