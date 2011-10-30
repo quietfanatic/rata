@@ -6,15 +6,15 @@
 #include <stdio.h>
 //#define printf(...) (__VA_ARGS__)
 
+static const float UNPX = 16.0;
+static const float PX  = 1/UNPX;
+static const float FPS = 60.0;
+static const double pi = M_PI;
 
 #include "debug.c++"
 #include "vec.h"
 #include "math.h"
 
-static const float UNPX = 16.0;
-static const float PX  = 1/UNPX;
-static const float FPS = 60.0;
-static const double pi = M_PI;
 
 float gravity = -30;
 

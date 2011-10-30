@@ -845,7 +845,6 @@ struct Rata : Walking {
 
 		float step = state == crawling ? 0.8 : 1.0;
 		int walk_frame;
-		float aim_angle;
 		bool flip = facing<0;
 		bool armflip = flip;
 		bool forearmflip = flip;
@@ -856,23 +855,7 @@ struct Rata : Walking {
 		//if (inv_frames % 3 == 2) return;
 
 		 // Select aim angle frame
-		if (facing > 0)
-			aim_angle = aim_direction;
-		else if (aim_direction > 0)
-			aim_angle = M_PI - aim_direction;
-		else
-			aim_angle = -M_PI - aim_direction;
-
-		angle_frame =
-		  aim_angle > M_PI* 7.0/16.0 ? 8
-		: aim_angle > M_PI* 5.0/16.0 ? 7
-		: aim_angle > M_PI* 3.0/16.0 ? 6
-		: aim_angle > M_PI* 1.0/16.0 ? 5
-		: aim_angle > M_PI*-1.0/16.0 ? 4
-		: aim_angle > M_PI*-3.0/16.0 ? 3
-		: aim_angle > M_PI*-5.0/16.0 ? 2
-		: aim_angle > M_PI*-7.0/16.0 ? 1
-		:                              0;
+		angle_frame = get_angle_frame(aim_direction);
 
 		 // Select walking frame
 		if (floor) {
