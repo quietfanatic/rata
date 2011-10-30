@@ -63,6 +63,7 @@ void RBullet::move () {
 			no_damage: { }
 			coll.hit = NULL;
 			pos2 = Vec(-1/0.0, -1/0.0);
+			lifetime = -1;
 		}
 		else {
 			just_bounce:
@@ -74,6 +75,7 @@ void RBullet::move () {
 			else {
 				coll.hit = NULL;
 				pos2 = Vec(-1/0.0, -1/0.0);
+				lifetime = -1;
 			}
 		}
 	}
