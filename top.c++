@@ -93,7 +93,7 @@ unsigned char button[10];
  // Time
 uint frame_number = 0;
 sf::Clock frameclock;
-float lastframe = 0;
+float draw_latency = 0;
 
  // Game-specific global stuff
 Rata* rata = NULL;

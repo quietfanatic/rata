@@ -15,11 +15,12 @@ void set_video () {
 		window->SetView(window_view);
 	}
 	window->UseVerticalSync(true);
-	window->SetFramerateLimit(60);
+	//window->SetFramerateLimit(60);
 	window->EnableKeyRepeat(false);
 	window->ShowMouseCursor(false);
 	window->Display();
-	lastframe = frameclock.GetElapsedTime();
+	frameclock.Reset();
+	draw_latency = 0;
 }
 
 
@@ -107,6 +108,11 @@ void destroy_phase () {
 
 
 void draw_phase () {
+	draw_latency -= 1/FPS;
+	if (draw_latency > 1/FPS) {
+		dbg(6, "Skipping frame %d.\n", frame_number);
+		return;
+	}
 	Room* rc = room::current;
 	if (rata) {
 		float focusx = rata->aim_center().x + cursor.x/2.0;
@@ -286,14 +292,12 @@ void draw_phase () {
 	if (message) {
 		render_text(message_pos, Vec(10, 1), 1, false, true, 0, true);
 	}
-	//sf::Sprite window_s (window);
-	//window_s.SetScale(window_scale, window_scale);
-	//window->Draw(window_s);
-	window->Display();
-	float time = frameclock.GetElapsedTime();
-	dbg(6, "%f\r", 1/(time - lastframe));
+	draw_latency += frameclock.GetElapsedTime();
+	frameclock.Reset();
+	if (draw_latency < 0) sf::Sleep(draw_latency);
+	dbg(6, "%f\r", draw_latency);
 	if (DEBUG >= 6) fflush(stdout);
-	lastframe = time;
+	window->Display();
 }
 
 void input_phase () {
