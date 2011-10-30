@@ -835,7 +835,7 @@ struct Rata : Walking {
 	uint pose_arm_by_aim () {
 		using namespace pose;
 		return
-		  recoil_frames > 20 ? Arm::angle_near[angle_frame + 1]
+		  recoil_frames > 20 ? Arm::angle_near[angle_frame] + 1
 		: aim_distance > 10  ? Arm::angle_far[angle_frame]
 		: aim_distance > 4   ? Arm::angle_mid[angle_frame]
 		:                     Arm::angle_near[angle_frame];
