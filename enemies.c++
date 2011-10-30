@@ -44,13 +44,13 @@ struct AI : Walking {
 		return Vec::undef;
 	}
 	Vec predict_pos_from (Vec p, Object* threat = rata) {
-		return Vec(p.x + threat->xvel() * decision_timer/FPS,
-		           p.y + threat->yvel() * decision_timer/FPS);
+		float lead = rand()*1.0/RAND_MAX;
+		return Vec(p + lead * threat->vel() * decision_timer/FPS);
 	}
 
 	Vec predict_pos (Object* threat = rata) {
-		return Vec(threat->x() + threat->xvel() * decision_timer/FPS,
-		           threat->y() + threat->yvel() * decision_timer/FPS);
+		float lead = rand()*1.0/RAND_MAX;
+		return Vec(threat->pos() + lead * threat->vel() * decision_timer/FPS);
 	}
 };
 
