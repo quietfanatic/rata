@@ -984,7 +984,7 @@ struct Rata : Walking {
 				pose.head = Head::laybk;
 				pose.arm = a90;
 				pose.forearm = a90;
-				pose.hand = a90;
+				pose.hand = Hand::inside;
 				break;
 			}
 			default: {
