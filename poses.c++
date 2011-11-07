@@ -109,10 +109,10 @@ const Head head [Head::num] = {
 	Head(  0.0, 0.0,      0, 0),  // layfd
 };
 const uint Head::angle_stand [9] = {
-	stand_23, stand_23, stand_45, stand_68, stand_90, stand_90, stand_135, stand_135, stand_158
+	stand_23, stand_23, stand_45, stand_68, stand_90, stand_90, stand_135, stand_158, stand_158
 };
 const uint Head::angle_walk [9] = {
-	 walk_23,  walk_23,  walk_45,  walk_68,  walk_90,  walk_90,  walk_135,  walk_135,  walk_158
+	 walk_23,  walk_23,  walk_45,  walk_68,  walk_90,  walk_90,  walk_135,  walk_158,  walk_158
 };
 
 

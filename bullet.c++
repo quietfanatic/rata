@@ -18,7 +18,7 @@ inline RBullet* fire_rbullet_dir (Object* owner, Vec pos, float angle, float vel
 inline RBullet* fire_rbullet_to (Object* owner, Vec pos, Vec to, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
 #else
 
-RBullet::RBullet () :lifetime(-1) { }
+RBullet::RBullet () :lifetime(-2) { }
 
 void RBullet::move () {
 	if (lifetime < 0) return;
@@ -67,7 +67,7 @@ void RBullet::move () {
 		}
 		else {
 			just_bounce:
-			if (velnorm > -1) {
+			if (velnorm > -0.8) {
 				snd::def[snd::ricochet].play(0.7+rand()*0.3/RAND_MAX, 50);
 				pos2 = pos1 + (0.99-coll.frac) * vel;
 				coll = Object::check_line(pos1, pos2, cf::bullet.maskBits, (Object*)coll.hit->GetBody()->GetUserData());
@@ -82,7 +82,7 @@ void RBullet::move () {
 	vel.y -= 30/FPS/FPS;
 }
 void RBullet::draw () {
-	if (lifetime < 0) return;
+	if (lifetime < -1) return;
 	if (pos1.x == -1/0.0) {
 		window->Draw(sf::Shape::Line(
 			pos0.x, pos0.y,
@@ -104,7 +104,7 @@ void RBullet::draw () {
 			));
 		}
 		else {
-			lifetime = -1;
+			lifetime = -2;
 		}
 	}
 }
