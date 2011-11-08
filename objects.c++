@@ -484,7 +484,7 @@ struct Walking : Object {
 };
 
 
-struct Item : Object {
+struct Item : Actor {
 	void draw ();
 	void before_move ();
 };
