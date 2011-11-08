@@ -517,12 +517,10 @@ struct Rata : Walking {
 						if (facing > 0) {
 							set_fix(fix_crawl_r);
 							set_helmet(fix_helmet_crawl_r);
-							sight_points = sight_points_crawl_r;
 						}
 						else {
 							set_fix(fix_crawl_l);
 							set_helmet(fix_helmet_crawl_l);
-							sight_points = sight_points_crawl_l;
 						}
 					}
 					else if (state == crawling) {
@@ -538,12 +536,10 @@ struct Rata : Walking {
 							if (facing > 0) {
 								set_fix(fix_crawl_r);
 								set_helmet(fix_helmet_crawl_r);
-								sight_points = sight_points_crawl_r;
 							}
 							else {
 								set_fix(fix_crawl_l);
 								set_helmet(fix_helmet_crawl_l);
-								sight_points = sight_points_crawl_l;
 							}
 						}
 						else {
@@ -562,12 +558,10 @@ struct Rata : Walking {
 							if (facing > 0) {
 								set_fix(fix_crawl_r);
 								set_helmet(fix_helmet_crawl_r);
-								sight_points = sight_points_crawl_r;
 							}
 							else {
 								set_fix(fix_crawl_l);
 								set_helmet(fix_helmet_crawl_l);
-								sight_points = sight_points_crawl_l;
 							}
 						}
 					}
@@ -587,7 +581,6 @@ struct Rata : Walking {
 						allow_use();
 						set_fix(fix_21);
 						set_helmet(fix_helmet_kneel);
-						sight_points = sight_points_kneel;
 					}
 				}
 				else if (allow_jump()) {
@@ -600,7 +593,6 @@ struct Rata : Walking {
 					allow_airmove();
 					set_fix(fix_27);
 					set_helmet(fix_helmet_stand);
-					sight_points = sight_points_stand;
 				}
 				else {
 					allow_turn();
@@ -618,7 +610,6 @@ struct Rata : Walking {
 					}
 					set_fix(fix_27);
 					set_helmet(fix_helmet_stand);
-					sight_points = sight_points_stand;
 				}
 				allow_action();
 				allow_examine();
@@ -646,7 +637,6 @@ struct Rata : Walking {
 				decrement_counters();
 				set_fix(fix_27);
 				set_helmet(fix_helmet_stand);
-				sight_points = sight_points_stand;
 				break;
 			}
 			case ouch: {
@@ -682,7 +672,6 @@ struct Rata : Walking {
 				decrement_counters();
 				set_fix(fix_25);
 				set_helmet(fix_helmet_stand);
-				sight_points = sight_points_kneel;
 				break;
 			}
 			case hurt: {
@@ -697,7 +686,6 @@ struct Rata : Walking {
 				decrement_counters();
 				set_fix(fix_21);
 				set_helmet(fix_helmet_kneel);
-				sight_points = sight_points_kneel;
 				break;
 			}
 			case dead_air: {
@@ -886,6 +874,7 @@ struct Rata : Walking {
 					pose.forearm = a0;
 					pose.hand = a0;
 				}
+				sight_points = sight_points_stand;
 				break;
 			}
 			case walking: {
@@ -903,6 +892,7 @@ struct Rata : Walking {
 					pose.forearm = pose.arm;
 					pose.hand = (int[4]){ a0, a338, a0, a23 }[walk_frame];
 				}
+				sight_points = sight_points_stand;
 				break;
 			}
 			case kneeling: {
@@ -918,6 +908,7 @@ struct Rata : Walking {
 					pose.forearm = a68;
 					pose.hand = a45;
 				}
+				sight_points = sight_points_kneel;
 				break;
 			}
 			case crawling: {
@@ -934,6 +925,8 @@ struct Rata : Walking {
 					pose.forearm = a90;
 					pose.hand = Hand::inside;
 				}
+				if (facing>0) sight_points = sight_points_crawl_r;
+				else sight_points = sight_points_crawl_l;
 				break;
 			}
 			case falling: {
@@ -950,6 +943,7 @@ struct Rata : Walking {
 					pose.forearm = a45;
 					pose.hand = a45;
 				}
+				sight_points = sight_points_stand;
 				break;
 			}
 			case ouch:
@@ -960,6 +954,7 @@ struct Rata : Walking {
 				pose.arm = a23;
 				pose.forearm = a68;
 				pose.hand = a68;
+				sight_points = sight_points_kneel;
 				break;
 			}
 			case hurt: {
@@ -977,6 +972,7 @@ struct Rata : Walking {
 					pose.forearm = -a23;
 					pose.hand = Hand::front;
 				}
+				sight_points = sight_points_kneel;
 				break;
 			}
 			case dead: {
@@ -985,6 +981,7 @@ struct Rata : Walking {
 				pose.arm = a90;
 				pose.forearm = a90;
 				pose.hand = Hand::inside;
+				sight_points = sight_points_crawl_r;
 				break;
 			}
 			default: {
