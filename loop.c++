@@ -294,7 +294,7 @@ void draw_phase () {
 	}
 	draw_latency += frameclock.GetElapsedTime();
 	frameclock.Reset();
-	if (draw_latency < 0) sf::Sleep(draw_latency);
+	if (draw_latency < 0) sf::Sleep(-draw_latency);
 	dbg(6, "%f\r", draw_latency);
 	if (DEBUG >= 6) fflush(stdout);
 	window->Display();
