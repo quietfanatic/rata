@@ -196,10 +196,6 @@ struct Object : Actor {
 	b2Body* body;
 	int facing;  // 1 = right, -1 = left
 	uint subimage;
-	Object* floor;
-	b2Fixture* floor_fix;
-	b2Contact* floor_contact;
-	Vec floor_normal;
 	int life;
 	int max_life;
 	
@@ -313,25 +309,6 @@ struct Object : Actor {
 		}
 		return r;
 	}
-	Object* get_floor (b2Fixture* fix) {
-		Object* r = NULL;
-		for (b2ContactEdge* ce = body->GetContactList(); ce; ce = ce->next) {
-			b2Contact* c = ce->contact;
-			if (c->IsEnabled() && c->IsTouching()) {
-				if (c->GetFixtureA() == fix) {
-					Object* other = (Object*)c->GetFixtureB()->GetBody()->GetUserData();
-					//if (yvelrel(other) <= 0.4)
-						r = other;
-				}
-				else if (c->GetFixtureB() == fix) {
-					Object* other = (Object*)c->GetFixtureA()->GetBody()->GetUserData();
-					//if (yvelrel(other) <= 0.4)
-						r = other;
-				}
-			}
-		}
-		return r;
-	}
 
 	 // Events
 	void on_create () {
@@ -344,8 +321,6 @@ struct Object : Actor {
 		}
 		else body = NULL;
 		facing = desc->facing;
-		floor = NULL;
-		floor_contact = NULL;
 		life = max_life = 0;
 		subimage = 0;
 //		realtest = 151783;
@@ -444,11 +419,17 @@ struct Solid : Object {
  // Base class for walking objects
  //  (They need a moving friction joint)
 struct Walking : Object {
+	Object* floor;
+	b2Fixture* floor_fix;
+	b2Contact* floor_contact;
+	Vec floor_normal;
 	b2Body* friction_body;
 	b2FrictionJoint* friction_joint;
 	float floor_friction;
 	float ideal_xvel;
 	virtual void on_create () {
+		floor = NULL;
+		floor_contact = NULL;
 		 // Create friction body
 		b2BodyDef fricdef;
 		fricdef.type = b2_kinematicBody;
@@ -785,35 +766,37 @@ struct myCL : b2ContactListener {
 			ci->normalImpulses[0], ci->tangentImpulses[1],
 			ci->normalImpulses[1], ci->tangentImpulses[1]);
 		if (afp->is_standable && bfp->stands) {
+			Walking* wb = (Walking*)b;
 			if (manifold->type == b2Manifold::e_faceA
 			 && manifold->localNormal.y > 0.7) {
-				b->floor = a;
-				b->floor_fix = contact->GetFixtureA();
-				b->floor_contact = contact;
-				b->floor_normal = manifold->localNormal;
+				wb->floor = a;
+				wb->floor_fix = contact->GetFixtureA();
+				wb->floor_contact = contact;
+				wb->floor_normal = manifold->localNormal;
 			}
 			else if (manifold->type == b2Manifold::e_faceB
 				  && manifold->localNormal.y < -0.7) {
-				b->floor = a;
-				b->floor_fix = contact->GetFixtureA();
-				b->floor_contact = contact;
-				b->floor_normal = -manifold->localNormal;
+				wb->floor = a;
+				wb->floor_fix = contact->GetFixtureA();
+				wb->floor_contact = contact;
+				wb->floor_normal = -manifold->localNormal;
 			}
 		}
 		if (bfp->is_standable && afp->stands) {
+			Walking* wa = (Walking*)a;
 			if (manifold->type == b2Manifold::e_faceB
 			 && manifold->localNormal.y > 0.7) {
-				a->floor = b;
-				a->floor_fix = contact->GetFixtureB();
-				a->floor_contact = contact;
-				a->floor_normal = manifold->localNormal;
+				wa->floor = b;
+				wa->floor_fix = contact->GetFixtureB();
+				wa->floor_contact = contact;
+				wa->floor_normal = manifold->localNormal;
 			}
 			else if (manifold->type == b2Manifold::e_faceA
 				  && manifold->localNormal.y < -0.7) {
-				a->floor = b;
-				a->floor_fix = contact->GetFixtureB();
-				a->floor_contact = contact;
-				a->floor_normal = -manifold->localNormal;
+				wa->floor = b;
+				wa->floor_fix = contact->GetFixtureB();
+				wa->floor_contact = contact;
+				wa->floor_normal = -manifold->localNormal;
 			}
 		}
 		if (bfp->touch_damage && afp->damage_factor)
@@ -830,10 +813,14 @@ struct myCL : b2ContactListener {
 		}
 	}
 	void EndContact (b2Contact* contact) {
-		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
-		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
-		if (a->floor == b) a->floor = NULL;
-		if (b->floor == a) b->floor = NULL;
+		if (((FixProp*)contact->GetFixtureA()->GetUserData())->stands) {
+			Walking* a = (Walking*) contact->GetFixtureA()->GetBody()->GetUserData();
+			if (a->floor == (Object*)contact->GetFixtureB()->GetBody()->GetUserData()) a->floor = NULL;
+		}
+		if (((FixProp*)contact->GetFixtureB()->GetUserData())->stands) {
+			Walking* b = (Walking*) contact->GetFixtureB()->GetBody()->GetUserData();
+			if (b->floor == (Object*)contact->GetFixtureA()->GetBody()->GetUserData()) b->floor = NULL;
+		}
 	}
 };
 
