@@ -6,14 +6,7 @@ Requirements
 
 
 Instructions:
-	To run: ./test
-	To recompile and run: ./try
-	To recompile (optimized) and run: ./tryopt
-	To reindex images (required if you change any image filenames): perl gen_img.pl > img.c++
-	To use map editor: ./build_mapeditor && ./mapeditor <roomnumber>
-	    where <roomnumber> is the number of the room you wish to edit.  The corresponding
-		 filename is "rooms/<roomnumber>-<roomname>.room.c++".
-	 
+	Run the executable named test.
 
 
 Controls:
@@ -30,14 +23,7 @@ R-click/L-Shift :  aim weapon
 
 
 
-Directories:
 
-img  - image files used in game
-snd  - sound effects
-bgm  - background music
-res  - used for working images and files
-lib  - required libraries
-rooms  - all the rooms in text format
 
 
 
