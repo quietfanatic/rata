@@ -8,6 +8,17 @@ const Vec sight_points_crawl_r [n_sight_points] = {Vec(0, 6*PX), Vec(7*PX, 13*PX
 const Vec sight_points_crawl_l [n_sight_points] = {Vec(0, 6*PX), Vec(-7*PX, 13*PX), Vec(8*PX, 2*PX)};
 
 
+MoveStats default_stats = {
+	1.0,  // decel
+	1.0, 4.0,  // walk
+	0.5, 6.0,  // run
+	1.0, 2.0,  // crawl
+	0.2, 4.0,  // air
+	10.0, 1.0,  // jumping stats
+};
+
+
+
 struct Rata : Walking {
 	 // Character state
 	enum State {
@@ -210,38 +221,18 @@ struct Rata : Walking {
 		equipment[slot] = itemobj->desc;
 		itemobj->desc->room = room::equipment;
 		if (otherslot > 0) equipment[otherslot] = itemobj->desc;
+		recalc_stats();
 	}
 
 	 // Character stats (affected by items and such)
-	float ground_accel () {
-		return 0.5;
-	}
-	float ground_decel () {
-		return 1.0;
-	}
-	float max_forward_speed () {
-		return 6.0;
-	}
-	float max_backward_speed () {
-		return 4.0;
-	}
-	float max_crawl_speed () {
-		return 2.0;
-	}
-	float air_accel () {
-		return 0.2;
-	}
-	float max_air_speed () {
-		return 4.0;
-	}
-	float jump_velocity () {
-		return 10.0;
-	}
-	float jump_float_time () {
-		return 1.0;
-	}
-	float max_fall_speed () {
-		return 8.0;
+	MoveStats stats;
+	void recalc_stats () {
+		stats = default_stats;
+		for (uint i=0; i < item::num_slots; i++)
+		if (equip_info(i))
+		if (equip_info(i)->slot == (int)i)  // Don't count otherslot
+		if (equip_info(i)->stat_mod)
+			(*equip_info(i)->stat_mod)(&stats);
 	}
 
 	 // controls
@@ -315,26 +306,26 @@ struct Rata : Walking {
 		 // Left
 		if (control_left && !control_right) {
 			if (xvel() < 0)
-				floor_friction = ground_accel();
-			else floor_friction = ground_decel();
+				floor_friction = stats.run_accel;
+			else floor_friction = stats.decel;
 			if (facing < 0)
-				ideal_xvel = !aiming ? -max_forward_speed() : -max_backward_speed();
+				ideal_xvel = !aiming ? -stats.run_speed : -stats.walk_speed;
 			else
-				ideal_xvel = -max_backward_speed();
+				ideal_xvel = -stats.walk_speed;
 		}
 		 // Right
 		else if (control_right && !control_left) {
 			if (xvel() > 0)
-				floor_friction = ground_accel();
-			else floor_friction = ground_decel();
+				floor_friction = stats.run_accel;
+			else floor_friction = stats.decel;
 			if (facing > 0)
-				ideal_xvel = !aiming ? max_forward_speed() : max_backward_speed();
+				ideal_xvel = !aiming ? stats.run_speed : stats.walk_speed;
 			else
-				ideal_xvel = max_backward_speed();
+				ideal_xvel = stats.walk_speed;
 		}
 		 // Stop
 		else {
-			floor_friction = ground_decel();
+			floor_friction = stats.decel;
 			ideal_xvel = 0;
 		}
 		return abs_f(xvel()) >= 0.01;
@@ -342,9 +333,8 @@ struct Rata : Walking {
 
 	bool allow_jump () {
 		if (control_jump) {  // Jump
-			//mutual_impulse(floor, 0, -jump_velocity()*mass());
-			set_vel(Vec(vel().x, jump_velocity()));
-			float_frames = jump_float_time()*FPS;
+			set_vel(Vec(vel().x, stats.jump_vel));
+			float_frames = stats.float_time*FPS;
 			state = falling;
 			return true;
 		}
@@ -357,15 +347,15 @@ struct Rata : Walking {
 	}
 
 	bool allow_crawl () {
-		floor_friction = ground_decel()*ground_decel();
+		floor_friction = stats.decel;
 		if (control_left && !control_right) {
 			if (!crawling) facing = -1;
-			ideal_xvel = -max_crawl_speed();
+			ideal_xvel = -stats.crawl_speed;
 			return true;
 		}
 		else if (control_right && !control_left) {
 			if (!crawling) facing = 1;
-			ideal_xvel = max_crawl_speed();
+			ideal_xvel = stats.crawl_speed;
 			return true;
 		}
 		else {
@@ -377,9 +367,9 @@ struct Rata : Walking {
 	void allow_airmove () {
 		 // Left
 		if (control_left && !control_right) {
-			float max = -max_air_speed();
+			float max = -stats.air_speed;
 			if (xvel() > max) {
-				add_vel(Vec(-air_accel(), 0));
+				add_vel(Vec(-stats.air_accel, 0));
 				if (xvel() < max) {
 					add_vel(Vec(-xvel() + max, 0));
 				}
@@ -387,9 +377,9 @@ struct Rata : Walking {
 		}
 		 // Right
 		else if (control_right && !control_left) {
-			float max = max_air_speed();
+			float max = stats.air_speed;
 			if (xvel() < max) {
-				add_vel(Vec(air_accel(), 0));
+				add_vel(Vec(stats.air_accel, 0));
 				if (xvel() > max) {
 					add_vel(Vec(-xvel() + max, 0));
 				}
@@ -397,7 +387,7 @@ struct Rata : Walking {
 		}
 		 // Adjust falling speed
 		if (control_jump && float_frames) {
-				body->SetGravityScale((jump_float_time()-float_frames/FPS)/jump_float_time());
+				body->SetGravityScale((stats.float_time-float_frames/FPS)/stats.float_time);
 				float_frames--;
 		}
 		else {
@@ -576,7 +566,7 @@ struct Rata : Walking {
 						allow_aim();
 						kneel:
 						state = kneeling;
-						floor_friction = ground_decel();
+						floor_friction = stats.decel;
 						ideal_xvel = 0;
 						allow_use();
 						set_fix(fix_21);
@@ -679,7 +669,7 @@ struct Rata : Walking {
 				if (hurt_frames == 0) goto got_floor;
 				hurt_floor:
 				state = hurt;
-				floor_friction = ground_decel();
+				floor_friction = stats.decel;
 				ideal_xvel = 0;
 				allow_look();
 				allow_examine();
@@ -703,7 +693,7 @@ struct Rata : Walking {
 				if (!floor) goto dead_no_floor;
 				dead_floor:
 				state = dead;
-				floor_friction = ground_decel();
+				floor_friction = stats.decel;
 				ideal_xvel = 0;
 				set_fix(fix_h7);
 				set_helmet(NULL);
@@ -815,6 +805,7 @@ struct Rata : Walking {
 		cursor.img = img::look;
 		trap_cursor = true;
 		oldyvel = 0.0;
+		recalc_stats();
 	}
 	virtual void on_destroy () {
 		rata = NULL;

@@ -23,6 +23,7 @@ float gravity = -30;
 
 #define DEF_ONLY
 #include "drawing.c++"
+#include "stats.c++"
 #include "objects.c++"
 #include "bullet.c++"
 #include "rooms.c++"

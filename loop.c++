@@ -244,7 +244,7 @@ void draw_phase () {
 		 // Debug draw rata path.
 		if (mag2(rata->pos() - oldratapos) > 0.2) {
 			debug_path[debug_path_pos % debug_path_size] = rata->pos();
-			uint8 whiteshift = rata->float_frames * 255.0 / (rata->jump_float_time()*FPS);
+			uint8 whiteshift = rata->float_frames * 255.0 / (rata->stats.float_time*FPS);
 			debug_path_color[debug_path_pos % debug_path_size] =
 				whiteshift ? Color(255, whiteshift, whiteshift, 127) : 0x0000ff7f;
 			oldratapos = rata->pos();
