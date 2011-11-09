@@ -149,7 +149,7 @@ struct Patroller : AI {
 	}
 	virtual void draw () {
 		motion_frames %= 60;
-		subimage = (motion_frames > 30);
+		subimage = (motion_frames < 30);
 		Object::draw();
 	}
 
@@ -165,10 +165,12 @@ struct Flyer : AI {
 	Vec dest;
 	Vec oldpos;
 	Vec prediction;
+	int angle_frame;
 	void on_create () {
 		AI::on_create();
 		life = max_life = 96;
 		motion_frames = 0;
+		angle_frame = 2;
 		body->SetGravityScale(0.0);
 		//body->SetLinearDamping(0.2);
 		dest = Vec(x(), y());
@@ -243,7 +245,13 @@ struct Flyer : AI {
 	void draw () {
 		motion_frames++;
 		motion_frames %= 4;
-		subimage = (motion_frames < 2);
+		if (defined(prediction)) {
+			angle_frame = get_angle_frame(ang(prediction - pos()));
+			if (prediction.x < pos().x)
+				facing = -1;
+			else facing = 1;
+		}
+		subimage = angle_frame + 9 * (motion_frames < 2);
 		Object::draw();
 	}
 	void damage (int d) {
