@@ -1,6 +1,7 @@
 
 
 void quit_game () {
+	window->SetCursorPosition(cursor2.x*UNPX*window_scale, window->GetHeight() - cursor2.y*UNPX*window_scale);
 	window->Close();
 	throw 0;
 }
@@ -36,15 +37,22 @@ void main_init () {
 	);
 	world->SetContactListener(new myCL);
 	 // Initial room
-	//room::testroom.start();	
+	//room::testroom.start();
+	cursor2.x = 10;
+	cursor2.y = 7.5;
 }
 
 void toggle_pause () {
 	if (paused) {
 		paused = false;
+		trap_cursor = true;
+		window->ShowMouseCursor(false);
+		window->SetCursorPosition(window->GetWidth()/2, window->GetHeight()/2);
 	}
 	else {
 		paused = true;
+		trap_cursor = false;
+		window->SetCursorPosition(cursor2.x*UNPX*window_scale, window->GetHeight() - cursor2.y*UNPX*window_scale);
 	}
 };
 
@@ -261,8 +269,7 @@ void draw_phase () {
 	}
 	else { debug_path_pos = 0; }
 	 // Draw cursor
-	if (trap_cursor) {
-		window->ShowMouseCursor(false);
+	if (draw_cursor) {
 		float ax = rata->aim_center().x;
 		float ay = rata->aim_center().y;
 		float cx = cursor.x;
@@ -285,9 +292,7 @@ void draw_phase () {
 		}
 		draw_image(cursor.img, Vec(cx+ax, cy+ay));
 	}
-	else {
-		window->ShowMouseCursor(true);
-	}
+	window->ShowMouseCursor(!trap_cursor);
 	 // Draw text message
 	if (message) {
 		render_text(message_pos, Vec(10, 1), 1, false, true, 0, true);

@@ -736,6 +736,7 @@ struct Rata : Walking {
 
 	virtual void kill () {
 		trap_cursor = false;
+		draw_cursor = false;
 		message = message_pos = message_pos_next = NULL;
 	}
 
@@ -804,6 +805,7 @@ struct Rata : Walking {
 		cursor.y = 0;
 		cursor.img = img::look;
 		trap_cursor = true;
+		draw_cursor = true;
 		oldyvel = 0.0;
 		recalc_stats();
 	}
