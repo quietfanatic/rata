@@ -600,6 +600,18 @@ Vec rata_poly_sensor_floor_l [] = {
 	Vec(-12*PX, -4*PX),
 	Vec(-4*PX, -4*PX),
 };
+Vec rata_poly_sensor_block_r [] = {
+	Vec(4*PX, 4*PX),
+	Vec(12*PX, 4*PX),
+	Vec(12*PX, 12*PX),
+	Vec(4*PX, 12*PX),
+};
+Vec rata_poly_sensor_block_l [] = {
+	Vec(-4*PX, 12*PX),
+	Vec(-12*PX, 12*PX),
+	Vec(-12*PX, 4*PX),
+	Vec(-4*PX, 4*PX),
+};
 
 FixProp rata_fixprop = {true, false, 1.0, 0, false};
 FixProp rata_fixprop_feet = {false, true, 1.0, 0, false};
@@ -615,6 +627,8 @@ b2FixtureDef rata_fixes [] = {
 	make_fixdef(make_poly(4, rata_poly_sensor_21), cf::sensor, 0, 0, 0.0, &rata_fixprop, true),
 	make_fixdef(make_poly(4, rata_poly_sensor_floor_r), cf::sensor, 0, 0, 0.0, &rata_fixprop, true),
 	make_fixdef(make_poly(4, rata_poly_sensor_floor_l), cf::sensor, 0, 0, 0.0, &rata_fixprop, true),
+	make_fixdef(make_poly(4, rata_poly_sensor_block_r), cf::sensor, 0, 0, 0.0, &rata_fixprop, true),
+	make_fixdef(make_poly(4, rata_poly_sensor_block_l), cf::sensor, 0, 0, 0.0, &rata_fixprop, true),
 	make_fixdef(make_circle(7*PX, 0*PX, 23.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),
 	make_fixdef(make_circle(7*PX, 0*PX, 16.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),
 	make_fixdef(make_circle(7*PX, 4.5*PX, 11.5*PX), cf::disabled, 0, 0, 0.0, &rata_fixprop_helmet, false),
@@ -640,7 +654,7 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 const obj::Def obj::def [] = {
 
 	{"Object", -1, NULL, 0, 0, obj::ALLOC<Object>, -1},
-	{"Rata", 14, rata_fixes, 10, 100, obj::ALLOC<Rata>, -1},
+	{"Rata", 16, rata_fixes, 10, 100, obj::ALLOC<Rata>, -1},
 	{"Entrance", -1, NULL, -1000, -1000, obj::ALLOC<Entrance>, -1},
 	{"Exit", -1, NULL, -100, -100, obj::ALLOC<Exit>, -1},
 	{"Door", -1, NULL, -100, 200, obj::ALLOC<Door>, -1},

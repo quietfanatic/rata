@@ -89,6 +89,8 @@ struct Rata : Walking {
 	b2Fixture* fix_sensor_21;
 	b2Fixture* fix_sensor_floor_r;
 	b2Fixture* fix_sensor_floor_l;
+	b2Fixture* fix_sensor_block_r;
+	b2Fixture* fix_sensor_block_l;
 	b2Fixture* fix_helmet_current;
 	b2Fixture* fix_helmet_stand;
 	b2Fixture* fix_helmet_kneel;
@@ -143,6 +145,9 @@ struct Rata : Walking {
 				return true;
 		}
 		return false;
+	}
+	bool check_sensor_block () {
+		return (facing > 0) ? check_fix(fix_sensor_block_r) : check_fix(fix_sensor_block_l);
 	}
 	bool bullet_inv () {
 		return state == dead
@@ -779,7 +784,9 @@ struct Rata : Walking {
 		fix_sensor_21 = fix_crawl_l->GetNext();
 		fix_sensor_floor_r = fix_sensor_21->GetNext();
 		fix_sensor_floor_l = fix_sensor_floor_r->GetNext();
-		fix_helmet_stand = fix_sensor_floor_l->GetNext();
+		fix_sensor_block_r = fix_sensor_floor_l->GetNext();
+		fix_sensor_block_l = fix_sensor_block_r->GetNext();
+		fix_helmet_stand = fix_sensor_block_l->GetNext();
 		fix_helmet_kneel = fix_helmet_stand->GetNext();
 		fix_helmet_crawl_r = fix_helmet_kneel->GetNext();
 		fix_helmet_crawl_l = fix_helmet_crawl_r->GetNext();
@@ -816,7 +823,8 @@ struct Rata : Walking {
 	uint pose_arm_by_aim () {
 		using namespace pose;
 		return
-		  recoil_frames > 20 ? Arm::angle_near[angle_frame] + 1
+		  check_sensor_block() ? Arm::angle_far[angle_frame]
+		: recoil_frames > 20 ? Arm::angle_near[angle_frame] + 1
 		: aim_distance > 10  ? Arm::angle_far[angle_frame]
 		: aim_distance > 4   ? Arm::angle_mid[angle_frame]
 		:                     Arm::angle_near[angle_frame];

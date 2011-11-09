@@ -42,12 +42,13 @@ bool window_fullscreen = false;
 float cursor_scale = 1.0;  // Higher = faster cursor
 bool debug_mode = false;  // Toggle to see object positions and such
 
+
  // Physical world for box2d
 b2World* world;
 bool paused = false;
 
  // SFML main window
-sf::Image* screen;
+//sf::Image* screen;
 sf::RenderWindow* window;
 sf::View window_view = sf::View(sf::FloatRect(0, 15, 20, 0));
 float viewleft () { return window_view.GetRect().Left; }
