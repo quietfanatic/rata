@@ -1,6 +1,13 @@
 
+(NOTICE: If you're viewing this from Github, you do not have the things
+ required to build or run this.  See http://wall.org/~lewis/games/rata for
+ some runnable demo tarballs.  This project is not at this time intended
+ for public consumption, so use only at your own risk.)
+
+
 Requirements
 	libsoil1 (libSOIL.so)
+	Various image and sound libraries that ought to come with your distro.
 	1.6GHz CPU
 	GPU that can do 2D OpenGL at 60fps, preferably with VSYNC
 
@@ -19,6 +26,7 @@ Controls:
         L-click :  examine
 R-click/L-Shift :  aim weapon
         L-click :  (while aiming) fire weapon
+              P :  pause
          Escape :  quit
 
 
