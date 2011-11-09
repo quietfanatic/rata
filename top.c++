@@ -29,6 +29,8 @@ float gravity = -30;
 #include "rooms.c++"
 #include "tiles.c++"
 #undef DEF_ONLY
+#include "text.c++"
+#include "buttons.c++"
 
 
  // SETTINGS
@@ -87,6 +89,10 @@ Actor* creation_queue = NULL;
 static const uint MAX_BULLETS = 10;
 RBullet bullets[MAX_BULLETS];
 
+ // Clickable buttons (for menu, pause screen, etc.)
+uint n_buttons = 0;
+Button* buttons = NULL;
+
 
  // Input state
 unsigned char key[400];  // Counts number of frames up to 255
@@ -105,7 +111,6 @@ char* message_pos_next = NULL;
 
 
 #include "drawing.c++"
-#include "text.c++"
 #include "poses.c++"
 #define DEF_ONLY
 #include "items.c++"

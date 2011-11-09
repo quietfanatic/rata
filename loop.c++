@@ -48,11 +48,14 @@ void toggle_pause () {
 		trap_cursor = true;
 		window->ShowMouseCursor(false);
 		window->SetCursorPosition(window->GetWidth()/2, window->GetHeight()/2);
+		n_buttons = 0;
 	}
 	else {
 		paused = true;
 		trap_cursor = false;
 		window->SetCursorPosition(cursor2.x*UNPX*window_scale, window->GetHeight() - cursor2.y*UNPX*window_scale);
+		n_buttons = n_pause_buttons;
+		buttons = pause_buttons;
 	}
 };
 
@@ -293,6 +296,13 @@ void draw_phase () {
 		draw_image(cursor.img, Vec(cx+ax, cy+ay));
 	}
 	window->ShowMouseCursor(!trap_cursor);
+	 // Draw buttons
+	if (n_buttons) {
+		uint i = n_buttons;
+		while (i) {
+			buttons[--i].draw();
+		}
+	}
 	 // Draw text message
 	if (message) {
 		render_text(message_pos, Vec(10, 1), 1, false, true, 0, true);

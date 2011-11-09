@@ -50,31 +50,6 @@ namespace obj {
 		shade,
 		lifebar,
 	};
-#ifdef MAPEDITOR
-	char* idname [] = {
-		"obj::object",
-		"obj::rata",
-		"obj::entrance",
-		"obj::exit",
-		"obj::door",
-		"obj::solid",
-		"obj::tilemap",
-		"obj::bullet",
-		"obj::rat",
-		"obj::crate",
-		"obj::mousehole",
-		"obj::hiteffect",
-		"obj::patroller",
-		"obj::flyer",
-		"obj::heart",
-		"obj::item",
-		"obj::tiles_back",
-		"obj::bullet_layer",
-		"obj::tiles_front",
-		"obj::shade",
-		"obj::lifebar",
-	};
-#endif
 	struct Desc;
 	struct Def;
 	extern const Def def [];

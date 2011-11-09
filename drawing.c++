@@ -11,12 +11,15 @@ struct Color {
 	operator sf::Color () const {
 		return sf::Color(x>>24, x>>16, x>>8, x);
 	}
+	bool visible () const { return (uint8)x; }
 };
+void draw_image (int16 imagei, Vec p, int sub=0, bool flip=false, bool cam=false, float scale=1.0);
+void draw_rect (float l, float t, float r, float b, Color color = 0x2f2f2f7f, bool cam = false);
 #else
 
 
 sf::Sprite drawing_sprite;
-void draw_image (int16 imagei, Vec p, int sub=0, bool flip=false, bool cam=false, float scale=1.0) {
+void draw_image (int16 imagei, Vec p, int sub, bool flip, bool cam, float scale) {
 	if (imagei < 0) return;
 	img::Image* image = &img::def[imagei];
 	//if (!cam)
@@ -62,7 +65,7 @@ void draw_image (int16 imagei, Vec p, int sub=0, bool flip=false, bool cam=false
 		);
 	window->Draw(drawing_sprite);
 };
-void draw_rect (float l, float t, float r, float b, Color color = 0x2f2f2f7f, bool cam = false) {
+void draw_rect (float l, float t, float r, float b, Color color, bool cam) {
 	if (cam)
 		window->Draw(sf::Shape::Rectangle(
 			viewleft() + l, viewbottom() + t,
