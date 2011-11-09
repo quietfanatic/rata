@@ -1,6 +1,6 @@
 
 
-#ifdef DEF_ONLY
+#ifdef HEADER
  // Just let me use hexadecimal colors, okay?
 struct Color {
 	uint32 x;

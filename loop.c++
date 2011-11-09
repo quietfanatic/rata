@@ -1,5 +1,5 @@
 
-#ifdef DEF_ONLY
+#ifdef HEADER
 
 void quit_game ();
 void main_init ();

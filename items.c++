@@ -1,5 +1,5 @@
 
-#ifdef DEF_ONLY
+#ifdef HEADER
 
 namespace item {
 	enum Slot {

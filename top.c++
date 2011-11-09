@@ -21,7 +21,7 @@ float gravity = -30;
 #include "img.c++"
 #include "snd.c++"
 
-#define DEF_ONLY
+#define HEADER
 #include "drawing.c++"
 #include "stats.c++"
 #include "objects.c++"
@@ -31,7 +31,7 @@ float gravity = -30;
 #include "loop.c++"
 #include "text.c++"
 #include "buttons.c++"
-#undef DEF_ONLY
+#undef HEADER
 #include "text.c++"
 
 
@@ -115,10 +115,10 @@ char* message_pos_next = NULL;
 #include "buttons.c++"
 #include "drawing.c++"
 #include "poses.c++"
-#define DEF_ONLY
+#define HEADER
 #include "items.c++"
 #include "save.c++"
-#undef DEF_ONLY
+#undef HEADER
 #include "objects.c++"
 #include "coll.c++"
 #include "bullet.c++"

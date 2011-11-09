@@ -1,5 +1,5 @@
 
-#ifdef DEF_ONLY
+#ifdef HEADER
 struct RBullet {
 	int power;
 	float mass;

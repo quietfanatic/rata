@@ -11,7 +11,7 @@
 
 
 
-#ifdef DEF_ONLY
+#ifdef HEADER
 
 struct Actor;
 struct Object;

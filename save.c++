@@ -1,6 +1,6 @@
 
 
-#ifdef DEF_ONLY
+#ifdef HEADER
 
 const uint SAVEFILE_VERSION = 3;
 

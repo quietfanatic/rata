@@ -3,7 +3,7 @@
 
 
 
-#ifdef DEF_ONLY
+#ifdef HEADER
 
 struct Button {
 	Vec pos;

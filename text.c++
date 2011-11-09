@@ -1,5 +1,5 @@
 
-#ifdef DEF_ONLY
+#ifdef HEADER
 
 void render_text (char* text, Vec p, uint lines=1, bool small=false, bool border=false, int align=1, bool cam=false);
 
