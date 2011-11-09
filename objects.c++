@@ -49,12 +49,6 @@ namespace obj {
 		tiles_front,
 		shade,
 		lifebar,
-		 // For editor
-		clickable_text,
-		tilemap_editor,
-		tilepicker,
-		roomsettings,
-		editor_menu
 	};
 #ifdef MAPEDITOR
 	char* idname [] = {
@@ -79,10 +73,6 @@ namespace obj {
 		"obj::tiles_front",
 		"obj::shade",
 		"obj::lifebar",
-		"obj::clickable_text",
-		"obj::tilemap_editor",
-		"obj::tilepicker",
-		"obj::editor_menu"
 	};
 #endif
 	struct Desc;
@@ -504,20 +494,9 @@ void Item::before_move () {
 }
 
 
-
-
 #include "enemies.c++"
-#ifdef MAPEDITOR
-#include "editor_objects.c++"
-#else
-typedef Object ClickableText;
-typedef Object TilemapEditor;
-typedef Object TilePicker;
-typedef Object RoomSettings;
-typedef Object EditorMenu;
-#endif
-#include "misc.c++"
 
+#include "misc.c++"
 
 
  // loose end from above
@@ -706,11 +685,6 @@ const obj::Def obj::def [] = {
 	{"Front Tiles", -1, NULL, -500, 0, obj::ALLOC<TileLayer>, -1},
 	{"Shade", -1, NULL, -3000, 0, obj::ALLOC<Shade>, -1},
 	{"Lifebar", -1, NULL, -4000, 0, obj::ALLOC<Lifebar>, -1},
-	{"Clickable text", -1, NULL, -2000, 2000, obj::ALLOC<ClickableText>, -1},
-	{"Tilemap editor", -1, NULL, -100, 100, obj::ALLOC<TilemapEditor>, -1},
-	{"Tile picker", -1, NULL, -1000, 1000, obj::ALLOC<TilePicker>, -1},
-	{"Rooms Settings pane", -1, NULL, -1000, 1000, obj::ALLOC<RoomSettings>, -1},
-	{"Editor menu", -1, NULL, -1900, 1900, obj::ALLOC<EditorMenu>, -1}
 
 };
 

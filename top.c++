@@ -104,13 +104,6 @@ char* message_pos = NULL;
 char* message_pos_next = NULL;
 
 
-#ifdef MAPEDITOR
- // Editor stuff
-bool mapeditor = false;
-int16 selected_tile = 0;
-bool flip_tile = false;
-#endif
-
 #include "drawing.c++"
 #include "text.c++"
 #include "poses.c++"
