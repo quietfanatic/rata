@@ -119,6 +119,7 @@ bool flip_tile = false;
 #include "save.c++"
 #undef DEF_ONLY
 #include "objects.c++"
+#include "coll.c++"
 #include "bullet.c++"
 #include "items.c++"
 #include "rooms.c++"
