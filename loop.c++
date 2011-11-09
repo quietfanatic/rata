@@ -388,14 +388,13 @@ void input_phase () {
 };
 
 void move_phase () {
-	click_taken = false;
+	if (paused) return;
 	for (Actor* a = actors_by_order; a; a = a->next_order)
 		a->before_move();
-	if (!click_taken) dragging = NULL;
 
 	for (uint i=0; i < MAX_BULLETS; i++)
 		bullets[i].move();
-	if (world && !paused) {
+	if (world) {
 		world->SetAutoClearForces(false);
 		world->Step(1/120.0, 10, 10);
 		world->SetAutoClearForces(true);
