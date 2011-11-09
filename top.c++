@@ -28,9 +28,11 @@ float gravity = -30;
 #include "bullet.c++"
 #include "rooms.c++"
 #include "tiles.c++"
-#undef DEF_ONLY
+#include "loop.c++"
 #include "text.c++"
 #include "buttons.c++"
+#undef DEF_ONLY
+#include "text.c++"
 
 
  // SETTINGS
@@ -110,6 +112,7 @@ char* message_pos = NULL;
 char* message_pos_next = NULL;
 
 
+#include "buttons.c++"
 #include "drawing.c++"
 #include "poses.c++"
 #define DEF_ONLY

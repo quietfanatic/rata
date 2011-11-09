@@ -1,4 +1,11 @@
 
+#ifdef DEF_ONLY
+
+void quit_game ();
+void main_init ();
+void main_loop ();
+
+#else
 
 void quit_game () {
 	window->SetCursorPosition(cursor2.x*UNPX*window_scale, window->GetHeight() - cursor2.y*UNPX*window_scale);
@@ -388,6 +395,16 @@ void input_phase () {
 };
 
 void move_phase () {
+	if (n_buttons) {
+		for (uint i=0; i < n_buttons; i++)
+		if (cursor2.x > buttons[i].pos.x)
+		if (cursor2.y > buttons[i].pos.y)
+		if (cursor2.x < buttons[i].pos.x + buttons[i].size.x)
+		if (cursor2.y < buttons[i].pos.y + buttons[i].size.y) {
+			if (buttons[i].click) (*buttons[i].click)();
+			break;
+		}
+	}
 	if (paused) return;
 	for (Actor* a = actors_by_order; a; a = a->next_order)
 		a->before_move();
@@ -423,5 +440,5 @@ void main_loop () {
 }
 
 
-
+#endif
 

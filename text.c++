@@ -1,4 +1,10 @@
 
+#ifdef DEF_ONLY
+
+void render_text (char* text, Vec p, uint lines=1, bool small=false, bool border=false, int align=1, bool cam=false);
+
+#else
+
 
 
 const uint8 letter_width [256] = {
@@ -59,7 +65,7 @@ uint text_width_small (char* s) {
 
 
 
-void render_text (char* text, Vec p, uint lines=1, bool small=false, bool border=false, int align=1, bool cam=false) {
+void render_text (char* text, Vec p, uint lines, bool small, bool border, int align, bool cam) {
 	float width;
 	uint linecount = 0;
 	float lineheight = small ? 7*PX : 16*PX;
@@ -96,6 +102,6 @@ void render_text (char* text, Vec p, uint lines=1, bool small=false, bool border
 
 
 
-
+#endif
 
 

@@ -3,7 +3,7 @@
 
 
 
-
+#ifdef DEF_ONLY
 
 struct Button {
 	Vec pos;
@@ -26,23 +26,30 @@ struct Button {
 		);
 		if (text) render_text(
 			text,
-			Vec(pos.x, pos.y + size.y),
-			10, false, false, 1, true
+			pos + size.scalex(0.5),
+			10, false, false, 0, true
 		);
 	}
 };
 
+#else
 
+
+void click_quit () {
+	if (button[sf::Mouse::Left] == 1) {
+		quit_game();
+	}
+}
 
 
 
 const uint n_pause_buttons = 2;
 Button pause_buttons [n_pause_buttons] = {
-	{Vec(2, 2), Vec(4, 1), NULL, NULL, -1, 0, 0x0000ff7f, NULL},
-	{Vec(14, 2), Vec(4, 1), NULL, NULL, -1, 0, 0xff00007f, NULL},
+	{Vec(0, 0), Vec(3, 1), NULL, NULL, -1, 0, 0, "Options"},
+	{Vec(18, 0), Vec(2, 1), &click_quit, NULL, -1, 0, 0, "Quit"},
 };
 
-
+#endif
 
 
 
