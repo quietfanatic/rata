@@ -674,7 +674,6 @@ struct Rata : Walking {
 				if (hurt_frames == 0) goto no_floor;
 				state = hurt_air;
 				allow_look();
-				allow_examine();
 				decrement_counters();
 				set_fix(fix_25);
 				set_helmet(fix_helmet_stand);
@@ -688,7 +687,6 @@ struct Rata : Walking {
 				floor_friction = stats.decel;
 				ideal_xvel = 0;
 				allow_look();
-				allow_examine();
 				decrement_counters();
 				set_fix(fix_21);
 				set_helmet(fix_helmet_kneel);
