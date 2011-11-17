@@ -9,6 +9,7 @@ enum ID {
 	edit1,
 	empty,
 	lotsodanger,
+	verybig,
 	n_rooms
 };
 
@@ -21,6 +22,7 @@ namespace file {
 	namespace edit1 { extern Room room; }
 	namespace empty { extern Room room; }
 	namespace lotsodanger { extern Room room; }
+	namespace verybig { extern Room room; }
 	namespace roompicker {
 		#include "rooms/0-roompicker.room.c++"
 	}
@@ -45,6 +47,9 @@ namespace file {
 	namespace lotsodanger {
 		#include "rooms/7-lotsodanger.room.c++"
 	}
+	namespace verybig {
+		#include "rooms/8-verybig.room.c++"
+	}
 }
 
 Room* list [] = {
@@ -55,7 +60,8 @@ Room* list [] = {
 	&file::test4::room,
 	&file::edit1::room,
 	&file::empty::room,
-	&file::lotsodanger::room
+	&file::lotsodanger::room,
+	&file::verybig::room
 };
 
 #ifdef MAPEDITOR
@@ -67,7 +73,8 @@ char* filename [] = {
 	"rooms/4-test4.room.c++",
 	"rooms/5-edit1.room.c++",
 	"rooms/6-empty.room.c++",
-	"rooms/7-lotsodanger.room.c++"
+	"rooms/7-lotsodanger.room.c++",
+	"rooms/8-verybig.room.c++"
 };
 #endif
 

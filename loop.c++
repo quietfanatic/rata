@@ -160,7 +160,7 @@ void draw_phase () {
 				else camera.y = newy;
 			}
 		}
-		window_view.SetCenter(camera.x, camera.y);
+		window_view.SetCenter(camera.x+10*(window_scale-1), camera.y+7.5*(window_scale-1));
 
 	}
 	window->SetView(window_view);
@@ -313,6 +313,12 @@ void draw_phase () {
 	 // Draw text message
 	if (message) {
 		render_text(message_pos, Vec(10, 1), 1, false, true, 0, true);
+	}
+	if (window_scale > 1.0) {
+		glRasterPos2f(viewleft()+0.000001, viewbottom()+0.000001);
+		glPixelZoom(window_scale, window_scale);
+		glCopyPixels(0, 0, 320, 240, GL_COLOR);
+		glPixelZoom(1.0, 1.0);
 	}
 	draw_latency += frameclock.GetElapsedTime();
 	frameclock.Reset();

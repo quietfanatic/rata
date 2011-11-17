@@ -50,14 +50,14 @@ bool paused = false;
  // SFML main window
 //sf::Image* screen;
 sf::RenderWindow* window;
-sf::View window_view = sf::View(sf::FloatRect(0, 15, 20, 0));
+sf::View window_view = sf::View(sf::FloatRect(0, 30, 40, 0));
 float viewleft () { return window_view.GetRect().Left; }
-float viewright () { return window_view.GetRect().Right; }
+float viewright () { return window_view.GetRect().Left + 20; }
  // For some reason it gets top and bottom confused.
-float viewtop () { return window_view.GetRect().Bottom; }
+float viewtop () { return window_view.GetRect().Top + 15; }
 float viewbottom () { return window_view.GetRect().Top; }
-float viewwidth () { return viewright() - viewleft(); }
-float viewheight () { return viewtop() - viewbottom(); }
+float viewwidth () { return 20; }
+float viewheight () { return 15; }
 
  // Debug draw Rata path.
 static const uint debug_path_size = 120;
