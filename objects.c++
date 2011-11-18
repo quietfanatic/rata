@@ -469,6 +469,7 @@ void Item::before_move () {
 
 #include "enemies.c++"
 
+#include "tilemap.c++"
 #include "misc.c++"
 
 

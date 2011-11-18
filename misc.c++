@@ -2,17 +2,7 @@
 
 
 struct Door : Actor {
-	void before_move () {
-		if (rata->floor)
-			rata->propose_action(Rata::action_enter, this, desc->pos, desc->vel.x);
-	}
 };
-
-
-struct Tilemap : Object {
-	void on_create () { }
-};
-
 
 
 struct Bullet : Actor {
