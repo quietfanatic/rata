@@ -18,10 +18,6 @@ MoveStats default_stats = {
 };
 
 
- // Equipment, stored seperately for various reasons.
-uint inventory_amount;
-obj::Desc* inventory [10];
-obj::Desc* equipment [item::num_slots];
 
 struct Rata : Walking {
 	 // Character state
@@ -82,26 +78,33 @@ struct Rata : Walking {
 	float helmet_angle;
 	const Vec* sight_points;
 	 // Fixtures
-	b2Fixture* fix_feet;
-	b2Fixture* fix_current;
-	b2Fixture* fix_27;
-	b2Fixture* fix_25;
-	b2Fixture* fix_21;
-	b2Fixture* fix_h7;
-	b2Fixture* fix_crawl_r;
-	b2Fixture* fix_crawl_l;
-	b2Fixture* fix_sensor_21;
-	b2Fixture* fix_sensor_floor_r;
-	b2Fixture* fix_sensor_floor_l;
-	b2Fixture* fix_sensor_block_r;
-	b2Fixture* fix_sensor_block_l;
-	b2Fixture* fix_sensor_wall_r;
-	b2Fixture* fix_sensor_wall_l;
-	b2Fixture* fix_helmet_current;
-	b2Fixture* fix_helmet_stand;
-	b2Fixture* fix_helmet_kneel;
-	b2Fixture* fix_helmet_crawl_r;
-	b2Fixture* fix_helmet_crawl_l;
+	enum {
+		fix_feet,
+		fix_27,
+		fix_25,
+		fix_21,
+		fix_h7,
+		fix_crawl_r,
+		fix_crawl_l,
+		fix_sensor_21,
+		fix_sensor_floor_r,
+		fix_sensor_floor_l,
+		fix_sensor_block_r,
+		fix_sensor_block_l,
+		fix_sensor_wall_r,
+		fix_sensor_wall_l,
+		fix_helmet_stand,
+		fix_helmet_kneel,
+		fix_helmet_crawl_r,
+		fix_helmet_crawl_l,
+	};
+	int fix_current;
+	int fix_old;
+	int fix_helmet_current;
+	int fix_helmet_old;
+	 // Equipment and inventory
+	obj::Desc* inventory [10];
+	obj::Desc* equipment [item::num_slots];
 	 // Actions
 	float action_distance;
 	void* action_arg;
@@ -133,13 +136,18 @@ struct Rata : Walking {
 	}
 	Vec aim_center () { return pos() + Vec(2*PX*facing, 13*PX); }
 	Vec cursor_pos () { return aim_center() + Vec(cursor.x, cursor.y); }
+	
+	void set_fix (int fix) {
+		fix_current = fix;
+	}
+	void set_helmet (int fix) {
+		fix_helmet_current = fix;
+	}
 
-//	b2Fixture* fix_current () {
-//		if (hurt_frames) return fix_27();
-//		else if (kneeling) return fix_21();
-//		else return fix_25();
-//	}
-	bool check_fix (b2Fixture* fix) {
+	bool check_fix (int fixi) {
+		b2Fixture* fix = body->GetFixtureList();
+		for (int i=0; i < fixi; i++)
+			fix = fix->GetNext();
 		for (b2ContactEdge* ce = body->GetContactList(); ce; ce=ce->next) {
 			b2Contact* c = ce->contact;
 			if (c->GetFixtureA() == fix || c->GetFixtureB() == fix)
@@ -163,25 +171,17 @@ struct Rata : Walking {
 		    || hurt_id[0] == obj::bullet
 		    || hurt_id[1] == obj::bullet;
 	}
-	void set_fix (b2Fixture* fix) {
-		fix_feet->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-		if (fix_current && fix_current != fix) {
-			fix_current->SetFilterData(cf::disabled);
-		}
-		fix_current = fix;
-		fix->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
-	}
-	void set_helmet (b2Fixture* fix) {
-		if (fix && wearing_helmet()) {
-			if (fix_helmet_current && fix_helmet_current != fix) {
-				fix_helmet_current->SetFilterData(cf::disabled);
+	void update_fixtures () {
+		int i = 0;
+		for (b2Fixture* fix = body->GetFixtureList(); fix; fix = fix->GetNext()) {
+			if (i == fix_current || i == fix_helmet_current || i == fix_feet) {
+				fix->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 			}
-			fix->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
+			else if (i == fix_old || i == fix_helmet_old) {
+				fix->SetFilterData(cf::disabled);
+			}
+			i++;
 		}
-		else if (fix_helmet_current) {
-			fix_helmet_current->SetFilterData(cf::disabled);
-		}
-		fix_helmet_current = fix;
 	}
 
 
@@ -195,9 +195,8 @@ struct Rata : Walking {
 	}
 	void add_to_inventory (obj::Desc* itemdesc) {
 		for (uint i=0; i < MAX_INVENTORY; i++) {
-			if (inventory[i] == 0) {
+			if (inventory[i] == NULL) {
 				inventory[i] = itemdesc;
-				inventory_amount++;
 				itemdesc->room = -100 - i;
 				return;
 			}
@@ -501,6 +500,8 @@ struct Rata : Walking {
 
 	void before_move () {
 		read_controls();
+		fix_old = fix_current;
+		fix_helmet_old = fix_helmet_current;
 		aiming = false;
 		switch (state) {
 			case standing:
@@ -709,7 +710,7 @@ struct Rata : Walking {
 				floor_friction = stats.decel;
 				ideal_xvel = 0;
 				set_fix(fix_h7);
-				set_helmet(NULL);
+				set_helmet(-1);
 				break;
 			}	
 		}
@@ -733,7 +734,8 @@ struct Rata : Walking {
 		//	else cursor.img = img::nolook;
 		//}
 		else cursor.img = img::nolook;
-
+		
+		update_fixtures();
 		Walking::before_move();
 	}
 
@@ -782,27 +784,10 @@ struct Rata : Walking {
 			for (uint i = obj::def[desc->id].nfixes; i > 0; i--) {
 				dbg(4, "Fix %d: 0x%08x\n", i, body->CreateFixture(&(obj::def[desc->id].fixdef[i-1])));
 			}
-		fix_feet = body->GetFixtureList();
-		fix_27 = fix_feet->GetNext();
-		fix_25 = fix_27->GetNext();
-		fix_21 = fix_25->GetNext();
-		fix_h7 = fix_21->GetNext();
-		fix_crawl_r = fix_h7->GetNext();
-		fix_crawl_l = fix_crawl_r->GetNext();
-		fix_sensor_21 = fix_crawl_l->GetNext();
-		fix_sensor_floor_r = fix_sensor_21->GetNext();
-		fix_sensor_floor_l = fix_sensor_floor_r->GetNext();
-		fix_sensor_block_r = fix_sensor_floor_l->GetNext();
-		fix_sensor_block_l = fix_sensor_block_r->GetNext();
-		fix_sensor_wall_r = fix_sensor_block_l->GetNext();
-		fix_sensor_wall_l = fix_sensor_wall_r->GetNext();
-		fix_helmet_stand = fix_sensor_wall_l->GetNext();
-		fix_helmet_kneel = fix_helmet_stand->GetNext();
-		fix_helmet_crawl_r = fix_helmet_kneel->GetNext();
-		fix_helmet_crawl_l = fix_helmet_crawl_r->GetNext();
-		fix_current = fix_helmet_current = NULL;
-		set_fix(fix_27);
 		dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
+		fix_old = fix_current = fix_27;
+		fix_helmet_old = fix_helmet_current = -1;
+		update_fixtures();
 		floor = NULL;
 		Walking::on_create();
 		float_frames = 0;
@@ -814,11 +799,20 @@ struct Rata : Walking {
 		if (desc->data) state = desc->data;
 		else state = falling;
 		life = max_life = 144;
-		inventory_amount = 0;
 		for (uint i=0; i<MAX_INVENTORY; i++)
-			if (inventory[i]) inventory_amount++;
+			inventory[i] = NULL;
 		for (uint i=0; i<item::num_slots; i++)
 			equipment[i] = NULL;
+		for (uint i=0; i<n_saved_things; i++) {
+			if (saved_things[i].room == room::equipment) {
+				equipment[item::def[saved_things[i].data].slot] = &saved_things[i];
+				if (item::def[saved_things[i].data].otherslot > -1)
+					equipment[item::def[saved_things[i].data].otherslot] = &saved_things[i];
+			}
+			else if (saved_things[i].room <= -100) {
+				inventory[saved_things[i].room + 100] = &saved_things[i];
+			}
+		}
 		facing = desc->facing ? desc->facing : 1;
 		cursor.x = 2.0 * facing;
 		cursor.y = 0;

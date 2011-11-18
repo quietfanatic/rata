@@ -83,15 +83,6 @@ void load_save () {
 		if (saved_things[i].room == room::everywhere) {
 			saved_things[i].manifest();
 		}
-		else if (saved_things[i].room == room::equipment) {
-//			if (item::def[saved_things[i].data].slot >= 0)
-//				rata->equipment[item::def[saved_things[i].data].slot] = &saved_things[i];
-//			if (item::def[saved_things[i].data].otherslot >= 0)
-//				rata->equipment[item::def[saved_things[i].data].otherslot] = &saved_things[i];
-		}
-		else if (saved_things[i].room <= -100) {
-//			rata->inventory[-(saved_things[i].room + 100)] = &saved_things[i];
-		}
 	}
 }
 
