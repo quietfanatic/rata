@@ -4,13 +4,13 @@
 
 const uint SAVEFILE_VERSION = 3;
 
-const uint n_saved_things = 14;
+const uint n_saved_things = 8;
 extern obj::Desc saved_things [n_saved_things];
 
 #else
 
 obj::Desc saved_things [n_saved_things] = {
-	obj::Desc(room::everywhere, obj::rata, Vec(10,10)),
+	obj::Desc(room::roompicker, obj::rata, Vec(10,10)),
 	obj::Desc(room::everywhere, obj::tiles_back, Vec(0,0), Vec(0,0), 0),
 	obj::Desc(room::everywhere, obj::bullet_layer),
 	obj::Desc(room::everywhere, obj::tiles_front, Vec(0,0), Vec(0,0), 1),
@@ -18,12 +18,12 @@ obj::Desc saved_things [n_saved_things] = {
 	obj::Desc(room::everywhere, obj::shade, Vec(0,0), Vec(20,15), -1, 0x0f0f0f4f),
 	obj::Desc(room::equipment, obj::item, Vec(0,0), Vec(0,0), 0, item::white_dress),
 	obj::Desc(room::roompicker, obj::item, Vec(14.5, 5.0), Vec(0,0), 0, item::handgun),
-	obj::Desc(room::test2, obj::item, Vec(8.5, 21.0), Vec(0,0), 0, item::white_dress),
-	obj::Desc(room::test2, obj::item, Vec(38.5, 17.0), Vec(0,0), 0, item::handgun),
-	obj::Desc(room::test4, obj::item, Vec(21.0, 1.0), Vec(0,0), 0, item::handgun),
-	obj::Desc(room::test4, obj::item, Vec(28.0, 1.0), Vec(0,0), 0, item::white_dress),
-	obj::Desc(room::test4, obj::item, Vec(25.0, 1.0), Vec(0,0), 0, item::boots),
-	obj::Desc(room::test4, obj::item, Vec(27.0, 14.0), Vec(0,0), 0, item::helmet),
+//	obj::Desc(room::test2, obj::item, Vec(8.5, 21.0), Vec(0,0), 0, item::white_dress),
+//	obj::Desc(room::test2, obj::item, Vec(38.5, 17.0), Vec(0,0), 0, item::handgun),
+//	obj::Desc(room::test4, obj::item, Vec(21.0, 1.0), Vec(0,0), 0, item::handgun),
+//	obj::Desc(room::test4, obj::item, Vec(28.0, 1.0), Vec(0,0), 0, item::white_dress),
+//	obj::Desc(room::test4, obj::item, Vec(25.0, 1.0), Vec(0,0), 0, item::boots),
+//	obj::Desc(room::test4, obj::item, Vec(27.0, 14.0), Vec(0,0), 0, item::helmet),
 };
 
 
@@ -77,17 +77,20 @@ void load_save () {
 		printf("Could not open save file; creating new game.\n");
 	}
 	for (uint i=0; i < n_saved_things; i++) {
+		if (saved_things[i].id == obj::rata) {
+			room::currenti = saved_things[i].room;
+		}
 		if (saved_things[i].room == room::everywhere) {
 			saved_things[i].manifest();
 		}
 		else if (saved_things[i].room == room::equipment) {
-			if (item::def[saved_things[i].data].slot >= 0)
-				rata->equipment[item::def[saved_things[i].data].slot] = &saved_things[i];
-			if (item::def[saved_things[i].data].otherslot >= 0)
-				rata->equipment[item::def[saved_things[i].data].otherslot] = &saved_things[i];
+//			if (item::def[saved_things[i].data].slot >= 0)
+//				rata->equipment[item::def[saved_things[i].data].slot] = &saved_things[i];
+//			if (item::def[saved_things[i].data].otherslot >= 0)
+//				rata->equipment[item::def[saved_things[i].data].otherslot] = &saved_things[i];
 		}
 		else if (saved_things[i].room <= -100) {
-			rata->inventory[-(saved_things[i].room + 100)] = &saved_things[i];
+//			rata->inventory[-(saved_things[i].room + 100)] = &saved_things[i];
 		}
 	}
 }

@@ -131,14 +131,9 @@ void draw_phase () {
 		dbg(6, "Skipping frame %d.\n", frame_number);
 		return;
 	}
-	Room* rc = room::current;
 	if (rata) {
 		float focusx = rata->aim_center().x + cursor.x/2.0;
 		float focusy = rata->aim_center().y + cursor.y/2.0;
-		if (focusx < 10) focusx = 10;
-		if (focusy < 7.5) focusy = 7.5;
-		if (focusx > rc->width-10) focusx = rc->width-10;
-		if (focusy > rc->height-7.5) focusy = rc->height-7.5;
 		 // To look smooth in a pixelated environment,
 		 //  we need a minimum speed.
 		if (camera_jump) {
@@ -165,18 +160,17 @@ void draw_phase () {
 	}
 	window->SetView(window_view);
 	 // Draw background
-	if (rc && rc->bg < 0)
-		window->Clear(rc->color);
-	else if (rc) {
-		float w = img::def[rc->bg].sfi.GetWidth()*PX;
-		float h = img::def[rc->bg].sfi.GetHeight()*PX;
-		float bg_x = mod_f(-camera.x/2, w);
-		float bg_y = mod_f(-camera.y/2, h);
-		for (float x = bg_x + viewleft(); x < viewright(); x += w)
-		for (float y = bg_y + h + viewtop(); y > viewbottom(); y -= h) {
-			draw_image(rc->bg, Vec(x, y));
-		}
-	}
+	window->Clear(Color(0x7f7f7fff));
+	//else if (rc) {
+	//	float w = img::def[rc->bg].sfi.GetWidth()*PX;
+	//	float h = img::def[rc->bg].sfi.GetHeight()*PX;
+	//	float bg_x = mod_f(-camera.x/2, w);
+	//	float bg_y = mod_f(-camera.y/2, h);
+	//	for (float x = bg_x + viewleft(); x < viewright(); x += w)
+	//	for (float y = bg_y + h + viewtop(); y > viewbottom(); y -= h) {
+	//		draw_image(rc->bg, Vec(x, y));
+	//	}
+	//}
 	 // Draw actors
 	for (Actor* a = actors_by_depth; a; a = a->next_depth) {
 		dbg(8, "Drawing 0x%08x\n", a);
@@ -348,12 +342,12 @@ void input_phase () {
 				window_fullscreen = !window_fullscreen;
 				set_video();
 			}
-			if (event.Key.Code == sf::Key::Num1) enter_room(room::test1, 0);
-			if (event.Key.Code == sf::Key::Num2) enter_room(room::test2, 0);
-			if (event.Key.Code == sf::Key::Num3) enter_room(room::test3, 0);
-			if (event.Key.Code == sf::Key::Num4) enter_room(room::test4, 0);
-			if (event.Key.Code == sf::Key::Num5) enter_room(room::edit1, 0);
-			if (event.Key.Code == sf::Key::Num6) enter_room(room::empty, 0);
+			//if (event.Key.Code == sf::Key::Num1) enter_room(room::test1, 0);
+			//if (event.Key.Code == sf::Key::Num2) enter_room(room::test2, 0);
+			//if (event.Key.Code == sf::Key::Num3) enter_room(room::test3, 0);
+			//if (event.Key.Code == sf::Key::Num4) enter_room(room::test4, 0);
+			//if (event.Key.Code == sf::Key::Num5) enter_room(room::edit1, 0);
+			//if (event.Key.Code == sf::Key::Num6) enter_room(room::empty, 0);
 			if (event.Key.Code == sf::Key::Num0) save_save();
 			if (event.Key.Code == sf::Key::P) toggle_pause();
 			if (event.Key.Code >= 400) break;

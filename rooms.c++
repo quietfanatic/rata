@@ -11,27 +11,23 @@ namespace room {
 	struct Room;
 	Room* current = NULL;
 	int currenti = -1;
-	int entrance = -1;
 	bool transition = false;
 	Tilemap* tilemap_obj = NULL;
 	struct Room {
+		roomconst Vec pos;
 		roomconst uint16 width;
 		roomconst uint16 height;
-		roomconst Color color;
-		roomconst int16 bg;
-		roomconst int16 bgm;
 		roomconst int16* tiles;
+		roomconst uint32 nneighbors;
+		roomconst int32* neighbors;
 		roomconst uint32 nobjects;
 		roomconst obj::Desc* objects;
 		obj::Desc* saved_objects;
 
 		void leave ();
-		void enter (int entrance = -1);
+		void enter ();
 		int16 tile (uint x, uint y);
 		void manifest_geometry ();
-#ifdef MAPEDITOR
-		int print_to_file(FILE* F);
-#endif
 	};
 	enum Location {
 		wherever = -1,
@@ -43,7 +39,7 @@ namespace room {
 }
 typedef room::Room Room;
 
-void enter_room (int id, int entrance);
+void enter_room (int id);
 
 #else
 
@@ -130,15 +126,14 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 
 
 
-void enter_room(int roomi, int entrance) {
+void enter_room(int roomi) {
 	room::currenti = roomi;
-	room::list[roomi]->enter(entrance);
+	room::list[roomi]->enter();
 }
 
 namespace room {
-	void Room::enter (int entrance_) {
+	void Room::enter () {
 		camera_jump = true;
-		entrance = entrance_;
 		if (current) current->leave();
 		current = this;
 		if (!saved_objects) {
@@ -155,13 +150,13 @@ namespace room {
 		if (saved_things[i].room == currenti)
 		if (saved_things[i].id > 0)
 			saved_things[i].manifest();
-		if (bgm > -1 && bgm != bgm::current) {
-			bgm::current = bgm;
-			bgm::music.OpenFromFile(bgm::name[bgm]);
-			bgm::music.SetLoop(true);
-			bgm::music.SetVolume(80);
-			bgm::music.Play();
-		}
+//		if (bgm > -1 && bgm != bgm::current) {
+//			bgm::current = bgm;
+//			bgm::music.OpenFromFile(bgm::name[bgm]);
+//			bgm::music.SetLoop(true);
+//			bgm::music.SetVolume(80);
+//			bgm::music.Play();
+//		}
 	}
 
 	void Room::leave () {
@@ -243,67 +238,18 @@ namespace room {
 		}
 	}
 
-	void die (const char* mess) {
-		fprintf(stderr, mess);
-		exit(1);
-	}
-
-#ifdef MAPEDITOR
-	int Room::print_to_file (FILE* F) {
-		fprintf(F,
-			"\n\n"
-			"ROOM_BEGIN\n\n"
-			"ROOM_WIDTH(%hu)\n"
-			"ROOM_HEIGHT(%hu)\n"
-			"ROOM_TILES(\n", width, height
-		);
-
-		for (uint y=0; y < height; y++) {
-			for (uint x=0; x < width; x++) {
-				fprintf(F, "% 3d,", tile(x, y));
-			}
-			fprintf(F, "\n");
-		}
-		fprintf(F,
-			")\n\n"
-			"ROOM_NOBJECTS(%hu)\n"
-			"ROOM_OBJECTS(\n", nobjects
-		);
-		for (uint i=0; i < nobjects; i++) {
-			fprintf(F, "\tROOM_OBJECT(%s, %f, %f, %f, %f, %d, %u, %u)\n",
-				obj::idname[objects[i].id],
-				objects[i].pos.x,
-				objects[i].pos.y,
-				objects[i].vel.x,
-				objects[i].vel.y,
-				objects[i].facing,
-				objects[i].data,
-				objects[i].data2
-			);
-		}
-		return 0<=fprintf(F,
-			")\n\n"
-			"ROOM_COLOR(%hhu, %hhu, %hhu, %hhu)\n"
-			"ROOM_BG(%hd)\n"
-			"ROOM_BGM(%hd)\n\n"
-			"ROOM_END\n\n",
-			color.r, color.g, color.b, color.a,
-			bg, bgm
-		);
-	}
-#endif
 
 #define ROOM_BEGIN
+#define ROOM_POS(x, y) static const Vec pos = Vec(x, y);
 #define ROOM_WIDTH(...) static const uint16 width = __VA_ARGS__;
 #define ROOM_HEIGHT(...) static const uint16 height = __VA_ARGS__;
 #define ROOM_TILES(...) roomconst int16 tiles [width * height] = {__VA_ARGS__};
+#define ROOM_NNEIGHBORS(...) static const uint32 nneighbors = __VA_ARGS__;
+#define ROOM_NEIGHBORS(...) roomconst int32 neighbors [nneighbors] = {__VA_ARGS__};
 #define ROOM_NOBJECTS(...) static const uint nobjects = __VA_ARGS__;
 #define ROOM_OBJECTS(...) roomconst obj::Desc objects [nobjects] = {__VA_ARGS__};
 #define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(-1, id, Vec(x, y), Vec(xvel, yvel), facing, data, data2),
-#define ROOM_COLOR(...) static const Color color = Color(__VA_ARGS__);
-#define ROOM_BG(...) static const uint16 bg = __VA_ARGS__;
-#define ROOM_BGM(...) static const uint16 bgm = __VA_ARGS__;
-#define ROOM_END Room room = {width, height, color, bg, bgm, tiles, nobjects, objects, NULL};
+#define ROOM_END Room room = {pos, width, height, tiles, nneighbors, neighbors, nobjects, objects, NULL};
 
 
 
@@ -311,7 +257,6 @@ namespace room {
 
 
 }
-
 
 
 

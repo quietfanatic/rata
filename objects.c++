@@ -29,8 +29,6 @@ namespace obj {
 	enum ID {
 		object,
 		rata,
-		entrance,
-		exit,
 		door,
 		solid,
 		tilemap,
@@ -669,8 +667,6 @@ const obj::Def obj::def [] = {
 
 	{"Object", -1, NULL, 0, 0, obj::ALLOC<Object>, -1},
 	{"Rata", 18, rata_fixes, 10, 100, obj::ALLOC<Rata>, -1},
-	{"Entrance", -1, NULL, -1000, -1000, obj::ALLOC<Entrance>, -1},
-	{"Exit", -1, NULL, -100, -100, obj::ALLOC<Exit>, -1},
 	{"Door", -1, NULL, -100, 200, obj::ALLOC<Door>, -1},
 	{"Solid Object", -1, NULL, 0, 0, obj::ALLOC<Solid>, -1},
 	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, -1},

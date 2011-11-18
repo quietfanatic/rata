@@ -18,6 +18,10 @@ MoveStats default_stats = {
 };
 
 
+ // Equipment, stored seperately for various reasons.
+uint inventory_amount;
+obj::Desc* inventory [10];
+obj::Desc* equipment [item::num_slots];
 
 struct Rata : Walking {
 	 // Character state
@@ -98,10 +102,6 @@ struct Rata : Walking {
 	b2Fixture* fix_helmet_kneel;
 	b2Fixture* fix_helmet_crawl_r;
 	b2Fixture* fix_helmet_crawl_l;
-	 // Equipment
-	uint inventory_amount;
-	obj::Desc* inventory [10];
-	obj::Desc* equipment [item::num_slots];
 	 // Actions
 	float action_distance;
 	void* action_arg;
@@ -429,7 +429,7 @@ struct Rata : Walking {
 			}
 			case action_enter: {
 				obj::Desc* d = ((Object*)action_arg)->desc;
-				enter_room(d->data, d->data2);
+				enter_room(d->data);
 				break;
 			}
 			default: { }
@@ -818,6 +818,8 @@ struct Rata : Walking {
 		inventory_amount = 0;
 		for (uint i=0; i<MAX_INVENTORY; i++)
 			if (inventory[i]) inventory_amount++;
+		for (uint i=0; i<item::num_slots; i++)
+			equipment[i] = NULL;
 		facing = desc->facing ? desc->facing : 1;
 		cursor.x = 2.0 * facing;
 		cursor.y = 0;

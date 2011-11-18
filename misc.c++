@@ -1,32 +1,5 @@
 
 
-struct Entrance : Actor {
-	void on_create () {
-		if (room::entrance == (int)desc->data2) {
-			if (rata->body) {
-				rata->set_pos(desc->pos);
-				if (desc->data) rata->state = (Rata::State)desc->data;
-				if (desc->facing) rata->facing = desc->facing;
-			}
-			else {
-				rata->desc->pos = desc->pos;
-				if (desc->data) rata->desc->data = desc->data;
-				if (desc->facing) rata->desc->facing = desc->facing;
-			}
-		}
-		destroy();
-	}
-};
-
-struct Exit : Actor {
-	void after_move () {
-		if (rata->x() > desc->pos.x)
-		if (rata->x() < desc->pos.x + desc->vel.x)
-		if (rata->y() > desc->pos.y)
-		if (rata->y() < desc->pos.y + desc->vel.y)
-			enter_room(desc->data, desc->data2);
-	}
-};
 
 struct Door : Actor {
 	void before_move () {
@@ -100,12 +73,12 @@ struct Heart : Object {
 struct TileLayer : Actor {
 	void draw () {
 		if (room::current) {
-			uint minx = viewleft();
-			uint miny = viewbottom();
-			uint maxx = ceil(viewright());
-			uint maxy = ceil(viewtop());
-			for (uint x=minx; x < maxx; x++)
-			for (uint y=miny; y < maxy; y++) {
+			int minx = floor(viewleft());
+			int miny = floor(viewbottom());
+			int maxx = ceil(viewright());
+			int maxy = ceil(viewtop());
+			for (int x=minx; x < maxx; x++)
+			for (int y=miny; y < maxy; y++) {
 				int tile = map::at(x, y).id;
 				bool flip = (tile < 0);
 				if (flip) tile = -tile;
