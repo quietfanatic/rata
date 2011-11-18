@@ -309,7 +309,7 @@ void draw_phase () {
 		render_text(message_pos, Vec(10, 1), 1, false, true, 0, true);
 	}
 	if (window_scale > 1.0) {
-		glRasterPos2f(viewleft()+0.000001, viewbottom()+0.000001);
+		//glWindowPos2i(ceil(viewleft()*UNPX)*PX, ceil(viewbottom()*UNPX)*PX);
 		glPixelZoom(window_scale, window_scale);
 		glCopyPixels(0, 0, 320, 240, GL_COLOR);
 		glPixelZoom(1.0, 1.0);
