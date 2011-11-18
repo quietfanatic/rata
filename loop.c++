@@ -68,10 +68,10 @@ void toggle_pause () {
 
 
 
-void create_phase () {
+void add_phase () {
 	 // We must repeat if an object creates a new object in on_create()
-	while (Actor* tq = creation_queue) {
-		creation_queue = NULL;
+	while (Actor* tq = activation_queue) {
+		activation_queue = NULL;
 		for (Actor* next; tq; tq = next) {
 			Actor* c = tq;
 			next = c->next_depth;
@@ -85,24 +85,17 @@ void create_phase () {
 			}  // Least deep object
 			c->next_depth = NULL;
 			*a = c;
-			done_depth:
-			c->on_create();
+			done_depth: { }
 		}
 	}
 }
 
-void destroy_phase () {
+void remove_phase () {
 	for (Actor** a = &actors_by_depth; *a;) {
-		if ((*a)->doomed) {
-			Actor* doomed = *a;
-			doomed->on_destroy();
-			*a = doomed->next_depth;
-			if (doomed->has_body()) {
-				world->DestroyBody(((Object*)doomed)->body);
-			}
-			if (doomed->desc->room == -2) delete doomed->desc;
-			delete doomed;
-		}  // Need to ensure we don't leave any dead pointers
+		if (!(*a)->active) {
+			Actor* old = *a;
+			*a = old->next_depth;
+		}
 		else { a = &(*a)->next_depth; }
 	}
 }
@@ -424,12 +417,11 @@ void main_loop () {
 	window->SetCursorPosition(window->GetWidth()/2, window->GetHeight()/2);
 	for (;;) {
 		frame_number++;
-		create_phase();
+		add_phase();
 		draw_phase();
-		destroy_phase();
 		input_phase();
 		move_phase();
-		destroy_phase();
+		remove_phase();
 	}
 }
 

@@ -36,7 +36,7 @@ struct myCL : b2ContactListener {
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
 		//b2Manifold* manifold = contact->GetManifold();
-		if (a->doomed or b->doomed)
+		if (!a->alive || !b->alive)
 			return contact->SetEnabled(false);
 	}
 	void PostSolve (b2Contact* contact, const b2ContactImpulse* ci) {

@@ -84,7 +84,8 @@ struct obj::Desc {
 struct Actor {
 	obj::Desc* desc;
 	Actor* next_depth;
-	bool doomed;
+	bool alive;
+	bool active;
 	virtual void on_create () { }
 	virtual void before_move () { }
 	virtual void after_move () { }
@@ -123,14 +124,18 @@ struct FixProp {
 #else
 
 void Actor::create () {
-	next_depth = creation_queue;
-	creation_queue = this;
-	doomed = false;
+	next_depth = activation_queue;
+	activation_queue = this;
+	alive = true;
+	active = true;
 	dbg(2, "Creating 0x%08x\n", this);
+	on_create();
 }
 void Actor::destroy () {
-	doomed = true;
+	alive = false;
+	active = false;
 	dbg(2, "Destroying 0x%08x\n", this);
+	on_destroy();
 }
 
  // Collision filters
@@ -214,7 +219,7 @@ struct Object : Actor {
 		float32 ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
 			if (fix->GetFilterData().categoryBits & mask)
 			if (fix->GetBody()->GetUserData() != owner)
-			if (!((Object*)fix->GetBody()->GetUserData())->doomed) {
+			if (((Object*)fix->GetBody()->GetUserData())->alive) {
 				dbg(6, "raytrace hit with cf %u, %u.\n", fix->GetFilterData().categoryBits, mask);
 				if (f < frac) {
 					hit = fix;
