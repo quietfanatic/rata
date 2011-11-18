@@ -134,6 +134,18 @@ void draw_phase () {
 	if (rata) {
 		float focusx = rata->aim_center().x + cursor.x/2.0;
 		float focusy = rata->aim_center().y + cursor.y/2.0;
+		if (room::current > -1) {
+			Room* r = room::list[room::current];
+			uint32 walls = r->walls;
+			if (walls&LEFT && focusx < r->pos.x + 10)
+				focusx = r->pos.x + 10;
+			else if (walls&RIGHT && focusx > r->pos.x + r->width - 10)
+				focusx = r->pos.x + r->width - 10;
+			if (walls&BOTTOM && focusy < r->pos.y + 7.5)
+				focusy = r->pos.y + 7.5;
+			else if (walls&TOP && focusy > r->pos.y + r->height - 7.5)
+				focusy = r->pos.y + r->height - 7.5;
+		}
 		 // To look smooth in a pixelated environment,
 		 //  we need a minimum speed.
 		if (camera_jump) {

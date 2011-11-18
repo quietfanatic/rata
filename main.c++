@@ -7,6 +7,7 @@ int main () {
 	main_init();
 	load_save();
 	room::list[room::current]->load();
+	camera_jump = true;
 
 	try { main_loop(); } catch (int x) { printf("Game quit succesfully with result %d.\n", x); }
 	return 0;

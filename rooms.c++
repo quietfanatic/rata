@@ -16,6 +16,7 @@ namespace room {
 		roomconst int16* tiles;
 		roomconst uint32 nneighbors;
 		roomconst int32* neighbors;
+		roomconst uint32 walls;
 		roomconst uint32 nobjects;
 		roomconst obj::Desc* objects;
 		obj::Desc* saved_objects;
@@ -87,10 +88,11 @@ namespace room {
 #define ROOM_TILES(...) roomconst int16 tiles [width * height] = {__VA_ARGS__};
 #define ROOM_NNEIGHBORS(...) static const uint32 nneighbors = __VA_ARGS__;
 #define ROOM_NEIGHBORS(...) roomconst int32 neighbors [nneighbors] = {__VA_ARGS__};
-#define ROOM_NOBJECTS(...) static const uint nobjects = __VA_ARGS__;
+#define ROOM_WALLS(...) roomconst uint32 walls = __VA_ARGS__;
+#define ROOM_NOBJECTS(...) static const uint32 nobjects = __VA_ARGS__;
 #define ROOM_OBJECTS(...) roomconst obj::Desc objects [nobjects] = {__VA_ARGS__};
 #define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(-1, id, Vec(x, y), Vec(xvel, yvel), facing, data, data2),
-#define ROOM_END Room room = {pos, width, height, tiles, nneighbors, neighbors, nobjects, objects, NULL};
+#define ROOM_END Room room = {pos, width, height, tiles, nneighbors, neighbors, walls, nobjects, objects, NULL};
 
 
 

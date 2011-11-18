@@ -41,7 +41,14 @@ static uint8 get_angle_frame (float a) {
 }
 
 
-
+enum SIDE {
+	NOSIDE = 0,
+	LEFT = 1,
+	TOP = 2,
+	RIGHT = 4,
+	BOTTOM = 8,
+	ALLSIDES = 15
+};
 
 
 
