@@ -124,6 +124,7 @@ struct Tilemap : Object {
 		make_body(desc, false, false);
 		b2FixtureDef fixdef;
 		fixdef.filter = cf::solid;
+		uint nfixes=0;
 		for (uint x=0; x < r->width; x++)
 		for (uint y=0; y < r->height; y++)
 		for (uint e=0; e < tile::max_vertexes; e++)
@@ -131,14 +132,14 @@ struct Tilemap : Object {
 			bool flip = (r->tile(x, y) < 0);
 			const tile::Def& t = tile::def[flip? -r->tile(x,y) : r->tile(x,y)];
 			b2EdgeShape edge;
-			edge.Set(edges[x][y][e].v1 + r->pos, edges[x][y][e].v2 + r->pos);
+			edge.Set(edges[x][y][e].v1, edges[x][y][e].v2);
 			if (edges[x][y][e].n1) {
 				edge.m_hasVertex0 = true;
-				edge.m_vertex0 = edges[x][y][e].n1->v1 + r->pos;
+				edge.m_vertex0 = edges[x][y][e].n1->v1;
 			}
 			if (edges[x][y][e].n2) {
 				edge.m_hasVertex3 = true;
-				edge.m_vertex3 = edges[x][y][e].n2->v2 + r->pos;
+				edge.m_vertex3 = edges[x][y][e].n2->v2;
 			}
 			fixdef.shape = &edge;
 			fixdef.friction = t.friction;
@@ -146,7 +147,9 @@ struct Tilemap : Object {
 			//fixdef.density = 100.0;
 			fixdef.userData = t.prop ? t.prop : &default_FixProp;
 			body->CreateFixture(&fixdef);
+			nfixes++;
 		}
+		printf("Created %u static fixtures.\n", nfixes);
 	}
 };
 

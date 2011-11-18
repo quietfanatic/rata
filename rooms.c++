@@ -73,10 +73,10 @@ namespace room {
 		}
 		(new obj::Desc(
 			-2, obj::tilemap,
-			pos, Vec(0, 0),
-			current
+			pos, Vec(0, 0), 0,
+			id
 		))->manifest();
-		map::load_room(current);
+		map::load_room(id);
 		 // Load these objects
 		for (uint i = 0; i < nobjects; i++)
 		if (saved_objects[i].id > 0)
