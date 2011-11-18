@@ -449,7 +449,7 @@ struct Walking : Object {
 
 struct Item : Actor {
 	void draw ();
-	void before_move ();
+	void after_move ();
 };
 
 
@@ -461,7 +461,7 @@ void Item::draw () {
 		draw_image(info->appearance, desc->pos, info->world_frame);
 	}
 }
-void Item::before_move () {
+void Item::after_move () {
 	if (rata->floor)
 		rata->propose_action(Rata::action_equip, this, desc->pos, 1);
 }

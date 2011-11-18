@@ -734,6 +734,8 @@ struct Rata : Walking {
 		//	else cursor.img = img::nolook;
 		//}
 		else cursor.img = img::nolook;
+		action = -1;
+		action_distance = 1000000;
 		
 		update_fixtures();
 		Walking::before_move();
@@ -1093,8 +1095,6 @@ struct Rata : Walking {
 		if (m) {
 			render_text((char*)m, pos() + Vec(0, 3), 1, true, true, 0);
 		}
-		action = -1;
-		action_distance = 10000000;
 
 	}
 };
