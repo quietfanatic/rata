@@ -60,7 +60,6 @@ struct obj::Def {
 	int nfixes;
 	b2FixtureDef* fixdef;
 	float depth;
-	float order;
 	Actor* (& alloc) ();
 	int16 image;
 };
@@ -84,7 +83,6 @@ struct obj::Desc {
 struct Actor {
 	obj::Desc* desc;
 	Actor* next_depth;
-	Actor* next_order;
 	bool doomed;
 	virtual void on_create () { }
 	virtual void before_move () { }
@@ -126,7 +124,6 @@ struct FixProp {
 void Actor::create () {
 	next_depth = creation_queue;
 	creation_queue = this;
-	next_order = NULL;
 	doomed = false;
 	dbg(2, "Creating 0x%08x\n", this);
 }
@@ -666,25 +663,25 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 
 const obj::Def obj::def [] = {
 
-	{"Object", -1, NULL, 0, 0, obj::ALLOC<Object>, -1},
-	{"Rata", 18, rata_fixes, 10, 100, obj::ALLOC<Rata>, -1},
-	{"Door", -1, NULL, -100, 200, obj::ALLOC<Door>, -1},
-	{"Solid Object", -1, NULL, 0, 0, obj::ALLOC<Solid>, -1},
-	{"Tilemap", 0, NULL, 0, 0, obj::ALLOC<Tilemap>, -1},
-	{"Bullet", 1, &bullet_fix, -10, 50, obj::ALLOC<Bullet>, -1},
-	{"Rat", 1, &rat_fix, 15, 10, obj::ALLOC<Rat>, img::rat},
-	{"Crate", 1, &crate_fix, 0, 0, obj::ALLOC<Crate>, img::crate},
-	{"Mousehole", 1, &mousehole_fix, 50, 0, obj::ALLOC<Mousehole>, img::mousehole},
-	{"Hit Effect", -1, NULL, -90, 0, obj::ALLOC<HitEffect>, -1},
-	{"Patroller", 1, patroller_fixes, 20, 20, obj::ALLOC<Patroller>, img::patroller},
-	{"Flyer", 1, &flyer_fix, 20, 20, obj::ALLOC<Flyer>, img::flyer},
-	{"Heart", 1, &heart_fix, -20, 0, obj::ALLOC<Heart>, img::heart},
-	{"Item", -1, NULL, -5, 150, obj::ALLOC<Item>, -1},
-	{"Back Tiles", -1, NULL, 500, 0, obj::ALLOC<TileLayer>, -1},
-	{"Bullet Layer", -1, NULL, -200, 0, obj::ALLOC<BulletLayer>, -1},
-	{"Front Tiles", -1, NULL, -500, 0, obj::ALLOC<TileLayer>, -1},
-	{"Shade", -1, NULL, -3000, 0, obj::ALLOC<Shade>, -1},
-	{"Lifebar", -1, NULL, -4000, 0, obj::ALLOC<Lifebar>, -1},
+	{"Object", -1, NULL, 0, obj::ALLOC<Object>, -1},
+	{"Rata", 18, rata_fixes, 10, obj::ALLOC<Rata>, -1},
+	{"Door", -1, NULL, -100,  obj::ALLOC<Door>, -1},
+	{"Solid Object", -1, NULL, 0, obj::ALLOC<Solid>, -1},
+	{"Tilemap", 0, NULL, 0, obj::ALLOC<Tilemap>, -1},
+	{"Bullet", 1, &bullet_fix, -10, obj::ALLOC<Bullet>, -1},
+	{"Rat", 1, &rat_fix, 15, obj::ALLOC<Rat>, img::rat},
+	{"Crate", 1, &crate_fix, 0, obj::ALLOC<Crate>, img::crate},
+	{"Mousehole", 1, &mousehole_fix, 50, obj::ALLOC<Mousehole>, img::mousehole},
+	{"Hit Effect", -1, NULL, -90, obj::ALLOC<HitEffect>, -1},
+	{"Patroller", 1, patroller_fixes, 20, obj::ALLOC<Patroller>, img::patroller},
+	{"Flyer", 1, &flyer_fix, 20, obj::ALLOC<Flyer>, img::flyer},
+	{"Heart", 1, &heart_fix, -20, obj::ALLOC<Heart>, img::heart},
+	{"Item", -1, NULL, -5, obj::ALLOC<Item>, -1},
+	{"Back Tiles", -1, NULL, 500, obj::ALLOC<TileLayer>, -1},
+	{"Bullet Layer", -1, NULL, -200, obj::ALLOC<BulletLayer>, -1},
+	{"Front Tiles", -1, NULL, -500, obj::ALLOC<TileLayer>, -1},
+	{"Shade", -1, NULL, -3000, obj::ALLOC<Shade>, -1},
+	{"Lifebar", -1, NULL, -4000, obj::ALLOC<Lifebar>, -1},
 
 };
 

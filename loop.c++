@@ -86,18 +86,7 @@ void create_phase () {
 			c->next_depth = NULL;
 			*a = c;
 			done_depth:
-			for (a = &actors_by_order; *a; a = &(*a)->next_order) {
-				if (obj::def[c->desc->id].order > obj::def[(*a)->desc->id].order) {
-					c->next_order = *a;
-					*a = c;
-					goto done_order;
-				}
-			}  // Least deep object
-			c->next_order = NULL;
-			*a = c;
-			done_order:
 			c->on_create();
-	//		if (c->realtest != 151783) printf("Error: junk object detected\n");
 		}
 	}
 }
@@ -105,22 +94,16 @@ void create_phase () {
 void destroy_phase () {
 	for (Actor** a = &actors_by_depth; *a;) {
 		if ((*a)->doomed) {
-			*a = (*a)->next_depth;
-		}
-		else { a = &(*a)->next_depth; }
-	}
-	for (Actor** a = &actors_by_order; *a;) {
-		if ((*a)->doomed) {
 			Actor* doomed = *a;
 			doomed->on_destroy();
-			*a = doomed->next_order;
+			*a = doomed->next_depth;
 			if (doomed->has_body()) {
 				world->DestroyBody(((Object*)doomed)->body);
 			}
 			if (doomed->desc->room == -2) delete doomed->desc;
 			delete doomed;
 		}  // Need to ensure we don't leave any dead pointers
-		else { a = &(*a)->next_order; }
+		else { a = &(*a)->next_depth; }
 	}
 }
 
@@ -418,7 +401,7 @@ void move_phase () {
 		}
 	}
 	if (paused) return;
-	for (Actor* a = actors_by_order; a; a = a->next_order)
+	for (Actor* a = actors_by_depth; a; a = a->next_depth)
 		a->before_move();
 
 	for (uint i=0; i < MAX_BULLETS; i++)
@@ -432,7 +415,7 @@ void move_phase () {
 		//world->Step(1/240.0, 10, 10);
 	}
 
-	for (Actor* a = actors_by_order; a; a = a->next_order)
+	for (Actor* a = actors_by_depth; a; a = a->next_depth)
 		a->after_move();
 }
 

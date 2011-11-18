@@ -87,7 +87,6 @@ bool camera_jump = false;
 
  // Global object lists
 Actor* actors_by_depth = NULL;  // Actors are linked list
-Actor* actors_by_order = NULL;
 Actor* creation_queue = NULL;
 static const uint MAX_BULLETS = 10;
 RBullet bullets[MAX_BULLETS];
