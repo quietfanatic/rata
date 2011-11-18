@@ -59,6 +59,7 @@ namespace room {
 				keep_this_one: { }
 			}
 		}
+		current = id;
 		if (!loaded) load();
 		 // Load neighbors
 		for (uint i=0; i < nneighbors; i++)
@@ -82,7 +83,7 @@ namespace room {
 		if (saved_objects[i].id > 0)
 			saved_objects[i].manifest();
 		for (uint i=0; i < n_saved_things; i++)
-		if (saved_things[i].room == current)
+		if (saved_things[i].room == id)
 		if (saved_things[i].id > 0)
 			saved_things[i].manifest();
 //		if (bgm > -1 && bgm != bgm::current) {
@@ -101,7 +102,7 @@ namespace room {
 				a->destroy();
 			}
 		}
-		map::unload_room(current);
+		map::unload_room(id);
 	}
 
 	int16 Room::tile (uint x, uint y) {

@@ -47,6 +47,7 @@ namespace obj {
 		tiles_front,
 		shade,
 		lifebar,
+		n_ids
 	};
 	struct Desc;
 	struct Def;
