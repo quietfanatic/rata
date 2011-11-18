@@ -6,7 +6,7 @@ int main () {
 	load_snd();
 	main_init();
 	load_save();
-	room::list[room::currenti]->load();
+	room::list[room::current]->load();
 
 	try { main_loop(); } catch (int x) { printf("Game quit succesfully with result %d.\n", x); }
 	return 0;

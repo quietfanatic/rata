@@ -78,7 +78,7 @@ void load_save () {
 	}
 	for (uint i=0; i < n_saved_things; i++) {
 		if (saved_things[i].id == obj::rata) {
-			room::currenti = saved_things[i].room;
+			room::current = saved_things[i].room;
 		}
 		if (saved_things[i].room == room::everywhere) {
 			saved_things[i].manifest();

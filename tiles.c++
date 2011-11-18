@@ -57,7 +57,7 @@ namespace map {
 		
 		Pos () { }
 		Pos(uint8 x, uint8 y) :x(x % width), y(y % height) { }
-		Pos(Vec v) :x((uint8)v.x % width), y((uint8)v.y % height) { }
+		Pos(Vec v) :x((int)floor(v.x) % width), y((int)floor(v.y) % height) { }
 		inline Pos left () const { return Pos(x-1, y); }
 		inline Pos right () const { return Pos(x+1, y); }
 		inline Pos down () const { return Pos(x, y-1); }
@@ -68,10 +68,10 @@ namespace map {
 
 
 
-	static inline Tile at (uint8 x, uint8 y) {
+	static inline Tile& at (uint8 x, uint8 y) {
 		return world[y % height][x % width];
 	}
-	static inline Tile at (Pos p) {
+	static inline Tile& at (Pos p) {
 		return world[p.y][p.x];
 	}
 
@@ -116,23 +116,27 @@ namespace map {
 
 
 
-	void clear () {
-		for (uint y=0; y < height; y++)
-		for (uint x=0; x < width; x++)
-			world[y][x] = Tile();
-	}
-	void load_room (room::Room* r) {
-		for (uint y=0; y < r->height; y++)
-		for (uint x=0; x < r->width; x++) {
-			world[y][x].id = r->tile(x, r->height-y-1);
-			world[y][x].nature = tile::def[abs(world[y][x].id)].nature;
-			if (world[y][x].nature == tile::empty) {
-				if (world[y-1][x].nature == tile::solid)
-					world[y][x].nature = tile::platform;
-				else if (world[y-1][x].nature == tile::unknown)
-					world[y][x].nature = tile::unknown;
+	void load_room (int16 room) {
+		Room* r = room::list[room];
+		for (uint ry=0; ry < r->height; ry++)
+		for (uint rx=0; rx < r->width; rx++) {
+			uint x = rx + r->pos.x;
+			uint y = ry + r->pos.y;
+			at(x, y).id = r->tile(rx, r->height - ry - 1);
+			at(x, y).nature = tile::def[abs(at(x, y).id)].nature;
+			if (at(x, y).nature == tile::empty) {
+				if (at(x, y-1).nature == tile::solid)
+					at(x, y).nature = tile::platform;
+				else if (at(x, y-1).nature == tile::unknown)
+					at(x, y).nature = tile::unknown;
 			}
 		}
+	}
+	void unload_room (int16 room) {
+		Room* r = room::list[room];
+		for (uint y=r->pos.y; y < r->pos.y + r->height; y++)
+		for (uint x=r->pos.x; x < r->pos.x + r->width; x++)
+			at(x, y) = Tile();
 	}
 
 	void debug_print () {

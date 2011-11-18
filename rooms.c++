@@ -8,11 +8,7 @@
 #endif
 
 namespace room {
-	struct Room;
-	Room* current = NULL;
-	int currenti = -1;
-	bool transition = false;
-	Tilemap* tilemap_obj = NULL;
+	int current = -1;
 	struct Room {
 		roomconst Vec pos;
 		roomconst uint16 width;
@@ -43,7 +39,6 @@ typedef room::Room Room;
 
 namespace room {
 	void Room::load () {
-		camera_jump = true;
 		if (!saved_objects) {
 			saved_objects = (obj::Desc*)malloc(nobjects*sizeof(obj::Desc));
 			memcpy((void*)saved_objects, (void*)objects, nobjects*sizeof(obj::Desc));
@@ -51,16 +46,15 @@ namespace room {
 		(new obj::Desc(
 			-2, obj::tilemap,
 			pos, Vec(0, 0),
-			currenti
+			current
 		))->manifest();
-		current = this;
-		map::clear();
 		map::load_room(current);
+		 // Load these objects
 		for (uint i = 0; i < nobjects; i++)
 		if (saved_objects[i].id > 0)
 			saved_objects[i].manifest();
 		for (uint i=0; i < n_saved_things; i++)
-		if (saved_things[i].room == currenti)
+		if (saved_things[i].room == current)
 		if (saved_things[i].id > 0)
 			saved_things[i].manifest();
 //		if (bgm > -1 && bgm != bgm::current) {
@@ -73,14 +67,12 @@ namespace room {
 	}
 
 	void Room::unload () {
-		transition = true;
 		for (Actor* a = actors_by_depth; a; a = a->next_depth) {
-			if (a->desc->room != everywhere) {
+			if (a->desc->room == current) {
 				a->destroy();
 			}
 		}
-		for (uint i=0; i < MAX_BULLETS; i++)
-			bullets[i].lifetime = -1;
+		map::unload_room(current);
 	}
 
 	int16 Room::tile (uint x, uint y) {

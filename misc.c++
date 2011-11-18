@@ -62,23 +62,21 @@ struct Heart : Object {
 
 struct TileLayer : Actor {
 	void draw () {
-		if (room::current) {
-			int minx = floor(viewleft());
-			int miny = floor(viewbottom());
-			int maxx = ceil(viewright());
-			int maxy = ceil(viewtop());
-			for (int x=minx; x < maxx; x++)
-			for (int y=miny; y < maxy; y++) {
-				int tile = map::at(x, y).id;
-				bool flip = (tile < 0);
-				if (flip) tile = -tile;
-				if (desc->facing ? tile::def[tile].front : tile::def[tile].back) {
-					draw_image(
-						img::tiles,
-						Vec(x+.5, y+.5),
-						tile, flip
-					);
-				}
+		int minx = floor(viewleft());
+		int miny = floor(viewbottom());
+		int maxx = ceil(viewright());
+		int maxy = ceil(viewtop());
+		for (int x=minx; x < maxx; x++)
+		for (int y=miny; y < maxy; y++) {
+			int tile = map::at(x, y).id;
+			bool flip = (tile < 0);
+			if (flip) tile = -tile;
+			if (desc->facing ? tile::def[tile].front : tile::def[tile].back) {
+				draw_image(
+					img::tiles,
+					Vec(x+.5, y+.5),
+					tile, flip
+				);
 			}
 		}
 	}

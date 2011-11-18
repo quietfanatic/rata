@@ -430,11 +430,10 @@ void main_loop () {
 	for (;;) {
 		frame_number++;
 		create_phase();
-		if (!room::transition) draw_phase();
-		if (!room::transition) destroy_phase();
-		if (!room::transition) input_phase();
-		if (!room::transition) move_phase();
-		room::transition = false;
+		draw_phase();
+		destroy_phase();
+		input_phase();
+		move_phase();
 		destroy_phase();
 	}
 }

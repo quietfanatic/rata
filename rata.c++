@@ -188,7 +188,7 @@ struct Rata : Walking {
 	 // Equipment and inventory management
 
 	void spawn_item (obj::Desc* itemdesc) {
-		itemdesc->room = room::currenti;
+		itemdesc->room = room::current;
 		itemdesc->pos = pos();
 		itemdesc->facing = facing;
 		itemdesc->manifest();
