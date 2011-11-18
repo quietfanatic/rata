@@ -8,6 +8,7 @@ enum ID {
 namespace file {
 	namespace roompicker { extern Room room; }
 	namespace roompicker {
+		#define THIS_ROOM room::roompicker
 		#include "rooms/0-roompicker.room.c++"
 	}
 }

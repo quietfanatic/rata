@@ -25,7 +25,7 @@ ${\(join ",\n", map "\t$_->{id}", @rooms)},
 
 namespace file {
 ${\(join "\n", map "\tnamespace $_->{id} { extern Room room; }", @rooms)}
-${\(join "\n", map "\tnamespace $_->{id} {\n\t\t#include \"$_->{file}\"\n\t}", @rooms)}
+${\(join "\n", map "\tnamespace $_->{id} {\n\t\t#define THIS_ROOM room::$_->{id}\n\t\t#include \"$_->{file}\"\n\t}", @rooms)}
 }
 
 Room* list [] = {

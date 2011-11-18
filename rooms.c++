@@ -20,7 +20,10 @@ namespace room {
 		roomconst uint32 nobjects;
 		roomconst obj::Desc* objects;
 		obj::Desc* saved_objects;
-
+		int16 id;
+		bool loaded;
+		
+		void enter ();
 		void unload ();
 		void load ();
 		int16 tile (uint x, uint y);
@@ -39,7 +42,31 @@ typedef room::Room Room;
 #else
 
 namespace room {
+	void Room::enter () {
+		if (current != id) {
+			Room* old = room::list[current];
+			 // Unload old neighbors that aren't our neighbors.
+			for (uint i=0; i < old->nneighbors; i++) {
+				if (room::list[old->neighbors[i]]->loaded)
+				if (old->neighbors[i] != id) {
+					for (uint j=0; j < nneighbors; j++) {
+						if (old->neighbors[i] == neighbors[j])
+							goto keep_this_one;
+					}
+					 // This room is obsolete
+					room::list[old->neighbors[i]]->unload();
+				}
+				keep_this_one: { }
+			}
+		}
+		if (!loaded) load();
+		 // Load neighbors
+		for (uint i=0; i < nneighbors; i++)
+		if (!room::list[neighbors[i]]->loaded)
+			room::list[neighbors[i]]->load();
+	}
 	void Room::load () {
+		loaded = true;
 		if (!saved_objects) {
 			saved_objects = (obj::Desc*)malloc(nobjects*sizeof(obj::Desc));
 			memcpy((void*)saved_objects, (void*)objects, nobjects*sizeof(obj::Desc));
@@ -68,6 +95,7 @@ namespace room {
 	}
 
 	void Room::unload () {
+		loaded = false;
 		for (Actor* a = actors_by_depth; a; a = a->next_depth) {
 			if (a->desc->room == current) {
 				a->destroy();
@@ -92,7 +120,7 @@ namespace room {
 #define ROOM_NOBJECTS(...) static const uint32 nobjects = __VA_ARGS__;
 #define ROOM_OBJECTS(...) roomconst obj::Desc objects [nobjects] = {__VA_ARGS__};
 #define ROOM_OBJECT(id, x, y, xvel, yvel, facing, data, data2) obj::Desc(-1, id, Vec(x, y), Vec(xvel, yvel), facing, data, data2),
-#define ROOM_END Room room = {pos, width, height, tiles, nneighbors, neighbors, walls, nobjects, objects, NULL};
+#define ROOM_END Room room = {pos, width, height, tiles, nneighbors, neighbors, walls, nobjects, objects, NULL, THIS_ROOM, false};
 
 
 
