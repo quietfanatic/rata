@@ -1,5 +1,11 @@
-#define MAX_INVENTORY 10
 
+#ifdef HEADER
+
+struct Rata;
+
+#else
+
+#define MAX_INVENTORY 10
 
 static const uint n_sight_points = 3;
 const Vec sight_points_stand [n_sight_points] = {Vec(0, 13*PX), Vec(0, 25*PX), Vec(0, 2*PX)};
@@ -168,8 +174,8 @@ struct Rata : Walking {
 	bool bullet_inv () {
 		return state == dead
 		    || state == dead_air
-		    || hurt_type_0 == obj::bullet
-		    || hurt_type_1 == obj::bullet;
+		    || hurt_type_0 == type::bullet
+		    || hurt_type_1 == type::bullet;
 	}
 	void update_fixtures () {
 		int i = 0;
@@ -412,7 +418,7 @@ struct Rata : Walking {
 						message = message_pos = NULL;
 					}
 				}
-				else if (can_see && pointed_object && pointed_object->type != obj::room) {
+				else if (can_see && pointed_object && pointed_object->type != type::room) {
 					message = pointed_object->describe();
 					message_pos = message;
 					message_pos_next = NULL;
@@ -670,7 +676,7 @@ struct Rata : Walking {
 		if (aiming) cursor.img = img::target;
 		else if (message) cursor.img = img::readmore;
 		else if (can_see) {
-			if (pointed_object && pointed_object->type != obj::room)
+			if (pointed_object && pointed_object->type != type::room)
 				cursor.img = img::see;
 			else cursor.img = img::look;
 		}
@@ -721,8 +727,8 @@ struct Rata : Walking {
 		}
 		else distance_walked = 0;
 	};
-	Rata (obj::Desc* desc) :
-		Walking(desc),
+	Rata (actor::Def* def) :
+		Walking(def),
 		fix_old(fix_27),
 		fix_current(fix_27),
 		fix_helmet_old(-1),
@@ -1023,4 +1029,5 @@ struct Rata : Walking {
 };
 
 
+#endif
 

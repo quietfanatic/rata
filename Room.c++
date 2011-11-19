@@ -108,8 +108,8 @@ struct Room : Object {
 		map::unload_room(this);
 		Object::deactivate();
 	}
-	Room (obj::Desc* desc) :
-		Object(desc)
+	Room (actor::Def* def) :
+		Object(def)
 	{
 		 // Create static geometry
 		room::Def* r = &room::def[data];

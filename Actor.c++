@@ -1,0 +1,74 @@
+
+
+#ifdef HEADER
+
+struct Actor : actor::Def {
+	int16 id;
+	bool active;
+	Actor* contents;
+	Actor* next;
+	Actor* prev;
+	Actor* next_active;
+	Actor (actor::Def* def);
+
+	virtual void activate ();
+	virtual void deactivate ();
+
+	virtual void before_move () { }
+	virtual void after_move () { }
+	virtual void draw () { }
+
+	virtual void take (Actor* a);
+	virtual void give (Actor* a);
+
+	bool has_body ();
+};
+
+#else
+
+Actor::Actor (actor::Def* def) :
+	actor::Def(*def),
+	id( def - actor::saved < actor::n_globals ? def - actor::saved : -1 ),
+	active(false),
+	contents(NULL),
+	next(NULL),
+	prev(NULL),
+	next_active(NULL)
+{ }
+
+void Actor::activate () {
+	next_active = activation_queue;
+	activation_queue = this;
+	active = true;
+	dbg(2, "Activating 0x%08x\n", this);
+}
+void Actor::deactivate () {
+	active = false;
+	dbg(2, "Deactivating 0x%08x\n", this);
+}
+
+void Actor::take (Actor* a) {
+	if (contents) contents->prev = a;
+	a->next = contents;
+	contents = a;
+}
+void Actor::give (Actor* a) {
+	if (a == contents) {
+		contents = a->next;
+	}
+	if (a->next) a->next->prev = a->prev;
+	if (a->prev) a->prev->next = a->next;
+}
+
+bool Actor::has_body () {
+	return type::def[type].nfixes > -1;
+}
+
+
+
+
+
+
+#endif
+
+

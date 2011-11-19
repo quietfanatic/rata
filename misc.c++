@@ -7,7 +7,7 @@
 struct Crate : Object {
 	virtual char* describe () { return "There's a wooden crate sitting here.\x80\nIt looks like it can be pushed around."; }
 	virtual void damage (int d) { Object::damage(d); snd::def[snd::woodhit].play(); }
-	Crate (obj::Desc* desc) : Object(desc) {
+	Crate (actor::Def* def) : Object(def) {
 		life = max_life = 144;
 	}
 };
@@ -16,7 +16,7 @@ struct Crate : Object {
 
 struct Heart : Object {
 	virtual char* describe () { return "Just as rats live off the refuse of humans,\x80\nYou too can live off of the rats.\x80\nPick this up to restore one heart."; }
-	Heart (obj::Desc* desc) : Object(desc) { }
+	Heart (Actor::Def* def) : Object(def) { }
 };
 
 
@@ -40,7 +40,7 @@ struct TileLayer : Actor {
 			}
 		}
 	}
-	TileLayer (obj::Desc* desc) : Actor(desc) { }
+	TileLayer (actor::Def* def) : Actor(def) { }
 };
 
 struct BulletLayer : Actor {
@@ -49,7 +49,7 @@ struct BulletLayer : Actor {
 			bullets[i].draw();
 		}
 	}
-	BulletLayer (obj::Desc* desc) : Actor(desc) { }
+	BulletLayer (actor::Def* def) : Actor(def) { }
 };
 
 
@@ -63,7 +63,7 @@ struct Shade : Actor {
 			);
 		}
 	}
-	Shade (obj::Desc* desc) : Actor(desc) { }
+	Shade (actor::Def* def) : Actor(def) { }
 };
 
 
@@ -92,7 +92,7 @@ struct Lifebar : Actor {
 			}
 		}
 	}
-	Lifebar (obj::Desc* desc) : Actor(desc) { }
+	Lifebar (actor::Def* def) : Actor(def) { }
 };
 
 

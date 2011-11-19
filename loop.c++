@@ -77,7 +77,7 @@ void add_phase () {
 			next = c->next_active;
 			Actor** a;
 			for (a = &active_actors; *a; a = &(*a)->next_active) {
-				if (obj::type[c->type].depth > obj::type[(*a)->type].depth) {
+				if (type::def[c->type].depth > type::def[(*a)->type].depth) {
 					c->next_active = *a;
 					*a = c;
 					goto done_activating;
@@ -111,7 +111,7 @@ void draw_phase () {
 		float focusx = rata->aim_center().x + cursor.x/2.0;
 		float focusy = rata->aim_center().y + cursor.y/2.0;
 		if (rata->loc > -1) {
-			Room* room = (Room*)obj::global[rata->loc];
+			Room* room = (Room*)actor::global[rata->loc];
 			room::Def* r = &room::def[room->data];
 			uint32 walls = r->walls;
 			if (walls&LEFT && focusx < room->pos.x + 10)

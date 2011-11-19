@@ -40,7 +40,7 @@ void RBullet::move () {
 		FixProp* fp = (FixProp*) coll.hit->GetUserData();
 		if (fp->damage_factor) {
 			Object* o = (Object*)coll.hit->GetBody()->GetUserData();
-			if (fp == &rata_fixprop_helmet) {
+			if (fp == &type::rata_fixprop_helmet) {
 				float angle = ang(coll.norm);
 				dbg(4, "Helmet strike: %f,%f; %f > %f == %d\n", coll.norm.x, coll.norm.y, angle, rata->helmet_angle, gt_angle(angle, rata->helmet_angle));
 				if (gt_angle(angle, rata->helmet_angle)) {
@@ -48,11 +48,11 @@ void RBullet::move () {
 					goto just_bounce;
 				}
 			}
-			if (o->type == obj::rata) {
-				if (rata->hurt_type_0 == obj::bullet
-				 || rata->hurt_type_1 == obj::bullet) goto no_damage;
+			if (o->type == type::rata) {
+				if (rata->hurt_type_0 == type::bullet
+				 || rata->hurt_type_1 == type::bullet) goto no_damage;
 				rata->hurt_type_1 = rata->hurt_type_0;
-				rata->hurt_type_0 = obj::bullet;
+				rata->hurt_type_0 = type::bullet;
 			}
 			o->damage(power * fp->damage_factor);
 			no_damage: { }

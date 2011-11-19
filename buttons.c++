@@ -34,7 +34,6 @@ struct Button {
 
 #else
 
-
 void click_quit () {
 	if (button[sf::Mouse::Left] == 1) {
 		quit_game();

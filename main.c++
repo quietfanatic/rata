@@ -1,5 +1,5 @@
-#include "top.c++"
 
+#include "top.c++"
 
 int main () {
 	load_img();
