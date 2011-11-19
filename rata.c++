@@ -104,7 +104,6 @@ struct Rata : Walking {
 	int fix_helmet_current;
 	int fix_helmet_old;
 	 // Equipment and inventory
-	Item* inventory [10];
 	Item* equipment [item::num_slots];
 	 // Actions
 	float action_distance;
@@ -739,12 +738,8 @@ struct Rata : Walking {
 		oldyvel(0)
 	{
 		rata = this;
-		//body = make_body(b2_dynamicBody, true);
-		//for (uint i = obj::type[type].nfixes; i > 0; i--) {
-		//	dbg(4, "Fix %d: 0x%08x\n", i, body->CreateFixture(&(obj::type[type].fixdef[i-1])));
-		//}
-		//dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
-		update_fixtures();
+		for (uint i=0; i < item::num_slots; i++)
+			equipment[i] = NULL;
 		if (!facing) facing = 1;
 		cursor.x = 2.0 * facing;
 		cursor.y = 0;
@@ -752,6 +747,7 @@ struct Rata : Walking {
 		trap_cursor = true;
 		draw_cursor = true;
 		life = max_life = 144;
+		update_fixtures();
 		recalc_stats();
 	}
 
