@@ -243,10 +243,17 @@ struct Rata : Walking {
 		inventory[(uint)a->pos.x] = NULL;
 		equip(a);
 	}
-	void trade_equip (Item* a, Item* e) {
+	void swap_equip (Item* a, Item* e) {
 		unequip(e);
 		inventory[(uint)a->pos.x] = e;
 		equip(a);
+	}
+	void swap_inv (Actor* a, Actor* b) {
+		float t = a->pos.x;
+		a->pos.x = b->pos.x;
+		b->pos.x = t;
+		inventory[(uint)a->pos.x] = a;
+		inventory[(uint)b->pos.x] = b;
 	}
 	void pickup (Actor* a) {
 		for (uint i=0; i < MAX_INVENTORY; i++) {
@@ -453,7 +460,7 @@ struct Rata : Walking {
 		if (control_action)
 		switch (action) {
 			case action_equip: {
-				//pick_up_equip((Item*)action_arg);
+				pickup_equip((Item*)action_arg);
 				break;
 			}
 			case action_enter: {
