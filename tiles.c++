@@ -132,7 +132,7 @@ namespace map {
 
 
 	void load_room (Room* room) {
-		room::Desc* r = &room::desc[room->data];
+		room::Def* r = &room::def[room->data];
 		for (uint ry=0; ry < r->height; ry++)
 		for (uint rx=0; rx < r->width; rx++) {
 			uint x = rx + room->pos.x;
@@ -148,7 +148,7 @@ namespace map {
 		}
 	}
 	void unload_room (Room* room) {
-		room::Desc* r = &room::desc[room->data];
+		room::Def* r = &room::def[room->data];
 		for (uint y=room->pos.y; y < room->pos.y + r->height; y++)
 		for (uint x=room->pos.x; x < room->pos.x + r->width; x++)
 			at(x, y) = Tile();

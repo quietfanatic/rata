@@ -27,8 +27,8 @@ namespace file {
 ${\(join "\n", map "\tnamespace $_->{id} {\n\t\t#define THIS_ROOM room::$_->{id}\n\t\t#include \"$_->{file}\"\n\t\t#undef THIS_ROOM\n\t}", @rooms)}
 }
 
-Desc desc [n_rooms] = {
-${\(join ",\n", map "\tfile::$_->{id}::desc", @rooms)}
+Def def [n_rooms] = {
+${\(join ",\n", map "\tfile::$_->{id}::def", @rooms)}
 };
 
 

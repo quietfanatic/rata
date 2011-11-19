@@ -25,6 +25,7 @@ float gravity = -30;
 #include "drawing.c++"
 #include "stats.c++"
 #include "objects.c++"
+#include "coll.c++"
 #include "bullet.c++"
 #include "rooms.c++"
 #include "room.c++"

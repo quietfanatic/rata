@@ -19,9 +19,9 @@ namespace file {
 	}
 }
 
-Desc desc [n_rooms] = {
-	file::roompicker::desc,
-	file::test1::desc
+Def def [n_rooms] = {
+	file::roompicker::def,
+	file::test1::def
 };
 
 

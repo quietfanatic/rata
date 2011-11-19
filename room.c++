@@ -112,7 +112,7 @@ struct Room : Object {
 		Object(desc)
 	{
 		 // Create static geometry
-		room::Desc* r = &room::desc[data];
+		room::Def* r = &room::def[data];
 		TileEdge edges [(uint)ceil(r->width)][(uint)ceil(r->height)][tile::max_vertexes];
 		for (uint y=0; y < r->height; y++)
 		for (uint x=0; x < r->width; x++) {

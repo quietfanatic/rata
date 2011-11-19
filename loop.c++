@@ -112,7 +112,7 @@ void draw_phase () {
 		float focusy = rata->aim_center().y + cursor.y/2.0;
 		if (rata->loc > -1) {
 			Room* room = (Room*)obj::global[rata->loc];
-			room::Desc* r = &room::desc[room->data];
+			room::Def* r = &room::def[room->data];
 			uint32 walls = r->walls;
 			if (walls&LEFT && focusx < room->pos.x + 10)
 				focusx = room->pos.x + 10;

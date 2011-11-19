@@ -1,14 +1,14 @@
 
 
 namespace room {
-	struct Desc {
+	struct Def {
 		uint16 width;
 		uint16 height;
 		const int16* tiles;
 		uint32 nneighbors;
 		const int16* neighbors;
 		uint32 walls;
-		
+
 		int16 tile (uint x, uint y) {
 			return tiles[y * width + x];
 		}
@@ -19,7 +19,7 @@ namespace room {
 		equipment = -3,
 		everywhere = -4
 	};
-	extern Desc desc [];
+	extern Def def [];
 
 
 
@@ -30,7 +30,7 @@ namespace room {
 #define ROOM_NNEIGHBORS(...) static const uint32 nneighbors = __VA_ARGS__;
 #define ROOM_NEIGHBORS(...) const int16 neighbors [nneighbors] = {__VA_ARGS__};
 #define ROOM_WALLS(...) const uint32 walls = __VA_ARGS__;
-#define ROOM_END static const room::Desc desc = {width, height, tiles, nneighbors, neighbors, walls};
+#define ROOM_END static const room::Def def = {width, height, tiles, nneighbors, neighbors, walls};
 
 
 
