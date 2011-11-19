@@ -68,13 +68,13 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 #include "text.c++"
 
  // ACTORS
-#include "actors.c++"
 #include "Actor.c++"
 #include "Object.c++"
 #include "Walking.c++"
 #include "Rata.c++"
 #include "Item.c++"
 #include "Room.c++"
+#include "actors.c++"
 #include "misc.c++"
 #include "types.c++"
  // MISC

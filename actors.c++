@@ -18,7 +18,7 @@ namespace actor {
 
 	};
 
-	const uint n_globals = 8;
+	const uint n_globals = 9;
 	extern Def saved [n_globals];
 	extern Actor* global [n_globals];
 }
@@ -29,11 +29,12 @@ namespace actor {
 actor::Def actor::saved [actor::n_globals] = {
  // Rooms are first
 #define R 0
-	{ -1, type::room     , Vec(  0,  0), Vec(  0,   0),  0, room::roompicker, 0},
-#define A 1
-	{R+0, type::rata     , Vec(  2,  2), Vec(  0,   0),  0, 0, 0},
-	{A+0, type::item     , Vec( -1,  0), Vec(  0,   0),  0, item::white_dress, 0},
-	{R+0, type::item     , Vec(  8,  5), Vec(  0,   0),  0, item::handgun, 0},
+	{ -1, type::room     , Vec(  0,  0), Vec(  0,  0),  0, room::roompicker, 0},
+	{ -1, type::room     , Vec( 20,  0), Vec(  0,  0),  0, room::test1, 0},
+#define A 2
+	{R+0, type::rata     , Vec(  2,  2), Vec(  0,  0),  0, 0, 0},
+	{A+0, type::item     , Vec( -1,  0), Vec(  0,  0),  0, item::white_dress, 0},
+	{R+0, type::item     , Vec(  8,  5), Vec(  0,  0),  0, item::handgun, 0},
 	{ -2, type::back_tiles, Vec(0, 0), Vec(0, 0), 0, 0, 0},
 	{ -2, type::bullet_layer, Vec(0, 0), Vec(0, 0), 0, 0, 0},
 	{ -2, type::front_tiles, Vec(0, 0), Vec(0, 0), 1, 0, 0},
@@ -46,18 +47,30 @@ Actor* actor::global [actor::n_globals];
 
 
 void init_objects () {
+	 // Create actors
 	for (uint i=0; i < actor::n_globals; i++) {
 		actor::global[i] = actor::saved[i].manifest();
 	}
+	 // Locate actors
 	for (uint i=0; i < actor::n_globals; i++) {
 		if (actor::saved[i].loc > -1)
 			actor::global[actor::saved[i].loc]->receive(actor::global[i]);
 	}
+	 // Activate 'everywhere' actors
 	for (uint i=0; i < actor::n_globals; i++) {
 		if (actor::saved[i].loc == -2)
 			actor::global[i]->activate();
 	}
-	actor::global[actor::global[A+0]->loc]->activate();  // Rata's room
+	 // Enter Rata's room.
+	if (actor::global[actor::global[A+0]->loc]->type != type::room) {
+		printf("Warning: Rata did not start out in a room.\n\tEjecting to room 0.\n");
+		actor::global[A+0]->loc = 0;
+		actor::global[A+0]->pos = actor::global[0]->pos + Vec(1, 1);
+		((Room*)actor::global[0])->enter(-1);
+	}
+	else {
+		((Room*)actor::global[actor::global[A+0]->loc])->enter(-1);
+	}
 }
 
 namespace actor {

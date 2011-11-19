@@ -41,6 +41,7 @@ bool camera_jump = false;
 Actor* active_actors = NULL;  // Actors are linked list
 Actor* activation_queue = NULL;
 Rata* rata = NULL;
+int current_room = -1;
 char* message = NULL;
 char* message_pos = NULL;
 char* message_pos_next = NULL;

@@ -94,6 +94,15 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 // Room object
 
 struct Room : Object {
+	void receive (Actor* a) {
+		if (active) {
+			if (!a->active) a->activate();
+		}
+		else {
+			if (a->active) a->deactivate();
+		}
+		Actor::take_unsorted(a);
+	}
 	void activate () {
 		Object::activate();
 		map::load_room(this);
@@ -108,6 +117,32 @@ struct Room : Object {
 		map::unload_room(this);
 		Object::deactivate();
 	}
+
+	bool is_neighbor (int r) {
+		for (uint i=0; i < room::def[id].nneighbors; i++)
+			if (room::def[id].neighbors[i] == r)
+				return true;
+		return false;
+	}
+	void enter (int oldroom) {
+		if (oldroom > -1) {
+			if (actor::global[oldroom]->active)
+			if (is_neighbor(oldroom))
+				actor::global[oldroom]->deactivate();
+			for (uint i=0; i < room::def[oldroom].nneighbors; i++) {
+				int oldneighbor = room::def[oldroom].neighbors[i];
+				if (actor::global[oldneighbor]->active)
+				if (is_neighbor(oldneighbor))
+					actor::global[oldneighbor]->deactivate();
+			}
+		}
+		if (!active) activate();
+		for (uint i=0; i < room::def[id].nneighbors; i++) {
+			if (!actor::global[room::def[id].neighbors[i]]->active)
+				actor::global[room::def[id].neighbors[i]]->activate();
+		}
+	}
+
 	Room (actor::Def* def) :
 		Object(def)
 	{
