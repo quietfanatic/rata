@@ -18,7 +18,7 @@ namespace actor {
 
 	};
 
-	const uint n_globals = 7;
+	const uint n_globals = 8;
 	extern Def saved [n_globals];
 	extern Actor* global [n_globals];
 }
@@ -31,6 +31,8 @@ actor::Def actor::saved [actor::n_globals] = {
 	{-1, type::game, Vec(0, 0), Vec(0, 0), 0, 0, 0},
 	{2, type::rata, Vec(2, 2), Vec(0, 0), 0, 0, 0},
 	{0, type::room, Vec(0, 0), Vec(0, 0), 0, room::roompicker, 0},
+	{1, type::item, Vec(-1, 0), Vec(0, 0), 0, item::white_dress, 0},
+
 	{-1, type::back_tiles, Vec(0, 0), Vec(0, 0), 0, 0, 0},
 	{-1, type::bullet_layer, Vec(0, 0), Vec(0, 0), 0, 0, 0},
 	{-1, type::front_tiles, Vec(0, 0), Vec(0, 0), 1, 0, 0},

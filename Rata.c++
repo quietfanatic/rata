@@ -110,6 +110,7 @@ struct Rata : Walking {
 	int fix_helmet_current;
 	int fix_helmet_old;
 	 // Equipment and inventory
+	Actor* inventory [MAX_INVENTORY];
 	Item* equipment [item::num_slots];
 	 // Actions
 	float action_distance;
@@ -188,6 +189,30 @@ struct Rata : Walking {
 			}
 			i++;
 		}
+	}
+
+	 // Inventory and equipment
+	void take (Actor* a) {
+		if (a->type == type::item && a->pos.x < 0)
+			equip((Item*)a);
+		else if (a->pos.x >= 0 && a->pos.x < MAX_INVENTORY)
+			inventory[(uint)a->pos.x] = a;
+		Actor::take(a);
+	}
+	void give (Actor* a) {
+		if (a->type == type::item && a->pos.x < 0)
+			unequip((Item*)a);
+		else if (a->pos.x >= 0 && a->pos.x < MAX_INVENTORY)
+			inventory[(uint)a->pos.x] = NULL;
+		Actor::give(a);
+	}
+	void equip (Item* i) {
+		uint slot = item::def[i->data].slot;
+		equipment[slot] = i;
+		slot = item::def[i->data].otherslot;
+		if (slot > -1) equipment[slot] = i;
+	}
+	void unequip (Item* a) {
 	}
 
 	 // Character stats (affected by items and such)

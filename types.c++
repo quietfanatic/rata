@@ -8,6 +8,7 @@ namespace type {
 		game,
 		rata,
 		room,
+		item,
 		bullet,
 		back_tiles,
 		bullet_layer,
@@ -208,6 +209,7 @@ const Def def [n_types] = {
 	{"Game", -1, NULL, 0, ALLOC<Game>, -1},
 	{"Rata", 18, rata_fixes, 10, ALLOC<Rata>, -1},
 	{"Room", 0, NULL, 0, ALLOC<Room>, -1},
+	{"Item", -1, NULL, -5, ALLOC<Item>, -1},
 	{"Bullet", 1, &bullet_fix, -10, ALLOC<Actor>, -1},
 	{"Back Tiles", -1, NULL, 500, ALLOC<TileLayer>, -1},
 	{"Bullet Layer", -1, NULL, -200, ALLOC<BulletLayer>, -1},
@@ -223,7 +225,6 @@ const Def def [n_types] = {
 //	{"Patroller", 1, patroller_fixes, 20, obj::ALLOC<Patroller>, img::patroller},
 //	{"Flyer", 1, &flyer_fix, 20, obj::ALLOC<Flyer>, img::flyer},
 //	{"Heart", 1, &heart_fix, -20, obj::ALLOC<Heart>, img::heart},
-//	{"Item", -1, NULL, -5, obj::ALLOC<Item>, -1},
 //	{"Lifebar", -1, NULL, -4000, obj::ALLOC<Lifebar>, -1},
 };
 

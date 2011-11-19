@@ -17,7 +17,9 @@ struct Actor : actor::Def {
 	virtual void before_move () { }
 	virtual void after_move () { }
 	virtual void draw () { }
-
+	
+	void take_sorted (Actor* a);
+	void take_unsorted (Actor* a);
 	virtual void take (Actor* a);
 	virtual void give (Actor* a);
 
@@ -47,10 +49,34 @@ void Actor::deactivate () {
 	dbg(2, "Deactivating 0x%08x\n", this);
 }
 
-void Actor::take (Actor* a) {
+void Actor::take_unsorted (Actor* a) {
 	if (contents) contents->prev = a;
 	a->next = contents;
 	contents = a;
+}
+void Actor::take_sorted (Actor* a) {
+	Actor* c;
+	if (!contents)
+		contents = a;
+	else if (a->pos.x > contents->pos.x) {
+		a->next = contents;
+		contents->prev = a;
+		contents = a;
+	}
+	else for (c = contents->next; c; c = c->next) {
+		if (a->pos.x > c->pos.x) {
+			a->prev = c->prev;
+			a->next = c;
+			c->prev->next = a;
+			c->prev = a;
+			return;
+		}
+	} // Last
+	a->prev = c;
+	c->next = a;
+}
+void Actor::take (Actor* a) {
+	take_unsorted(a);
 }
 void Actor::give (Actor* a) {
 	if (a == contents) {
