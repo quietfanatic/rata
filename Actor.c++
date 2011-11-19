@@ -20,8 +20,9 @@ struct Actor : actor::Def {
 	
 	void take_sorted (Actor* a);
 	void take_unsorted (Actor* a);
-	virtual void take (Actor* a);
-	virtual void give (Actor* a);
+	virtual void receive (Actor* a);
+	virtual void release (Actor* a);
+	void produce (Actor* a);
 
 	bool has_body ();
 };
@@ -75,15 +76,23 @@ void Actor::take_sorted (Actor* a) {
 	a->prev = c;
 	c->next = a;
 }
-void Actor::take (Actor* a) {
+void Actor::receive (Actor* a) {
+	if (a->loc != id) {
+		actor::global[a->loc]->release(a);
+		a->loc = id;
+	}
+	if (a->active) a->deactivate();
 	take_unsorted(a);
 }
-void Actor::give (Actor* a) {
+void Actor::release (Actor* a) {
 	if (a == contents) {
 		contents = a->next;
 	}
 	if (a->next) a->next->prev = a->prev;
 	if (a->prev) a->prev->next = a->next;
+}
+void Actor::produce (Actor* a) {
+	actor::global[loc]->receive(a);
 }
 
 bool Actor::has_body () {

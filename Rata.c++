@@ -192,27 +192,78 @@ struct Rata : Walking {
 	}
 
 	 // Inventory and equipment
-	void take (Actor* a) {
+	void receive (Actor* a) {
+		Actor::receive(a);
 		if (a->type == type::item && a->pos.x < 0)
 			equip((Item*)a);
 		else if (a->pos.x >= 0 && a->pos.x < MAX_INVENTORY)
 			inventory[(uint)a->pos.x] = a;
-		Actor::take(a);
 	}
-	void give (Actor* a) {
+	void release (Actor* a) {
 		if (a->type == type::item && a->pos.x < 0)
 			unequip((Item*)a);
 		else if (a->pos.x >= 0 && a->pos.x < MAX_INVENTORY)
 			inventory[(uint)a->pos.x] = NULL;
-		Actor::give(a);
+		Actor::release(a);
 	}
-	void equip (Item* i) {
-		uint slot = item::def[i->data].slot;
-		equipment[slot] = i;
-		slot = item::def[i->data].otherslot;
-		if (slot > -1) equipment[slot] = i;
+	 // Secondary
+	void equip (Item* a) {
+		a->pos.x = -1;
+		int slot = item::def[a->data].slot;
+		if (equipment[slot])
+			move_e2i(equipment[slot]);
+		equipment[slot] = a;
+		slot = item::def[a->data].otherslot;
+		if (slot > -1) {
+			if (equipment[slot])
+				move_e2i(equipment[slot]);
+			equipment[slot] = a;
+		}
+		recalc_stats();
 	}
 	void unequip (Item* a) {
+		int slot = item::def[a->data].slot;
+		equipment[slot] = NULL;
+		slot = item::def[a->data].otherslot;
+		if (slot > -1) equipment[slot] = NULL;
+	}
+	 // Primary
+	void move_e2i (Item* a) {
+		unequip(a);
+		for (uint i=0; i < MAX_INVENTORY; i++) {
+			if (inventory[i] == NULL) {
+				a->pos.x = i;
+				inventory[i] = a;
+				return;
+			}
+		}  // No room
+		drop(a);
+	}
+	void move_i2e (Item* a) {
+		inventory[(uint)a->pos.x] = NULL;
+		equip(a);
+	}
+	void trade_equip (Item* a, Item* e) {
+		unequip(e);
+		inventory[(uint)a->pos.x] = e;
+		equip(a);
+	}
+	void pickup (Actor* a) {
+		for (uint i=0; i < MAX_INVENTORY; i++) {
+			if (inventory[i] == NULL) {
+				a->pos.x = i;
+				receive(a);
+				return;
+			}
+		}  // No room
+	}
+	void drop (Actor* a) {
+		a->pos = pos;
+		produce(a);  // Calls release
+	}
+	void pickup_equip (Item* a) {
+		a->pos.x = -1;
+		receive(a);
 	}
 
 	 // Character stats (affected by items and such)

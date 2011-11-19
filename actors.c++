@@ -52,7 +52,7 @@ void init_objects () {
 	}
 	for (uint i=0; i < actor::n_globals; i++) {
 		if (actor::saved[i].loc > -1)
-			actor::global[actor::saved[i].loc]->take(actor::global[i]);
+			actor::global[actor::saved[i].loc]->receive(actor::global[i]);
 	}
 	for (uint i=0; i < actor::n_globals; i++) {
 		if (actor::saved[i].loc < 0)
