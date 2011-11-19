@@ -27,8 +27,8 @@ void RBullet::move () {
 	pos0 = pos2;
 	pos1 = Vec(-1/0.0, -1/0.0);
 	pos2 = pos0 + vel;
-	Object::LineChecker coll;
-	coll = Object::check_line(pos0, pos2, cf::bullet.maskBits, owner);
+	LineChecker coll;
+	coll = check_line(pos0, pos2, cf::bullet.maskBits, owner);
 	while (coll.hit) {
 		dbg(3, "Bullet hit %08x, cf %u.\n", coll.hit->GetBody()->GetUserData(), coll.hit->GetFilterData().categoryBits);
 		pos1 = pos0 + coll.frac * vel;
@@ -48,18 +48,13 @@ void RBullet::move () {
 					goto just_bounce;
 				}
 			}
-			if (o->desc->id == obj::rata) {
-				if (rata->hurt_id[0] == obj::bullet
-				 || rata->hurt_id[1] == obj::bullet) goto no_damage;
-				rata->hurt_id[1] = rata->hurt_id[0];
-				rata->hurt_id[0] = obj::bullet;
+			if (o->type == obj::rata) {
+				if (rata->hurt_type_0 == obj::bullet
+				 || rata->hurt_type_1 == obj::bullet) goto no_damage;
+				rata->hurt_type_1 = rata->hurt_type_0;
+				rata->hurt_type_0 = obj::bullet;
 			}
 			o->damage(power * fp->damage_factor);
-			(new obj::Desc(-2, 
-				obj::hiteffect,
-				pos1, Vec(7, 0), 0,
-				img::hit_damagable
-			))->manifest();
 			no_damage: { }
 			coll.hit = NULL;
 			pos2 = Vec(-1/0.0, -1/0.0);
@@ -70,7 +65,7 @@ void RBullet::move () {
 			if (velnorm > -0.8) {
 				snd::def[snd::ricochet].play(0.7+rand()*0.3/RAND_MAX, 50);
 				pos2 = pos1 + (0.99-coll.frac) * vel;
-				coll = Object::check_line(pos1, pos2, cf::bullet.maskBits, (Object*)coll.hit->GetBody()->GetUserData());
+				coll = check_line(pos1, pos2, cf::bullet.maskBits, (Object*)coll.hit->GetBody()->GetUserData());
 			}
 			else {
 				coll.hit = NULL;

@@ -1,62 +1,22 @@
 
 
 
-struct Door : Actor {
-};
-
-
-struct Bullet : Actor {
-};
 
 
 
 struct Crate : Object {
 	virtual char* describe () { return "There's a wooden crate sitting here.\x80\nIt looks like it can be pushed around."; }
-	virtual void on_create () { Object::on_create(); life = max_life = 144; }
 	virtual void damage (int d) { Object::damage(d); snd::def[snd::woodhit].play(); }
-};
-
-struct Mousehole : Object {
-	int timer;
-	virtual char* describe () { return "A large metal pipe is coming out of the ground.\x80\nFor ventilation, perhaps?\x80\nIt's big enough for a rat to crawl through.\x80\nMaybe that's where they're coming from."; }
-	virtual void before_move () {
-		timer--;
-		if (timer <= 0) {
-			timer = 300 + rand() % 1200;
-			if (rata && abs_f(rata->x() - desc->pos.x) < 3.0 && abs_f(rata->y() - desc->pos.y)) {
-				return;
-			}
-			(new obj::Desc (-2, obj::rat, desc->pos))->manifest();
-		}
-	}
-	virtual void on_create () {
-		make_body(desc, false, false);
-		body->CreateFixture(&def()->fixdef[0]);
-		timer = 300 + rand() % 1200;
+	Crate (obj::Desc* desc) : Object(desc) {
+		life = max_life = 144;
 	}
 };
 
-struct HitEffect : Actor {
-	int timer;
-	uint numsubs;
-	uint fpsub;
-	virtual void on_create () {
-		timer = desc->vel.x;
-		int16 image = img::hit_damagable;
-		numsubs = img::def[image].numsubs();
-		fpsub = (timer+numsubs-1) / numsubs;
-	}
-	virtual void draw () {
-		int16 image = img::hit_damagable;
-		uint sub = numsubs - timer / numsubs - 1;
-		draw_image(image, desc->pos, sub);
-		timer--;
-		if (timer == 0) destroy();
-	}
-};
+
 
 struct Heart : Object {
 	virtual char* describe () { return "Just as rats live off the refuse of humans,\x80\nYou too can live off of the rats.\x80\nPick this up to restore one heart."; }
+	Heart (obj::Desc* desc) : Object(desc) { }
 };
 
 
@@ -71,7 +31,7 @@ struct TileLayer : Actor {
 			int tile = map::at(x, y).id;
 			bool flip = (tile < 0);
 			if (flip) tile = -tile;
-			if (desc->facing ? tile::def[tile].front : tile::def[tile].back) {
+			if (facing ? tile::def[tile].front : tile::def[tile].back) {
 				draw_image(
 					img::tiles,
 					Vec(x+.5, y+.5),
@@ -80,6 +40,7 @@ struct TileLayer : Actor {
 			}
 		}
 	}
+	TileLayer (obj::Desc* desc) : Actor(desc) { }
 };
 
 struct BulletLayer : Actor {
@@ -88,19 +49,21 @@ struct BulletLayer : Actor {
 			bullets[i].draw();
 		}
 	}
+	BulletLayer (obj::Desc* desc) : Actor(desc) { }
 };
 
 
 struct Shade : Actor {
 	void draw () {
-		if (desc->facing > -1 || paused) {
+		if (facing > -1 || paused) {
 			draw_rect(
-				desc->pos.x, desc->pos.y,
-				desc->pos.x + desc->vel.x, desc->pos.y + desc->vel.y,
-				desc->data, desc->facing <= 0
+				pos.x, pos.y,
+				pos.x + vel.x, pos.y + vel.y,
+				data, facing <= 0
 			);
 		}
 	}
+	Shade (obj::Desc* desc) : Actor(desc) { }
 };
 
 
@@ -129,6 +92,7 @@ struct Lifebar : Actor {
 			}
 		}
 	}
+	Lifebar (obj::Desc* desc) : Actor(desc) { }
 };
 
 

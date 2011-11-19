@@ -1,5 +1,5 @@
 
-
+#ifdef HEADER
 
 
 // Maximum number of vertexes in a tile's physical shape
@@ -38,17 +38,16 @@ namespace tile {
 	};
 }
 
-
 namespace map {
-
-	static const uint width = 128;
-	static const uint height = 128;
-
 	struct Tile {
 		int16 id;
 		int16 nature;
 		Tile () :id(1), nature(tile::unknown) { }
 	};
+
+	static const uint width = 128;
+	static const uint height = 128;
+
 	Tile world [height][width];
 
 	struct Pos {
@@ -65,8 +64,6 @@ namespace map {
 
 		inline bool operator == (Pos p) { return x == p.x && y == p.y; }
 	};
-
-
 
 	static inline Tile& at (uint8 x, uint8 y) {
 		return world[y % height][x % width];
@@ -98,6 +95,24 @@ namespace map {
 		return get_end_left(a) == get_end_left(b);
 	}
 
+	void debug_print () {
+		for (uint y=0; y < height; y++) {
+			for (uint x=0; x < width; x++) {
+				putchar(world[height-y-1][x].nature);
+			}
+			putchar('\n');
+		}
+	}
+
+	void load_room(Room*);
+	void unload_room(Room*);
+}
+
+
+#else
+
+namespace map {
+
 	 // Check if a point can be reached via jump (no obstacles)
 	 // See notes
 	bool can_reach_with_jump(Vec from, Vec vel, Vec to, float float_time) {
@@ -116,12 +131,12 @@ namespace map {
 
 
 
-	void load_room (int16 room) {
-		Room* r = room::list[room];
+	void load_room (Room* room) {
+		room::Desc* r = &room::desc[room->data];
 		for (uint ry=0; ry < r->height; ry++)
 		for (uint rx=0; rx < r->width; rx++) {
-			uint x = rx + r->pos.x;
-			uint y = ry + r->pos.y;
+			uint x = rx + room->pos.x;
+			uint y = ry + room->pos.y;
 			at(x, y).id = r->tile(rx, r->height - ry - 1);
 			at(x, y).nature = tile::def[abs(at(x, y).id)].nature;
 			if (at(x, y).nature == tile::empty) {
@@ -132,25 +147,16 @@ namespace map {
 			}
 		}
 	}
-	void unload_room (int16 room) {
-		Room* r = room::list[room];
-		for (uint y=r->pos.y; y < r->pos.y + r->height; y++)
-		for (uint x=r->pos.x; x < r->pos.x + r->width; x++)
+	void unload_room (Room* room) {
+		room::Desc* r = &room::desc[room->data];
+		for (uint y=room->pos.y; y < room->pos.y + r->height; y++)
+		for (uint x=room->pos.x; x < room->pos.x + r->width; x++)
 			at(x, y) = Tile();
-	}
-
-	void debug_print () {
-		for (uint y=0; y < height; y++) {
-			for (uint x=0; x < width; x++) {
-				putchar(world[height-y-1][x].nature);
-			}
-			putchar('\n');
-		}
 	}
 
 }
 
 
-
+#endif
 
 

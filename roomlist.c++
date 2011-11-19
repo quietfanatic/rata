@@ -7,8 +7,6 @@ enum ID {
 };
 
 namespace file {
-	namespace roompicker { extern Room room; }
-	namespace test1 { extern Room room; }
 	namespace roompicker {
 		#define THIS_ROOM room::roompicker
 		#include "rooms/0-roompicker.room.c++"
@@ -21,15 +19,9 @@ namespace file {
 	}
 }
 
-Room* list [] = {
-	&file::roompicker::room,
-	&file::test1::room
+Desc desc [n_rooms] = {
+	file::roompicker::desc,
+	file::test1::desc
 };
 
-#ifdef MAPEDITOR
-char* filename [] = {
-	"rooms/0-roompicker.room.c++",
-	"rooms/1-test1.room.c++"
-};
-#endif
 

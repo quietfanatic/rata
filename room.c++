@@ -1,5 +1,10 @@
 
 
+#ifdef HEADER
+
+struct Room;
+
+#else
 
  // STATIC GEOMETRY GENERATION
 
@@ -86,9 +91,28 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 
 
 
-struct Tilemap : Object {
-	void on_create () {
-		Room* r = room::list[desc->data];
+// Room object
+
+struct Room : Object {
+	void activate () {
+		Object::activate();
+		map::load_room(this);
+		for (Actor* a = contents; a; a = a->next)
+		if (a->type > -1)
+			a->activate();
+	}
+	void deactivate () {
+		for (Actor* a = contents; a; a = a->next)
+		if (a->type > -1)
+			a->deactivate();
+		map::unload_room(this);
+		Object::deactivate();
+	}
+	Room (obj::Desc* desc) :
+		Object(desc)
+	{
+		 // Create static geometry
+		room::Desc* r = &room::desc[data];
 		TileEdge edges [(uint)ceil(r->width)][(uint)ceil(r->height)][tile::max_vertexes];
 		for (uint y=0; y < r->height; y++)
 		for (uint x=0; x < r->width; x++) {
@@ -121,7 +145,7 @@ struct Tilemap : Object {
 			}
 		}
 		 // Transform to b2Fixtures
-		make_body(desc, false, false);
+		body = make_body(b2_staticBody, false);
 		b2FixtureDef fixdef;
 		fixdef.filter = cf::solid;
 		uint nfixes=0;
@@ -150,13 +174,11 @@ struct Tilemap : Object {
 			nfixes++;
 		}
 		printf("Created %u static fixtures.\n", nfixes);
+
 	}
 };
 
 
 
 
-
-
-
-
+#endif

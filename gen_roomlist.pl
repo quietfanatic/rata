@@ -24,19 +24,13 @@ ${\(join ",\n", map "\t$_->{id}", @rooms)},
 };
 
 namespace file {
-${\(join "\n", map "\tnamespace $_->{id} { extern Room room; }", @rooms)}
 ${\(join "\n", map "\tnamespace $_->{id} {\n\t\t#define THIS_ROOM room::$_->{id}\n\t\t#include \"$_->{file}\"\n\t\t#undef THIS_ROOM\n\t}", @rooms)}
 }
 
-Room* list [] = {
-${\(join ",\n", map "\t&file::$_->{id}::room", @rooms)}
+Desc desc [n_rooms] = {
+${\(join ",\n", map "\tfile::$_->{id}::desc", @rooms)}
 };
 
-#ifdef MAPEDITOR
-char* filename [] = {
-${\(join ",\n", map "\t\"$_->{file}\"", @rooms)}
-};
-#endif
 
 END
 

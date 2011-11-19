@@ -60,7 +60,8 @@ struct Rata : Walking {
 	int inv_frames;
 	int adrenaline;
 	int hurt_direction;
-	int hurt_id [2];
+	int hurt_type_0;
+	int hurt_type_1;
 	 // Aiming
 	float min_aim;
 	float max_aim;
@@ -103,8 +104,8 @@ struct Rata : Walking {
 	int fix_helmet_current;
 	int fix_helmet_old;
 	 // Equipment and inventory
-	obj::Desc* inventory [10];
-	obj::Desc* equipment [item::num_slots];
+	Item* inventory [10];
+	Item* equipment [item::num_slots];
 	 // Actions
 	float action_distance;
 	void* action_arg;
@@ -114,11 +115,11 @@ struct Rata : Walking {
 	};
 	int action;
 	void propose_action (int act, void* arg, Vec p, float radius) {
-		if (y() > p.y - radius)
-		if (y() < p.y + radius)
-		if (x() > p.x - radius)
-		if (x() < p.x + radius) {
-			float dist = abs_f(x() - p.x);
+		if (pos.y > p.y - radius)
+		if (pos.y < p.y + radius)
+		if (pos.x > p.x - radius)
+		if (pos.x < p.x + radius) {
+			float dist = abs_f(pos.x - p.x);
 			if (dist < action_distance || dist < 0.2) {
 				action = act;
 				action_arg = arg;
@@ -134,7 +135,7 @@ struct Rata : Walking {
 	bool wearing_helmet () {
 		return equip_info(item::head) == &item::def[item::helmet];
 	}
-	Vec aim_center () { return pos() + Vec(2*PX*facing, 13*PX); }
+	Vec aim_center () { return pos + Vec(2*PX*facing, 13*PX); }
 	Vec cursor_pos () { return aim_center() + Vec(cursor.x, cursor.y); }
 	
 	void set_fix (int fix) {
@@ -168,8 +169,8 @@ struct Rata : Walking {
 	bool bullet_inv () {
 		return state == dead
 		    || state == dead_air
-		    || hurt_id[0] == obj::bullet
-		    || hurt_id[1] == obj::bullet;
+		    || hurt_type_0 == obj::bullet
+		    || hurt_type_1 == obj::bullet;
 	}
 	void update_fixtures () {
 		int i = 0;
@@ -182,58 +183,6 @@ struct Rata : Walking {
 			}
 			i++;
 		}
-	}
-
-
-	 // Equipment and inventory management
-
-	void spawn_item (obj::Desc* itemdesc) {
-		itemdesc->room = room::current;
-		itemdesc->pos = pos();
-		itemdesc->facing = facing;
-		itemdesc->manifest();
-	}
-	void add_to_inventory (obj::Desc* itemdesc) {
-		for (uint i=0; i < MAX_INVENTORY; i++) {
-			if (inventory[i] == NULL) {
-				inventory[i] = itemdesc;
-				itemdesc->room = -100 - i;
-				return;
-			}
-		} // No room
-		spawn_item(itemdesc);
-	}	
-	void pick_up (Item* itemobj) {
-		itemobj->destroy();
-		add_to_inventory(itemobj->desc);
-	}
-	void drop (uint i) {
-		spawn_item(inventory[i]);
-		for (; i < MAX_INVENTORY - 1; i++) {
-			inventory[i] = inventory[i+1];
-		}
-		inventory[MAX_INVENTORY] = NULL;
-	}
-	void unequip_drop (obj::Desc* itemdesc) {
-		if (itemdesc == NULL) return;
-		int slot = item::def[itemdesc->data].slot;
-		equipment[slot] = NULL;
-		int otherslot = item::def[itemdesc->data].otherslot;
-		if (otherslot > 0) equipment[otherslot] = NULL;
-		spawn_item(itemdesc);
-	}
-	void pick_up_equip (Item* itemobj) {
-		itemobj->destroy();
-		int slot = item::def[itemobj->desc->data].slot;
-		if (equipment[slot])
-			unequip_drop(equipment[slot]);
-		int otherslot = item::def[itemobj->desc->data].otherslot;
-		if (otherslot > 0 && equipment[otherslot])
-			unequip_drop(equipment[otherslot]);
-		equipment[slot] = itemobj->desc;
-		itemobj->desc->room = room::equipment;
-		if (otherslot > 0) equipment[otherslot] = itemobj->desc;
-		recalc_stats();
 	}
 
 	 // Character stats (affected by items and such)
@@ -265,7 +214,7 @@ struct Rata : Walking {
 			auto_control = true;
 		}
 		if (auto_control) {
-			map::Pos plat = map::get_platform(pos());
+			map::Pos plat = map::get_platform(pos);
 			if (map::same_platform(plat, destination)) {
 				if (destination.x < plat.x)
 					control_left = true;
@@ -276,7 +225,7 @@ struct Rata : Walking {
 		 // Dump debug info
 		if (key[sf::Key::BackSlash] == 1) {
 			map::debug_print();
-			for (Actor* a = actors_by_depth; a; a = a->next_depth)
+			for (Actor* a = active_actors; a; a = a->next_active)
 				a->debug_print();
 		}
 	}
@@ -317,7 +266,7 @@ struct Rata : Walking {
 	bool allow_walk () {
 		 // Left
 		if (control_left && !control_right) {
-			if (xvel() < 0)
+			if (vel.x < 0)
 				floor_friction = stats.run_accel;
 			else floor_friction = stats.decel;
 			if (facing < 0)
@@ -327,7 +276,7 @@ struct Rata : Walking {
 		}
 		 // Right
 		else if (control_right && !control_left) {
-			if (xvel() > 0)
+			if (vel.x > 0)
 				floor_friction = stats.run_accel;
 			else floor_friction = stats.decel;
 			if (facing > 0)
@@ -340,12 +289,12 @@ struct Rata : Walking {
 			floor_friction = stats.decel;
 			ideal_xvel = 0;
 		}
-		return abs_f(xvel()) >= 0.01;
+		return abs_f(vel.x) >= 0.01;
 	}
 
 	bool allow_jump () {
 		if (control_jump) {  // Jump
-			set_vel(Vec(vel().x, stats.jump_vel));
+			vel.y = stats.jump_vel;
 			float_frames = stats.float_time*FPS;
 			state = falling;
 			return true;
@@ -380,27 +329,27 @@ struct Rata : Walking {
 		 // Left
 		if (control_left && !control_right) {
 			float max = -stats.air_speed;
-			if (xvel() > max) {
-				add_vel(Vec(-stats.air_accel, 0));
-				if (xvel() < max) {
-					add_vel(Vec(-xvel() + max, 0));
+			if (vel.x > max) {
+				vel.x -= stats.air_accel;
+				if (vel.x < max) {
+					vel.x += max - vel.x;
 				}
 			}
 		}
 		 // Right
 		else if (control_right && !control_left) {
 			float max = stats.air_speed;
-			if (xvel() < max) {
-				add_vel(Vec(stats.air_accel, 0));
-				if (xvel() > max) {
-					add_vel(Vec(-xvel() + max, 0));
+			if (vel.x < max) {
+				vel.x += stats.air_accel;
+				if (vel.x > max) {
+					vel.x += max - vel.x;
 				}
 			}
 		}
 		 // Adjust falling speed
 		if (control_jump && float_frames) {
-				body->SetGravityScale((stats.float_time-float_frames/FPS)/stats.float_time);
-				float_frames--;
+			body->SetGravityScale((stats.float_time-float_frames/FPS)/stats.float_time);
+			float_frames--;
 		}
 		else {
 			body->SetGravityScale(1.0);
@@ -423,11 +372,11 @@ struct Rata : Walking {
 		if (control_action)
 		switch (action) {
 			case action_equip: {
-				pick_up_equip((Item*)action_arg);
+				//pick_up_equip((Item*)action_arg);
 				break;
 			}
 			case action_enter: {
-				obj::Desc* d = ((Object*)action_arg)->desc;
+				//obj::Desc* d = ((Object*)action_arg)->desc;
 				break;
 			}
 			default: { }
@@ -464,7 +413,7 @@ struct Rata : Walking {
 						message = message_pos = NULL;
 					}
 				}
-				else if (can_see && pointed_object && pointed_object->desc->id != obj::tilemap) {
+				else if (can_see && pointed_object && pointed_object->type != obj::room) {
 					message = pointed_object->describe();
 					message_pos = message;
 					message_pos_next = NULL;
@@ -482,19 +431,19 @@ struct Rata : Walking {
 
 	void decrement_counters () {
 		if (recoil_frames) recoil_frames--;
-		if (yvel() < -20.0) {
+		if (vel.y < -20.0) {
 			hurt_frames++;
 			state = hurt_air;
 		}
 		if (hurt_frames) {
-			if (yvel() < -10.0)
+			if (vel.y < -10.0)
 				hurt_frames++;
 			else
 				hurt_frames--;
 		}
 		if (hurt_frames > 120) hurt_frames = 120;
 		if (inv_frames) inv_frames--;
-		else hurt_id[0] = hurt_id[1] = -1;
+		else hurt_type_0 = hurt_type_1 = -1;
 		if (adrenaline) adrenaline--;
 	}
 
@@ -648,9 +597,9 @@ struct Rata : Walking {
 			case ouch: {
 				body->SetGravityScale(1.0);
 				float_frames = 0;
-				if (yvel() < 1.0) add_vel(Vec(0, 3.0));
+				if (vel.y < 1.0) vel.y += 3.0;
 				if (life <= 0) {
-					impulse(Vec(0, 5.0));
+					vel.y += 2.0;
 					goto dead_no_floor;
 				}
 				else {
@@ -659,7 +608,7 @@ struct Rata : Walking {
 				break;
 			}
 			case hurt_air: {
-				hurt_direction = sign_f(xvel())*facing;
+				hurt_direction = sign_f(vel.x)*facing;
 				if (floor) {
 					if (hurt_frames < 20) {
 						snd::def[snd::step].play(1.2, 8*-oldyvel/2.0);
@@ -715,25 +664,19 @@ struct Rata : Walking {
 			}	
 		}
 
-		if (floor) oldxrel = x() - floor->x();
-		oldyvel = yvel();
+		if (floor) oldxrel = pos.x - floor->pos.x;
+		oldyvel = vel.y;
 
 		 // Select cursor image
 		if (aiming) cursor.img = img::target;
 		else if (message) cursor.img = img::readmore;
 		else if (can_see) {
-			if (pointed_object && pointed_object->desc->id != obj::tilemap)
+			if (pointed_object && pointed_object->type != obj::room)
 				cursor.img = img::see;
 			else cursor.img = img::look;
 		}
-		 // Test can_reach_with_jump
-		//if (floor) {
-		//	if (map::can_reach_with_jump(pos(), Vec(6.0, jump_velocity()), cursor_pos(), jump_float_time())) {
-		//		cursor.img = img::see;
-		//	}
-		//	else cursor.img = img::nolook;
-		//}
 		else cursor.img = img::nolook;
+
 		action = -1;
 		action_distance = 1000000;
 		
@@ -758,74 +701,58 @@ struct Rata : Walking {
 	}
 
 
-
-
 	void after_move () {
+		Walking::after_move();
 //		printf("%08x's floor is: %08x\n", this, floor);
 //		floor = get_floor(fix_feet_current());
 		float step = state == crawling ? 0.8 : 1.0;
 		if (floor && (state == walking || state == crawling)) {
-			if (abs_f(xvel()) < 0.01)
+			if (abs_f(vel.x) < 0.01)
 				distance_walked = 0;
 			else {
 				float olddist = distance_walked;
-				distance_walked += ((x() - floor->x()) - oldxrel)*sign_f(xvel());
+				distance_walked += ((pos.x - floor->pos.x) - oldxrel)*sign_f(vel.x);
 				if (state == walking) {
 					float oldstep = mod_f(olddist, step);
 					float step_d = mod_f(distance_walked, step);
 					if (oldstep < 0.4 && step_d >= 0.4)
-						snd::def[snd::step].play(0.9+rand()*0.2/RAND_MAX, 6*abs_f(xvel())*(1.0+rand()*0.2/RAND_MAX));
+						snd::def[snd::step].play(0.9+rand()*0.2/RAND_MAX, 6*abs_f(vel.x)*(1.0+rand()*0.2/RAND_MAX));
 				}
 			}
 		}
 		else distance_walked = 0;
 	};
-	Rata () : Walking() { rata = this; }
-	virtual void on_create () {
-		make_body(desc, true, true);
-			for (uint i = obj::def[desc->id].nfixes; i > 0; i--) {
-				dbg(4, "Fix %d: 0x%08x\n", i, body->CreateFixture(&(obj::def[desc->id].fixdef[i-1])));
-			}
-		dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
-		fix_old = fix_current = fix_27;
-		fix_helmet_old = fix_helmet_current = -1;
+	Rata (obj::Desc* desc) :
+		Walking(desc),
+		fix_old(fix_27),
+		fix_current(fix_27),
+		fix_helmet_old(-1),
+		fix_helmet_current(-1),
+		float_frames(0),
+		recoil_frames(0),
+		hurt_frames(0),
+		inv_frames(0),
+		adrenaline(0),
+		hurt_type_0(-1),
+		hurt_type_1(-1),
+		state(data ? data : falling),
+		oldyvel(0)
+	{
+		rata = this;
+		//body = make_body(b2_dynamicBody, true);
+		//for (uint i = obj::type[type].nfixes; i > 0; i--) {
+		//	dbg(4, "Fix %d: 0x%08x\n", i, body->CreateFixture(&(obj::type[type].fixdef[i-1])));
+		//}
+		//dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
 		update_fixtures();
-		floor = NULL;
-		Walking::on_create();
-		float_frames = 0;
-		recoil_frames = 0;
-		hurt_frames = 0;
-		inv_frames = 0;
-		adrenaline = 0;
-		hurt_id[0] = hurt_id[1] = -1;
-		if (desc->data) state = desc->data;
-		else state = falling;
-		life = max_life = 144;
-		for (uint i=0; i<MAX_INVENTORY; i++)
-			inventory[i] = NULL;
-		for (uint i=0; i<item::num_slots; i++)
-			equipment[i] = NULL;
-		for (uint i=0; i<n_saved_things; i++) {
-			if (saved_things[i].room == room::equipment) {
-				equipment[item::def[saved_things[i].data].slot] = &saved_things[i];
-				if (item::def[saved_things[i].data].otherslot > -1)
-					equipment[item::def[saved_things[i].data].otherslot] = &saved_things[i];
-			}
-			else if (saved_things[i].room <= -100) {
-				inventory[saved_things[i].room + 100] = &saved_things[i];
-			}
-		}
-		facing = desc->facing ? desc->facing : 1;
+		if (!facing) facing = 1;
 		cursor.x = 2.0 * facing;
 		cursor.y = 0;
 		cursor.img = img::look;
 		trap_cursor = true;
 		draw_cursor = true;
-		oldyvel = 0.0;
+		life = max_life = 144;
 		recalc_stats();
-	}
-	virtual void on_destroy () {
-		rata = NULL;
 	}
 
 	uint pose_arm_by_aim () {
@@ -848,7 +775,7 @@ struct Rata : Walking {
 		bool flip = facing<0;
 		bool armflip = flip;
 		bool forearmflip = flip;
-		Vec p = pos();
+		Vec p = pos;
 		if (equip_info(item::feet))
 		if (state == standing || state == walking) p.y += 1*PX;
 		
@@ -862,7 +789,7 @@ struct Rata : Walking {
 			float step_d = mod_f(distance_walked, step * 2);
 			if (step_d < 0) step_d += step*2;
 			walk_frame =
-			  abs_f(xvel()) < 0.01 ? 0
+			  abs_f(vel.x) < 0.01 ? 0
 			: step_d < step*5/9.0  ? 1
 			: step_d < step        ? 2
 			: step_d < step*14/9.0 ? 3
@@ -943,7 +870,7 @@ struct Rata : Walking {
 			}
 			case falling: {
 				pose.body = Body::walk;
-				pose.head = (yvel() < 0) ? Head::angle_walk[angle_frame]
+				pose.head = (vel.y < 0) ? Head::angle_walk[angle_frame]
 				                        : Head::angle_stand[angle_frame];
 				if (aiming) {
 					pose.arm = pose_arm_by_aim();
@@ -1093,7 +1020,7 @@ struct Rata : Walking {
 		: action == action_enter ? "ENTER"
 		:                          NULL;
 		if (m) {
-			render_text((char*)m, pos() + Vec(0, 3), 1, true, true, 0);
+			render_text((char*)m, pos + Vec(0, 3), 1, true, true, 0);
 		}
 
 	}

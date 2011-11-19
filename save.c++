@@ -83,6 +83,11 @@ void load_save () {
 		if (saved_things[i].room == room::everywhere) {
 			saved_things[i].manifest();
 		}
+		else if (saved_things[i].room > -1) {
+			Actor* a = saved_things[i].manifest();
+			a->next_room = room::list[saved_things[i].room]->objlist;
+			room::list[saved_things[i].room]->objlist = a;
+		}
 	}
 }
 

@@ -27,10 +27,12 @@ float gravity = -30;
 #include "objects.c++"
 #include "bullet.c++"
 #include "rooms.c++"
+#include "room.c++"
 #include "tiles.c++"
 #include "loop.c++"
 #include "text.c++"
 #include "buttons.c++"
+#include "query.c++"
 #undef HEADER
 #include "text.c++"
 
@@ -76,7 +78,6 @@ struct Cursor {
 bool click_taken = false;
 bool draw_cursor = false;
 bool trap_cursor = false;
-Object* dragging = NULL;
 
  // Camera state
 struct Camera {
@@ -86,7 +87,7 @@ struct Camera {
 bool camera_jump = false;
 
  // Global object lists
-Actor* actors_by_depth = NULL;  // Actors are linked list
+Actor* active_actors = NULL;  // Actors are linked list
 Actor* activation_queue = NULL;
 static const uint MAX_BULLETS = 10;
 RBullet bullets[MAX_BULLETS];
@@ -117,14 +118,14 @@ char* message_pos_next = NULL;
 #include "poses.c++"
 #define HEADER
 #include "items.c++"
-#include "save.c++"
 #undef HEADER
 #include "objects.c++"
+#include "query.c++"
+#include "global.c++"
 #include "coll.c++"
 #include "bullet.c++"
 #include "items.c++"
-#include "rooms.c++"
-#include "save.c++"
+#include "tiles.c++"
 #include "loop.c++"
 
 

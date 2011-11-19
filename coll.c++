@@ -13,11 +13,11 @@ void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Man
 	}
 
 	if (a->life <= 0) return;
-	if (a->desc->id == obj::rata) {
-		if (rata->hurt_id[0] == b->desc->id
-		 || rata->hurt_id[1] == b->desc->id) return;
-		rata->hurt_id[1] = rata->hurt_id[0];
-		rata->hurt_id[0] = b->desc->id;
+	if (a->type == obj::rata) {
+		if (rata->hurt_type_0 == b->type
+		 || rata->hurt_type_1 == b->type) return;
+		rata->hurt_type_1 = rata->hurt_type_0;
+		rata->hurt_type_0 = b->type;
 	}
 	else if (!bfp->damages_enemies) return;
 	
@@ -36,7 +36,7 @@ struct myCL : b2ContactListener {
 		Object* a = (Object*) contact->GetFixtureA()->GetBody()->GetUserData();
 		Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
 		//b2Manifold* manifold = contact->GetManifold();
-		if (!a->alive || !b->alive)
+		if (a->type < 0 || b->type < 0)
 			return contact->SetEnabled(false);
 	}
 	void PostSolve (b2Contact* contact, const b2ContactImpulse* ci) {
@@ -88,14 +88,14 @@ struct myCL : b2ContactListener {
 			apply_touch_damage(a, b, afp, bfp, manifold);
 		if (afp->touch_damage && bfp->damage_factor)
 			apply_touch_damage(b, a, bfp, afp, manifold);
-		if (a->desc->id == obj::heart && b->desc->id == obj::rata) {
-			rata->heal(48);
-			a->destroy();
-		}
-		else if (b->desc->id == obj::heart && a->desc->id == obj::rata) {
-			rata->heal(48);
-			b->destroy();
-		}
+//		if (a->type == obj::heart && b->type == obj::rata) {
+//			rata->heal(48);
+//			a->destroy();
+//		}
+//		else if (b->type == obj::heart && a->type == obj::rata) {
+//			rata->heal(48);
+//			b->destroy();
+//		}
 	}
 	void EndContact (b2Contact* contact) {
 		if (((FixProp*)contact->GetFixtureA()->GetUserData())->stands) {

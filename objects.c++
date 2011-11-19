@@ -14,6 +14,7 @@
 #ifdef HEADER
 
 struct Actor;
+struct Game;
 struct Object;
 struct Rata;
 struct Tilemap;
@@ -26,87 +27,99 @@ struct Bullet;
 // structs representing active instances.
 
 namespace obj {
-	enum ID {
-		object,
+	enum {
+		game,
 		rata,
-		door,
-		solid,
-		tilemap,
+		room,
 		bullet,
-		rat,
-		crate,
-		mousehole,
-		hiteffect,
-		patroller,
-		flyer,
-		heart,
-		item,
-		 // For drawing
-		tiles_back,
+		back_tiles,
 		bullet_layer,
-		tiles_front,
+		front_tiles,
 		shade,
-		lifebar,
-		n_ids
+		n_types
 	};
 	struct Desc;
-	struct Def;
-	extern const Def def [];
-	template <class T> Actor* ALLOC () { return new T; }
+	struct Type;
+	extern const uint n_globals;
+	extern Desc saved [];
+	extern Actor* global [];
+	extern const Type type [n_types];
+	template <class T> Actor* ALLOC (obj::Desc* desc) { return new T (desc); }
 }
 
 
-struct obj::Def {
+struct obj::Type {
 	const char* name;
 	int nfixes;
 	b2FixtureDef* fixdef;
 	float depth;
-	Actor* (& alloc) ();
+	Actor* (& alloc )(obj::Desc*);
 	int16 image;
 };
 
 struct obj::Desc {
-	int16 room;
-	int16 id;
+	int16 loc;
+	int16 type;
 	Vec pos;
 	Vec vel;
 	int32 facing;
 	uint32 data;
 	uint32 data2;
-	Actor* manifest ();
 
-	Desc (uint16 room=-1, uint16 id=0, Vec pos=Vec(0, 0), Vec vel=Vec(0, 0), int facing=0, uint32 data=0, uint32 data2=0)
-	 :room(room), id(id), pos(pos), vel(vel), facing(facing), data(data), data2(data2)
-		{ }
+	Actor* manifest ();
 };
 
  // Most "things" in the game world are this.
-struct Actor {
-	obj::Desc* desc;
-	Actor* next_depth;
-	bool alive;
+struct Actor : obj::Desc {
+	int16 id;
 	bool active;
-	virtual void on_create () { }
+	Actor* contents;
+	Actor* next;
+	Actor* prev;
+	Actor* next_active;
+
+	virtual void activate ();
+	virtual void deactivate ();
+
 	virtual void before_move () { }
 	virtual void after_move () { }
-	virtual void on_destroy () { }
 	virtual void draw () { }
 
+	Actor (obj::Desc* desc) :
+		obj::Desc(*desc),
+		id( desc - obj::saved < obj::n_globals ? desc - obj::saved : -1 ),
+		active(false),
+		contents(NULL),
+		next(NULL),
+		prev(NULL),
+		next_active(NULL)
+	{ }
+	
 	bool has_body () {
-		return obj::def[desc->id].nfixes > -1;
+		return obj::type[type].nfixes > -1;
 	}
-
-	void create ();
-	void destroy ();
 
 	 // debug
 	virtual void debug_print () {
 		printf("%08x %12s: (% 8.4f, % 8.4f) @ (% 8.4f, % 8.4f) % d; %d %d\n",
-			this, obj::def[desc->id].name,
-			desc->pos.x, desc->pos.y,
-			desc->vel.x, desc->vel.y,
-			desc->facing, desc->data, desc->data2
+			this, obj::type[id].name,
+			pos.x, pos.y,
+			vel.x, vel.y,
+			facing, data, data2
 		);
+	}
+
+	virtual void take (Actor* a) {
+		if (contents) contents->prev = a;
+		a->next = contents;
+		contents = a;
+	}
+	virtual void give (Actor* a) {
+		if (a == contents) {
+			contents = a->next;
+		}
+		if (a->next) a->next->prev = a->prev;
+		if (a->prev) a->prev->next = a->next;
 	}
 };
 
@@ -120,23 +133,6 @@ struct FixProp {
 	bool damages_enemies;
 } default_FixProp = {true, false, 0.0, 0, false};
 
-
-#else
-
-void Actor::create () {
-	next_depth = activation_queue;
-	activation_queue = this;
-	alive = true;
-	active = true;
-	dbg(2, "Creating 0x%08x\n", this);
-	on_create();
-}
-void Actor::destroy () {
-	alive = false;
-	active = false;
-	dbg(2, "Destroying 0x%08x\n", this);
-	on_destroy();
-}
 
  // Collision filters
 
@@ -156,228 +152,106 @@ namespace cf {
 
 
 
+#else
+
+void Actor::activate () {
+	next_active = activation_queue;
+	activation_queue = this;
+	active = true;
+	dbg(2, "Activating 0x%08x\n", this);
+}
+void Actor::deactivate () {
+	active = false;
+	dbg(2, "Deactivating 0x%08x\n", this);
+}
+
+
  // INSTANCE STRUCTURES
 
 struct Object : Actor {
 	b2Body* body;
-	int facing;  // 1 = right, -1 = left
 	uint subimage;
 	int life;
 	int max_life;
 	
 
 	 // Create a Box2d body for this object
-	void make_body (obj::Desc* desc, bool dynamic=false, bool bullet=false) {
+	b2Body* make_body (b2BodyType btype = b2_staticBody, bool bullet=false) {
 		b2BodyDef d;
-		if (dynamic) d.type = b2_dynamicBody;
-		d.position = desc->pos;
-		d.linearVelocity = desc->vel;
+		d.type = btype;
+		d.position = pos;
+		d.linearVelocity = vel;
 		d.fixedRotation = true;
 		d.userData = this;
 		d.gravityScale = 1.0;
 		d.bullet = bullet;
-		body = world->CreateBody(&d);
+		d.active = false;
+		return world->CreateBody(&d);
+	}
+
+	Object (obj::Desc* desc) :
+		Actor(desc),
+		body(obj::type[id].nfixes > 0 ? make_body(b2_dynamicBody, true) : NULL),
+		life(0),
+		max_life(0),
+		subimage(0)
+	{
+		for (int i = obj::type[type].nfixes; i > 0; i--) {
+			dbg(4, "Fix %d: 0x%08x\n", i, body->CreateFixture(&(obj::type[type].fixdef[i-1])));
+		}
+		dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
 	}
 	
-	 // Find one object (by default solid) in the area given by world coords
-	 // This has false positives.
-	struct AreaChecker : public b2QueryCallback {
-		b2Fixture* found;
-		uint16 cat;
-		bool ReportFixture(b2Fixture* fix) {
-			if (fix->GetFilterData().categoryBits & cat) {
-				found = fix;
-				return false;
-			}
-			else {
-				return true;
-			}
-		}
-	};
-	Object* check_area (float l, float t, float r, float b, uint16 cat = 2|32) {
-		AreaChecker checker;
-		checker.found = NULL;
-		checker.cat = cat;
-		b2AABB aabb;
-		if (l > r) SWAP(l, r)
-		if (t > b) SWAP(t, b)
-		aabb.lowerBound.Set(l, b);
-		aabb.upperBound.Set(r, t);
-		world->QueryAABB(&checker, aabb);
-		if (checker.found)
-			return (Object*) checker.found->GetBody()->GetUserData();
-		else return NULL;
-	}
-
-	 // Find one object (by default solid) along the line in world coords
-	struct LineChecker : public b2RayCastCallback {
-		Object* owner;
-		uint16 mask;
-		float frac;
-		b2Fixture* hit;
-		Vec norm;
-		float32 ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
-			if (fix->GetFilterData().categoryBits & mask)
-			if (fix->GetBody()->GetUserData() != owner)
-			if (((Object*)fix->GetBody()->GetUserData())->alive) {
-				dbg(6, "raytrace hit with cf %u, %u.\n", fix->GetFilterData().categoryBits, mask);
-				if (f < frac) {
-					hit = fix;
-					frac = f;
-					norm = n;
-				}
-				return frac;
-			}
-			return 1;
-		}
-	};
-	struct LineLooker : public b2RayCastCallback {
-		uint16 mask;
-		bool seen;
-		float32 ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
-			if (fix->GetFilterData().categoryBits & mask) {
-				seen = true;
-				return 0;
-			}
-			else {
-				return -1;
-			}
-		}
-	};
-
-	static inline LineChecker check_line (Vec from, Vec to, uint16 mask = cf::solid.categoryBits, Object* owner = NULL) {
-		LineChecker checker;
-		checker.owner = owner;
-		checker.mask = mask;
-		checker.frac = 1;
-		checker.hit = NULL;
-		world->RayCast(&checker, from, to);
-		return checker;
-	}
-	static inline bool look_line (Vec from, Vec to, uint16 mask = cf::solid.categoryBits) {
-		LineLooker looker;
-		looker.mask = mask;
-		looker.seen = false;
-		world->RayCast(&looker, from, to);
-		return looker.seen;
-	}
-	 // Get contacts of a fixture
-	Object* get_touching (b2Fixture* fix) {
-		Object* r = NULL;
-		for (b2ContactEdge* ce = body->GetContactList(); ce; ce = ce->next) {
-			b2Contact* c = ce->contact;
-			if (c->IsEnabled() && c->IsTouching()) {
-				if (c->GetFixtureA() == fix)
-					r = (Object*)c->GetFixtureB()->GetBody()->GetUserData();
-				else if (c->GetFixtureB() == fix)
-					r = (Object*)c->GetFixtureA()->GetBody()->GetUserData();
-			}
-		}
-		return r;
-	}
-
 	 // Events
-	void on_create () {
-		if (obj::def[desc->id].nfixes) {
-			make_body(desc, true);
-			for (int i = obj::def[desc->id].nfixes; i > 0; i--) {
-				dbg(4, "Fix %d: 0x%08x\n", i, body->CreateFixture(&(obj::def[desc->id].fixdef[i-1])));
-			}
-			dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
-		}
-		else body = NULL;
-		facing = desc->facing;
-		life = max_life = 0;
-		subimage = 0;
-//		realtest = 151783;
+	void before_move () {
+		//body->SetPosition(pos);
+		body->SetLinearVelocity(vel);
 	}
-	void before_move () { }
-	void after_move () { }
-	void on_destroy () { }
+	void after_move () {
+		pos = body->GetPosition();
+		vel = body->GetLinearVelocity();
+	}
+
 	void draw () {
-		if (def()->image) {
-			if (body) {
-				draw_image(def()->image, pos(), subimage, facing == 1);
-			}
-			else {
-				draw_image(def()->image, desc->pos, subimage, facing == 1);
-			}
+		if (obj::type[type].image) {
+			draw_image(obj::type[type].image, pos, subimage, facing == 1);
 		}
 	}
 
+	 // New things specific to object.
 	virtual void damage (int d) { life -= d; if (life <= 0) kill(); }
 	virtual void heal (int h) { life += h; if (life > max_life) life = max_life; }
-	virtual void kill () { destroy(); desc->id = -1; }
+	virtual void kill () { type = -1; deactivate(); }
 	virtual char* describe () { return "What a mysterious object."; }
 
 
-	 // Wrap b2Body
-	float x() { return body->GetPosition().x; }
-	float y() { return body->GetPosition().y; }
-	Vec pos() { return body->GetPosition(); }
-	float xvel() { return body->GetLinearVelocity().x; }
-	float yvel() { return body->GetLinearVelocity().y; }
-	Vec vel() { return body->GetLinearVelocity(); }
-	//float speed() { return xvel()*xvel() + yvel()*yvel(); }
 	float mass() { return body->GetMass(); }
-	float xvelrel(Object* other) {
-		return xvel() - other->xvel();
-	}
-	float yvelrel(Object* other) {
-		return yvel() - other->yvel();
-	}
-	Vec velrel(Object* other) {
-		return vel() - other->vel();
-	}
-	inline void set_pos(Vec p) {
-		body->SetTransform(p, 0);
-	}
-	inline void set_vel(Vec v) {
-		body->SetLinearVelocity(v);
-	}
-	inline void add_vel(Vec v) {
-		Vec oldvel = body->GetLinearVelocity();
-		body->SetLinearVelocity(oldvel + v);
-	}
 	void impulse (Vec i) {
-		body->ApplyLinearImpulse(i, body->GetPosition());
+		vel += i / mass();
 	}
 	void mutual_impulse(Object* other, Vec i) {
-		float m = body->GetMass();
-		float om = other->body->GetMass();
+		float m = mass();
+		float om = other->mass();
 		if (m == 0 || m == 1/0.0)
-			other->body->ApplyLinearImpulse(i, other->body->GetPosition());
+			other->impulse(i);
 		if (om == 0 || om == 1/0.0)
-			body->ApplyLinearImpulse(-i, body->GetPosition());
+			impulse(-i);
 		else {
-			other->body->ApplyLinearImpulse(i * m/(m+om), other->body->GetPosition());
-			body->ApplyLinearImpulse(-i * om/(m+om), other->body->GetPosition());
+			other->impulse(i * m/(m+om));
+			impulse(-i * om/(m+om));
 		}
 	}
 
-	 // Get def, id
-	const uint16 id () { return desc->id; }
-	const obj::Def* def () { return &obj::def[id()]; }
-
-	 // debug
-	void debug_print () {
-		printf("%08x %12s: (% 8.4f, % 8.4f) @ (% 8.4f, % 8.4f) % d; %d %d\n",
-			this, def()->name,
-			pos().x, pos().y, vel().x, vel().y,
-			facing, desc->data, desc->data2
-		);
+	void activate () {
+		Actor::activate();
+		body->SetActive(true);
 	}
-};
-
-struct Solid : Object {
-	virtual void on_create () {
-		Object::on_create();
-		make_body(desc, false, false);
-		body->CreateFixture((b2FixtureDef*)desc->data);
-		dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
+	void deactivate () {
+		body->SetActive(false);
+		Actor::deactivate();
 	}
-};
 
+};
 
 
 
@@ -393,29 +267,32 @@ struct Walking : Object {
 	b2FrictionJoint* friction_joint;
 	float floor_friction;
 	float ideal_xvel;
-	virtual void on_create () {
-		floor = NULL;
-		floor_contact = NULL;
+	Walking (obj::Desc* desc) :
+		Object(desc),
+		floor(NULL),
+		floor_friction(0.4),
+		ideal_xvel(0)
+	{
 		 // Create friction body
 		b2BodyDef fricdef;
 		fricdef.type = b2_kinematicBody;
-		fricdef.position = desc->pos;
+		fricdef.position = pos;
+		fricdef.active = false;
 		friction_body = world->CreateBody(&fricdef);
 		 // Create joint
 		b2FrictionJointDef fjd;
 		fjd.bodyA = body;
 		fjd.bodyB = friction_body;
-		fjd.localAnchorA = b2Vec2(0, 0);
-		fjd.localAnchorB = b2Vec2(0, 0);
+		fjd.localAnchorA = Vec(0, 0);
+		fjd.localAnchorB = Vec(0, 0);
 		fjd.maxForce = 0;
 		fjd.maxTorque = 0;
 		friction_joint = (b2FrictionJoint*)world->CreateJoint(&fjd);
-		 // Some default values
-		floor_friction = 0.4;
 	}
-	virtual void before_move () {
-		friction_body->SetTransform(body->GetPosition(), 0);
+	void before_move () {
+		friction_body->SetTransform(pos, 0);
 		if (floor) {
+			friction_body->SetActive(true);
 			friction_joint->SetMaxForce(
 				  body->GetMass()
 				* sqrt(floor_friction * floor_fix->GetFriction())
@@ -442,13 +319,21 @@ struct Walking : Object {
 		else {
 			friction_joint->SetMaxForce(0);
 		}
+		Object::before_move();
 	}
-	virtual void on_destroy () {
-		Object::on_destroy();
-		world->DestroyBody(friction_body);
+	void activate () {
+		Object::activate();
+		friction_body->SetActive(true);
+		printf("Activated a Walking.\n");
+	}
+	void deactivate () {
+		friction_body->SetActive(false);
+		Object::deactivate();
 	}
 };
 
+
+#include "game.c++"
 
 struct Item : Actor {
 	void draw ();
@@ -459,33 +344,27 @@ struct Item : Actor {
 #include "rata.c++"
 
 void Item::draw () {
-	if (desc->data) {
-		item::Def* info = &item::def[desc->data];
-		draw_image(info->appearance, desc->pos, info->world_frame);
+	if (data) {
+		item::Def* info = &item::def[data];
+		draw_image(info->appearance, pos, info->world_frame);
 	}
 }
 void Item::after_move () {
 	if (rata->floor)
-		rata->propose_action(Rata::action_equip, this, desc->pos, 1);
+		rata->propose_action(Rata::action_equip, this, pos, 1);
 }
 
 
-#include "enemies.c++"
+//#include "enemies.c++"
 
-#include "tilemap.c++"
+#include "room.c++"
 #include "misc.c++"
 
 
  // loose end from above
 
 Actor* obj::Desc::manifest () {
-	Actor* r = obj::def[id].alloc();
-	r->desc = this;
-	if (r->has_body()) {
-		((Object*)r)->body = NULL;
-	}
-	r->create();
-	return r;
+	return obj::type[type].alloc(this);
 }
 
 
@@ -667,27 +546,28 @@ b2FixtureDef flyer_fix = make_fixdef(make_circle(6*PX), cf::enemy, 0, 0.6, 6.0, 
 FixProp heart_fixprop = {false, false, 0.0, 0, false};
 b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.1, &heart_fixprop);
 
-const obj::Def obj::def [] = {
+const obj::Type obj::type [obj::n_types] = {
 
-	{"Object", -1, NULL, 0, obj::ALLOC<Object>, -1},
+	{"Game", -1, NULL, 0, obj::ALLOC<Game>, -1},
 	{"Rata", 18, rata_fixes, 10, obj::ALLOC<Rata>, -1},
-	{"Door", -1, NULL, -100,  obj::ALLOC<Door>, -1},
-	{"Solid Object", -1, NULL, 0, obj::ALLOC<Solid>, -1},
-	{"Tilemap", 0, NULL, 0, obj::ALLOC<Tilemap>, -1},
-	{"Bullet", 1, &bullet_fix, -10, obj::ALLOC<Bullet>, -1},
-	{"Rat", 1, &rat_fix, 15, obj::ALLOC<Rat>, img::rat},
-	{"Crate", 1, &crate_fix, 0, obj::ALLOC<Crate>, img::crate},
-	{"Mousehole", 1, &mousehole_fix, 50, obj::ALLOC<Mousehole>, img::mousehole},
-	{"Hit Effect", -1, NULL, -90, obj::ALLOC<HitEffect>, -1},
-	{"Patroller", 1, patroller_fixes, 20, obj::ALLOC<Patroller>, img::patroller},
-	{"Flyer", 1, &flyer_fix, 20, obj::ALLOC<Flyer>, img::flyer},
-	{"Heart", 1, &heart_fix, -20, obj::ALLOC<Heart>, img::heart},
-	{"Item", -1, NULL, -5, obj::ALLOC<Item>, -1},
+	{"Room", 0, NULL, 0, obj::ALLOC<Room>, -1},
+	{"Bullet", 1, &bullet_fix, -10, obj::ALLOC<Actor>, -1},
 	{"Back Tiles", -1, NULL, 500, obj::ALLOC<TileLayer>, -1},
 	{"Bullet Layer", -1, NULL, -200, obj::ALLOC<BulletLayer>, -1},
 	{"Front Tiles", -1, NULL, -500, obj::ALLOC<TileLayer>, -1},
 	{"Shade", -1, NULL, -3000, obj::ALLOC<Shade>, -1},
-	{"Lifebar", -1, NULL, -4000, obj::ALLOC<Lifebar>, -1},
+//	{"Door", -1, NULL, -100,  obj::ALLOC<Door>, -1},
+//	{"Solid Object", -1, NULL, 0, obj::ALLOC<Solid>, -1},
+//	{"Tilemap", 0, NULL, 0, obj::ALLOC<Tilemap>, -1},
+//	{"Rat", 1, &rat_fix, 15, obj::ALLOC<Rat>, img::rat},
+//	{"Crate", 1, &crate_fix, 0, obj::ALLOC<Crate>, img::crate},
+//	{"Mousehole", 1, &mousehole_fix, 50, obj::ALLOC<Mousehole>, img::mousehole},
+//	{"Hit Effect", -1, NULL, -90, obj::ALLOC<HitEffect>, -1},
+//	{"Patroller", 1, patroller_fixes, 20, obj::ALLOC<Patroller>, img::patroller},
+//	{"Flyer", 1, &flyer_fix, 20, obj::ALLOC<Flyer>, img::flyer},
+//	{"Heart", 1, &heart_fix, -20, obj::ALLOC<Heart>, img::heart},
+//	{"Item", -1, NULL, -5, obj::ALLOC<Item>, -1},
+//	{"Lifebar", -1, NULL, -4000, obj::ALLOC<Lifebar>, -1},
 
 };
 
