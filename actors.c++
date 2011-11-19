@@ -18,7 +18,7 @@ namespace actor {
 
 	};
 
-	const uint n_globals = 9;
+	const uint n_globals = 8;
 	extern Def saved [n_globals];
 	extern Actor* global [n_globals];
 }
@@ -27,19 +27,17 @@ namespace actor {
 
 
 actor::Def actor::saved [actor::n_globals] = {
-
-	{-1, type::game, Vec(0, 0), Vec(0, 0), 0, 0, 0},
-	{2, type::rata, Vec(2, 2), Vec(0, 0), 0, 0, 0},
-	{0, type::room, Vec(0, 0), Vec(0, 0), 0, room::roompicker, 0},
-	{1, type::item, Vec(-1, 0), Vec(0, 0), 0, item::white_dress, 0},
-	{2, type::item, Vec(8, 5), Vec(0, 0), 0, item::handgun, 0},
-
-	{-1, type::back_tiles, Vec(0, 0), Vec(0, 0), 0, 0, 0},
-	{-1, type::bullet_layer, Vec(0, 0), Vec(0, 0), 0, 0, 0},
-	{-1, type::front_tiles, Vec(0, 0), Vec(0, 0), 1, 0, 0},
-	{-1, type::shade, Vec(0, 0), Vec(0, 0), 0, 0x0000004f, 0}
-
-
+ // Rooms are first
+#define R 0
+	{ -1, type::room     , Vec(  0,  0), Vec(  0,   0),  0, room::roompicker, 0},
+#define A 1
+	{R+0, type::rata     , Vec(  2,  2), Vec(  0,   0),  0, 0, 0},
+	{A+0, type::item     , Vec( -1,  0), Vec(  0,   0),  0, item::white_dress, 0},
+	{R+0, type::item     , Vec(  8,  5), Vec(  0,   0),  0, item::handgun, 0},
+	{ -2, type::back_tiles, Vec(0, 0), Vec(0, 0), 0, 0, 0},
+	{ -2, type::bullet_layer, Vec(0, 0), Vec(0, 0), 0, 0, 0},
+	{ -2, type::front_tiles, Vec(0, 0), Vec(0, 0), 1, 0, 0},
+	{ -2, type::shade, Vec(0, 0), Vec(0, 0), 0, 0x0000004f, 0}
 
 };
 
@@ -56,10 +54,10 @@ void init_objects () {
 			actor::global[actor::saved[i].loc]->receive(actor::global[i]);
 	}
 	for (uint i=0; i < actor::n_globals; i++) {
-		if (actor::saved[i].loc < 0)
+		if (actor::saved[i].loc == -2)
 			actor::global[i]->activate();
 	}
-	actor::global[actor::global[1]->loc]->activate();  // Rata's room
+	actor::global[actor::global[A+0]->loc]->activate();  // Rata's room
 }
 
 namespace actor {
@@ -77,8 +75,8 @@ namespace actor {
 }
 
 
-
-
+#undef R
+#undef A
 
 
 #endif

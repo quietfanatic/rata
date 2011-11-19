@@ -5,7 +5,6 @@ namespace type {
 
 #ifdef HEADER
 	enum {
-		game,
 		rata,
 		room,
 		item,
@@ -206,7 +205,6 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 
 const Def def [n_types] = {
 
-	{"Game", -1, NULL, 0, ALLOC<Game>, -1},
 	{"Rata", 18, rata_fixes, 10, ALLOC<Rata>, -1},
 	{"Room", 0, NULL, 0, ALLOC<Room>, -1},
 	{"Item", -1, NULL, -5, ALLOC<Item>, -1},
