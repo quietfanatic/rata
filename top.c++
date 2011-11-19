@@ -30,6 +30,7 @@ float gravity = -30;
 #include "rooms.c++"
 #include "room.c++"
 #include "tiles.c++"
+#include "map.c++"
 #include "loop.c++"
 #include "text.c++"
 #include "buttons.c++"
@@ -126,7 +127,7 @@ char* message_pos_next = NULL;
 #include "coll.c++"
 #include "bullet.c++"
 #include "items.c++"
-#include "tiles.c++"
+#include "map.c++"
 #include "loop.c++"
 
 

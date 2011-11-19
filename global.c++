@@ -3,7 +3,7 @@
 extern const uint obj::n_globals = 7;
 obj::Desc obj::saved [obj::n_globals] = {
 
-	{0, obj::game, Vec(0, 0), Vec(0, 0), 0, 0, 0},
+	{-1, obj::game, Vec(0, 0), Vec(0, 0), 0, 0, 0},
 	{2, obj::rata, Vec(2, 2), Vec(0, 0), 0, 0, 0},
 	{0, obj::room, Vec(0, 0), Vec(0, 0), 0, room::roompicker, 0},
 	{-1, obj::back_tiles, Vec(0, 0), Vec(0, 0), 0, 0, 0},
