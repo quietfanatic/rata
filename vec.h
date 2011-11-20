@@ -30,6 +30,8 @@ static inline Vec operator += (Vec& a, Vec b) { return a = a + b; }
 static inline Vec operator -= (Vec& a, Vec b) { return a = a - b; }
 static inline Vec operator *= (Vec& a, float b) { return a = a * b; }
 static inline Vec operator /= (Vec& a, float b) { return a = a / b; }
+static inline bool operator == (Vec a, Vec b) { return a.x==b.x && a.y==b.y; }
+static inline bool operator != (Vec a, Vec b) { return a.x!=b.x || a.y!=b.y; }
 static const inline float mag2 (Vec a) { return a.x*a.x+a.y*a.y; }
 static const inline float mag (Vec a) { return sqrt(mag2(a)); }
 static const inline float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }

@@ -28,7 +28,7 @@ struct Object : Actor {
 
 Object::Object (actor::Def* def) :
 	Actor(def),
-	body(type::def[type].nfixes > 0 ? make_body(b2_dynamicBody, true) : NULL),
+	body(type::def[type].nfixes > 0 ? make_body(b2_dynamicBody, false) : NULL),
 	life(0),
 	max_life(0),
 	subimage(0)
@@ -49,8 +49,10 @@ void Object::deactivate () {
 }
 
 void Object::before_move () {
-	//body->SetPosition(pos);
-	body->SetLinearVelocity(vel);
+	if (pos != body->GetPosition())
+		body->SetTransform(pos, 0);
+	if (vel != body->GetLinearVelocity())
+		body->SetLinearVelocity(vel);
 }
 void Object::after_move () {
 	pos = body->GetPosition();
