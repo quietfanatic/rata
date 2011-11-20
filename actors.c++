@@ -46,7 +46,7 @@ actor::Def actor::saved [actor::n_globals] = {
 	{R+1, type::bg_color , Vec(  20,   0), Vec( 20, 15),  0, 0x7f7f7fff, 0},
 	{R+1, type::rat      , Vec(  29,  10), Vec(  0,  0),  1, 0, 0},
 	{R+1, type::rat      , Vec(  32,   1), Vec(  0,  0),  1, 0, 0},
-	{R+2, type::bg_color , Vec(   0,  20), Vec( 40, 30),  0, 0x7f7f7fff, 0},
+	{R+2, type::bg_color , Vec(   0,  15), Vec( 40, 30),  0, 0x7f7f7fff, 0},
 	{R+2, type::rat      , Vec(  13,  34), Vec(  0,  0),  1, 0, 0},
 	{R+2, type::rat      , Vec(  17,  34), Vec(  0,  0),  1, 0, 0},
 	{R+2, type::rat      , Vec(  29,  34), Vec(  0,  0),  1, 0, 0},
