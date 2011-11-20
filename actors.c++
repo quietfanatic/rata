@@ -19,7 +19,7 @@ namespace actor {
 
 	};
 
-	const uint n_globals = 14;  // Make sure this isn't too big!
+	const uint n_globals = 32;  // Make sure this isn't too big!
 	extern Def saved [n_globals];
 	extern Actor* global [n_globals];
 }
@@ -33,16 +33,34 @@ namespace room {
 actor::Def actor::saved [actor::n_globals] = {
  // Rooms are first
 #define R 0
-	{ -1, type::room     , Vec(  0,  0), Vec(  0,  0),  0, room::roompicker, 0},
-	{ -1, type::room     , Vec( 20,  0), Vec(  0,  0),  0, room::test1, 0},
-	{ -1, type::room     , Vec(  0, 15), Vec(  0,  0),  0, room::test2, 0},
+	{ -1, type::room     , Vec(   0,   0), Vec(  0,  0),  0, room::roompicker, 0},
+	{ -1, type::room     , Vec(  20,   0), Vec(  0,  0),  0, room::test1, 0},
+	{ -1, type::room     , Vec(   0,  15), Vec(  0,  0),  0, room::test2, 0},
 #define A 3
-	{R+0, type::rata     , Vec(  2,  2), Vec(  0,  0),  0, 0, 0},
-	{A+0, type::item     , Vec( -1,  0), Vec(  0,  0),  0, item::white_dress, 0},
-	{R+0, type::item     , Vec(  8,  5), Vec(  0,  0),  0, item::handgun, 0},
-	{R+0, type::door     , Vec(  8,  1), Vec( -6, 35),  0, 0, 0},
-	{R+1, type::rat      , Vec( 29, 10), Vec(  0,  0),  0, 0, 0},
-	{R+1, type::rat      , Vec( 32,  1), Vec(  0,  0),  0, 0, 0},
+	{R+0, type::rata     , Vec(   2,   2), Vec(  0,  0),  0, 0, 0},
+	{A+0, type::item     , Vec(  -1,   0), Vec(  0,  0),  0, item::white_dress, 0},
+	{R+0, type::item     , Vec(   8,   5), Vec(  0,  0),  0, item::handgun, 0},
+	{R+0, type::door     , Vec( 8.5,   1), Vec( -7, 35),  0, 0, 0},
+	{R+2, type::door     , Vec( 1.5,  36), Vec(  7,-35),  0, 0, 0},
+	{R+1, type::rat      , Vec(  29,  10), Vec(  0,  0),  1, 0, 0},
+	{R+1, type::rat      , Vec(  32,   1), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::rat      , Vec(  13,  34), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::rat      , Vec(  17,  34), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::rat      , Vec(  29,  34), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::rat      , Vec(  32,  34), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec(10.5,  32), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec( 6.5,  20), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec( 7.5,  20), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec( 7.0,  21), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec(21.5,  30), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec(22.5,  30), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec(22.5,  31), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec(20.5,  18), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec(21.5,  19), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec(21.5,  18), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec(20.5,  19), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec( 1.5,  16), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::crate    , Vec( 2.5,  16), Vec(  0,  0),  1, 0, 0},
 
 	{ -2, type::back_tiles, Vec(0, 0), Vec(0, 0), 0, 0, 0},
 	{ -2, type::bullet_layer, Vec(0, 0), Vec(0, 0), 0, 0, 0},
