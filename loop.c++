@@ -307,6 +307,7 @@ void draw_phase () {
 	}
 	if (window_scale > 1.0) {
 		//glWindowPos2i(ceil(viewleft()*UNPX)*PX, ceil(viewbottom()*UNPX)*PX);
+		glDisable(GL_BLEND);
 		glPixelZoom(window_scale, window_scale);
 		glCopyPixels(0, 0, 320, 240, GL_COLOR);
 		glPixelZoom(1.0, 1.0);

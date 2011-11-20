@@ -66,18 +66,15 @@ void draw_image (int16 imagei, Vec p, int sub, bool flip, bool cam, float scale)
 	window->Draw(drawing_sprite);
 };
 void draw_rect (float l, float t, float r, float b, Color color, bool cam) {
+	glDisable(GL_TEXTURE_2D);
+	glColor4ub(color.x>>24, color.x>>16, color.x>>8, color.x);
 	if (cam)
-		window->Draw(sf::Shape::Rectangle(
-			viewleft() + l, viewbottom() + t,
-			viewleft() + r, viewbottom() + b,
-			color
-		));
+		glRectf(
+			viewleft()+l, viewbottom()+b,
+			viewleft()+r, viewbottom()+t
+		);
 	else
-		window->Draw(sf::Shape::Rectangle(
-			round(l*UNPX)*PX, round(t*UNPX)*PX,
-			round(r*UNPX)*PX, round(b*UNPX)*PX,
-			color
-		));
+		glRectf(l, b, r, t);
 };
 
 
