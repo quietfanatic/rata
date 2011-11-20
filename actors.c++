@@ -19,7 +19,7 @@ namespace actor {
 
 	};
 
-	const uint n_globals = 36;  // Make sure this isn't too big!
+	const uint n_globals = 38;  // Make sure this isn't too big!
 	extern Def saved [n_globals];
 	extern Actor* global [n_globals];
 }
@@ -51,6 +51,8 @@ actor::Def actor::saved [actor::n_globals] = {
 	{R+2, type::rat      , Vec(  17,  34), Vec(  0,  0),  1, 0, 0},
 	{R+2, type::rat      , Vec(  29,  34), Vec(  0,  0),  1, 0, 0},
 	{R+2, type::rat      , Vec(  32,  34), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::patroller, Vec(  14,  23), Vec(  0,  0), -1, 0, 0},
+	{R+2, type::patroller, Vec(  32,  27), Vec(  0,  0), -1, 0, 0},
 	{R+2, type::crate    , Vec(10.5,  32), Vec(  0,  0),  1, 0, 0},
 	{R+2, type::crate    , Vec( 6.5,  20), Vec(  0,  0),  1, 0, 0},
 	{R+2, type::crate    , Vec( 7.5,  20), Vec(  0,  0),  1, 0, 0},

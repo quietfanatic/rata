@@ -181,7 +181,7 @@ struct Rata : Walking {
 	void update_fixtures () {
 		int i = 0;
 		for (b2Fixture* fix = body->GetFixtureList(); fix; fix = fix->GetNext()) {
-			if (i == fix_current || i == fix_helmet_current || i == fix_feet) {
+			if (i == fix_current || (wearing_helmet() && i == fix_helmet_current) || i == fix_feet) {
 				fix->SetFilterData(bullet_inv() ? cf::rata_invincible : cf::rata);
 			}
 			else if (i == fix_old || i == fix_helmet_old) {
