@@ -98,7 +98,9 @@ void remove_phase () {
 	for (Actor** a = &active_actors; *a;) {
 		if (!(*a)->active) {
 			printf("Unlinking %08x.\n", *a);
-			*a = (*a)->next_active;
+			Actor* c = *a;
+			*a = c->next_active;
+			c->next_active = NULL;
 		}
 		else { a = &(*a)->next_active; }
 	}
@@ -119,7 +121,7 @@ void draw_phase () {
 		float focusx = rata->aim_center().x + cursor.x/2.0;
 		float focusy = rata->aim_center().y + cursor.y/2.0;
 		if (rata->loc > -1) {
-			Room* room = (Room*)actor::global[rata->loc];
+			Room* room = room::global[rata->loc];
 			room::Def* r = &room::def[room->data];
 			uint32 walls = r->walls;
 			if (walls&LEFT && focusx < room->pos.x + 10)

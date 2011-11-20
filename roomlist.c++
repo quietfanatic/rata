@@ -4,6 +4,7 @@ enum ID {
 	roompicker,
 	test1,
 	test2,
+	dangent,
 	n_rooms
 };
 
@@ -23,12 +24,18 @@ namespace file {
 		#include "rooms/2-test2.room.c++"
 		#undef THIS_ROOM
 	}
+	namespace dangent {
+		#define THIS_ROOM room::dangent
+		#include "rooms/3-dangent.room.c++"
+		#undef THIS_ROOM
+	}
 }
 
 Def def [n_rooms] = {
 	file::roompicker::def,
 	file::test1::def,
-	file::test2::def
+	file::test2::def,
+	file::dangent::def
 };
 
 

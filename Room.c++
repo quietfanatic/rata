@@ -101,10 +101,8 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 
 
 void Room::receive (Actor* a) {
-	if (a->loc != id) {
-		actor::global[a->loc]->release(a);
-		a->loc = id;
-	}
+	actor::global[a->loc]->release(a);
+	a->loc = id;
 	if (active) {
 		if (!a->active) a->activate();
 	}
@@ -156,9 +154,10 @@ void Room::enter () {
 		}
 	}
 	current_room = id;
-	if (!active) activate();
+	if (!active && !awaiting_activation) activate();
 	for (uint i=0; i < room::def[id].nneighbors; i++) {
-		if (!actor::global[room::def[id].neighbors[i]]->active)
+		if (!actor::global[room::def[id].neighbors[i]]->active
+		 && !actor::global[room::def[id].neighbors[i]]->awaiting_activation)
 			actor::global[room::def[id].neighbors[i]]->activate();
 	}
 }

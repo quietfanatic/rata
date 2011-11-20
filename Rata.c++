@@ -313,8 +313,12 @@ struct Rata : Walking {
 		 // Dump debug info
 		if (key[sf::Key::BackSlash] == 1) {
 			map::debug_print();
-			for (Actor* a = active_actors; a; a = a->next_active)
-				a->debug_print();
+			for (uint i=0; i < actor::n_globals; i++)
+				actor::global[i]->debug_print();
+			printf("active_actors=%02d activation_queue=%02d\n",
+				active_actors ? active_actors->id : -2,
+				activation_queue ? activation_queue->id : -2
+			);
 		}
 	}
 

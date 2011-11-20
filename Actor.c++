@@ -10,6 +10,7 @@ struct Actor : actor::Def {
 	Actor* next;
 	Actor* prev;
 	Actor* next_active;
+
 	Actor (actor::Def* def);
 
 	virtual void activate ();
@@ -27,6 +28,7 @@ struct Actor : actor::Def {
 
 	bool has_body ();
 	int get_room ();
+	void debug_print ();
 };
 
 #else
@@ -35,11 +37,14 @@ Actor::Actor (actor::Def* def) :
 	actor::Def(*def),
 	id( def - actor::saved < actor::n_globals ? def - actor::saved : -1 ),
 	active(false),
+	awaiting_activation(false),
 	contents(NULL),
 	next(NULL),
 	prev(NULL),
 	next_active(NULL)
-{ }
+{
+	printf("Creating actor %d=%d\n", (def - actor::saved < actor::n_globals ? def - actor::saved : -1), id);
+}
 
 void Actor::activate () {
 	if (active) {
@@ -67,6 +72,7 @@ void Actor::deactivate () {
 void Actor::take_unsorted (Actor* a) {
 	if (contents) contents->prev = a;
 	a->next = contents;
+	a->prev = NULL;
 	contents = a;
 }
 void Actor::take_sorted (Actor* a) {
@@ -91,10 +97,8 @@ void Actor::take_sorted (Actor* a) {
 	c->next = a;
 }
 void Actor::receive (Actor* a) {
-	if (a->loc != id) {
-		actor::global[a->loc]->release(a);
-		a->loc = id;
-	}
+	actor::global[a->loc]->release(a);
+	a->loc = id;
 	if (a->active) a->deactivate();
 	take_unsorted(a);
 }
@@ -123,6 +127,16 @@ int Actor::get_room () {
 	return -1;
 }
 
+void Actor::debug_print () {
+	printf("%02d %08x: %02d %8.8s (% 8.4f % 8.4f) (% 8.4f % 8.4f) %08x%08x%08x %1d%1d %02d (%02d %02d) %02d\n",
+		id, this, loc, type::def[type].name, pos.x, pos.y, vel.x, vel.y,
+		facing, data, data2, active, awaiting_activation,
+		contents ? contents->id : -2,
+		prev ? prev->id : -2,
+		next ? next->id : -2,
+		next_active ? next_active->id : -2
+	);
+}
 
 
 
