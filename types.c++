@@ -16,6 +16,7 @@ namespace type {
 		bullet_layer,
 		front_tiles,
 		shade,
+		lifebar,
 		n_types
 	};
 	struct Def {
@@ -219,6 +220,7 @@ const Def def [n_types] = {
 	{"Bullet Layer", -1, NULL, -200, ALLOC<BulletLayer>, -1},
 	{"Front Tiles", -1, NULL, -500, ALLOC<TileLayer>, -1},
 	{"Shade", -1, NULL, -3000, ALLOC<Shade>, -1},
+	{"Lifebar", -1, NULL, -4000, ALLOC<Lifebar>, -1},
 //	{"Door", -1, NULL, -100,  obj::ALLOC<Door>, -1},
 //	{"Solid Object", -1, NULL, 0, obj::ALLOC<Solid>, -1},
 //	{"Tilemap", 0, NULL, 0, obj::ALLOC<Tilemap>, -1},
@@ -226,7 +228,6 @@ const Def def [n_types] = {
 //	{"Mousehole", 1, &mousehole_fix, 50, obj::ALLOC<Mousehole>, img::mousehole},
 //	{"Hit Effect", -1, NULL, -90, obj::ALLOC<HitEffect>, -1},
 //	{"Heart", 1, &heart_fix, -20, obj::ALLOC<Heart>, img::heart},
-//	{"Lifebar", -1, NULL, -4000, obj::ALLOC<Lifebar>, -1},
 };
 
 
