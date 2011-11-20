@@ -132,7 +132,12 @@ struct Lifebar : Actor {
 	Lifebar (actor::Def* def) : Actor(def) { }
 };
 
-
+struct BGColor : Actor {
+	void draw () {
+		draw_rect(pos.x, pos.y, pos.x+vel.x, pos.y+vel.y, data);
+	}
+	BGColor (actor::Def* def) : Actor(def) { }
+};
 
 
 

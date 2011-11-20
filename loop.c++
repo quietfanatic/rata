@@ -157,7 +157,7 @@ void draw_phase () {
 	}
 	window->SetView(window_view);
 	 // Draw background
-	window->Clear(Color(0x7f7f7fff));
+	//window->Clear(Color(0x7f7f7fff));
 	//else if (rc) {
 	//	float w = img::def[rc->bg].sfi.GetWidth()*PX;
 	//	float h = img::def[rc->bg].sfi.GetHeight()*PX;

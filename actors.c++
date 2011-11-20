@@ -19,7 +19,7 @@ namespace actor {
 
 	};
 
-	const uint n_globals = 33;  // Make sure this isn't too big!
+	const uint n_globals = 36;  // Make sure this isn't too big!
 	extern Def saved [n_globals];
 	extern Actor* global [n_globals];
 }
@@ -39,11 +39,14 @@ actor::Def actor::saved [actor::n_globals] = {
 #define A 3
 	{R+0, type::rata     , Vec(   2,   2), Vec(  0,  0),  0, 0, 0},
 	{A+0, type::item     , Vec(  -1,   0), Vec(  0,  0),  0, item::white_dress, 0},
+	{R+0, type::bg_color , Vec(   0,   0), Vec( 20, 15),  0, 0x7f7f7fff, 0},
 	{R+0, type::item     , Vec(   8,   5), Vec(  0,  0),  0, item::handgun, 0},
 	{R+0, type::door     , Vec( 8.5,   1), Vec( -7, 35),  0, 0, 0},
 	{R+2, type::door     , Vec( 1.5,  36), Vec(  7,-35),  0, 0, 0},
+	{R+1, type::bg_color , Vec(  20,   0), Vec( 20, 15),  0, 0x7f7f7fff, 0},
 	{R+1, type::rat      , Vec(  29,  10), Vec(  0,  0),  1, 0, 0},
 	{R+1, type::rat      , Vec(  32,   1), Vec(  0,  0),  1, 0, 0},
+	{R+2, type::bg_color , Vec(   0,  20), Vec( 40, 30),  0, 0x7f7f7fff, 0},
 	{R+2, type::rat      , Vec(  13,  34), Vec(  0,  0),  1, 0, 0},
 	{R+2, type::rat      , Vec(  17,  34), Vec(  0,  0),  1, 0, 0},
 	{R+2, type::rat      , Vec(  29,  34), Vec(  0,  0),  1, 0, 0},
