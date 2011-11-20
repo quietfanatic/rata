@@ -75,6 +75,7 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 #include "Item.c++"
 #include "Room.c++"
 #include "actors.c++"
+#include "enemies.c++"
 #include "misc.c++"
 #include "types.c++"
  // MISC
