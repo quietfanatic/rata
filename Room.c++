@@ -200,6 +200,7 @@ Room::Room (actor::Def* def) :
 	}
 	 // Transform to b2Fixtures
 	body = make_body(b2_staticBody, false);
+	body->SetActive(true);
 	b2FixtureDef fixdef;
 	fixdef.filter = cf::solid;
 	uint nfixes=0;

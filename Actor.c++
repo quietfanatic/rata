@@ -118,11 +118,11 @@ bool Actor::has_body () {
 }
 
 int Actor::get_room () {
-	if (room::global[current_room]->in_room(this))
-		return current_room;
-	for (uint i=0; i < room::def[current_room].nneighbors; i++) {
-		if (room::global[room::def[current_room].neighbors[i]]->in_room(this))
-			return room::def[current_room].neighbors[i];
+	if (room::global[loc]->in_room(this))
+		return loc;
+	for (uint i=0; i < room::def[loc].nneighbors; i++) {
+		if (room::global[room::def[loc].neighbors[i]]->in_room(this))
+			return room::def[loc].neighbors[i];
 	}
 	return -1;
 }
