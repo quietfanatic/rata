@@ -2,7 +2,17 @@
 
 #ifdef HEADER
 
-struct Room;
+struct Room : Object {
+	void after_move () { }
+	void before_move () { }
+	void receive (Actor* a);
+	void activate ();
+	void deactivate ();
+	bool in_room (Actor* a);
+	bool is_neighbor (int r);
+	void enter ();
+	Room (actor::Def* def);
+};
 
 #else
 
@@ -90,129 +100,137 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 
 
 
+void Room::receive (Actor* a) {
+	if (a->loc != id) {
+		actor::global[a->loc]->release(a);
+		a->loc = id;
+	}
+	if (active) {
+		if (!a->active) a->activate();
+	}
+	else {
+		if (a->active) a->deactivate();
+	}
+	Actor::take_unsorted(a);
+}
+void Room::activate () {
+	Object::activate();
+	map::load_room(this);
+	for (Actor* a = contents; a; a = a->next)
+	if (a->type > -1)
+		a->activate();
+}
+void Room::deactivate () {
+	for (Actor* a = contents; a; a = a->next)
+	if (a->type > -1)
+		a->deactivate();
+	map::unload_room(this);
+	Object::deactivate();
+}
 
-// Room object
+bool Room::in_room (Actor* a) {
+	return in_rect(a->pos, pos, pos + Vec(room::def[id].width, room::def[id].height));
+}
 
-struct Room : Object {
-	void receive (Actor* a) {
-		if (active) {
-			if (!a->active) a->activate();
+bool Room::is_neighbor (int r) {
+	if (r == id) return true;
+	for (uint i=0; i < room::def[id].nneighbors; i++)
+		if (room::def[id].neighbors[i] == r)
+			return true;
+	return false;
+}
+void Room::enter () {
+	if (current_room == id) {
+		printf("Warning: Attempted to enter an already-entered room.\n");
+		return;
+	}
+	if (current_room > -1) {
+		if (actor::global[current_room]->active)
+		if (!is_neighbor(current_room))
+			actor::global[current_room]->deactivate();
+		for (uint i=0; i < room::def[current_room].nneighbors; i++) {
+			int oldneighbor = room::def[current_room].neighbors[i];
+			if (actor::global[oldneighbor]->active)
+			if (!is_neighbor(oldneighbor))
+				actor::global[oldneighbor]->deactivate();
 		}
-		else {
-			if (a->active) a->deactivate();
-		}
-		Actor::take_unsorted(a);
 	}
-	void activate () {
-		Object::activate();
-		map::load_room(this);
-		for (Actor* a = contents; a; a = a->next)
-		if (a->type > -1)
-			a->activate();
+	current_room = id;
+	if (!active) activate();
+	for (uint i=0; i < room::def[id].nneighbors; i++) {
+		if (!actor::global[room::def[id].neighbors[i]]->active)
+			actor::global[room::def[id].neighbors[i]]->activate();
 	}
-	void deactivate () {
-		for (Actor* a = contents; a; a = a->next)
-		if (a->type > -1)
-			a->deactivate();
-		map::unload_room(this);
-		Object::deactivate();
-	}
+}
 
-	bool is_neighbor (int r) {
-		for (uint i=0; i < room::def[id].nneighbors; i++)
-			if (room::def[id].neighbors[i] == r)
-				return true;
-		return false;
-	}
-	void enter (int oldroom) {
-		if (oldroom > -1) {
-			if (actor::global[oldroom]->active)
-			if (is_neighbor(oldroom))
-				actor::global[oldroom]->deactivate();
-			for (uint i=0; i < room::def[oldroom].nneighbors; i++) {
-				int oldneighbor = room::def[oldroom].neighbors[i];
-				if (actor::global[oldneighbor]->active)
-				if (is_neighbor(oldneighbor))
-					actor::global[oldneighbor]->deactivate();
+Room::Room (actor::Def* def) :
+	Object(def)
+{
+	 // Create static geometry
+	room::Def* r = &room::def[data];
+	TileEdge edges [(uint)ceil(r->width)][(uint)ceil(r->height)][tile::max_vertexes];
+	for (uint y=0; y < r->height; y++)
+	for (uint x=0; x < r->width; x++) {
+		bool flip = (r->tile(x, y) < 0);
+		const tile::Def& t = tile::def[flip? -r->tile(x,y) : r->tile(x,y)];
+		uint nv = t.nvertexes;
+		 // Generate edges
+		for (uint e=0; e < tile::max_vertexes; e++) {
+			if (e < nv) {
+				uint n1e = (nv+e - 1) % nv;
+				uint n2e = (nv+e + 1) % nv;
+				edges[x][y][e].use = true;
+				edges[x][y][e].n1 = &edges[x][y][n1e];
+				edges[x][y][e].v1 = t.vertexes[e] + Vec(x, r->height-y-1);
+				edges[x][y][e].v2 = t.vertexes[n2e] + Vec(x, r->height-y-1);
+				edges[x][y][e].n2 = &edges[x][y][n2e];
 			}
+			else edges[x][y][e].use = false;
 		}
-		if (!active) activate();
-		for (uint i=0; i < room::def[id].nneighbors; i++) {
-			if (!actor::global[room::def[id].neighbors[i]]->active)
-				actor::global[room::def[id].neighbors[i]]->activate();
+		 // Merge edges
+		for (uint e=0; e < nv; e++) {
+			if (x > 0)
+			for (uint p=0; p < tile::max_vertexes; p++)
+			if (edges[x-1][y][p].use)
+				maybe_merge_edge(&edges[x][y][e], &edges[x-1][y][p]);
+			if (y > 0)
+			for (uint p=0; p < tile::max_vertexes; p++)
+			if (edges[x][y-1][p].use)
+				maybe_merge_edge(&edges[x][y][e], &edges[x][y-1][p]);
 		}
 	}
-
-	Room (actor::Def* def) :
-		Object(def)
-	{
-		 // Create static geometry
-		room::Def* r = &room::def[data];
-		TileEdge edges [(uint)ceil(r->width)][(uint)ceil(r->height)][tile::max_vertexes];
-		for (uint y=0; y < r->height; y++)
-		for (uint x=0; x < r->width; x++) {
-			bool flip = (r->tile(x, y) < 0);
-			const tile::Def& t = tile::def[flip? -r->tile(x,y) : r->tile(x,y)];
-			uint nv = t.nvertexes;
-			 // Generate edges
-			for (uint e=0; e < tile::max_vertexes; e++) {
-				if (e < nv) {
-					uint n1e = (nv+e - 1) % nv;
-					uint n2e = (nv+e + 1) % nv;
-					edges[x][y][e].use = true;
-					edges[x][y][e].n1 = &edges[x][y][n1e];
-					edges[x][y][e].v1 = t.vertexes[e] + Vec(x, r->height-y-1);
-					edges[x][y][e].v2 = t.vertexes[n2e] + Vec(x, r->height-y-1);
-					edges[x][y][e].n2 = &edges[x][y][n2e];
-				}
-				else edges[x][y][e].use = false;
-			}
-			 // Merge edges
-			for (uint e=0; e < nv; e++) {
-				if (x > 0)
-				for (uint p=0; p < tile::max_vertexes; p++)
-				if (edges[x-1][y][p].use)
-					maybe_merge_edge(&edges[x][y][e], &edges[x-1][y][p]);
-				if (y > 0)
-				for (uint p=0; p < tile::max_vertexes; p++)
-				if (edges[x][y-1][p].use)
-					maybe_merge_edge(&edges[x][y][e], &edges[x][y-1][p]);
-			}
+	 // Transform to b2Fixtures
+	body = make_body(b2_staticBody, false);
+	b2FixtureDef fixdef;
+	fixdef.filter = cf::solid;
+	uint nfixes=0;
+	for (uint x=0; x < r->width; x++)
+	for (uint y=0; y < r->height; y++)
+	for (uint e=0; e < tile::max_vertexes; e++)
+	if (edges[x][y][e].use) {
+		bool flip = (r->tile(x, y) < 0);
+		const tile::Def& t = tile::def[flip? -r->tile(x,y) : r->tile(x,y)];
+		b2EdgeShape edge;
+		edge.Set(edges[x][y][e].v1, edges[x][y][e].v2);
+		if (edges[x][y][e].n1) {
+			edge.m_hasVertex0 = true;
+			edge.m_vertex0 = edges[x][y][e].n1->v1;
 		}
-		 // Transform to b2Fixtures
-		body = make_body(b2_staticBody, false);
-		b2FixtureDef fixdef;
-		fixdef.filter = cf::solid;
-		uint nfixes=0;
-		for (uint x=0; x < r->width; x++)
-		for (uint y=0; y < r->height; y++)
-		for (uint e=0; e < tile::max_vertexes; e++)
-		if (edges[x][y][e].use) {
-			bool flip = (r->tile(x, y) < 0);
-			const tile::Def& t = tile::def[flip? -r->tile(x,y) : r->tile(x,y)];
-			b2EdgeShape edge;
-			edge.Set(edges[x][y][e].v1, edges[x][y][e].v2);
-			if (edges[x][y][e].n1) {
-				edge.m_hasVertex0 = true;
-				edge.m_vertex0 = edges[x][y][e].n1->v1;
-			}
-			if (edges[x][y][e].n2) {
-				edge.m_hasVertex3 = true;
-				edge.m_vertex3 = edges[x][y][e].n2->v2;
-			}
-			fixdef.shape = &edge;
-			fixdef.friction = t.friction;
-			fixdef.restitution = 0;
-			//fixdef.density = 100.0;
-			fixdef.userData = t.prop ? t.prop : &default_FixProp;
-			body->CreateFixture(&fixdef);
-			nfixes++;
+		if (edges[x][y][e].n2) {
+			edge.m_hasVertex3 = true;
+			edge.m_vertex3 = edges[x][y][e].n2->v2;
 		}
-		printf("Created %u static fixtures.\n", nfixes);
-
+		fixdef.shape = &edge;
+		fixdef.friction = t.friction;
+		fixdef.restitution = 0;
+		//fixdef.density = 100.0;
+		fixdef.userData = t.prop ? t.prop : &default_FixProp;
+		body->CreateFixture(&fixdef);
+		nfixes++;
 	}
-};
+	printf("Created %u static fixtures.\n", nfixes);
 
+}
 
 
 

@@ -40,4 +40,11 @@ static const inline bool defined (float a) { return a==a; }
 static const inline bool defined (Vec a) { return defined(a.x) && defined(a.y); }
 
 
+static const inline bool in_rect (Vec a, Vec b, Vec c) {
+	return a.x >= b.x
+	    && a.x <= c.x
+	    && a.y >= b.y
+	    && a.y <= c.y;
+}
+
 

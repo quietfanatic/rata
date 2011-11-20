@@ -5,6 +5,7 @@
 struct Actor : actor::Def {
 	int16 id;
 	bool active;
+	bool awaiting_activation;
 	Actor* contents;
 	Actor* next;
 	Actor* prev;
@@ -25,6 +26,7 @@ struct Actor : actor::Def {
 	void produce (Actor* a);
 
 	bool has_body ();
+	int get_room ();
 };
 
 #else
@@ -40,12 +42,24 @@ Actor::Actor (actor::Def* def) :
 { }
 
 void Actor::activate () {
+	if (active) {
+		printf("Warning: Attempted to activate an active actor.\n");
+		return;
+	}
+	if (awaiting_activation) {
+		printf("Warning: Attempted to double-activate an actor.\n");
+		return;
+	}
 	next_active = activation_queue;
 	activation_queue = this;
-	active = true;
+	awaiting_activation = true;
 	dbg(2, "Activating 0x%08x\n", this);
 }
 void Actor::deactivate () {
+	if (!active) {
+		printf("Warning: Attempted to deactivate an inactive actor.\n");
+		return;
+	}
 	active = false;
 	dbg(2, "Deactivating 0x%08x\n", this);
 }
@@ -99,7 +113,15 @@ bool Actor::has_body () {
 	return type::def[type].nfixes > -1;
 }
 
-
+int Actor::get_room () {
+	if (room::global[current_room]->in_room(this))
+		return current_room;
+	for (uint i=0; i < room::def[current_room].nneighbors; i++) {
+		if (room::global[room::def[current_room].neighbors[i]]->in_room(this))
+			return room::def[current_room].neighbors[i];
+	}
+	return -1;
+}
 
 
 

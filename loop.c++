@@ -69,35 +69,43 @@ void toggle_pause () {
 
 
 void add_phase () {
-	 // We must repeat if an object creates a new object in on_create()
-	while (Actor* tq = activation_queue) {
-		activation_queue = NULL;
-		for (Actor* next; tq; tq = next) {
-			Actor* c = tq;
-			next = c->next_active;
-			Actor** a;
-			for (a = &active_actors; *a; a = &(*a)->next_active) {
-				if (type::def[c->type].depth > type::def[(*a)->type].depth) {
-					c->next_active = *a;
-					*a = c;
-					goto done_activating;
-				}
-			}  // Least deep object
-			c->next_active = NULL;
-			*a = c;
-			done_activating: { }
-		}
+	while (activation_queue) {
+		Actor* c = activation_queue;
+		activation_queue = c->next_active;
+		Actor** a;
+		for (a = &active_actors; *a; a = &(*a)->next_active) {
+			if (type::def[c->type].depth > type::def[(*a)->type].depth) {
+				printf("Linking %08x.\n", c);
+				c->next_active = *a;
+				*a = c;
+				goto done_activating;
+			}
+		}  // Least deep object
+		printf("Linking %08x.\n", c);
+		c->next_active = NULL;
+		*a = c;
+		done_activating:
+		c->awaiting_activation = false;
+		c->active = true;
 	}
+//	printf("-------\n");
+//	for (Actor* a = active_actors; a; a = a->next_active) {
+//		printf("%08x\n", a);
+//	}
 }
 
 void remove_phase () {
 	for (Actor** a = &active_actors; *a;) {
 		if (!(*a)->active) {
-			Actor* old = *a;
-			*a = old->next_active;
+			printf("Unlinking %08x.\n", *a);
+			*a = (*a)->next_active;
 		}
 		else { a = &(*a)->next_active; }
 	}
+//	printf("-------\n");
+//	for (Actor* a = active_actors; a; a = a->next_active) {
+//		printf("%08x\n", a);
+//	}
 }
 
 

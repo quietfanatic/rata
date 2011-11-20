@@ -2,6 +2,7 @@
 #ifdef HEADER
 
 struct Actor;
+struct Room;
 
 namespace actor {
 	struct Def {
@@ -21,6 +22,9 @@ namespace actor {
 	const uint n_globals = 9;
 	extern Def saved [n_globals];
 	extern Actor* global [n_globals];
+}
+namespace room {
+	extern Room** global;
 }
 
 #else
@@ -42,9 +46,8 @@ actor::Def actor::saved [actor::n_globals] = {
 
 };
 
-
 Actor* actor::global [actor::n_globals];
-
+Room** room::global = (Room**)actor::global;
 
 void init_objects () {
 	 // Create actors
@@ -66,10 +69,10 @@ void init_objects () {
 		printf("Warning: Rata did not start out in a room.\n\tEjecting to room 0.\n");
 		actor::global[A+0]->loc = 0;
 		actor::global[A+0]->pos = actor::global[0]->pos + Vec(1, 1);
-		((Room*)actor::global[0])->enter(-1);
+		room::global[0]->enter();
 	}
 	else {
-		((Room*)actor::global[actor::global[A+0]->loc])->enter(-1);
+		room::global[actor::global[A+0]->loc]->enter();
 	}
 }
 

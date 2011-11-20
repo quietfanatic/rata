@@ -790,7 +790,11 @@ struct Rata : Walking {
 
 
 	void after_move () {
+		int oldroom = loc;
 		Walking::after_move();
+		if (loc != oldroom)
+			((Room*)actor::global[loc])->enter();
+
 //		printf("%08x's floor is: %08x\n", this, floor);
 //		floor = get_floor(fix_feet_current());
 		float step = state == crawling ? 0.8 : 1.0;
