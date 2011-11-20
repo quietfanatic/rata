@@ -2,6 +2,15 @@
 
 
 
+struct Door : Actor {
+	void before_move () {
+		if (rata->floor)
+			rata->propose_action(Rata::action_enter, this, pos, 1);
+	}
+
+	Door (actor::Def* def) : Actor(def) { }
+};
+
 
 
 struct Crate : Object {

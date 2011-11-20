@@ -464,7 +464,9 @@ struct Rata : Walking {
 				break;
 			}
 			case action_enter: {
-				//obj::Desc* d = ((Object*)action_arg)->desc;
+				pos = ((Actor*)action_arg)->pos + ((Actor*)action_arg)->vel;
+				body->SetTransform(pos, 0);
+				camera_jump = true;
 				break;
 			}
 			default: { }
