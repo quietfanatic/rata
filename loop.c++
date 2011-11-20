@@ -269,31 +269,6 @@ void draw_phase () {
 		}
 	}
 	else { debug_path_pos = 0; }
-	 // Draw cursor
-	if (draw_cursor) {
-		float ax = rata->aim_center().x;
-		float ay = rata->aim_center().y;
-		float cx = cursor.x;
-		float cy = cursor.y;
-		if (cx+ax > viewright()) {
-			cy *= (viewright() - ax) / cx;
-			cx = viewright() - ax;
-		}
-		if (cx+ax < viewleft()) {
-			cy *= (viewleft() - ax) / cx;
-			cx = viewleft() - ax;
-		}
-		if (cy+ay > viewtop()) {
-			cx *= (viewtop() - ay) / cy;
-			cy = viewtop() - ay;
-		}
-		if (cy+ay < viewbottom()) {
-			cx *= (viewbottom() - ay) / cy;
-			cy = viewbottom() - ay;
-		}
-		draw_image(cursor.img, Vec(cx+ax, cy+ay));
-	}
-	window->ShowMouseCursor(!trap_cursor);
 	 // Draw buttons
 	if (n_buttons) {
 		uint i = n_buttons;
@@ -312,6 +287,7 @@ void draw_phase () {
 		glCopyPixels(0, 0, 320, 240, GL_COLOR);
 		glPixelZoom(1.0, 1.0);
 	}
+	window->ShowMouseCursor(!trap_cursor);
 	draw_latency += frameclock.GetElapsedTime();
 	frameclock.Reset();
 	if (draw_latency < 0) sf::Sleep(-draw_latency);

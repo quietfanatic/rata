@@ -19,7 +19,7 @@ namespace actor {
 
 	};
 
-	const uint n_globals = 32;  // Make sure this isn't too big!
+	const uint n_globals = 33;  // Make sure this isn't too big!
 	extern Def saved [n_globals];
 	extern Actor* global [n_globals];
 }
@@ -65,7 +65,8 @@ actor::Def actor::saved [actor::n_globals] = {
 	{ -2, type::back_tiles, Vec(0, 0), Vec(0, 0), 0, 0, 0},
 	{ -2, type::bullet_layer, Vec(0, 0), Vec(0, 0), 0, 0, 0},
 	{ -2, type::front_tiles, Vec(0, 0), Vec(0, 0), 1, 0, 0},
-	{ -2, type::shade, Vec(0, 0), Vec(0, 0), 0, 0x0000004f, 0},
+	{ -2, type::cursor_layer, Vec(0, 0), Vec(0, 0), 1, 0, 0},
+	{ -2, type::shade, Vec(0, 0), Vec(20, 15), -1, 0x0000004f, 0},
 	{ -2, type::lifebar, Vec(0, 0), Vec(0, 0), 0, 0, 0},
 
 };

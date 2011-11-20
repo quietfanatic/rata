@@ -61,6 +61,34 @@ struct BulletLayer : Actor {
 	BulletLayer (actor::Def* def) : Actor(def) { }
 };
 
+struct CursorLayer : Actor {
+	void draw () {
+		if (draw_cursor) {
+			float ax = rata->aim_center().x;
+			float ay = rata->aim_center().y;
+			float cx = cursor.x;
+			float cy = cursor.y;
+			if (cx+ax > viewright()) {
+				cy *= (viewright() - ax) / cx;
+				cx = viewright() - ax;
+			}
+			if (cx+ax < viewleft()) {
+				cy *= (viewleft() - ax) / cx;
+				cx = viewleft() - ax;
+			}
+			if (cy+ay > viewtop()) {
+				cx *= (viewtop() - ay) / cy;
+				cy = viewtop() - ay;
+			}
+			if (cy+ay < viewbottom()) {
+				cx *= (viewbottom() - ay) / cy;
+				cy = viewbottom() - ay;
+			}
+			draw_image(cursor.img, Vec(cx+ax, cy+ay));
+		}
+	}
+	CursorLayer (actor::Def* def) : Actor(def) { }
+};
 
 struct Shade : Actor {
 	void draw () {

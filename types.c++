@@ -17,6 +17,7 @@ namespace type {
 		back_tiles,
 		bullet_layer,
 		front_tiles,
+		cursor_layer,
 		shade,
 		lifebar,
 		n_types
@@ -223,6 +224,7 @@ const Def def [n_types] = {
 	{"Back Tiles", -1, NULL, 500, ALLOC<TileLayer>, -1},
 	{"Bullet Layer", -1, NULL, -200, ALLOC<BulletLayer>, -1},
 	{"Front Tiles", -1, NULL, -500, ALLOC<TileLayer>, -1},
+	{"Cursor Layer", -1, NULL, -2000, ALLOC<CursorLayer>, -1},
 	{"Shade", -1, NULL, -3000, ALLOC<Shade>, -1},
 	{"Lifebar", -1, NULL, -4000, ALLOC<Lifebar>, -1},
 //	{"Solid Object", -1, NULL, 0, obj::ALLOC<Solid>, -1},
