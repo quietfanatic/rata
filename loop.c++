@@ -185,35 +185,35 @@ void draw_phase () {
 			switch (f->GetType()) {
 				case (b2Shape::e_edge): {
 					b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
-					if (e->m_vertex1.x > viewleft() - 1
-					 && e->m_vertex1.x < viewright() + 1
-					 && e->m_vertex1.y > viewbottom() - 1
-					 && e->m_vertex1.y < viewtop() + 1)
+					if (e->m_vertex1.x+o->pos.x > viewleft() - 1
+					 && e->m_vertex1.x+o->pos.x < viewright() + 1
+					 && e->m_vertex1.y+o->pos.y > viewbottom() - 1
+					 && e->m_vertex1.y+o->pos.y < viewtop() + 1)
 						window->Draw(sf::Shape::Line(
-							e->m_vertex1.x, e->m_vertex1.y,
-							e->m_vertex2.x, e->m_vertex2.y,
+							e->m_vertex1.x+o->pos.x, e->m_vertex1.y+o->pos.y,
+							e->m_vertex2.x+o->pos.x, e->m_vertex2.y+o->pos.y,
 							1.0*PX, Color(0x00ff007f)
 						));
-					if (rata->pos.x + cursor.x > e->m_vertex1.x - 1.0)
-					if (rata->pos.x + cursor.x < e->m_vertex1.x + 1.0)
-					if (rata->pos.y + cursor.y+1 > e->m_vertex1.y - 1.0)
-					if (rata->pos.y + cursor.y+1 < e->m_vertex1.y + 1.0) {
+					if (rata->pos.x + cursor.x > e->m_vertex1.x+o->pos.x - 1.0)
+					if (rata->pos.x + cursor.x < e->m_vertex1.x+o->pos.x + 1.0)
+					if (rata->pos.y + cursor.y+1 > e->m_vertex1.y+o->pos.y - 1.0)
+					if (rata->pos.y + cursor.y+1 < e->m_vertex1.y+o->pos.y + 1.0) {
 						window->Draw(sf::Shape::Line(
-							e->m_vertex1.x, e->m_vertex1.y,
-							e->m_vertex0.x+3*PX, e->m_vertex0.y+3*PX,
+							e->m_vertex1.x+o->pos.x, e->m_vertex1.y+o->pos.y,
+							e->m_vertex0.x+o->pos.x+3*PX, e->m_vertex0.y+o->pos.y+3*PX,
 							1.0*PX, Color(0x00ff007f)
 						));
 						//printf("(% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f)\n",
 						//	e->m_vertex0.x, e->m_vertex0.y, e->m_vertex1.x, e->m_vertex1.y, 
 						//	e->m_vertex2.x, e->m_vertex2.y, e->m_vertex3.x, e->m_vertex3.y);
 					}
-					if (rata->pos.x + cursor.x > e->m_vertex2.x - 1)
-					if (rata->pos.x + cursor.x < e->m_vertex2.x + 1)
-					if (rata->pos.y + cursor.y+1 > e->m_vertex2.y - 1)
-					if (rata->pos.y + cursor.y+1 < e->m_vertex2.y + 1)
+					if (rata->pos.x + cursor.x > e->m_vertex2.x+o->pos.x - 1)
+					if (rata->pos.x + cursor.x < e->m_vertex2.x+o->pos.x + 1)
+					if (rata->pos.y + cursor.y+1 > e->m_vertex2.y+o->pos.y - 1)
+					if (rata->pos.y + cursor.y+1 < e->m_vertex2.y+o->pos.y + 1)
 						window->Draw(sf::Shape::Line(
-							e->m_vertex3.x-3*PX, e->m_vertex3.y-3*PX,
-							e->m_vertex2.x, e->m_vertex2.y,
+							e->m_vertex3.x+o->pos.x-3*PX, e->m_vertex3.y+o->pos.y-3*PX,
+							e->m_vertex2.x+o->pos.x, e->m_vertex2.y+o->pos.y,
 							1.0*PX, Color(0x0000ff7f)
 						));
 					break;
