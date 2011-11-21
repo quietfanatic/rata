@@ -67,8 +67,8 @@ namespace map {
 		}
 	}
 
-	void load_room(Room*);
-	void unload_room(Room*);
+	void load_room(room::Def*);
+	void unload_room(room::Def*);
 }
 
 
@@ -94,12 +94,11 @@ namespace map {
 
 
 
-	void load_room (Room* room) {
-		room::Def* r = &room::def[room->data];
+	void load_room (room::Def* r) {
 		for (uint ry=0; ry < r->height; ry++)
 		for (uint rx=0; rx < r->width; rx++) {
-			uint x = rx + room->pos.x;
-			uint y = ry + room->pos.y;
+			uint x = rx + r->pos.x;
+			uint y = ry + r->pos.y;
 			at(x, y).id = r->tile(rx, r->height - ry - 1);
 			at(x, y).nature = tile::def[abs(at(x, y).id)].nature;
 			if (at(x, y).nature == tile::empty) {
@@ -110,10 +109,9 @@ namespace map {
 			}
 		}
 	}
-	void unload_room (Room* room) {
-		room::Def* r = &room::def[room->data];
-		for (uint y=room->pos.y; y < room->pos.y + r->height; y++)
-		for (uint x=room->pos.x; x < room->pos.x + r->width; x++)
+	void unload_room (room::Def* r) {
+		for (uint y=r->pos.y; y < r->pos.y + r->height; y++)
+		for (uint x=r->pos.x; x < r->pos.x + r->width; x++)
 			at(x, y) = Tile();
 	}
 

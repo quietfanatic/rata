@@ -6,7 +6,7 @@ namespace type {
 #ifdef HEADER
 	enum {
 		rata,
-		room,
+		tilemap,
 		item,
 		bullet,
 		crate,
@@ -28,10 +28,8 @@ namespace type {
 		int32 nfixes;
 		const b2FixtureDef* fixdef;
 		float depth;
-		Actor* (& alloc ) (actor::Def* def);
 		int16 image;
 	};
-	template <class T> Actor* ALLOC (actor::Def* def) { return new T (def); }
 	extern const Def def [n_types];
 #else
 
@@ -213,27 +211,27 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 
 const Def def [n_types] = {
 
-	{"Rata", 18, rata_fixes, 10, ALLOC<Rata>, -1},
-	{"Room", 0, NULL, 0, ALLOC<Room>, -1},
-	{"Item", -1, NULL, -5, ALLOC<Item>, -1},
-	{"Bullet", 1, &bullet_fix, -10, ALLOC<Actor>, -1},
-	{"Crate", 1, &crate_fix, 0, ALLOC<Crate>, img::crate},
-	{"Rat", 1, &rat_fix, 15, ALLOC<Rat>, img::rat},
-	{"Patroller", 1, patroller_fixes, 20, ALLOC<Patroller>, img::patroller},
-	{"Flyer", 1, &flyer_fix, 20, ALLOC<Flyer>, img::flyer},
-	{"Door", -1, NULL, -100,  ALLOC<Door>, -1},
-	{"BG Color", -1, NULL, 1000, ALLOC<BGColor>, -1},
-	{"Back Tiles", -1, NULL, 500, ALLOC<TileLayer>, -1},
-	{"Bullet Layer", -1, NULL, -200, ALLOC<BulletLayer>, -1},
-	{"Front Tiles", -1, NULL, -500, ALLOC<TileLayer>, -1},
-	{"Cursor Layer", -1, NULL, -2000, ALLOC<CursorLayer>, -1},
-	{"Shade", -1, NULL, -3000, ALLOC<Shade>, -1},
-	{"Lifebar", -1, NULL, -4000, ALLOC<Lifebar>, -1},
-//	{"Solid Object", -1, NULL, 0, obj::ALLOC<Solid>, -1},
-//	{"Tilemap", 0, NULL, 0, obj::ALLOC<Tilemap>, -1},
-//	{"Mousehole", 1, &mousehole_fix, 50, obj::ALLOC<Mousehole>, img::mousehole},
-//	{"Hit Effect", -1, NULL, -90, obj::ALLOC<HitEffect>, -1},
-//	{"Heart", 1, &heart_fix, -20, obj::ALLOC<Heart>, img::heart},
+	{"Rata", 18, rata_fixes, 10, -1},
+	{"Tilemap", 0, NULL, 0, -1},
+	{"Item", -1, NULL, -5, -1},
+	{"Bullet", 1, &bullet_fix, -10, -1},
+	{"Crate", 1, &crate_fix, 0, img::crate},
+	{"Rat", 1, &rat_fix, 15, img::rat},
+	{"Patroller", 1, patroller_fixes, 20, img::patroller},
+	{"Flyer", 1, &flyer_fix, 20, img::flyer},
+	{"Door", -1, NULL, -100,  -1},
+	{"BG Color", -1, NULL, 1000, -1},
+	{"Back Tiles", -1, NULL, 500, -1},
+	{"Bullet Layer", -1, NULL, -200, -1},
+	{"Front Tiles", -1, NULL, -500, -1},
+	{"Cursor Layer", -1, NULL, -2000, -1},
+	{"Shade", -1, NULL, -3000, -1},
+	{"Lifebar", -1, NULL, -4000, -1},
+//	{"Solid Object", -1, NULL, 0, obj::-1},
+//	{"Tilemap", 0, NULL, 0, obj::-1},
+//	{"Mousehole", 1, &mousehole_fix, 50, obj::img::mousehole},
+//	{"Hit Effect", -1, NULL, -90, obj::-1},
+//	{"Heart", 1, &heart_fix, -20, obj::img::heart},
 };
 
 

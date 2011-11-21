@@ -32,23 +32,24 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 #include "img.c++"
 #include "snd.c++"
 #include "tiles.c++"
-#include "rooms.c++"
 #include "stats.c++"
 #include "poses.c++"
 #include "items.c++"
+#include "rooms.c++"
 
  // GRAPHICS
 #include "drawing.c++"
 #include "text.c++"
 
  // ACTORS
-#include "actors.c++"
 #include "Actor.c++"
+#include "Spatial.c++"
 #include "Object.c++"
 #include "Walking.c++"
+#include "misc.c++"
 #include "Item.c++"
 #include "Rata.c++"
-#include "Room.c++"
+#include "Tilemap.c++"
 #include "types.c++"
 
  // MISC
@@ -62,6 +63,7 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 
 #include "game.c++"
 
+#include "rooms.c++"
 
  // GRAPHICS
 #include "drawing.c++"
@@ -69,13 +71,12 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 
  // ACTORS
 #include "Actor.c++"
+#include "Spatial.c++"
 #include "Object.c++"
 #include "Walking.c++"
 #include "Rata.c++"
 #include "Item.c++"
-#include "Room.c++"
-#include "actors.c++"
-#include "enemies.c++"
+#include "Tilemap.c++"
 #include "misc.c++"
 #include "types.c++"
  // MISC

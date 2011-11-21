@@ -120,18 +120,17 @@ void draw_phase () {
 	if (rata) {
 		float focusx = rata->aim_center().x + cursor.x/2.0;
 		float focusy = rata->aim_center().y + cursor.y/2.0;
-		if (rata->loc > -1) {
-			Room* room = room::global[rata->loc];
-			room::Def* r = &room::def[room->data];
+		if (rata->loc) {
+			room::Def* r = current_room;
 			uint32 walls = r->walls;
-			if (walls&LEFT && focusx < room->pos.x + 10)
-				focusx = room->pos.x + 10;
-			else if (walls&RIGHT && focusx > room->pos.x + r->width - 10)
-				focusx = room->pos.x + r->width - 10;
-			if (walls&BOTTOM && focusy < room->pos.y + 7.5)
-				focusy = room->pos.y + 7.5;
-			else if (walls&TOP && focusy > room->pos.y + r->height - 7.5)
-				focusy = room->pos.y + r->height - 7.5;
+			if (walls&LEFT && focusx < r->pos.x + 10)
+				focusx = r->pos.x + 10;
+			else if (walls&RIGHT && focusx > r->pos.x + r->width - 10)
+				focusx = r->pos.x + r->width - 10;
+			if (walls&BOTTOM && focusy < r->pos.y + 7.5)
+				focusy = r->pos.y + 7.5;
+			else if (walls&TOP && focusy > r->pos.y + r->height - 7.5)
+				focusy = r->pos.y + r->height - 7.5;
 		}
 		 // To look smooth in a pixelated environment,
 		 //  we need a minimum speed.
@@ -246,12 +245,12 @@ void draw_phase () {
 				default: { }
 			}
 		}
-		else {  // Debug draw an object without a b2Body
-			window->Draw(sf::Shape::Line(
-				a->pos, a->pos + a->vel,
-				1.0*PX, Color(0xff00007f)
-			));
-		};
+//		else {  // Debug draw an object without a b2Body
+//			window->Draw(sf::Shape::Line(
+//				a->pos, a->pos + a->vel,
+//				1.0*PX, Color(0xff00007f)
+//			));
+//		};
 		 // Debug draw rata path.
 		if (mag2(rata->pos - oldratapos) > 0.2) {
 			debug_path[debug_path_pos % debug_path_size] = rata->pos;

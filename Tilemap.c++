@@ -2,16 +2,10 @@
 
 #ifdef HEADER
 
-struct Room : Object {
+struct Tilemap : Object {
 	void after_move () { }
 	void before_move () { }
-	void receive (Actor* a);
-	void activate ();
-	void deactivate ();
-	bool in_room (Actor* a);
-	bool is_neighbor (int r);
-	void enter ();
-	Room (actor::Def* def);
+	Tilemap (int16 type, room::Def* def);
 };
 
 #else
@@ -100,78 +94,16 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 
 
 
-void Room::receive (Actor* a) {
-	actor::global[a->loc]->release(a);
-	a->loc = id;
-	if (active) {
-		if (!a->active) a->activate();
-	}
-	else {
-		if (a->active) a->deactivate();
-	}
-	Actor::take_unsorted(a);
-}
-void Room::activate () {
-	Object::activate();
-	map::load_room(this);
-	for (Actor* a = contents; a; a = a->next)
-	if (a->type > -1)
-		a->activate();
-}
-void Room::deactivate () {
-	for (Actor* a = contents; a; a = a->next)
-	if (a->type > -1)
-		a->deactivate();
-	map::unload_room(this);
-	Object::deactivate();
-}
 
-bool Room::in_room (Actor* a) {
-	return in_rect(a->pos, pos, pos + Vec(room::def[id].width, room::def[id].height));
-}
-
-bool Room::is_neighbor (int r) {
-	if (r == id) return true;
-	for (uint i=0; i < room::def[id].nneighbors; i++)
-		if (room::def[id].neighbors[i] == r)
-			return true;
-	return false;
-}
-void Room::enter () {
-	if (current_room == id) {
-		printf("Warning: Attempted to enter an already-entered room.\n");
-		return;
-	}
-	if (current_room > -1) {
-		if (actor::global[current_room]->active)
-		if (!is_neighbor(current_room))
-			actor::global[current_room]->deactivate();
-		for (uint i=0; i < room::def[current_room].nneighbors; i++) {
-			int oldneighbor = room::def[current_room].neighbors[i];
-			if (actor::global[oldneighbor]->active)
-			if (!is_neighbor(oldneighbor))
-				actor::global[oldneighbor]->deactivate();
-		}
-	}
-	current_room = id;
-	if (!active && !awaiting_activation) activate();
-	for (uint i=0; i < room::def[id].nneighbors; i++) {
-		if (!actor::global[room::def[id].neighbors[i]]->active
-		 && !actor::global[room::def[id].neighbors[i]]->awaiting_activation)
-			actor::global[room::def[id].neighbors[i]]->activate();
-	}
-}
-
-Room::Room (actor::Def* def) :
-	Object(def)
+Tilemap::Tilemap (int16 type, room::Def* def) :
+	Object(type, def, def->pos)
 {
 	 // Create static geometry
-	room::Def* r = &room::def[data];
-	TileEdge edges [(uint)ceil(r->width)][(uint)ceil(r->height)][tile::max_vertexes];
-	for (uint y=0; y < r->height; y++)
-	for (uint x=0; x < r->width; x++) {
-		bool flip = (r->tile(x, y) < 0);
-		const tile::Def& t = tile::def[flip? -r->tile(x,y) : r->tile(x,y)];
+	TileEdge edges [(uint)ceil(def->width)][(uint)ceil(def->height)][tile::max_vertexes];
+	for (uint y=0; y < def->height; y++)
+	for (uint x=0; x < def->width; x++) {
+		bool flip = (def->tile(x, y) < 0);
+		const tile::Def& t = tile::def[flip? -def->tile(x,y) : def->tile(x,y)];
 		uint nv = t.nvertexes;
 		 // Generate edges
 		for (uint e=0; e < tile::max_vertexes; e++) {
@@ -180,8 +112,8 @@ Room::Room (actor::Def* def) :
 				uint n2e = (nv+e + 1) % nv;
 				edges[x][y][e].use = true;
 				edges[x][y][e].n1 = &edges[x][y][n1e];
-				edges[x][y][e].v1 = t.vertexes[e] + Vec(x, r->height-y-1);
-				edges[x][y][e].v2 = t.vertexes[n2e] + Vec(x, r->height-y-1);
+				edges[x][y][e].v1 = t.vertexes[e] + Vec(x, def->height-y-1);
+				edges[x][y][e].v2 = t.vertexes[n2e] + Vec(x, def->height-y-1);
 				edges[x][y][e].n2 = &edges[x][y][n2e];
 			}
 			else edges[x][y][e].use = false;
@@ -204,12 +136,12 @@ Room::Room (actor::Def* def) :
 	b2FixtureDef fixdef;
 	fixdef.filter = cf::solid;
 	uint nfixes=0;
-	for (uint x=0; x < r->width; x++)
-	for (uint y=0; y < r->height; y++)
+	for (uint x=0; x < def->width; x++)
+	for (uint y=0; y < def->height; y++)
 	for (uint e=0; e < tile::max_vertexes; e++)
 	if (edges[x][y][e].use) {
-		bool flip = (r->tile(x, y) < 0);
-		const tile::Def& t = tile::def[flip? -r->tile(x,y) : r->tile(x,y)];
+		bool flip = (def->tile(x, y) < 0);
+		const tile::Def& t = tile::def[flip? -def->tile(x,y) : def->tile(x,y)];
 		b2EdgeShape edge;
 		edge.Set(edges[x][y][e].v1, edges[x][y][e].v2);
 		if (edges[x][y][e].n1) {

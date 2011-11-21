@@ -136,7 +136,8 @@ struct Rata : Walking {
 
 	 // Easy access to bits
 	item::Def* equip_info (uint i) {
-		return equipment[i] ? &item::def[equipment[i]->data] : NULL;
+		if (equipment[i]) return equipment[i]->def;
+		return NULL;
 	}
 	bool wearing_helmet () {
 		return equip_info(item::head) == &item::def[item::helmet];
@@ -191,88 +192,6 @@ struct Rata : Walking {
 		}
 	}
 
-	 // Inventory and equipment
-	void receive (Actor* a) {
-		Actor::receive(a);
-		if (a->type == type::item && a->pos.x < 0)
-			equip((Item*)a);
-		else if (a->pos.x >= 0 && a->pos.x < MAX_INVENTORY)
-			inventory[(uint)a->pos.x] = a;
-	}
-	void release (Actor* a) {
-		if (a->type == type::item && a->pos.x < 0)
-			unequip((Item*)a);
-		else if (a->pos.x >= 0 && a->pos.x < MAX_INVENTORY)
-			inventory[(uint)a->pos.x] = NULL;
-		Actor::release(a);
-	}
-	 // Secondary
-	void equip (Item* a) {
-		a->pos.x = -1;
-		int slot = item::def[a->data].slot;
-		if (equipment[slot])
-			move_e2i(equipment[slot]);
-		equipment[slot] = a;
-		slot = item::def[a->data].otherslot;
-		if (slot > -1) {
-			if (equipment[slot])
-				move_e2i(equipment[slot]);
-			equipment[slot] = a;
-		}
-		recalc_stats();
-	}
-	void unequip (Item* a) {
-		int slot = item::def[a->data].slot;
-		equipment[slot] = NULL;
-		slot = item::def[a->data].otherslot;
-		if (slot > -1) equipment[slot] = NULL;
-	}
-	 // Primary
-	void move_e2i (Item* a) {
-		unequip(a);
-		for (uint i=0; i < MAX_INVENTORY; i++) {
-			if (inventory[i] == NULL) {
-				a->pos.x = i;
-				inventory[i] = a;
-				return;
-			}
-		}  // No room
-		drop(a);
-	}
-	void move_i2e (Item* a) {
-		inventory[(uint)a->pos.x] = NULL;
-		equip(a);
-	}
-	void swap_equip (Item* a, Item* e) {
-		unequip(e);
-		inventory[(uint)a->pos.x] = e;
-		equip(a);
-	}
-	void swap_inv (Actor* a, Actor* b) {
-		float t = a->pos.x;
-		a->pos.x = b->pos.x;
-		b->pos.x = t;
-		inventory[(uint)a->pos.x] = a;
-		inventory[(uint)b->pos.x] = b;
-	}
-	void pickup (Actor* a) {
-		for (uint i=0; i < MAX_INVENTORY; i++) {
-			if (inventory[i] == NULL) {
-				a->pos.x = i;
-				receive(a);
-				return;
-			}
-		}  // No room
-	}
-	void drop (Actor* a) {
-		a->pos = pos;
-		produce(a);  // Calls release
-	}
-	void pickup_equip (Item* a) {
-		a->pos.x = -1;
-		receive(a);
-	}
-
 	 // Character stats (affected by items and such)
 	MoveStats stats;
 	void recalc_stats () {
@@ -313,11 +232,11 @@ struct Rata : Walking {
 		 // Dump debug info
 		if (key[sf::Key::BackSlash] == 1) {
 			map::debug_print();
-			for (uint i=0; i < actor::n_globals; i++)
-				actor::global[i]->debug_print();
-			printf("active_actors=%02d activation_queue=%02d\n",
-				active_actors ? active_actors->id : -2,
-				activation_queue ? activation_queue->id : -2
+			for (Actor* a=global_actors; a; a = a->next_global)
+				a->debug_print();
+			printf("active_actors=%08x activation_queue=%08x\n",
+				active_actors,
+				activation_queue
 			);
 		}
 	}
@@ -464,12 +383,11 @@ struct Rata : Walking {
 		if (control_action)
 		switch (action) {
 			case action_equip: {
-				pickup_equip((Item*)action_arg);
+				//pickup_equip((Item*)action_arg);
 				break;
 			}
 			case action_enter: {
-				pos = ((Actor*)action_arg)->pos + ((Actor*)action_arg)->vel;
-				body->SetTransform(pos, 0);
+				pos = ((Door*)action_arg)->dest;
 				camera_jump = true;
 				break;
 			}
@@ -507,7 +425,7 @@ struct Rata : Walking {
 						message = message_pos = NULL;
 					}
 				}
-				else if (can_see && pointed_object && pointed_object->type != type::room) {
+				else if (can_see && pointed_object && pointed_object->type != type::tilemap) {
 					message = pointed_object->describe();
 					message_pos = message;
 					message_pos_next = NULL;
@@ -765,7 +683,7 @@ struct Rata : Walking {
 		if (aiming) cursor.img = img::target;
 		else if (message) cursor.img = img::readmore;
 		else if (can_see) {
-			if (pointed_object && pointed_object->type != type::room)
+			if (pointed_object && pointed_object->type != type::tilemap)
 				cursor.img = img::see;
 			else cursor.img = img::look;
 		}
@@ -796,10 +714,10 @@ struct Rata : Walking {
 
 
 	void after_move () {
-		int oldroom = loc;
+		room::Def* oldroom = loc;
 		Walking::after_move();
 		if (loc != oldroom)
-			((Room*)actor::global[loc])->enter();
+			loc->enter();
 
 //		printf("%08x's floor is: %08x\n", this, floor);
 //		floor = get_floor(fix_feet_current());
@@ -820,8 +738,10 @@ struct Rata : Walking {
 		}
 		else distance_walked = 0;
 	};
-	Rata (actor::Def* def) :
-		Walking(def),
+
+
+	Rata (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0), int facing_ = 1) :
+		Walking(type, loc, pos, vel),
 		fix_old(fix_27),
 		fix_current(fix_27),
 		fix_helmet_old(-1),
@@ -833,13 +753,14 @@ struct Rata : Walking {
 		adrenaline(0),
 		hurt_type_0(-1),
 		hurt_type_1(-1),
-		state(data ? data : falling),
+		state(standing),
 		oldyvel(0)
-	{
+	{	
+		facing = facing_;
+		type = type::rata;
 		rata = this;
 		for (uint i=0; i < item::num_slots; i++)
 			equipment[i] = NULL;
-		if (!facing) facing = 1;
 		cursor.x = 2.0 * facing;
 		cursor.y = 0;
 		cursor.img = img::look;

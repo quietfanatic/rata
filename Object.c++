@@ -1,22 +1,26 @@
 
 
 #ifdef HEADER
-struct Object : Actor {
+struct Object : Spatial {
+	Vec vel;
 	b2Body* body;
 	uint subimage;
 	int life;
 	int max_life;
+	int facing;
 
-	Object (actor::Def* def);
+	Object (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0));
 	void activate ();
 	void deactivate ();
 	void before_move ();
 	void after_move ();
 	void draw ();
+
 	virtual void damage (int d);
 	virtual void heal (int d);
 	virtual void kill ();
 	virtual char* describe ();
+
 	b2Body* make_body (b2BodyType btype = b2_staticBody, bool bullet=false);
 	void impulse (Vec i);
 	void mutual_impulse(Object* other, Vec i);
@@ -26,8 +30,9 @@ struct Object : Actor {
 #else
 
 
-Object::Object (actor::Def* def) :
-	Actor(def),
+Object::Object (int16 type, room::Def* loc, Vec pos, Vec vel) :
+	Spatial(type, loc, pos),
+	vel(vel),
 	body(type::def[type].nfixes > 0 ? make_body(b2_dynamicBody, false) : NULL),
 	life(0),
 	max_life(0),
@@ -40,12 +45,12 @@ Object::Object (actor::Def* def) :
 }
 
 void Object::activate () {
-	Actor::activate();
+	Spatial::activate();
 	body->SetActive(true);
 }
 void Object::deactivate () {
 	body->SetActive(false);
-	Actor::deactivate();
+	Spatial::deactivate();
 }
 
 void Object::before_move () {
@@ -57,10 +62,7 @@ void Object::before_move () {
 void Object::after_move () {
 	pos = body->GetPosition();
 	vel = body->GetLinearVelocity();
-	int newroom = get_room();
-	if (newroom > -1 && loc != newroom) {
-		room::global[newroom]->receive(this);
-	}
+	change_room();
 }
 void Object::draw () {
 	if (type::def[type].image) {
@@ -105,7 +107,6 @@ void Object::mutual_impulse(Object* other, Vec i) {
 		impulse(-i * om/(m+om));
 	}
 }
-
 
 
 #endif

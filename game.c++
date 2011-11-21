@@ -38,10 +38,11 @@ bool camera_jump = false;
 
 
  // GAME STATE
-Actor* active_actors = NULL;  // Actors are linked list
+Actor* global_actors = NULL;
+Actor* active_actors = NULL;
 Actor* activation_queue = NULL;
 Rata* rata = NULL;
-int current_room = -1;
+room::Def* current_room = NULL;
 char* message = NULL;
 char* message_pos = NULL;
 char* message_pos_next = NULL;

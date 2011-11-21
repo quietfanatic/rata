@@ -2,6 +2,7 @@
 
 ROOM_BEGIN
 
+ROOM_POS(0, 0)
 ROOM_WIDTH(20)
 ROOM_HEIGHT(15)
 ROOM_TILES(
@@ -22,12 +23,17 @@ ROOM_TILES(
   1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
 )
 
-ROOM_NNEIGHBORS(2)
+ROOM_N_NEIGHBORS(0)
 ROOM_NEIGHBORS(
-	room::test1,
-	room::test2
+//	room::test1,
+//	room::test2
 )
 ROOM_WALLS(LEFT|TOP|BOTTOM)
+
+ROOM_INIT(
+	new Tilemap(type::tilemap, room::def+THIS_ROOM);
+	new Item(type::item, room::def+THIS_ROOM, pos+Vec(8, 5), item::def+item::handgun);
+)
 
 ROOM_END
 

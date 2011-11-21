@@ -15,9 +15,12 @@ struct Walking : Object {
 	float floor_friction;
 	float ideal_xvel;
 
-	Walking (actor::Def* def) :
-		Object(def),
+	Walking (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
+		Object(type, loc, pos, vel),
 		floor(NULL),
+		floor_fix(NULL),
+		floor_contact(NULL),
+		floor_normal(Vec::undef),
 		floor_friction(0.4),
 		ideal_xvel(0)
 	{

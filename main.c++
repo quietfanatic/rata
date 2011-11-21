@@ -5,8 +5,19 @@ int main () {
 	load_img();
 	load_snd();
 	main_init();
+	
+	rata = new Rata(type::rata, room::def+room::roompicker, Vec(2, 2));
+	(new TileLayer(type::back_tiles))->activate();
+	(new BulletLayer(type::bullet_layer))->activate();
+	(new TileLayer(type::front_tiles))->activate();
+	(new CursorLayer(type::cursor_layer))->activate();
+	(new Lifebar(type::lifebar))->activate();
+	for (uint i=0; i < room::n_rooms; i++) {
+		room::def[i].init();
+	}
 
-	init_objects();
+	rata->loc->enter();
+
 	camera_jump = true;
 
 	try { main_loop(); } catch (int x) { printf("Game quit succesfully with result %d.\n", x); }

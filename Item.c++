@@ -2,25 +2,29 @@
 
 #ifdef HEADER
 
-struct Item : Actor {
-	Item (actor::Def* def);
+struct Item : Spatial {
+	item::Def* def;
+	Item (int16 type, room::Def* loc, Vec pos, item::Def* def);
 	void after_move ();
 	void draw ();
 };
 
 #else
 
-Item::Item (actor::Def* def) : Actor(def) { }
+Item::Item (int16 type, room::Def* loc, Vec pos, item::Def* def) :
+	Spatial(type, loc, pos),
+	def(def)
+{ }
 void Item::after_move () {
 	if (rata->floor)
 		rata->propose_action(Rata::action_equip, this, pos, 1);
 }
 void Item::draw () {
-	if (data)
+	if (def)
 		draw_image(
-			item::def[data].appearance,
+			def->appearance,
 			pos,
-			item::def[data].world_frame
+			def->world_frame
 		);
 }
 

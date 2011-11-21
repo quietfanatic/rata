@@ -1,22 +1,26 @@
 
+#ifdef HEADER
 
-
-
-struct Door : Actor {
-	void before_move () {
-		if (rata->floor)
-			rata->propose_action(Rata::action_enter, this, pos, 1);
-	}
-
-	Door (actor::Def* def) : Actor(def) { }
+struct Door : Spatial {
+	Vec dest;
+	void before_move ();
+	Door (int16 type, room::Def* loc, Vec pos, Vec dest);
 };
+
+#else
+
+void Door::before_move () {
+	if (rata->floor)
+		rata->propose_action(Rata::action_enter, this, pos, 1);
+}
+Door::Door (int16 type, room::Def* loc, Vec pos, Vec dest) : Spatial(type, loc, pos), dest(dest) { }
 
 
 
 struct Crate : Object {
 	virtual char* describe () { return "There's a wooden crate sitting here.\x80\nIt looks like it can be pushed around."; }
 	virtual void damage (int d) { Object::damage(d); snd::def[snd::woodhit].play(); }
-	Crate (actor::Def* def) : Object(def) {
+	Crate (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) : Object(type, loc, pos, vel) {
 		life = max_life = 144;
 	}
 };
@@ -25,7 +29,7 @@ struct Crate : Object {
 
 struct Heart : Object {
 	virtual char* describe () { return "Just as rats live off the refuse of humans,\x80\nYou too can live off of the rats.\x80\nPick this up to restore one heart."; }
-	Heart (Actor::Def* def) : Object(def) { }
+	Heart (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) : Object(type, loc, pos, vel) { }
 };
 
 
@@ -40,7 +44,7 @@ struct TileLayer : Actor {
 			int tile = map::at(x, y).id;
 			bool flip = (tile < 0);
 			if (flip) tile = -tile;
-			if (facing ? tile::def[tile].front : tile::def[tile].back) {
+			if (type == type::front_tiles ? tile::def[tile].front : tile::def[tile].back) {
 				draw_image(
 					img::tiles,
 					Vec(x+.5, y+.5),
@@ -49,7 +53,7 @@ struct TileLayer : Actor {
 			}
 		}
 	}
-	TileLayer (actor::Def* def) : Actor(def) { }
+	TileLayer (int16 type) : Actor(type) { }
 };
 
 struct BulletLayer : Actor {
@@ -58,7 +62,7 @@ struct BulletLayer : Actor {
 			bullets[i].draw();
 		}
 	}
-	BulletLayer (actor::Def* def) : Actor(def) { }
+	BulletLayer (int16 type) : Actor(type) { }
 };
 
 struct CursorLayer : Actor {
@@ -87,20 +91,25 @@ struct CursorLayer : Actor {
 			draw_image(cursor.img, Vec(cx+ax, cy+ay));
 		}
 	}
-	CursorLayer (actor::Def* def) : Actor(def) { }
+	CursorLayer (int16 type) : Actor(type) { }
 };
 
-struct Shade : Actor {
+struct Shade : Spatial {
+	Vec pos;
+	Vec size;
+	Color color;
 	void draw () {
-		if (facing > -1 || paused) {
-			draw_rect(
-				pos.x, pos.y,
-				pos.x + vel.x, pos.y + vel.y,
-				data, facing <= 0
-			);
-		}
+		draw_rect(
+			pos.x, pos.y,
+			pos.x + size.x, pos.y + size.y,
+			color, false
+		);
 	}
-	Shade (actor::Def* def) : Actor(def) { }
+	Shade (int16 type, room::Def* loc, Vec pos, Vec size, Color color) :
+		Spatial(type, loc, pos),
+		size(size),
+		color(color)
+	{ }
 };
 
 
@@ -129,14 +138,20 @@ struct Lifebar : Actor {
 			}
 		}
 	}
-	Lifebar (actor::Def* def) : Actor(def) { }
+	Lifebar (int16 type) : Actor(type) { }
 };
 
-struct BGColor : Actor {
+struct BGColor : Spatial {
+	Vec size;
+	Color color;
 	void draw () {
-		draw_rect(pos.x, pos.y, pos.x+vel.x, pos.y+vel.y, data);
+		draw_rect(pos.x, pos.y, pos.x+size.x, pos.y+size.y, color);
 	}
-	BGColor (actor::Def* def) : Actor(def) { }
+	BGColor (int16 type, room::Def* loc, Vec pos, Vec size, Color color) :
+		Spatial(type, loc, pos),
+		size(size),
+		color(color)
+	{ }
 };
 
 
@@ -147,7 +162,7 @@ struct BGColor : Actor {
 
 
 
-
+#endif
 
 
 
