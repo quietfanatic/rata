@@ -23,9 +23,9 @@ ROOM_TILES(
   1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,
 )
 
-ROOM_N_NEIGHBORS(0)
+ROOM_N_NEIGHBORS(1)
 ROOM_NEIGHBORS(
-//	room::test1,
+	room::def+room::test1,
 //	room::test2
 )
 ROOM_WALLS(LEFT|TOP|BOTTOM)
