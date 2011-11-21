@@ -18,6 +18,7 @@ namespace room {
 			return tiles[y * width + x];
 		}
 		void receive (Spatial* a);
+		void release (Spatial* a);
 		void load ();
 		void unload ();
 		bool is_neighbor (room::Def* r);
@@ -31,18 +32,27 @@ namespace room {
 
 namespace room {
 	void Def::receive (Spatial* a) {
-		if (a->loc) {
-			if (a->loc->contents == a)
-				a->loc->contents = a->next;
-			if (a->next) a->next->prev = a->prev;
-			if (a->prev) a->prev->next = a->next;
-		}
+		if (a->loc) a->loc->release(a);
 		a->loc = this;
 		printf("Receiving a Spatial.\n");
 		if (contents) contents->prev = a;
 		a->next = contents;
 		a->prev = NULL;
 		contents = a;
+		if (loaded) {
+			if (!a->active && !a->awaiting_activation)
+				a->activate();
+		}
+		else {
+			if (a->active)
+				a->deactivate();
+		}
+	}
+	void Def::release (Spatial* a) {
+		if (a->loc->contents == a)
+			a->loc->contents = a->next;
+		if (a->next) a->next->prev = a->prev;
+		if (a->prev) a->prev->next = a->next;
 	}
 	void Def::load () {
 		loaded = true;

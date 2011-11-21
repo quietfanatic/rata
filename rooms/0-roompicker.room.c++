@@ -32,6 +32,7 @@ ROOM_WALLS(LEFT|TOP|BOTTOM)
 
 ROOM_INIT(
 	new Tilemap(type::tilemap, room::def+THIS_ROOM);
+	new BGColor(type::bg_color, room::def+THIS_ROOM, pos, pos+Vec(width, height), 0x7f7f7fff);
 	new Item(type::item, room::def+THIS_ROOM, pos+Vec(8, 5), item::def+item::handgun);
 )
 

@@ -63,7 +63,6 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 
 #include "game.c++"
 
-#include "rooms.c++"
 
  // GRAPHICS
 #include "drawing.c++"
@@ -79,6 +78,7 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 #include "Tilemap.c++"
 #include "misc.c++"
 #include "types.c++"
+#include "rooms.c++"
  // MISC
 #include "coll.c++"
 #include "map.c++"

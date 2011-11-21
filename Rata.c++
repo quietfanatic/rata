@@ -110,7 +110,7 @@ struct Rata : Walking {
 	int fix_helmet_current;
 	int fix_helmet_old;
 	 // Equipment and inventory
-	Actor* inventory [MAX_INVENTORY];
+	Item* inventory [MAX_INVENTORY];
 	Item* equipment [item::num_slots];
 	 // Actions
 	float action_distance;
@@ -190,6 +190,32 @@ struct Rata : Walking {
 			}
 			i++;
 		}
+	}
+	 // Inventory and Equipment
+	void pickup_equip (Item* i) {
+		if (i->loc) {
+			i->loc->release(i);
+			i->deactivate();
+		}
+		if (i->def->slot > -1) {
+			if (equipment[i->def->slot])
+				unequip_drop(equipment[i->def->slot]);
+			equipment[i->def->slot] = i;
+		}
+		if (i->def->otherslot > -1) {
+			if (equipment[i->def->otherslot])
+				unequip_drop(equipment[i->def->otherslot]);
+			equipment[i->def->otherslot] = i;
+		}
+	}
+	void unequip_drop (Item* i) {
+		if (i->loc) return;
+		if (i->def->slot)
+			equipment[i->def->slot] = NULL;
+		if (i->def->otherslot)
+			equipment[i->def->otherslot] = NULL;
+		i->pos = pos;
+		loc->receive(i);
 	}
 
 	 // Character stats (affected by items and such)
@@ -383,7 +409,7 @@ struct Rata : Walking {
 		if (control_action)
 		switch (action) {
 			case action_equip: {
-				//pickup_equip((Item*)action_arg);
+				pickup_equip((Item*)action_arg);
 				break;
 			}
 			case action_enter: {
