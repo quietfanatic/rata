@@ -140,7 +140,7 @@ struct Rata : Walking {
 		return NULL;
 	}
 	bool wearing_helmet () {
-		return equip_info(item::head) == &item::def[item::helmet];
+		return equip_info(item::head) == item::helmet;
 	}
 	Vec aim_center () { return pos + Vec(2*PX*facing, 13*PX); }
 	Vec cursor_pos () { return aim_center() + Vec(cursor.x, cursor.y); }

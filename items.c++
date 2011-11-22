@@ -10,13 +10,6 @@ namespace item {
 		hand,
 		num_slots
 	};
-	enum ID {
-		white_dress,
-		handgun,
-		boots,
-		helmet,
-	};
-
 	struct Def {
 		char* name;
 		int8 slot;
@@ -66,6 +59,10 @@ namespace item {
 			NULL, &decrease_float_time
 		},
 	};
+	static Def*const white_dress = def+0;
+	static Def*const handgun = def+1;
+	static Def*const boots = def+2;
+	static Def*const helmet = def+3;
 }
 
 #else
