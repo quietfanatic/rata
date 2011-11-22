@@ -50,6 +50,7 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 #include "Item.c++"
 #include "Rata.c++"
 #include "Tilemap.c++"
+#include "enemies.c++"
 #include "types.c++"
 
  // MISC
@@ -77,6 +78,7 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 #include "Item.c++"
 #include "Tilemap.c++"
 #include "misc.c++"
+#include "enemies.c++"
 #include "types.c++"
 #include "rooms.c++"
  // MISC

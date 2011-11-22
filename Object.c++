@@ -9,7 +9,7 @@ struct Object : Spatial {
 	int max_life;
 	int facing;
 
-	Object (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0));
+	Object (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0), int facing = 0);
 	void activate ();
 	void deactivate ();
 	void before_move ();
@@ -30,9 +30,10 @@ struct Object : Spatial {
 #else
 
 
-Object::Object (int16 type, room::Def* loc, Vec pos, Vec vel) :
+Object::Object (int16 type, room::Def* loc, Vec pos, Vec vel, int facing) :
 	Spatial(type, loc, pos),
 	vel(vel),
+	facing(facing),
 	body(type::def[type].nfixes > 0 ? make_body(b2_dynamicBody, false) : NULL),
 	life(0),
 	max_life(0),

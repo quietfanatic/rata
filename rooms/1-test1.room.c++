@@ -30,7 +30,9 @@ ROOM_WALLS(TOP|BOTTOM)
 
 ROOM_INIT(
 	new Tilemap(type::tilemap, THIS_ROOM);
-	new BGColor(type::bg_color, THIS_ROOM, pos, pos+Vec(width, height), 0x7f7f7fff);
+	new BGColor(type::bg_color, THIS_ROOM, pos, Vec(width, height), 0x7f7f7fff);
+	new Rat(type::rat, THIS_ROOM, pos+Vec(1.5, 7));
+	new Rat(type::rat, THIS_ROOM, pos+Vec(12.5, 1));
 )
 
 

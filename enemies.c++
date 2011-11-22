@@ -1,5 +1,12 @@
 
+#ifdef HEADER
 
+struct AI;
+struct Rat;
+struct Patroller;
+struct Flyer;
+
+#else
 
  // Base class for semi-intelligent enemies
 struct AI : Walking {
@@ -10,8 +17,8 @@ struct AI : Walking {
 	virtual Vec eye () { return pos + Vec(0, 1); }
 	virtual void decision () { }
 	
-	AI (actor::Def* def) :
-		Walking(def),
+	AI (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
+		Walking(type, loc, pos, vel),
 		decision_timer(update_start())
 	{ }
 	void before_move () {
@@ -60,8 +67,8 @@ struct AI : Walking {
 struct Rat : AI {
 	int anim_timer;
 	char* describe () { return "It's a large gray rat that smells like trash.\x80\nDoesn't seem very timid for a rodent."; }
-	Rat (actor::Def* def) :
-		AI(def),
+	Rat (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
+		AI(type, loc, pos, vel),
 		anim_timer(0)
 	{
 		if (!facing) facing = -1;
@@ -104,8 +111,8 @@ struct Patroller : AI {
 	Vec threat_vel;
 	Vec prediction;
 
-	Patroller (actor::Def* def) :
-		AI(def),
+	Patroller (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
+		AI(type, loc, pos, vel),
 		motion_frames(0),
 		threat_detected(false)
 	{
@@ -168,8 +175,8 @@ struct Flyer : AI {
 	uint motion_frames;
 	int angle_frame;
 
-	Flyer (actor::Def* def) :
-		AI(def),
+	Flyer (int16 type, room::Def* loc, Vec pos, Vec vel) :
+		AI(type, loc, pos, vel),
 		dest(pos),
 		oldpos(Vec::undef),
 		prediction(Vec::undef),
@@ -261,4 +268,4 @@ struct Flyer : AI {
 	}
 };
 
-
+#endif

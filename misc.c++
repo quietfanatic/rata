@@ -2,9 +2,10 @@
 #ifdef HEADER
 
 struct Door : Spatial {
-	Vec dest;
+	room::Def* destloc;
+	Vec destpos;
 	void before_move ();
-	Door (int16 type, room::Def* loc, Vec pos, Vec dest);
+	Door (int16 type, room::Def* loc, Vec pos, room::Def* destloc, Vec dest);
 };
 
 #else
@@ -13,7 +14,11 @@ void Door::before_move () {
 	if (rata->floor)
 		rata->propose_action(Rata::action_enter, this, pos, 1);
 }
-Door::Door (int16 type, room::Def* loc, Vec pos, Vec dest) : Spatial(type, loc, pos), dest(dest) { }
+Door::Door (int16 type, room::Def* loc, Vec pos, room::Def* destloc, Vec destpos) :
+	Spatial(type, loc, pos),
+	destloc(destloc),
+	destpos(destpos)
+{ }
 
 
 

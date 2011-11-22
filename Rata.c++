@@ -413,7 +413,8 @@ struct Rata : Walking {
 				break;
 			}
 			case action_enter: {
-				pos = ((Door*)action_arg)->dest;
+				loc = ((Door*)action_arg)->destloc;
+				pos = ((Door*)action_arg)->destpos;
 				camera_jump = true;
 				break;
 			}
@@ -744,6 +745,7 @@ struct Rata : Walking {
 		Walking::after_move();
 		if (loc != oldroom)
 			loc->enter();
+		current_room = loc;
 
 //		printf("%08x's floor is: %08x\n", this, floor);
 //		floor = get_floor(fix_feet_current());
