@@ -22,17 +22,18 @@ ROOM_TILES(
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 )
 
-ROOM_N_NEIGHBORS(1)
+ROOM_N_NEIGHBORS(2)
 ROOM_NEIGHBORS(
 	room::roompicker,
+	room::dangent
 )
 ROOM_WALLS(TOP|BOTTOM)
 
 ROOM_INIT(
-	new Tilemap(THIS_ROOM);
-	new BGColor(THIS_ROOM, pos, Vec(width, height), 0x7f7f7fff);
-	new Rat(THIS_ROOM, pos+Vec(1.5, 7));
-	new Rat(THIS_ROOM, pos+Vec(12.5, 1));
+	new Tilemap(HERE);
+	new BGColor(HERE, pos, Vec(width, height), 0x7f7f7fff);
+	new Rat(HERE, pos+Vec(1.5, 7));
+	new Rat(HERE, pos+Vec(12.5, 1));
 )
 
 

@@ -22,7 +22,7 @@ ${\(join "\n", map "static Def*const $rooms[$_]{id} = def+$_;", 0..$#rooms)}
 static const uint n_rooms = ${\(0+@rooms)};
 
 namespace file {
-${\(join "\n", map "\tnamespace $_->{id} {\n\t\t#define THIS_ROOM room::$_->{id}\n\t\t#include \"$_->{file}\"\n\t\t#undef THIS_ROOM\n\t}", @rooms)}
+${\(join "\n", map "\tnamespace $_->{id} {\n\t\t#define HERE room::$_->{id}\n\t\t#include \"$_->{file}\"\n\t\t#undef HERE\n\t}", @rooms)}
 }
 
 Def def [n_rooms] = {

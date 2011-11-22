@@ -175,7 +175,7 @@ struct Flyer : AI {
 	uint motion_frames;
 	int angle_frame;
 
-	Flyer (room::Def* loc, Vec pos, Vec vel) :
+	Flyer (room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
 		AI(type::flyer, loc, pos, vel),
 		dest(pos),
 		oldpos(Vec::undef),

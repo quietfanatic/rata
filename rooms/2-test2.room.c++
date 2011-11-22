@@ -43,30 +43,30 @@ ROOM_WALLS(ALLSIDES)
 
 
 ROOM_INIT(
-	new Tilemap(THIS_ROOM);
-	new BGColor(THIS_ROOM, pos, Vec(width, height), 0x7f7f7fff);
-	new Door(THIS_ROOM, pos+Vec(1, 21), room::roompicker, room::roompicker->pos+Vec(8.5, 1));
-	new Rat(THIS_ROOM, pos+Vec(13, 21));
-	new Rat(THIS_ROOM, pos+Vec(17, 21));
-	new Rat(THIS_ROOM, pos+Vec(29, 21));
-	new Rat(THIS_ROOM, pos+Vec(32, 21));
-	new Crate(THIS_ROOM, pos+Vec(10.5, 17));
-	new Crate(THIS_ROOM, pos+Vec(6.5, 5));
-	new Crate(THIS_ROOM, pos+Vec(7.5, 5));
-	new Crate(THIS_ROOM, pos+Vec(7, 6));
-	new Crate(THIS_ROOM, pos+Vec(21.5, 15));
-	new Crate(THIS_ROOM, pos+Vec(22.5, 15));
-	new Crate(THIS_ROOM, pos+Vec(22, 16));
-	new Crate(THIS_ROOM, pos+Vec(20.5, 3));
-	new Crate(THIS_ROOM, pos+Vec(21.5, 4));
-	new Crate(THIS_ROOM, pos+Vec(21.5, 3));
-	new Crate(THIS_ROOM, pos+Vec(20.5, 4));
-	new Crate(THIS_ROOM, pos+Vec(1.5, 1));
-	new Crate(THIS_ROOM, pos+Vec(2.5, 1));
+	new Tilemap(HERE);
+	new BGColor(HERE, pos, Vec(width, height), 0x7f7f7fff);
+	new Door(HERE, pos+Vec(1, 21), room::roompicker, room::roompicker->pos+Vec(8.5, 1));
+	new Rat(HERE, pos+Vec(13, 21));
+	new Rat(HERE, pos+Vec(17, 21));
+	new Rat(HERE, pos+Vec(29, 21));
+	new Rat(HERE, pos+Vec(32, 21));
+	new Crate(HERE, pos+Vec(10.5, 17));
+	new Crate(HERE, pos+Vec(6.5, 5));
+	new Crate(HERE, pos+Vec(7.5, 5));
+	new Crate(HERE, pos+Vec(7, 6));
+	new Crate(HERE, pos+Vec(21.5, 15));
+	new Crate(HERE, pos+Vec(22.5, 15));
+	new Crate(HERE, pos+Vec(22, 16));
+	new Crate(HERE, pos+Vec(20.5, 3));
+	new Crate(HERE, pos+Vec(21.5, 4));
+	new Crate(HERE, pos+Vec(21.5, 3));
+	new Crate(HERE, pos+Vec(20.5, 4));
+	new Crate(HERE, pos+Vec(1.5, 1));
+	new Crate(HERE, pos+Vec(2.5, 1));
 //	ROOM_OBJECT(obj::mousehole, 15.5, 21, 0, 0, 1, 0, 0)
 //	ROOM_OBJECT(obj::mousehole, 27.5, 21, 0, 0, 1, 0, 0)
-	new Patroller(THIS_ROOM, pos+Vec(29.5, 12));
-	new Patroller(THIS_ROOM, pos+Vec(11.5, 8));
+	new Patroller(HERE, pos+Vec(29.5, 12));
+	new Patroller(HERE, pos+Vec(11.5, 8));
 )
 
 ROOM_END
