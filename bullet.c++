@@ -78,29 +78,14 @@ void RBullet::move () {
 }
 void RBullet::draw () {
 	if (lifetime < -1) return;
-	if (pos1.x == -1/0.0) {
-		window->Draw(sf::Shape::Line(
-			pos0.x, pos0.y,
-			pos2.x, pos2.y,
-			1*PX, Color(0xffffff7f)
-		));
-	}
+	if (pos1.x == -1/0.0)
+		draw_line(pos0, pos2);
 	else {
-		window->Draw(sf::Shape::Line(
-			pos0.x, pos0.y,
-			pos1.x, pos1.y,
-			1*PX, Color(0xffffff7f)
-		));
-		if (pos2.x != -1/0.0) {
-			window->Draw(sf::Shape::Line(
-				pos1.x, pos1.y,
-				pos2.x, pos2.y,
-				1*PX, Color(0xffffff7f)
-			));
-		}
-		else {
+		draw_line(pos0, pos1);
+		if (pos2.x != -1/0.0)
+			draw_line(pos1, pos2);
+		else
 			lifetime = -2;
-		}
 	}
 }
 

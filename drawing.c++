@@ -15,6 +15,7 @@ struct Color {
 };
 void draw_image (img::Def* image, Vec p, int sub=0, bool flip=false, bool cam=false, float scale=1.0);
 void draw_rect (float l, float t, float r, float b, Color color = 0x2f2f2f7f, bool cam = false);
+void draw_line (Vec a, Vec v, Color color = 0xffffff7f, bool cam = false);
 #else
 
 
@@ -75,7 +76,20 @@ void draw_rect (float l, float t, float r, float b, Color color, bool cam) {
 	else
 		glRectf(l, b, r, t);
 };
-
+void draw_line (Vec a, Vec b, Color color, bool cam) {
+	glDisable(GL_TEXTURE_2D);
+	glColor4ub(color.x>>24, color.x>>16, color.x>>8, color.x);
+	glBegin(GL_LINES);
+	if (cam) {
+		glVertex2f(viewleft()+a.x, viewbottom()+a.y);
+		glVertex2f(viewleft()+b.x, viewbottom()+b.y);
+	}
+	else {
+		glVertex2f(a.x, a.y);
+		glVertex2f(b.x, b.y);
+	}
+	glEnd();
+};
 
 
 
