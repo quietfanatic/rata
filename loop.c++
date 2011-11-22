@@ -145,14 +145,20 @@ void draw_phase () {
 			if (abs_f(focusx - camera.x) < .25*PX) camera.x = focusx;
 			else {
 				float newx = (9*camera.x + focusx) / 10;
-				if (abs_f(newx - camera.x) < .25*PX) camera.x += .25*PX * sign_f(newx - camera.x);
-				else camera.x = newx;
+				if (abs_f(newx - camera.x) < .25*PX)
+					camera.x += .25*PX * sign_f(newx - camera.x);
+				else if (abs_f((newx - camera.x) - rata->vel.x/FPS) < .25*PX)
+					camera.x += rata->vel.x/FPS;
+				else
+					camera.x = newx;
 			}
 			if (abs_f(focusy - camera.y) < .25*PX) camera.y = focusy;
 			else {
 				float newy = (9*camera.y + focusy) / 10;
-				if (abs_f(newy - camera.y) < .25*PX) camera.y += .25*PX * sign_f(newy - camera.y);
-				else camera.y = newy;
+				if (abs_f(newy - camera.y) < .25*PX)
+					camera.y += .25*PX * sign_f(newy - camera.y);
+				else
+					camera.y = newy;
 			}
 		}
 		window_view.SetCenter(
