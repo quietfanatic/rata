@@ -112,11 +112,6 @@ void remove_phase () {
 
 
 void draw_phase () {
-	draw_latency -= 1/FPS;
-	if (draw_latency > 1/FPS) {
-		dbg(6, "Skipping frame %d.\n", frame_number);
-		return;
-	}
 	if (rata) {
 		float focusx = rata->aim_center().x + cursor.x/2.0;
 		float focusy = rata->aim_center().y + cursor.y/2.0;
@@ -180,6 +175,11 @@ void draw_phase () {
 	//		draw_image(rc->bg, Vec(x, y));
 	//	}
 	//}
+	draw_latency -= 1/FPS;
+	if (draw_latency > 1/FPS) {
+		dbg(6, "Skipping frame %d.\n", frame_number);
+		return;
+	}
 	 // Draw actors
 	for (Actor* a = active_actors; a; a = a->next_active) {
 		dbg(8, "Drawing 0x%08x\n", a);
