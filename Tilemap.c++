@@ -43,10 +43,10 @@ struct TileEdge {
 //}
 
 
-inline bool about_eq (float a, float b) {
+bool about_eq (float a, float b) {
 	return a < b+0.001 && b < a+0.001;
 }
-inline bool vec_eq (Vec a, Vec b) {
+bool vec_eq (Vec a, Vec b) {
 	return about_eq(a.x, b.x) && about_eq(a.y, b.y);
 }
 int edge_cmp (TileEdge* a, TileEdge* b) {
@@ -73,7 +73,7 @@ int edge_cmp (TileEdge* a, TileEdge* b) {
   n2  v2 v1  n1
 */
 
-inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
+void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 	int cmp = edge_cmp(a, b);
 	if (cmp > 0) {
 		a->n1->n2 = b->n1;

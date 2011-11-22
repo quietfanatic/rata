@@ -59,7 +59,7 @@ b2CircleShape* make_circle (float rad, float x = 0, float y = 0) {
 }
 
 
-inline b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction=0, float restitution=0, float density=0, FixProp* prop=NULL, bool sensor=false) {
+b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction=0, float restitution=0, float density=0, FixProp* prop=NULL, bool sensor=false) {
 	b2FixtureDef r;
 	r.shape = shape;
 	r.friction = friction;

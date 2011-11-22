@@ -20,18 +20,18 @@ namespace map {
 		Pos () { }
 		Pos(uint8 x, uint8 y) :x(x % width), y(y % height) { }
 		Pos(Vec v) :x((int)floor(v.x) % width), y((int)floor(v.y) % height) { }
-		inline Pos left () const { return Pos(x-1, y); }
-		inline Pos right () const { return Pos(x+1, y); }
-		inline Pos down () const { return Pos(x, y-1); }
-		inline Pos up () const { return Pos(x, y+1); }
+		Pos left () const { return Pos(x-1, y); }
+		Pos right () const { return Pos(x+1, y); }
+		Pos down () const { return Pos(x, y-1); }
+		Pos up () const { return Pos(x, y+1); }
 
-		inline bool operator == (Pos p) { return x == p.x && y == p.y; }
+		bool operator == (Pos p) { return x == p.x && y == p.y; }
 	};
 
-	inline Tile& at (uint8 x, uint8 y) {
+	Tile& at (uint8 x, uint8 y) {
 		return world[y % height][x % width];
 	}
-	inline Tile& at (Pos p) {
+	Tile& at (Pos p) {
 		return world[p.y][p.x];
 	}
 
@@ -54,7 +54,7 @@ namespace map {
 		}
 		return p.left();
 	}
-	inline bool same_platform (Pos a, Pos b) {
+	bool same_platform (Pos a, Pos b) {
 		return get_end_left(a) == get_end_left(b);
 	}
 

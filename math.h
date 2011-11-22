@@ -3,21 +3,21 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define SWAP(a, b) {typeof(a) _t = b; b = a; a = _t;}
-inline float mod_f (float a, float b) {
+float mod_f (float a, float b) {
 	return a >= 0 ? a - b*(double)(int)(a/b)
 	              : a - b*(double)(int)(a/b);
 }
-inline float abs_f (float x) { return x>0 ? x : -x; }
-inline int sign_f (float x) { return (x>0)-(x<0); }
+float abs_f (float x) { return x>0 ? x : -x; }
+int sign_f (float x) { return (x>0)-(x<0); }
 
-inline float dither (float c, float err) {
+float dither (float c, float err) {
 	return c - err + rand()*2.0*err/RAND_MAX;
 }
 
-inline float flip_angle (float a) {
+float flip_angle (float a) {
 	return a<0 ? -pi-a : pi-a;
 }
-inline bool gt_angle (float a, float b) {
+bool gt_angle (float a, float b) {
 	if (b < 0)
 		return a > b && a < b+pi;
 	else return a > b || a < b-pi;

@@ -41,33 +41,33 @@ namespace img {
 		{sf::Image(), "img/target;4.5,4.5.png", 0, 0, 4.5, 4.5},
 		{sf::Image(), "img/tiles;16x16,8,8.png", 16, 16, 8, 8}
 	};
-	static img::Def*const metal = def+0;
-	static img::Def*const boots = def+1;
-	static img::Def*const crate = def+2;
-	static img::Def*const dress_arm = def+3;
-	static img::Def*const dress_body = def+4;
-	static img::Def*const dress_forearm = def+5;
-	static img::Def*const flyer = def+6;
-	static img::Def*const font_proportional = def+7;
-	static img::Def*const font_small = def+8;
-	static img::Def*const handgun = def+9;
-	static img::Def*const heart = def+10;
-	static img::Def*const helmet = def+11;
-	static img::Def*const hit_damagable = def+12;
-	static img::Def*const look = def+13;
-	static img::Def*const mousehole = def+14;
-	static img::Def*const nolook = def+15;
-	static img::Def*const patroller = def+16;
-	static img::Def*const rat = def+17;
-	static img::Def*const rata_arm = def+18;
-	static img::Def*const rata_body = def+19;
-	static img::Def*const rata_forearm = def+20;
-	static img::Def*const rata_head = def+21;
-	static img::Def*const readmore = def+22;
-	static img::Def*const see = def+23;
-	static img::Def*const target = def+24;
-	static img::Def*const tiles = def+25;
-	static const uint n_imgs = 26;
+	img::Def*const metal = def+0;
+	img::Def*const boots = def+1;
+	img::Def*const crate = def+2;
+	img::Def*const dress_arm = def+3;
+	img::Def*const dress_body = def+4;
+	img::Def*const dress_forearm = def+5;
+	img::Def*const flyer = def+6;
+	img::Def*const font_proportional = def+7;
+	img::Def*const font_small = def+8;
+	img::Def*const handgun = def+9;
+	img::Def*const heart = def+10;
+	img::Def*const helmet = def+11;
+	img::Def*const hit_damagable = def+12;
+	img::Def*const look = def+13;
+	img::Def*const mousehole = def+14;
+	img::Def*const nolook = def+15;
+	img::Def*const patroller = def+16;
+	img::Def*const rat = def+17;
+	img::Def*const rata_arm = def+18;
+	img::Def*const rata_body = def+19;
+	img::Def*const rata_forearm = def+20;
+	img::Def*const rata_head = def+21;
+	img::Def*const readmore = def+22;
+	img::Def*const see = def+23;
+	img::Def*const target = def+24;
+	img::Def*const tiles = def+25;
+	const uint n_imgs = 26;
 
 }
 void load_img () {

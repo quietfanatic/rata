@@ -1,10 +1,10 @@
 
 extern Def def [];
-static Def*const roompicker = def+0;
-static Def*const test1 = def+1;
-static Def*const test2 = def+2;
-static Def*const dangent = def+3;
-static const uint n_rooms = 4;
+Def*const roompicker = def+0;
+Def*const test1 = def+1;
+Def*const test2 = def+2;
+Def*const dangent = def+3;
+const uint n_rooms = 4;
 
 namespace file {
 	namespace roompicker {

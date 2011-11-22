@@ -39,8 +39,8 @@ namespace img {
 	Def def [] = {
 ${\(join ",\n", map "\t\t{sf::Image(), \"$_->{file}\", $_->{w}, $_->{h}, $_->{x}, $_->{y}}", @imgs)}
 	};
-${\(join "\n", map "\tstatic img::Def*const $imgs[$_]{id} = def+$_;", 0..$#imgs)}
-	static const uint n_imgs = ${\(0+@imgs)};
+${\(join "\n", map "\timg::Def*const $imgs[$_]{id} = def+$_;", 0..$#imgs)}
+	const uint n_imgs = ${\(0+@imgs)};
 
 }
 void load_img () {

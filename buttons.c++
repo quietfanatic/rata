@@ -15,7 +15,7 @@ struct Button {
 	Color color;
 	char* text;
 
-	inline void draw () const {
+	void draw () const {
 		if (color.visible()) draw_rect(
 			pos.x, pos.y,
 			pos.x+size.x, pos.y+size.y,

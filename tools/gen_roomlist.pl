@@ -18,8 +18,8 @@ my @rooms = map {
 print <<"END";
 
 extern Def def [];
-${\(join "\n", map "static Def*const $rooms[$_]{id} = def+$_;", 0..$#rooms)}
-static const uint n_rooms = ${\(0+@rooms)};
+${\(join "\n", map "Def*const $rooms[$_]{id} = def+$_;", 0..$#rooms)}
+const uint n_rooms = ${\(0+@rooms)};
 
 namespace file {
 ${\(join "\n", map "\tnamespace $_->{id} {\n\t\t#define HERE room::$_->{id}\n\t\t#include \"$_->{file}\"\n\t\t#undef HERE\n\t}", @rooms)}
