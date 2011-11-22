@@ -13,15 +13,14 @@ struct Color {
 	}
 	bool visible () const { return (uint8)x; }
 };
-void draw_image (int16 imagei, Vec p, int sub=0, bool flip=false, bool cam=false, float scale=1.0);
+void draw_image (img::Def* image, Vec p, int sub=0, bool flip=false, bool cam=false, float scale=1.0);
 void draw_rect (float l, float t, float r, float b, Color color = 0x2f2f2f7f, bool cam = false);
 #else
 
 
 sf::Sprite drawing_sprite;
-void draw_image (int16 imagei, Vec p, int sub, bool flip, bool cam, float scale) {
-	if (imagei < 0) return;
-	img::Image* image = &img::def[imagei];
+void draw_image (img::Def* image, Vec p, int sub, bool flip, bool cam, float scale) {
+	if (!image) return;
 	//if (!cam)
 	//if (x < camera.x - 10 - img->w
 	// || y < camera.y - 7.5 - img->h

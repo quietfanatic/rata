@@ -1,6 +1,6 @@
 
 namespace img {
-	struct Image {
+	struct Def {
 		sf::Image sfi;
 		const char* file;
 		uint w;
@@ -13,36 +13,7 @@ namespace img {
 		}
 	};
 
-	enum {
-		metal,
-		boots,
-		crate,
-		dress_arm,
-		dress_body,
-		dress_forearm,
-		flyer,
-		font_proportional,
-		font_small,
-		handgun,
-		heart,
-		helmet,
-		hit_damagable,
-		look,
-		mousehole,
-		nolook,
-		patroller,
-		rat,
-		rata_arm,
-		rata_body,
-		rata_forearm,
-		rata_head,
-		readmore,
-		see,
-		target,
-		tiles,
-		n_imgs
-	};
-	img::Image def [] = {
+	Def def [] = {
 		{sf::Image(), "img/0-metal;0,0.png", 0, 0, 0, 0},
 		{sf::Image(), "img/boots;32x32,16,30.png", 32, 32, 16, 30},
 		{sf::Image(), "img/crate;8,16.png", 0, 0, 8, 16},
@@ -70,6 +41,33 @@ namespace img {
 		{sf::Image(), "img/target;4.5,4.5.png", 0, 0, 4.5, 4.5},
 		{sf::Image(), "img/tiles;16x16,8,8.png", 16, 16, 8, 8}
 	};
+	static img::Def*const metal = def+0;
+	static img::Def*const boots = def+1;
+	static img::Def*const crate = def+2;
+	static img::Def*const dress_arm = def+3;
+	static img::Def*const dress_body = def+4;
+	static img::Def*const dress_forearm = def+5;
+	static img::Def*const flyer = def+6;
+	static img::Def*const font_proportional = def+7;
+	static img::Def*const font_small = def+8;
+	static img::Def*const handgun = def+9;
+	static img::Def*const heart = def+10;
+	static img::Def*const helmet = def+11;
+	static img::Def*const hit_damagable = def+12;
+	static img::Def*const look = def+13;
+	static img::Def*const mousehole = def+14;
+	static img::Def*const nolook = def+15;
+	static img::Def*const patroller = def+16;
+	static img::Def*const rat = def+17;
+	static img::Def*const rata_arm = def+18;
+	static img::Def*const rata_body = def+19;
+	static img::Def*const rata_forearm = def+20;
+	static img::Def*const rata_head = def+21;
+	static img::Def*const readmore = def+22;
+	static img::Def*const see = def+23;
+	static img::Def*const target = def+24;
+	static img::Def*const tiles = def+25;
+	static const uint n_imgs = 26;
 
 }
 void load_img () {

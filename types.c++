@@ -29,7 +29,7 @@ namespace type {
 		int32 nfixes;
 		const b2FixtureDef* fixdef;
 		float depth;
-		int16 image;
+		img::Def* image;
 	};
 	extern const Def def [n_types];
 #else
@@ -212,23 +212,23 @@ b2FixtureDef heart_fix = make_fixdef(make_rect(0.5, 0.5), cf::pickup, 0.8, 0, 0.
 
 const Def def [n_types] = {
 
-	{"Rata", 18, rata_fixes, 10, -1},
-	{"Tilemap", 0, NULL, 0, -1},
-	{"Item", -1, NULL, -5, -1},
-	{"Bullet", 1, &bullet_fix, -10, -1},
+	{"Rata", 18, rata_fixes, 10, NULL},
+	{"Tilemap", 0, NULL, 0, NULL},
+	{"Item", -1, NULL, -5, NULL},
+	{"Bullet", 1, &bullet_fix, -10, NULL},
 	{"Crate", 1, &crate_fix, 0, img::crate},
 	{"Rat", 1, &rat_fix, 15, img::rat},
 	{"Patroller", 1, patroller_fixes, 20, img::patroller},
 	{"Flyer", 1, &flyer_fix, 20, img::flyer},
 	{"Heart", 1, &heart_fix, -20, img::heart},
-	{"Door", -1, NULL, -100,  -1},
-	{"BG Color", -1, NULL, 1000, -1},
-	{"Back Tiles", -1, NULL, 500, -1},
-	{"Bullet Layer", -1, NULL, -200, -1},
-	{"Front Tiles", -1, NULL, -500, -1},
-	{"Cursor Layer", -1, NULL, -2000, -1},
-	{"Shade", -1, NULL, -3000, -1},
-	{"Lifebar", -1, NULL, -4000, -1},
+	{"Door", -1, NULL, -100,  NULL},
+	{"BG Color", -1, NULL, 1000, NULL},
+	{"Back Tiles", -1, NULL, 500, NULL},
+	{"Bullet Layer", -1, NULL, -200, NULL},
+	{"Front Tiles", -1, NULL, -500, NULL},
+	{"Cursor Layer", -1, NULL, -2000, NULL},
+	{"Shade", -1, NULL, -3000, NULL},
+	{"Lifebar", -1, NULL, -4000, NULL},
 //	{"Solid Object", -1, NULL, 0, -1},
 //	{"Tilemap", 0, NULL, 0, -1},
 //	{"Mousehole", 1, &mousehole_fix, 50, img::mousehole},

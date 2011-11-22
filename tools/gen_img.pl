@@ -23,7 +23,7 @@ my @imgs = map {
 print <<"END";
 
 namespace img {
-	struct Image {
+	struct Def {
 		sf::Image sfi;
 		const char* file;
 		uint w;
@@ -36,13 +36,11 @@ namespace img {
 		}
 	};
 
-	enum {
-${\(join "\n", map "\t\t$_->{id},", @imgs)}
-		n_imgs
-	};
-	img::Image def [] = {
+	Def def [] = {
 ${\(join ",\n", map "\t\t{sf::Image(), \"$_->{file}\", $_->{w}, $_->{h}, $_->{x}, $_->{y}}", @imgs)}
 	};
+${\(join "\n", map "\tstatic img::Def*const $imgs[$_]{id} = def+$_;", 0..$#imgs)}
+	static const uint n_imgs = ${\(0+@imgs)};
 
 }
 void load_img () {

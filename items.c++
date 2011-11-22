@@ -15,15 +15,15 @@ namespace item {
 		int8 slot;
 		int8 otherslot;
 		
-		int16 appearance;
+		img::Def* appearance;
 		uint16 world_frame;
 		uint16 inventory_frame;
-		int16 body;
-		int16 head;
-		int16 helmet;
-		int16 arm;
-		int16 forearm;
-		int16 hand;
+		img::Def* body;
+		img::Def* head;
+		img::Def* helmet;
+		img::Def* arm;
+		img::Def* forearm;
+		img::Def* hand;
 		void (* use ) ();
 		void (* stat_mod ) (MoveStats* s);
 	};
@@ -37,25 +37,25 @@ namespace item {
 		{	"White dress",
 			body, -1,
 			img::dress_body, pose::Body::laybk, pose::Body::stand,
-			img::dress_body, -1, -1, img::dress_arm, img::dress_forearm, -1,
+			img::dress_body, NULL, NULL, img::dress_arm, img::dress_forearm, NULL,
 			NULL, NULL
 		},
 		{	"Handgun",	
 			hand, -1,
 			img::handgun, 19, pose::a45,
-			-1, -1, -1, -1, -1, img::handgun,
+			NULL, NULL, NULL, NULL, NULL, img::handgun,
 			&fire_handgun, NULL
 		},
 		{	"Boots",
 			feet, -1,
 			img::boots, pose::Body::stand, pose::Body::stand,
-			img::boots, -1, -1, -1, -1, -1,
+			img::boots, NULL, NULL, NULL, NULL, NULL,
 			NULL, NULL
 		},
 		{	"Helmet",
 			head, -1,
 			img::helmet, 0, 2,
-			-1, -1, img::helmet, -1, -1, -1,
+			NULL, NULL, img::helmet, NULL, NULL, NULL,
 			NULL, &decrease_float_time
 		},
 	};

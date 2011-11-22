@@ -10,7 +10,7 @@ struct Button {
 	Vec size;
 	void (* click )();
 	void (* drag )();
-	int16 image;
+	img::Def* image;
 	int16 subimage;
 	Color color;
 	char* text;
@@ -44,8 +44,8 @@ void click_quit () {
 
 const uint n_pause_buttons = 2;
 Button pause_buttons [n_pause_buttons] = {
-	{Vec(0, 0), Vec(3, 1), NULL, NULL, -1, 0, 0, "Options"},
-	{Vec(18, 0), Vec(2, 1), &click_quit, NULL, -1, 0, 0, "Quit"},
+	{Vec(0, 0), Vec(3, 1), NULL, NULL, NULL, 0, 0, "Options"},
+	{Vec(18, 0), Vec(2, 1), &click_quit, NULL, NULL, 0, 0, "Quit"},
 };
 
 #endif

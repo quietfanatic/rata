@@ -23,7 +23,7 @@ unsigned char button[10];
 struct Cursor {
 	float x;
 	float y;
-	int16 img;  // Draw this
+	img::Def* img;  // Draw this
 } cursor,  // Relative to player
   cursor2;  // Relative to world
 bool click_taken = false;

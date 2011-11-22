@@ -80,7 +80,7 @@ void render_text (char* text, Vec p, uint lines, bool small, bool border, int al
 	if (border) draw_rect(start, p.y, start + width + lmargin+rmargin, p.y - lines*lineheight, 0x2f2f2f7f, cam);
 
 	float pos = start+lmargin;
-	int16 font = small ? img::font_small : img::font_proportional;
+	img::Def* font = small ? img::font_small : img::font_proportional;
 	for (;*text != 0 && linecount <= lines; text++) {
 		//printf("%c;%d;%d;", *text, *text%16, *text/16);
 		if (*text == '\n') {
