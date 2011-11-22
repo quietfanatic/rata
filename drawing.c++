@@ -56,8 +56,8 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip, bool cam, float sca
 //	uint xpos = flip && image->w ? image->w - image->x : image->x;
 	if (!cam)
 		drawing_sprite.SetPosition(
-			(round(xpx)-.5)*PX,
-			(round(ypx)-.5)*PX
+			p.x - (flip ? w-image->x : image->x)*PX - .5*PX,
+			p.y + image->y*PX - .5*PX
 		);
 	else
 		drawing_sprite.SetPosition(

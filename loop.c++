@@ -134,6 +134,8 @@ void draw_phase () {
 		}
 		 // To look smooth in a pixelated environment,
 		 //  we need a minimum speed.
+		 // We also need to snap the camera's xvel to
+		 //  Rata's xvel when running.
 		if (camera_jump) {
 			camera.x = focusx;
 			camera.y = focusy;
@@ -153,7 +155,10 @@ void draw_phase () {
 				else camera.y = newy;
 			}
 		}
-		window_view.SetCenter(camera.x+10*(window_scale-1), camera.y+7.5*(window_scale-1));
+		window_view.SetCenter(
+			round((camera.x+10*(window_scale-1))*UNPX)*PX,
+			round((camera.y+7.5*(window_scale-1))*UNPX)*PX
+		);
 
 	}
 	window->SetView(window_view);
