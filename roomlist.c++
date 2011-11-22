@@ -1,10 +1,8 @@
 
-
-enum ID {
-	roompicker,
-	test1,
-	n_rooms
-};
+extern Def def [];
+static Def*const roompicker = def+0;
+static Def*const test1 = def+1;
+static const uint n_rooms = 2;
 
 namespace file {
 	namespace roompicker {

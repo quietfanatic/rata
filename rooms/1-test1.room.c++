@@ -24,13 +24,13 @@ ROOM_TILES(
 
 ROOM_N_NEIGHBORS(1)
 ROOM_NEIGHBORS(
-	room::def+room::roompicker,
+	room::roompicker,
 )
 ROOM_WALLS(TOP|BOTTOM)
 
 ROOM_INIT(
-	new Tilemap(type::tilemap, room::def+THIS_ROOM);
-	new BGColor(type::bg_color, room::def+THIS_ROOM, pos, pos+Vec(width, height), 0x7f7f7fff);
+	new Tilemap(type::tilemap, THIS_ROOM);
+	new BGColor(type::bg_color, THIS_ROOM, pos, pos+Vec(width, height), 0x7f7f7fff);
 )
 
 

@@ -6,7 +6,7 @@ int main () {
 	load_snd();
 	main_init();
 	
-	rata = new Rata(type::rata, room::def+room::roompicker, Vec(2, 2));
+	rata = new Rata(type::rata, room::roompicker, Vec(2, 2));
 	rata->pickup_equip(new Item(type::item, NULL, rata->pos, item::def+item::white_dress));
 	(new TileLayer(type::back_tiles))->activate();
 	(new BulletLayer(type::bullet_layer))->activate();
