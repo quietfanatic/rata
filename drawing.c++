@@ -12,6 +12,7 @@ struct Color {
 		return sf::Color(x>>24, x>>16, x>>8, x);
 	}
 	bool visible () const { return (uint8)x; }
+	void setGL () const { glColor4ub(x>>24, x>>16, x>>8, x); }
 };
 void draw_image (img::Def* image, Vec p, int sub=0, bool flip=false, bool cam=false, float scale=1.0);
 void draw_rect (float l, float t, float r, float b, Color color = 0x2f2f2f7f, bool cam = false);
@@ -67,7 +68,7 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip, bool cam, float sca
 };
 void draw_rect (float l, float t, float r, float b, Color color, bool cam) {
 	glDisable(GL_TEXTURE_2D);
-	glColor4ub(color.x>>24, color.x>>16, color.x>>8, color.x);
+	color.setGL();
 	if (cam)
 		glRectf(
 			viewleft()+l, viewbottom()+b,
@@ -78,7 +79,7 @@ void draw_rect (float l, float t, float r, float b, Color color, bool cam) {
 };
 void draw_line (Vec a, Vec b, Color color, bool cam) {
 	glDisable(GL_TEXTURE_2D);
-	glColor4ub(color.x>>24, color.x>>16, color.x>>8, color.x);
+	color.setGL();
 	glBegin(GL_LINES);
 	if (cam) {
 		glVertex2f(viewleft()+a.x, viewbottom()+a.y);

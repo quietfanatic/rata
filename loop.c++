@@ -190,47 +190,41 @@ void draw_phase () {
 					 && e->m_vertex1.x+o->pos.x < viewright() + 1
 					 && e->m_vertex1.y+o->pos.y > viewbottom() - 1
 					 && e->m_vertex1.y+o->pos.y < viewtop() + 1)
-						window->Draw(sf::Shape::Line(
-							e->m_vertex1.x+o->pos.x, e->m_vertex1.y+o->pos.y,
-							e->m_vertex2.x+o->pos.x, e->m_vertex2.y+o->pos.y,
-							1.0*PX, Color(0x00ff007f)
-						));
+						draw_line(
+							o->pos + Vec(e->m_vertex1),
+							o->pos + Vec(e->m_vertex2),
+							0x00ff007f
+						);
 					if (rata->pos.x + cursor.x > e->m_vertex1.x+o->pos.x - 1.0)
 					if (rata->pos.x + cursor.x < e->m_vertex1.x+o->pos.x + 1.0)
 					if (rata->pos.y + cursor.y+1 > e->m_vertex1.y+o->pos.y - 1.0)
-					if (rata->pos.y + cursor.y+1 < e->m_vertex1.y+o->pos.y + 1.0) {
-						window->Draw(sf::Shape::Line(
-							e->m_vertex1.x+o->pos.x, e->m_vertex1.y+o->pos.y,
-							e->m_vertex0.x+o->pos.x+3*PX, e->m_vertex0.y+o->pos.y+3*PX,
-							1.0*PX, Color(0x00ff007f)
-						));
-						//printf("(% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f) (% 6.2f, % 6.2f)\n",
-						//	e->m_vertex0.x, e->m_vertex0.y, e->m_vertex1.x, e->m_vertex1.y, 
-						//	e->m_vertex2.x, e->m_vertex2.y, e->m_vertex3.x, e->m_vertex3.y);
-					}
+					if (rata->pos.y + cursor.y+1 < e->m_vertex1.y+o->pos.y + 1.0)
+						draw_line(
+							o->pos + Vec(e->m_vertex1),
+							o->pos + Vec(e->m_vertex0) + Vec(3, 3)*PX,
+							0xffff007f
+						);
 					if (rata->pos.x + cursor.x > e->m_vertex2.x+o->pos.x - 1)
 					if (rata->pos.x + cursor.x < e->m_vertex2.x+o->pos.x + 1)
 					if (rata->pos.y + cursor.y+1 > e->m_vertex2.y+o->pos.y - 1)
 					if (rata->pos.y + cursor.y+1 < e->m_vertex2.y+o->pos.y + 1)
-						window->Draw(sf::Shape::Line(
-							e->m_vertex3.x+o->pos.x-3*PX, e->m_vertex3.y+o->pos.y-3*PX,
-							e->m_vertex2.x+o->pos.x, e->m_vertex2.y+o->pos.y,
-							1.0*PX, Color(0x0000ff7f)
-						));
+						draw_line(
+							o->pos + Vec(e->m_vertex2),
+							o->pos + Vec(e->m_vertex3) - Vec(3, 3)*PX,
+							0x0000ff7f
+						);
 					break;
 				}
 				case (b2Shape::e_polygon): {
 					b2PolygonShape* p = (b2PolygonShape*)f->GetShape();
 					Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
-					sf::Shape draw_shape;
-					draw_shape.EnableFill(false);
-					draw_shape.EnableOutline(true);
-					draw_shape.SetOutlineWidth(1.0*PX);
+					glDisable(GL_TEXTURE_2D);
+					color.setGL();
+					glBegin(GL_LINE_LOOP);
 					for (int i=0; i < p->m_vertexCount; i++) {
-						draw_shape.AddPoint(p->m_vertices[i].x, p->m_vertices[i].y, Color(0), color);
+						glVertex2f(o->pos.x + p->m_vertices[i].x, o->pos.y + p->m_vertices[i].y);
 					}
-					draw_shape.SetPosition(o->pos);
-					window->Draw(draw_shape);
+					glEnd();
 					break;
 				}
 				case (b2Shape::e_circle): {
@@ -261,13 +255,13 @@ void draw_phase () {
 			debug_path_pos++;
 		}
 
-		uint i = debug_path_pos>=debug_path_size ? debug_path_pos-debug_path_size+2 : 1;
+		uint i = debug_path_pos>=debug_path_size ? debug_path_pos-debug_path_size+1 : 0;
+		glBegin(GL_LINE_STRIP);
 		for (; i < debug_path_pos; i++) {
-			window->Draw(sf::Shape::Line(
-				debug_path[(i-1) % debug_path_size], debug_path[i % debug_path_size],
-				1.0*PX, debug_path_color[i % debug_path_size]
-			));
+			debug_path_color[i % debug_path_size].setGL();
+			glVertex2fv((float*)&debug_path[i % debug_path_size]);
 		}
+		glEnd();
 	}
 	else { debug_path_pos = 0; }
 	 // Draw buttons
