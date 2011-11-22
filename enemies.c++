@@ -67,8 +67,8 @@ struct AI : Walking {
 struct Rat : AI {
 	int anim_timer;
 	char* describe () { return "It's a large gray rat that smells like trash.\x80\nDoesn't seem very timid for a rodent."; }
-	Rat (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
-		AI(type, loc, pos, vel),
+	Rat (room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
+		AI(type::rat, loc, pos, vel),
 		anim_timer(0)
 	{
 		if (!facing) facing = -1;
@@ -111,8 +111,8 @@ struct Patroller : AI {
 	Vec threat_vel;
 	Vec prediction;
 
-	Patroller (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
-		AI(type, loc, pos, vel),
+	Patroller (room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
+		AI(type::patroller, loc, pos, vel),
 		motion_frames(0),
 		threat_detected(false)
 	{
@@ -175,8 +175,8 @@ struct Flyer : AI {
 	uint motion_frames;
 	int angle_frame;
 
-	Flyer (int16 type, room::Def* loc, Vec pos, Vec vel) :
-		AI(type, loc, pos, vel),
+	Flyer (room::Def* loc, Vec pos, Vec vel) :
+		AI(type::flyer, loc, pos, vel),
 		dest(pos),
 		oldpos(Vec::undef),
 		prediction(Vec::undef),

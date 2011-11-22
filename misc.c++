@@ -5,7 +5,7 @@ struct Door : Spatial {
 	room::Def* destloc;
 	Vec destpos;
 	void before_move ();
-	Door (int16 type, room::Def* loc, Vec pos, room::Def* destloc, Vec dest);
+	Door (room::Def* loc, Vec pos, room::Def* destloc, Vec dest);
 };
 
 #else
@@ -14,8 +14,8 @@ void Door::before_move () {
 	if (rata->floor)
 		rata->propose_action(Rata::action_enter, this, pos, 1);
 }
-Door::Door (int16 type, room::Def* loc, Vec pos, room::Def* destloc, Vec destpos) :
-	Spatial(type, loc, pos),
+Door::Door (room::Def* loc, Vec pos, room::Def* destloc, Vec destpos) :
+	Spatial(type::door, loc, pos),
 	destloc(destloc),
 	destpos(destpos)
 { }
@@ -25,7 +25,7 @@ Door::Door (int16 type, room::Def* loc, Vec pos, room::Def* destloc, Vec destpos
 struct Crate : Object {
 	virtual char* describe () { return "There's a wooden crate sitting here.\x80\nIt looks like it can be pushed around."; }
 	virtual void damage (int d) { Object::damage(d); snd::def[snd::woodhit].play(); }
-	Crate (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) : Object(type, loc, pos, vel) {
+	Crate (room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) : Object(type::crate, loc, pos, vel) {
 		life = max_life = 144;
 	}
 };
@@ -34,7 +34,7 @@ struct Crate : Object {
 
 struct Heart : Object {
 	virtual char* describe () { return "Just as rats live off the refuse of humans,\x80\nYou too can live off of the rats.\x80\nPick this up to restore one heart."; }
-	Heart (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) : Object(type, loc, pos, vel) { }
+	Heart (room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) : Object(type::heart, loc, pos, vel) { }
 };
 
 
@@ -67,7 +67,7 @@ struct BulletLayer : Actor {
 			bullets[i].draw();
 		}
 	}
-	BulletLayer (int16 type) : Actor(type) { }
+	BulletLayer () : Actor(type::bullet_layer) { }
 };
 
 struct CursorLayer : Actor {
@@ -96,7 +96,7 @@ struct CursorLayer : Actor {
 			draw_image(cursor.img, Vec(cx+ax, cy+ay));
 		}
 	}
-	CursorLayer (int16 type) : Actor(type) { }
+	CursorLayer () : Actor(type::cursor_layer) { }
 };
 
 struct Shade : Spatial {
@@ -110,8 +110,8 @@ struct Shade : Spatial {
 			color, false
 		);
 	}
-	Shade (int16 type, room::Def* loc, Vec pos, Vec size, Color color) :
-		Spatial(type, loc, pos),
+	Shade (room::Def* loc, Vec pos, Vec size, Color color) :
+		Spatial(type::shade, loc, pos),
 		size(size),
 		color(color)
 	{ }
@@ -143,7 +143,7 @@ struct Lifebar : Actor {
 			}
 		}
 	}
-	Lifebar (int16 type) : Actor(type) { }
+	Lifebar () : Actor(type::lifebar) { }
 };
 
 struct BGColor : Spatial {
@@ -152,8 +152,8 @@ struct BGColor : Spatial {
 	void draw () {
 		draw_rect(pos.x, pos.y, pos.x+size.x, pos.y+size.y, color);
 	}
-	BGColor (int16 type, room::Def* loc, Vec pos, Vec size, Color color) :
-		Spatial(type, loc, pos),
+	BGColor (room::Def* loc, Vec pos, Vec size, Color color) :
+		Spatial(type::bg_color, loc, pos),
 		size(size),
 		color(color)
 	{ }

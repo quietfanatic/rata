@@ -29,10 +29,10 @@ ROOM_NEIGHBORS(
 ROOM_WALLS(TOP|BOTTOM)
 
 ROOM_INIT(
-	new Tilemap(type::tilemap, THIS_ROOM);
-	new BGColor(type::bg_color, THIS_ROOM, pos, Vec(width, height), 0x7f7f7fff);
-	new Rat(type::rat, THIS_ROOM, pos+Vec(1.5, 7));
-	new Rat(type::rat, THIS_ROOM, pos+Vec(12.5, 1));
+	new Tilemap(THIS_ROOM);
+	new BGColor(THIS_ROOM, pos, Vec(width, height), 0x7f7f7fff);
+	new Rat(THIS_ROOM, pos+Vec(1.5, 7));
+	new Rat(THIS_ROOM, pos+Vec(12.5, 1));
 )
 
 

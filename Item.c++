@@ -4,15 +4,15 @@
 
 struct Item : Spatial {
 	item::Def* def;
-	Item (int16 type, room::Def* loc, Vec pos, item::Def* def);
+	Item (room::Def* loc, Vec pos, item::Def* def);
 	void after_move ();
 	void draw ();
 };
 
 #else
 
-Item::Item (int16 type, room::Def* loc, Vec pos, item::Def* def) :
-	Spatial(type, loc, pos),
+Item::Item (room::Def* loc, Vec pos, item::Def* def) :
+	Spatial(type::item, loc, pos),
 	def(def)
 { }
 void Item::after_move () {

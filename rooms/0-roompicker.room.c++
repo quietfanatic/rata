@@ -31,10 +31,10 @@ ROOM_NEIGHBORS(
 ROOM_WALLS(LEFT|TOP|BOTTOM)
 
 ROOM_INIT(
-	new Tilemap(type::tilemap, THIS_ROOM);
-	new BGColor(type::bg_color, THIS_ROOM, pos, Vec(width, height), 0x7f7f7fff);
-	new Door(type::door, THIS_ROOM, pos+Vec(8.5, 1), room::test2, room::test2->pos+Vec(1.5, 21));
-	new Item(type::item, THIS_ROOM, pos+Vec(8, 5), item::handgun);
+	new Tilemap(THIS_ROOM);
+	new BGColor(THIS_ROOM, pos, Vec(width, height), 0x7f7f7fff);
+	new Door(THIS_ROOM, pos+Vec(8.5, 1), room::test2, room::test2->pos+Vec(1.5, 21));
+	new Item(THIS_ROOM, pos+Vec(8, 5), item::handgun);
 )
 
 ROOM_END

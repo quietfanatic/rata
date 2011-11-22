@@ -768,8 +768,8 @@ struct Rata : Walking {
 	};
 
 
-	Rata (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0), int facing_ = 1) :
-		Walking(type, loc, pos, vel),
+	Rata (room::Def* loc, Vec pos, Vec vel = Vec(0, 0), int facing_ = 1) :
+		Walking(type::rata, loc, pos, vel),
 		fix_old(fix_27),
 		fix_current(fix_27),
 		fix_helmet_old(-1),

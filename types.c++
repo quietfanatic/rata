@@ -13,6 +13,7 @@ namespace type {
 		rat,
 		patroller,
 		flyer,
+		heart,
 		door,
 		bg_color,
 		back_tiles,
@@ -219,6 +220,7 @@ const Def def [n_types] = {
 	{"Rat", 1, &rat_fix, 15, img::rat},
 	{"Patroller", 1, patroller_fixes, 20, img::patroller},
 	{"Flyer", 1, &flyer_fix, 20, img::flyer},
+	{"Heart", 1, &heart_fix, -20, img::heart},
 	{"Door", -1, NULL, -100,  -1},
 	{"BG Color", -1, NULL, 1000, -1},
 	{"Back Tiles", -1, NULL, 500, -1},
@@ -227,11 +229,10 @@ const Def def [n_types] = {
 	{"Cursor Layer", -1, NULL, -2000, -1},
 	{"Shade", -1, NULL, -3000, -1},
 	{"Lifebar", -1, NULL, -4000, -1},
-//	{"Solid Object", -1, NULL, 0, obj::-1},
-//	{"Tilemap", 0, NULL, 0, obj::-1},
-//	{"Mousehole", 1, &mousehole_fix, 50, obj::img::mousehole},
-//	{"Hit Effect", -1, NULL, -90, obj::-1},
-//	{"Heart", 1, &heart_fix, -20, obj::img::heart},
+//	{"Solid Object", -1, NULL, 0, -1},
+//	{"Tilemap", 0, NULL, 0, -1},
+//	{"Mousehole", 1, &mousehole_fix, 50, img::mousehole},
+//	{"Hit Effect", -1, NULL, -90, -1},
 };
 
 

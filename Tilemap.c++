@@ -5,7 +5,7 @@
 struct Tilemap : Object {
 	void after_move () { }
 	void before_move () { }
-	Tilemap (int16 type, room::Def* def);
+	Tilemap (room::Def* def);
 };
 
 #else
@@ -95,8 +95,8 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 
 
 
-Tilemap::Tilemap (int16 type, room::Def* def) :
-	Object(type, def, def->pos)
+Tilemap::Tilemap (room::Def* def) :
+	Object(type::tilemap, def, def->pos)
 {
 	 // Create static geometry
 	TileEdge edges [(uint)ceil(def->width)][(uint)ceil(def->height)][tile::max_vertexes];
