@@ -20,29 +20,29 @@ struct Vec {
 const Vec Vec::undef = Vec(0/0.0, 0/0.0);
 
 
-static const inline Vec operator - (Vec a) { return Vec(-a.x, -a.y); }
-static const inline Vec operator + (Vec a, Vec b) { return Vec(a.x+b.x, a.y+b.y); }
-static const inline Vec operator - (Vec a, Vec b) { return Vec(a.x-b.x, a.y-b.y); }
-static const inline Vec operator * (Vec a, float b) { return Vec(a.x*b, a.y*b); }
-static const inline Vec operator * (float a, Vec b) { return Vec(a*b.x, a*b.y); }
-static const inline Vec operator / (Vec a,  float b) { return Vec(a.x/b, a.y/b); }
-static inline Vec operator += (Vec& a, Vec b) { return a = a + b; }
-static inline Vec operator -= (Vec& a, Vec b) { return a = a - b; }
-static inline Vec operator *= (Vec& a, float b) { return a = a * b; }
-static inline Vec operator /= (Vec& a, float b) { return a = a / b; }
-static inline bool operator == (Vec a, Vec b) { return a.x==b.x && a.y==b.y; }
-static inline bool operator != (Vec a, Vec b) { return a.x!=b.x || a.y!=b.y; }
-static const inline float mag2 (Vec a) { return a.x*a.x+a.y*a.y; }
-static const inline float mag (Vec a) { return sqrt(mag2(a)); }
-static const inline float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
-static const inline float ang (Vec a) { return atan2(a.y, a.x); }
-static const inline Vec norm (Vec a) { return a / mag(a); }
+const inline Vec operator - (Vec a) { return Vec(-a.x, -a.y); }
+const inline Vec operator + (Vec a, Vec b) { return Vec(a.x+b.x, a.y+b.y); }
+const inline Vec operator - (Vec a, Vec b) { return Vec(a.x-b.x, a.y-b.y); }
+const inline Vec operator * (Vec a, float b) { return Vec(a.x*b, a.y*b); }
+const inline Vec operator * (float a, Vec b) { return Vec(a*b.x, a*b.y); }
+const inline Vec operator / (Vec a,  float b) { return Vec(a.x/b, a.y/b); }
+inline Vec operator += (Vec& a, Vec b) { return a = a + b; }
+inline Vec operator -= (Vec& a, Vec b) { return a = a - b; }
+inline Vec operator *= (Vec& a, float b) { return a = a * b; }
+inline Vec operator /= (Vec& a, float b) { return a = a / b; }
+inline bool operator == (Vec a, Vec b) { return a.x==b.x && a.y==b.y; }
+inline bool operator != (Vec a, Vec b) { return a.x!=b.x || a.y!=b.y; }
+const inline float mag2 (Vec a) { return a.x*a.x+a.y*a.y; }
+const inline float mag (Vec a) { return sqrt(mag2(a)); }
+const inline float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
+const inline float ang (Vec a) { return atan2(a.y, a.x); }
+const inline Vec norm (Vec a) { return a / mag(a); }
 
-static const inline bool defined (float a) { return a==a; }
-static const inline bool defined (Vec a) { return defined(a.x) && defined(a.y); }
+const inline bool defined (float a) { return a==a; }
+const inline bool defined (Vec a) { return defined(a.x) && defined(a.y); }
 
 
-static const inline bool in_rect (Vec a, Vec b, Vec c) {
+const inline bool in_rect (Vec a, Vec b, Vec c) {
 	return a.x >= b.x
 	    && a.x <= c.x
 	    && a.y >= b.y

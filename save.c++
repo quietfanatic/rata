@@ -27,7 +27,7 @@ obj::Desc saved_things [n_saved_things] = {
 };
 
 
-static inline bool readthing (FILE* f, uint32* x) {
+inline bool readthing (FILE* f, uint32* x) {
 	uint8 b [4];
 	if (fread(b, 4, 1, f)) {
 		*x = b[0] << 24
@@ -39,7 +39,7 @@ static inline bool readthing (FILE* f, uint32* x) {
 	printf("Error: Could not read save file!\n");
 	return false;
 }
-static inline bool writething (FILE* f, uint32 x) {
+inline bool writething (FILE* f, uint32 x) {
 	uint8 b [4];
 	b[0] = x >> 24;
 	b[1] = x >> 16;

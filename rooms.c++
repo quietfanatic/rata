@@ -95,15 +95,15 @@ namespace room {
 	}
 
 #define ROOM_BEGIN
-#define ROOM_POS(...) static const Vec pos = Vec(__VA_ARGS__);
-#define ROOM_WIDTH(...) static const uint16 width = __VA_ARGS__;
-#define ROOM_HEIGHT(...) static const uint16 height = __VA_ARGS__;
-#define ROOM_TILES(...) static const int16 tiles [width * height] = {__VA_ARGS__};
-#define ROOM_N_NEIGHBORS(...) static const uint32 n_neighbors = __VA_ARGS__;
-#define ROOM_NEIGHBORS(...) static room::Def*const neighbors [n_neighbors] = {__VA_ARGS__};
+#define ROOM_POS(...) const Vec pos = Vec(__VA_ARGS__);
+#define ROOM_WIDTH(...) const uint16 width = __VA_ARGS__;
+#define ROOM_HEIGHT(...) const uint16 height = __VA_ARGS__;
+#define ROOM_TILES(...) const int16 tiles [width * height] = {__VA_ARGS__};
+#define ROOM_N_NEIGHBORS(...) const uint32 n_neighbors = __VA_ARGS__;
+#define ROOM_NEIGHBORS(...) room::Def*const neighbors [n_neighbors] = {__VA_ARGS__};
 #define ROOM_WALLS(...) const uint32 walls = __VA_ARGS__;
 #define ROOM_INIT(...) void init () {__VA_ARGS__};
-#define ROOM_END static const room::Def def = {pos, width, height, tiles, n_neighbors, neighbors, walls, init, false, NULL};
+#define ROOM_END const room::Def def = {pos, width, height, tiles, n_neighbors, neighbors, walls, init, false, NULL};
 
 
 

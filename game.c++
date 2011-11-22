@@ -47,7 +47,7 @@ char* message = NULL;
 char* message_pos = NULL;
 char* message_pos_next = NULL;
 
-static const uint MAX_BULLETS = 10;
+const uint MAX_BULLETS = 10;
 RBullet bullets[MAX_BULLETS];
 
 uint n_buttons = 0;
@@ -63,7 +63,7 @@ float draw_latency = 0;
 
  // FOR DEBUGGING
 bool debug_mode = false;
-static const uint debug_path_size = 120;
+const uint debug_path_size = 120;
 Vec debug_path [debug_path_size];
 Color debug_path_color [debug_path_size];
 uint debug_path_pos;

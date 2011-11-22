@@ -8,8 +8,8 @@ namespace map {
 		Tile () :id(1), nature(tile::unknown) { }
 	};
 
-	static const uint width = 128;
-	static const uint height = 128;
+	const uint width = 128;
+	const uint height = 128;
 
 	Tile world [height][width];
 
@@ -28,10 +28,10 @@ namespace map {
 		inline bool operator == (Pos p) { return x == p.x && y == p.y; }
 	};
 
-	static inline Tile& at (uint8 x, uint8 y) {
+	inline Tile& at (uint8 x, uint8 y) {
 		return world[y % height][x % width];
 	}
-	static inline Tile& at (Pos p) {
+	inline Tile& at (Pos p) {
 		return world[p.y][p.x];
 	}
 
@@ -54,7 +54,7 @@ namespace map {
 		}
 		return p.left();
 	}
-	static inline bool same_platform (Pos a, Pos b) {
+	inline bool same_platform (Pos a, Pos b) {
 		return get_end_left(a) == get_end_left(b);
 	}
 

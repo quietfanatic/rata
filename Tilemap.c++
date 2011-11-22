@@ -98,7 +98,7 @@ inline void maybe_merge_edge (TileEdge* a, TileEdge* b) {
 Tilemap::Tilemap (room::Def* def) :
 	Object(type::tilemap, def, def->pos)
 {
-	 // Create static geometry
+	 // Create geometry
 	TileEdge edges [(uint)ceil(def->width)][(uint)ceil(def->height)][tile::max_vertexes];
 	for (uint y=0; y < def->height; y++)
 	for (uint x=0; x < def->width; x++) {
@@ -160,7 +160,7 @@ Tilemap::Tilemap (room::Def* def) :
 		body->CreateFixture(&fixdef);
 		nfixes++;
 	}
-	printf("Created %u static fixtures.\n", nfixes);
+	printf("Created %u fixtures.\n", nfixes);
 
 }
 

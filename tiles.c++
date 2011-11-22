@@ -1,7 +1,7 @@
 
 
 namespace tile {
-	static const uint max_vertexes = 4;
+	const uint max_vertexes = 4;
 	struct Def {
 		const char* name;
 		int8 nature;
@@ -19,8 +19,8 @@ namespace tile {
 		unknown = '.',
 	};
 
-	static const uint num_tiles = 9;
-	static const Def def [num_tiles] = {
+	const uint num_tiles = 9;
+	const Def def [num_tiles] = {
 
 		{"Empty", empty, 0, 0, 0.0, 0},
 		{"Metal block", solid, 1, 0, 0.4, 4, {Vec(0, 0), Vec(1, 0), Vec(1, 1), Vec(0, 1)}, NULL},

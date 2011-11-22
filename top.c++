@@ -7,11 +7,11 @@
 //#define printf(...) (__VA_ARGS__)
 
  // CONSTANTS
-static const float UNPX = 16.0;
-static const float PX  = 1/UNPX;
-static const float FPS = 60.0;
-static const double pi = M_PI;
-static const float gravity = -30;
+const float UNPX = 16.0;
+const float PX  = 1/UNPX;
+const float FPS = 60.0;
+const double pi = M_PI;
+const float gravity = -30;
  // SETTINGS
 uint window_scale = 2;  // 1 = 320x240, 2 = 640x480, 3 = 960x720
 bool window_fullscreen = false;
