@@ -7,7 +7,7 @@ b2World* world;
 bool paused = false;
 
  // GRAPHICS
-sf::RenderWindow* window;
+sf::Window* window;
 sf::View window_view = sf::View(sf::FloatRect(0, 15 * window_scale, 20 * window_scale, 0));
 float viewleft () { return window_view.GetRect().Left; }
 float viewright () { return window_view.GetRect().Left + 20; }

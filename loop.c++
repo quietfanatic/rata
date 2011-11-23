@@ -16,12 +16,15 @@ void quit_game () {
 void set_video () {
 	if (window_fullscreen) {
 		window->Create(sf::VideoMode(640, 480, 32), "", sf::Style::Fullscreen);
-		window->SetView(window_view);
+		//window->SetView(window_view);
 	}
 	else {
 		window->Create(sf::VideoMode(320*window_scale, 240*window_scale, 32), "");
-		window->SetView(window_view);
+		//window->SetView(window_view);
 	}
+	glDisable(GL_ALPHA_TEST);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
 	window->UseVerticalSync(true);
 	//window->SetFramerateLimit(60);
 	window->EnableKeyRepeat(false);
@@ -112,6 +115,21 @@ void remove_phase () {
 
 
 void draw_phase () {
+	//glClearColor(1, 1, 1, 1);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	//glViewport(0, 0, 1, 1);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glTranslatef(-1, -1, 0);
+	glScalef(1/20.0, 1/15.0, 1);
+	glTranslatef(0.01, 0.01, 0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glTranslatef(0.375, 0.375, 0);
+	//glColor4f(1, 0, 0, 1);
+	//glRectf(0.1, 0.1, 0.9, 0.9);
+	//draw_rect(-2, -2, 2, 2, 0xff0000ff);
+	
 	if (rata) {
 		float focusx = rata->aim_center().x + cursor.x/2.0;
 		float focusy = rata->aim_center().y + cursor.y/2.0;
@@ -162,7 +180,7 @@ void draw_phase () {
 		);
 
 	}
-	window->SetView(window_view);
+	//window->SetView(window_view);
 	 // Draw background
 	//window->Clear(Color(0x7f7f7fff));
 	//else if (rc) {
@@ -244,7 +262,7 @@ void draw_phase () {
 					sf::Shape draw_shape = sf::Shape::Circle(Vec(c->m_p)+o->pos, c->m_radius, Color(0), 1.0*PX, color);
 					draw_shape.EnableFill(false);
 					draw_shape.EnableOutline(true);
-					window->Draw(draw_shape);
+					//window->Draw(draw_shape);
 					break;
 				}
 				default: { }

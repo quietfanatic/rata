@@ -23,72 +23,58 @@ void draw_line (Vec a, Vec v, Color color = 0xffffff7f, bool cam = false);
 sf::Sprite drawing_sprite;
 void draw_image (img::Def* image, Vec p, int sub, bool flip, bool cam, float scale) {
 	if (!image) return;
-	//if (!cam)
-	//if (x < camera.x - 10 - img->w
-	// || y < camera.y - 7.5 - img->h
-	// || x > camera.x + 10 + img->w
-	// || y > camera.y + 7.5 + img->h) return;
-	uint iw = image->sfi.GetWidth();
-	uint ih = image->sfi.GetHeight();
 	sub %= image->numsubs();
+	if (sub < 0) sub += image->numsubs();
+	uint tw = image->sfi.GetWidth();
+	uint th = image->sfi.GetHeight();
+	uint iw = image->w ? image->w : image->sfi.GetWidth();
+	uint ih = image->h ? image->h : image->sfi.GetHeight();
+	uint subx = (sub % (tw / iw));
+	uint suby = (sub / (tw / iw));
+	float x = p.x - (flip ? iw-image->x : image->x)*PX;
+	float y = p.y - (ih-image->y)*PX;
+	if (!cam) {
+		x -= camera.x - 10;
+		y -= camera.y - 7.5;
+	}
+
+	float tl = subx*iw + iw*flip;
+	float tr = subx*iw + iw*!flip;
+	float tt = suby*ih;
+	float tb = suby*ih + ih;
 	
-	sf::IntRect sr;
-	if (image->w == 0 || image->h == 0)
-		sr = sf::IntRect(0, ih, iw, 0);
-	else
-		sr = sf::IntRect(
-			sub % (iw/image->w) * image->w,
-			sub / (iw/image->w) * image->h + image->h,
-			sub % (iw/image->w) * image->w + image->w,
-			sub / (iw/image->w) * image->h
-		);
-	drawing_sprite.SetScale(PX*scale, PX*scale);
-	drawing_sprite.SetImage(image->sfi);
-	drawing_sprite.SetSubRect(sr);
-	drawing_sprite.FlipX(flip);
-	drawing_sprite.FlipY(true);
-	uint h = image->h;
-	uint w = image->w;
-	if (h == 0) h = ih;
-	if (w == 0) w = iw;
-	float xpx = p.x*UNPX - (flip ? w-image->x : image->x);
-	float ypx = p.y*UNPX + image->y;
-//	uint xpos = flip && image->w ? image->w - image->x : image->x;
-	if (!cam)
-		drawing_sprite.SetPosition(
-			p.x - (flip ? w-image->x : image->x)*PX - .5*PX,
-			p.y + image->y*PX - .5*PX
-		);
-	else
-		drawing_sprite.SetPosition(
-			window_view.GetRect().Left + xpx*PX,
-			window_view.GetRect().Top + ypx*PX
-		);
-	window->Draw(drawing_sprite);
-};
+	glEnable(GL_TEXTURE_2D);
+	image->sfi.Bind();
+	glColor4f(1, 1, 1, 1);
+	glBegin(GL_QUADS);
+		glTexCoord2f(tl/tw, tb/th); glVertex2f(x,       y);
+		glTexCoord2f(tr/tw, tb/th); glVertex2f(x+iw*PX, y);
+		glTexCoord2f(tr/tw, tt/th); glVertex2f(x+iw*PX, y+ih*PX);
+		glTexCoord2f(tl/tw, tt/th); glVertex2f(x,       y+ih*PX);
+	glEnd();
+	//window->Draw(drawing_sprite);
+}
 void draw_rect (float l, float t, float r, float b, Color color, bool cam) {
 	glDisable(GL_TEXTURE_2D);
 	color.setGL();
-	if (cam)
-		glRectf(
-			viewleft()+l, viewbottom()+b,
-			viewleft()+r, viewbottom()+t
-		);
-	else
-		glRectf(l, b, r, t);
+	if (!cam) {
+		l -= camera.x - 10;
+		t -= camera.y - 7.5;
+		r -= camera.x - 10;
+		b -= camera.y - 7.5;
+	}
+	glRectf(l, b, r, t);
 };
 void draw_line (Vec a, Vec b, Color color, bool cam) {
 	glDisable(GL_TEXTURE_2D);
 	color.setGL();
 	glBegin(GL_LINES);
-	if (cam) {
-		glVertex2f(viewleft()+a.x, viewbottom()+a.y);
-		glVertex2f(viewleft()+b.x, viewbottom()+b.y);
+	if (!cam) {
+		a -= Vec(camera.x-10, camera.y-7.5);
+		b -= Vec(camera.x-10, camera.y-7.5);
 	}
-	else {
-		glVertex2f(a.x, a.y);
-		glVertex2f(b.x, b.y);
-	}
+	glVertex2f(a.x, a.y);
+	glVertex2f(b.x, b.y);
 	glEnd();
 };
 
