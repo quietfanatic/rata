@@ -14,10 +14,18 @@ struct Color {
 	bool visible () const { return (uint8)x; }
 	void setGL () const { glColor4ub(x>>24, x>>16, x>>8, x); }
 };
+void dcp (Vec v);
+void dwp (Vec v);
 void draw_image (img::Def* image, Vec p, int sub=0, bool flip=false, bool cam=false, float scale=1.0);
 void draw_rect (float l, float t, float r, float b, Color color = 0x2f2f2f7f, bool cam = false);
-void draw_line (Vec a, Vec v, Color color = 0xffffff7f, bool cam = false);
+void draw_line (Vec a, Vec b, Color color = 0xffffff7f, bool cam = false);
 #else
+void dcp (Vec v) {
+	glVertex2f(v.x, v.y);
+}
+void dwp (Vec v) {
+	dcp(v - Vec(camera.x, camera.y) + Vec(10, 7.5));
+}
 
 
 sf::Sprite drawing_sprite;
@@ -73,8 +81,8 @@ void draw_line (Vec a, Vec b, Color color, bool cam) {
 		a -= Vec(camera.x-10, camera.y-7.5);
 		b -= Vec(camera.x-10, camera.y-7.5);
 	}
-	glVertex2f(a.x, a.y);
-	glVertex2f(b.x, b.y);
+	dcp(a);
+	dcp(b);
 	glEnd();
 };
 

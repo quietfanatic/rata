@@ -238,15 +238,13 @@ void draw_phase () {
 					break;
 				}
 				case (b2Shape::e_polygon): {
-					float x = o->pos.x - camera.x + 10;
-					float y = o->pos.y - camera.y + 7.5;
 					b2PolygonShape* p = (b2PolygonShape*)f->GetShape();
 					Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
 					glDisable(GL_TEXTURE_2D);
 					color.setGL();
 					glBegin(GL_LINE_LOOP);
 					for (int i=0; i < p->m_vertexCount; i++) {
-						glVertex2f(x + p->m_vertices[i].x, y + p->m_vertices[i].y);
+						dwp(o->pos + Vec(p->m_vertices[i]));
 					}
 					glEnd();
 					break;
@@ -283,10 +281,7 @@ void draw_phase () {
 		glBegin(GL_LINE_STRIP);
 		for (; i < debug_path_pos; i++) {
 			debug_path_color[i % debug_path_size].setGL();
-			glVertex2f(
-				debug_path[i % debug_path_size].x - camera.x + 10,
-				debug_path[i % debug_path_size].y - camera.y + 7.5
-			);
+			dwp(debug_path[i % debug_path_size]);
 		}
 		glEnd();
 	}
