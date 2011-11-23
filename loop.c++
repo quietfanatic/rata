@@ -25,6 +25,13 @@ void set_video () {
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glTranslatef(-1, -1, 0);
+	glScalef(1/20.0, 1/15.0, 1);
+	glTranslatef(0.375*PX/2, 0.375*PX/2, 0);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	window->UseVerticalSync(true);
 	//window->SetFramerateLimit(60);
 	window->EnableKeyRepeat(false);
@@ -115,20 +122,6 @@ void remove_phase () {
 
 
 void draw_phase () {
-	//glClearColor(1, 1, 1, 1);
-	//glClear(GL_COLOR_BUFFER_BIT);
-	//glViewport(0, 0, 1, 1);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glTranslatef(-1, -1, 0);
-	glScalef(1/20.0, 1/15.0, 1);
-	glTranslatef(0.375*PX/2, 0.375*PX/2, 0);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glTranslatef(0.375, 0.375, 0);
-	//glColor4f(1, 0, 0, 1);
-	//glRectf(0.1, 0.1, 0.9, 0.9);
-	//draw_rect(-2, -2, 2, 2, 0xff0000ff);
 	
 	if (rata) {
 		float focusx = rata->aim_center().x + cursor.x/2.0;
@@ -310,6 +303,7 @@ void draw_phase () {
 		glPixelZoom(window_scale, window_scale);
 		glCopyPixels(0, 0, 320, 240, GL_COLOR);
 		glPixelZoom(1.0, 1.0);
+		glEnable(GL_BLEND);
 	}
 	window->ShowMouseCursor(!trap_cursor);
 	draw_latency += frameclock.GetElapsedTime();
