@@ -8,13 +8,6 @@ bool paused = false;
 
  // GRAPHICS
 sf::Window* window;
-sf::View window_view = sf::View(sf::FloatRect(0, 15 * window_scale, 20 * window_scale, 0));
-float viewleft () { return window_view.GetRect().Left; }
-float viewright () { return window_view.GetRect().Left + 20; }
-float viewtop () { return window_view.GetRect().Top + 15; }
-float viewbottom () { return window_view.GetRect().Top; }
-float viewwidth () { return 20; }
-float viewheight () { return 15; }
 
 
  // INPUT
@@ -33,6 +26,10 @@ bool trap_cursor = false;
 struct Camera {
 	float x;
 	float y;
+	float l () { return x - 10; }
+	float b () { return y - 7.5; }
+	float r () { return x + 10; }
+	float t () { return y + 7.5; }
 } camera;
 bool camera_jump = false;
 

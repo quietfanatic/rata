@@ -16,11 +16,9 @@ void quit_game () {
 void set_video () {
 	if (window_fullscreen) {
 		window->Create(sf::VideoMode(640, 480, 32), "", sf::Style::Fullscreen);
-		//window->SetView(window_view);
 	}
 	else {
 		window->Create(sf::VideoMode(320*window_scale, 240*window_scale, 32), "");
-		//window->SetView(window_view);
 	}
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_DEPTH_TEST);
@@ -29,7 +27,7 @@ void set_video () {
 	glLoadIdentity();
 	glTranslatef(-1, -1, 0);
 	glScalef(1/20.0, 1/15.0, 1);
-	glTranslatef(0.375*PX/2, 0.375*PX/2, 0);
+	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	window->UseVerticalSync(true);
@@ -167,25 +165,8 @@ void draw_phase () {
 					camera.y = newy;
 			}
 		}
-		window_view.SetCenter(
-			round((camera.x+10*(window_scale-1))*UNPX)*PX,
-			round((camera.y+7.5*(window_scale-1))*UNPX)*PX
-		);
 
 	}
-	//window->SetView(window_view);
-	 // Draw background
-	//window->Clear(Color(0x7f7f7fff));
-	//else if (rc) {
-	//	float w = img::def[rc->bg].sfi.GetWidth()*PX;
-	//	float h = img::def[rc->bg].sfi.GetHeight()*PX;
-	//	float bg_x = mod_f(-camera.x/2, w);
-	//	float bg_y = mod_f(-camera.y/2, h);
-	//	for (float x = bg_x + viewleft(); x < viewright(); x += w)
-	//	for (float y = bg_y + h + viewtop(); y > viewbottom(); y -= h) {
-	//		draw_image(rc->bg, Vec(x, y));
-	//	}
-	//}
 	draw_latency -= 1/FPS;
 	if (draw_latency > 1/FPS) {
 		dbg(6, "Skipping frame %d.\n", frame_number);
@@ -208,10 +189,10 @@ void draw_phase () {
 			switch (f->GetType()) {
 				case (b2Shape::e_edge): {
 					b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
-					if (e->m_vertex1.x+o->pos.x > viewleft() - 1
-					 && e->m_vertex1.x+o->pos.x < viewright() + 1
-					 && e->m_vertex1.y+o->pos.y > viewbottom() - 1
-					 && e->m_vertex1.y+o->pos.y < viewtop() + 1)
+					if (e->m_vertex1.x+o->pos.x > camera.l() - 1
+					 && e->m_vertex1.x+o->pos.x < camera.r() + 1
+					 && e->m_vertex1.y+o->pos.y > camera.b() - 1
+					 && e->m_vertex1.y+o->pos.y < camera.t() + 1)
 						draw_line(
 							o->pos + Vec(e->m_vertex1),
 							o->pos + Vec(e->m_vertex2),
@@ -298,7 +279,6 @@ void draw_phase () {
 		render_text(message_pos, Vec(10, 1), 1, false, true, 0, true);
 	}
 	if (window_scale > 1.0) {
-		//glWindowPos2i(ceil(viewleft()*UNPX)*PX, ceil(viewbottom()*UNPX)*PX);
 		glDisable(GL_BLEND);
 		glPixelZoom(window_scale, window_scale);
 		glCopyPixels(0, 0, 320, 240, GL_COLOR);

@@ -24,7 +24,10 @@ void dcp (Vec v) {
 	glVertex2f(v.x, v.y);
 }
 void dwp (Vec v) {
-	dcp(v - Vec(camera.x, camera.y) + Vec(10, 7.5));
+	dcp(Vec(
+		round(v.x*UNPX)*PX - camera.x + 10,
+		round(v.y*UNPX)*PX - camera.y + 7.5
+	));
 }
 
 
@@ -41,10 +44,6 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip, bool cam, float sca
 	uint suby = (sub / (tw / iw));
 	float x = p.x - (flip ? iw-image->x : image->x)*PX;
 	float y = p.y - (ih-image->y)*PX;
-	if (!cam) {
-		x -= camera.x - 10;
-		y -= camera.y - 7.5;
-	}
 
 	float tl = subx*iw + iw*flip;
 	float tr = subx*iw + iw*!flip;
@@ -55,10 +54,18 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip, bool cam, float sca
 	image->sfi.Bind();
 	glColor4f(1, 1, 1, 1);
 	glBegin(GL_QUADS);
-		glTexCoord2f(tl/tw, tb/th); glVertex2f(x,       y);
-		glTexCoord2f(tr/tw, tb/th); glVertex2f(x+iw*PX, y);
-		glTexCoord2f(tr/tw, tt/th); glVertex2f(x+iw*PX, y+ih*PX);
-		glTexCoord2f(tl/tw, tt/th); glVertex2f(x,       y+ih*PX);
+	if (cam) {
+		glTexCoord2f(tl/tw, tb/th); dcp(Vec(x,       y      ));
+		glTexCoord2f(tr/tw, tb/th); dcp(Vec(x+iw*PX, y      ));
+		glTexCoord2f(tr/tw, tt/th); dcp(Vec(x+iw*PX, y+ih*PX));
+		glTexCoord2f(tl/tw, tt/th); dcp(Vec(x,       y+ih*PX));
+	}
+	else {
+		glTexCoord2f(tl/tw, tb/th); dwp(Vec(x,       y      ));
+		glTexCoord2f(tr/tw, tb/th); dwp(Vec(x+iw*PX, y      ));
+		glTexCoord2f(tr/tw, tt/th); dwp(Vec(x+iw*PX, y+ih*PX));
+		glTexCoord2f(tl/tw, tt/th); dwp(Vec(x,       y+ih*PX));
+	}
 	glEnd();
 	//window->Draw(drawing_sprite);
 }
@@ -77,12 +84,14 @@ void draw_line (Vec a, Vec b, Color color, bool cam) {
 	glDisable(GL_TEXTURE_2D);
 	color.setGL();
 	glBegin(GL_LINES);
-	if (!cam) {
-		a -= Vec(camera.x-10, camera.y-7.5);
-		b -= Vec(camera.x-10, camera.y-7.5);
+	if (cam) {
+		dcp(a);
+		dcp(b);
 	}
-	dcp(a);
-	dcp(b);
+	else {
+		dwp(a);
+		dwp(b);
+	}
 	glEnd();
 };
 
