@@ -19,15 +19,15 @@ struct Button {
 		if (color.visible()) draw_rect(
 			pos.x, pos.y,
 			pos.x+size.x, pos.y+size.y,
-			color, true
+			color
 		);
 		if (image) draw_image(
-			image, pos, subimage, false, true
+			image, pos, subimage, false
 		);
 		if (text) render_text(
 			text,
 			pos + size.scalex(0.5),
-			10, false, false, 0, true
+			10, false, false, 0
 		);
 	}
 };

@@ -1,7 +1,7 @@
 
 #ifdef HEADER
 
-void render_text (char* text, Vec p, uint lines=1, bool small=false, bool border=false, int align=1, bool cam=false);
+void render_text (char* text, Vec p, uint lines=1, bool small=false, bool border=false, int align=1);
 
 #else
 
@@ -65,7 +65,7 @@ uint text_width_small (char* s) {
 
 
 
-void render_text (char* text, Vec p, uint lines, bool small, bool border, int align, bool cam) {
+void render_text (char* text, Vec p, uint lines, bool small, bool border, int align) {
 	float width;
 	uint linecount = 0;
 	float lineheight = small ? 7*PX : 16*PX;
@@ -77,7 +77,7 @@ void render_text (char* text, Vec p, uint lines, bool small, bool border, int al
 	  align > 0 ? p.x
 	: align < 0 ? p.x - width
 	:             p.x - width/2;
-	if (border) draw_rect(start, p.y, start + width + lmargin+rmargin, p.y - lines*lineheight, 0x2f2f2f7f, cam);
+	if (border) draw_rect(start, p.y, start + width + lmargin+rmargin, p.y - lines*lineheight, 0x2f2f2f7f);
 
 	float pos = start+lmargin;
 	img::Def* font = small ? img::font_small : img::font_proportional;
@@ -90,7 +90,7 @@ void render_text (char* text, Vec p, uint lines, bool small, bool border, int al
 		else {
 			draw_image(font,
 				Vec(pos, p.y-linecount*lineheight),
-				*text, false, cam
+				*text, false
 			);
 			if (small)
 				pos += letter_width_small[(uint8)*text]*PX;

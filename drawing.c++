@@ -14,25 +14,21 @@ struct Color {
 	bool visible () const { return (uint8)x; }
 	void setGL () const { glColor4ub(x>>24, x>>16, x>>8, x); }
 };
-void dcp (Vec v);
-void dwp (Vec v);
-void draw_image (img::Def* image, Vec p, int sub=0, bool flip=false, bool cam=false, float scale=1.0);
-void draw_rect (float l, float t, float r, float b, Color color = 0x2f2f2f7f, bool cam = false);
-void draw_line (Vec a, Vec b, Color color = 0xffffff7f, bool cam = false);
+void vertex (Vec v);
+void draw_image (img::Def* image, Vec p, int sub=0, bool flip=false);
+void draw_rect (float l, float t, float r, float b, Color color = 0x2f2f2f7f);
+void draw_line (Vec a, Vec b, Color color = 0xffffff7f);
 #else
-void dcp (Vec v) {
-	glVertex2f(v.x, v.y);
-}
-void dwp (Vec v) {
-	dcp(Vec(
-		round(v.x*UNPX)*PX - camera.x + 10,
-		round(v.y*UNPX)*PX - camera.y + 7.5
-	));
+void vertex (Vec v) {
+	glVertex2f(
+		round(v.x*UNPX)*PX,
+		round(v.y*UNPX)*PX
+	);
 }
 
 
 sf::Sprite drawing_sprite;
-void draw_image (img::Def* image, Vec p, int sub, bool flip, bool cam, float scale) {
+void draw_image (img::Def* image, Vec p, int sub, bool flip) {
 	if (!image) return;
 	sub %= image->numsubs();
 	if (sub < 0) sub += image->numsubs();
@@ -54,44 +50,24 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip, bool cam, float sca
 	image->sfi.Bind();
 	glColor4f(1, 1, 1, 1);
 	glBegin(GL_QUADS);
-	if (cam) {
-		glTexCoord2f(tl/tw, tb/th); dcp(Vec(x,       y      ));
-		glTexCoord2f(tr/tw, tb/th); dcp(Vec(x+iw*PX, y      ));
-		glTexCoord2f(tr/tw, tt/th); dcp(Vec(x+iw*PX, y+ih*PX));
-		glTexCoord2f(tl/tw, tt/th); dcp(Vec(x,       y+ih*PX));
-	}
-	else {
-		glTexCoord2f(tl/tw, tb/th); dwp(Vec(x,       y      ));
-		glTexCoord2f(tr/tw, tb/th); dwp(Vec(x+iw*PX, y      ));
-		glTexCoord2f(tr/tw, tt/th); dwp(Vec(x+iw*PX, y+ih*PX));
-		glTexCoord2f(tl/tw, tt/th); dwp(Vec(x,       y+ih*PX));
-	}
+		glTexCoord2f(tl/tw, tb/th); vertex(Vec(x,       y      ));
+		glTexCoord2f(tr/tw, tb/th); vertex(Vec(x+iw*PX, y      ));
+		glTexCoord2f(tr/tw, tt/th); vertex(Vec(x+iw*PX, y+ih*PX));
+		glTexCoord2f(tl/tw, tt/th); vertex(Vec(x,       y+ih*PX));
 	glEnd();
 	//window->Draw(drawing_sprite);
 }
-void draw_rect (float l, float t, float r, float b, Color color, bool cam) {
+void draw_rect (float l, float t, float r, float b, Color color) {
 	glDisable(GL_TEXTURE_2D);
 	color.setGL();
-	if (!cam) {
-		l -= camera.x - 10;
-		t -= camera.y - 7.5;
-		r -= camera.x - 10;
-		b -= camera.y - 7.5;
-	}
 	glRectf(l, b, r, t);
 };
-void draw_line (Vec a, Vec b, Color color, bool cam) {
+void draw_line (Vec a, Vec b, Color color) {
 	glDisable(GL_TEXTURE_2D);
 	color.setGL();
 	glBegin(GL_LINES);
-	if (cam) {
-		dcp(a);
-		dcp(b);
-	}
-	else {
-		dwp(a);
-		dwp(b);
-	}
+		vertex(a);
+		vertex(b);
 	glEnd();
 };
 

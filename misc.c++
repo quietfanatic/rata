@@ -107,7 +107,7 @@ struct Shade : Spatial {
 		draw_rect(
 			pos.x, pos.y,
 			pos.x + size.x, pos.y + size.y,
-			color, false
+			color
 		);
 	}
 	Shade (room::Def* loc, Vec pos, Vec size, Color color) :
@@ -138,7 +138,7 @@ struct Lifebar : Actor {
 					img::heart,
 					Vec(19.5 - (i * 12*PX), 14.25),
 					subimage,
-					false, true
+					false
 				);
 			}
 		}

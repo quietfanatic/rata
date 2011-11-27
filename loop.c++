@@ -24,10 +24,6 @@ void set_video () {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glTranslatef(-1, -1, 0);
-	glScalef(1/20.0, 1/15.0, 1);
-	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	window->UseVerticalSync(true);
@@ -172,6 +168,16 @@ void draw_phase () {
 		dbg(6, "Skipping frame %d.\n", frame_number);
 		return;
 	}
+	 // Move GL view to camera pos
+	glLoadIdentity();
+	glTranslatef(-1, -1, 0);
+	glScalef(1/20.0, 1/15.0, 1);
+	glTranslatef(
+		0.45*PX/2 - camera.x + 10,
+		0.45*PX/2 - camera.y + 7.5,
+		0
+	);
+
 	 // Draw actors
 	for (Actor* a = active_actors; a; a = a->next_active) {
 		dbg(8, "Drawing 0x%08x\n", a);
@@ -225,7 +231,7 @@ void draw_phase () {
 					color.setGL();
 					glBegin(GL_LINE_LOOP);
 					for (int i=0; i < p->m_vertexCount; i++) {
-						dwp(o->pos + Vec(p->m_vertices[i]));
+						vertex(o->pos + Vec(p->m_vertices[i]));
 					}
 					glEnd();
 					break;
@@ -262,7 +268,7 @@ void draw_phase () {
 		glBegin(GL_LINE_STRIP);
 		for (; i < debug_path_pos; i++) {
 			debug_path_color[i % debug_path_size].setGL();
-			dwp(debug_path[i % debug_path_size]);
+			vertex(debug_path[i % debug_path_size]);
 		}
 		glEnd();
 	}
@@ -276,7 +282,7 @@ void draw_phase () {
 	}
 	 // Draw text message
 	if (message) {
-		render_text(message_pos, Vec(10, 1), 1, false, true, 0, true);
+		render_text(message_pos, Vec(10, 1), 1, false, true, 0);
 	}
 	if (window_scale > 1.0) {
 		glDisable(GL_BLEND);
