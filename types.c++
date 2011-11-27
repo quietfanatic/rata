@@ -21,7 +21,6 @@ namespace type {
 		front_tiles,
 		cursor_layer,
 		shade,
-		lifebar,
 		n_types
 	};
 	struct Def {
@@ -228,7 +227,6 @@ const Def def [n_types] = {
 	{"Front Tiles", -1, NULL, -500, NULL},
 	{"Cursor Layer", -1, NULL, -2000, NULL},
 	{"Shade", -1, NULL, -3000, NULL},
-	{"Lifebar", -1, NULL, -4000, NULL},
 //	{"Solid Object", -1, NULL, 0, -1},
 //	{"Tilemap", 0, NULL, 0, -1},
 //	{"Mousehole", 1, &mousehole_fix, 50, img::mousehole},

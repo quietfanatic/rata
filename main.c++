@@ -12,7 +12,6 @@ int main () {
 	(new BulletLayer())->activate();
 	(new TileLayer(type::front_tiles))->activate();
 	(new CursorLayer())->activate();
-	(new Lifebar())->activate();
 	for (uint i=0; i < room::n_rooms; i++) {
 		room::def[i].init();
 	}
@@ -20,6 +19,7 @@ int main () {
 	rata->loc->enter();
 
 	camera_jump = true;
+	draw_hud = &hud_play;
 
 	try { main_loop(); } catch (int x) { printf("Game quit succesfully with result %d.\n", x); }
 	return 0;

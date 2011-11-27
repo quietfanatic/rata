@@ -24,6 +24,10 @@ void set_video () {
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glTranslatef(-1, -1, 0);
+	glScalef(1/20.0, 1/15.0, 1);
+	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	window->UseVerticalSync(true);
@@ -60,6 +64,7 @@ void toggle_pause () {
 		window->ShowMouseCursor(false);
 		window->SetCursorPosition(window->GetWidth()/2, window->GetHeight()/2);
 		n_buttons = 0;
+		draw_hud = &hud_play;
 	}
 	else {
 		paused = true;
@@ -67,6 +72,7 @@ void toggle_pause () {
 		window->SetCursorPosition(cursor2.x*UNPX*window_scale, window->GetHeight() - cursor2.y*UNPX*window_scale);
 		n_buttons = n_pause_buttons;
 		buttons = pause_buttons;
+		draw_hud = &hud_pause;
 	}
 };
 
@@ -169,12 +175,9 @@ void draw_phase () {
 		return;
 	}
 	 // Move GL view to camera pos
-	glLoadIdentity();
-	glTranslatef(-1, -1, 0);
-	glScalef(1/20.0, 1/15.0, 1);
 	glTranslatef(
-		0.45*PX/2 - camera.x + 10,
-		0.45*PX/2 - camera.y + 7.5,
+		- camera.x + 10,
+		- camera.y + 7.5,
 		0
 	);
 
@@ -273,17 +276,17 @@ void draw_phase () {
 		glEnd();
 	}
 	else { debug_path_pos = 0; }
-	 // Draw buttons
-	if (n_buttons) {
-		uint i = n_buttons;
-		while (i) {
-			buttons[--i].draw();
-		}
+	 // Reset view (Don't use camera for hud)
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glTranslatef(-1, -1, 0);
+	glScalef(1/20.0, 1/15.0, 1);
+	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
+	 // Draw hud
+	if (draw_hud) {
+		(*draw_hud)();
 	}
-	 // Draw text message
-	if (message) {
-		render_text(message_pos, Vec(10, 1), 1, false, true, 0);
-	}
+	 // Scale view
 	if (window_scale > 1.0) {
 		glDisable(GL_BLEND);
 		glPixelZoom(window_scale, window_scale);

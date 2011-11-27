@@ -74,12 +74,12 @@ void render_text (char* text, Vec p, uint lines, bool small, bool border, int al
 	float lmargin = small ? 2*PX : 4*PX;
 	float rmargin = small ? 1*PX : 4*PX;
 	float start =
-	  align > 0 ? p.x
-	: align < 0 ? p.x - width
+	  align > 0 ? p.x + lmargin
+	: align < 0 ? p.x - width - rmargin
 	:             p.x - width/2;
 	if (border) draw_rect(start, p.y, start + width + lmargin+rmargin, p.y - lines*lineheight, 0x2f2f2f7f);
 
-	float pos = start+lmargin;
+	float pos = start;
 	img::Def* font = small ? img::font_small : img::font_proportional;
 	for (;*text != 0 && linecount <= lines; text++) {
 		//printf("%c;%d;%d;", *text, *text%16, *text/16);

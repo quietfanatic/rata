@@ -47,6 +47,7 @@ char* message_pos_next = NULL;
 const uint MAX_BULLETS = 10;
 RBullet bullets[MAX_BULLETS];
 
+void (* draw_hud )() = NULL;
 uint n_buttons = 0;
 Button* buttons = NULL;
 

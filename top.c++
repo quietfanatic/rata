@@ -58,7 +58,7 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 #include "map.c++"
 #include "query.c++"
 #include "bullet.c++"
-#include "buttons.c++"
+#include "hud.c++"
 #undef HEADER
 
 
@@ -86,7 +86,7 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 #include "map.c++"
 #include "query.c++"
 #include "bullet.c++"
-#include "buttons.c++"
+#include "hud.c++"
 #include "items.c++"
 
 
