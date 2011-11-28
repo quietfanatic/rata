@@ -124,33 +124,32 @@ void remove_phase () {
 void draw_phase () {
 	
 	if (rata) {
-		float focusx = rata->aim_center().x + cursor.x/2.0;
-		float focusy = rata->aim_center().y + cursor.y/2.0;
+		Vec focus = rata->aim_center() + cursor/2.0;
 		if (rata->loc) {
 			room::Def* r = current_room;
 			uint32 walls = r->walls;
-			if (walls&LEFT && focusx < r->pos.x + 10)
-				focusx = r->pos.x + 10;
-			else if (walls&RIGHT && focusx > r->pos.x + r->width - 10)
-				focusx = r->pos.x + r->width - 10;
-			if (walls&BOTTOM && focusy < r->pos.y + 7.5)
-				focusy = r->pos.y + 7.5;
-			else if (walls&TOP && focusy > r->pos.y + r->height - 7.5)
-				focusy = r->pos.y + r->height - 7.5;
+			if (walls&LEFT && focus.x < r->pos.x + 10)
+				focus.x = r->pos.x + 10;
+			else if (walls&RIGHT && focus.x > r->pos.x + r->width - 10)
+				focus.x = r->pos.x + r->width - 10;
+			if (walls&BOTTOM && focus.y < r->pos.y + 7.5)
+				focus.y = r->pos.y + 7.5;
+			else if (walls&TOP && focus.y > r->pos.y + r->height - 7.5)
+				focus.y = r->pos.y + r->height - 7.5;
 		}
 		 // To look smooth in a pixelated environment,
 		 //  we need a minimum speed.
 		 // We also need to hold camera pixel-steady
 		 //  to Rata pos when running.
 		if (camera_jump) {
-			camera.x = focusx;
-			camera.y = focusy;
+			camera.x = focus.x;
+			camera.y = focus.y;
 			camera_jump = false;
 		}
 		else {
-			if (abs_f(focusx - camera.x) < .25*PX) camera.x = focusx;
+			if (abs_f(focus.x - camera.x) < .25*PX) camera.x = focus.x;
 			else {
-				float newx = (9*camera.x + focusx) / 10;
+				float newx = (9*camera.x + focus.x) / 10;
 				if (abs_f(newx - camera.x) < .25*PX)
 					camera.x += .25*PX * sign_f(newx - camera.x);
 				else if (abs_f((newx - camera.x) - rata->vel.x/FPS) < .25*PX) {
@@ -159,9 +158,9 @@ void draw_phase () {
 				else
 					camera.x = newx;
 			}
-			if (abs_f(focusy - camera.y) < .25*PX) camera.y = focusy;
+			if (abs_f(focus.y - camera.y) < .25*PX) camera.y = focus.y;
 			else {
-				float newy = (9*camera.y + focusy) / 10;
+				float newy = (9*camera.y + focus.y) / 10;
 				if (abs_f(newy - camera.y) < .25*PX)
 					camera.y += .25*PX * sign_f(newy - camera.y);
 				else
