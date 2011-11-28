@@ -153,8 +153,9 @@ void draw_phase () {
 				float newx = (9*camera.x + focusx) / 10;
 				if (abs_f(newx - camera.x) < .25*PX)
 					camera.x += .25*PX * sign_f(newx - camera.x);
-				else if (abs_f((newx - camera.x) - rata->vel.x/FPS) < .25*PX)
-					camera.x += rata->vel.x/FPS;
+				else if (abs_f((newx - camera.x) - rata->vel.x/FPS) < .25*PX) {
+					camera.x = old_camera_rel + round(rata->pos.x*UNPX)*PX;
+				}
 				else
 					camera.x = newx;
 			}
@@ -167,7 +168,7 @@ void draw_phase () {
 					camera.y = newy;
 			}
 		}
-
+		old_camera_rel = camera.x - round(rata->pos.x*UNPX)*PX;
 	}
 	draw_latency -= 1/FPS;
 	if (draw_latency > 1/FPS) {

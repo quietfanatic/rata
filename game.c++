@@ -31,6 +31,7 @@ struct Camera {
 	float r () { return x + 10; }
 	float t () { return y + 7.5; }
 } camera;
+float old_camera_rel = 0;
 bool camera_jump = false;
 
 
