@@ -149,22 +149,22 @@ void draw_phase () {
 		else {
 			if (abs_f(focus.x - camera.x) < .25*PX) camera.x = focus.x;
 			else {
-				float newx = (9*camera.x + focus.x) / 10;
-				if (abs_f(newx - camera.x) < .25*PX)
-					camera.x += .25*PX * sign_f(newx - camera.x);
-				else if (abs_f((newx - camera.x) - rata->vel.x/FPS) < .25*PX) {
+				float xvel = (focus.x - camera.x) / 10;
+				if (abs_f(xvel) < .25*PX)
+					camera.x += .25*PX * sign_f(xvel);
+				else if (abs_f((xvel) - rata->vel.x/FPS) < .25*PX) {
 					camera.x = old_camera_rel + round(rata->pos.x*UNPX)*PX;
 				}
 				else
-					camera.x = newx;
+					camera.x += xvel;
 			}
 			if (abs_f(focus.y - camera.y) < .25*PX) camera.y = focus.y;
 			else {
-				float newy = (9*camera.y + focus.y) / 10;
-				if (abs_f(newy - camera.y) < .25*PX)
-					camera.y += .25*PX * sign_f(newy - camera.y);
+				float yvel = (focus.y - camera.y) / 10;
+				if (abs_f(yvel) < .25*PX)
+					camera.y += .25*PX * sign_f(yvel);
 				else
-					camera.y = newy;
+					camera.y += yvel;
 			}
 		}
 		old_camera_rel = camera.x - round(rata->pos.x*UNPX)*PX;
