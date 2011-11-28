@@ -29,12 +29,8 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip) {
 	if (sub < 0) sub += image->numsubs();
 	uint tw = image->tw;
 	uint th = image->th;
-	uint iw = image->w ? image->w : tw;
-	uint ih = image->h ? image->h : th;
-	if (p.x + iw*PX < camera.x - 10) return;
-	if (p.x - iw*PX > camera.x + 10) return;
-	if (p.y + ih*PX < camera.y - 7.5) return;
-	if (p.y - ih*PX > camera.y + 7.5) return;
+	uint iw = image->w;
+	uint ih = image->h;
 	uint subx = (sub % (tw / iw));
 	uint suby = (sub / (tw / iw));
 	float x = p.x - (flip ? iw-image->x : image->x)*PX;

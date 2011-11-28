@@ -66,9 +66,13 @@ void Object::after_move () {
 	change_room();
 }
 void Object::draw () {
-	if (type::def[type].image) {
+	img::Def* img = type::def[type].image;
+	if (img)
+	if (pos.x + img->w*PX >= camera.x - 10)
+	if (pos.x - img->w*PX <= camera.x + 10)
+	if (pos.y + img->h*PX >= camera.y - 7.5)
+	if (pos.y - img->h*PX <= camera.y + 7.5)
 		draw_image(type::def[type].image, pos, subimage, facing == 1);
-	}
 }
 
  // New things specific to object.

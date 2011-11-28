@@ -13,8 +13,8 @@ my @imgs = map {
 		id => $id,
 		tw => $1,
 		th => $2,
-		w => $w // 0,
-		h => $h // 0,
+		w => $w // $1,
+		h => $h // $2,
 		x => $x // 0,
 		y => $y // 0,
 	}
@@ -37,8 +37,7 @@ namespace img {
 		float x;
 		float y;
 		uint numsubs () {
-			if (w == 0 && h == 0) return 1;
-			else return (tw / w) * (th / h);
+			return (tw / w) * (th / h);
 		}
 	};
 

@@ -28,7 +28,7 @@ namespace map {
 		bool operator == (Pos p) { return x == p.x && y == p.y; }
 	};
 
-	Tile& at (uint8 x, uint8 y) {
+	Tile& at (uint x, uint y) {
 		return world[y % height][x % width];
 	}
 	Tile& at (Pos p) {
