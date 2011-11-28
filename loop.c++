@@ -141,6 +141,8 @@ void draw_phase () {
 		 //  we need a minimum speed.
 		 // We also need to hold camera pixel-steady
 		 //  to Rata pos when running.
+		float snap_dist = camera_snap ? .5*PX : .25*PX;
+		camera_snap = false;
 		if (camera_jump) {
 			camera.x = focus.x;
 			camera.y = focus.y;
@@ -152,8 +154,9 @@ void draw_phase () {
 				float xvel = (focus.x - camera.x) / 10;
 				if (abs_f(xvel) < .25*PX)
 					camera.x += .25*PX * sign_f(xvel);
-				else if (abs_f((xvel) - rata->vel.x/FPS) < .25*PX) {
+				else if (abs_f((xvel) - rata->vel.x/FPS) < snap_dist) {
 					camera.x = old_camera_rel + round(rata->pos.x*UNPX)*PX;
+					camera_snap = true;
 				}
 				else
 					camera.x += xvel;

@@ -29,6 +29,7 @@ struct Camera : Vec {
 } camera;
 float old_camera_rel = 0;
 bool camera_jump = false;
+bool camera_snap = false;
 
 
  // GAME STATE
