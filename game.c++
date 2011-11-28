@@ -13,9 +13,7 @@ sf::Window* window;
  // INPUT
 unsigned char key[400];  // Counts number of frames up to 255
 unsigned char button[10];
-struct Cursor {
-	float x;
-	float y;
+struct Cursor : Vec {
 	img::Def* img;  // Draw this
 } cursor,  // Relative to player
   cursor2;  // Relative to world
@@ -23,9 +21,7 @@ bool click_taken = false;
 bool draw_cursor = false;
 bool trap_cursor = false;
 
-struct Camera {
-	float x;
-	float y;
+struct Camera : Vec {
 	float l () { return x - 10; }
 	float b () { return y - 7.5; }
 	float r () { return x + 10; }

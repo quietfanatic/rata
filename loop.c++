@@ -140,8 +140,8 @@ void draw_phase () {
 		}
 		 // To look smooth in a pixelated environment,
 		 //  we need a minimum speed.
-		 // We also need to snap the camera's xvel to
-		 //  Rata's xvel when running.
+		 // We also need to hold camera pixel-steady
+		 //  to Rata pos when running.
 		if (camera_jump) {
 			camera.x = focusx;
 			camera.y = focusy;
