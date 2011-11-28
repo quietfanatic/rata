@@ -2,9 +2,9 @@
 #include "top.c++"
 
 int main () {
+	main_init();
 	load_img();
 	load_snd();
-	main_init();
 	
 	rata = new Rata(room::roompicker, Vec(2, 2));
 	rata->pickup_equip(new Item(NULL, rata->pos, item::white_dress));

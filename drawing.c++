@@ -7,10 +7,6 @@ struct Color {
 	Color () { }
 	Color (uint32 x) :x(x) { }
 	Color (uint32 r, uint32 g, uint32 b, uint32 a) :x(r<<24|g<<16|b<<8|a) { }
-	Color (sf::Color c) :x(c.r<<24|c.g<<16|c.b<<8|c.a) { }
-	operator sf::Color () const {
-		return sf::Color(x>>24, x>>16, x>>8, x);
-	}
 	bool visible () const { return (uint8)x; }
 	void setGL () const { glColor4ub(x>>24, x>>16, x>>8, x); }
 };
@@ -27,15 +23,14 @@ void vertex (Vec v) {
 }
 
 
-sf::Sprite drawing_sprite;
 void draw_image (img::Def* image, Vec p, int sub, bool flip) {
 	if (!image) return;
 	sub %= image->numsubs();
 	if (sub < 0) sub += image->numsubs();
-	uint tw = image->sfi.GetWidth();
-	uint th = image->sfi.GetHeight();
-	uint iw = image->w ? image->w : image->sfi.GetWidth();
-	uint ih = image->h ? image->h : image->sfi.GetHeight();
+	uint tw = image->tw;
+	uint th = image->th;
+	uint iw = image->w ? image->w : tw;
+	uint ih = image->h ? image->h : th;
 	uint subx = (sub % (tw / iw));
 	uint suby = (sub / (tw / iw));
 	float x = p.x - (flip ? iw-image->x : image->x)*PX;
@@ -47,7 +42,7 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip) {
 	float tb = suby*ih + ih;
 	
 	glEnable(GL_TEXTURE_2D);
-	image->sfi.Bind();
+	glBindTexture(GL_TEXTURE_2D, image->tex);
 	glColor4f(1, 1, 1, 1);
 	glBegin(GL_QUADS);
 		glTexCoord2f(tl/tw, tb/th); vertex(Vec(x,       y      ));

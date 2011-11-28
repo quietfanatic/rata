@@ -1,9 +1,9 @@
+#include <stdio.h>
+#include <SOIL.h>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <Box2D/Box2D.h>
-#include <stdio.h>
 //#define printf(...) (__VA_ARGS__)
 
  // CONSTANTS

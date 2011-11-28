@@ -42,7 +42,7 @@ void set_video () {
 
 void main_init () {
 	 // SFML
-	window = new sf::RenderWindow;
+	window = new sf::Window;
 	//window = new sf::Image(320, 240);
 	set_video();
 	 // box2d
@@ -228,7 +228,7 @@ void draw_phase () {
 					break;
 				}
 				case (b2Shape::e_polygon): {
-					b2PolygonShape* p = (b2PolygonShape*)f->GetShape();
+					b2PolygonShape* p = (b2PolygonShape*)f->GetShape();					
 					Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
 					glDisable(GL_TEXTURE_2D);
 					color.setGL();
@@ -240,11 +240,11 @@ void draw_phase () {
 					break;
 				}
 				case (b2Shape::e_circle): {
-					b2CircleShape* c = (b2CircleShape*)f->GetShape();
-					Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
-					sf::Shape draw_shape = sf::Shape::Circle(Vec(c->m_p)+o->pos, c->m_radius, Color(0), 1.0*PX, color);
-					draw_shape.EnableFill(false);
-					draw_shape.EnableOutline(true);
+					//b2CircleShape* c = (b2CircleShape*)f->GetShape();
+					//Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
+					//sf::Shape draw_shape = sf::Shape::Circle(Vec(c->m_p)+o->pos, c->m_radius, Color(0), 1.0*PX, color);
+					//draw_shape.EnableFill(false);
+					//draw_shape.EnableOutline(true);
 					//window->Draw(draw_shape);
 					break;
 				}
