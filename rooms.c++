@@ -1,6 +1,9 @@
 #ifdef HEADER
 struct Spatial;
 
+ // C's type syntax is ucky.
+typedef Vec Vec2 [2];
+
 namespace room {
 	struct Def {
 		Vec pos;
@@ -9,7 +12,8 @@ namespace room {
 		const int16* tiles;
 		uint32 n_neighbors;
 		room::Def*const* neighbors;
-		uint32 walls;
+		uint32 n_walls;
+		const Vec2 * walls;
 		void (& init ) ();
 		bool loaded;
 		Spatial* contents;
@@ -101,9 +105,10 @@ namespace room {
 #define ROOM_TILES(...) const int16 tiles [width * height] = {__VA_ARGS__};
 #define ROOM_N_NEIGHBORS(...) const uint32 n_neighbors = __VA_ARGS__;
 #define ROOM_NEIGHBORS(...) room::Def*const neighbors [n_neighbors] = {__VA_ARGS__};
-#define ROOM_WALLS(...) const uint32 walls = __VA_ARGS__;
+#define ROOM_N_WALLS(...) const uint32 n_walls = __VA_ARGS__;
+#define ROOM_WALLS(...) const Vec2 walls [n_walls] = {__VA_ARGS__};
 #define ROOM_INIT(...) void init () {__VA_ARGS__};
-#define ROOM_END const room::Def def = {pos, width, height, tiles, n_neighbors, neighbors, walls, init, false, NULL};
+#define ROOM_END const room::Def def = {pos, width, height, tiles, n_neighbors, neighbors, n_walls, walls, init, false, NULL};
 
 
 

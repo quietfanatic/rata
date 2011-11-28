@@ -125,17 +125,34 @@ void draw_phase () {
 	
 	if (rata) {
 		Vec focus = rata->aim_center() + cursor/2.0;
+		 // Move focus point out of camera walls.
 		if (rata->loc) {
 			room::Def* r = current_room;
-			uint32 walls = r->walls;
-			if (walls&LEFT && focus.x < r->pos.x + 10)
-				focus.x = r->pos.x + 10;
-			else if (walls&RIGHT && focus.x > r->pos.x + r->width - 10)
-				focus.x = r->pos.x + r->width - 10;
-			if (walls&BOTTOM && focus.y < r->pos.y + 7.5)
-				focus.y = r->pos.y + 7.5;
-			else if (walls&TOP && focus.y > r->pos.y + r->height - 7.5)
-				focus.y = r->pos.y + r->height - 7.5;
+			float curdist = 1/0.0;
+			Vec newfocus = focus;
+			for (uint i=0; i < r->n_walls; i++)
+			if (across_line(focus, r->walls[i][0], r->walls[i][1])) {
+				Vec uncross = uncross_line(focus, r->walls[i][0], r->walls[i][1]);
+				//printf("[%d] Focus vs. uncross: %f,%f vs. %f,%f\n",
+				//	frame_number, focus.x, focus.y, uncross.x, uncross.y);
+				if (in_rect(
+						uncross,
+						Vec(MIN(r->walls[i][0].x, r->walls[i][1].x),
+						    MIN(r->walls[i][0].y, r->walls[i][1].y)),
+						Vec(MAX(r->walls[i][0].x, r->walls[i][1].x),
+						    MAX(r->walls[i][0].y, r->walls[i][1].y))
+					)
+				) {
+					//printf("[%d] Focus is crossing a wall.\n", frame_number);
+					float dist = mag(uncross - focus);
+					if (dist < curdist) {
+						//printf("[%d] Uncrossed focus.\n", frame_number);
+						curdist = dist;
+						newfocus = uncross;
+					}
+				}
+			}
+			focus = newfocus;
 		}
 		 // To look smooth in a pixelated environment,
 		 //  we need a minimum speed.

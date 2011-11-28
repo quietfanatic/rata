@@ -27,7 +27,8 @@ ROOM_NEIGHBORS(
 	room::roompicker,
 	room::dangent
 )
-ROOM_WALLS(TOP|BOTTOM)
+ROOM_N_WALLS(0)
+ROOM_WALLS()
 
 ROOM_INIT(
 	new Tilemap(HERE);
