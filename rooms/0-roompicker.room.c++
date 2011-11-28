@@ -28,11 +28,12 @@ ROOM_NEIGHBORS(
 	room::test1,
 	room::test2
 )
-ROOM_N_WALLS(3)
+ROOM_N_WALLS(4)
 ROOM_WALLS(
-	{Vec(40, 7.5), Vec(0, 7.5)},
-	{Vec(10, 0), Vec(10, 15)},
-	{Vec(0, 7.5), Vec(40, 7.5)},
+	{Vec(0, 0), Vec(0, 15), 0, false},
+	{Vec(0, 15), Vec(20, 15), 0, false},
+	{Vec(20, 15), Vec(20, 0), 0, false},
+	{Vec(20, 0), Vec(0, 0), 0, false},
 )
 
 ROOM_INIT(

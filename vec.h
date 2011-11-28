@@ -42,6 +42,7 @@ float liney (Vec a, Vec b, float x) {
 }
 Vec norm (Vec a) { return a / mag(a); }
 Vec rotcw (Vec a) { return Vec(-a.y, a.x); }
+Vec rotccw (Vec a) { return Vec(a.y, -a.x); }
 
 bool defined (float a) { return a==a; }
 bool defined (Vec a) { return defined(a.x) && defined(a.y); }

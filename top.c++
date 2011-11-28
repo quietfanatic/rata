@@ -35,6 +35,7 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 #include "stats.c++"
 #include "poses.c++"
 #include "items.c++"
+#include "walls.c++"
 #include "rooms.c++"
 
  // GRAPHICS
@@ -80,8 +81,9 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 #include "misc.c++"
 #include "enemies.c++"
 #include "types.c++"
-#include "rooms.c++"
  // MISC
+#include "walls.c++"
+#include "rooms.c++"
 #include "coll.c++"
 #include "map.c++"
 #include "query.c++"
