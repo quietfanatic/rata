@@ -126,49 +126,7 @@ void draw_phase () {
 	if (rata) {
 		Vec focus = rata->aim_center() + cursor/2.0;
 		 // Move focus point out of camera walls.
-		if (rata->loc) {
-			room::Def* r = current_room;
-			bool hit_wall = false;
-			float curdist2 = 1/0.0;
-			Vec newfocus = focus;
-			for (uint i=0; i < r->n_walls; i++)
-			 // Line segment walls
-			if (across_line(focus, r->walls[i].a, r->walls[i].b)) {
-				Vec uncross = uncross_line(focus, r->walls[i].a, r->walls[i].b);
-				//printf("[%d] Focus vs. uncross: %f,%f vs. %f,%f\n",
-				//	frame_number, focus.x, focus.y, uncross.x, uncross.y);
-				if (in_rect(
-						uncross,
-						Vec(MIN(r->walls[i].a.x, r->walls[i].b.x),
-						    MIN(r->walls[i].a.y, r->walls[i].b.y)),
-						Vec(MAX(r->walls[i].a.x, r->walls[i].b.x),
-						    MAX(r->walls[i].a.y, r->walls[i].b.y))
-					)
-				) {
-					//printf("[%d] Focus is crossing a wall.\n", frame_number);
-					float dist2 = mag2(uncross - focus);
-					if (dist2 < curdist2) {
-						hit_wall = true;
-						//printf("[%d] Uncrossed focus.\n", frame_number);
-						curdist2 = dist2;
-						newfocus = uncross;
-					}
-				}
-			}
-			 // Circle walls
-			if (!hit_wall)
-			for (uint i=0; i < r->n_walls; i++) {
-				Vec uncross = r->walls[i].uncross_corner(focus, &r->walls[(i+1) % r->n_walls]);
-				if (defined(uncross)) {
-					float dist2 = mag2(uncross - focus);
-					if (dist2 < curdist2) {
-						curdist2 = dist2;
-						newfocus = uncross;
-					}
-				}
-			}
-			focus = newfocus;
-		}
+		focus = constrain(focus);
 		 // To look smooth in a pixelated environment,
 		 //  we need a minimum speed.
 		 // We also need to hold camera pixel-steady
