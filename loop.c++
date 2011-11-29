@@ -53,8 +53,7 @@ void main_init () {
 	world->SetContactListener(new myCL);
 	 // Initial room
 	//room::testroom.start();
-	cursor2.x = 10;
-	cursor2.y = 7.5;
+	cursor2 = screen/2;
 }
 
 void toggle_pause () {
@@ -123,7 +122,7 @@ void remove_phase () {
 
 void draw_phase () {
 	Vec oldfocus = Vec::undef;
-	Vec focus = oldfocus;
+	focus = oldfocus;
 	if (rata) {
 		oldfocus = rata->aim_center() + cursor/2.0;
 		 // Move focus point out of camera walls.
@@ -135,8 +134,7 @@ void draw_phase () {
 		float snap_dist = camera_snap ? .5*PX : .25*PX;
 		camera_snap = false;
 		if (camera_jump) {
-			camera.x = focus.x;
-			camera.y = focus.y;
+			camera = focus;
 			camera_jump = false;
 		}
 		else {
@@ -160,6 +158,7 @@ void draw_phase () {
 				else
 					camera.y += yvel;
 			}
+			camera = constrain(camera);
 		}
 		old_camera_rel = camera.x - round(rata->pos.x*UNPX)*PX;
 	}
@@ -168,13 +167,10 @@ void draw_phase () {
 		dbg(6, "Skipping frame %d.\n", frame_number);
 		return;
 	}
-	Vec c = constrain(camera);
-	camera.x = c.x;
-	camera.y = c.y;
 	 // Move GL view to camera pos
 	glTranslatef(
-		- round(camera.x*UNPX)*PX + 10,
-		- round(camera.y*UNPX)*PX + 7.5,
+		- round(camera.x*UNPX)*PX + screen.x/2,
+		- round(camera.y*UNPX)*PX + screen.y/2,
 		0
 	);
 
@@ -195,28 +191,18 @@ void draw_phase () {
 			switch (f->GetType()) {
 				case (b2Shape::e_edge): {
 					b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
-					if (e->m_vertex1.x+o->pos.x > camera.l() - 1
-					 && e->m_vertex1.x+o->pos.x < camera.r() + 1
-					 && e->m_vertex1.y+o->pos.y > camera.b() - 1
-					 && e->m_vertex1.y+o->pos.y < camera.t() + 1)
-						draw_line(
-							o->pos + Vec(e->m_vertex1),
-							o->pos + Vec(e->m_vertex2),
-							0x00ff007f
-						);
-					if (rata->pos.x + cursor.x > e->m_vertex1.x+o->pos.x - 1.0)
-					if (rata->pos.x + cursor.x < e->m_vertex1.x+o->pos.x + 1.0)
-					if (rata->pos.y + cursor.y+1 > e->m_vertex1.y+o->pos.y - 1.0)
-					if (rata->pos.y + cursor.y+1 < e->m_vertex1.y+o->pos.y + 1.0)
+					draw_line(
+						o->pos + Vec(e->m_vertex1),
+						o->pos + Vec(e->m_vertex2),
+						0x00ff007f
+					);
+					if (mag2(rata->cursor_pos() - o->pos + Vec(e->m_vertex1)) < 1)
 						draw_line(
 							o->pos + Vec(e->m_vertex1),
 							o->pos + Vec(e->m_vertex0) + Vec(3, 3)*PX,
 							0xffff007f
 						);
-					if (rata->pos.x + cursor.x > e->m_vertex2.x+o->pos.x - 1)
-					if (rata->pos.x + cursor.x < e->m_vertex2.x+o->pos.x + 1)
-					if (rata->pos.y + cursor.y+1 > e->m_vertex2.y+o->pos.y - 1)
-					if (rata->pos.y + cursor.y+1 < e->m_vertex2.y+o->pos.y + 1)
+					if (mag2(rata->cursor_pos() - o->pos + Vec(e->m_vertex2)) < 1)
 						draw_line(
 							o->pos + Vec(e->m_vertex2),
 							o->pos + Vec(e->m_vertex3) - Vec(3, 3)*PX,
@@ -373,10 +359,10 @@ void input_phase () {
 		}
 		case sf::Event::MouseMoved: {
 			if (trap_cursor) {
-				cursor.x += (event.MouseMove.X - window->GetWidth()/2.0)
-					* PX * cursor_scale / window_scale;
-				cursor.y += -(event.MouseMove.Y - window->GetHeight()/2.0)
-					* PX * cursor_scale / window_scale;
+				cursor += Vec(
+					(event.MouseMove.X - window->GetWidth()/2.0),
+					-(event.MouseMove.Y - window->GetHeight()/2.0)
+				) * PX * cursor_scale / window_scale;
 				window->SetCursorPosition(window->GetWidth()/2, window->GetHeight()/2);
 				if (cursor.x > 19) cursor.x = 19;
 				else if (cursor.x < -19) cursor.x = -19;
@@ -384,8 +370,10 @@ void input_phase () {
 				else if (cursor.y < -14) cursor.y = -14;
 			}
 			else {
-				cursor2.x = event.MouseMove.X*PX/window_scale;
-				cursor2.y = (window->GetHeight() - event.MouseMove.Y)*PX/window_scale;
+				cursor2 = Vec(
+					event.MouseMove.X,
+					(window->GetHeight() - event.MouseMove.Y)
+				) * PX / window_scale;
 			}
 			break;
 		}
@@ -399,10 +387,7 @@ void input_phase () {
 void move_phase () {
 	if (n_buttons) {
 		for (uint i=0; i < n_buttons; i++)
-		if (cursor2.x > buttons[i].pos.x)
-		if (cursor2.y > buttons[i].pos.y)
-		if (cursor2.x < buttons[i].pos.x + buttons[i].size.x)
-		if (cursor2.y < buttons[i].pos.y + buttons[i].size.y) {
+		if (in_rect(cursor2, buttons[i].pos, buttons[i].pos+buttons[i].size)) {
 			if (buttons[i].click) (*buttons[i].click)();
 			break;
 		}

@@ -143,7 +143,7 @@ struct Rata : Walking {
 		return equip_info(item::head) == item::helmet;
 	}
 	Vec aim_center () { return pos + Vec(2*PX*facing, 13*PX); }
-	Vec cursor_pos () { return aim_center() + Vec(cursor.x, cursor.y); }
+	Vec cursor_pos () { return aim_center() + cursor; }
 	
 	void set_fix (int fix) {
 		fix_current = fix;
@@ -243,7 +243,7 @@ struct Rata : Walking {
 		 || control_action || control_aim) auto_control = false;
 		else if (control_goto) {
 			printf("Calculating route...\n");
-			destination = map::get_platform(aim_center() + Vec(cursor.x, cursor.y));
+			destination = map::get_platform(cursor_pos());
 			auto_control = true;
 		}
 		if (auto_control) {
@@ -273,8 +273,8 @@ struct Rata : Walking {
 		else if (cursor.x < 0) facing = -1;
 	}
 	void allow_look () {
-		aim_distance = sqrt(cursor.x*cursor.x + cursor.y*cursor.y);
-		aim_direction = atan2(cursor.y, cursor.x);
+		aim_distance = mag(cursor);
+		aim_direction = ang(cursor);
 		pointed_object = check_area(
 			aim_center().x + cursor.x + 1*PX, aim_center().y + cursor.y + 1*PX,
 			aim_center().x + cursor.x - 1*PX, aim_center().y + cursor.y - 1*PX,
@@ -707,14 +707,14 @@ struct Rata : Walking {
 		oldyvel = vel.y;
 
 		 // Select cursor image
-		if (aiming) cursor.img = img::target;
-		else if (message) cursor.img = img::readmore;
+		if (aiming) cursor_img = img::target;
+		else if (message) cursor_img = img::readmore;
 		else if (can_see) {
 			if (pointed_object && pointed_object->type != type::tilemap)
-				cursor.img = img::see;
-			else cursor.img = img::look;
+				cursor_img = img::see;
+			else cursor_img = img::look;
 		}
-		else cursor.img = img::nolook;
+		else cursor_img = img::nolook;
 
 		action = -1;
 		action_distance = 1000000;
@@ -789,9 +789,8 @@ struct Rata : Walking {
 		rata = this;
 		for (uint i=0; i < item::num_slots; i++)
 			equipment[i] = NULL;
-		cursor.x = 2.0 * facing;
-		cursor.y = 0;
-		cursor.img = img::look;
+		cursor = Vec(2.0 * facing, 0);
+		cursor_img = img::look;
 		trap_cursor = true;
 		draw_cursor = true;
 		life = max_life = 144;

@@ -40,10 +40,10 @@ struct Heart : Object {
 
 struct TileLayer : Actor {
 	void draw () {
-		int minx = floor(camera.l());
-		int miny = floor(camera.b());
-		int maxx = ceil(camera.r());
-		int maxy = ceil(camera.t());
+		int minx = floor(camera.x - screen.x/2);
+		int miny = floor(camera.y - screen.y/2);
+		int maxx = ceil(camera.x + screen.x/2);
+		int maxy = ceil(camera.y + screen.y/2);
 		for (int x=minx; x < maxx; x++)
 		for (int y=miny; y < maxy; y++) {
 			int tile = map::at(x, y).id;
@@ -77,23 +77,23 @@ struct CursorLayer : Actor {
 			float ay = rata->aim_center().y;
 			float cx = cursor.x;
 			float cy = cursor.y;
-			if (cx+ax > camera.r()) {
-				cy *= (camera.r() - ax) / cx;
-				cx = camera.r() - ax;
+			if (cx+ax > camera.x + screen.x/2) {
+				cy *= (camera.x + screen.x/2 - ax) / cx;
+				cx = camera.x + screen.x/2 - ax;
 			}
-			if (cx+ax < camera.l()) {
-				cy *= (camera.l() - ax) / cx;
-				cx = camera.l() - ax;
+			else if (cx+ax < camera.x - screen.x/2) {
+				cy *= (camera.x - screen.x/2 - ax) / cx;
+				cx = camera.x - screen.x/2 - ax;
 			}
-			if (cy+ay > camera.t()) {
-				cx *= (camera.t() - ay) / cy;
-				cy = camera.t() - ay;
+			if (cy+ay > camera.y + screen.y/2) {
+				cx *= (camera.y + screen.y/2 - ay) / cy;
+				cy = camera.y + screen.y/2 - ay;
 			}
-			if (cy+ay < camera.b()) {
-				cx *= (camera.b() - ay) / cy;
-				cy = camera.b() - ay;
+			else if (cy+ay < camera.y - screen.y/2) {
+				cx *= (camera.y - screen.y/2 - ay) / cy;
+				cy = camera.y - screen.y/2 - ay;
 			}
-			draw_image(cursor.img, Vec(cx+ax, cy+ay));
+			draw_image(cursor_img, Vec(cx+ax, cy+ay));
 		}
 	}
 	CursorLayer () : Actor(type::cursor_layer) { }
