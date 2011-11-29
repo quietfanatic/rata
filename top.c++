@@ -21,7 +21,6 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 
  // UTILITY
 #include "debug.c++"
-#include "vec.h"
 #include "math.h"
 
 
