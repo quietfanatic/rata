@@ -13,7 +13,7 @@ struct Wall {
 	Vec corner_center () const {
 		if (convex)
 			return b;
-		return b + radius * norm(rotcw(b - a));
+		return b + radius * norm(rotcw(a - b));
 	}
 	Vec uncross_corner (Vec p, const Wall* next) const {
 		if (convex)

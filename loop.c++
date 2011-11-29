@@ -309,11 +309,19 @@ void draw_phase () {
 		 // Debug draw Camera walls.
 		Color(0xff00ff7f).setGL();
 		glBegin(GL_LINES);
-		for (uint i = 0; i < current_room->n_walls; i++) {
+		for (uint i=0; i < current_room->n_walls; i++) {
 			vertex(current_room->walls[i].a);
 			vertex(current_room->walls[i].b);
 		}
 		glEnd();
+		for (uint i=0; i < current_room->n_walls; i++)
+		if (current_room->walls[i].radius > 0) {
+			draw_circle(
+				current_room->walls[i].corner_center(),
+				current_room->walls[i].radius,
+				0xff00ff7f
+			);
+		}
 	}
 	else { debug_path_pos = 0; }
 	 // Reset view (Don't use camera for hud)
