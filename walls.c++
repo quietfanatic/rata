@@ -22,7 +22,7 @@ struct Wall {
 		if (radius == 0 && prev->radius == 0) {
 			a = prev->center;
 			b = center;
-		}
+		} /*
 		else if (radius == 0) {
 			 // Triangle:
 			 //  O = center
@@ -45,10 +45,13 @@ struct Wall {
 				b = center + polar(radius, ang(prev->center - center) + anglediff);
 			else
 				b = center + polar(radius, ang(prev->center - center) - anglediff);
-		}
+		} */
 		else {
-			a = prev->center;
-			b = center;
+			float pr = prev->convex ? -prev->radius : prev->radius;
+			float r = convex ? -radius : radius;
+			float anglediff = acos((pr - r) / mag(center - prev->center));
+			a = prev->center + polar(pr, ang(center - prev->center) + anglediff);;
+			b = center + polar(r, ang(center - prev->center) + anglediff);
 		}
 	}
 
