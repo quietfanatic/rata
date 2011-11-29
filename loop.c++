@@ -309,6 +309,14 @@ void draw_phase () {
 			vertex(debug_path[i % debug_path_size]);
 		}
 		glEnd();
+		 // Debug draw Camera walls.
+		Color(0xff00ff7f).setGL();
+		glBegin(GL_LINES);
+		for (uint i = 0; i < current_room->n_walls; i++) {
+			vertex(current_room->walls[i].a);
+			vertex(current_room->walls[i].b);
+		}
+		glEnd();
 	}
 	else { debug_path_pos = 0; }
 	 // Reset view (Don't use camera for hud)
