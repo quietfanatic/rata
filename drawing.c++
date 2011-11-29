@@ -103,6 +103,7 @@ Vec circle_points [32] = {
 
 
 void draw_circle (Vec p, float r, Color color) {
+	color.setGL();
 	glBegin(GL_LINE_LOOP);
 	for (uint i=0; i < 32; i++) {
 		vertex(p + r * circle_points[i]);
