@@ -66,6 +66,49 @@ void draw_line (Vec a, Vec b, Color color) {
 	glEnd();
 };
 
+Vec circle_points [32] = {
+	Vec(cos(pi*0/16.0), sin(pi*0/16.0)),
+	Vec(cos(pi*1/16.0), sin(pi*1/16.0)),
+	Vec(cos(pi*2/16.0), sin(pi*2/16.0)),
+	Vec(cos(pi*3/16.0), sin(pi*3/16.0)),
+	Vec(cos(pi*4/16.0), sin(pi*4/16.0)),
+	Vec(cos(pi*5/16.0), sin(pi*5/16.0)),
+	Vec(cos(pi*6/16.0), sin(pi*6/16.0)),
+	Vec(cos(pi*7/16.0), sin(pi*7/16.0)),
+	Vec(cos(pi*8/16.0), sin(pi*8/16.0)),
+	Vec(cos(pi*9/16.0), sin(pi*9/16.0)),
+	Vec(cos(pi*10/16.0), sin(pi*10/16.0)),
+	Vec(cos(pi*11/16.0), sin(pi*11/16.0)),
+	Vec(cos(pi*12/16.0), sin(pi*12/16.0)),
+	Vec(cos(pi*13/16.0), sin(pi*13/16.0)),
+	Vec(cos(pi*14/16.0), sin(pi*14/16.0)),
+	Vec(cos(pi*15/16.0), sin(pi*15/16.0)),
+	Vec(cos(pi*16/16.0), sin(pi*16/16.0)),
+	Vec(cos(pi*17/16.0), sin(pi*17/16.0)),
+	Vec(cos(pi*18/16.0), sin(pi*18/16.0)),
+	Vec(cos(pi*19/16.0), sin(pi*19/16.0)),
+	Vec(cos(pi*20/16.0), sin(pi*20/16.0)),
+	Vec(cos(pi*21/16.0), sin(pi*21/16.0)),
+	Vec(cos(pi*22/16.0), sin(pi*22/16.0)),
+	Vec(cos(pi*23/16.0), sin(pi*23/16.0)),
+	Vec(cos(pi*24/16.0), sin(pi*24/16.0)),
+	Vec(cos(pi*25/16.0), sin(pi*25/16.0)),
+	Vec(cos(pi*26/16.0), sin(pi*26/16.0)),
+	Vec(cos(pi*27/16.0), sin(pi*27/16.0)),
+	Vec(cos(pi*28/16.0), sin(pi*28/16.0)),
+	Vec(cos(pi*29/16.0), sin(pi*29/16.0)),
+	Vec(cos(pi*30/16.0), sin(pi*30/16.0)),
+	Vec(cos(pi*31/16.0), sin(pi*31/16.0)),
+};
+
+
+void draw_circle (Vec p, float r, Color color) {
+	glBegin(GL_LINE_LOOP);
+	for (uint i=0; i < 32; i++) {
+		vertex(p + r * circle_points[i]);
+	}
+	glEnd();
+};
 
 
 

@@ -39,6 +39,7 @@ ROOM_INIT(
 	new BGColor(HERE, pos, Vec(width, height), 0x7f7f7fff);
 	new Door(HERE, pos+Vec(8.5, 1), room::test2, room::test2->pos+Vec(1.5, 21));
 	new Item(HERE, pos+Vec(8, 5), item::handgun);
+	new Item(HERE, pos+Vec(12, 5), item::helmet);
 )
 
 ROOM_END
