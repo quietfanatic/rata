@@ -169,8 +169,8 @@ void draw_phase () {
 	}
 	 // Move GL view to camera pos
 	glTranslatef(
-		- camera.x + 10,
-		- camera.y + 7.5,
+		- round(camera.x*UNPX)*PX + 10,
+		- round(camera.y*UNPX)*PX + 7.5,
 		0
 	);
 
