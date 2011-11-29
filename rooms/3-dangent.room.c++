@@ -31,8 +31,15 @@ ROOM_N_NEIGHBORS(1)
 ROOM_NEIGHBORS(
 	room::test1
 )
-ROOM_N_WALLS(0)
-ROOM_WALLS()
+ROOM_N_WALLS(6)
+ROOM_WALLS(
+	{Vec(50, 2.5), Vec(30, 7.5), 0, false},
+	{Vec(30, 7.5), Vec(50, 2.5), 0, true},
+	{Vec(50, 2.5), Vec(60, 2.5), 0, false},
+	{Vec(60, 2.5), Vec(60, -2.5), 0, false},
+	{Vec(60, -2.5), Vec(50, -2.5), 0, false},
+	{Vec(50, -2.5), Vec(50, 2.5), 0, true},
+)
 
 ROOM_INIT(
 	new Tilemap(HERE);

@@ -39,8 +39,13 @@ ROOM_TILES(
 
 ROOM_N_NEIGHBORS(1)
 ROOM_NEIGHBORS(room::roompicker)
-ROOM_N_WALLS(0)
-ROOM_WALLS()
+ROOM_N_WALLS(4)
+ROOM_WALLS(
+	{Vec(10, 22.5), Vec(10, 37.5), 0, false},
+	{Vec(10, 37.5), Vec(30, 37.5), 0, false},
+	{Vec(30, 37.5), Vec(30, 22.5), 0, false},
+	{Vec(30, 22.5), Vec(10, 22.5), 0, false},
+)
 
 
 ROOM_INIT(

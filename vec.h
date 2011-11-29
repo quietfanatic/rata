@@ -77,11 +77,11 @@ Vec uncross_line (Vec p, Vec a, Vec b) {
 		return Vec(p.x, a.y);
 	float x = (liney(a, b, 0) - liney(p, p + rotcw(b - a), 0))
 	        / (slope(rotcw(b - a)) - slope(b - a));
-	printf("x = (%f-%f)/(%f-%f) = %f\n",
-		liney(a, b, 0), liney(p, p + rotcw(b - a), 0),
-		slope(rotcw(b - a)), slope(b - a),
-		x
-	);
+//	printf("x = (%f-%f)/(%f-%f) = %f\n",
+//		liney(a, b, 0), liney(p, p + rotcw(b - a), 0),
+//		slope(rotcw(b - a)), slope(b - a),
+//		x
+//	);
 	return Vec(x, liney(a, b, x));
 }
 

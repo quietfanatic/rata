@@ -27,8 +27,13 @@ ROOM_NEIGHBORS(
 	room::roompicker,
 	room::dangent
 )
-ROOM_N_WALLS(0)
-ROOM_WALLS()
+ROOM_N_WALLS(4)
+ROOM_WALLS(
+	{Vec(10, 7.5), Vec(30, 7.5), 0, false},
+	{Vec(30, 7.5), Vec(50, 2.5), 0, false},
+	{Vec(50, 2.5), Vec(30, 7.5), 0, true},
+	{Vec(30, 7.5), Vec(10, 7.5), 0, false},
+)
 
 ROOM_INIT(
 	new Tilemap(HERE);
