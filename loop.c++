@@ -167,6 +167,9 @@ void draw_phase () {
 		dbg(6, "Skipping frame %d.\n", frame_number);
 		return;
 	}
+	Vec c = constrain(camera);
+	camera.x = c.x;
+	camera.y = c.y;
 	 // Move GL view to camera pos
 	glTranslatef(
 		- round(camera.x*UNPX)*PX + 10,
