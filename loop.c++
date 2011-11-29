@@ -122,11 +122,12 @@ void remove_phase () {
 
 
 void draw_phase () {
-	
+	Vec oldfocus = Vec::undef;
+	Vec focus = oldfocus;
 	if (rata) {
-		Vec focus = rata->aim_center() + cursor/2.0;
+		oldfocus = rata->aim_center() + cursor/2.0;
 		 // Move focus point out of camera walls.
-		focus = constrain(focus);
+		focus = constrain(oldfocus);
 		 // To look smooth in a pixelated environment,
 		 //  we need a minimum speed.
 		 // We also need to hold camera pixel-steady
@@ -280,10 +281,19 @@ void draw_phase () {
 			draw_circle(
 				current_room->walls[i].center,
 				current_room->walls[i].radius,
-				0xff00ff7f
+				0xff00ff4f
 			);
 		}
-		 // Draw camera
+		 // Draw camera and focus
+		Color(0x00ffff4f).setGL();
+		glBegin(GL_LINE_LOOP);
+			glVertex2f(viewl(), viewt());
+			glVertex2f(viewr(), viewt());
+			glVertex2f(viewr(), viewb());
+			glVertex2f(viewl(), viewb());
+		glEnd();
+		draw_rect(oldfocus.x - 1*PX, oldfocus.y - 1*PX, oldfocus.x + 1*PX, oldfocus.y + 1*PX, 0x00ffff7f);
+		draw_rect(focus.x - 1*PX, focus.y - 1*PX, focus.x + 1*PX, focus.y + 1*PX, 0x0000ff7f);
 		draw_rect(camera.x - 1*PX, camera.y - 1*PX, camera.x + 1*PX, camera.y + 1*PX, 0xff00007f);
 	}
 	else { debug_path_pos = 0; }
