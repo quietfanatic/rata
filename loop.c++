@@ -283,6 +283,8 @@ void draw_phase () {
 				0xff00ff7f
 			);
 		}
+		 // Draw camera
+		draw_rect(camera.x - 1*PX, camera.y - 1*PX, camera.x + 1*PX, camera.y + 1*PX, 0xff00007f);
 	}
 	else { debug_path_pos = 0; }
 	 // Reset view (Don't use camera for hud)

@@ -5,6 +5,14 @@ struct Wall;
 
 #else
 
+
+float viewl() { return rata->pos.x - 9; }
+float viewr() { return rata->pos.x + 9; }
+float viewb() { return rata->pos.y - 5.5; }
+float viewt() { return rata->pos.y + 7.5; }
+
+
+
 struct Wall {
 	const Vec center;
 	const float radius;
@@ -58,15 +66,46 @@ struct Wall {
 	Vec uncross_side (Vec p) const {
 		if (!across_line(p, a, b))
 			return Vec::undef;
-		else
-			return uncross_line(p, a, b);
+		else {
+			Vec uncross = uncross_line(p, a, b);
+			//if (uncross.x < viewl()) {
+			//	uncross = Vec(viewl(), liney(a, b, viewl()));
+			//}
+			//else if (uncross.x > viewr()) {
+			//	uncross = Vec(viewr(), liney(a, b, viewr()));
+			//}
+			//if (uncross.y < viewb()) {
+			//	uncross = Vec(linex(a, b, viewb()), viewb());
+			//}
+			//else if (uncross.y > viewt()) {
+			//	uncross = Vec(linex(a, b, viewt()), viewt());
+			//}
+			return uncross;
+		}
 	}
 	Vec uncross_corner (Vec p, const Wall* next) const {
 		if (convex) {
 			if (across_line(p, b + rotccw(a - b), b)
 			 && across_line(p, next->a, next->a + rotcw(next->b - next->a))) {
 				if (mag2(p - center) < radius*radius) {
-					return center + radius * norm(p - center);
+					Vec uncross = center + radius * norm(p - center);
+					if (uncross.x < viewl()) {
+						float sign = uncross.y < center.y ? -1 : 1;
+						uncross = Vec(viewl(), center.y + sign*sqrt(radius*radius - (center.x-viewl())*(center.x-viewl())));
+					}
+					else if (uncross.x > viewr()) {
+						float sign = uncross.y < center.y ? -1 : 1;
+						uncross = Vec(viewr(), center.y + sign*sqrt(radius*radius - (viewr()-center.x)*(viewr()-center.x)));
+					}
+					if (uncross.y < viewb()) {
+						float sign = uncross.x < center.x ? -1 : 1;
+						uncross = Vec(center.x + sign*sqrt(radius*radius - (center.y-viewb())*(center.y-viewb())), viewb());
+					}
+					else if (uncross.y > viewt()) {
+						float sign = uncross.x < center.x ? -1 : 1;
+						uncross = Vec(center.x + sign*sqrt(radius*radius - (viewt()-center.y)*(viewt()-center.y)), viewt());
+					}
+					return uncross;
 				}
 				else return Vec::undef;
 			}
@@ -87,6 +126,10 @@ Vec constrain (Vec p) {
 	room::Def* r = current_room;
 	float curdist2 = 1/0.0;
 	Vec newp = p;
+	if (newp.x < viewl()) newp.x = viewl();
+	else if (newp.x > viewr()) newp.x = viewr();
+	if (newp.y < viewb()) newp.y = viewb();
+	else if (newp.y > viewt()) newp.y = viewt();
 	for (uint i=0; i < r->n_walls; i++) {
 		 // Wall side (is a line)
 		Vec uncross = r->walls[i].uncross_side(p);

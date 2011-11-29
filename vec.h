@@ -40,6 +40,9 @@ float slope (Vec a) { return a.y / a.x; }
 float liney (Vec a, Vec b, float x) {
 	return a.y + slope(b - a) * (x - a.x);
 }
+float linex (Vec a, Vec b, float y) {
+	return a.x + (y - a.y) / slope(b - a);
+}
 Vec norm (Vec a) { return a / mag(a); }
 Vec rotcw (Vec a) { return Vec(-a.y, a.x); }
 Vec rotccw (Vec a) { return Vec(a.y, -a.x); }
