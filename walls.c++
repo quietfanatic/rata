@@ -6,21 +6,34 @@ struct Wall;
 #else
 
 struct Wall {
+	const Vec center;
+	const float radius;
+	const bool convex;
 	Vec a;
 	Vec b;
-	float radius;
-	bool convex;
+	
+	Wall (Vec center, float radius = 0, bool convex = false) :
+		center(center),
+		radius(radius),
+		convex(convex)
+	{ }
+
+	void build_side (const Wall* prev) {
+		if (radius == 0 && prev->radius == 0) {
+			a = prev->center;
+			b = center;
+		}
+		else {
+			a = prev->center;
+			b = center;
+		}
+	}
+
 	Vec uncross_side (Vec p) const {
 		if (!across_line(p, a, b))
 			return Vec::undef;
 		else
 			return uncross_line(p, a, b);
-	}
-	Vec corner_center () const {
-		if (convex)
-			return b + radius * norm(rotccw(a - b));
-		else
-			return b + radius * norm(rotcw(a - b));
 	}
 	Vec uncross_corner (Vec p, const Wall* next) const {
 		if (convex) {
@@ -28,7 +41,6 @@ struct Wall {
 			 // because the earlier one was checked when
 			 // testing the side.
 			if (across_line(p, next->a, next->a + rotcw(next->b - next->a))) {
-				Vec center = corner_center();
 				if (mag2(p - center) < radius*radius) {
 					return center + radius * norm(p - center);
 				}
@@ -38,7 +50,6 @@ struct Wall {
 		}  // concave
 		else if (across_line(p, b + rotccw(a - b), b)
 		 && across_line(p, next->a, next->a + rotcw(next->b - next->a))) {
-			Vec center = corner_center();
 			if (mag2(p - center) > radius*radius) {
 				return center + radius * norm(p - center);
 			}

@@ -11,7 +11,7 @@ namespace room {
 		uint32 n_neighbors;
 		room::Def*const* neighbors;
 		uint32 n_walls;
-		const Wall * walls;
+		Wall* walls;
 		void (& init ) ();
 		bool loaded;
 		Spatial* contents;
@@ -104,7 +104,7 @@ namespace room {
 #define ROOM_N_NEIGHBORS(...) const uint32 n_neighbors = __VA_ARGS__;
 #define ROOM_NEIGHBORS(...) room::Def*const neighbors [n_neighbors] = {__VA_ARGS__};
 #define ROOM_N_WALLS(...) const uint32 n_walls = __VA_ARGS__;
-#define ROOM_WALLS(...) const Wall walls [n_walls] = {__VA_ARGS__};
+#define ROOM_WALLS(...) Wall walls [n_walls] = {__VA_ARGS__};
 #define ROOM_INIT(...) void init () {__VA_ARGS__};
 #define ROOM_END const room::Def def = {pos, width, height, tiles, n_neighbors, neighbors, n_walls, walls, init, false, NULL};
 

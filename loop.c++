@@ -275,7 +275,7 @@ void draw_phase () {
 		for (uint i=0; i < current_room->n_walls; i++)
 		if (current_room->walls[i].radius > 0) {
 			draw_circle(
-				current_room->walls[i].corner_center(),
+				current_room->walls[i].center,
 				current_room->walls[i].radius,
 				0xff00ff7f
 			);
