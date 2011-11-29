@@ -30,9 +30,9 @@ ROOM_NEIGHBORS(
 ROOM_N_WALLS(4)
 ROOM_WALLS(
 	Wall(Vec(10, 7.5), 0, false),
-	Wall(Vec(30, -2.5), 10, false),
-	Wall(Vec(50, 2.5), 0, false),
-	Wall(Vec(30, -2.5), 10, true),
+	Wall(Vec(40.5, -2.0), 9.5, false),
+	Wall(Vec(50, -2.5), 0, false),
+	Wall(Vec(40.5, -2.0), 9.5, true),
 )
 
 ROOM_INIT(

@@ -63,10 +63,8 @@ struct Wall {
 	}
 	Vec uncross_corner (Vec p, const Wall* next) const {
 		if (convex) {
-			 // We only need to check the later angle
-			 // because the earlier one was checked when
-			 // testing the side.
-			if (across_line(p, next->a, next->a + rotcw(next->b - next->a))) {
+			if (across_line(p, b + rotccw(a - b), b)
+			 && across_line(p, next->a, next->a + rotcw(next->b - next->a))) {
 				if (mag2(p - center) < radius*radius) {
 					return center + radius * norm(p - center);
 				}

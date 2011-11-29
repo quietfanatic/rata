@@ -31,16 +31,15 @@ ROOM_N_NEIGHBORS(1)
 ROOM_NEIGHBORS(
 	room::test1
 )
-ROOM_N_WALLS(8)
+ROOM_N_WALLS(7)
 ROOM_WALLS(
 	Wall(Vec(10, 7.5), 0, false),
-	Wall(Vec(30, -2.5), 10, false),
-	Wall(Vec(50, 2.5), 0, true),
+	Wall(Vec(40.5, -2.0), 9.5, false),
+	Wall(Vec(52.5, 5), 2.5, true),
 	Wall(Vec(60, 2.5), 0, false),
 	Wall(Vec(60, -2.5), 0, false),
 	Wall(Vec(50, -2.5), 0, false),
-	Wall(Vec(50, 2.5), 0, true),
-	Wall(Vec(30, -2.5), 10, true),
+	Wall(Vec(40.5, -2.0), 9.5, true),
 )
 
 ROOM_INIT(
