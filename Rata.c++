@@ -260,10 +260,10 @@ struct Rata : Walking {
 			map::debug_print();
 			for (Actor* a=global_actors; a; a = a->next_global)
 				a->debug_print();
-			printf("active_actors=%08x activation_queue=%08x\n",
-				active_actors,
-				activation_queue
-			);
+			//printf("active_actors=%08x activation_queue=%08x\n",
+			//	active_actors,
+			//	activation_queue
+			//);
 		}
 	}
 
