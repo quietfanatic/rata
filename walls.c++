@@ -37,49 +37,44 @@ struct Wall {
 };
 
 Vec constrain (Vec p) {
-	if (current_room) {
-		room::Def* r = current_room;
-		bool hit_wall = false;
-		float curdist2 = 1/0.0;
-		 // Line segment walls
-		for (uint i=0; i < r->n_walls; i++) {
-			Vec uncross = r->walls[i].uncross_side(p);
-			if (defined(uncross)) {
-				//printf("[%d] Focus vs. uncross: %f,%f vs. %f,%f\n",
-				//	frame_number, focus.x, focus.y, uncross.x, uncross.y);
-				if (in_rect(
-						uncross,
-						Vec(MIN(r->walls[i].a.x, r->walls[i].b.x),
-						    MIN(r->walls[i].a.y, r->walls[i].b.y)),
-						Vec(MAX(r->walls[i].a.x, r->walls[i].b.x),
-						    MAX(r->walls[i].a.y, r->walls[i].b.y))
-					)
-				) {
-					//printf("[%d] Focus is crossing a wall.\n", frame_number);
-					float dist2 = mag2(uncross - rata->pos);
-					if (dist2 < curdist2) {
-						hit_wall = true;
-						//printf("[%d] Uncrossed focus.\n", frame_number);
-						curdist2 = dist2;
-						p = uncross;
-					}
-				}
-			}
-		}
-		 // Circle walls
-		if (!hit_wall)
-		for (uint i=0; i < r->n_walls; i++) {
-			Vec uncross = r->walls[i].uncross_corner(p, &r->walls[(i+1) % r->n_walls]);
-			if (defined(uncross)) {
+	room::Def* r = current_room;
+	float curdist2 = 1/0.0;
+	Vec newp = p;
+	for (uint i=0; i < r->n_walls; i++) {
+		 // Wall side (is a line)
+		Vec uncross = r->walls[i].uncross_side(p);
+		if (defined(uncross)) {
+			//printf("[%d] Focus vs. uncross: %f,%f vs. %f,%f\n",
+			//	frame_number, focus.x, focus.y, uncross.x, uncross.y);
+			if (in_rect(
+					uncross,
+					Vec(MIN(r->walls[i].a.x, r->walls[i].b.x),
+					    MIN(r->walls[i].a.y, r->walls[i].b.y)),
+					Vec(MAX(r->walls[i].a.x, r->walls[i].b.x),
+					    MAX(r->walls[i].a.y, r->walls[i].b.y))
+				)
+			) {
+				//printf("[%d] Focus is crossing a wall.\n", frame_number);
 				float dist2 = mag2(uncross - rata->pos);
 				if (dist2 < curdist2) {
+					//printf("[%d] Uncrossed to side %u at %f.\n", frame_number, i, dist2);
 					curdist2 = dist2;
-					p = uncross;
+					newp = uncross;
 				}
 			}
 		}
-		return p;
+		 // Wall corner (is an arc)
+		uncross = r->walls[i].uncross_corner(p, &r->walls[(i+1) % r->n_walls]);
+		if (defined(uncross)) {
+			float dist2 = mag2(uncross - rata->pos);
+			if (dist2 < curdist2) {
+				//printf("[%d] Uncrossed to corner %u at %f.\n", frame_number, i, dist2);
+				curdist2 = dist2;
+				newp = uncross;
+			}
+		}
 	}
+	return newp;
 }
 
 #endif
