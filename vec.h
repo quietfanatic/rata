@@ -44,6 +44,8 @@ Vec norm (Vec a) { return a / mag(a); }
 Vec rotcw (Vec a) { return Vec(-a.y, a.x); }
 Vec rotccw (Vec a) { return Vec(a.y, -a.x); }
 
+Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
+
 bool defined (float a) { return a==a; }
 bool defined (Vec a) { return defined(a.x) && defined(a.y); }
 

@@ -23,6 +23,29 @@ struct Wall {
 			a = prev->center;
 			b = center;
 		}
+		else if (radius == 0) {
+			 // Triangle:
+			 //  O = center
+			 //  | = mag(center - prev->center)
+			 //  O = prev->center (angle)
+			 //  | = prev->radius
+			 //  O   (right angle)
+			 //  |
+			float anglediff = acos(prev->radius / mag(center - prev->center));
+			if (prev->convex)
+				a = prev->center + polar(prev->radius, ang(center - prev->center) - anglediff);
+			else 
+				a = prev->center + polar(prev->radius, ang(center - prev->center) + anglediff);
+			b = center;
+		}
+		else if (prev->radius == 0) {
+			float anglediff = acos(radius / mag(center - prev->center));
+			a = prev->center;
+			if (convex)
+				b = center + polar(radius, ang(prev->center - center) + anglediff);
+			else
+				b = center + polar(radius, ang(prev->center - center) - anglediff);
+		}
 		else {
 			a = prev->center;
 			b = center;
