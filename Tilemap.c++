@@ -112,8 +112,8 @@ Tilemap::Tilemap (room::Def* def) :
 				uint n2e = (nv+e + 1) % nv;
 				edges[x][y][e].use = true;
 				edges[x][y][e].n1 = &edges[x][y][n1e];
-				edges[x][y][e].v1 = t.vertexes[e] + Vec(x, def->height-y-1);
-				edges[x][y][e].v2 = t.vertexes[n2e] + Vec(x, def->height-y-1);
+				edges[x][y][e].v1 = t.vertexes[e] + vec(x, def->height-y-1);
+				edges[x][y][e].v2 = t.vertexes[n2e] + vec(x, def->height-y-1);
 				edges[x][y][e].n2 = &edges[x][y][n2e];
 			}
 			else edges[x][y][e].use = false;
@@ -143,14 +143,14 @@ Tilemap::Tilemap (room::Def* def) :
 		bool flip = (def->tile(x, y) < 0);
 		const tile::Def& t = tile::def[flip? -def->tile(x,y) : def->tile(x,y)];
 		b2EdgeShape edge;
-		edge.Set(edges[x][y][e].v1, edges[x][y][e].v2);
+		edge.Set(vecb2(edges[x][y][e].v1), vecb2(edges[x][y][e].v2));
 		if (edges[x][y][e].n1) {
 			edge.m_hasVertex0 = true;
-			edge.m_vertex0 = edges[x][y][e].n1->v1;
+			edge.m_vertex0 = vecb2(edges[x][y][e].n1->v1);
 		}
 		if (edges[x][y][e].n2) {
 			edge.m_hasVertex3 = true;
-			edge.m_vertex3 = edges[x][y][e].n2->v2;
+			edge.m_vertex3 = vecb2(edges[x][y][e].n2->v2);
 		}
 		fixdef.shape = &edge;
 		fixdef.friction = t.friction;

@@ -15,27 +15,27 @@ struct Walking : Object {
 	float floor_friction;
 	float ideal_xvel;
 
-	Walking (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
+	Walking (int16 type, room::Def* loc, Vec pos, Vec vel = vec(0, 0)) :
 		Object(type, loc, pos, vel),
 		floor(NULL),
 		floor_fix(NULL),
 		floor_contact(NULL),
-		floor_normal(Vec::undef),
+		floor_normal(nanvec),
 		floor_friction(0.4),
 		ideal_xvel(0)
 	{
 		 // Create friction body
 		b2BodyDef fricdef;
 		fricdef.type = b2_kinematicBody;
-		fricdef.position = pos;
+		fricdef.position = vecb2(pos);
 		fricdef.active = false;
 		friction_body = world->CreateBody(&fricdef);
 		 // Create joint
 		b2FrictionJointDef fjd;
 		fjd.bodyA = body;
 		fjd.bodyB = friction_body;
-		fjd.localAnchorA = Vec(0, 0);
-		fjd.localAnchorB = Vec(0, 0);
+		fjd.localAnchorA = b2Vec2(0, 0);
+		fjd.localAnchorB = b2Vec2(0, 0);
 		fjd.maxForce = 0;
 		fjd.maxTorque = 0;
 		friction_joint = (b2FrictionJoint*)world->CreateJoint(&fjd);
@@ -52,7 +52,7 @@ struct Walking : Object {
 	}
 
 	void before_move () {
-		friction_body->SetTransform(pos, 0);
+		friction_body->SetTransform(vecb2(pos), 0);
 		if (floor) {
 			friction_body->SetActive(true);
 			friction_joint->SetMaxForce(

@@ -97,7 +97,7 @@ namespace room {
 	}
 
 #define ROOM_BEGIN
-#define ROOM_POS(...) const Vec pos = Vec(__VA_ARGS__);
+#define ROOM_POS(...) const Vec pos = {__VA_ARGS__};
 #define ROOM_WIDTH(...) const uint16 width = __VA_ARGS__;
 #define ROOM_HEIGHT(...) const uint16 height = __VA_ARGS__;
 #define ROOM_TILES(...) const int16 tiles [width * height] = {__VA_ARGS__};

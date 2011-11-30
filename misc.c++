@@ -25,7 +25,7 @@ Door::Door (room::Def* loc, Vec pos, room::Def* destloc, Vec destpos) :
 struct Crate : Object {
 	virtual char* describe () { return "There's a wooden crate sitting here.\x80\nIt looks like it can be pushed around."; }
 	virtual void damage (int d) { Object::damage(d); snd::def[snd::woodhit].play(); }
-	Crate (room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) : Object(type::crate, loc, pos, vel) {
+	Crate (room::Def* loc, Vec pos, Vec vel = vec(0, 0)) : Object(type::crate, loc, pos, vel) {
 		life = max_life = 144;
 	}
 };
@@ -34,7 +34,7 @@ struct Crate : Object {
 
 struct Heart : Object {
 	virtual char* describe () { return "Just as rats live off the refuse of humans,\x80\nYou too can live off of the rats.\x80\nPick this up to restore one heart."; }
-	Heart (room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) : Object(type::heart, loc, pos, vel) { }
+	Heart (room::Def* loc, Vec pos, Vec vel = vec(0, 0)) : Object(type::heart, loc, pos, vel) { }
 };
 
 
@@ -52,7 +52,7 @@ struct TileLayer : Actor {
 			if (type == type::front_tiles ? tile::def[tile].front : tile::def[tile].back) {
 				draw_image(
 					img::tiles,
-					Vec(x+.5, y+.5),
+					vec(x+.5, y+.5),
 					tile, flip
 				);
 			}
@@ -93,7 +93,7 @@ struct CursorLayer : Actor {
 				cx *= (camera.y - screen.y/2 - ay) / cy;
 				cy = camera.y - screen.y/2 - ay;
 			}
-			draw_image(cursor_img, Vec(cx+ax, cy+ay));
+			draw_image(cursor_img, vec(cx+ax, cy+ay));
 		}
 	}
 	CursorLayer () : Actor(type::cursor_layer) { }

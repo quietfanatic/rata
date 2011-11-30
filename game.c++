@@ -23,7 +23,7 @@ bool trap_cursor = false;
  // View
 Vec focus;
 Vec camera;
-const Vec screen = Vec(20, 15);
+const Vec screen = {20, 15};
 float old_camera_rel = 0;
 bool camera_jump = false;
 bool camera_snap = false;

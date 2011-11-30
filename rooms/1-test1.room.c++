@@ -29,17 +29,17 @@ ROOM_NEIGHBORS(
 )
 ROOM_N_WALLS(4)
 ROOM_WALLS(
-	Wall(Vec(10, 7.5), 0, false),
-	Wall(Vec(40.5, -2.0), 9.5, false),
-	Wall(Vec(50, -2.5), 0, false),
-	Wall(Vec(40.5, -2.0), 9.5, true),
+	{{10, 7.5}, 0, false},
+	{{40.5, -2.0}, 9.5, false},
+	{{50, -2.5}, 0, false},
+	{{40.5, -2.0}, 9.5, true},
 )
 
 ROOM_INIT(
 	new Tilemap(HERE);
-	new BGColor(HERE, pos, Vec(width, height), 0x7f7f7fff);
-	new Rat(HERE, pos+Vec(1.5, 7));
-	new Rat(HERE, pos+Vec(12.5, 1));
+	new BGColor(HERE, pos, vec(width, height), 0x7f7f7fff);
+	new Rat(HERE, pos+vec(1.5, 7));
+	new Rat(HERE, pos+vec(12.5, 1));
 )
 
 

@@ -25,7 +25,7 @@ void RBullet::move () {
 	if (lifetime == 2) owner = NULL;
 	lifetime++;
 	pos0 = pos2;
-	pos1 = Vec(-1/0.0, -1/0.0);
+	pos1 = vec(-1/0.0, -1/0.0);
 	pos2 = pos0 + vel;
 	LineChecker coll;
 	coll = check_line(pos0, pos2, cf::bullet.maskBits, owner);
@@ -35,7 +35,7 @@ void RBullet::move () {
 		 // This is how you bounce.
 		float velnorm = dot(vel, coll.norm);
 		vel -= 2 * velnorm * coll.norm;
-		coll.hit->GetBody()->ApplyLinearImpulse(mass*FPS*velnorm*coll.norm, pos1);
+		coll.hit->GetBody()->ApplyLinearImpulse(vecb2(mass*FPS*velnorm*coll.norm), vecb2(pos1));
 		 // We've ended up with a somewhat more than 100% elastic collision, but oh well.
 		FixProp* fp = (FixProp*) coll.hit->GetUserData();
 		if (fp->damage_factor) {
@@ -57,7 +57,7 @@ void RBullet::move () {
 			o->damage(power * fp->damage_factor);
 			no_damage: { }
 			coll.hit = NULL;
-			pos2 = Vec(-1/0.0, -1/0.0);
+			pos2 = vec(-1/0.0, -1/0.0);
 			lifetime = -1;
 		}
 		else {
@@ -69,7 +69,7 @@ void RBullet::move () {
 			}
 			else {
 				coll.hit = NULL;
-				pos2 = Vec(-1/0.0, -1/0.0);
+				pos2 = vec(-1/0.0, -1/0.0);
 				lifetime = -1;
 			}
 		}
@@ -119,7 +119,7 @@ RBullet* fire_rbullet (Object* owner, Vec pos, Vec vel, int power, float mass) {
 }
 RBullet* fire_rbullet_dir (Object* owner, Vec pos, float angle, float vel, int power, float spread, float mass) {
 	angle = dither(angle, spread);
-	return fire_rbullet(owner, pos, Vec(vel*cos(angle), vel*sin(angle)), power, mass);
+	return fire_rbullet(owner, pos, vec(vel*cos(angle), vel*sin(angle)), power, mass);
 }
 RBullet* fire_rbullet_to (Object* owner, Vec pos, Vec to, float vel, int power, float spread, float mass) {
 	return fire_rbullet_dir(owner, pos, ang(to - pos), vel, power, spread, mass);

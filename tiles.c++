@@ -23,14 +23,14 @@ namespace tile {
 	const Def def [num_tiles] = {
 
 		{"Empty", empty, 0, 0, 0.0, 0},
-		{"Metal block", solid, 1, 0, 0.4, 4, {Vec(0, 0), Vec(1, 0), Vec(1, 1), Vec(0, 1)}, NULL},
+		{"Metal block", solid, 1, 0, 0.4, 4, {{0, 0}, {1, 0}, {1, 1}, {0, 1}}, NULL},
 		{"Metal support", empty, 0, 1, 0.0, 0},
 		{"Metal support", empty, 0, 1, 0.0, 0},
 		{"Metal support", empty, 0, 1, 0.0, 0},
 		{"Metal support", empty, 0, 1, 0.0, 0},
 		{"Metal support", empty, 0, 1, 0.0, 0},
-		{"Metal ramp l", unknown, 1, 0, 1.5, 3, {Vec(0, 0), Vec(1, 0), Vec(1, 1)}},
-		{"Metal ramp r", unknown, 1, 0, 1.5, 3, {Vec(0, 0), Vec(1, 0), Vec(0, 1)}},
+		{"Metal ramp l", unknown, 1, 0, 1.5, 3, {{0, 0}, {1, 0}, {1, 1}}},
+		{"Metal ramp r", unknown, 1, 0, 1.5, 3, {{0, 0}, {1, 0}, {0, 1}}},
 
 	};
 }

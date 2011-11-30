@@ -30,16 +30,16 @@ ROOM_NEIGHBORS(
 )
 ROOM_N_WALLS(2)
 ROOM_WALLS(
-	Wall(Vec(10, 7.5), 0, false),
-	Wall(Vec(45, 7.5), 0, false),
+	{{10, 7.5}, 0, false},
+	{{45, 7.5}, 0, false},
 )
 
 ROOM_INIT(
 	new Tilemap(HERE);
-	new BGColor(HERE, pos, Vec(width, height), 0x7f7f7fff);
-	new Door(HERE, pos+Vec(8.5, 1), room::test2, room::test2->pos+Vec(1.5, 21));
-	new Item(HERE, pos+Vec(8, 5), item::handgun);
-	new Item(HERE, pos+Vec(12, 5), item::helmet);
+	new BGColor(HERE, pos, vec(width, height), 0x7f7f7fff);
+	new Door(HERE, pos+vec(8.5, 1), room::test2, room::test2->pos+vec(1.5, 21));
+	new Item(HERE, pos+vec(8, 5), item::handgun);
+	new Item(HERE, pos+vec(12, 5), item::helmet);
 )
 
 ROOM_END

@@ -12,7 +12,7 @@ int main () {
 		room::def[i].walls[j].build_side(&room::def[i].walls[pj]);
 	}
 	
-	rata = new Rata(room::roompicker, Vec(2, 2));
+	rata = new Rata(room::roompicker, vec(2, 2));
 	rata->pickup_equip(new Item(NULL, rata->pos, item::white_dress));
 	(new TileLayer(type::back_tiles))->activate();
 	(new BulletLayer())->activate();

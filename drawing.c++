@@ -45,10 +45,10 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip) {
 	glBindTexture(GL_TEXTURE_2D, image->tex);
 	glColor4f(1, 1, 1, 1);
 	glBegin(GL_QUADS);
-		glTexCoord2f(tl/tw, tb/th); vertex(Vec(x,       y      ));
-		glTexCoord2f(tr/tw, tb/th); vertex(Vec(x+iw*PX, y      ));
-		glTexCoord2f(tr/tw, tt/th); vertex(Vec(x+iw*PX, y+ih*PX));
-		glTexCoord2f(tl/tw, tt/th); vertex(Vec(x,       y+ih*PX));
+		glTexCoord2f(tl/tw, tb/th); vertex(vec(x,       y      ));
+		glTexCoord2f(tr/tw, tb/th); vertex(vec(x+iw*PX, y      ));
+		glTexCoord2f(tr/tw, tt/th); vertex(vec(x+iw*PX, y+ih*PX));
+		glTexCoord2f(tl/tw, tt/th); vertex(vec(x,       y+ih*PX));
 	glEnd();
 	//window->Draw(drawing_sprite);
 }
@@ -67,38 +67,38 @@ void draw_line (Vec a, Vec b, Color color) {
 };
 
 Vec circle_points [32] = {
-	Vec(cos(pi*0/16.0), sin(pi*0/16.0)),
-	Vec(cos(pi*1/16.0), sin(pi*1/16.0)),
-	Vec(cos(pi*2/16.0), sin(pi*2/16.0)),
-	Vec(cos(pi*3/16.0), sin(pi*3/16.0)),
-	Vec(cos(pi*4/16.0), sin(pi*4/16.0)),
-	Vec(cos(pi*5/16.0), sin(pi*5/16.0)),
-	Vec(cos(pi*6/16.0), sin(pi*6/16.0)),
-	Vec(cos(pi*7/16.0), sin(pi*7/16.0)),
-	Vec(cos(pi*8/16.0), sin(pi*8/16.0)),
-	Vec(cos(pi*9/16.0), sin(pi*9/16.0)),
-	Vec(cos(pi*10/16.0), sin(pi*10/16.0)),
-	Vec(cos(pi*11/16.0), sin(pi*11/16.0)),
-	Vec(cos(pi*12/16.0), sin(pi*12/16.0)),
-	Vec(cos(pi*13/16.0), sin(pi*13/16.0)),
-	Vec(cos(pi*14/16.0), sin(pi*14/16.0)),
-	Vec(cos(pi*15/16.0), sin(pi*15/16.0)),
-	Vec(cos(pi*16/16.0), sin(pi*16/16.0)),
-	Vec(cos(pi*17/16.0), sin(pi*17/16.0)),
-	Vec(cos(pi*18/16.0), sin(pi*18/16.0)),
-	Vec(cos(pi*19/16.0), sin(pi*19/16.0)),
-	Vec(cos(pi*20/16.0), sin(pi*20/16.0)),
-	Vec(cos(pi*21/16.0), sin(pi*21/16.0)),
-	Vec(cos(pi*22/16.0), sin(pi*22/16.0)),
-	Vec(cos(pi*23/16.0), sin(pi*23/16.0)),
-	Vec(cos(pi*24/16.0), sin(pi*24/16.0)),
-	Vec(cos(pi*25/16.0), sin(pi*25/16.0)),
-	Vec(cos(pi*26/16.0), sin(pi*26/16.0)),
-	Vec(cos(pi*27/16.0), sin(pi*27/16.0)),
-	Vec(cos(pi*28/16.0), sin(pi*28/16.0)),
-	Vec(cos(pi*29/16.0), sin(pi*29/16.0)),
-	Vec(cos(pi*30/16.0), sin(pi*30/16.0)),
-	Vec(cos(pi*31/16.0), sin(pi*31/16.0)),
+	{cos(pi*0/16.0), sin(pi*0/16.0)},
+	{cos(pi*1/16.0), sin(pi*1/16.0)},
+	{cos(pi*2/16.0), sin(pi*2/16.0)},
+	{cos(pi*3/16.0), sin(pi*3/16.0)},
+	{cos(pi*4/16.0), sin(pi*4/16.0)},
+	{cos(pi*5/16.0), sin(pi*5/16.0)},
+	{cos(pi*6/16.0), sin(pi*6/16.0)},
+	{cos(pi*7/16.0), sin(pi*7/16.0)},
+	{cos(pi*8/16.0), sin(pi*8/16.0)},
+	{cos(pi*9/16.0), sin(pi*9/16.0)},
+	{cos(pi*10/16.0), sin(pi*10/16.0)},
+	{cos(pi*11/16.0), sin(pi*11/16.0)},
+	{cos(pi*12/16.0), sin(pi*12/16.0)},
+	{cos(pi*13/16.0), sin(pi*13/16.0)},
+	{cos(pi*14/16.0), sin(pi*14/16.0)},
+	{cos(pi*15/16.0), sin(pi*15/16.0)},
+	{cos(pi*16/16.0), sin(pi*16/16.0)},
+	{cos(pi*17/16.0), sin(pi*17/16.0)},
+	{cos(pi*18/16.0), sin(pi*18/16.0)},
+	{cos(pi*19/16.0), sin(pi*19/16.0)},
+	{cos(pi*20/16.0), sin(pi*20/16.0)},
+	{cos(pi*21/16.0), sin(pi*21/16.0)},
+	{cos(pi*22/16.0), sin(pi*22/16.0)},
+	{cos(pi*23/16.0), sin(pi*23/16.0)},
+	{cos(pi*24/16.0), sin(pi*24/16.0)},
+	{cos(pi*25/16.0), sin(pi*25/16.0)},
+	{cos(pi*26/16.0), sin(pi*26/16.0)},
+	{cos(pi*27/16.0), sin(pi*27/16.0)},
+	{cos(pi*28/16.0), sin(pi*28/16.0)},
+	{cos(pi*29/16.0), sin(pi*29/16.0)},
+	{cos(pi*30/16.0), sin(pi*30/16.0)},
+	{cos(pi*31/16.0), sin(pi*31/16.0)},
 };
 
 

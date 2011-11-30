@@ -24,7 +24,7 @@ Spatial::Spatial (int16 type, room::Def* loc, Vec pos) :
 }
 
 bool Spatial::in_room (room::Def* r) {
-	return in_rect(pos, r->pos, r->pos+Vec(r->width, r->height));
+	return in_rect(pos, r->pos, r->pos+vec(r->width, r->height));
 }
 void Spatial::change_room () {
 	if (!in_room(loc))

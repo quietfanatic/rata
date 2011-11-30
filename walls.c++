@@ -20,12 +20,6 @@ struct Wall {
 	Vec a;
 	Vec b;
 	
-	Wall (Vec center, float radius = 0, bool convex = false) :
-		center(center),
-		radius(radius),
-		convex(convex)
-	{ }
-
 	void build_side (const Wall* prev) {
 		if (radius == 0 && prev->radius == 0) {
 			a = prev->center;
@@ -49,20 +43,20 @@ struct Wall {
 
 	Vec uncross_side (Vec p) const {
 		if (!across_line(p, a, b))
-			return Vec::undef;
+			return nanvec;
 		else {
 			Vec uncross = uncross_line(p, a, b);
 			//if (uncross.x < viewl()) {
-			//	uncross = Vec(viewl(), liney(a, b, viewl()));
+			//	uncross = vec(viewl(), liney(a, b, viewl()));
 			//}
 			//else if (uncross.x > viewr()) {
-			//	uncross = Vec(viewr(), liney(a, b, viewr()));
+			//	uncross = vec(viewr(), liney(a, b, viewr()));
 			//}
 			//if (uncross.y < viewb()) {
-			//	uncross = Vec(linex(a, b, viewb()), viewb());
+			//	uncross = vec(linex(a, b, viewb()), viewb());
 			//}
 			//else if (uncross.y > viewt()) {
-			//	uncross = Vec(linex(a, b, viewt()), viewt());
+			//	uncross = vec(linex(a, b, viewt()), viewt());
 			//}
 			return uncross;
 		}
@@ -75,34 +69,34 @@ struct Wall {
 					Vec uncross = center + radius * norm(p - center);
 					if (uncross.x < viewl()) {
 						float sign = uncross.y < center.y ? -1 : 1;
-						uncross = Vec(viewl(), center.y + sign*sqrt(radius*radius - (center.x-viewl())*(center.x-viewl())));
+						uncross = vec(viewl(), center.y + sign*sqrt(radius*radius - (center.x-viewl())*(center.x-viewl())));
 					}
 					else if (uncross.x > viewr()) {
 						float sign = uncross.y < center.y ? -1 : 1;
-						uncross = Vec(viewr(), center.y + sign*sqrt(radius*radius - (viewr()-center.x)*(viewr()-center.x)));
+						uncross = vec(viewr(), center.y + sign*sqrt(radius*radius - (viewr()-center.x)*(viewr()-center.x)));
 					}
 					if (uncross.y < viewb()) {
 						float sign = uncross.x < center.x ? -1 : 1;
-						uncross = Vec(center.x + sign*sqrt(radius*radius - (center.y-viewb())*(center.y-viewb())), viewb());
+						uncross = vec(center.x + sign*sqrt(radius*radius - (center.y-viewb())*(center.y-viewb())), viewb());
 					}
 					else if (uncross.y > viewt()) {
 						float sign = uncross.x < center.x ? -1 : 1;
-						uncross = Vec(center.x + sign*sqrt(radius*radius - (viewt()-center.y)*(viewt()-center.y)), viewt());
+						uncross = vec(center.x + sign*sqrt(radius*radius - (viewt()-center.y)*(viewt()-center.y)), viewt());
 					}
 					return uncross;
 				}
-				else return Vec::undef;
+				else return nanvec;
 			}
-			else return Vec::undef;
+			else return nanvec;
 		}  // concave
 		else if (across_line(p, b + rotccw(a - b), b)
 		 && across_line(p, next->a, next->a + rotcw(next->b - next->a))) {
 			if (mag2(p - center) > radius*radius) {
 				return center + radius * norm(p - center);
 			}
-			else return Vec::undef;
+			else return nanvec;
 		}
-		else return Vec::undef;
+		else return nanvec;
 	}
 };
 
@@ -120,9 +114,9 @@ Vec constrain (Vec p) {
 		if (defined(uncross)
 		 && in_rect(
 				uncross,
-				Vec(MIN(r->walls[i].a.x, r->walls[i].b.x),
+				vec(MIN(r->walls[i].a.x, r->walls[i].b.x),
 				    MIN(r->walls[i].a.y, r->walls[i].b.y)),
-				Vec(MAX(r->walls[i].a.x, r->walls[i].b.x),
+				vec(MAX(r->walls[i].a.x, r->walls[i].b.x),
 				    MAX(r->walls[i].a.y, r->walls[i].b.y))
 			)
 		) {

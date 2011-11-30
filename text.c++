@@ -89,7 +89,7 @@ void render_text (char* text, Vec p, uint lines, bool small, bool border, int al
 		}
 		else {
 			draw_image(font,
-				Vec(pos, p.y-linecount*lineheight),
+				vec(pos, p.y-linecount*lineheight),
 				*text, false
 			);
 			if (small)
