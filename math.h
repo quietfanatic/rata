@@ -49,28 +49,33 @@ uint8 get_angle_frame (float a) {
 struct Vec {
 	float x;
 	float y;
+	Vec () { }
+	Vec (float x, float y) :x(x), y(y) { }
+	Vec (b2Vec2 v) :x(v.x), y(v.y) { }
+	Vec (sf::Vector2<float> v) :x(v.x), y(v.y) { }
+	operator const b2Vec2 () const { return b2Vec2(x, y); }
+	operator const sf::Vector2<float> () const { return sf::Vector2<float>(x, y); }
+
+	Vec scalex (float s) const { return Vec(s*x, y); }
+	Vec scaley (float s) const { return Vec(x, s*y); }
+
+	static const Vec undef;
 };
+const Vec Vec::undef = Vec(0/0.0, 0/0.0);
 
-const Vec nanvec = {0/0.0, 0/0.0};
-#define vec(x, y) ((Vec){x, y})
-Vec b2vec (b2Vec2 v) { return vec(v.x, v.y); }
-b2Vec2 vecb2 (Vec v) { return b2Vec2(v.x, v.y); }
-sf::Vector2<float> vecsf (Vec v) { return sf::Vector2<float>(v.x, v.y); }
 
-Vec operator - (Vec a) { return vec(-a.x, -a.y); }
-Vec operator + (Vec a, Vec b) { return vec(a.x+b.x, a.y+b.y); }
-Vec operator - (Vec a, Vec b) { return vec(a.x-b.x, a.y-b.y); }
-Vec operator * (Vec a, float b) { return vec(a.x*b, a.y*b); }
-Vec operator * (float a, Vec b) { return vec(a*b.x, a*b.y); }
-Vec operator / (Vec a,  float b) { return vec(a.x/b, a.y/b); }
+Vec operator - (Vec a) { return Vec(-a.x, -a.y); }
+Vec operator + (Vec a, Vec b) { return Vec(a.x+b.x, a.y+b.y); }
+Vec operator - (Vec a, Vec b) { return Vec(a.x-b.x, a.y-b.y); }
+Vec operator * (Vec a, float b) { return Vec(a.x*b, a.y*b); }
+Vec operator * (float a, Vec b) { return Vec(a*b.x, a*b.y); }
+Vec operator / (Vec a,  float b) { return Vec(a.x/b, a.y/b); }
 Vec operator += (Vec& a, Vec b) { return a = a + b; }
 Vec operator -= (Vec& a, Vec b) { return a = a - b; }
 Vec operator *= (Vec& a, float b) { return a = a * b; }
 Vec operator /= (Vec& a, float b) { return a = a / b; }
 bool operator == (Vec a, Vec b) { return a.x==b.x && a.y==b.y; }
 bool operator != (Vec a, Vec b) { return a.x!=b.x || a.y!=b.y; }
-Vec scalex (Vec a, float b) { return vec(a.x * b, a.y); }
-Vec scaley (Vec a, float b) { return vec(a.x, a.y * b); }
 float mag2 (Vec a) { return a.x*a.x+a.y*a.y; }
 float mag (Vec a) { return sqrt(mag2(a)); }
 float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
@@ -83,10 +88,10 @@ float linex (Vec a, Vec b, float y) {
 	return a.x + (y - a.y) / slope(b - a);
 }
 Vec norm (Vec a) { return a / mag(a); }
-Vec rotcw (Vec a) { return vec(-a.y, a.x); }
-Vec rotccw (Vec a) { return vec(a.y, -a.x); }
+Vec rotcw (Vec a) { return Vec(-a.y, a.x); }
+Vec rotccw (Vec a) { return Vec(a.y, -a.x); }
 
-Vec polar (float r, float a) { return r*vec(cos(a), sin(a)); }
+Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
 
 bool defined (float a) { return a==a; }
 bool defined (Vec a) { return defined(a.x) && defined(a.y); }
@@ -116,9 +121,9 @@ Vec uncross_line (Vec p, Vec a, Vec b) {
 	// x = (by - ay) / (as - bs)
 	// y = liney(a, b, x)
 	if (a.x == b.x)
-		return vec(a.x, p.y);
+		return Vec(a.x, p.y);
 	if (a.y == b.y)
-		return vec(p.x, a.y);
+		return Vec(p.x, a.y);
 	float x = (liney(a, b, 0) - liney(p, p + rotcw(b - a), 0))
 	        / (slope(rotcw(b - a)) - slope(b - a));
 //	printf("x = (%f-%f)/(%f-%f) = %f\n",
@@ -126,7 +131,7 @@ Vec uncross_line (Vec p, Vec a, Vec b) {
 //		slope(rotcw(b - a)), slope(b - a),
 //		x
 //	);
-	return vec(x, liney(a, b, x));
+	return Vec(x, liney(a, b, x));
 }
 
 

@@ -14,10 +14,10 @@ struct AI : Walking {
 
 	virtual int update_start () { return rand()%update_interval(); }
 	virtual int update_interval () { return 30; }
-	virtual Vec eye () { return pos + vec(0, 1); }
+	virtual Vec eye () { return pos + Vec(0, 1); }
 	virtual void decision () { }
 	
-	AI (int16 type, room::Def* loc, Vec pos, Vec vel = vec(0, 0)) :
+	AI (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
 		Walking(type, loc, pos, vel),
 		decision_timer(update_start())
 	{ }
@@ -48,16 +48,16 @@ struct AI : Walking {
 		for (uint i=0; i < n_sight_points; i++)
 		if (see_rata_at(rata->pos + rata->sight_points[i]))
 			return rata->pos + rata->sight_points[i];
-		return nanvec;
+		return Vec::undef;
 	}
 	Vec predict_pos_from (Vec p, Object* threat = rata) {
 		float lead = rand()*1.0/RAND_MAX;
-		return p + lead * threat->vel * decision_timer/FPS;
+		return Vec(p + lead * threat->vel * decision_timer/FPS);
 	}
 
 	Vec predict_pos (Object* threat = rata) {
 		float lead = rand()*1.0/RAND_MAX;
-		return threat->pos + lead * threat->vel * decision_timer/FPS;
+		return Vec(threat->pos + lead * threat->vel * decision_timer/FPS);
 	}
 };
 
@@ -67,7 +67,7 @@ struct AI : Walking {
 struct Rat : AI {
 	int anim_timer;
 	char* describe () { return "It's a large gray rat that smells like trash.\x80\nDoesn't seem very timid for a rodent."; }
-	Rat (room::Def* loc, Vec pos, Vec vel = vec(0, 0)) :
+	Rat (room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
 		AI(type::rat, loc, pos, vel),
 		anim_timer(0)
 	{
@@ -111,7 +111,7 @@ struct Patroller : AI {
 	Vec threat_vel;
 	Vec prediction;
 
-	Patroller (room::Def* loc, Vec pos, Vec vel = vec(0, 0)) :
+	Patroller (room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
 		AI(type::patroller, loc, pos, vel),
 		motion_frames(0),
 		threat_detected(false)
@@ -126,8 +126,8 @@ struct Patroller : AI {
 			ideal_xvel = 0.0;
 		}
 		else if (floor) {
-			if (clear_to_point(pos + vec(0.7*facing, -0.3))
-			 || !clear_to_point(pos + vec(0.7*facing, 0.3))) {
+			if (clear_to_point(pos + Vec(0.7*facing, -0.3))
+			 || !clear_to_point(pos + Vec(0.7*facing, 0.3))) {
 				facing = -facing;
 			}
 			ideal_xvel = 3.0*facing;
@@ -139,8 +139,8 @@ struct Patroller : AI {
 		if (threat_detected) {
 			RBullet* b = fire_rbullet_to(
 				this,
-				pos + vec(0, 0.5),
-				prediction + vec(0, 1),
+				pos + Vec(0, 0.5),
+				prediction + Vec(0, 1),
 				120, 48, 0.1
 			);
 			snd::def[snd::gunshot].play(1.0, 70);
@@ -175,11 +175,11 @@ struct Flyer : AI {
 	uint motion_frames;
 	int angle_frame;
 
-	Flyer (room::Def* loc, Vec pos, Vec vel = vec(0, 0)) :
+	Flyer (room::Def* loc, Vec pos, Vec vel = Vec(0, 0)) :
 		AI(type::flyer, loc, pos, vel),
 		dest(pos),
-		oldpos(nanvec),
-		prediction(nanvec),
+		oldpos(Vec::undef),
+		prediction(Vec::undef),
 		motion_frames(0),
 		angle_frame(2)
 	{
@@ -191,8 +191,8 @@ struct Flyer : AI {
 		Vec reldest = dest - pos;
 		float destdir = ang(dest - pos);
 		float destdist = mag(reldest);
-		float relv = dot(vel, norm(reldest));
-		bool offtrack = (relv < mag(vel) - 1.0);
+		float relv = dot(body->GetLinearVelocity(), norm(reldest));
+		bool offtrack = (relv < mag(body->GetLinearVelocity()) - 1.0);
 		// We have: p, v, a.  We need d.
 		// d = p + vt + att/2; since v = at, t = v/a
 		// d = p + vv/a + vv/a/2;
@@ -205,13 +205,13 @@ struct Flyer : AI {
 		}
 		//destdir = dither(destdir, 0.01);
 		if (offtrack || stopdist <= destdist) {
-			body->ApplyForceToCenter(b2Vec2(
+			body->ApplyForceToCenter(Vec(
 				accel*cos(destdir),
 				accel*sin(destdir)
 			));
 		}
 		else {
-			body->ApplyForceToCenter(b2Vec2(
+			body->ApplyForceToCenter(Vec(
 				-accel*cos(destdir),
 				-accel*sin(destdir)
 			));
@@ -243,7 +243,7 @@ struct Flyer : AI {
 			oldpos = ratapos;
 		}
 		else {
-			prediction = nanvec;
+			prediction = Vec::undef;
 			 // Chase
 			if (defined(oldpos)) {
 				dest = oldpos;

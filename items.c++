@@ -85,7 +85,7 @@ void item::fire_handgun () {
 	fire_rbullet_dir(
 		rata,
 		rata->pos + rata->hand_pos
-		          + vec(handgun_bulletx[rata->angle_frame]*rata->facing,
+		          + Vec(handgun_bulletx[rata->angle_frame]*rata->facing,
 		                handgun_bullety[rata->angle_frame]),
 		rata->aim_direction,
 		120

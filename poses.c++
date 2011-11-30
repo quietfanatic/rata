@@ -41,21 +41,23 @@ struct Body {
 		num
 	};
 	Vec arm; Vec head;
+	Body (float armx, float army, float headx, float heady)
+	 :arm(Vec(armx*PX, army*PX)), head(Vec(headx*PX, heady*PX)) { }
 };
 
 const Body body [Body::num] = {
-	{{-1*PX, 14*PX}, { 0*PX, 16*PX}},  // stand
-	{{-1*PX, 13*PX}, { 0*PX, 15*PX}},  // walk
-	{{-1*PX, 15*PX}, { 0*PX, 17*PX}},  // tiptoe
-	{{-1*PX,  8*PX}, { 0*PX, 10*PX}},  // kneel
-	{{ 1*PX,  4*PX}, { 3*PX,  5*PX}},  // crawl
-	{{ 1*PX,  3*PX}, { 3*PX,  4*PX}},  // crawl2
-	{{-1*PX,  8*PX}, { 0*PX,  9*PX}},  // sit
-	{{-1*PX, 14*PX}, { 0*PX, 16*PX}},  // hurtbk
-	{{-1*PX,  1*PX}, {-3*PX,  2*PX}},  // laybk
-	{{ 0*PX,  0*PX}, { 0*PX,  0*PX}},  // hurtfd
-	{{ 0*PX,  0*PX}, { 0*PX,  0*PX}},  // layfd
-	{{ 0*PX,  0*PX}, { 0*PX,  0*PX}},  // grab
+	Body( -1, 14,    0, 16 ),  // stand
+	Body( -1, 13,    0, 15 ),  // walk
+	Body( -1, 15,    0, 17 ),  // tiptoe
+	Body( -1,  8,    0, 10 ),  // kneel
+	Body(  1,  4,    3,  5 ),  // crawl
+	Body(  1,  3,    3,  4 ),  // crawl2
+	Body( -1,  8,    0,  9 ),  // sit
+	Body( -1, 14,    0, 16 ),  // hurtbk
+	Body( -1,  1,   -3,  2 ),  // laybk
+	Body(  0,  0,    0,  0 ),  // hurtfd
+	Body(  0,  0,    0,  0 ),  // layfd
+	Body(  0,  0,    0,  0 ),  // grab
 };
 
 
@@ -83,26 +85,28 @@ struct Head {
 	static const uint angle_stand [9];
 	static const uint angle_walk [9];
 	Vec helmet; float helmeta; uint8 helmetf;
+	Head (float x, float y, float a, uint8 f)
+	 :helmet(Vec(x*PX, y*PX)), helmeta(a), helmetf(f) { }
 };
 
 const Head head [Head::num] = {
-	{{-0.5*PX, 6.5*PX}, -pi/18, 0},  // stand_23
-	{{-0.5*PX, 7.5*PX},      0, 1},  // stand_45
-	{{-0.5*PX, 7.5*PX},  pi/18, 2},  // stand_68
-	{{-0.5*PX, 7.5*PX},  pi/18, 2},  // stand_90
-	{{-0.5*PX, 7.5*PX},  pi/ 8, 3},  // stand_135
-	{{-1.5*PX, 7.5*PX},  pi/ 4, 4},  // stand_158
-	{{-0.5*PX, 6.5*PX}, -pi/18, 0},  // walk_23
-	{{-0.5*PX, 7.5*PX},      0, 1},  // walk_45
-	{{-0.5*PX, 7.5*PX},  pi/18, 2},  // walk_68
-	{{-0.5*PX, 7.5*PX},  pi/18, 2},  // walk_90
-	{{-0.5*PX, 7.5*PX},  pi/ 8, 3},  // walk_135
-	{{-1.5*PX, 7.5*PX},  pi/ 4, 4},  // walk_158
-	{{ 0.5*PX, 6.5*PX},      0, 1},  // crawl
-	{{-0.5*PX, 6.5*PX}, -pi/18, 0},  // hurtbk
-	{{-0.5*PX, 6.5*PX},      0, 0},  // hurtfd
-	{{-9.5*PX, 0.5*PX}, -pi/ 2, 5},  // laybk
-	{{ 0.0*PX, 0.0*PX},      0, 0},  // layfd
+	Head( -0.5, 6.5, -pi/18, 0),  // stand_23
+	Head( -0.5, 7.5,      0, 1),  // stand_45
+	Head( -0.5, 7.5,  pi/18, 2),  // stand_68
+	Head( -0.5, 7.5,  pi/18, 2),  // stand_90
+	Head( -0.5, 7.5,  pi/ 8, 3),  // stand_135
+	Head( -1.5, 7.5,  pi/ 4, 4),  // stand_158
+	Head( -0.5, 6.5, -pi/18, 0),  // walk_23
+	Head( -0.5, 7.5,      0, 1),  // walk_45
+	Head( -0.5, 7.5,  pi/18, 2),  // walk_68
+	Head( -0.5, 7.5,  pi/18, 2),  // walk_90
+	Head( -0.5, 7.5,  pi/ 8, 3),  // walk_135
+	Head( -1.5, 7.5,  pi/ 4, 4),  // walk_158
+	Head(  0.5, 6.5,      0, 1),  // crawl
+	Head( -0.5, 6.5, -pi/18, 0),  // hurtbk
+	Head( -0.5, 6.5,      0, 0),  // hurtfd
+	Head( -9.5, 0.5, -pi/ 2, 5),  // laybk
+	Head(  0.0, 0.0,      0, 0),  // layfd
 };
 const uint Head::angle_stand [9] = {
 	stand_23, stand_23, stand_45, stand_68, stand_90, stand_90, stand_135, stand_158, stand_158
@@ -119,18 +123,19 @@ struct Arm {
 	static const int angle_mid [9];
 	static const int angle_near [9];
 	Vec forearm;
+	Arm (float x, float y) :forearm(Vec(x*PX, y*PX)) { }
 };
 
 const Arm arm [Arm::num] = {
-	{{0*PX, -3*PX}},
-	{{1*PX, -3*PX}},
-	{{2*PX, -2*PX}},
-	{{3*PX, -1*PX}},
-	{{3*PX,  0*PX}},
-	{{3*PX,  1*PX}},
-	{{2*PX,  2*PX}},
-	{{1*PX,  3*PX}},
-	{{0*PX,  3*PX}},
+	Arm(0, -3),
+	Arm(1, -3),
+	Arm(2, -2),
+	Arm(3, -1),
+	Arm(3,  0),
+	Arm(3,  1),
+	Arm(2,  2),
+	Arm(1,  3),
+	Arm(0,  3),
 };
 
 const int Arm::angle_far  [9]={ a0,  a23,  a45,  a68, a90, a113, a135, a158, a180 };
@@ -142,18 +147,19 @@ const int Arm::angle_near [9]={ a0, -a23, -a45, -a23,  a0,  a23,  a45,  a68,  a9
 struct Forearm {
 	static const uint num = 9;
 	Vec hand;
+	Forearm (float x, float y) :hand(Vec(x*PX, y*PX)) { }
 };
 
 const Forearm forearm [Forearm::num] = {
-	{{0*PX, -5*PX}},
-	{{2*PX, -4*PX}},
-	{{3*PX, -3*PX}},
-	{{4*PX, -2*PX}},
-	{{5*PX,  0*PX}},
-	{{4*PX,  2*PX}},
-	{{3*PX,  3*PX}},
-	{{2*PX,  4*PX}},
-	{{0*PX,  5*PX}},
+	Forearm(0, -5),
+	Forearm(2, -4),
+	Forearm(3, -3),
+	Forearm(4, -2),
+	Forearm(5,  0),
+	Forearm(4,  2),
+	Forearm(3,  3),
+	Forearm(2,  4),
+	Forearm(0,  5),
 };
 
 

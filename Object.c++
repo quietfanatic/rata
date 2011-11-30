@@ -9,7 +9,7 @@ struct Object : Spatial {
 	int max_life;
 	int facing;
 
-	Object (int16 type, room::Def* loc, Vec pos, Vec vel = vec(0, 0), int facing = 0);
+	Object (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0), int facing = 0);
 	void activate ();
 	void deactivate ();
 	void before_move ();
@@ -55,14 +55,14 @@ void Object::deactivate () {
 }
 
 void Object::before_move () {
-	if (pos != b2vec(body->GetPosition()))
-		body->SetTransform(vecb2(pos), 0);
-	if (vel != b2vec(body->GetLinearVelocity()))
-		body->SetLinearVelocity(vecb2(vel));
+	if (pos != body->GetPosition())
+		body->SetTransform(pos, 0);
+	if (vel != body->GetLinearVelocity())
+		body->SetLinearVelocity(vel);
 }
 void Object::after_move () {
-	pos = b2vec(body->GetPosition());
-	vel = b2vec(body->GetLinearVelocity());
+	pos = body->GetPosition();
+	vel = body->GetLinearVelocity();
 	change_room();
 }
 void Object::draw () {
@@ -87,8 +87,8 @@ char* Object::describe () { return "What a mysterious object."; }
 b2Body* Object::make_body (b2BodyType btype, bool bullet) {
 	b2BodyDef d;
 	d.type = btype;
-	d.position = vecb2(pos);
-	d.linearVelocity = vecb2(vel);
+	d.position = pos;
+	d.linearVelocity = vel;
 	d.fixedRotation = true;
 	d.userData = this;
 	d.gravityScale = 1.0;

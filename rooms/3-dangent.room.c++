@@ -33,19 +33,19 @@ ROOM_NEIGHBORS(
 )
 ROOM_N_WALLS(7)
 ROOM_WALLS(
-	{{10, 7.5}, 0, false},
-	{{40.5, -2.0}, 9.5, false},
-	{{52.5, 5}, 2.5, true},
-	{{60, 2.5}, 0, false},
-	{{60, -2.5}, 0, false},
-	{{50, -2.5}, 0, false},
-	{{40.5, -2.0}, 9.5, true},
+	Wall(Vec(10, 7.5), 0, false),
+	Wall(Vec(40.5, -2.0), 9.5, false),
+	Wall(Vec(52.5, 5), 2.5, true),
+	Wall(Vec(60, 2.5), 0, false),
+	Wall(Vec(60, -2.5), 0, false),
+	Wall(Vec(50, -2.5), 0, false),
+	Wall(Vec(40.5, -2.0), 9.5, true),
 )
 
 ROOM_INIT(
 	new Tilemap(HERE);
-	new BGColor(HERE, pos, vec(width, height), 0x7f7f7fff);
-	new Flyer(HERE, pos+vec(16.5, 4));
+	new BGColor(HERE, pos, Vec(width, height), 0x7f7f7fff);
+	new Flyer(HERE, pos+Vec(16.5, 4));
 )
 
 ROOM_END

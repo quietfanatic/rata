@@ -56,7 +56,7 @@ float32 LineChecker::ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2
 		if (f < frac) {
 			hit = fix;
 			frac = f;
-			norm = b2vec(n);
+			norm = n;
 		}
 		return frac;
 	}
@@ -83,14 +83,14 @@ LineChecker check_line (Vec from, Vec to, uint16 mask, Object* owner) {
 	checker.mask = mask;
 	checker.frac = 1;
 	checker.hit = NULL;
-	world->RayCast(&checker, vecb2(from), vecb2(to));
+	world->RayCast(&checker, from, to);
 	return checker;
 }
 bool look_line (Vec from, Vec to, uint16 mask) {
 	LineLooker looker;
 	looker.mask = mask;
 	looker.seen = false;
-	world->RayCast(&looker, vecb2(from), vecb2(to));
+	world->RayCast(&looker, from, to);
 	return looker.seen;
 }
 

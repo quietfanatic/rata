@@ -121,7 +121,7 @@ void remove_phase () {
 
 
 void draw_phase () {
-	Vec oldfocus = nanvec;
+	Vec oldfocus = Vec::undef;
 	focus = oldfocus;
 	if (rata) {
 		oldfocus = rata->aim_center() + cursor/2.0;
@@ -192,20 +192,20 @@ void draw_phase () {
 				case (b2Shape::e_edge): {
 					b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
 					draw_line(
-						o->pos + b2vec(e->m_vertex1),
-						o->pos + b2vec(e->m_vertex2),
+						o->pos + Vec(e->m_vertex1),
+						o->pos + Vec(e->m_vertex2),
 						0x00ff007f
 					);
-					if (mag2(rata->cursor_pos() - o->pos + b2vec(e->m_vertex1)) < 1)
+					if (mag2(rata->cursor_pos() - o->pos + Vec(e->m_vertex1)) < 1)
 						draw_line(
-							o->pos + b2vec(e->m_vertex1),
-							o->pos + b2vec(e->m_vertex0) + vec(3, 3)*PX,
+							o->pos + Vec(e->m_vertex1),
+							o->pos + Vec(e->m_vertex0) + Vec(3, 3)*PX,
 							0xffff007f
 						);
-					if (mag2(rata->cursor_pos() - o->pos + b2vec(e->m_vertex2)) < 1)
+					if (mag2(rata->cursor_pos() - o->pos + Vec(e->m_vertex2)) < 1)
 						draw_line(
-							o->pos + b2vec(e->m_vertex2),
-							o->pos + b2vec(e->m_vertex3) - vec(3, 3)*PX,
+							o->pos + Vec(e->m_vertex2),
+							o->pos + Vec(e->m_vertex3) - Vec(3, 3)*PX,
 							0x0000ff7f
 						);
 					break;
@@ -217,7 +217,7 @@ void draw_phase () {
 					color.setGL();
 					glBegin(GL_LINE_LOOP);
 					for (int i=0; i < p->m_vertexCount; i++) {
-						vertex(o->pos + b2vec(p->m_vertices[i]));
+						vertex(o->pos + Vec(p->m_vertices[i]));
 					}
 					glEnd();
 					break;
@@ -225,7 +225,7 @@ void draw_phase () {
 				case (b2Shape::e_circle): {
 					b2CircleShape* c = (b2CircleShape*)f->GetShape();
 					Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
-					draw_circle(b2vec(c->m_p)+o->pos, c->m_radius, color);
+					draw_circle(Vec(c->m_p)+o->pos, c->m_radius, color);
 					break;
 				}
 				default: { }
@@ -359,7 +359,7 @@ void input_phase () {
 		}
 		case sf::Event::MouseMoved: {
 			if (trap_cursor) {
-				cursor += vec(
+				cursor += Vec(
 					(event.MouseMove.X - window->GetWidth()/2.0),
 					-(event.MouseMove.Y - window->GetHeight()/2.0)
 				) * PX * cursor_scale / window_scale;
@@ -370,7 +370,7 @@ void input_phase () {
 				else if (cursor.y < -14) cursor.y = -14;
 			}
 			else {
-				cursor2 = vec(
+				cursor2 = Vec(
 					event.MouseMove.X,
 					(window->GetHeight() - event.MouseMove.Y)
 				) * PX / window_scale;

@@ -8,10 +8,10 @@ struct Rata;
 #define MAX_INVENTORY 10
 
 const uint n_sight_points = 3;
-const Vec sight_points_stand [n_sight_points] = {{0, 13*PX}, {0, 25*PX}, {0, 2*PX}};
-const Vec sight_points_kneel [n_sight_points] = {{0, 10*PX}, {0, 19*PX}, {0, 2*PX}};
-const Vec sight_points_crawl_r [n_sight_points] = {{0, 6*PX}, {7*PX, 13*PX}, {-8*PX, 2*PX}};
-const Vec sight_points_crawl_l [n_sight_points] = {{0, 6*PX}, {-7*PX, 13*PX}, {8*PX, 2*PX}};
+const Vec sight_points_stand [n_sight_points] = {Vec(0, 13*PX), Vec(0, 25*PX), Vec(0, 2*PX)};
+const Vec sight_points_kneel [n_sight_points] = {Vec(0, 10*PX), Vec(0, 19*PX), Vec(0, 2*PX)};
+const Vec sight_points_crawl_r [n_sight_points] = {Vec(0, 6*PX), Vec(7*PX, 13*PX), Vec(-8*PX, 2*PX)};
+const Vec sight_points_crawl_l [n_sight_points] = {Vec(0, 6*PX), Vec(-7*PX, 13*PX), Vec(8*PX, 2*PX)};
 
 
 MoveStats default_stats = {
@@ -142,7 +142,7 @@ struct Rata : Walking {
 	bool wearing_helmet () {
 		return equip_info(item::head) == item::helmet;
 	}
-	Vec aim_center () { return pos + vec(2*PX*facing, 13*PX); }
+	Vec aim_center () { return pos + Vec(2*PX*facing, 13*PX); }
 	Vec cursor_pos () { return aim_center() + cursor; }
 	
 	void set_fix (int fix) {
@@ -768,7 +768,7 @@ struct Rata : Walking {
 	};
 
 
-	Rata (room::Def* loc, Vec pos, Vec vel = vec(0, 0), int facing_ = 1) :
+	Rata (room::Def* loc, Vec pos, Vec vel = Vec(0, 0), int facing_ = 1) :
 		Walking(type::rata, loc, pos, vel),
 		fix_old(fix_27),
 		fix_current(fix_27),
@@ -789,7 +789,7 @@ struct Rata : Walking {
 		rata = this;
 		for (uint i=0; i < item::num_slots; i++)
 			equipment[i] = NULL;
-		cursor = vec(2.0 * facing, 0);
+		cursor = Vec(2.0 * facing, 0);
 		cursor_img = img::look;
 		trap_cursor = true;
 		draw_cursor = true;
@@ -978,11 +978,11 @@ struct Rata : Walking {
 		if (pose.forearm > a180) pose.forearm = (2*a180)-pose.forearm, forearmflip = !forearmflip;
 		
 		 // Get offsets
-		Vec headp =    scalex(pose::body[   pose.body].head,    facing);
-		Vec helmetp =  scalex(headp+head[   pose.head].helmet,  facing);
-		Vec armp =     scalex(pose::body[   pose.body].arm,     facing);
-		Vec forearmp = scalex(armp + arm[    pose.arm].forearm, armflip?-1:1);
-		hand_pos =     scalex(forearmp + forearm[pose.forearm].hand,    forearmflip?-1:1);
+		Vec headp =        pose::body[   pose.body].head   .scalex(facing);
+		Vec helmetp =    headp + head[   pose.head].helmet .scalex(facing);
+		Vec armp =         pose::body[   pose.body].arm    .scalex(facing);
+		Vec forearmp =     armp + arm[    pose.arm].forearm.scalex(armflip?-1:1);
+		hand_pos = forearmp + forearm[pose.forearm].hand   .scalex(forearmflip?-1:1);
 
 		 // Now to actually draw.
 
@@ -1063,7 +1063,7 @@ struct Rata : Walking {
 		: action == action_enter ? "ENTER"
 		:                          NULL;
 		if (m) {
-			render_text((char*)m, pos + vec(0, 3), 1, true, true, 0);
+			render_text((char*)m, pos + Vec(0, 3), 1, true, true, 0);
 		}
 
 	}

@@ -41,38 +41,38 @@ ROOM_N_NEIGHBORS(1)
 ROOM_NEIGHBORS(room::roompicker)
 ROOM_N_WALLS(4)
 ROOM_WALLS(
-	{{10, 22.5}, 0, false},
-	{{10, 37.5}, 0, false},
-	{{30, 37.5}, 0, false},
-	{{30, 22.5}, 0, false},
+	Wall(Vec(10, 22.5), 0, false),
+	Wall(Vec(10, 37.5), 0, false),
+	Wall(Vec(30, 37.5), 0, false),
+	Wall(Vec(30, 22.5), 0, false),
 )
 
 
 ROOM_INIT(
 	new Tilemap(HERE);
-	new BGColor(HERE, pos, vec(width, height), 0x7f7f7fff);
-	new Door(HERE, pos+vec(1, 21), room::roompicker, room::roompicker->pos+vec(8.5, 1));
-	new Rat(HERE, pos+vec(13, 21));
-	new Rat(HERE, pos+vec(17, 21));
-	new Rat(HERE, pos+vec(29, 21));
-	new Rat(HERE, pos+vec(32, 21));
-	new Crate(HERE, pos+vec(10.5, 17));
-	new Crate(HERE, pos+vec(6.5, 5));
-	new Crate(HERE, pos+vec(7.5, 5));
-	new Crate(HERE, pos+vec(7, 6));
-	new Crate(HERE, pos+vec(21.5, 15));
-	new Crate(HERE, pos+vec(22.5, 15));
-	new Crate(HERE, pos+vec(22, 16));
-	new Crate(HERE, pos+vec(20.5, 3));
-	new Crate(HERE, pos+vec(21.5, 4));
-	new Crate(HERE, pos+vec(21.5, 3));
-	new Crate(HERE, pos+vec(20.5, 4));
-	new Crate(HERE, pos+vec(1.5, 1));
-	new Crate(HERE, pos+vec(2.5, 1));
+	new BGColor(HERE, pos, Vec(width, height), 0x7f7f7fff);
+	new Door(HERE, pos+Vec(1, 21), room::roompicker, room::roompicker->pos+Vec(8.5, 1));
+	new Rat(HERE, pos+Vec(13, 21));
+	new Rat(HERE, pos+Vec(17, 21));
+	new Rat(HERE, pos+Vec(29, 21));
+	new Rat(HERE, pos+Vec(32, 21));
+	new Crate(HERE, pos+Vec(10.5, 17));
+	new Crate(HERE, pos+Vec(6.5, 5));
+	new Crate(HERE, pos+Vec(7.5, 5));
+	new Crate(HERE, pos+Vec(7, 6));
+	new Crate(HERE, pos+Vec(21.5, 15));
+	new Crate(HERE, pos+Vec(22.5, 15));
+	new Crate(HERE, pos+Vec(22, 16));
+	new Crate(HERE, pos+Vec(20.5, 3));
+	new Crate(HERE, pos+Vec(21.5, 4));
+	new Crate(HERE, pos+Vec(21.5, 3));
+	new Crate(HERE, pos+Vec(20.5, 4));
+	new Crate(HERE, pos+Vec(1.5, 1));
+	new Crate(HERE, pos+Vec(2.5, 1));
 //	ROOM_OBJECT(obj::mousehole, 15.5, 21, 0, 0, 1, 0, 0)
 //	ROOM_OBJECT(obj::mousehole, 27.5, 21, 0, 0, 1, 0, 0)
-	new Patroller(HERE, pos+vec(29.5, 12));
-	new Patroller(HERE, pos+vec(11.5, 8));
+	new Patroller(HERE, pos+Vec(29.5, 12));
+	new Patroller(HERE, pos+Vec(11.5, 8));
 )
 
 ROOM_END
