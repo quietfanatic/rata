@@ -52,7 +52,7 @@ void hud_play () {
 
 void hud_pause () {
 	hud_play();
-	draw_rect(0, 0, 20, 15, 0x0000004f);
+	draw_rect(Rect(0, 0, 20, 15), 0x0000004f);
 	render_text("Options", Vec(0, 1));
 	render_text("Quit", Vec(20, 1), 1, false, false, -1);
 }

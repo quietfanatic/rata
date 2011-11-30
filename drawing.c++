@@ -12,7 +12,7 @@ struct Color {
 };
 void vertex (Vec v);
 void draw_image (img::Def* image, Vec p, int sub=0, bool flip=false);
-void draw_rect (float l, float t, float r, float b, Color color = 0x2f2f2f7f);
+void draw_rect (const Rect& r, Color color = 0x2f2f2f7f);
 void draw_line (Vec a, Vec b, Color color = 0xffffff7f);
 #else
 void vertex (Vec v) {
@@ -52,10 +52,10 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip) {
 	glEnd();
 	//window->Draw(drawing_sprite);
 }
-void draw_rect (float l, float t, float r, float b, Color color) {
+void draw_rect (const Rect& r, Color color) {
 	glDisable(GL_TEXTURE_2D);
 	color.setGL();
-	glRectf(l, b, r, t);
+	glRectf(r.l, r.b, r.r, r.t);
 };
 void draw_line (Vec a, Vec b, Color color) {
 	glDisable(GL_TEXTURE_2D);

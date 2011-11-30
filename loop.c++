@@ -278,9 +278,9 @@ void draw_phase () {
 			glVertex2f(viewr(), viewb());
 			glVertex2f(viewl(), viewb());
 		glEnd();
-		draw_rect(oldfocus.x - 1*PX, oldfocus.y - 1*PX, oldfocus.x + 1*PX, oldfocus.y + 1*PX, 0x00ffff7f);
-		draw_rect(focus.x - 1*PX, focus.y - 1*PX, focus.x + 1*PX, focus.y + 1*PX, 0x0000ff7f);
-		draw_rect(camera.x - 1*PX, camera.y - 1*PX, camera.x + 1*PX, camera.y + 1*PX, 0xff00007f);
+		draw_rect(Rect(oldfocus - Vec(1, 1)*PX, oldfocus + Vec(1, 1)*PX), 0x00ffff7f);
+		draw_rect(Rect(focus - Vec(1, 1)*PX, focus + Vec(1, 1)*PX), 0x0000ff7f);
+		draw_rect(Rect(camera - Vec(1, 1)*PX, camera + Vec(1, 1)*PX), 0xff00007f);
 	}
 	else { debug_path_pos = 0; }
 	 // Reset view (Don't use camera for hud)

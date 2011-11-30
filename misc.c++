@@ -105,8 +105,7 @@ struct Shade : Spatial {
 	Color color;
 	void draw () {
 		draw_rect(
-			pos.x, pos.y,
-			pos.x + size.x, pos.y + size.y,
+			Rect(pos, pos + size),
 			color
 		);
 	}
@@ -122,7 +121,7 @@ struct BGColor : Spatial {
 	Vec size;
 	Color color;
 	void draw () {
-		draw_rect(pos.x, pos.y, pos.x+size.x, pos.y+size.y, color);
+		draw_rect(Rect(pos, pos + size), color);
 	}
 	BGColor (room::Def* loc, Vec pos, Vec size, Color color) :
 		Spatial(type::bg_color, loc, pos),
