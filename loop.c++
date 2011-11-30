@@ -271,13 +271,6 @@ void draw_phase () {
 			);
 		}
 		 // Draw camera and focus
-		Color(0x00ffff4f).setGL();
-		glBegin(GL_LINE_LOOP);
-			glVertex2f(viewl(), viewt());
-			glVertex2f(viewr(), viewt());
-			glVertex2f(viewr(), viewb());
-			glVertex2f(viewl(), viewb());
-		glEnd();
 		draw_rect(Rect(oldfocus - Vec(1, 1)*PX, oldfocus + Vec(1, 1)*PX), 0x00ffff7f);
 		draw_rect(Rect(focus - Vec(1, 1)*PX, focus + Vec(1, 1)*PX), 0x0000ff7f);
 		draw_rect(Rect(camera - Vec(1, 1)*PX, camera + Vec(1, 1)*PX), 0xff00007f);

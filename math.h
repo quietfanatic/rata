@@ -96,6 +96,7 @@ struct Rect {
 	float b;
 	float r;
 	float t;
+	Rect () { }
 	Rect (float l, float b, float r, float t) :
 		l(l), b(b), r(r), t(t)
 	{ }

@@ -5,12 +5,7 @@ struct Wall;
 
 #else
 
-
-float viewl() { return rata->pos.x - 9; }
-float viewr() { return rata->pos.x + 9; }
-float viewb() { return rata->pos.y - 5.5; }
-float viewt() { return rata->pos.y + 7.5; }
-
+ // WALL CONSTRUCTION
 
 Line get_tangent (const Circle& a, const Circle& b) {
 	if (a.r == 0 && b.r == 0) {
@@ -38,21 +33,51 @@ void build_sides (const room::Def* r) {
 	}
 }
 
-
+ // WALL GEOMETRY
 
 Vec constrain (Vec p) {
 	room::Def* r = current_room;
 	float curdist2 = 1/0.0;
 	Vec newp = p;
-	if (newp.x < viewl()) newp.x = viewl();
-	else if (newp.x > viewr()) newp.x = viewr();
-	if (newp.y < viewb()) newp.y = viewb();
-	else if (newp.y > viewt()) newp.y = viewt();
 //	for (uint i=0; i < r->n_walls; i++) {
 //		
 //	}
 	return newp;
 }
+
+
+ // ATTENTION
+
+struct Attention {
+	float priority;
+	Rect range;
+	Attention () : priority(-1/0.0) { }
+	Attention (float priority, Rect range) :
+		priority(priority),
+		range(range)
+	{ }
+};
+
+const uint MAX_ATTENTIONS = 8;
+Attention attention [MAX_ATTENTIONS];
+
+void reset_attentions () {
+	attention[0] = Attention(200000, Rect(rata->cursor_pos() - Vec(9, 6.5), rata->cursor_pos() + Vec(9, 6.5)));
+	attention[1] = Attention(100000, Rect(rata->aim_center() - Vec(9, 6.5), rata->aim_center() + Vec(9, 6.5)));
+	for (uint i=2; i < MAX_ATTENTIONS; i++)
+		attention[i].priority = -1/0.0;
+}
+
+void propose_attention (Attention cur) {
+	bool shifting;
+	for (uint i=0; i < MAX_ATTENTIONS; i++)
+	if (shifting || cur.priority > attention[i].priority)
+		SWAP(attention[i], cur);
+}
+
+
+ // CAMERA CONTROL
+
 
 #endif
 
