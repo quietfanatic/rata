@@ -81,12 +81,6 @@ float mag (Vec a) { return sqrt(mag2(a)); }
 float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
 float ang (Vec a) { return atan2(a.y, a.x); }
 float slope (Vec a) { return a.y / a.x; }
-float liney (Vec a, Vec b, float x) {
-	return a.y + slope(b - a) * (x - a.x);
-}
-float linex (Vec a, Vec b, float y) {
-	return a.x + (y - a.y) / slope(b - a);
-}
 Vec norm (Vec a) { return a / mag(a); }
 Vec rotcw (Vec a) { return Vec(-a.y, a.x); }
 Vec rotccw (Vec a) { return Vec(a.y, -a.x); }
@@ -132,9 +126,6 @@ Rect uninvert (Rect r) {
 	return r;
 }
 
-
-// GEOMETRY
-
 bool in_rect (Vec p, Rect r) {
 	return p.x >= r.l
 	    && p.y >= r.b
@@ -142,32 +133,67 @@ bool in_rect (Vec p, Rect r) {
 	    && p.y <= r.t;
 }
 
-bool across_line (Vec p, Vec a, Vec b) {
-	if (a.x == b.x)
-		return (a.y < b.y) ? p.x < a.x
-		                   : p.x > a.x;
-	float y = liney(a, b, p.x);
-	return (a.x < b.x) ? y < p.y
-	                   : y > p.y;
+ // Circles
+struct Circle {
+	Vec c;
+	float r;
+};
+
+bool in_circle (Vec p, Circle c) {
+	if (c.r == 0) return false;
+	return sign_f(c.r)*mag2(p - c.c) < c.r*c.r;
 }
 
-Vec uncross_line (Vec p, Vec a, Vec b) {
+
+struct Line {
+	Vec a;
+	Vec b;
+	Line () { }
+	Line (Vec a, Vec b) : a(a), b(b) { }
+};
+
+bool vertical (const Line& l) { return l.a.x == l.b.x; }
+bool horizontal (const Line& l) { return l.a.y == l.b.y; }
+float slope (const Line& l) { return (l.b.y - l.a.y) / (l.b.x - l.a.x); }
+float solvey (const Line& l, float x) {
+	return l.a.y + slope(l) * (x - l.a.x);
+}
+float solvex (const Line& l, float y) {
+	return l.a.x + (y - l.a.y) / slope(l);
+}
+//Line a_bound (const Line& l) {
+//	return Line(a + rot
+//}
+
+
+ // Lines
+
+bool across_line (Vec p, const Line& l) {
+	if (vertical(l))
+		return (l.a.y < l.b.y) ? p.x < l.a.x
+		                       : p.x > l.a.x;
+	float y = solvey(l, p.x);
+	return (l.a.x < l.b.x) ? y < p.y
+	                       : y > p.y;
+}
+
+Vec uncross_line (Vec p, Line l) {
 	// To get the intersection of two lines, use
 	// ay + asx = by + bsx (y is y-intercept and s is slope)
 	// x = (by - ay) / (as - bs)
 	// y = liney(a, b, x)
-	if (a.x == b.x)
-		return Vec(a.x, p.y);
-	if (a.y == b.y)
-		return Vec(p.x, a.y);
-	float x = (liney(a, b, 0) - liney(p, p + rotcw(b - a), 0))
-	        / (slope(rotcw(b - a)) - slope(b - a));
+	if (vertical(l))
+		return Vec(l.a.x, p.y);
+	if (horizontal(l))
+		return Vec(p.x, l.a.y);
+	float x = (solvey(l, 0) - solvey(Line(p, p + rotcw(l.b - l.a)), 0))
+	        / (slope(rotcw(l.b - l.a)) - slope(l));
 //	printf("x = (%f-%f)/(%f-%f) = %f\n",
 //		liney(a, b, 0), liney(p, p + rotcw(b - a), 0),
 //		slope(rotcw(b - a)), slope(b - a),
 //		x
 //	);
-	return Vec(x, liney(a, b, x));
+	return Vec(x, solvey(l, x));
 }
 
 
