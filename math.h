@@ -82,8 +82,8 @@ float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
 float ang (Vec a) { return atan2(a.y, a.x); }
 float slope (Vec a) { return a.y / a.x; }
 Vec norm (Vec a) { return a / mag(a); }
-Vec rotcw (Vec a) { return Vec(-a.y, a.x); }
-Vec rotccw (Vec a) { return Vec(a.y, -a.x); }
+Vec rotcw (Vec a) { return Vec(a.y, -a.x); }
+Vec rotccw (Vec a) { return Vec(-a.y, a.x); }
 
 Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
 
@@ -186,8 +186,8 @@ Vec uncross_line (Vec p, Line l) {
 		return Vec(l.a.x, p.y);
 	if (horizontal(l))
 		return Vec(p.x, l.a.y);
-	float x = (solvey(l, 0) - solvey(Line(p, p + rotcw(l.b - l.a)), 0))
-	        / (slope(rotcw(l.b - l.a)) - slope(l));
+	float x = (solvey(l, 0) - solvey(Line(p, p + rotccw(l.b - l.a)), 0))
+	        / (slope(rotccw(l.b - l.a)) - slope(l));
 //	printf("x = (%f-%f)/(%f-%f) = %f\n",
 //		liney(a, b, 0), liney(p, p + rotcw(b - a), 0),
 //		slope(rotcw(b - a)), slope(b - a),
