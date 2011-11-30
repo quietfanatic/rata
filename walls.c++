@@ -120,10 +120,10 @@ Vec constrain (Vec p) {
 		if (defined(uncross)
 		 && in_rect(
 				uncross,
-				Vec(MIN(r->walls[i].a.x, r->walls[i].b.x),
-				    MIN(r->walls[i].a.y, r->walls[i].b.y)),
-				Vec(MAX(r->walls[i].a.x, r->walls[i].b.x),
-				    MAX(r->walls[i].a.y, r->walls[i].b.y))
+				Rect(MIN(r->walls[i].a.x, r->walls[i].b.x),
+				     MIN(r->walls[i].a.y, r->walls[i].b.y),
+				     MAX(r->walls[i].a.x, r->walls[i].b.x),
+				     MAX(r->walls[i].a.y, r->walls[i].b.y))
 			)
 		) {
 			//printf("[%d] Focus is crossing a wall.\n", frame_number);

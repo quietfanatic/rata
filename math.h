@@ -96,14 +96,50 @@ Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
 bool defined (float a) { return a==a; }
 bool defined (Vec a) { return defined(a.x) && defined(a.y); }
 
+// Rectangles
+struct Rect {
+	float l;
+	float b;
+	float r;
+	float t;
+	Rect (float l, float b, float r, float t) :
+		l(l), b(b), r(r), t(t)
+	{ }
+	Rect (Vec lb, Vec rt) :
+		l(lb.x), b(lb.y), r(rt.x), t(rt.y)
+	{ }
+	Vec lb () const { return Vec(l, b); }
+	Vec rt () const { return Vec(r, t); }
+};
+
+Rect operator & (const Rect& a, const Rect& b) {
+	return Rect(
+		MAX(a.l, b.l),
+		MAX(a.b, b.b),
+		MIN(a.r, b.r),
+		MIN(a.t, b.t)
+	);
+}
+Rect& operator &= (Rect& a, const Rect& b) {
+	return a = a & b;
+}
+bool defined (const Rect& r) {
+	return r.l <= r.r && r.b <= r.t;
+}
+Rect uninvert (Rect r) {
+	if (r.l > r.r) { SWAP(r.l, r.r); }
+	if (r.b > r.t) { SWAP(r.b, r.t); }
+	return r;
+}
+
 
 // GEOMETRY
 
-bool in_rect (Vec p, Vec a, Vec b) {
-	return p.x >= a.x
-	    && p.x <= b.x
-	    && p.y >= a.y
-	    && p.y <= b.y;
+bool in_rect (Vec p, Rect r) {
+	return p.x >= r.l
+	    && p.y >= r.b
+	    && p.x <= r.r
+	    && p.y <= r.t;
 }
 
 bool across_line (Vec p, Vec a, Vec b) {
