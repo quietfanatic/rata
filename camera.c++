@@ -15,19 +15,17 @@ float viewt() { return rata->pos.y + 7.5; }
 
 struct Wall {
 	const Vec center;
-	const float radius;
-	const bool convex;
+	const float r;
 	Vec a;
 	Vec b;
 	
-	Wall (Vec center, float radius = 0, bool convex = false) :
+	Wall (Vec center, float r = 0) :
 		center(center),
-		radius(radius),
-		convex(convex)
+		r(r)
 	{ }
 
 	void build_side (const Wall* prev) {
-		if (radius == 0 && prev->radius == 0) {
+		if (r == 0 && prev->r == 0) {
 			a = prev->center;
 			b = center;
 		}
@@ -39,10 +37,8 @@ struct Wall {
 			 //  O   (right angle)
 			 //  |
 		else {
-			float pr = prev->convex ? -prev->radius : prev->radius;
-			float r = convex ? -radius : radius;
-			float anglediff = acos((pr - r) / mag(center - prev->center));
-			a = prev->center + polar(pr, ang(center - prev->center) + anglediff);;
+			float anglediff = -acos((prev->r - r) / mag(center - prev->center));
+			a = prev->center + polar(prev->r, ang(center - prev->center) + anglediff);;
 			b = center + polar(r, ang(center - prev->center) + anglediff);
 		}
 	}
@@ -68,27 +64,11 @@ struct Wall {
 		}
 	}
 	Vec uncross_corner (Vec p, const Wall* next) const {
-		if (convex) {
+		if (r > 0) {  // convex
 			if (across_line(p, b + rotccw(a - b), b)
 			 && across_line(p, next->a, next->a + rotcw(next->b - next->a))) {
-				if (mag2(p - center) < radius*radius) {
-					Vec uncross = center + radius * norm(p - center);
-					if (uncross.x < viewl()) {
-						float sign = uncross.y < center.y ? -1 : 1;
-						uncross = Vec(viewl(), center.y + sign*sqrt(radius*radius - (center.x-viewl())*(center.x-viewl())));
-					}
-					else if (uncross.x > viewr()) {
-						float sign = uncross.y < center.y ? -1 : 1;
-						uncross = Vec(viewr(), center.y + sign*sqrt(radius*radius - (viewr()-center.x)*(viewr()-center.x)));
-					}
-					if (uncross.y < viewb()) {
-						float sign = uncross.x < center.x ? -1 : 1;
-						uncross = Vec(center.x + sign*sqrt(radius*radius - (center.y-viewb())*(center.y-viewb())), viewb());
-					}
-					else if (uncross.y > viewt()) {
-						float sign = uncross.x < center.x ? -1 : 1;
-						uncross = Vec(center.x + sign*sqrt(radius*radius - (viewt()-center.y)*(viewt()-center.y)), viewt());
-					}
+				if (mag2(p - center) < r*r) {
+					Vec uncross = center + r * norm(p - center);
 					return uncross;
 				}
 				else return Vec::undef;
@@ -97,8 +77,8 @@ struct Wall {
 		}  // concave
 		else if (across_line(p, b + rotccw(a - b), b)
 		 && across_line(p, next->a, next->a + rotcw(next->b - next->a))) {
-			if (mag2(p - center) > radius*radius) {
-				return center + radius * norm(p - center);
+			if (mag2(p - center) > r*r) {
+				return center - r * norm(p - center);
 			}
 			else return Vec::undef;
 		}

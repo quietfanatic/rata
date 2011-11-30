@@ -263,10 +263,10 @@ void draw_phase () {
 		}
 		glEnd();
 		for (uint i=0; i < current_room->n_walls; i++)
-		if (current_room->walls[i].radius > 0) {
+		if (current_room->walls[i].r > 0) {
 			draw_circle(
 				current_room->walls[i].center,
-				current_room->walls[i].radius,
+				current_room->walls[i].r,
 				0xff00ff4f
 			);
 		}

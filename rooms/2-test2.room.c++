@@ -41,10 +41,10 @@ ROOM_N_NEIGHBORS(1)
 ROOM_NEIGHBORS(room::roompicker)
 ROOM_N_WALLS(4)
 ROOM_WALLS(
-	Wall(Vec(10, 22.5), 0, false),
-	Wall(Vec(10, 37.5), 0, false),
-	Wall(Vec(30, 37.5), 0, false),
-	Wall(Vec(30, 22.5), 0, false),
+	Wall(Vec(10, 22.5), 0),
+	Wall(Vec(10, 37.5), 0),
+	Wall(Vec(30, 37.5), 0),
+	Wall(Vec(30, 22.5), 0),
 )
 
 

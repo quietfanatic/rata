@@ -33,13 +33,13 @@ ROOM_NEIGHBORS(
 )
 ROOM_N_WALLS(7)
 ROOM_WALLS(
-	Wall(Vec(10, 7.5), 0, false),
-	Wall(Vec(40.5, -2.0), 9.5, false),
-	Wall(Vec(52.5, 5), 2.5, true),
-	Wall(Vec(60, 2.5), 0, false),
-	Wall(Vec(60, -2.5), 0, false),
-	Wall(Vec(50, -2.5), 0, false),
-	Wall(Vec(40.5, -2.0), 9.5, true),
+	Wall(Vec(10, 7.5), 0),
+	Wall(Vec(40.5, -2.0), -9.5),
+	Wall(Vec(52.5, 5), 2.5),
+	Wall(Vec(60, 2.5), 0),
+	Wall(Vec(60, -2.5), 0),
+	Wall(Vec(50, -2.5), 0),
+	Wall(Vec(40.5, -2.0), 9.5),
 )
 
 ROOM_INIT(
