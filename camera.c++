@@ -65,8 +65,8 @@ struct Wall {
 	}
 	Vec uncross_corner (Vec p, const Wall* next) const {
 		if (r > 0) {  // convex
-			if (across_line(p, Line(b + rotcw(a - b), b))
-			 && across_line(p, Line(next->a, next->a + rotccw(next->b - next->a)))) {
+			if (!across_line(p, bound_b(Line(a, b)))
+			 && !across_line(p, bound_a(Line(next->a, next->b)))) {
 				if (mag2(p - center) < r*r) {
 					Vec uncross = center + r * norm(p - center);
 					return uncross;
@@ -75,8 +75,8 @@ struct Wall {
 			}
 			else return Vec::undef;
 		}  // concave
-		else if (across_line(p, Line(b + rotcw(a - b), b))
-		 && across_line(p, Line(next->a, next->a + rotccw(next->b - next->a)))) {
+		else if (!across_line(p, bound_b(Line(a, b)))
+		 && !across_line(p, bound_a(Line(next->a, next->b)))) {
 			if (mag2(p - center) > r*r) {
 				return center - r * norm(p - center);
 			}

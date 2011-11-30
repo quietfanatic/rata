@@ -161,9 +161,12 @@ float solvey (const Line& l, float x) {
 float solvex (const Line& l, float y) {
 	return l.a.x + (y - l.a.y) / slope(l);
 }
-//Line a_bound (const Line& l) {
-//	return Line(a + rot
-//}
+Line bound_a (const Line& l) {
+	return Line(l.a, l.a + rotcw(l.b - l.a));
+}
+Line bound_b (const Line& l) {
+	return Line(l.b + rotccw(l.a - l.b), l.b);
+}
 
 
  // Lines
