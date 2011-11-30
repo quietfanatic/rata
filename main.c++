@@ -7,10 +7,7 @@ int main () {
 	load_snd();
 	 // Construct room camera constraint geometry
 	for (uint i=0; i < room::n_rooms; i++)
-	for (uint j=0; j < room::def[i].n_walls; j++) {
-		uint pj = j ? j-1 : room::def[i].n_walls - 1;
-		room::def[i].walls[j].build_side(&room::def[i].walls[pj]);
-	}
+		build_sides(&room::def[i]);
 	
 	rata = new Rata(room::roompicker, Vec(2, 2));
 	rata->pickup_equip(new Item(NULL, rata->pos, item::white_dress));

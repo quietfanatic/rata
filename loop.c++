@@ -258,14 +258,14 @@ void draw_phase () {
 		Color(0xff00ff7f).setGL();
 		glBegin(GL_LINES);
 		for (uint i=0; i < current_room->n_walls; i++) {
-			vertex(current_room->walls[i].a);
-			vertex(current_room->walls[i].b);
+			vertex(current_room->sides[i].a);
+			vertex(current_room->sides[i].b);
 		}
 		glEnd();
 		for (uint i=0; i < current_room->n_walls; i++)
 		if (current_room->walls[i].r > 0) {
 			draw_circle(
-				current_room->walls[i].center,
+				current_room->walls[i].c,
 				current_room->walls[i].r,
 				0xff00ff4f
 			);

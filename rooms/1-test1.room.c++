@@ -29,10 +29,10 @@ ROOM_NEIGHBORS(
 )
 ROOM_N_WALLS(4)
 ROOM_WALLS(
-	Wall(Vec(10, 7.5), 0),
-	Wall(Vec(40.5, -2.0), -9.5),
-	Wall(Vec(50, -2.5), 0),
-	Wall(Vec(40.5, -2.0), 9.5),
+	Circle(Vec(10, 7.5), 0),
+	Circle(Vec(40.5, -2.0), -9.5),
+	Circle(Vec(50, -2.5), 0),
+	Circle(Vec(40.5, -2.0), 9.5),
 )
 
 ROOM_INIT(

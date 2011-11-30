@@ -137,10 +137,11 @@ bool in_rect (Vec p, Rect r) {
 struct Circle {
 	Vec c;
 	float r;
+	Circle (Vec c, float r) : c(c), r(r) { }
 };
 
 bool in_circle (Vec p, Circle c) {
-	if (c.r == 0) return false;
+	if (c.r == 0) return true;
 	return sign_f(c.r)*mag2(p - c.c) < c.r*c.r;
 }
 
@@ -199,8 +200,10 @@ Vec uncross_line (Vec p, Line l) {
 	return Vec(x, solvey(l, x));
 }
 
-
-
+Vec uncross_circle (Vec p, Circle c) {
+	if (c.r == 0) return c.c;
+	return c.c + abs_f(c.r) * norm(p - c.c);
+}
 
 
 
