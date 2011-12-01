@@ -269,6 +269,7 @@ void draw_phase () {
 		 // Draw camera and focus
 		Color(0x007f7f7f).setGL();
 		for (uint i=0; i < MAX_ATTENTIONS; i++) {
+			if (attention[i].priority == -1/0.0) break;
 			glBegin(GL_LINE_LOOP);
 				vertex(Vec(attention[i].range.l, attention[i].range.b));
 				vertex(Vec(attention[i].range.r, attention[i].range.b));
