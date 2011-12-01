@@ -42,17 +42,19 @@ Vec constrain (Vec p, const Rect& range) {
 	room::Def* room = current_room;
 	bool currently_in = true;
 	Vec minp = Vec::undef;
+	Vec selectedp = Vec::undef;
 	for (uint i=0; i < room->n_walls; i++) {
 		if (!across_line(p, bound_a(room->sides[i]))) { // Corner
 			if (!across_line(p, bound_b(room->sides[(i?i:room->n_walls)-1]))) {
 				Vec tryp = uncross_circle(p, room->walls[i]);
-				if (in_rect(tryp, range)) {
-					bool in_this = !in_circle(p, room->walls[i]);
-					 // Favor violations a little over nonviolations
-					 // The !> is to deal with NANs.
-					if (!(mag2(tryp - p)+in_this > mag2(minp - p)+currently_in)) {
-						currently_in = in_this;
-						minp = tryp;
+				bool in_this = !in_circle(p, room->walls[i]);
+				 // Favor violations a little over nonviolations
+				 // The !> is to deal with NANs.
+				if (!(mag2(tryp - p)+in_this > mag2(minp - p)+currently_in)) {
+					currently_in = in_this;
+					minp = tryp;
+					if (in_rect(tryp, range)) {
+						selectedp = tryp;
 					}
 				}
 			}
@@ -60,17 +62,22 @@ Vec constrain (Vec p, const Rect& range) {
 		else { // Side
 			if (across_line(p, bound_b(room->sides[i]))) {
 				Vec tryp = uncross_line(p, room->sides[i]);
-				if (in_rect(tryp, range)) {
-					bool in_this = !across_line(p, room->sides[i]);
-					if (!(mag2(tryp - p)+in_this > mag2(minp - p)+currently_in)) {
-						currently_in = in_this;
-						minp = tryp;
+				bool in_this = !across_line(p, room->sides[i]);
+				if (!(mag2(tryp - p)+in_this > mag2(minp - p)+currently_in)) {
+					currently_in = in_this;
+					minp = tryp;
+					if (in_rect(tryp, range)) {
+						selectedp = tryp;
 					}
 				}
 			}
 		}
 	}
-	return currently_in ? p : minp;
+	if (currently_in) return p;
+	else if (defined(selectedp)) return selectedp;
+	else {
+		return minp;
+	}
 }
 
 
