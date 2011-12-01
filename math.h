@@ -115,24 +115,23 @@ Rect operator & (const Rect& a, const Rect& b) {
 		MIN(a.t, b.t)
 	);
 }
-Rect& operator &= (Rect& a, const Rect& b) {
-	return a = a & b;
-}
-bool defined (const Rect& r) {
-	return r.l <= r.r && r.b <= r.t;
-}
+Rect& operator &= (Rect& a, const Rect& b) { return a = a & b; }
+bool defined (const Rect& r) { return r.l <= r.r && r.b <= r.t; }
 Rect uninvert (Rect r) {
 	if (r.l > r.r) { SWAP(r.l, r.r); }
 	if (r.b > r.t) { SWAP(r.b, r.t); }
 	return r;
 }
-
 bool in_rect (Vec p, Rect r) {
 	return p.x >= r.l
 	    && p.y >= r.b
 	    && p.x <= r.r
 	    && p.y <= r.t;
 }
+Vec size (const Rect& r) {
+	return Vec(r.r - r.l, r.t - r.b);
+}
+
 
  // Circles
 struct Circle {

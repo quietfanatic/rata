@@ -78,6 +78,30 @@ void propose_attention (Attention cur) {
 
  // CAMERA CONTROL
 
+void get_focus () {
+	Rect range = attention[0].range & attention[1].range;
+	Rect range_but_cursor = attention[1].range;
+	for (uint i=2; i < MAX_ATTENTIONS; i++) {
+		if (attention[i].priority == -1/0.0) break;
+		Rect cur_range = range & attention[i].range;
+		if (defined(cur_range)) {
+			 // todo: ensure range is within walls
+			range = cur_range;
+			range_but_cursor &= attention[i].range;
+		}
+	}
+	focus.x = (attention[0].range.r - range_but_cursor.l)
+	        / (size(attention[0].range).x + size(range_but_cursor).x)
+			* size(range_but_cursor).x
+			+ range_but_cursor.l;
+	focus.y = (attention[0].range.t - range_but_cursor.b)
+	        / (size(attention[0].range).y + size(range_but_cursor).y)
+			* size(range_but_cursor).y
+			+ range_but_cursor.b;
+		 
+}
+
+
 
 #endif
 

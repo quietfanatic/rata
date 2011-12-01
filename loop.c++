@@ -120,48 +120,45 @@ void remove_phase () {
 }
 
 
-void draw_phase () {
-	Vec oldfocus = Vec::undef;
-	focus = oldfocus;
-	if (rata) {
-		oldfocus = rata->aim_center() + cursor/2.0;
-		 // Move focus point out of camera walls.
-		focus = constrain(oldfocus);
-		 // To look smooth in a pixelated environment,
-		 //  we need a minimum speed.
-		 // We also need to hold camera pixel-steady
-		 //  to Rata pos when running.
-		float snap_dist = camera_snap ? .5*PX : .25*PX;
-		camera_snap = false;
-		if (camera_jump) {
-			camera = focus;
-			camera_jump = false;
-		}
-		else {
-			if (abs_f(focus.x - camera.x) < .25*PX) camera.x = focus.x;
-			else {
-				float xvel = (focus.x - camera.x) / 10;
-				if (abs_f(xvel) < .25*PX)
-					camera.x += .25*PX * sign_f(xvel);
-				else if (abs_f((xvel) - rata->vel.x/FPS) < snap_dist) {
-					camera.x = old_camera_rel + round(rata->pos.x*UNPX)*PX;
-					camera_snap = true;
-				}
-				else
-					camera.x += xvel;
-			}
-			if (abs_f(focus.y - camera.y) < .25*PX) camera.y = focus.y;
-			else {
-				float yvel = (focus.y - camera.y) / 10;
-				if (abs_f(yvel) < .25*PX)
-					camera.y += .25*PX * sign_f(yvel);
-				else
-					camera.y += yvel;
-			}
-			camera = constrain(camera);
-		}
-		old_camera_rel = camera.x - round(rata->pos.x*UNPX)*PX;
+void camera_phase () {
+	get_focus();
+	 // To look smooth in a pixelated environment,
+	 //  we need a minimum speed.
+	 // We also need to hold camera pixel-steady
+	 //  to Rata pos when running.
+	float snap_dist = camera_snap ? .5*PX : .25*PX;
+	camera_snap = false;
+	if (camera_jump) {
+		camera = focus;
+		camera_jump = false;
 	}
+	else {
+		if (abs_f(focus.x - camera.x) < .25*PX) camera.x = focus.x;
+		else {
+			float xvel = (focus.x - camera.x) / 10;
+			if (abs_f(xvel) < .25*PX)
+				camera.x += .25*PX * sign_f(xvel);
+			else if (abs_f((xvel) - rata->vel.x/FPS) < snap_dist) {
+				camera.x = old_camera_rel + round(rata->pos.x*UNPX)*PX;
+				camera_snap = true;
+			}
+			else
+				camera.x += xvel;
+		}
+		if (abs_f(focus.y - camera.y) < .25*PX) camera.y = focus.y;
+		else {
+			float yvel = (focus.y - camera.y) / 10;
+			if (abs_f(yvel) < .25*PX)
+				camera.y += .25*PX * sign_f(yvel);
+			else
+				camera.y += yvel;
+		}
+		camera = constrain(camera);
+	}
+	old_camera_rel = camera.x - round(rata->pos.x*UNPX)*PX;
+}
+
+void draw_phase () {
 	draw_latency -= 1/FPS;
 	if (draw_latency > 1/FPS) {
 		dbg(6, "Skipping frame %d.\n", frame_number);
@@ -255,7 +252,7 @@ void draw_phase () {
 		}
 		glEnd();
 		 // Debug draw Camera walls.
-		Color(0xff00ff7f).setGL();
+		Color(0x7f007f4f).setGL();
 		glBegin(GL_LINES);
 		for (uint i=0; i < current_room->n_walls; i++) {
 			vertex(current_room->sides[i].a);
@@ -267,11 +264,19 @@ void draw_phase () {
 			draw_circle(
 				current_room->walls[i].c,
 				current_room->walls[i].r,
-				0xff00ff4f
+				0x7f007f4f
 			);
 		}
 		 // Draw camera and focus
-		draw_rect(Rect(oldfocus - Vec(1, 1)*PX, oldfocus + Vec(1, 1)*PX), 0x00ffff7f);
+		Color(0x007f7f4f).setGL();
+		for (uint i=0; i < MAX_ATTENTIONS; i++) {
+			glBegin(GL_LINE_LOOP);
+				vertex(Vec(attention[i].range.l, attention[i].range.b));
+				vertex(Vec(attention[i].range.r, attention[i].range.b));
+				vertex(Vec(attention[i].range.r, attention[i].range.t));
+				vertex(Vec(attention[i].range.l, attention[i].range.t));
+			glEnd();
+		}
 		draw_rect(Rect(focus - Vec(1, 1)*PX, focus + Vec(1, 1)*PX), 0x0000ff7f);
 		draw_rect(Rect(camera - Vec(1, 1)*PX, camera + Vec(1, 1)*PX), 0xff00007f);
 	}
@@ -399,6 +404,8 @@ void move_phase () {
 		//world->Step(1/180.0, 10, 10);
 		//world->Step(1/240.0, 10, 10);
 	}
+	 // We need to reset attentions before actors register more.
+	reset_attentions();
 
 	for (Actor* a = active_actors; a; a = a->next_active)
 		a->after_move();
@@ -407,9 +414,11 @@ void move_phase () {
 
 void main_loop () {
 	window->SetCursorPosition(window->GetWidth()/2, window->GetHeight()/2);
+	reset_attentions();
 	for (;;) {
 		frame_number++;
 		add_phase();
+		camera_phase();
 		draw_phase();
 		input_phase();
 		move_phase();
