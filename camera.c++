@@ -204,7 +204,25 @@ Vec constrain (Vec p, const Rect& range) {
 		return selectedp;
 	}
 }
-
+/*
+ // Move the cursor to a position where it is possible to see
+ // both it and Rata.
+void constrain_cursor () {
+	room::Def* room = current_room;
+	Line los = Line(rata->aim_center(), rata->cursor_pos());
+	float fraction = 0;  // 1 = b, 0 = a
+	for (uint i=0; i < room->n_walls; i++) {
+		Vec inter = intersect_line(los, sides[i]);
+		if (in_line(inter, sides[i]))
+		if (in_line(inter, los)) {
+			float newf = line_fraction(inter, los);
+			if (newf > fraction)
+				fraction = newf;
+		}
+		if (
+	}
+}
+*/
 
  // ATTENTION
 

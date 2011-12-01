@@ -156,6 +156,7 @@ struct Line {
 bool vertical (const Line& l) { return l.a.x == l.b.x; }
 bool horizontal (const Line& l) { return l.a.y == l.b.y; }
 float slope (const Line& l) { return (l.b.y - l.a.y) / (l.b.x - l.a.x); }
+bool verticalish (const Line& l) { return (l.b.y - l.a.y) > (l.b.x - l.a.x); }
 float solvey (const Line& l, float x) {
 	return l.a.y + slope(l) * (x - l.a.x);
 }
@@ -205,6 +206,78 @@ Vec uncross_circle (Vec p, Circle c) {
 	return c.c + abs_f(c.r) * norm(p - c.c);
 }
 
+Vec intersect_lines (const Line& a, const Line& b) {
+	if (vertical(a)) {
+		if (vertical(b)) return Vec::undef;
+		if (horizontal(b)) return Vec(a.a.x, b.a.y);
+		return Vec(a.a.x, solvey(b, a.a.x));
+	}
+	if (horizontal(a)) {
+		if (vertical(b)) return Vec(b.a.x, a.a.y);
+		if (horizontal(b)) return Vec::undef;
+		return Vec(solvex(b, a.a.y), a.a.y);
+	}
+	if (vertical(b)) return Vec(b.a.x, solvey(a, b.a.x));
+	if (horizontal(b)) return Vec(solvex(a, b.a.y), b.a.y);
+	float x = (solvey(a, 0) - solvey(b, 0))
+	        / (slope(b) - slope(a));
+	return Vec(x, solvey(a, x));
+}
+
+float line_fraction (Vec p, const Line& l) {
+	if (verticalish(l)) return (p.y - l.a.y) / (l.b.y - l.a.y);
+	else return (p.x - l.a.x) / (l.b.x - l.a.x);
+}
+float in_line (Vec p, const Line& l) {
+	if (verticalish(l)) return p.y > l.a.y && p.y < l.b.y;
+	else return p.x > l.a.x && p.x < l.a.y;
+}
+
+Line intersect_line_circle (const Line& l, const Circle& c) {
+	 // Formula take from http://mathworld.wolfram.com/Circle-LineIntersection.html
+	double dx = l.b.x - l.a.x;
+	double dy = l.b.y - l.a.y;
+	double dr2 = dx*dx + dy*dy;
+	double D = l.a.x * l.b.y - l.b.x * l.a.y;
+	double disc = c.r*c.r * dr2 - D*D;
+	if (disc < 0) return Line(Vec::undef, Vec::undef);
+	if (disc == 0) {
+		Vec tangent = Vec(
+			D * dy / dr2,
+			-D * dx / dr2
+		);
+		return Line(tangent, tangent);
+	}
+
+	// (disc > 0)
+	double sqrtdisc = sqrt(disc);
+	double variant_x = sign_f(dy) * dx * sqrtdisc;
+	double variant_y = abs_f(dy) * sqrtdisc;
+	Line r = Line(
+		Vec(
+			(D * dy - variant_x) / dr2,
+			(-D * dx - variant_y) / dr2
+		),
+		Vec(
+			(D * dy + variant_x) / dr2,
+			(-D * dx + variant_y) / dr2
+		)
+	);
+	if (abs_f(slope(r) - slope(l)) > 0.1)
+		printf("Warning: something went wrong in intersect_line_circle.\n");
+	return r;
+}
+
+
+Rect aabb (const Line& l) {
+	return uninvert(Rect(l.a, l.b));
+}
+Rect aabb (const Circle& c) {
+	float r = abs_f(c.r);
+	return Rect(
+		c.c.x - r, c.c.y - r, c.c.x + r, c.c.y + r
+	);
+}
 
 
 
