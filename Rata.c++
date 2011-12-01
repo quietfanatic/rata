@@ -1063,7 +1063,7 @@ struct Rata : Walking {
 		: action == action_enter ? "ENTER"
 		:                          NULL;
 		if (m) {
-			render_text((char*)m, pos + Vec(0, 3), 1, true, true, 0);
+			render_text((char*)m, pos + Vec(0, 2.5), 1, true, true, 0);
 		}
 
 	}
