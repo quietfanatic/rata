@@ -101,8 +101,8 @@ Vec constrain (Vec p, const Rect& range) {
 						selectedp = Vec(range.l, y);
 					}
 				}
-				if (range.b >= siderect.b && range.b >= siderect.t) {
-					float x = solvey(side, range.b);
+				if (range.b >= siderect.b && range.b <= siderect.t) {
+					float x = solvex(side, range.b);
 					if (x >= range.l && x <= range.r)
 					if (!(mag2(Vec(x, range.b) - p) >= mag2(selectedp - p))) {
 						selectedp = Vec(x, range.b);
@@ -115,8 +115,8 @@ Vec constrain (Vec p, const Rect& range) {
 						selectedp = Vec(range.r, y);
 					}
 				}
-				if (range.t >= siderect.b && range.t >= siderect.t) {
-					float x = solvey(side, range.t);
+				if (range.t >= siderect.b && range.t <= siderect.t) {
+					float x = solvex(side, range.t);
 					if (x >= range.l && x <= range.r)
 					if (!(mag2(Vec(x, range.t) - p) >= mag2(selectedp - p))) {
 						selectedp = Vec(x, range.t);
