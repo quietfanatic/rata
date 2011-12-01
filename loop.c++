@@ -251,7 +251,7 @@ void draw_phase () {
 		}
 		glEnd();
 		 // Debug draw Camera walls.
-		Color(0x7f007f4f).setGL();
+		Color(0x7f007f7f).setGL();
 		glBegin(GL_LINES);
 		for (uint i=0; i < current_room->n_walls; i++) {
 			vertex(current_room->sides[i].a);
@@ -263,11 +263,11 @@ void draw_phase () {
 			draw_circle(
 				current_room->walls[i].c,
 				current_room->walls[i].r,
-				0x7f007f4f
+				0x7f007f7f
 			);
 		}
 		 // Draw camera and focus
-		Color(0x007f7f4f).setGL();
+		Color(0x007f7f7f).setGL();
 		for (uint i=0; i < MAX_ATTENTIONS; i++) {
 			glBegin(GL_LINE_LOOP);
 				vertex(Vec(attention[i].range.l, attention[i].range.b));
@@ -276,6 +276,7 @@ void draw_phase () {
 				vertex(Vec(attention[i].range.l, attention[i].range.t));
 			glEnd();
 		}
+		draw_rect(Rect(oldfocus - Vec(1, 1)*PX, oldfocus + Vec(1, 1)*PX), 0x007f7f7f);
 		draw_rect(Rect(focus - Vec(1, 1)*PX, focus + Vec(1, 1)*PX), 0x0000ff7f);
 		draw_rect(Rect(camera - Vec(1, 1)*PX, camera + Vec(1, 1)*PX), 0xff00007f);
 	}

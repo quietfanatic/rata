@@ -67,6 +67,7 @@ Vec constrain (Vec p, const Rect& range) {
 					currently_in = in_this;
 					minp = tryp;
 					if (in_rect(tryp, range)) {
+						//printf("[%u] In range.\n", frame_number);
 						selectedp = tryp;
 					}
 				}
@@ -247,7 +248,8 @@ void get_focus () {
 		             / (size(attention[0].range).y + size(cur_rwc).y)
 		             * size(cur_rwc).y
 		            + cur_rwc.b;
-		cur_focus = constrain(cur_focus, range);
+		oldfocus = cur_focus;
+		cur_focus = constrain(cur_focus, cur_range);
 		if (defined(cur_focus)) {
 			range = cur_range;
 			rwc = cur_rwc;

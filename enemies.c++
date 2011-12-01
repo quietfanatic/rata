@@ -157,12 +157,12 @@ struct Patroller : AI {
 	}
 	void after_move () {
 		AI::after_move();
-		if (threat_detected) {
+		//if (threat_detected) {
 			propose_attention(Attention(
 				2000 - mag2(eye() - rata->cursor_pos()),
 				Rect(pos - Vec(9.5, 6.5), pos + Vec(9.5, 7.5))
 			));
-		}
+		//}
 	}
 	void draw () {
 		motion_frames %= 60;
@@ -261,12 +261,12 @@ struct Flyer : AI {
 	}
 	void after_move() {
 		AI::after_move();
-		if (defined(prediction) || mag2(dest - pos) > 1) {
+		//if (defined(prediction) || mag2(dest - pos) > 1) {
 			propose_attention(Attention(
 				1000 - mag2(eye() - rata->cursor_pos()),
 				Rect(pos - Vec(9.5, 7.0), pos + Vec(9.5, 7.0))
 			));
-		}
+		//}
 	}
 	void draw () {
 		motion_frames++;

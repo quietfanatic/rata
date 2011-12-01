@@ -21,6 +21,7 @@ bool draw_cursor = false;
 bool trap_cursor = false;
 
  // View
+Vec oldfocus;
 Vec focus;
 Vec camera;
 const Vec screen = Vec(20, 15);
