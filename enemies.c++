@@ -261,7 +261,7 @@ struct Flyer : AI {
 	}
 	void after_move() {
 		AI::after_move();
-		if (defined(prediction)) {
+		if (defined(prediction) || mag2(dest - pos) > 1) {
 			propose_attention(Attention(
 				1000 - mag2(eye() - rata->cursor_pos()),
 				Rect(eye() - Vec(10, 7.5), eye() + Vec(10, 7.5))
