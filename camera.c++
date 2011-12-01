@@ -1,7 +1,17 @@
 
 #ifdef HEADER
 
-struct Wall;
+struct Attention {
+	float priority;
+	Rect range;
+	Attention () : priority(-1/0.0) { }
+	Attention (float priority, Rect range) :
+		priority(priority),
+		range(range)
+	{ }
+};
+
+void propose_attention(Attention);
 
 #else
 
@@ -34,9 +44,6 @@ void build_sides (const room::Def* r) {
 }
 
  // WALL USAGE
-
-void try_point (Vec tryp, Vec* minp, Vec p, const Rect& range) {
-}
 
 Vec constrain (Vec p, const Rect& range) {
 	room::Def* room = current_room;
@@ -76,22 +83,13 @@ Vec constrain (Vec p, const Rect& range) {
 	if (currently_in) return p;
 	else if (defined(selectedp)) return selectedp;
 	else {
+		 // todo: return closest intersection between walls and range
 		return minp;
 	}
 }
 
 
  // ATTENTION
-
-struct Attention {
-	float priority;
-	Rect range;
-	Attention () : priority(-1/0.0) { }
-	Attention (float priority, Rect range) :
-		priority(priority),
-		range(range)
-	{ }
-};
 
 const uint MAX_ATTENTIONS = 8;
 Attention attention [MAX_ATTENTIONS];
@@ -104,10 +102,12 @@ void reset_attentions () {
 }
 
 void propose_attention (Attention cur) {
-	bool shifting;
+	bool shifting = false;
 	for (uint i=0; i < MAX_ATTENTIONS; i++)
-	if (shifting || cur.priority > attention[i].priority)
+	if (shifting || cur.priority > attention[i].priority) {
+		shifting = true;
 		SWAP(attention[i], cur);
+	}
 }
 
 

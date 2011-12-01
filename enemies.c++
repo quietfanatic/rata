@@ -155,6 +155,15 @@ struct Patroller : AI {
 			else threat_detected = false;
 		}
 	}
+	void after_move () {
+		AI::after_move();
+		if (threat_detected) {
+			propose_attention(Attention(
+				2000 - mag2(eye() - rata->cursor_pos()),
+				Rect(eye() - Vec(10, 7.5), eye() + Vec(10, 7.5))
+			));
+		}
+	}
 	void draw () {
 		motion_frames %= 60;
 		subimage = (motion_frames < 30);
@@ -248,6 +257,15 @@ struct Flyer : AI {
 			if (defined(oldpos)) {
 				dest = oldpos;
 			}
+		}
+	}
+	void after_move() {
+		AI::after_move();
+		if (defined(prediction)) {
+			propose_attention(Attention(
+				1000 - mag2(eye() - rata->cursor_pos()),
+				Rect(eye() - Vec(10, 7.5), eye() + Vec(10, 7.5))
+			));
 		}
 	}
 	void draw () {
