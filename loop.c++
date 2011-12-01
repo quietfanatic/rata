@@ -279,7 +279,7 @@ void draw_phase () {
 		}
 		 // Draw debug points
 		for (uint i=0; i < n_debug_points; i++) {
-			draw_rect(Rect(debug_points[i] - Vec(1, 1)*PX, debug_points[i] + Vec(1, 1)*PX), 0xfffff007f);
+			draw_rect(Rect(debug_points[i] - Vec(1, 1)*PX, debug_points[i] + Vec(1, 1)*PX), 0xffff007f);
 		}
 		draw_rect(Rect(oldfocus - Vec(1, 1)*PX, oldfocus + Vec(1, 1)*PX), 0x007f7f7f);
 		//draw_rect(Rect(focus - Vec(1, 1)*PX, focus + Vec(1, 1)*PX), 0x0000ff7f);

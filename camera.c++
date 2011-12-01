@@ -121,7 +121,7 @@ Vec constrain (Vec p, const Rect& range) {
 					}
 				}
 				if (range.t >= siderect.b && range.t <= siderect.t) {
-					Vec tryp = Vec(solvex(side, range.t), range.b);
+					Vec tryp = Vec(solvex(side, range.t), range.t);
 					reg_debug_point(tryp);
 					if (tryp.x >= range.l && tryp.x <= range.r)
 					if (!(mag2(tryp - p) >= mag2(selectedp - p))) {
@@ -133,7 +133,7 @@ Vec constrain (Vec p, const Rect& range) {
 			Rect cornerrect = aabb(corner);
 			if (defined(range & cornerrect)) {
 				Line abound = bound_a(room->sides[i]);
-				Line bbound = bound_b(room->sides[(i?i:room->n_walls)]);
+				Line bbound = bound_b(room->sides[(i?i:room->n_walls)-1]);
 				if (range.l >= cornerrect.l && range.l <= cornerrect.r) {
 					float y = sqrt(
 						corner.r * corner.r - (range.l - corner.c.x) * (range.l - corner.c.x)
