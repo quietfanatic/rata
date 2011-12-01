@@ -33,16 +33,38 @@ void build_sides (const room::Def* r) {
 	}
 }
 
- // WALL GEOMETRY
+ // WALL USAGE
 
-Vec constrain (Vec p) {
-	room::Def* r = current_room;
-	float curdist2 = 1/0.0;
-	Vec newp = p;
-//	for (uint i=0; i < r->n_walls; i++) {
-//		
-//	}
-	return newp;
+void try_point (Vec tryp, Vec* minp, Vec p, const Rect& range) {
+}
+
+Vec constrain (Vec p, const Rect& range) {
+	room::Def* room = current_room;
+	bool currently_in = true;
+	Vec minp = Vec::undef;
+	for (uint i=0; i < room->n_walls; i++) {
+		if (!across_line(p, bound_a(room->sides[i]))) { // Corner
+			if (!across_line(p, bound_b(room->sides[(i?i:room->n_walls)-1]))) {
+				Vec tryp = uncross_circle(p, room->walls[i]);
+				if (in_rect(tryp, range))
+				if (!(mag2(tryp - minp) > mag2(p - minp))) {
+					currently_in = !in_circle(p, room->walls[i]);
+					minp = tryp;
+				}
+			}
+		}
+		else { // Side
+			if (across_line(p, bound_b(room->sides[i]))) {
+				Vec tryp = uncross_line(p, room->sides[i]);
+				if (in_rect(tryp, range))
+				if (!(mag2(tryp - minp) > mag2(p - minp))) {
+					currently_in = !across_line(p, room->sides[i]);
+					minp = tryp;
+				}
+			}
+		}
+	}
+	return currently_in ? p : minp;
 }
 
 
@@ -98,6 +120,7 @@ void get_focus () {
 	        / (size(attention[0].range).y + size(range_but_cursor).y)
 			* size(range_but_cursor).y
 			+ range_but_cursor.b;
+	focus = constrain(focus, range);
 		 
 }
 

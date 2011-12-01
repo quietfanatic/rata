@@ -153,7 +153,6 @@ void camera_phase () {
 			else
 				camera.y += yvel;
 		}
-		camera = constrain(camera);
 	}
 	old_camera_rel = camera.x - round(rata->pos.x*UNPX)*PX;
 }
