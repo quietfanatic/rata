@@ -63,6 +63,7 @@ Vec constrain (Vec p, const Rect& range) {
 				bool in_this = !in_circle(p, room->walls[i]);
 				 // Favor violations a little over nonviolations
 				 // The !>= is to deal with NANs.
+				reg_debug_point(tryp);
 				if (!(mag2(tryp - p)+in_this >= mag2(minp - p)+currently_in)) {
 					currently_in = in_this;
 					minp = tryp;
@@ -77,6 +78,7 @@ Vec constrain (Vec p, const Rect& range) {
 			if (across_line(p, bound_b(room->sides[i]))) {
 				Vec tryp = uncross_line(p, room->sides[i]);
 				bool in_this = !across_line(p, room->sides[i]);
+				reg_debug_point(tryp);
 				if (!(mag2(tryp - p)+in_this >= mag2(minp - p)+currently_in)) {
 					currently_in = in_this;
 					minp = tryp;
@@ -95,31 +97,35 @@ Vec constrain (Vec p, const Rect& range) {
 			Rect siderect = aabb(side);
 			if (defined(range & siderect)) {
 				if (range.l >= siderect.l && range.l <= siderect.r) {
-					float y = solvey(side, range.l);
-					if (y >= range.b && y <= range.t)
-					if (!(mag2(Vec(range.l, y) - p) >= mag2(selectedp - p))) {
-						selectedp = Vec(range.l, y);
+					Vec tryp = Vec(range.l, solvey(side, range.l));
+					reg_debug_point(tryp);
+					if (tryp.y >= range.b && tryp.y <= range.t)
+					if (!(mag2(tryp - p) >= mag2(selectedp - p))) {
+						selectedp = tryp;
 					}
 				}
 				if (range.b >= siderect.b && range.b <= siderect.t) {
-					float x = solvex(side, range.b);
-					if (x >= range.l && x <= range.r)
-					if (!(mag2(Vec(x, range.b) - p) >= mag2(selectedp - p))) {
-						selectedp = Vec(x, range.b);
+					Vec tryp = Vec(solvex(side, range.b), range.b);
+					reg_debug_point(tryp);
+					if (tryp.x >= range.l && tryp.x <= range.r)
+					if (!(mag2(tryp - p) >= mag2(selectedp - p))) {
+						selectedp = tryp;
 					}
 				}
 				if (range.r >= siderect.l && range.r <= siderect.r) {
-					float y = solvey(side, range.r);
-					if (y >= range.b && y <= range.t)
-					if (!(mag2(Vec(range.r, y) - p) >= mag2(selectedp - p))) {
-						selectedp = Vec(range.r, y);
+					Vec tryp = Vec(range.r, solvey(side, range.r));
+					reg_debug_point(tryp);
+					if (tryp.y >= range.b && tryp.y <= range.t)
+					if (!(mag2(tryp - p) >= mag2(selectedp - p))) {
+						selectedp = tryp;
 					}
 				}
 				if (range.t >= siderect.b && range.t <= siderect.t) {
-					float x = solvex(side, range.t);
-					if (x >= range.l && x <= range.r)
-					if (!(mag2(Vec(x, range.t) - p) >= mag2(selectedp - p))) {
-						selectedp = Vec(x, range.t);
+					Vec tryp = Vec(solvex(side, range.t), range.b);
+					reg_debug_point(tryp);
+					if (tryp.x >= range.l && tryp.x <= range.r)
+					if (!(mag2(tryp - p) >= mag2(selectedp - p))) {
+						selectedp = tryp;
 					}
 				}
 			}
@@ -133,12 +139,14 @@ Vec constrain (Vec p, const Rect& range) {
 						corner.r * corner.r - (range.l - corner.c.x) * (range.l - corner.c.x)
 					);
 					Vec tryp = Vec(range.l, corner.c.y + y);
+					reg_debug_point(tryp);
 					if (tryp.y >= range.b && tryp.y <= range.t)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound))
 					if (!(mag2(tryp - p) >= mag2(selectedp - p))) 
 						selectedp = tryp;
 					tryp.y = corner.c.y - y;
+					reg_debug_point(tryp);
 					if (tryp.y >= range.b && tryp.y <= range.t)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound))
@@ -150,12 +158,14 @@ Vec constrain (Vec p, const Rect& range) {
 						corner.r * corner.r - (range.b - corner.c.y) * (range.b - corner.c.y)
 					);
 					Vec tryp = Vec(corner.c.x + x, range.b);
+					reg_debug_point(tryp);
 					if (tryp.x >= range.l && tryp.x <= range.r)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound))
 					if (!(mag2(tryp - p) >= mag2(selectedp - p)))
 						selectedp = tryp;
 					tryp.x = corner.c.x - x;
+					reg_debug_point(tryp);
 					if (tryp.x >= range.l && tryp.x <= range.r)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound))
@@ -167,12 +177,14 @@ Vec constrain (Vec p, const Rect& range) {
 						corner.r * corner.r - (range.r - corner.c.x) * (range.r - corner.c.x)
 					);
 					Vec tryp = Vec(range.r, corner.c.y + y);
+					reg_debug_point(tryp);
 					if (tryp.y >= range.b && tryp.y <= range.t)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound))
 					if (!(mag2(tryp - p) >= mag2(selectedp - p)))
 						selectedp = tryp;
 					tryp.y = corner.c.y - y;
+					reg_debug_point(tryp);
 					if (tryp.y >= range.b && tryp.y <= range.t)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound))
@@ -184,12 +196,14 @@ Vec constrain (Vec p, const Rect& range) {
 						corner.r * corner.r - (range.t - corner.c.y) * (range.t - corner.c.y)
 					);
 					Vec tryp = Vec(corner.c.x + x, range.t);
+					reg_debug_point(tryp);
 					if (tryp.x >= range.l && tryp.x <= range.r)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound))
 					if (!(mag2(tryp - p) >= mag2(selectedp - p)))
 						selectedp = tryp;
 					tryp.x = corner.c.x - x;
+					reg_debug_point(tryp);
 					if (tryp.x >= range.l && tryp.x <= range.r)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound))
