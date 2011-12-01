@@ -92,7 +92,7 @@ Vec constrain (Vec p, const Rect& range) {
 	else {  // Get closest intersection between range and walls
 		for (uint i=0; i < room->n_walls; i++) {
 			const Line& side = room->sides[i];
-			Rect siderect = uninvert(Rect(side.a, side.b));
+			Rect siderect = aabb(side);
 			if (defined(range & siderect)) {
 				if (range.l >= siderect.l && range.l <= siderect.r) {
 					float y = solvey(side, range.l);
@@ -124,10 +124,7 @@ Vec constrain (Vec p, const Rect& range) {
 				}
 			}
 			const Circle& corner = room->walls[i];
-			Rect cornerrect = uninvert(Rect(
-				corner.c - Vec(corner.r, corner.r), 
-				corner.c + Vec(corner.r, corner.r)
-			));
+			Rect cornerrect = aabb(corner);
 			if (defined(range & cornerrect)) {
 				Line abound = bound_a(room->sides[i]);
 				Line bbound = bound_b(room->sides[(i?i:room->n_walls)]);
