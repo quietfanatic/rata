@@ -46,20 +46,26 @@ Vec constrain (Vec p, const Rect& range) {
 		if (!across_line(p, bound_a(room->sides[i]))) { // Corner
 			if (!across_line(p, bound_b(room->sides[(i?i:room->n_walls)-1]))) {
 				Vec tryp = uncross_circle(p, room->walls[i]);
-				if (in_rect(tryp, range))
-				if (!(mag2(tryp - minp) > mag2(p - minp))) {
-					currently_in = !in_circle(p, room->walls[i]);
-					minp = tryp;
+				if (in_rect(tryp, range)) {
+					bool in_this = !in_circle(p, room->walls[i]);
+					 // Favor violations a little over nonviolations
+					 // The !> is to deal with NANs.
+					if (!(mag2(tryp - p)+in_this > mag2(minp - p)+currently_in)) {
+						currently_in = in_this;
+						minp = tryp;
+					}
 				}
 			}
 		}
 		else { // Side
 			if (across_line(p, bound_b(room->sides[i]))) {
 				Vec tryp = uncross_line(p, room->sides[i]);
-				if (in_rect(tryp, range))
-				if (!(mag2(tryp - minp) > mag2(p - minp))) {
-					currently_in = !across_line(p, room->sides[i]);
-					minp = tryp;
+				if (in_rect(tryp, range)) {
+					bool in_this = !across_line(p, room->sides[i]);
+					if (!(mag2(tryp - p)+in_this > mag2(minp - p)+currently_in)) {
+						currently_in = in_this;
+						minp = tryp;
+					}
 				}
 			}
 		}
