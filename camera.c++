@@ -66,7 +66,7 @@ Vec constrain (Vec p, const Rect& range) {
 				if (!(mag2(tryp - p)+in_this >= mag2(minp - p)+currently_in)) {
 					currently_in = in_this;
 					minp = tryp;
-					if (in_rect(tryp, range)) {
+					if (!in_this && in_rect(tryp, range)) {
 						//printf("[%u] In range.\n", frame_number);
 						selectedp = tryp;
 					}
@@ -80,7 +80,7 @@ Vec constrain (Vec p, const Rect& range) {
 				if (!(mag2(tryp - p)+in_this >= mag2(minp - p)+currently_in)) {
 					currently_in = in_this;
 					minp = tryp;
-					if (in_rect(tryp, range)) {
+					if (!in_this && in_rect(tryp, range)) {
 						selectedp = tryp;
 					}
 				}
