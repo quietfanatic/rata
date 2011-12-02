@@ -241,11 +241,14 @@ void constrain_cursor () {
 		if (defined(linerect & aabb(side))) {
 			 // Ray
 			Vec inter = intersect_lines(los, side);
+			//printf("[%u] Checking intersection at %f, %f\n", frame_number, inter.x, inter.y);
 			if (in_line(inter, side))
 			if (in_line(inter, los)) {
 				float newf = line_fraction(inter, los);
-				if (newf < fraction)
+				if (newf < fraction) {
+					//printf("[%u] Hit side with corner.\n", frame_number);
 					fraction = newf;
+				}
 			}
 		}
 		if (defined(range & aabb(side))) {
@@ -306,24 +309,32 @@ void constrain_cursor () {
 					corner.c.y
 				);
 				if (in_rect(tryp, range)) {
-					float newf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
-					if (abs_f((tryp.x - los.a.x)) <= abs_f((los.b.x - los.a.x)*newf))
+					float xf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
+					float yf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
+					float newf = MAX(xf, yf);
+					if (newf >= 0 && newf <= 1)
 					if (newf < fraction)
 					if (!across_line(tryp, abound))
-					if (!across_line(tryp, bbound))
+					if (!across_line(tryp, bbound)) {
+						//printf("[%u] Hit aligned X line at %f, %f.\n", frame_number, tryp.x, tryp.y);
 						fraction = newf;
+					}
 				}
 				tryp = Vec(
 					corner.c.x,
 					corner.c.y + sign_f(los.a.y - los.b.y)*abs_f(corner.r)
 				);
 				if (in_rect(tryp, range)) {
-					float newf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
-					if (abs_f((tryp.y - los.a.y)) <= abs_f((los.b.y - los.a.y)*newf))
+					float xf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
+					float yf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
+					float newf = MAX(xf, yf);
+					if (newf >= 0 && newf <= 1)
 					if (newf < fraction)
 					if (!across_line(tryp, abound))
-					if (!across_line(tryp, bbound))
+					if (!across_line(tryp, bbound)) {
+						//printf("[%u] Hit aligned Y line at %f, %f.\n", frame_number, tryp.x, tryp.y);
 						fraction = newf;
+					}
 				}
 				 // Aligned rays
 				if (edge.x >= cornerrect.l && edge.x <= cornerrect.r) {
@@ -409,7 +420,7 @@ void get_focus () {
 	if (cursor.y < -13)
 		cursor = Vec(-13 / slope(cursor), -13);
 	else if (cursor.y > 13)
-		cursor = Vec(13 / slope(cursor), -13);
+		cursor = Vec(13 / slope(cursor), 13);
 	attention[0].range = Rect(rata->cursor_pos() - Vec(9, 6.5), rata->cursor_pos() + Vec(9, 6.5));
 
 	Rect range = attention[0].range;

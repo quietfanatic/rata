@@ -256,6 +256,10 @@ void draw_phase () {
 		for (uint i=0; i < current_room->n_walls; i++) {
 			vertex(current_room->sides[i].a);
 			vertex(current_room->sides[i].b);
+			vertex(bound_a(current_room->sides[i]).a);
+			vertex(bound_a(current_room->sides[i]).b);
+			vertex(bound_b(current_room->sides[i]).a);
+			vertex(bound_b(current_room->sides[i]).b);
 		}
 		glEnd();
 		for (uint i=0; i < current_room->n_walls; i++)

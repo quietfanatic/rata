@@ -227,8 +227,14 @@ float line_fraction (Vec p, const Line& l) {
 	else return (p.x - l.a.x) / (l.b.x - l.a.x);
 }
 float in_line (Vec p, const Line& l) {
-	if (verticalish(l)) return p.y > l.a.y && p.y < l.b.y;
-	else return p.x > l.a.x && p.x < l.a.y;
+	if (verticalish(l)) {
+		if (l.a.y < l.b.y) return p.y >= l.a.y && p.y <= l.b.y;
+		else return p.y <= l.a.y && p.y >= l.b.y;
+	}
+	else {
+		if (l.a.x < l.b.x) return p.x >= l.a.x && p.x <= l.b.x;
+		else return p.x <= l.a.x && p.x >= l.b.x;
+	}
 }
 
 Line intersect_line_circle (const Line& l, const Circle& c) {
