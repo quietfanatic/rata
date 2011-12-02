@@ -221,7 +221,7 @@ Vec constrain (Vec p, const Rect& range) {
  // both it and Rata.  Basically we need to do an area sweep
  // consisting of a ray cast, two aligned line casts, and two
  // aligned ray casts.
-void constrain_cursor () {
+Vec constrain_cursor () {
 	room::Def* room = current_room;
 	Line los = Line(rata->cursor_pos(), rata->aim_center());
 	 // Offset our ray to the appropriate corner of the screen.
@@ -397,8 +397,7 @@ void constrain_cursor () {
 			}
 		}
 	}
-	 // Finally move the cursor back.
-	cursor *= 1-fraction;
+	return cursor * (1-fraction);
 }
 
 
@@ -466,12 +465,33 @@ void get_focus () {
 			focus = cur_focus;
 		}
 		else if (i == 1 && !moved_cursor) {
-			constrain_cursor();
-			range = attention[0].range = Rect(rata->cursor_pos() - Vec(9, 6.5), rata->cursor_pos() + Vec(9, 6.5));
+			Vec newcursor = constrain_cursor();
+			Vec diff = cursor - newcursor;
+			 // Let the cursor push its constraint by up to 1 block in each
+			 // direction.  Adjust its attention range accorsingly.
+			if (abs_f(diff.x) < 1) {
+				attention[0].range.l -= abs_f(diff.x);
+				attention[0].range.r += abs_f(diff.x);
+			}
+			else {
+				cursor.x = newcursor.x + 1 * sign_f(diff.x);
+				attention[0].range.l -= 1;
+				attention[0].range.r += 1;
+			}
+			if (abs_f(diff.y) < 1) {
+				attention[0].range.b -= abs_f(diff.y);
+				attention[0].range.t += abs_f(diff.y);
+			}
+			else {
+				cursor.y = newcursor.y + 1 * sign_f(diff.y);
+				attention[0].range.b -= 1;
+				attention[0].range.t += 1;
+			}
+			range = attention[0].range;
 			moved_cursor = true;
 			goto tryagain;
 		}
-	}	 
+	}
 }
 
 
