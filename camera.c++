@@ -241,33 +241,35 @@ void constrain_cursor () {
 		if (defined(linerect & aabb(side))) {
 			 // Ray
 			Vec inter = intersect_lines(los, side);
-			printf("[%u] Checking intersection at %f, %f\n", frame_number, inter.x, inter.y);
-			printf(" in %f, %f -- %f, %f: %d; in %f, %f -- %f, %f: %d\n",
-				side.a.x, side.a.y, side.b.x, side.b.y, in_line(inter, side),
-				los.a.x, los.a.y, los.b.x, los.b.y, in_line(inter, los)
-			);
+			//printf("[%u] Checking intersection at %f, %f\n", frame_number, inter.x, inter.y);
+			//printf(" in %f, %f -- %f, %f: %d; in %f, %f -- %f, %f: %d\n",
+			//	side.a.x, side.a.y, side.b.x, side.b.y, in_line(inter, side),
+			//	los.a.x, los.a.y, los.b.x, los.b.y, in_line(inter, los)
+			//);
 			if (in_line(inter, side))
 			if (in_line(inter, los)) {
 				float newf = line_fraction(inter, los);
 				if (newf < fraction) {
-					printf("[%u] Hit side with corner.\n", frame_number);
+					//printf("[%u] Hit side with corner.\n", frame_number);
 					fraction = newf;
 				}
 			}
 		}
-		if (defined(range & aabb(side))) {
-			 // Aligned rays
-			float y = solvey(side, edge.x);
-			if (y >= linerect.b && y <= linerect.t) {
-				float newf = (y - los.a.y) / (los.b.y - los.a.y);
-				if (newf < fraction)
-					fraction = newf;
+		 // Aligned rays
+		float y = solvey(side, edge.x);
+		if (in_line(Vec(edge.x, y), side)) {
+			float newf = (y - los.a.y) / (los.b.y - los.a.y);
+			if (newf < fraction) {
+				//printf("[%u] Hit side with edge.x.\n", frame_number);
+				fraction = newf;
 			}
-			float x = solvex(side, edge.y);
-			if (x >= linerect.l && x <= linerect.r) {
-				float newf = (x - los.a.x) / (los.b.x - los.a.x);
-				if (newf < fraction)
-					fraction = newf;
+		}
+		float x = solvex(side, edge.y);
+		if (in_line(Vec(x,edge.y), side)) {
+			float newf = (x - los.a.x) / (los.b.x - los.a.x);
+			if (newf < fraction) {
+				//printf("[%u] Hit side with edge.y.\n", frame_number);
+				fraction = newf;
 			}
 		}
 		 // Check corner
@@ -282,8 +284,10 @@ void constrain_cursor () {
 					float xf = (corner.c.x - los.a.x) / (los.b.x - los.a.x);
 					float yf = (corner.c.y - los.a.y) / (los.b.y - los.a.y);
 					float newf = MAX(xf, yf);
-					if (newf < fraction)
+					if (newf < fraction) {
+						//printf("[%u] Hit 0-radius corner.\n", frame_number);
 						fraction = newf;
+					}
 				}
 			}
 			else {
