@@ -239,14 +239,15 @@ float in_line (Vec p, const Line& l) {
 
 Line intersect_line_circle (const Line& l, const Circle& c) {
 	 // Formula take from http://mathworld.wolfram.com/Circle-LineIntersection.html
+	 // with slight modifications.
 	double dx = l.b.x - l.a.x;
 	double dy = l.b.y - l.a.y;
 	double dr2 = dx*dx + dy*dy;
-	double D = l.a.x * l.b.y - l.b.x * l.a.y;
+	double D = (l.a.x - c.c.x) * (l.b.y - c.c.y) - (l.b.x - c.c.x) * (l.a.y - c.c.y);
 	double disc = c.r*c.r * dr2 - D*D;
 	if (disc < 0) return Line(Vec::undef, Vec::undef);
 	if (disc == 0) {
-		Vec tangent = Vec(
+		Vec tangent = c.c + Vec(
 			D * dy / dr2,
 			-D * dx / dr2
 		);
@@ -258,11 +259,11 @@ Line intersect_line_circle (const Line& l, const Circle& c) {
 	double variant_x = sign_f(dy) * dx * sqrtdisc;
 	double variant_y = abs_f(dy) * sqrtdisc;
 	Line r = Line(
-		Vec(
+		c.c + Vec(
 			(D * dy - variant_x) / dr2,
 			(-D * dx - variant_y) / dr2
 		),
-		Vec(
+		c.c + Vec(
 			(D * dy + variant_x) / dr2,
 			(-D * dx + variant_y) / dr2
 		)

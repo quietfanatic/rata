@@ -288,6 +288,7 @@ void constrain_cursor () {
 					Line inter = intersect_line_circle(los, corner);
 					if (defined(inter.a)) {
 						float newf = line_fraction(inter.a, los);
+						//printf("[%u] inter.a newf = %f\n", frame_number, newf);
 						if (newf >= 0 && newf <= 1)
 						if (newf < fraction)
 						if (!across_line(inter.a, abound))
@@ -295,12 +296,16 @@ void constrain_cursor () {
 							fraction = newf;
 						}
 						newf = line_fraction(inter.b, los);
+						//printf("[%u] inter.b newf = %f\n", frame_number, newf);
 						if (newf >= 0 && newf <= 1)
 						if (newf < fraction)
 						if (!across_line(inter.b, abound))
 						if (!across_line(inter.b, bbound)) {
 							fraction = newf;
 						}
+					}
+					else {
+						//printf("[%u] No intersections found.\n", frame_number);
 					}
 				}
 				 // Aligned lines
