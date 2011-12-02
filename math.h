@@ -171,8 +171,6 @@ Line bound_b (const Line& l) {
 }
 
 
- // Lines
-
 bool across_line (Vec p, const Line& l) {
 	if (vertical(l))
 		return (l.a.y < l.b.y) ? p.x < l.a.x
