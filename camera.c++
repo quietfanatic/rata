@@ -241,12 +241,16 @@ void constrain_cursor () {
 		if (defined(linerect & aabb(side))) {
 			 // Ray
 			Vec inter = intersect_lines(los, side);
-			//printf("[%u] Checking intersection at %f, %f\n", frame_number, inter.x, inter.y);
+			printf("[%u] Checking intersection at %f, %f\n", frame_number, inter.x, inter.y);
+			printf(" in %f, %f -- %f, %f: %d; in %f, %f -- %f, %f: %d\n",
+				side.a.x, side.a.y, side.b.x, side.b.y, in_line(inter, side),
+				los.a.x, los.a.y, los.b.x, los.b.y, in_line(inter, los)
+			);
 			if (in_line(inter, side))
 			if (in_line(inter, los)) {
 				float newf = line_fraction(inter, los);
 				if (newf < fraction) {
-					//printf("[%u] Hit side with corner.\n", frame_number);
+					printf("[%u] Hit side with corner.\n", frame_number);
 					fraction = newf;
 				}
 			}

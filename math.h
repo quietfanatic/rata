@@ -156,7 +156,7 @@ struct Line {
 bool vertical (const Line& l) { return l.a.x == l.b.x; }
 bool horizontal (const Line& l) { return l.a.y == l.b.y; }
 float slope (const Line& l) { return (l.b.y - l.a.y) / (l.b.x - l.a.x); }
-bool verticalish (const Line& l) { return (l.b.y - l.a.y) > (l.b.x - l.a.x); }
+bool verticalish (const Line& l) { return abs_f(l.b.y - l.a.y) > abs_f(l.b.x - l.a.x); }
 float solvey (const Line& l, float x) {
 	return l.a.y + slope(l) * (x - l.a.x);
 }
@@ -226,7 +226,7 @@ float line_fraction (Vec p, const Line& l) {
 	if (verticalish(l)) return (p.y - l.a.y) / (l.b.y - l.a.y);
 	else return (p.x - l.a.x) / (l.b.x - l.a.x);
 }
-float in_line (Vec p, const Line& l) {
+bool in_line (Vec p, const Line& l) {
 	if (verticalish(l)) {
 		if (l.a.y < l.b.y) return p.y >= l.a.y && p.y <= l.b.y;
 		else return p.y <= l.a.y && p.y >= l.b.y;
