@@ -43,6 +43,28 @@ void build_sides (const room::Def* r) {
 	}
 }
 
+ // ATTENTION
+
+const uint MAX_ATTENTIONS = 8;
+Attention attention [MAX_ATTENTIONS];
+
+void reset_attentions () {
+	attention[0] = Attention(200000, Rect(rata->cursor_pos() - Vec(9, 6.5), rata->cursor_pos() + Vec(9, 6.5)));
+	attention[1] = Attention(100000, Rect(rata->aim_center() - Vec(9, 6.5), rata->aim_center() + Vec(9, 6.5)));
+	for (uint i=2; i < MAX_ATTENTIONS; i++)
+		attention[i].priority = -1/0.0;
+}
+
+void propose_attention (Attention cur) {
+	bool shifting = false;
+	for (uint i=0; i < MAX_ATTENTIONS; i++)
+	if (shifting || cur.priority > attention[i].priority) {
+		shifting = true;
+		SWAP(attention[i], cur);
+	}
+}
+
+
  // WALL USAGE
 
  // Constrain a point to the walls of the room and the current range.
@@ -221,7 +243,12 @@ Vec constrain (Vec p, const Rect& range) {
  // both it and Rata.  Basically we need to do an area sweep
  // consisting of a ray cast, two aligned line casts, and two
  // aligned ray casts.
-Vec constrain_cursor () {
+enum {
+	hit_corner,
+	hit_x,
+	hit_y
+};
+void constrain_cursor () {
 	room::Def* room = current_room;
 	Line los = Line(rata->cursor_pos(), rata->aim_center());
 	 // Offset our ray to the appropriate corner of the screen.
@@ -235,6 +262,7 @@ Vec constrain_cursor () {
 	Vec edge = rata->aim_center() - offset;
 	Rect range = uninvert(Rect(los.b, edge));
 	float fraction = 1;  // 1 = b, 0 = a
+	int hit = hit_corner;
 	for (uint i=0; i < room->n_walls; i++) {
 		const Line& side = room->sides[i];
 		 // Check side
@@ -251,6 +279,7 @@ Vec constrain_cursor () {
 				float newf = line_fraction(inter, los);
 				if (newf < fraction) {
 					//printf("[%u] Hit side with corner.\n", frame_number);
+					hit = hit_corner;
 					fraction = newf;
 				}
 			}
@@ -262,6 +291,7 @@ Vec constrain_cursor () {
 			if (newf >= 0 && newf <= 1)
 			if (newf < fraction) {
 				//printf("[%u] Hit side with edge.x.\n", frame_number);
+				hit = hit_y;
 				fraction = newf;
 			}
 		}
@@ -271,6 +301,7 @@ Vec constrain_cursor () {
 			if (newf >= 0 && newf <= 1)
 			if (newf < fraction) {
 				//printf("[%u] Hit side with edge.y.\n", frame_number);
+				hit = hit_x;
 				fraction = newf;
 			}
 		}
@@ -288,6 +319,7 @@ Vec constrain_cursor () {
 					float newf = MAX(xf, yf);
 					if (newf < fraction) {
 						//printf("[%u] Hit 0-radius corner.\n", frame_number);
+						hit = xf>yf ? hit_x : hit_y;
 						fraction = newf;
 					}
 				}
@@ -303,6 +335,7 @@ Vec constrain_cursor () {
 						if (newf < fraction)
 						if (!across_line(inter.a, abound))
 						if (!across_line(inter.a, bbound)) {
+							hit = hit_corner;
 							fraction = newf;
 						}
 						newf = line_fraction(inter.b, los);
@@ -311,6 +344,7 @@ Vec constrain_cursor () {
 						if (newf < fraction)
 						if (!across_line(inter.b, abound))
 						if (!across_line(inter.b, bbound)) {
+							hit = hit_corner;
 							fraction = newf;
 						}
 					}
@@ -332,6 +366,7 @@ Vec constrain_cursor () {
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound)) {
 						//printf("[%u] Hit aligned X line at %f, %f.\n", frame_number, tryp.x, tryp.y);
+						hit = hit_x;
 						fraction = newf;
 					}
 				}
@@ -348,6 +383,7 @@ Vec constrain_cursor () {
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound)) {
 						//printf("[%u] Hit aligned Y line at %f, %f.\n", frame_number, tryp.x, tryp.y);
+						hit = hit_y;
 						fraction = newf;
 					}
 				}
@@ -361,16 +397,20 @@ Vec constrain_cursor () {
 						float newf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
 						if (newf < fraction)
 						if (!across_line(tryp, abound))
-						if (!across_line(tryp, bbound))
+						if (!across_line(tryp, bbound)) {
+							hit = hit_y;
 							fraction = newf;
+						}
 					}
 					tryp.y = corner.c.y - y;
 					if (tryp.y >= linerect.b && tryp.y <= linerect.t) {
 						float newf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
 						if (newf < fraction)
 						if (!across_line(tryp, abound))
-						if (!across_line(tryp, bbound))
+						if (!across_line(tryp, bbound)) {
+							hit = hit_y;
 							fraction = newf;
+						}
 					}
 				}
 				if (edge.y >= cornerrect.b && edge.y <= cornerrect.t) {
@@ -382,43 +422,46 @@ Vec constrain_cursor () {
 						float newf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
 						if (newf < fraction)
 						if (!across_line(tryp, abound))
-						if (!across_line(tryp, bbound))
+						if (!across_line(tryp, bbound)) {
+							hit = hit_x;
 							fraction = newf;
+						}
 					}
 					tryp.x = corner.c.x - x;
 					if (tryp.x >= linerect.l && tryp.x <= linerect.r) {
 						float newf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
 						if (newf < fraction)
 						if (!across_line(tryp, abound))
-						if (!across_line(tryp, bbound))
+						if (!across_line(tryp, bbound)) {
+							hit = hit_x;
 							fraction = newf;
+						}
 					}
 				}
 			}
 		}
 	}
-	return cursor * (1-fraction);
-}
-
-
- // ATTENTION
-
-const uint MAX_ATTENTIONS = 8;
-Attention attention [MAX_ATTENTIONS];
-
-void reset_attentions () {
-	attention[0] = Attention(200000, Rect(rata->cursor_pos() - Vec(9, 6.5), rata->cursor_pos() + Vec(9, 6.5)));
-	attention[1] = Attention(100000, Rect(rata->aim_center() - Vec(9, 6.5), rata->aim_center() + Vec(9, 6.5)));
-	for (uint i=2; i < MAX_ATTENTIONS; i++)
-		attention[i].priority = -1/0.0;
-}
-
-void propose_attention (Attention cur) {
-	bool shifting = false;
-	for (uint i=0; i < MAX_ATTENTIONS; i++)
-	if (shifting || cur.priority > attention[i].priority) {
-		shifting = true;
-		SWAP(attention[i], cur);
+	 // Now actually do the work.
+	Vec newcursor = cursor * (1-fraction);
+	Vec diff = newcursor - cursor;
+	Vec absdiff = Vec(abs_f(diff.x), abs_f(diff.y));
+	attention[0].range.l -= absdiff.x;
+	attention[0].range.r += absdiff.x;
+	attention[0].range.b -= absdiff.y;
+	attention[0].range.t += absdiff.y;
+	 // Let the cursor push its boundary by up to 1 block, in the
+	 // direction given by hit.
+	printf("[%u] ", frame_number);
+	if (hit == hit_corner) printf("Hit corner and ");
+	if ( hit == hit_x
+	 || (hit == hit_corner && absdiff.x > absdiff.y)
+	) {
+		printf("Hit x.\n");
+		if (absdiff.x > 1) cursor += diff - Vec(1, cursor.y/cursor.x)*sign_f(diff.x);
+	}
+	else {
+		printf("Hit y.\n");
+		if (absdiff.y > 1) cursor += diff - Vec(cursor.x/cursor.y, 1)*sign_f(diff.y);
 	}
 }
 
@@ -465,28 +508,7 @@ void get_focus () {
 			focus = cur_focus;
 		}
 		else if (i == 1 && !moved_cursor) {
-			Vec newcursor = constrain_cursor();
-			Vec diff = cursor - newcursor;
-			 // Let the cursor push its constraint by up to 1 block in each
-			 // direction.  Adjust its attention range accorsingly.
-			if (abs_f(diff.x) < 1) {
-				attention[0].range.l -= abs_f(diff.x);
-				attention[0].range.r += abs_f(diff.x);
-			}
-			else {
-				cursor.x = newcursor.x + 1 * sign_f(diff.x);
-				attention[0].range.l -= 1;
-				attention[0].range.r += 1;
-			}
-			if (abs_f(diff.y) < 1) {
-				attention[0].range.b -= abs_f(diff.y);
-				attention[0].range.t += abs_f(diff.y);
-			}
-			else {
-				cursor.y = newcursor.y + 1 * sign_f(diff.y);
-				attention[0].range.b -= 1;
-				attention[0].range.t += 1;
-			}
+			constrain_cursor();
 			range = attention[0].range;
 			moved_cursor = true;
 			goto tryagain;
