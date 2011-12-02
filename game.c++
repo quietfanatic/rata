@@ -72,7 +72,7 @@ void reg_debug_point(Vec p) {
 	}
 	debug_points[n_debug_points++] = p;
 }
-
+Line debug_line = Line(Vec::undef, Vec::undef);
 
 
 

@@ -223,41 +223,47 @@ Vec constrain (Vec p, const Rect& range) {
  // aligned ray casts.
 void constrain_cursor () {
 	room::Def* room = current_room;
-	Line los = Line(rata->aim_center(), rata->cursor_pos());
+	Line los = Line(rata->cursor_pos(), rata->aim_center());
 	 // Offset our ray to the appropriate corner of the screen.
 	Vec offset = Vec(9, 6.5);
-	if (los.a.x <= los.b.x) offset.x = -offset.x;
-	if (los.a.y <= los.b.y) offset.y = -offset.y;
+	if (los.a.x > los.b.x) offset.x = -offset.x;
+	if (los.a.y > los.b.y) offset.y = -offset.y;
 	los.a += offset;
 	los.b += offset;
-	Rect range = aabb(los);
-	float fraction = 0;  // 1 = b, 0 = a
+	debug_line = los;
+	Rect linerect = aabb(los);
+	Vec edge = rata->aim_center() - offset;
+	Rect range = uninvert(Rect(los.b, edge));
+	float fraction = 1;  // 1 = b, 0 = a
 	for (uint i=0; i < room->n_walls; i++) {
 		const Line& side = room->sides[i];
 		 // Check side
-		if (defined(range & aabb(side))) {
+		if (defined(linerect & aabb(side))) {
 			 // Ray
 			Vec inter = intersect_lines(los, side);
 			if (in_line(inter, side))
 			if (in_line(inter, los)) {
 				float newf = line_fraction(inter, los);
-				if (newf > fraction)
-					fraction = newf;
-			}
-			 // Aligned rays
-			float y = solvey(side, los.a.x);
-			if (y >= range.b && y <= range.t) {
-				float newf = (y - los.a.y) / (los.b.y - los.a.y);
-				if (newf > fraction)
-					fraction = newf;
-			}
-			float x = solvex(side, los.a.y);
-			if (x >= range.l && x <= range.r) {
-				float newf = (x - los.a.x) / (los.b.x - los.a.x);
-				if (newf > fraction)
+				if (newf < fraction)
 					fraction = newf;
 			}
 		}
+		if (defined(range & aabb(side))) {
+			 // Aligned rays
+			float y = solvey(side, edge.x);
+			if (y >= linerect.b && y <= linerect.t) {
+				float newf = (y - los.a.y) / (los.b.y - los.a.y);
+				if (newf < fraction)
+					fraction = newf;
+			}
+			float x = solvex(side, edge.y);
+			if (x >= linerect.l && x <= linerect.r) {
+				float newf = (x - los.a.x) / (los.b.x - los.a.x);
+				if (newf < fraction)
+					fraction = newf;
+			}
+		}
+		 // Check corner
 		const Circle& corner = room->walls[i];
 		Rect cornerrect = aabb(corner);
 		if (defined(range & cornerrect)) {
@@ -269,27 +275,29 @@ void constrain_cursor () {
 					float xf = (corner.c.x - los.a.x) / (los.b.x - los.a.x);
 					float yf = (corner.c.y - los.a.y) / (los.b.y - los.a.y);
 					float newf = MAX(xf, yf);
-					if (newf > fraction)
+					if (newf < fraction)
 						fraction = newf;
 				}
 			}
 			else {
 				 // Ray
-				Line inter = intersect_line_circle(los, corner);
-				if (defined(inter.a)) {
-					float newf = line_fraction(inter.a, los);
-					if (newf >= 0 && newf <= 1)
-					if (newf > fraction)
-					if (!across_line(inter.a, abound))
-					if (!across_line(inter.a, bbound)) {
-						fraction = newf;
-					}
-					newf = line_fraction(inter.b, los);
-					if (newf >= 0 && newf <= 1)
-					if (newf > fraction)
-					if (!across_line(inter.b, abound))
-					if (!across_line(inter.b, bbound)) {
-						fraction = newf;
+				if (defined(linerect & cornerrect)) {
+					Line inter = intersect_line_circle(los, corner);
+					if (defined(inter.a)) {
+						float newf = line_fraction(inter.a, los);
+						if (newf >= 0 && newf <= 1)
+						if (newf < fraction)
+						if (!across_line(inter.a, abound))
+						if (!across_line(inter.a, bbound)) {
+							fraction = newf;
+						}
+						newf = line_fraction(inter.b, los);
+						if (newf >= 0 && newf <= 1)
+						if (newf < fraction)
+						if (!across_line(inter.b, abound))
+						if (!across_line(inter.b, bbound)) {
+							fraction = newf;
+						}
 					}
 				}
 				 // Aligned lines
@@ -298,9 +306,9 @@ void constrain_cursor () {
 					corner.c.y
 				);
 				if (in_rect(tryp, range)) {
-					float newf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
-					if (abs_f((tryp.y - los.a.y)) <= abs_f((los.b.y - los.a.y)*newf))
-					if (newf > fraction)
+					float newf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
+					if (abs_f((tryp.x - los.a.x)) <= abs_f((los.b.x - los.a.x)*newf))
+					if (newf < fraction)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound))
 						fraction = newf;
@@ -310,51 +318,51 @@ void constrain_cursor () {
 					corner.c.y + sign_f(los.a.y - los.b.y)*abs_f(corner.r)
 				);
 				if (in_rect(tryp, range)) {
-					float newf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
-					if (abs_f((tryp.x - los.a.x)) <= abs_f((los.b.x - los.a.x)*newf))
-					if (newf > fraction)
+					float newf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
+					if (abs_f((tryp.y - los.a.y)) <= abs_f((los.b.y - los.a.y)*newf))
+					if (newf < fraction)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound))
 						fraction = newf;
 				}
 				 // Aligned rays
-				if (los.a.x >= cornerrect.l && los.a.x <= cornerrect.r) {
+				if (edge.x >= cornerrect.l && edge.x <= cornerrect.r) {
 					float y = sqrt(
-						corner.r * corner.r - (los.a.x - corner.c.x) * (los.a.x - corner.c.x)
+						corner.r * corner.r - (edge.x - corner.c.x) * (edge.x - corner.c.x)
 					);
-					Vec tryp = Vec(los.a.x, corner.c.y + y);
-					if (tryp.y >= range.b && tryp.y <= range.t) {
+					Vec tryp = Vec(edge.x, corner.c.y + y);
+					if (tryp.y >= linerect.b && tryp.y <= linerect.t) {
 						float newf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
-						if (newf > fraction)
+						if (newf < fraction)
 						if (!across_line(tryp, abound))
 						if (!across_line(tryp, bbound))
 							fraction = newf;
 					}
 					tryp.y = corner.c.y - y;
-					if (tryp.y >= range.b && tryp.y <= range.t) {
+					if (tryp.y >= linerect.b && tryp.y <= linerect.t) {
 						float newf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
-						if (newf > fraction)
+						if (newf < fraction)
 						if (!across_line(tryp, abound))
 						if (!across_line(tryp, bbound))
 							fraction = newf;
 					}
 				}
-				if (los.a.y >= cornerrect.b && los.a.y <= cornerrect.t) {
+				if (edge.y >= cornerrect.b && edge.y <= cornerrect.t) {
 					float x = sqrt(
-						corner.r * corner.r - (los.a.y - corner.c.y) * (los.a.y - corner.c.y)
+						corner.r * corner.r - (edge.y - corner.c.y) * (edge.y - corner.c.y)
 					);
-					Vec tryp = Vec(corner.c.x + x, los.a.y);
-					if (tryp.x >= range.l && tryp.x <= range.r) {
+					Vec tryp = Vec(corner.c.x + x, edge.y);
+					if (tryp.x >= linerect.l && tryp.x <= linerect.r) {
 						float newf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
-						if (newf > fraction)
+						if (newf < fraction)
 						if (!across_line(tryp, abound))
 						if (!across_line(tryp, bbound))
 							fraction = newf;
 					}
 					tryp.x = corner.c.x - x;
-					if (tryp.x >= range.l && tryp.x <= range.r) {
+					if (tryp.x >= linerect.l && tryp.x <= linerect.r) {
 						float newf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
-						if (newf > fraction)
+						if (newf < fraction)
 						if (!across_line(tryp, abound))
 						if (!across_line(tryp, bbound))
 							fraction = newf;
@@ -364,7 +372,7 @@ void constrain_cursor () {
 		}
 	}
 	 // Finally move the cursor back.
-	cursor *= fraction;
+	cursor *= 1-fraction;
 }
 
 

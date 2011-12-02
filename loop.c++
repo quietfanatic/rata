@@ -281,6 +281,8 @@ void draw_phase () {
 		for (uint i=0; i < n_debug_points; i++) {
 			draw_rect(Rect(debug_points[i] - Vec(1, 1)*PX, debug_points[i] + Vec(1, 1)*PX), 0xffff007f);
 		}
+		if (defined(debug_line.a))
+			draw_line(debug_line.a, debug_line.b, 0x007f7f7f);
 		draw_rect(Rect(oldfocus - Vec(1, 1)*PX, oldfocus + Vec(1, 1)*PX), 0x007f7f7f);
 		//draw_rect(Rect(focus - Vec(1, 1)*PX, focus + Vec(1, 1)*PX), 0x0000ff7f);
 		draw_rect(Rect(camera - Vec(1, 1)*PX, camera + Vec(1, 1)*PX), 0xff00007f);
