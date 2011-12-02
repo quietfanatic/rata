@@ -279,7 +279,7 @@ void constrain_cursor () {
 				float newf = line_fraction(inter, los);
 				if (newf < fraction) {
 					//printf("[%u] Hit side with corner.\n", frame_number);
-					hit = hit_corner;
+					hit = vertical(side) ? hit_x : horizontal(side) ? hit_y : hit_corner;
 					fraction = newf;
 				}
 			}
@@ -451,16 +451,16 @@ void constrain_cursor () {
 	attention[0].range.t += absdiff.y;
 	 // Let the cursor push its boundary by up to 1 block, in the
 	 // direction given by hit.
-	printf("[%u] ", frame_number);
-	if (hit == hit_corner) printf("Hit corner and ");
+	//printf("[%u] ", frame_number);
+	//if (hit == hit_corner) printf("Hit corner and ");
 	if ( hit == hit_x
 	 || (hit == hit_corner && absdiff.x > absdiff.y)
 	) {
-		printf("Hit x.\n");
+		//printf("Hit x.\n");
 		if (absdiff.x > 1) cursor += diff - Vec(1, cursor.y/cursor.x)*sign_f(diff.x);
 	}
 	else {
-		printf("Hit y.\n");
+		//printf("Hit y.\n");
 		if (absdiff.y > 1) cursor += diff - Vec(cursor.x/cursor.y, 1)*sign_f(diff.y);
 	}
 }
