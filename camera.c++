@@ -52,6 +52,7 @@ void build_sides (const room::Def* r) {
  // If during phase one it is decided that p is not in a wall, p
  // is returned.
 Vec constrain (Vec p, const Rect& range) {
+	n_debug_points = 0;
 	room::Def* room = current_room;
 	bool currently_in = true;
 	Vec minp = Vec::undef;
@@ -350,7 +351,7 @@ void constrain_cursor () {
 			}
 		}
 	}
-	 // Finally move the cursor.
+	 // Finally move the cursor back.
 	cursor *= fraction;
 }
 

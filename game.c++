@@ -62,7 +62,7 @@ Vec debug_path [debug_path_size];
 Color debug_path_color [debug_path_size];
 uint debug_path_pos;
 Vec oldratapos;
-const uint max_debug_points = 64;
+const uint max_debug_points = 32;
 uint n_debug_points = 0;
 Vec debug_points [max_debug_points];
 void reg_debug_point(Vec p) {

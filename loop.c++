@@ -423,7 +423,6 @@ void main_loop () {
 	for (;;) {
 		frame_number++;
 		add_phase();
-		n_debug_points = 0;
 		camera_phase();
 		draw_phase();
 		input_phase();
