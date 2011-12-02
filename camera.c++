@@ -479,8 +479,9 @@ void get_focus () {
 	else if (cursor.y > 13)
 		cursor = Vec(13 / slope(cursor), 13);
 	attention[0].range = Rect(rata->cursor_pos() - Vec(9, 6.5), rata->cursor_pos() + Vec(9, 6.5));
-
+	
 	Rect range = attention[0].range;
+	Rect oldcursorrange = range;
 	 // rwc = range without cursor
 	Rect rwc = Rect(-1/0.0, -1/0.0, 1/0.0, 1/0.0);
 	Vec cur_focus;
@@ -492,14 +493,18 @@ void get_focus () {
 		tryagain:
 		Rect cur_range = range & attention[i].range;
 		if (!defined(cur_range)) continue;
-		cur_focus.x =  (attention[0].range.r - cur_rwc.l)
-		             / (size(attention[0].range).x + size(cur_rwc).x)
+		cur_focus.x =  (oldcursorrange.r - cur_rwc.l)
+		             / (size(oldcursorrange).x + size(cur_rwc).x)
 		             * size(cur_rwc).x
 		            + cur_rwc.l;
-		cur_focus.y =  (attention[0].range.t - cur_rwc.b)
-		             / (size(attention[0].range).y + size(cur_rwc).y)
+		cur_focus.y =  (oldcursorrange.t - cur_rwc.b)
+		             / (size(oldcursorrange).y + size(cur_rwc).y)
 		             * size(cur_rwc).y
 		            + cur_rwc.b;
+		if (cur_focus.x < cur_range.l) cur_focus.x = cur_range.l;
+		if (cur_focus.y < cur_range.b) cur_focus.y = cur_range.b;
+		if (cur_focus.x > cur_range.r) cur_focus.x = cur_range.r;
+		if (cur_focus.y > cur_range.t) cur_focus.y = cur_range.t;
 		oldfocus = cur_focus;
 		cur_focus = constrain(cur_focus, cur_range);
 		if (defined(cur_focus)) {
