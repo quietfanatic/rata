@@ -259,6 +259,7 @@ void constrain_cursor () {
 		float y = solvey(side, edge.x);
 		if (in_line(Vec(edge.x, y), side)) {
 			float newf = (y - los.a.y) / (los.b.y - los.a.y);
+			if (newf >= 0 && newf <= 1)
 			if (newf < fraction) {
 				//printf("[%u] Hit side with edge.x.\n", frame_number);
 				fraction = newf;
@@ -267,6 +268,7 @@ void constrain_cursor () {
 		float x = solvex(side, edge.y);
 		if (in_line(Vec(x,edge.y), side)) {
 			float newf = (x - los.a.x) / (los.b.x - los.a.x);
+			if (newf >= 0 && newf <= 1)
 			if (newf < fraction) {
 				//printf("[%u] Hit side with edge.y.\n", frame_number);
 				fraction = newf;
