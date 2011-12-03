@@ -25,6 +25,12 @@ bool gt_angle (float a, float b) {
 		return a > b && a < b+pi;
 	else return a > b || a < b-pi;
 }
+float angle_diff (float a, float b) {
+	float diff = abs_f(a - b);
+	if (diff > pi) diff = 2*pi - diff;
+	return diff;
+}
+
  // Using angles in animation
 uint8 get_angle_frame (float a) {
 	if (a != a) return 4;

@@ -24,8 +24,8 @@
 #define dbg_coll(...)
 //#define dbg_coll(...) { printf("[%d coll] ", frame_number); printf(__VA_ARGS__); }
 
-#define dbg_util(...)
-//#define dbg_util(...) { printf("[%d util] ", frame_number); printf(__VA_ARGS__); }
+//#define dbg_util(...)
+#define dbg_util(...) { printf("[%d util] ", frame_number); printf(__VA_ARGS__); }
 
 //#define dbg_object(...)
 #define dbg_object(...) { printf("[%d object] ", frame_number); printf(__VA_ARGS__); }
