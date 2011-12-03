@@ -40,9 +40,9 @@ Object::Object (int16 type, room::Def* loc, Vec pos, Vec vel, int facing) :
 	subimage(0)
 {
 	for (int i = type::def[type].nfixes; i > 0; i--) {
-		dbg(4, "Fix %d: 0x%08x\n", i, body->CreateFixture(&(type::def[type].fixdef[i-1])));
+		dbg_object("Fix %d: 0x%08x\n", i, body->CreateFixture(&(type::def[type].fixdef[i-1])));
 	}
-	dbg(3, "Affixed 0x%08x with 0x%08x\n", this, body);
+	dbg_object("Affixed 0x%08x with 0x%08x\n", this, body);
 }
 
 void Object::activate () {

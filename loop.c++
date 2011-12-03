@@ -84,13 +84,13 @@ void add_phase () {
 		Actor** a;
 		for (a = &active_actors; *a; a = &(*a)->next_active) {
 			if (type::def[c->type].depth > type::def[(*a)->type].depth) {
-				printf("Linking %08x.\n", c);
+				dbg_actor("Linking %08x.\n", c);
 				c->next_active = *a;
 				*a = c;
 				goto done_activating;
 			}
 		}  // Least deep object
-		printf("Linking %08x.\n", c);
+		dbg_actor("Linking %08x.\n", c);
 		c->next_active = NULL;
 		*a = c;
 		done_activating:
@@ -106,7 +106,7 @@ void add_phase () {
 void remove_phase () {
 	for (Actor** a = &active_actors; *a;) {
 		if (!(*a)->active) {
-			printf("Unlinking %08x.\n", *a);
+			dbg_actor("Unlinking %08x.\n", *a);
 			Actor* c = *a;
 			*a = c->next_active;
 			c->next_active = NULL;
@@ -160,7 +160,7 @@ void camera_phase () {
 void draw_phase () {
 	draw_latency -= 1/FPS;
 	if (draw_latency > 1/FPS) {
-		dbg(6, "Skipping frame %d.\n", frame_number);
+		dbg_timing("Skipping frame.\n");
 		return;
 	}
 	 // Move GL view to camera pos
@@ -172,7 +172,7 @@ void draw_phase () {
 
 	 // Draw actors
 	for (Actor* a = active_actors; a; a = a->next_active) {
-		dbg(8, "Drawing 0x%08x\n", a);
+		dbg_draw("Drawing 0x%08x\n", a);
 
 		a->draw();
 	}
@@ -227,12 +227,6 @@ void draw_phase () {
 				default: { }
 			}
 		}
-//		else {  // Debug draw an object without a b2Body
-//			window->Draw(sf::Shape::Line(
-//				a->pos, a->pos + a->vel,
-//				1.0*PX, Color(0xff00007f)
-//			));
-//		};
 		 // Debug draw rata path.
 		if (mag2(rata->pos - oldratapos) > 0.2) {
 			debug_path[debug_path_pos % debug_path_size] = rata->pos;
@@ -314,8 +308,7 @@ void draw_phase () {
 	draw_latency += frameclock.GetElapsedTime();
 	frameclock.Reset();
 	if (draw_latency < 0) sf::Sleep(-draw_latency);
-	dbg(6, "%f\r", draw_latency);
-	if (DEBUG >= 6) fflush(stdout);
+	dbg_timing("%f\n", draw_latency);
 	window->Display();
 }
 

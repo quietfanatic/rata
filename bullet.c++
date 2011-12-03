@@ -30,7 +30,7 @@ void RBullet::move () {
 	LineChecker coll;
 	coll = check_line(pos0, pos2, cf::bullet.maskBits, owner);
 	while (coll.hit) {
-		dbg(3, "Bullet hit %08x, cf %u.\n", coll.hit->GetBody()->GetUserData(), coll.hit->GetFilterData().categoryBits);
+		dbg_bullet("Hit %08x, cf %u.\n", coll.hit->GetBody()->GetUserData(), coll.hit->GetFilterData().categoryBits);
 		pos1 = pos0 + coll.frac * vel;
 		 // This is how you bounce.
 		float velnorm = dot(vel, coll.norm);
@@ -42,7 +42,7 @@ void RBullet::move () {
 			Object* o = (Object*)coll.hit->GetBody()->GetUserData();
 			if (fp == &type::rata_fixprop_helmet) {
 				float angle = ang(coll.norm);
-				dbg(4, "Helmet strike: %f,%f; %f > %f == %d\n", coll.norm.x, coll.norm.y, angle, rata->helmet_angle, gt_angle(angle, rata->helmet_angle));
+				dbg_bullet("Helmet strike: %f,%f; %f > %f == %d\n", coll.norm.x, coll.norm.y, angle, rata->helmet_angle, gt_angle(angle, rata->helmet_angle));
 				if (gt_angle(angle, rata->helmet_angle)) {
 					snd::def[snd::helmethit2].play(dither(1.0, 0.02));
 					goto just_bounce;
@@ -100,7 +100,7 @@ RBullet* fire_rbullet (Object* owner, Vec pos, Vec vel, int power, float mass) {
 			bullets[i].mass = mass;
 			bullets[i].owner = owner;
 			bullets[i].lifetime = 0;
-			dbg(3, "Creating bullet %d\n", i);
+			dbg_bullet("Creating bullet %d\n", i);
 			return &bullets[i];
 		}
 		else if (bullets[i].lifetime > oldesttime) {
@@ -114,7 +114,7 @@ RBullet* fire_rbullet (Object* owner, Vec pos, Vec vel, int power, float mass) {
 	bullets[oldest].mass = mass;
 	bullets[oldest].owner = owner;
 	bullets[oldest].lifetime = 0;
-	dbg(3, "Rewriting bullet %d\n", oldest);
+	dbg_bullet("Rewriting bullet %d\n", oldest);
 	return &bullets[oldest];
 }
 RBullet* fire_rbullet_dir (Object* owner, Vec pos, float angle, float vel, int power, float spread, float mass) {

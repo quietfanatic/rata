@@ -91,7 +91,7 @@ Vec constrain (Vec p, const Rect& range) {
 					currently_in = in_this;
 					minp = tryp;
 					if (!in_this && in_rect(tryp, range)) {
-						//printf("[%u] In range.\n", frame_number);
+						//dbg_camera("[%u] In range.\n");
 						selectedp = tryp;
 					}
 				}
@@ -269,16 +269,11 @@ void constrain_cursor () {
 		if (defined(linerect & aabb(side))) {
 			 // Ray
 			Vec inter = intersect_lines(los, side);
-			//printf("[%u] Checking intersection at %f, %f\n", frame_number, inter.x, inter.y);
-			//printf(" in %f, %f -- %f, %f: %d; in %f, %f -- %f, %f: %d\n",
-			//	side.a.x, side.a.y, side.b.x, side.b.y, in_line(inter, side),
-			//	los.a.x, los.a.y, los.b.x, los.b.y, in_line(inter, los)
-			//);
 			if (in_line(inter, side))
 			if (in_line(inter, los)) {
 				float newf = line_fraction(inter, los);
 				if (newf < fraction) {
-					//printf("[%u] Hit side with corner.\n", frame_number);
+					dbg_camera("Hit side with corner ray.\n");
 					hit = vertical(side) ? hit_x : horizontal(side) ? hit_y : hit_corner;
 					fraction = newf;
 				}
@@ -290,7 +285,7 @@ void constrain_cursor () {
 			float newf = (y - los.a.y) / (los.b.y - los.a.y);
 			if (newf >= 0 && newf <= 1)
 			if (newf < fraction) {
-				//printf("[%u] Hit side with edge.x.\n", frame_number);
+				dbg_camera("Hit side with Y ray.\n");
 				hit = hit_y;
 				fraction = newf;
 			}
@@ -300,7 +295,7 @@ void constrain_cursor () {
 			float newf = (x - los.a.x) / (los.b.x - los.a.x);
 			if (newf >= 0 && newf <= 1)
 			if (newf < fraction) {
-				//printf("[%u] Hit side with edge.y.\n", frame_number);
+				dbg_camera("Hit side with X ray.\n");
 				hit = hit_x;
 				fraction = newf;
 			}
@@ -318,7 +313,7 @@ void constrain_cursor () {
 					float yf = (corner.c.y - los.a.y) / (los.b.y - los.a.y);
 					float newf = MAX(xf, yf);
 					if (newf < fraction) {
-						//printf("[%u] Hit 0-radius corner.\n", frame_number);
+						dbg_camera("Hit 0-radius corner.\n");
 						hit = xf>yf ? hit_x : hit_y;
 						fraction = newf;
 					}
@@ -330,7 +325,7 @@ void constrain_cursor () {
 					Line inter = intersect_line_circle(los, corner);
 					if (defined(inter.a)) {
 						float newf = line_fraction(inter.a, los);
-						//printf("[%u] inter.a newf = %f\n", frame_number, newf);
+						dbg_camera("inter.a newf = %f\n", newf);
 						if (newf >= 0 && newf <= 1)
 						if (newf < fraction)
 						if (!across_line(inter.a, abound))
@@ -339,7 +334,7 @@ void constrain_cursor () {
 							fraction = newf;
 						}
 						newf = line_fraction(inter.b, los);
-						//printf("[%u] inter.b newf = %f\n", frame_number, newf);
+						dbg_camera("inter.b newf = %f\n", newf);
 						if (newf >= 0 && newf <= 1)
 						if (newf < fraction)
 						if (!across_line(inter.b, abound))
@@ -348,9 +343,9 @@ void constrain_cursor () {
 							fraction = newf;
 						}
 					}
-					else {
-						//printf("[%u] No intersections found.\n", frame_number);
-					}
+					//else {
+					//	dbg_camera("No intersections found.\n");
+					//}
 				}
 				 // Aligned lines
 				Vec tryp = Vec(
@@ -365,7 +360,7 @@ void constrain_cursor () {
 					if (newf < fraction)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound)) {
-						//printf("[%u] Hit aligned X line at %f, %f.\n", frame_number, tryp.x, tryp.y);
+						dbg_camera("Hit corner with aligned X line at %f, %f.\n", tryp.x, tryp.y);
 						hit = hit_x;
 						fraction = newf;
 					}
@@ -382,7 +377,7 @@ void constrain_cursor () {
 					if (newf < fraction)
 					if (!across_line(tryp, abound))
 					if (!across_line(tryp, bbound)) {
-						//printf("[%u] Hit aligned Y line at %f, %f.\n", frame_number, tryp.x, tryp.y);
+						dbg_camera("Hit corner with aligned Y line at %f, %f.\n", tryp.x, tryp.y);
 						hit = hit_y;
 						fraction = newf;
 					}
@@ -398,6 +393,7 @@ void constrain_cursor () {
 						if (newf < fraction)
 						if (!across_line(tryp, abound))
 						if (!across_line(tryp, bbound)) {
+							dbg_camera("Hit corner with aligned Y ray.\n");
 							hit = hit_y;
 							fraction = newf;
 						}
@@ -408,6 +404,7 @@ void constrain_cursor () {
 						if (newf < fraction)
 						if (!across_line(tryp, abound))
 						if (!across_line(tryp, bbound)) {
+							dbg_camera("Hit corner with aligned Y ray.\n");
 							hit = hit_y;
 							fraction = newf;
 						}
@@ -423,6 +420,7 @@ void constrain_cursor () {
 						if (newf < fraction)
 						if (!across_line(tryp, abound))
 						if (!across_line(tryp, bbound)) {
+							dbg_camera("Hit corner with aligned X ray.\n");
 							hit = hit_x;
 							fraction = newf;
 						}
@@ -433,6 +431,7 @@ void constrain_cursor () {
 						if (newf < fraction)
 						if (!across_line(tryp, abound))
 						if (!across_line(tryp, bbound)) {
+							dbg_camera("Hit corner with aligned X ray.\n");
 							hit = hit_x;
 							fraction = newf;
 						}

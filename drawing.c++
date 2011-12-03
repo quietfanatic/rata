@@ -50,12 +50,13 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip) {
 		glTexCoord2f(tr/tw, tt/th); vertex(Vec(x+iw*PX, y+ih*PX));
 		glTexCoord2f(tl/tw, tt/th); vertex(Vec(x,       y+ih*PX));
 	glEnd();
-	//window->Draw(drawing_sprite);
+	dbg_draw("Drawing image at <%f v%f >%f ^%f\n", x, y, x+iw*PX, y+ih*PX);
 }
 void draw_rect (const Rect& r, Color color) {
 	glDisable(GL_TEXTURE_2D);
 	color.setGL();
 	glRectf(r.l, r.b, r.r, r.t);
+	//dbg_draw("Drawing rect at <%f v%f >%f ^%f\n", r.l, r.b, r.r, r.t);
 };
 void draw_line (Vec a, Vec b, Color color) {
 	glDisable(GL_TEXTURE_2D);

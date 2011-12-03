@@ -269,7 +269,7 @@ Line intersect_line_circle (const Line& l, const Circle& c) {
 		)
 	);
 	if (abs_f(slope(r) - slope(l)) > 0.1)
-		printf("Warning: something went wrong in intersect_line_circle.\n");
+		dbg_util("Warning: something went wrong in intersect_line_circle.\n");
 	return r;
 }
 

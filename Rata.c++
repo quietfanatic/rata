@@ -260,10 +260,10 @@ struct Rata : Walking {
 			map::debug_print();
 			for (Actor* a=global_actors; a; a = a->next_global)
 				a->debug_print();
-			//printf("active_actors=%08x activation_queue=%08x\n",
-			//	active_actors,
-			//	activation_queue
-			//);
+			printf("active_actors=%08x activation_queue=%08x\n",
+				active_actors,
+				activation_queue
+			);
 		}
 	}
 
@@ -729,7 +729,7 @@ struct Rata : Walking {
 		hurt_frames = (20 + d) / (2 + adrenaline/60.0);
 		inv_frames = 50;
 		adrenaline += 5*d;
-		//printf("Hurt status: %d, %d, %d\n", hurt_frames, inv_frames, adrenaline);
+		dbg_rata("Hurt status: %d, %d, %d\n", hurt_frames, inv_frames, adrenaline);
 		snd::def[snd::hurt].play(1.0 - 0.1*d/24, 40 + d);
 	}
 
@@ -747,8 +747,7 @@ struct Rata : Walking {
 			loc->enter();
 		current_room = loc;
 
-//		printf("%08x's floor is: %08x\n", this, floor);
-//		floor = get_floor(fix_feet_current());
+		//dbg_rata("%08x's floor is: %08x\n", this, floor);
 		float step = state == crawling ? 0.8 : 1.0;
 		if (floor && (state == walking || state == crawling)) {
 			if (abs_f(vel.x) < 0.01)

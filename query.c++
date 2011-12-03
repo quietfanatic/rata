@@ -52,7 +52,7 @@ float32 LineChecker::ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2
 	if (fix->GetFilterData().categoryBits & mask)
 	if (fix->GetBody()->GetUserData() != owner)
 	if (((Object*)fix->GetBody()->GetUserData())->active) {
-		dbg(6, "raytrace hit with cf %u, %u.\n", fix->GetFilterData().categoryBits, mask);
+		dbg_util("raytrace hit with cf %u, %u.\n", fix->GetFilterData().categoryBits, mask);
 		if (f < frac) {
 			hit = fix;
 			frac = f;

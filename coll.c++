@@ -81,8 +81,7 @@ void myCL::PostSolve (b2Contact* contact, const b2ContactImpulse* ci) {
 	Object* b = (Object*) contact->GetFixtureB()->GetBody()->GetUserData();
 	FixProp* bfp = (FixProp*) contact->GetFixtureB()->GetUserData();
 	b2Manifold* manifold = contact->GetManifold();
-	//printf("%d <-> %d\n", a->type, b->type);
-	dbg(7, "COLL: %08x %08x @ (% 7.4f, % 7.4f) [% 8.4f, % 8.4f], [% 8.4f, % 8.4f]\n",
+	dbg_coll("COLL: %08x %08x @ (% 7.4f, % 7.4f) [% 8.4f, % 8.4f], [% 8.4f, % 8.4f]\n",
 		a, b, manifold->localNormal.x, manifold->localNormal.y,
 		ci->normalImpulses[0], ci->tangentImpulses[1],
 		ci->normalImpulses[1], ci->tangentImpulses[1]);

@@ -48,7 +48,7 @@ uint n_buttons = 0;
 Button* buttons = NULL;
 
  // TIMING
-uint frame_number = 0;
+//uint frame_number = 0;
 sf::Clock frameclock;
 float draw_latency = 0;
 

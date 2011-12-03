@@ -44,7 +44,6 @@ struct Walking : Object {
 	void activate () {
 		Object::activate();
 		friction_body->SetActive(true);
-		printf("Activated a Walking.\n");
 	}
 	void deactivate () {
 		friction_body->SetActive(false);

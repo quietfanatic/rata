@@ -97,7 +97,6 @@ void render_text (char* text, Vec p, uint lines, bool small, bool border, int al
 			else pos += letter_width[(uint8)*text]*PX;
 		}
 	}
-	//printdesc->x, desc->y
 }
 
 

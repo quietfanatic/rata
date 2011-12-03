@@ -19,6 +19,8 @@ float cursor_scale = 1.0;  // Higher = faster cursor
 
 
 
+int frame_number = -1;
+
  // UTILITY
 #include "debug.c++"
 #include "math.h"
