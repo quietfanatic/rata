@@ -48,7 +48,7 @@ void Actor::activate () {
 	next_active = activation_queue;
 	activation_queue = this;
 	awaiting_activation = true;
-	dbg_actor("Activating 0x%08x\n", this);
+	dbg_actor("Activating %08x\n", this);
 }
 void Actor::deactivate () {
 	if (!active) {
@@ -56,7 +56,7 @@ void Actor::deactivate () {
 		return;
 	}
 	active = false;
-	dbg_actor("Deactivating 0x%08x\n", this);
+	dbg_actor("Deactivating %08x\n", this);
 }
 
 

@@ -49,40 +49,10 @@ bool about_eq (float a, float b) {
 bool vec_eq (Vec a, Vec b) {
 	return about_eq(a.x, b.x) && about_eq(a.y, b.y);
 }
-int edge_cmp (TileEdge* a, TileEdge* b) {
-	if (vec_eq(a->v1, b->v1) && vec_eq(a->v2, b->v2)) return 1;
-	else if (vec_eq(a->v1, b->v2) && vec_eq(a->v2, b->v1)) return -1;
-	else return 0;
-}
 
-/*  CMP > 0
-  n1  v1 v1  n1
--------+ +-------
-       | |
-     A | | B
-       | |
--------+ +-------
-  n2  v2 v2  n2
-    CMP < 0
-  n1  v1 v2  n2
--------+ +-------
-       | |
-     A | | B
-       | |
--------+ +-------
-  n2  v2 v1  n1
-*/
 
 void maybe_merge_edge (TileEdge* a, TileEdge* b) {
-	int cmp = edge_cmp(a, b);
-	if (cmp > 0) {
-		a->n1->n2 = b->n1;
-		a->n2->n1 = b->n2;
-		b->n1->n2 = a->n1;
-		b->n2->n1 = a->n2;
-		a->use = b->use = false;
-	}
-	else if (cmp < 0) {  // This should generally be the case.
+	if (vec_eq(a->v1, b->v2) && vec_eq(a->v2, b->v1)) {
 		a->n1->n2 = b->n2;
 		a->n2->n1 = b->n1;
 		b->n1->n2 = a->n2;

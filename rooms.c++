@@ -37,7 +37,7 @@ namespace room {
 	void Def::receive (Spatial* a) {
 		if (a->loc) a->loc->release(a);
 		a->loc = this;
-		dbg_room("Room %u receiving a Spatial.\n", room::def-this);
+		dbg_room("Room %d receiving a Spatial.\n", this-room::def);
 		if (contents) contents->prev = a;
 		a->next = contents;
 		a->prev = NULL;
