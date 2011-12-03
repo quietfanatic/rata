@@ -49,7 +49,7 @@ const uint MAX_ATTENTIONS = 8;
 Attention attention [MAX_ATTENTIONS];
 
 void reset_attentions () {
-	attention[0] = Attention(200000, Rect(rata->cursor_pos() - Vec(9, 6.5), rata->cursor_pos() + Vec(9, 6.5)));
+	attention[0] = Attention(200000, Rect(rata->cursor_pos() - Vec(9.5, 7), rata->cursor_pos() + Vec(9.5, 7)));
 	attention[1] = Attention(100000, Rect(rata->aim_center() - Vec(9, 6.5), rata->aim_center() + Vec(9, 6.5)));
 	for (uint i=2; i < MAX_ATTENTIONS; i++)
 		attention[i].priority = -1/0.0;
@@ -252,7 +252,7 @@ void constrain_cursor () {
 	room::Def* room = current_room;
 	Line los = Line(rata->cursor_pos(), rata->aim_center());
 	 // Offset our ray to the appropriate corner of the screen.
-	Vec offset = Vec(9, 6.5);
+	Vec offset = Vec(9.5, 7);
 	if (los.a.x > los.b.x) offset.x = -offset.x;
 	if (los.a.y > los.b.y) offset.y = -offset.y;
 	los.a += offset;
@@ -441,28 +441,8 @@ void constrain_cursor () {
 			}
 		}
 	}
-	 // Now actually do the work.
-	Vec newcursor = cursor * (1-fraction);
-	Vec diff = newcursor - cursor;
-	Vec absdiff = Vec(abs_f(diff.x), abs_f(diff.y));
-	attention[0].range.l -= absdiff.x;
-	attention[0].range.r += absdiff.x;
-	attention[0].range.b -= absdiff.y;
-	attention[0].range.t += absdiff.y;
-	 // Let the cursor push its boundary by up to 1 block, in the
-	 // direction given by hit.
-	//printf("[%u] ", frame_number);
-	//if (hit == hit_corner) printf("Hit corner and ");
-	if ( hit == hit_x
-	 || (hit == hit_corner && absdiff.x > absdiff.y)
-	) {
-		//printf("Hit x.\n");
-		if (absdiff.x > 1) cursor += diff - Vec(1, cursor.y/cursor.x)*sign_f(diff.x);
-	}
-	else {
-		//printf("Hit y.\n");
-		if (absdiff.y > 1) cursor += diff - Vec(cursor.x/cursor.y, 1)*sign_f(diff.y);
-	}
+
+	cursor *= (1 - fraction);
 }
 
 
@@ -478,7 +458,7 @@ void get_focus () {
 		cursor = Vec(-13 / slope(cursor), -13);
 	else if (cursor.y > 13)
 		cursor = Vec(13 / slope(cursor), 13);
-	attention[0].range = Rect(rata->cursor_pos() - Vec(9, 6.5), rata->cursor_pos() + Vec(9, 6.5));
+	attention[0].range = Rect(rata->cursor_pos() - Vec(9.5, 7), rata->cursor_pos() + Vec(9.5, 7));
 	
 	Rect range = attention[0].range;
 	Rect oldcursorrange = range;
@@ -514,7 +494,7 @@ void get_focus () {
 		}
 		else if (i == 1 && !moved_cursor) {
 			constrain_cursor();
-			range = attention[0].range;
+			range = attention[0].range = Rect(rata->cursor_pos() - Vec(9.5, 7), rata->cursor_pos() + Vec(9.5, 7));
 			moved_cursor = true;
 			goto tryagain;
 		}
