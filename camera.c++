@@ -505,60 +505,35 @@ void get_camera () {
 	 //  we need a minimum speed.
 	 // We also need to hold camera pixel-steady
 	 //  to Rata pos when running.
-	//float snap_dist = camera_snap ? .5*PX : .25*PX;
-	//camera_snap = false;
+	float snap_dist = camera_snap ? .5*PX : .25*PX;
+	camera_snap = false;
 	if (camera_jump) {
 		camera = focus;
 		camera_jump = false;
 	}
 	else {
-		float accel = 1*PX;
-		if (abs_f(focus.x - camera.x) < 1*PX) {
-			camera.x = focus.x;
-			camera_vel.x = 0;
-		}
+		if (abs_f(focus.x - camera.x) < .25*PX) camera.x = focus.x;
 		else {
-			float stopdist = 1.5 * camera_vel.x*camera_vel.x / accel;
-			if (focus.x - camera.x > 0) {
-				if (camera_vel.x < 0 || stopdist > focus.x - camera.x) {
-					camera_vel.x -= accel;
-					if (camera_vel.x < 0) camera_vel.x = 0;
-				}
-				else camera_vel.x += accel;
+			float xvel = (focus.x - camera.x) / 10;
+			if (abs_f(xvel) < .25*PX)
+				camera.x += .25*PX * sign_f(xvel);
+			else if (abs_f((xvel) - rata->vel.x/FPS) < snap_dist) {
+				camera.x = old_camera_rel + round(rata->pos.x*UNPX)*PX;
+				camera_snap = true;
 			}
-			else {
-				if (camera_vel.x > 0 || stopdist > camera.x - focus.x) {
-					camera_vel.x += accel;
-					if (camera_vel.x > 0) camera_vel.x = 0;
-				}
-				else camera_vel.x -= accel;
-			}
-			camera.x += camera_vel.x;
+			else
+				camera.x += xvel;
 		}
-		if (abs_f(focus.y - camera.y) < 1*PX) {
-			camera.y = focus.y;
-			camera_vel.y = 0;
-		}
+		if (abs_f(focus.y - camera.y) < .25*PX) camera.y = focus.y;
 		else {
-			float stopdist = 1.5 * camera_vel.y*camera_vel.y / accel;
-			if (focus.y - camera.y > 0) {
-				if (camera_vel.y < 0 || stopdist > focus.y - camera.y) {
-					camera_vel.y -= accel;
-					if (camera_vel.y < 0) camera_vel.y = 0;
-				}
-				else camera_vel.y += accel;
-			}
-			else {
-				if (camera_vel.y > 0 || stopdist > camera.y - focus.y) {
-					camera_vel.y += accel;
-					if (camera_vel.y > 0) camera_vel.y = 0;
-				}
-				else camera_vel.y -= accel;
-			}
-			camera.y += camera_vel.y;
+			float yvel = (focus.y - camera.y) / 10;
+			if (abs_f(yvel) < .25*PX)
+				camera.y += .25*PX * sign_f(yvel);
+			else
+				camera.y += yvel;
 		}
 	}
-	//old_camera_rel = camera.x - round(rata->pos.x*UNPX)*PX;
+	old_camera_rel = camera.x - round(rata->pos.x*UNPX)*PX;
 }
 
 
