@@ -500,6 +500,42 @@ void get_focus () {
 	}
 }
 
+void get_camera () {
+	 // To look smooth in a pixelated environment,
+	 //  we need a minimum speed.
+	 // We also need to hold camera pixel-steady
+	 //  to Rata pos when running.
+	float snap_dist = camera_snap ? .5*PX : .25*PX;
+	camera_snap = false;
+	if (camera_jump) {
+		camera = focus;
+		camera_jump = false;
+	}
+	else {
+		if (abs_f(focus.x - camera.x) < .25*PX) camera.x = focus.x;
+		else {
+			float xvel = (focus.x - camera.x) / 10;
+			if (abs_f(xvel) < .25*PX)
+				camera.x += .25*PX * sign_f(xvel);
+			else if (abs_f((xvel) - rata->vel.x/FPS) < snap_dist) {
+				camera.x = old_camera_rel + round(rata->pos.x*UNPX)*PX;
+				camera_snap = true;
+			}
+			else
+				camera.x += xvel;
+		}
+		if (abs_f(focus.y - camera.y) < .25*PX) camera.y = focus.y;
+		else {
+			float yvel = (focus.y - camera.y) / 10;
+			if (abs_f(yvel) < .25*PX)
+				camera.y += .25*PX * sign_f(yvel);
+			else
+				camera.y += yvel;
+		}
+	}
+	old_camera_rel = camera.x - round(rata->pos.x*UNPX)*PX;
+}
+
 
 
 #endif
