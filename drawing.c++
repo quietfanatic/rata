@@ -55,7 +55,12 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip) {
 void draw_rect (const Rect& r, Color color) {
 	glDisable(GL_TEXTURE_2D);
 	color.setGL();
-	glRectf(r.l, r.b, r.r, r.t);
+	glRectf(
+		round(r.l*UNPX)*PX,
+		round(r.b*UNPX)*PX,
+		round(r.r*UNPX)*PX,
+		round(r.t*UNPX)*PX
+	);
 	//dbg_draw("Drawing rect at <%f v%f >%f ^%f\n", r.l, r.b, r.r, r.t);
 };
 void draw_line (Vec a, Vec b, Color color) {
