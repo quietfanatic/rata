@@ -49,7 +49,7 @@ const uint MAX_ATTENTIONS = 8;
 Attention attention [MAX_ATTENTIONS];
 
 void reset_attentions () {
-	attention[0] = Attention(200000, Rect(rata->cursor_pos() - Vec(9.5, 7), rata->cursor_pos() + Vec(9.5, 7)));
+	attention[0] = Attention(200000, Rect(rata->cursor_pos() - Vec(9.75, 7.25), rata->cursor_pos() + Vec(9.75, 7.25)));
 	attention[1] = Attention(100000, Rect(rata->aim_center() - Vec(9, 6.5), rata->aim_center() + Vec(9, 6.5)));
 	for (uint i=2; i < MAX_ATTENTIONS; i++)
 		attention[i].priority = -1/0.0;
@@ -252,7 +252,7 @@ void constrain_cursor () {
 	room::Def* room = current_room;
 	Line los = Line(rata->cursor_pos(), rata->aim_center());
 	 // Offset our ray to the appropriate corner of the screen.
-	Vec offset = Vec(9.5, 7);
+	Vec offset = Vec(9.75, 7.25);
 	if (los.a.x > los.b.x) offset.x = -offset.x;
 	if (los.a.y > los.b.y) offset.y = -offset.y;
 	los.a += offset;
@@ -457,7 +457,7 @@ void get_focus () {
 		cursor = Vec(-13 / slope(cursor), -13);
 	else if (cursor.y > 13)
 		cursor = Vec(13 / slope(cursor), 13);
-	attention[0].range = Rect(rata->cursor_pos() - Vec(9.5, 7), rata->cursor_pos() + Vec(9.5, 7));
+	attention[0].range = Rect(rata->cursor_pos() - Vec(9.75, 7.25), rata->cursor_pos() + Vec(9.75, 7.25));
 	
 	Rect range = attention[0].range;
 	Rect oldcursorrange = range;
@@ -493,7 +493,7 @@ void get_focus () {
 		}
 		else if (i == 1 && !moved_cursor) {
 			constrain_cursor();
-			range = attention[0].range = Rect(rata->cursor_pos() - Vec(9.5, 7), rata->cursor_pos() + Vec(9.5, 7));
+			range = attention[0].range = Rect(rata->cursor_pos() - Vec(9.75, 7.25), rata->cursor_pos() + Vec(9.75, 7.25));
 			moved_cursor = true;
 			goto tryagain;
 		}
