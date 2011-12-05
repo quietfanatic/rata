@@ -24,6 +24,7 @@ bool trap_cursor = false;
 Vec oldfocus;
 Vec focus;
 Vec camera;
+Vec camera_vel = Vec(0, 0);
 const Vec screen = Vec(20, 15);
 float old_camera_rel = 0;
 bool camera_jump = false;
