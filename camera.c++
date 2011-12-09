@@ -49,9 +49,8 @@ const uint MAX_ATTENTIONS = 8;
 Attention attention [MAX_ATTENTIONS];
 
 void reset_attentions () {
-	attention[0] = Attention(200000, Rect(rata->cursor_pos() - Vec(9.75, 7.25), rata->cursor_pos() + Vec(9.75, 7.25)));
-	attention[1] = Attention(100000, Rect(rata->aim_center() - Vec(9, 6.5), rata->aim_center() + Vec(9, 6.5)));
-	for (uint i=2; i < MAX_ATTENTIONS; i++)
+	attention[0] = Attention(1000000, Rect(rata->aim_center() - Vec(9, 6.5), rata->aim_center() + Vec(9, 6.5)));
+	for (uint i=1; i < MAX_ATTENTIONS; i++)
 		attention[i].priority = -1/0.0;
 }
 
@@ -112,8 +111,14 @@ Vec constrain (Vec p, const Rect& range) {
 			}
 		}
 	}
-	if (currently_in) return p;
-	else if (defined(selectedp)) return selectedp;
+	if (currently_in) {
+		//dbg_camera("Currently in, %f, %f\n", p.x, p.y);
+		return p;
+	}
+	else if (defined(selectedp)) {
+		//dbg_camera("Moved to wall, %f, %f -> %f, %f\n", p.x, p.y, selectedp.x, selectedp.y);
+		return selectedp;
+	}
 	else {  // Get closest intersection between range and walls
 		for (uint i=0; i < room->n_walls; i++) {
 			const Line& side = room->sides[i];
@@ -235,6 +240,7 @@ Vec constrain (Vec p, const Rect& range) {
 				}
 			}
 		}
+		//dbg_camera("Moved to wall and range, %f, %f -> %f, %f\n", p.x, p.y, selectedp.x, selectedp.y);
 		return selectedp;
 	}
 }
@@ -444,6 +450,7 @@ void constrain_cursor () {
 	cursor *= (1 - fraction);
 }
 
+Vec oldcursorpos = Vec(0, 0);
 
  // CAMERA CONTROL
 
@@ -457,27 +464,43 @@ void get_focus () {
 		cursor = Vec(-13 / slope(cursor), -13);
 	else if (cursor.y > 13)
 		cursor = Vec(13 / slope(cursor), 13);
-	attention[0].range = Rect(rata->cursor_pos() - Vec(9.75, 7.25), rata->cursor_pos() + Vec(9.75, 7.25));
-	
-	Rect range = attention[0].range;
-	Rect oldcursorrange = range;
-	 // rwc = range without cursor
+	 // Secondary cursor restriction
+	oldcursorpos = constrain(
+		oldcursorpos,
+		attention[0].range
+	);
+	oldcursorpos -= rata->aim_center();
+	Vec debug_point = oldcursorpos + rata->aim_center();
+	if (cursor.x < oldcursorpos.x - 9.75)
+		cursor = Vec(oldcursorpos.x - 9.75, (oldcursorpos.x - 9.75) * slope(cursor));
+	else if (cursor.x > oldcursorpos.x + 9.75)
+		cursor = Vec(oldcursorpos.x + 9.75, (oldcursorpos.x + 9.75) * slope(cursor));
+	if (cursor.y < oldcursorpos.y - 7.25)
+		cursor = Vec((oldcursorpos.y - 7.25) / slope(cursor), oldcursorpos.y - 7.25);
+	else if (cursor.y > oldcursorpos.y + 7.25)
+		cursor = Vec((oldcursorpos.y + 7.25) / slope(cursor), oldcursorpos.y + 7.25);
+	oldcursorpos = rata->cursor_pos();
+	 // rwc = Range Without Cursor
 	Rect rwc = Rect(-1/0.0, -1/0.0, 1/0.0, 1/0.0);
+	Rect cursorrange = Rect(rata->cursor_pos() - Vec(9.75, 7.25), rata->cursor_pos() + Vec(9.75, 7.25));
+	Rect range = cursorrange;
+	
+
 	Vec cur_focus;
 	
 	bool moved_cursor = false;
-	for (uint i=1; i < MAX_ATTENTIONS; i++) {
+	for (uint i=0; i < MAX_ATTENTIONS; i++) {
 		if (attention[i].priority == -1/0.0) break;
 		Rect cur_rwc = rwc & attention[i].range;
 		tryagain:
 		Rect cur_range = range & attention[i].range;
 		if (!defined(cur_range)) continue;
-		cur_focus.x =  (oldcursorrange.r - cur_rwc.l)
-		             / (size(oldcursorrange).x + size(cur_rwc).x)
+		cur_focus.x =  (cursorrange.r - cur_rwc.l)
+		             / (size(cursorrange).x + size(cur_rwc).x)
 		             * size(cur_rwc).x
 		            + cur_rwc.l;
-		cur_focus.y =  (oldcursorrange.t - cur_rwc.b)
-		             / (size(oldcursorrange).y + size(cur_rwc).y)
+		cur_focus.y =  (cursorrange.t - cur_rwc.b)
+		             / (size(cursorrange).y + size(cur_rwc).y)
 		             * size(cur_rwc).y
 		            + cur_rwc.b;
 		if (cur_focus.x < cur_range.l) cur_focus.x = cur_range.l;
@@ -491,13 +514,8 @@ void get_focus () {
 			rwc = cur_rwc;
 			focus = cur_focus;
 		}
-		else if (i == 1 && !moved_cursor) {
-			constrain_cursor();
-			range = attention[0].range = Rect(rata->cursor_pos() - Vec(9.75, 7.25), rata->cursor_pos() + Vec(9.75, 7.25));
-			moved_cursor = true;
-			goto tryagain;
-		}
 	}
+	reg_debug_point(debug_point);
 }
 
 void get_camera () {
