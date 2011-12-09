@@ -514,7 +514,7 @@ void get_camera () {
 	else {
 		if (abs_f(focus.x - camera.x) < .25*PX) camera.x = focus.x;
 		else {
-			float xvel = (focus.x - camera.x) / 10;
+			float xvel = (focus.x - camera.x) / 4;
 			if (abs_f(xvel) < .25*PX)
 				camera.x += .25*PX * sign_f(xvel);
 			else if (abs_f((xvel) - rata->vel.x/FPS) < snap_dist) {
@@ -526,7 +526,7 @@ void get_camera () {
 		}
 		if (abs_f(focus.y - camera.y) < .25*PX) camera.y = focus.y;
 		else {
-			float yvel = (focus.y - camera.y) / 10;
+			float yvel = (focus.y - camera.y) / 4;
 			if (abs_f(yvel) < .25*PX)
 				camera.y += .25*PX * sign_f(yvel);
 			else
