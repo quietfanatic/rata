@@ -245,211 +245,6 @@ Vec constrain (Vec p, const Rect& range) {
 	}
 }
 
- // Move the cursor to a position where it is possible to see
- // both it and Rata.  Basically we need to do an area sweep
- // consisting of a ray cast, two aligned line casts, and two
- // aligned ray casts.
-enum {
-	hit_corner,
-	hit_x,
-	hit_y
-};
-void constrain_cursor () {
-	room::Def* room = current_room;
-	Line los = Line(rata->cursor_pos(), rata->aim_center());
-	 // Offset our ray to the appropriate corner of the screen.
-	Vec offset = Vec(9.75, 7.25);
-	if (los.a.x > los.b.x) offset.x = -offset.x;
-	if (los.a.y > los.b.y) offset.y = -offset.y;
-	los.a += offset;
-	los.b += offset;
-	debug_line = los;
-	Rect linerect = aabb(los);
-	Vec edge = rata->aim_center() - Vec(9*sign_f(offset.x), 6.5*sign_f(offset.y));
-	Rect range = uninvert(Rect(los.b, edge));
-	float fraction = 1;  // 1 = b, 0 = a
-	int hit = hit_corner;
-	for (uint i=0; i < room->n_walls; i++) {
-		const Line& side = room->sides[i];
-		 // Check side
-		if (defined(linerect & aabb(side))) {
-			 // Ray
-			Vec inter = intersect_lines(los, side);
-			if (in_line(inter, side))
-			if (in_line(inter, los)) {
-				float newf = line_fraction(inter, los);
-				if (newf < fraction) {
-					dbg_camera("Hit side with ray.\n");
-					hit = vertical(side) ? hit_x : horizontal(side) ? hit_y : hit_corner;
-					fraction = newf;
-				}
-			}
-		}
-		 // Aligned rays
-		float y = solvey(side, edge.x);
-		if (in_line(Vec(edge.x, y), side)) {
-			float newf = (y - los.a.y) / (los.b.y - los.a.y);
-			if (newf >= 0 && newf <= 1)
-			if (newf < fraction) {
-				dbg_camera("Hit side with Y ray.\n");
-				hit = hit_y;
-				fraction = newf;
-			}
-		}
-		float x = solvex(side, edge.y);
-		if (in_line(Vec(x,edge.y), side)) {
-			float newf = (x - los.a.x) / (los.b.x - los.a.x);
-			if (newf >= 0 && newf <= 1)
-			if (newf < fraction) {
-				dbg_camera("Hit side with X ray.\n");
-				hit = hit_x;
-				fraction = newf;
-			}
-		}
-		 // Check corner
-		const Circle& corner = room->walls[i];
-		Rect cornerrect = aabb(corner);
-		if (defined(range & cornerrect)) {
-			Line abound = bound_a(room->sides[i]);
-			Line bbound = bound_b(room->sides[(i?i:room->n_walls)-1]);
-			if (corner.r == 0) {
-				 // Only do the aligned lines.
-				if (in_rect(corner.c, range)) {
-					float xf = (corner.c.x - los.a.x) / (los.b.x - los.a.x);
-					float yf = (corner.c.y - los.a.y) / (los.b.y - los.a.y);
-					float newf = MAX(xf, yf);
-					if (newf < fraction) {
-						dbg_camera("Hit 0-radius corner.\n");
-						hit = xf>yf ? hit_x : hit_y;
-						fraction = newf;
-					}
-				}
-			}
-			else {
-				 // Ray
-				if (defined(linerect & cornerrect)) {
-					Line inter = intersect_line_circle(los, corner);
-					if (defined(inter.a)) {
-						float newf = line_fraction(inter.a, los);
-						if (newf >= 0 && newf <= 1)
-						if (newf < fraction)
-						if (!across_line(inter.a, abound))
-						if (!across_line(inter.a, bbound)) {
-							dbg_camera("Hit corner with ray.\n");
-							hit = hit_corner;
-							fraction = newf;
-						}
-						newf = line_fraction(inter.b, los);
-						if (newf >= 0 && newf <= 1)
-						if (newf < fraction)
-						if (!across_line(inter.b, abound))
-						if (!across_line(inter.b, bbound)) {
-							dbg_camera("Hit corner with ray.\n");
-							hit = hit_corner;
-							fraction = newf;
-						}
-					}
-					//else {
-					//	dbg_camera("No intersections found.\n");
-					//}
-				}
-				 // Aligned lines
-				Vec tryp = Vec(
-					corner.c.x + sign_f(los.a.x - los.b.x)*abs_f(corner.r),
-					corner.c.y
-				);
-				if (in_rect(tryp, range)) {
-					float xf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
-					float yf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
-					float newf = MAX(xf, yf);
-					if (newf >= 0 && newf <= 1)
-					if (newf < fraction)
-					if (!across_line(tryp, abound))
-					if (!across_line(tryp, bbound)) {
-						dbg_camera("Hit corner with X line at %f, %f.\n", tryp.x, tryp.y);
-						hit = hit_x;
-						fraction = newf;
-					}
-				}
-				tryp = Vec(
-					corner.c.x,
-					corner.c.y + sign_f(los.a.y - los.b.y)*abs_f(corner.r)
-				);
-				if (in_rect(tryp, range)) {
-					float xf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
-					float yf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
-					float newf = MAX(xf, yf);
-					if (newf >= 0 && newf <= 1)
-					if (newf < fraction)
-					if (!across_line(tryp, abound))
-					if (!across_line(tryp, bbound)) {
-						dbg_camera("Hit corner with Y line at %f, %f.\n", tryp.x, tryp.y);
-						hit = hit_y;
-						fraction = newf;
-					}
-				}
-				 // Aligned rays
-				if (edge.x >= cornerrect.l && edge.x <= cornerrect.r) {
-					float y = sqrt(
-						corner.r * corner.r - (edge.x - corner.c.x) * (edge.x - corner.c.x)
-					);
-					Vec tryp = Vec(edge.x, corner.c.y + y);
-					if (tryp.y >= linerect.b && tryp.y <= linerect.t) {
-						float newf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
-						if (newf < fraction)
-						if (!across_line(tryp, abound))
-						if (!across_line(tryp, bbound)) {
-							dbg_camera("Hit corner with Y ray.\n");
-							hit = hit_y;
-							fraction = newf;
-						}
-					}
-					tryp.y = corner.c.y - y;
-					if (tryp.y >= linerect.b && tryp.y <= linerect.t) {
-						float newf = (tryp.y - los.a.y) / (los.b.y - los.a.y);
-						if (newf < fraction)
-						if (!across_line(tryp, abound))
-						if (!across_line(tryp, bbound)) {
-							dbg_camera("Hit corner with Y ray.\n");
-							hit = hit_y;
-							fraction = newf;
-						}
-					}
-				}
-				if (edge.y >= cornerrect.b && edge.y <= cornerrect.t) {
-					float x = sqrt(
-						corner.r * corner.r - (edge.y - corner.c.y) * (edge.y - corner.c.y)
-					);
-					Vec tryp = Vec(corner.c.x + x, edge.y);
-					if (tryp.x >= linerect.l && tryp.x <= linerect.r) {
-						float newf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
-						if (newf < fraction)
-						if (!across_line(tryp, abound))
-						if (!across_line(tryp, bbound)) {
-							dbg_camera("Hit corner with X ray.\n");
-							hit = hit_x;
-							fraction = newf;
-						}
-					}
-					tryp.x = corner.c.x - x;
-					if (tryp.x >= linerect.l && tryp.x <= linerect.r) {
-						float newf = (tryp.x - los.a.x) / (los.b.x - los.a.x);
-						if (newf < fraction)
-						if (!across_line(tryp, abound))
-						if (!across_line(tryp, bbound)) {
-							dbg_camera("Hit corner with X ray.\n");
-							hit = hit_x;
-							fraction = newf;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	cursor *= (1 - fraction);
-}
-
 
  // CAMERA CONTROL
 
@@ -466,17 +261,29 @@ void get_focus () {
 	 // Secondary cursor restriction
 	focus = constrain(focus, attention[0].range);
 	Vec rel_focus = focus - rata->aim_center();
-	if (cursor.x < rel_focus.x - 9.75)
-		cursor = Vec(rel_focus.x - 9.75, (rel_focus.x - 9.75) * slope(cursor));
-	else if (cursor.x > rel_focus.x + 9.75)
-		cursor = Vec(rel_focus.x + 9.75, (rel_focus.x + 9.75) * slope(cursor));
-	if (cursor.y < rel_focus.y - 7.25)
-		cursor = Vec((rel_focus.y - 7.25) / slope(cursor), rel_focus.y - 7.25);
-	else if (cursor.y > rel_focus.y + 7.25)
-		cursor = Vec((rel_focus.y + 7.25) / slope(cursor), rel_focus.y + 7.25);
+	if (cursor.x < rel_focus.x - 10)
+		cursor = Vec(rel_focus.x - 10, (rel_focus.x - 10) * slope(cursor));
+	else if (cursor.x > rel_focus.x + 10)
+		cursor = Vec(rel_focus.x + 10, (rel_focus.x + 10) * slope(cursor));
+	if (cursor.y < rel_focus.y - 7.5)
+		cursor = Vec((rel_focus.y - 7.5) / slope(cursor), rel_focus.y - 7.5);
+	else if (cursor.y > rel_focus.y + 7.5)
+		cursor = Vec((rel_focus.y + 7.5) / slope(cursor), rel_focus.y + 7.5);
+	 // Stretch cursor range
+	Vec cursorrange_v;
+	if (cursor.x < rel_focus.x - 9)
+		cursorrange_v.x = rel_focus.x - cursor.x;
+	else if (cursor.x > rel_focus.x + 9)
+		cursorrange_v.x = cursor.x - rel_focus.x;
+	else cursorrange_v.x = 9;
+	if (cursor.y < rel_focus.y - 7.5)
+		cursorrange_v.y = rel_focus.y - cursor.y;
+	else if (cursor.y > rel_focus.y + 7.5)
+		cursorrange_v.y = cursor.y - rel_focus.y;
+	else cursorrange_v.y = 7.5;
+	Rect cursorrange = Rect(rata->cursor_pos() - cursorrange_v, rata->cursor_pos() + cursorrange_v);
 	 // rwc = Range Without Cursor
 	Rect rwc = Rect(-1/0.0, -1/0.0, 1/0.0, 1/0.0);
-	Rect cursorrange = Rect(rata->cursor_pos() - Vec(9.75, 7.25), rata->cursor_pos() + Vec(9.75, 7.25));
 	Rect range = cursorrange;
 	
 
