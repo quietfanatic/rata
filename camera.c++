@@ -259,8 +259,9 @@ void get_focus () {
 	else if (cursor.y > 13)
 		cursor = Vec(13 / slope(cursor), 13);
 	 // Secondary cursor restriction
-	focus = constrain(focus, attention[0].range);
-	Vec rel_focus = focus - rata->aim_center();
+	Vec prim_focus = (rata->cursor_pos() + rata->aim_center()) / 2;
+	prim_focus = constrain(prim_focus, attention[0].range);
+	Vec rel_focus = prim_focus - rata->aim_center();
 	if (cursor.x < rel_focus.x - 10)
 		cursor = Vec(rel_focus.x - 10, (rel_focus.x - 10) * slope(cursor));
 	else if (cursor.x > rel_focus.x + 10)
