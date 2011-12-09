@@ -111,7 +111,7 @@ Vec constrain (Vec p, const Rect& range) {
 			}
 		}
 	}
-	if (currently_in) {
+	if (in_rect(p, range) && currently_in) {
 		//dbg_camera("Currently in, %f, %f\n", p.x, p.y);
 		return p;
 	}
@@ -450,7 +450,6 @@ void constrain_cursor () {
 	cursor *= (1 - fraction);
 }
 
-Vec oldcursorpos = Vec(0, 0);
 
  // CAMERA CONTROL
 
@@ -465,21 +464,16 @@ void get_focus () {
 	else if (cursor.y > 13)
 		cursor = Vec(13 / slope(cursor), 13);
 	 // Secondary cursor restriction
-	oldcursorpos = constrain(
-		oldcursorpos,
-		attention[0].range
-	);
-	oldcursorpos -= rata->aim_center();
-	Vec debug_point = oldcursorpos + rata->aim_center();
-	if (cursor.x < oldcursorpos.x - 9.75)
-		cursor = Vec(oldcursorpos.x - 9.75, (oldcursorpos.x - 9.75) * slope(cursor));
-	else if (cursor.x > oldcursorpos.x + 9.75)
-		cursor = Vec(oldcursorpos.x + 9.75, (oldcursorpos.x + 9.75) * slope(cursor));
-	if (cursor.y < oldcursorpos.y - 7.25)
-		cursor = Vec((oldcursorpos.y - 7.25) / slope(cursor), oldcursorpos.y - 7.25);
-	else if (cursor.y > oldcursorpos.y + 7.25)
-		cursor = Vec((oldcursorpos.y + 7.25) / slope(cursor), oldcursorpos.y + 7.25);
-	oldcursorpos = rata->cursor_pos();
+	focus = constrain(focus, attention[0].range);
+	Vec rel_focus = focus - rata->aim_center();
+	if (cursor.x < rel_focus.x - 9.75)
+		cursor = Vec(rel_focus.x - 9.75, (rel_focus.x - 9.75) * slope(cursor));
+	else if (cursor.x > rel_focus.x + 9.75)
+		cursor = Vec(rel_focus.x + 9.75, (rel_focus.x + 9.75) * slope(cursor));
+	if (cursor.y < rel_focus.y - 7.25)
+		cursor = Vec((rel_focus.y - 7.25) / slope(cursor), rel_focus.y - 7.25);
+	else if (cursor.y > rel_focus.y + 7.25)
+		cursor = Vec((rel_focus.y + 7.25) / slope(cursor), rel_focus.y + 7.25);
 	 // rwc = Range Without Cursor
 	Rect rwc = Rect(-1/0.0, -1/0.0, 1/0.0, 1/0.0);
 	Rect cursorrange = Rect(rata->cursor_pos() - Vec(9.75, 7.25), rata->cursor_pos() + Vec(9.75, 7.25));
@@ -515,7 +509,6 @@ void get_focus () {
 			focus = cur_focus;
 		}
 	}
-	reg_debug_point(debug_point);
 }
 
 void get_camera () {
