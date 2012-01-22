@@ -21,11 +21,13 @@ namespace tile {
 	};
 	
 	 // A tile entry is:
-	 //   {name, type, front, back, nvertexes, vertexes},
-	 // where name is a string,
-	 //       type is one of the above types (this doesn't actually matter right now)
+	 //   {name, type, front, back, friction, nvertexes, vertexes},
+	 // where name is a the name of the tile (currently unused, intended for easy reading)
+	 //       type is one of the above types (currently unused, intended for enemy AI)
 	 //       front, if 1, means the tile is drawn in foreground
 	 //       back, if 1, means the tile is drawn in background
+	 //       friction is the amount of friction of the material, from 0 to whatever
+	 //        0.4 is pretty normal.  Something slippery should be 0.1 or something
 	 //       nvertexes is the size of 'vertexes'
 	 //       vertexes is a list of vectors describing the corners of the tile,
 	 //        in counter-clockwise order.  X is to the left, Y is up.
