@@ -43,9 +43,9 @@ ROOM_WALLS(
 )
 
 ROOM_INIT(
-	new Tilemap(HERE);
-	new BGColor(HERE, pos, Vec(width, height), 0x7f7f7fff);
-	new Flyer(HERE, pos+Vec(16.5, 4));
+	static Tilemap a1 (HERE);
+	static BGColor a2 (HERE, pos, Vec(width, height), 0x7f7f7fff);
+	static Flyer a3 (HERE, pos+Vec(16.5, 4));
 )
 
 ROOM_END

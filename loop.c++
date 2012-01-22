@@ -362,6 +362,10 @@ void input_phase () {
 
 void move_phase () {
 	if (n_buttons) {
+		if (dragging) {
+			(*dragging->drag)();
+		}
+		else
 		for (uint i=0; i < n_buttons; i++)
 		if (in_rect(cursor2, Rect(buttons[i].pos, buttons[i].pos+buttons[i].size))) {
 			if (buttons[i].click) (*buttons[i].click)();

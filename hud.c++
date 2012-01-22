@@ -8,11 +8,29 @@
 struct Button {
 	Vec pos;
 	Vec size;
-	void (* click )();
-	void (* drag )();
+	void (* click )();  // Executed immediately on click
+	void (* drag )();  // Executed each frame when dragging.
 };
+const uint n_pause_buttons = 2;
+extern Button pause_buttons [n_pause_buttons];
 
 #else
+
+void click_options () {
+	if (button[sf::Mouse::Left] == 1) {
+		dragging = &pause_buttons[0];
+		drag_start = cursor2;
+	}
+}
+void drag_options () {
+	if (button[sf::Mouse::Left]) {
+		pause_buttons[0].pos += cursor2 - drag_start;
+		drag_start = cursor2;
+	}
+	else {
+		dragging = NULL;
+	}
+}
 
 void click_quit () {
 	if (button[sf::Mouse::Left] == 1) {
@@ -53,13 +71,13 @@ void hud_play () {
 void hud_pause () {
 	hud_play();
 	draw_rect(Rect(0, 0, 20, 15), 0x0000004f);
-	render_text("Options", Vec(0, 1));
+	render_text("Options", pause_buttons[0].pos + Vec(0, 1));
 	render_text("Quit", Vec(20, 1), 1, false, false, -1);
 }
 
-const uint n_pause_buttons = 2;
+//const uint n_pause_buttons = 2;
 Button pause_buttons [n_pause_buttons] = {
-	{Vec(0, 0), Vec(3, 1), NULL, NULL},
+	{Vec(0, 0), Vec(3, 1), &click_options, &drag_options},
 	{Vec(18, 0), Vec(2, 1), &click_quit, NULL},
 };
 

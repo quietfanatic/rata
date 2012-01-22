@@ -46,6 +46,8 @@ RBullet bullets[MAX_BULLETS];
 void (* draw_hud )() = NULL;
 uint n_buttons = 0;
 Button* buttons = NULL;
+Button* dragging = NULL;
+Vec drag_start;
 
  // TIMING
 //uint frame_number = 0;

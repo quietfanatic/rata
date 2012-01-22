@@ -36,10 +36,10 @@ ROOM_WALLS(
 )
 
 ROOM_INIT(
-	new Tilemap(HERE);
-	new BGColor(HERE, pos, Vec(width, height), 0x7f7f7fff);
-	new Rat(HERE, pos+Vec(1.5, 7));
-	new Rat(HERE, pos+Vec(12.5, 1));
+	static Tilemap a1 (HERE);
+	static BGColor a2 (HERE, pos, Vec(width, height), 0x7f7f7fff);
+	static Rat a3 (HERE, pos+Vec(1.5, 7));
+	static Rat a4 (HERE, pos+Vec(12.5, 1));
 )
 
 
