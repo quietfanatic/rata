@@ -46,15 +46,29 @@ struct TileLayer : Actor {
 		int maxy = ceil(camera.y + screen.y/2);
 		for (int x=minx; x < maxx; x++)
 		for (int y=miny; y < maxy; y++) {
-			int tile = map::at(x, y).id;
-			bool flip = (tile < 0);
-			if (flip) tile = -tile;
-			if (type == type::front_tiles ? tile::def[tile].front : tile::def[tile].back) {
-				draw_image(
-					img::tiles,
-					Vec(x+.5, y+.5),
-					tile, flip
-				);
+			int tile = map::at(x, y).tile1;
+			if (tile) {
+				bool flip = tile & 0x8000;
+				tile &= 0x7fff;
+				if (type == type::front_tiles ? tile::def[tile].front : tile::def[tile].back) {
+					draw_image(
+						img::tiles,
+						Vec(x+.5, y+.5),
+						tile, flip
+					);
+				}
+			}
+			tile = map::at(x, y).tile2;
+			if (tile) {
+				bool flip = tile & 0x8000;
+				tile &= 0x7fff;
+				if (type == type::front_tiles ? tile::def[tile].front : tile::def[tile].back) {
+					draw_image(
+						img::tiles,
+						Vec(x+.5, y+.5),
+						tile, flip
+					);
+				}
 			}
 		}
 	}

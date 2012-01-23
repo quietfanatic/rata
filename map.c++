@@ -3,9 +3,10 @@
 
 namespace map {
 	struct Tile {
-		int16 id;
+		uint16 tile1;
+		uint16 tile2;
 		int16 nature;
-		Tile () :id(1), nature(tile::unknown) { }
+		Tile () :tile1(1), tile2(0), nature(tile::unknown) { }
 	};
 
 	const uint width = 128;
@@ -99,8 +100,8 @@ namespace map {
 		for (uint rx=0; rx < r->width; rx++) {
 			uint x = rx + r->pos.x;
 			uint y = ry + r->pos.y;
-			at(x, y).id = r->tile(rx, r->height - ry - 1);
-			at(x, y).nature = tile::def[abs(at(x, y).id)].nature;
+			at(x, y).tile1 = r->tile(rx, r->height - ry - 1);
+			at(x, y).nature = tile::def[at(x, y).tile1 & 0x7fff].nature;
 			if (at(x, y).nature == tile::empty) {
 				if (at(x, y-1).nature == tile::solid)
 					at(x, y).nature = tile::platform;

@@ -20,6 +20,7 @@ namespace tile {
 		unknown = '.',
 	};
 	
+	 // TILE CATALOGUE
 	 // A tile entry is:
 	 //   {name, type, front, back, friction, nvertexes, vertexes},
 	 // where name is a the name of the tile (currently unused, intended for easy reading)

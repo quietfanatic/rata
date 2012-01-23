@@ -7,7 +7,7 @@ namespace room {
 		Vec pos;
 		uint16 width;
 		uint16 height;
-		const int16* tiles;
+		const uint16* tiles;
 		uint32 n_neighbors;
 		room::Def*const* neighbors;
 		uint32 n_walls;
@@ -101,7 +101,7 @@ namespace room {
 #define ROOM_POS(...) const Vec pos = Vec(__VA_ARGS__);
 #define ROOM_WIDTH(...) const uint16 width = __VA_ARGS__;
 #define ROOM_HEIGHT(...) const uint16 height = __VA_ARGS__;
-#define ROOM_TILES(...) const int16 tiles [width * height] = {__VA_ARGS__};
+#define ROOM_TILES(...) const uint16 tiles [width * height] = {__VA_ARGS__};
 #define ROOM_N_NEIGHBORS(...) const uint32 n_neighbors = __VA_ARGS__;
 #define ROOM_NEIGHBORS(...) room::Def*const neighbors [n_neighbors] = {__VA_ARGS__};
 #define ROOM_N_WALLS(...) const uint32 n_walls = __VA_ARGS__;
