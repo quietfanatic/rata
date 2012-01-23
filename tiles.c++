@@ -4,7 +4,6 @@ namespace tile {
 	const uint max_vertexes = 4;
 	struct Def {
 		const char* name;
-		int8 nature;
 		bool front;
 		bool back;
 		float friction;
@@ -12,19 +11,11 @@ namespace tile {
 		Vec vertexes [max_vertexes];
 		FixProp* prop;
 	};
-	 // tile types
-	enum {
-		empty = ' ',
-		platform = '_',
-		solid = '#',
-		unknown = '.',
-	};
 	
 	 // TILE CATALOGUE
 	 // A tile entry is:
-	 //   {name, type, front, back, friction, nvertexes, vertexes},
+	 //   {name, front, back, friction, nvertexes, vertexes},
 	 // where name is a the name of the tile (currently unused, intended for easy reading)
-	 //       type is one of the above types (currently unused, intended for enemy AI)
 	 //       front, if 1, means the tile is drawn in foreground
 	 //       back, if 1, means the tile is drawn in background
 	 //       friction is the amount of friction of the material, from 0 to whatever
@@ -35,15 +26,15 @@ namespace tile {
 	const uint num_tiles = 9;  // Make sure this number is correct
 	const Def def [num_tiles] = {
 
-		{"Empty", empty, 0, 0, 0.0, 0},
-		{"Metal block", solid, 1, 0, 0.4, 4, {Vec(0, 0), Vec(1, 0), Vec(1, 1), Vec(0, 1)}, NULL},
-		{"Metal support", empty, 0, 1, 0.0, 0},
-		{"Metal support", empty, 0, 1, 0.0, 0},
-		{"Metal support", empty, 0, 1, 0.0, 0},
-		{"Metal support", empty, 0, 1, 0.0, 0},
-		{"Metal support", empty, 0, 1, 0.0, 0},
-		{"Metal ramp l", unknown, 1, 0, 1.5, 3, {Vec(0, 0), Vec(1, 0), Vec(1, 1)}},
-		{"Metal ramp r", unknown, 1, 0, 1.5, 3, {Vec(0, 0), Vec(1, 0), Vec(0, 1)}},
+		{"Empty", 0, 0, 0.0, 0},
+		{"Metal block", 1, 0, 0.4, 4, {Vec(0, 0), Vec(1, 0), Vec(1, 1), Vec(0, 1)}, NULL},
+		{"Metal support", 0, 1, 0.0, 0},
+		{"Metal support", 0, 1, 0.0, 0},
+		{"Metal support", 0, 1, 0.0, 0},
+		{"Metal support", 0, 1, 0.0, 0},
+		{"Metal support", 0, 1, 0.0, 0},
+		{"Metal ramp l", 1, 0, 1.5, 3, {Vec(0, 0), Vec(1, 0), Vec(1, 1)}},
+		{"Metal ramp r", 1, 0, 1.5, 3, {Vec(0, 0), Vec(1, 0), Vec(0, 1)}},
 
 	};
 }

@@ -5,8 +5,7 @@ namespace map {
 	struct Tile {
 		uint16 tile1;
 		uint16 tile2;
-		int16 nature;
-		Tile () :tile1(1), tile2(0), nature(tile::unknown) { }
+		Tile () :tile1(1), tile2(0) { }
 	};
 
 	const uint width = 128;
@@ -36,33 +35,13 @@ namespace map {
 		return world[p.y][p.x];
 	}
 
-	Pos get_platform (Pos p) {
-		while (at(p).nature != tile::platform && at(p).nature != tile::unknown) {
-			p = p.down();
-		}
-		return p;
-	}
-
-	Pos get_end_left (Pos p) {
-		while (at(p).nature == tile::platform) {
-			p = p.left();
-		}
-		return p.right();
-	}
-	Pos get_end_right (Pos p) {
-		while (at(p).nature == tile::platform) {
-			p = p.right();
-		}
-		return p.left();
-	}
-	bool same_platform (Pos a, Pos b) {
-		return get_end_left(a) == get_end_left(b);
-	}
-
 	void debug_print () {
 		for (uint y=0; y < height; y++) {
 			for (uint x=0; x < width; x++) {
-				putchar(world[height-y-1][x].nature);
+				if (world[height-y-1][x].tile1)
+					putchar('#');
+				else
+					putchar('.');
 			}
 			putchar('\n');
 		}
@@ -96,18 +75,18 @@ namespace map {
 
 
 	void load_room (room::Def* r) {
+		uint offset = 0;
 		for (uint ry=0; ry < r->height; ry++)
 		for (uint rx=0; rx < r->width; rx++) {
 			uint x = rx + r->pos.x;
 			uint y = ry + r->pos.y;
-			at(x, y).tile1 = r->tile(rx, r->height - ry - 1);
-			at(x, y).nature = tile::def[at(x, y).tile1 & 0x7fff].nature;
-			if (at(x, y).nature == tile::empty) {
-				if (at(x, y-1).nature == tile::solid)
-					at(x, y).nature = tile::platform;
-				else if (at(x, y-1).nature == tile::unknown)
-					at(x, y).nature = tile::unknown;
+			uint16 tileid = r->tile(rx + offset, r->height - ry - 1);
+			if (tileid == 0x8000) {  // Double tile
+				at(x, y).tile1 = r->tile(rx + offset + 1, r->height - ry - 1);
+				at(x, y).tile2 = r->tile(rx + offset + 2, r->height - ry - 1);
+				offset += 2;
 			}
+			else at(x, y).tile1 = tileid;
 		}
 	}
 	void unload_room (room::Def* r) {

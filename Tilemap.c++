@@ -103,8 +103,8 @@ Tilemap::Tilemap (room::Def* def) :
 	TileEdge edges [(uint)ceil(def->width)][(uint)ceil(def->height)][tile::max_vertexes];
 	for (uint y=0; y < def->height; y++)
 	for (uint x=0; x < def->width; x++) {
-		bool flip = (def->tile(x, y) < 0);
-		const tile::Def& t = tile::def[flip? -def->tile(x,y) : def->tile(x,y)];
+		bool flip = def->tile(x, y) & 0x8000;
+		const tile::Def& t = tile::def[def->tile(x,y) & 0x7fff];
 		uint nv = t.nvertexes;
 		 // Generate edges
 		for (uint e=0; e < tile::max_vertexes; e++) {
