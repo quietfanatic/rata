@@ -11,7 +11,7 @@ struct Color {
 	void setGL () const { glColor4ub(x>>24, x>>16, x>>8, x); }
 };
 void vertex (Vec v);
-void draw_image (img::Def* image, Vec p, int sub=0, bool flip=false);
+void draw_image (img::Def* image, Vec p, int sub=0, bool fliph=false, bool flipv=false);
 void draw_rect (const Rect& r, Color color = 0x2f2f2f7f);
 void draw_line (Vec a, Vec b, Color color = 0xffffff7f);
 #else
@@ -23,7 +23,7 @@ void vertex (Vec v) {
 }
 
 
-void draw_image (img::Def* image, Vec p, int sub, bool flip) {
+void draw_image (img::Def* image, Vec p, int sub, bool fliph, bool flipv) {
 	if (!image) return;
 	sub %= image->numsubs();
 	if (sub < 0) sub += image->numsubs();
@@ -33,13 +33,13 @@ void draw_image (img::Def* image, Vec p, int sub, bool flip) {
 	uint ih = image->h;
 	uint subx = (sub % (tw / iw));
 	uint suby = (sub / (tw / iw));
-	float x = p.x - (flip ? iw-image->x : image->x)*PX;
-	float y = p.y - (ih-image->y)*PX;
+	float x = p.x - (fliph ? iw-image->x : image->x)*PX;
+	float y = p.y - (flipv ? image->y : ih-image->y)*PX;
 
-	float tl = subx*iw + iw*flip;
-	float tr = subx*iw + iw*!flip;
-	float tt = suby*ih;
-	float tb = suby*ih + ih;
+	float tl = subx*iw + iw*fliph;
+	float tr = subx*iw + iw*!fliph;
+	float tt = suby*ih + iw*flipv;
+	float tb = suby*ih + ih*!flipv;
 	
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, image->tex);
