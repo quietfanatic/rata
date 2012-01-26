@@ -18,8 +18,8 @@ namespace map {
 		uint8 y;
 		
 		Pos () { }
-		Pos(uint8 x, uint8 y) :x(x % width), y(y % height) { }
-		Pos(Vec v) :x((int)floor(v.x) % width), y((int)floor(v.y) % height) { }
+		Pos (uint8 x, uint8 y) :x(x % width), y(y % height) { }
+		Pos (Vec v) :x((int)floor(v.x) % width), y((int)floor(v.y) % height) { }
 		Pos left () const { return Pos(x-1, y); }
 		Pos right () const { return Pos(x+1, y); }
 		Pos down () const { return Pos(x, y-1); }
@@ -47,8 +47,8 @@ namespace map {
 		}
 	}
 
-	void load_room(room::Def*);
-	void unload_room(room::Def*);
+	void load_room (room::Def*);
+	void unload_room (room::Def*);
 }
 
 
@@ -58,7 +58,7 @@ namespace map {
 
 	 // Check if a point can be reached via jump (no obstacles)
 	 // See notes
-	bool can_reach_with_jump(Vec from, Vec vel, Vec to, float float_time) {
+	bool can_reach_with_jump (Vec from, Vec vel, Vec to, float float_time) {
 		float t = (to.x - from.x) / vel.x;
 		float height = 
 		  t <= float_time

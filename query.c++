@@ -9,7 +9,7 @@ struct LineChecker : public b2RayCastCallback {
 	float frac;
 	b2Fixture* hit;
 	Vec norm;
-	float32 ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f);
+	float32 ReportFixture (b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f);
 };
 
 LineChecker check_line (Vec from, Vec to, uint16 mask = cf::solid.categoryBits, Object* owner = NULL);
@@ -22,7 +22,7 @@ bool look_line (Vec from, Vec to, uint16 mask = cf::solid.categoryBits);
 struct AreaChecker : public b2QueryCallback {
 	b2Fixture* found;
 	uint16 cat;
-	bool ReportFixture(b2Fixture* fix) {
+	bool ReportFixture (b2Fixture* fix) {
 		if (fix->GetFilterData().categoryBits & cat) {
 			found = fix;
 			return false;
@@ -48,7 +48,7 @@ Object* check_area (float l, float t, float r, float b, uint16 cat) {
 }
 
  // Find one object (by default solid) along the line in world coords
-float32 LineChecker::ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
+float32 LineChecker::ReportFixture (b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
 	if (fix->GetFilterData().categoryBits & mask)
 	if (fix->GetBody()->GetUserData() != owner)
 	if (((Object*)fix->GetBody()->GetUserData())->active) {
@@ -66,7 +66,7 @@ float32 LineChecker::ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2
 struct LineLooker : public b2RayCastCallback {
 	uint16 mask;
 	bool seen;
-	float32 ReportFixture(b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
+	float32 ReportFixture (b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f) {
 		if (fix->GetFilterData().categoryBits & mask) {
 			seen = true;
 			return 0;

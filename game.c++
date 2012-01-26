@@ -11,8 +11,8 @@ sf::Window* window;
 
 
  // INPUT
-unsigned char key[400];  // Counts number of frames up to 255
-unsigned char button[10];
+unsigned char key [400];  // Counts number of frames up to 255
+unsigned char button [10];
 Vec cursor;  // Relative to player
 Vec cursor2;  // Relative to screen
 img::Def* cursor_img = NULL;
@@ -41,7 +41,7 @@ char* message_pos = NULL;
 char* message_pos_next = NULL;
 
 const uint MAX_BULLETS = 10;
-RBullet bullets[MAX_BULLETS];
+RBullet bullets [MAX_BULLETS];
 
 void (* draw_hud )() = NULL;
 uint n_buttons = 0;
@@ -67,7 +67,7 @@ Vec oldratapos;
 const uint max_debug_points = 32;
 uint n_debug_points = 0;
 Vec debug_points [max_debug_points];
-void reg_debug_point(Vec p) {
+void reg_debug_point (Vec p) {
 	if (n_debug_points == max_debug_points) {
 		printf("Warning: Out of debug points.\n");
 		return;

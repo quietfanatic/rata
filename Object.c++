@@ -23,7 +23,7 @@ struct Object : Spatial {
 
 	b2Body* make_body (b2BodyType btype = b2_staticBody, bool bullet=false);
 	void impulse (Vec i);
-	void mutual_impulse(Object* other, Vec i);
+	void mutual_impulse (Object* other, Vec i);
 };
 
 
@@ -100,7 +100,7 @@ b2Body* Object::make_body (b2BodyType btype, bool bullet) {
 void Object::impulse (Vec i) {
 	vel += i / body->GetMass();
 }
-void Object::mutual_impulse(Object* other, Vec i) {
+void Object::mutual_impulse (Object* other, Vec i) {
 	float m = body->GetMass();
 	float om = other->body->GetMass();
 	if (m == 0 || m == 1/0.0)

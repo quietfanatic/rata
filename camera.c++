@@ -11,7 +11,7 @@ struct Attention {
 	{ }
 };
 
-void propose_attention(Attention);
+void propose_attention (Attention);
 
 #else
 

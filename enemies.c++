@@ -259,7 +259,7 @@ struct Flyer : AI {
 			}
 		}
 	}
-	void after_move() {
+	void after_move () {
 		AI::after_move();
 		if (defined(prediction) || mag2(dest - pos) > 1) {
 			propose_attention(Attention(

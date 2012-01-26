@@ -47,7 +47,8 @@ struct Rata : Walking {
 		int8 arm;
 		int8 forearm;
 		int8 hand;
-	} pose;
+	};
+	Pose pose;
 	 // Control
 	bool auto_control;
 	map::Pos destination;
