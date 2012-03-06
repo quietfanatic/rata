@@ -49,13 +49,25 @@ ${\(join "\n", map "\timg::Def*const $imgs[$_]{id} = def+$_;", 0..$#imgs)}
 
 }
 void load_img () {
+	glEnable(GL_TEXTURE_RECTANGLE);
 	for (uint i=0; i < img::n_imgs; i++) {
-		img::def[i].tex = SOIL_load_OGL_texture(img::def[i].file, 4, 0, 0);
-		if (!img::def[i].tex)
+		uint channels;
+		uint8* image = SOIL_load_image(
+			img::def[i].file, (int*)&img::def[i].tw, (int*)&img::def[i].th,
+			(int*)&channels, SOIL_LOAD_RGBA
+		);
+		if (!image)
 			printf("Error: Failed to load image %s.\\n", img::def[i].file);
-		glBindTexture(GL_TEXTURE_2D, img::def[i].tex);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glGenTextures(1, &img::def[i].tex);
+		glBindTexture(GL_TEXTURE_RECTANGLE, img::def[i].tex);
+		glTexImage2D(
+			GL_TEXTURE_RECTANGLE, 0, GL_RGBA8,
+			img::def[i].tw, img::def[i].th, 0,
+			GL_RGBA, GL_UNSIGNED_BYTE, image
+		);
+		free(image);
+		glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
 }
 
