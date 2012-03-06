@@ -38,7 +38,7 @@ void draw_image (img::Def* image, Vec p, int sub, bool fliph, bool flipv) {
 
 	float tl = subx*iw + iw*fliph;
 	float tr = subx*iw + iw*!fliph;
-	float tt = suby*ih + iw*flipv;
+	float tt = suby*ih + ih*flipv;
 	float tb = suby*ih + ih*!flipv;
 	
 	glEnable(GL_TEXTURE_2D);
