@@ -23,6 +23,18 @@ void vertex (Vec v) {
 }
 
 
+void draw_image_2 (img::Def* image, float tl, float tr, float tt, float tb, float x, float y, float iw, float ih) {
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, image->tex);
+	glColor4f(1, 1, 1, 1);
+	glBegin(GL_QUADS);
+		glTexCoord2f(tl, tb); vertex(Vec(x,       y      ));
+		glTexCoord2f(tr, tb); vertex(Vec(x+iw*PX, y      ));
+		glTexCoord2f(tr, tt); vertex(Vec(x+iw*PX, y+ih*PX));
+		glTexCoord2f(tl, tt); vertex(Vec(x,       y+ih*PX));
+	glEnd();
+	dbg_draw("Drawing image at <%f v%f >%f ^%f\n", x, y, x+iw*PX, y+ih*PX);
+}
 void draw_image (img::Def* image, Vec p, int sub, bool fliph, bool flipv) {
 	if (!image) return;
 	sub %= image->numsubs();
@@ -36,21 +48,12 @@ void draw_image (img::Def* image, Vec p, int sub, bool fliph, bool flipv) {
 	float x = p.x - (fliph ? iw-image->x : image->x)*PX;
 	float y = p.y - (flipv ? image->y : ih-image->y)*PX;
 
-	float tl = subx*iw + iw*fliph;
-	float tr = subx*iw + iw*!fliph;
-	float tt = suby*ih + ih*flipv;
-	float tb = suby*ih + ih*!flipv;
-	
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, image->tex);
-	glColor4f(1, 1, 1, 1);
-	glBegin(GL_QUADS);
-		glTexCoord2f(tl/tw, tb/th); vertex(Vec(x,       y      ));
-		glTexCoord2f(tr/tw, tb/th); vertex(Vec(x+iw*PX, y      ));
-		glTexCoord2f(tr/tw, tt/th); vertex(Vec(x+iw*PX, y+ih*PX));
-		glTexCoord2f(tl/tw, tt/th); vertex(Vec(x,       y+ih*PX));
-	glEnd();
-	dbg_draw("Drawing image at <%f v%f >%f ^%f\n", x, y, x+iw*PX, y+ih*PX);
+	float tl = (subx*iw + iw*fliph)/(float)tw;
+	float tr = (subx*iw + iw*!fliph)/(float)tw;
+	float tt = (suby*ih + ih*flipv)/(float)th;
+	float tb = (suby*ih + ih*!flipv)/(float)th;
+	 // separated out for profiling
+	draw_image_2(image, tl, tr, tt, tb, x, y, iw, ih);
 }
 void draw_rect (const Rect& r, Color color) {
 	glDisable(GL_TEXTURE_2D);
