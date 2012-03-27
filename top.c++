@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <SOIL.h>
+#include <SOIL/SOIL.h>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Audio.hpp>
