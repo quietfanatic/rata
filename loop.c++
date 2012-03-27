@@ -26,7 +26,7 @@ void set_video () {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glTranslatef(-1, -1, 0);
-	glScalef(1/20.0, 1/15.0, 1);
+	glScalef(1/10.0/window_scale, 1/7.5/window_scale, 1);
 	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -264,7 +264,7 @@ void draw_phase () {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glTranslatef(-1, -1, 0);
-	glScalef(1/20.0, 1/15.0, 1);
+	glScalef(1/10.0/window_scale, 1/7.5/window_scale, 1);
 	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
 	 // Draw hud
 	if (draw_hud) {

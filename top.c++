@@ -13,7 +13,7 @@ const float FPS = 60.0;
 const double pi = M_PI;
 const float gravity = -30;
  // SETTINGS
-uint window_scale = 2;  // 1 = 320x240, 2 = 640x480, 3 = 960x720
+uint window_scale = 3;  // 1 = 320x240, 2 = 640x480, 3 = 960x720
 bool window_fullscreen = false;
 float cursor_scale = 1.0;  // Higher = faster cursor
 
