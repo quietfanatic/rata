@@ -1,19 +1,5 @@
 
-#ifdef HEADER
 
-struct Attention {
-	float priority;
-	Rect range;
-	Attention () : priority(-1/0.0) { }
-	Attention (float priority, Rect range) :
-		priority(priority),
-		range(range)
-	{ }
-};
-
-void propose_attention (Attention);
-
-#else
 
  // WALL CONSTRUCTION
 
@@ -44,9 +30,6 @@ void build_sides (const room::Def* r) {
 }
 
  // ATTENTION
-
-const uint MAX_ATTENTIONS = 8;
-Attention attention [MAX_ATTENTIONS];
 
 void reset_attentions () {
 	attention[0] = Attention(1000000, Rect(rata->aim_center() - Vec(9, 6.5), rata->aim_center() + Vec(9, 6.5)));
@@ -357,7 +340,6 @@ void get_camera () {
 
 
 
-#endif
 
 
 

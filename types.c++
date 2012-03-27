@@ -1,47 +1,16 @@
 
 
 
-namespace type {
-
-#ifdef HEADER
-	enum {
-		rata,
-		tilemap,
-		item,
-		bullet,
-		crate,
-		rat,
-		patroller,
-		flyer,
-		heart,
-		door,
-		bg_color,
-		back_tiles,
-		bullet_layer,
-		front_tiles,
-		cursor_layer,
-		shade,
-		n_types
-	};
-	struct Def {
-		const char* name;
-		int32 nfixes;
-		const b2FixtureDef* fixdef;
-		float depth;
-		img::Def* image;
-	};
-	extern const Def def [n_types];
-#else
 
  // Fixture helper functions
-b2PolygonShape* make_poly (uint n, Vec* vs, float radius = 0.01) {
+b2PolygonShape* make_poly (uint n, Vec* vs, float radius) {
 	b2PolygonShape* r = new b2PolygonShape;
 	r->Set((b2Vec2*)vs, n);
 	r->m_radius = radius;
 	return r;
 }
 
-b2PolygonShape* make_rect (float w, float h, float radius = 0.01) {
+b2PolygonShape* make_rect (float w, float h, float radius) {
 	return make_poly(4, (Vec[]){
 		Vec(-w/2, 0),
 		Vec(w/2, 0),
@@ -50,7 +19,7 @@ b2PolygonShape* make_rect (float w, float h, float radius = 0.01) {
 	}, radius);
 }
 
-b2CircleShape* make_circle (float rad, float x = 0, float y = 0) {
+b2CircleShape* make_circle (float rad, float x, float y) {
 	b2CircleShape* r = new b2CircleShape;
 	r->m_radius = rad;
 	r->m_p = Vec(x, y);
@@ -58,7 +27,7 @@ b2CircleShape* make_circle (float rad, float x = 0, float y = 0) {
 }
 
 
-b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction=0, float restitution=0, float density=0, FixProp* prop=NULL, bool sensor=false) {
+b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction, float restitution, float density, FixProp* prop, bool sensor) {
 	b2FixtureDef r;
 	r.shape = shape;
 	r.friction = friction;
@@ -70,8 +39,7 @@ b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction=0, flo
 	return r;
 }
 
- // OBJECT DEFINITIONS
-
+namespace type {
 
 Vec rata_poly_feet [] = {
 	Vec(-2.5*PX, 0*PX),
@@ -232,8 +200,5 @@ const Def def [n_types] = {
 //	{"Mousehole", 1, &mousehole_fix, 50, img::mousehole},
 //	{"Hit Effect", -1, NULL, -90, -1},
 };
-
-
-#endif
 
 }

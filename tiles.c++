@@ -1,16 +1,6 @@
 
 
 namespace tile {
-	const uint max_vertexes = 4;
-	struct Def {
-		const char* name;
-		bool front;
-		bool back;
-		float friction;
-		uint nvertexes;
-		Vec vertexes [max_vertexes];
-		FixProp* prop;
-	};
 	
 	 // TILE CATALOGUE
 	 // A tile entry is:

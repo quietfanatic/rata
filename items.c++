@@ -1,33 +1,4 @@
-
-#ifdef HEADER
-
 namespace item {
-	enum Slot {
-		feet,
-		body,
-		head,
-		arm,
-		hand,
-		num_slots
-	};
-	struct Def {
-		char* name;
-		int8 slot;
-		int8 otherslot;
-		
-		img::Def* appearance;
-		uint16 world_frame;
-		uint16 inventory_frame;
-		img::Def* body;
-		img::Def* head;
-		img::Def* helmet;
-		img::Def* arm;
-		img::Def* forearm;
-		img::Def* hand;
-		void (* use ) ();
-		void (* stat_mod ) (MoveStats* s);
-	};
-
 
 	void fire_handgun ();
 	void decrease_float_time (MoveStats* s);
@@ -65,8 +36,6 @@ namespace item {
 	Def*const helmet = def+3;
 }
 
-#else
-
 float handgun_bulletx [] = {
 	2*PX, 3*PX, 5*PX, 5*PX, 5*PX, 4*PX, 3*PX, 0*PX, -2*PX
 };
@@ -97,8 +66,6 @@ void item::decrease_float_time (MoveStats* s) {
 	s->float_time *= 0.8;
 }
 
-
-#endif
 
 
 

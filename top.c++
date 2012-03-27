@@ -26,41 +26,16 @@ int frame_number = -1;
 #include "math.h"
 
 
+#include "header.h"
+
+
 #define HEADER
 
-#include "coll.c++"
  // RESOURCES
 #include "img.c++"
 #include "snd.c++"
-#include "tiles.c++"
-#include "stats.c++"
 #include "poses.c++"
-#include "items.c++"
-#include "camera.c++"
-#include "rooms.c++"
 
- // GRAPHICS
-#include "drawing.c++"
-#include "text.c++"
-
- // ACTORS
-#include "Actor.c++"
-#include "Spatial.c++"
-#include "Object.c++"
-#include "Walking.c++"
-#include "misc.c++"
-#include "Item.c++"
-#include "Rata.c++"
-#include "Tilemap.c++"
-#include "enemies.c++"
-#include "types.c++"
-
- // MISC
-#include "loop.c++"
-#include "map.c++"
-#include "query.c++"
-#include "bullet.c++"
-#include "hud.c++"
 #undef HEADER
 
 
@@ -76,8 +51,10 @@ int frame_number = -1;
 #include "Spatial.c++"
 #include "Object.c++"
 #include "Walking.c++"
-#include "Rata.c++"
 #include "Item.c++"
+#include "items.c++"
+#include "Rata.c++"
+#include "tiles.c++"
 #include "Tilemap.c++"
 #include "misc.c++"
 #include "enemies.c++"
@@ -90,7 +67,6 @@ int frame_number = -1;
 #include "query.c++"
 #include "bullet.c++"
 #include "hud.c++"
-#include "items.c++"
 
 
 

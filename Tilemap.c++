@@ -1,14 +1,5 @@
 
 
-#ifdef HEADER
-
-struct Tilemap : Object {
-	void after_move () { }
-	void before_move () { }
-	Tilemap (room::Def* def);
-};
-
-#else
 
  // STATIC GEOMETRY GENERATION
 
@@ -182,4 +173,3 @@ Tilemap::Tilemap (room::Def* def) :
 
 
 
-#endif
