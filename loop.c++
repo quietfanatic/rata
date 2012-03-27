@@ -13,32 +13,6 @@ void quit_game () {
 	throw 0;
 }
 
-void set_video () {
-	if (window_fullscreen) {
-		window->Create(sf::VideoMode(640, 480, 32), "", sf::Style::Fullscreen);
-	}
-	else {
-		window->Create(sf::VideoMode(320*window_scale, 240*window_scale, 32), "");
-	}
-	glDisable(GL_ALPHA_TEST);
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_LIGHTING);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glTranslatef(-1, -1, 0);
-	glScalef(1/10.0/window_scale, 1/7.5/window_scale, 1);
-	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	window->UseVerticalSync(true);
-	//window->SetFramerateLimit(60);
-	window->EnableKeyRepeat(false);
-	window->ShowMouseCursor(false);
-	window->Display();
-	frameclock.Reset();
-	draw_latency = 0;
-}
-
 
 void main_init () {
 	 // SFML
@@ -131,12 +105,8 @@ void draw_phase () {
 		dbg_timing("Skipping frame.\n");
 		return;
 	}
-	 // Move GL view to camera pos
-	glTranslatef(
-		- round(camera.x*UNPX)*PX + screen.x/2,
-		- round(camera.y*UNPX)*PX + screen.y/2,
-		0
-	);
+	
+	camera_to_screen();
 
 	 // Draw actors
 	for (Actor* a = active_actors; a; a = a->next_active) {
@@ -145,139 +115,10 @@ void draw_phase () {
 		a->draw();
 	}
 
-	 // DEBUG DRAWING
-	if (debug_mode)
-	for (Actor* a=active_actors; a; a = a->next_active) {
-		if (a->has_body()) {
-			Object* o = (Object*) a;
-			for (b2Fixture* f = o->body->GetFixtureList(); f; f = f->GetNext())
-			if (f->GetFilterData().categoryBits)
-			switch (f->GetType()) {
-				case (b2Shape::e_edge): {
-					b2EdgeShape* e = (b2EdgeShape*)f->GetShape();
-					draw_line(
-						o->pos + Vec(e->m_vertex1),
-						o->pos + Vec(e->m_vertex2),
-						0x00ff007f
-					);
-					if (mag2(rata->cursor_pos() - o->pos + Vec(e->m_vertex1)) < 1)
-						draw_line(
-							o->pos + Vec(e->m_vertex1),
-							o->pos + Vec(e->m_vertex0) + Vec(3, 3)*PX,
-							0xffff007f
-						);
-					if (mag2(rata->cursor_pos() - o->pos + Vec(e->m_vertex2)) < 1)
-						draw_line(
-							o->pos + Vec(e->m_vertex2),
-							o->pos + Vec(e->m_vertex3) - Vec(3, 3)*PX,
-							0x0000ff7f
-						);
-					break;
-				}
-				case (b2Shape::e_polygon): {
-					b2PolygonShape* p = (b2PolygonShape*)f->GetShape();					
-					Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
-					glDisable(GL_TEXTURE_2D);
-					color.setGL();
-					glBegin(GL_LINE_LOOP);
-					for (int i=0; i < p->m_vertexCount; i++) {
-						vertex(o->pos + Vec(p->m_vertices[i]));
-					}
-					glEnd();
-					break;
-				}
-				case (b2Shape::e_circle): {
-					b2CircleShape* c = (b2CircleShape*)f->GetShape();
-					Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
-					draw_circle(Vec(c->m_p)+o->pos, c->m_radius, color);
-					break;
-				}
-				default: { }
-			}
-		}
-		 // Debug draw rata path.
-		if (mag2(rata->pos - oldratapos) > 0.2) {
-			debug_path[debug_path_pos % debug_path_size] = rata->pos;
-			uint8 whiteshift = rata->float_frames * 255.0 / (rata->stats.float_time*FPS);
-			debug_path_color[debug_path_pos % debug_path_size] =
-				whiteshift ? Color(255, whiteshift, whiteshift, 127) : 0x0000ff7f;
-			oldratapos = rata->pos;
-			debug_path_pos++;
-		}
+	debug_draw();
 
-		uint i = debug_path_pos>=debug_path_size ? debug_path_pos-debug_path_size+1 : 0;
-		glBegin(GL_LINE_STRIP);
-		for (; i < debug_path_pos; i++) {
-			debug_path_color[i % debug_path_size].setGL();
-			vertex(debug_path[i % debug_path_size]);
-		}
-		glEnd();
-		 // Debug draw Camera walls.
-		Color(0x7f007f7f).setGL();
-		glBegin(GL_LINES);
-		for (uint i=0; i < current_room->n_walls; i++) {
-			vertex(current_room->sides[i].a);
-			vertex(current_room->sides[i].b);
-			//vertex(bound_a(current_room->sides[i]).a);
-			//vertex(bound_a(current_room->sides[i]).b);
-			//vertex(bound_b(current_room->sides[i]).a);
-			//vertex(bound_b(current_room->sides[i]).b);
-		}
-		glEnd();
-		for (uint i=0; i < current_room->n_walls; i++)
-		if (current_room->walls[i].r > 0) {
-			draw_circle(
-				current_room->walls[i].c,
-				current_room->walls[i].r,
-				0x7f007f7f
-			);
-		}
-		 // Draw camera and focus
-		Color(0x007f7f7f).setGL();
-		glBegin(GL_LINE_LOOP);
-			vertex(rata->cursor_pos() + Vec(-9, -6.5));
-			vertex(rata->cursor_pos() + Vec(9, -6.5));
-			vertex(rata->cursor_pos() + Vec(9, 6.5));
-			vertex(rata->cursor_pos() + Vec(-9, 6.5));
-		glEnd();
-		for (uint i=0; i < MAX_ATTENTIONS; i++) {
-			if (attention[i].priority == -1/0.0) break;
-			glBegin(GL_LINE_LOOP);
-				vertex(Vec(attention[i].range.l, attention[i].range.b));
-				vertex(Vec(attention[i].range.r, attention[i].range.b));
-				vertex(Vec(attention[i].range.r, attention[i].range.t));
-				vertex(Vec(attention[i].range.l, attention[i].range.t));
-			glEnd();
-		}
-		 // Draw debug points
-		for (uint i=0; i < n_debug_points; i++) {
-			draw_rect(Rect(debug_points[i] - Vec(1, 1)*PX, debug_points[i] + Vec(1, 1)*PX), 0xffff007f);
-		}
-		if (defined(debug_line.a))
-			draw_line(debug_line.a, debug_line.b, 0x007f7f7f);
-		draw_rect(Rect(oldfocus - Vec(1, 1)*PX, oldfocus + Vec(1, 1)*PX), 0x007f7f7f);
-		//draw_rect(Rect(focus - Vec(1, 1)*PX, focus + Vec(1, 1)*PX), 0x0000ff7f);
-		draw_rect(Rect(camera - Vec(1, 1)*PX, camera + Vec(1, 1)*PX), 0xff00007f);
-	}
-	else { debug_path_pos = 0; }
-	 // Reset view (Don't use camera for hud)
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glTranslatef(-1, -1, 0);
-	glScalef(1/10.0/window_scale, 1/7.5/window_scale, 1);
-	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
-	 // Draw hud
-	if (draw_hud) {
-		(*draw_hud)();
-	}
-	 // Scale view
-	if (window_scale > 1.0) {
-		glDisable(GL_BLEND);
-		glPixelZoom(window_scale, window_scale);
-		glCopyPixels(0, 0, 320, 240, GL_COLOR);
-		glPixelZoom(1.0, 1.0);
-		glEnable(GL_BLEND);
-	}
+	finish_drawing();
+
 	window->ShowMouseCursor(!trap_cursor);
 	draw_latency += frameclock.GetElapsedTime();
 	frameclock.Reset();

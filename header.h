@@ -13,7 +13,6 @@ namespace img { struct Def; }
 void quit_game ();
 void main_init ();
 void main_loop ();
-void set_video ();
 void toggle_pause ();
 
 
@@ -560,6 +559,12 @@ RBullet* fire_rbullet_to (Object* owner, Vec pos, Vec to, float vel, int power =
 
 
 // GRAPHICS
+
+void set_video ();
+void reset_screen ();
+void camera_to_screen ();
+void debug_draw ();
+void finish_drawing ();
 
 struct Color {  // Just let me use hexadecimal colors, okay?
 	uint32 x;
