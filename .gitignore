@@ -1,4 +1,7 @@
 test
+test-opt
+test-dbg
+test-prof
 mapeditor
 lib
 demo
