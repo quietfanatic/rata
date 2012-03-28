@@ -17,13 +17,13 @@ extern Button pause_buttons [n_pause_buttons];
 #else
 
 void click_options () {
-	if (button[sf::Mouse::Left] == 1) {
+	if (button[GLFW_MOUSE_BUTTON_LEFT] == 1) {
 		dragging = &pause_buttons[0];
 		drag_start = cursor2;
 	}
 }
 void drag_options () {
-	if (button[sf::Mouse::Left]) {
+	if (button[GLFW_MOUSE_BUTTON_LEFT]) {
 		pause_buttons[0].pos += cursor2 - drag_start;
 		drag_start = cursor2;
 	}
@@ -33,7 +33,7 @@ void drag_options () {
 }
 
 void click_quit () {
-	if (button[sf::Mouse::Left] == 1) {
+	if (button[GLFW_MOUSE_BUTTON_LEFT] == 1) {
 		quit_game();
 	}
 }

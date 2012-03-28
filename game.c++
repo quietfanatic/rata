@@ -7,13 +7,14 @@ b2World* world;
 bool paused = false;
 
  // GRAPHICS
-sf::Window* window;
 
 
  // INPUT
 unsigned char key [400];  // Counts number of frames up to 255
 unsigned char button [10];
 Vec cursor;  // Relative to player
+int oldmousex;
+int oldmousey;
 Vec cursor2;  // Relative to screen
 img::Def* cursor_img = NULL;
 bool click_taken = false;
@@ -51,8 +52,7 @@ Vec drag_start;
 
  // TIMING
 //uint frame_number = 0;
-sf::Clock frameclock;
-float draw_latency = 0;
+double draw_latency = 0;
 
 
 

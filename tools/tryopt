@@ -4,6 +4,6 @@ perl tools/gen_img.pl > img.c++
 perl tools/gen_snd.pl > snd.c++
 perl tools/gen_roomlist.pl > roomlist.c++
 
-LD_RUN_PATH=lib g++ -Wall -Wno-write-strings -Wno-switch -Wno-reorder -Wno-format -O3 -fwhole-program -fno-rtti -fmax-errors=10 main.c++ -lGL /usr/lib/libsfml-system.so.1.6 /usr/lib/libsfml-window.so.1.6 -lSOIL /usr/lib/libsfml-audio.so.1.6 lib/libBox2D.so.2.1.0 -o test-opt && ./test-opt
+LD_RUN_PATH=lib g++ -Wall -Wno-write-strings -Wno-switch -Wno-reorder -Wno-format -O3 -fwhole-program -fno-rtti -fmax-errors=10 main.c++ -lGL -lglfw -lSOIL /usr/lib/libsfml-audio.so.1.6 lib/libBox2D.so.2.1.0 -o test-opt && ./test-opt
 
 

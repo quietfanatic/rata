@@ -127,14 +127,14 @@ void Rata::recalc_stats () {
 
  // controls
 void Rata::read_controls () {
-	control_left = key[sf::Key::A];
-	control_right = key[sf::Key::D];
-	control_jump = key[sf::Key::W] && ((!floor) || key[sf::Key::W] < 3);
-	control_kneel = key[sf::Key::S];
-	control_action = key[sf::Key::Space] == 1;
-	control_aim = button[sf::Mouse::Right] || key[sf::Key::LShift];
-	control_click = control_aim ? button[sf::Mouse::Left] : button[sf::Mouse::Left] == 1;
-	control_goto = button[sf::Mouse::Middle] == 1;
+	control_left = key['A'];
+	control_right = key['D'];
+	control_jump = key['W'] && ((!floor) || key['W'] < 3);
+	control_kneel = key['S'];
+	control_action = key[GLFW_KEY_SPACE] == 1;
+	control_aim = button[GLFW_MOUSE_BUTTON_RIGHT] || key[GLFW_KEY_LSHIFT];
+	control_click = control_aim ? button[GLFW_MOUSE_BUTTON_LEFT] : button[GLFW_MOUSE_BUTTON_LEFT] == 1;
+	control_goto = button[GLFW_MOUSE_BUTTON_MIDDLE] == 1;
 	if (control_left || control_right || control_jump || control_kneel
 	 || control_action || control_aim) auto_control = false;
 	//else if (control_goto) {
@@ -152,7 +152,7 @@ void Rata::read_controls () {
 	//	}
 	//}
 	 // Dump debug info
-	if (key[sf::Key::BackSlash] == 1) {
+	if (key['\\'] == 1) {
 		map::debug_print();
 		for (Actor* a=global_actors; a; a = a->next_global)
 			a->debug_print();
@@ -301,6 +301,7 @@ void Rata::allow_use () {
 }
 
 void Rata::allow_action () {
+	if (action_arg)
 	if (control_action)
 	switch (action) {
 		case action_equip: {
@@ -676,7 +677,8 @@ Rata::Rata (room::Def* loc, Vec pos, Vec vel, int facing_) :
 	hurt_type_0(-1),
 	hurt_type_1(-1),
 	state(standing),
-	oldyvel(0)
+	oldyvel(0),
+	action_arg(NULL)
 {	
 	facing = facing_;
 	type = type::rata;

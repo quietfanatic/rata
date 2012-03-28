@@ -1,24 +1,24 @@
 
 
 void set_video () {
-	if (window_fullscreen) {
-		window->Create(sf::VideoMode(640, 480, 32), "", sf::Style::Fullscreen);
-	}
-	else {
-		window->Create(sf::VideoMode(320*window_scale, 240*window_scale, 32), "");
-	}
+//	if (window_fullscreen) {
+//		window->Create(sf::VideoMode(640, 480, 32), "", sf::Style::Fullscreen);
+//	}
+//	else {
+		glfwOpenWindow(
+			320*window_scale, 240*window_scale,
+			8, 8, 8, 8, 0, 0, GLFW_WINDOW
+		);
+//	}
+	glfwSwapInterval(1);
+	start_trap();
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
-	reset_screen();
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	window->UseVerticalSync(true);
-	//window->SetFramerateLimit(60);
-	window->EnableKeyRepeat(false);
-	window->ShowMouseCursor(false);
-	window->Display();
-	frameclock.Reset();
+	reset_screen();
+	glfwSetTime(0);
 	draw_latency = 0;
 }
 

@@ -58,9 +58,7 @@ struct Vec {
 	Vec () { }
 	Vec (float x, float y) :x(x), y(y) { }
 	Vec (b2Vec2 v) :x(v.x), y(v.y) { }
-	Vec (sf::Vector2<float> v) :x(v.x), y(v.y) { }
 	operator const b2Vec2 () const { return b2Vec2(x, y); }
-	operator const sf::Vector2<float> () const { return sf::Vector2<float>(x, y); }
 
 	Vec scalex (float s) const { return Vec(s*x, y); }
 	Vec scaley (float s) const { return Vec(x, s*y); }

@@ -14,7 +14,13 @@ void quit_game ();
 void main_init ();
 void main_loop ();
 void toggle_pause ();
+void start_trap ();
+void stop_trap ();
 
+void GLFWCALL key_cb (int key, int action);
+void GLFWCALL btn_cb (int btn, int action);
+void GLFWCALL mouse_cb (int x, int y);
+int GLFWCALL close_cb ();
 
 // ROOMS
 

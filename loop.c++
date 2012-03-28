@@ -8,17 +8,35 @@ void main_loop ();
 #else
 
 void quit_game () {
-	window->SetCursorPosition(cursor2.x*UNPX*window_scale, window->GetHeight() - cursor2.y*UNPX*window_scale);
-	window->Close();
+	//window->SetCursorPosition(cursor2.x*UNPX*window_scale, window->GetHeight() - cursor2.y*UNPX*window_scale);
+	glfwTerminate();
 	throw 0;
+}
+
+void start_trap () {
+	trap_cursor = true;
+	glfwDisable(GLFW_MOUSE_CURSOR);
+	glfwGetMousePos(&oldmousex, &oldmousey);
+}
+
+void stop_trap () {
+	trap_cursor = false;
+	glfwEnable(GLFW_MOUSE_CURSOR);
 }
 
 
 void main_init () {
-	 // SFML
-	window = new sf::Window;
-	//window = new sf::Image(320, 240);
+	if (!glfwInit()) {
+		printf("Error: could not initialize glfw.\n");
+		exit(1);
+	}
 	set_video();
+	glfwDisable(GLFW_AUTO_POLL_EVENTS);
+	glfwSetWindowCloseCallback(close_cb);
+	glfwSetKeyCallback(key_cb);
+	glfwSetMouseButtonCallback(btn_cb);
+	glfwSetMousePosCallback(mouse_cb);
+	start_trap();
 	 // box2d
 	world = new b2World(
 		b2Vec2(0.0, gravity),  // grav
@@ -33,16 +51,13 @@ void main_init () {
 void toggle_pause () {
 	if (paused) {
 		paused = false;
-		trap_cursor = true;
-		window->ShowMouseCursor(false);
-		window->SetCursorPosition(window->GetWidth()/2, window->GetHeight()/2);
+		start_trap();
 		n_buttons = 0;
 		draw_hud = &hud_play;
 	}
 	else {
 		paused = true;
-		trap_cursor = false;
-		window->SetCursorPosition(cursor2.x*UNPX*window_scale, window->GetHeight() - cursor2.y*UNPX*window_scale);
+		stop_trap();
 		n_buttons = n_pause_buttons;
 		buttons = pause_buttons;
 		draw_hud = &hud_pause;
@@ -119,13 +134,76 @@ void draw_phase () {
 
 	finish_drawing();
 
-	window->ShowMouseCursor(!trap_cursor);
-	draw_latency += frameclock.GetElapsedTime();
-	frameclock.Reset();
-	if (draw_latency < 0) sf::Sleep(-draw_latency);
+	draw_latency += glfwGetTime();
+	glfwSetTime(0);
+	if (draw_latency < 0) glfwSleep(-draw_latency);
 	dbg_timing("%f\n", draw_latency);
-	window->Display();
+	glfwSwapBuffers();	
 }
+
+int GLFWCALL close_cb () {
+	quit_game();
+	return true;
+}
+
+void GLFWCALL key_cb (int keycode, int action) {
+	if (action == GLFW_PRESS) {
+		switch (keycode) {
+			case GLFW_KEY_ESC: {
+				quit_game();
+			}
+			case '=': {
+				debug_mode = !debug_mode;
+				return;
+			}
+			case 'P': {
+				toggle_pause();
+				return;
+			}
+			default: {
+				if (keycode < 400)
+					key[keycode] = 1;
+				return;
+			}
+		}
+	}
+	else {  // action == GLFW_RELEASE
+		if (keycode < 400)
+			key[keycode] = 0;
+		return;
+	}
+}
+
+void GLFWCALL btn_cb (int btn, int action) {
+	if (action == GLFW_PRESS) {
+		if (btn < 10) button[btn] = 1;
+	}
+	else {
+		if (btn < 10) button[btn] = 0;
+	}
+}
+
+void GLFWCALL mouse_cb (int x, int y) {
+	if (trap_cursor) {
+		cursor += Vec(
+			x - oldmousex,
+			oldmousey - y
+		) * PX * cursor_scale / window_scale;
+		if (cursor.x > 19) cursor.x = 19;
+		else if (cursor.x < -19) cursor.x = -19;
+		if (cursor.y > 14) cursor.y = 14;
+		else if (cursor.y < -14) cursor.y = -14;
+	}
+	else {
+		cursor2 = Vec(
+			x - oldmousex,
+			oldmousey - y
+		) * PX / window_scale;
+	}
+	oldmousex = x;
+	oldmousey = y;
+}
+
 
 void input_phase () {
 	click_taken = false;
@@ -134,71 +212,7 @@ void input_phase () {
 	if (key[sym] > 0 and key[sym] < 255) key[sym]++;
 	for (uint btn = 0; btn < 10; btn++)
 	if (button[btn] > 0 and btn[button] < 255) button[btn]++;
-	 // Start event handling
-	sf::Event event;
-	while (window->GetEvent(event))
-	switch (event.Type) {
-		case sf::Event::KeyPressed: {
-			if (event.Key.Code == sf::Key::Escape) {
-				quit_game();
-			}
-			if (event.Key.Code == sf::Key::Equal) debug_mode = !debug_mode;
-			if (event.Key.Code == sf::Key::F11) {
-				window_fullscreen = !window_fullscreen;
-				set_video();
-			}
-			//if (event.Key.Code == sf::Key::Num1) enter_room(room::test1, 0);
-			//if (event.Key.Code == sf::Key::Num2) enter_room(room::test2, 0);
-			//if (event.Key.Code == sf::Key::Num3) enter_room(room::test3, 0);
-			//if (event.Key.Code == sf::Key::Num4) enter_room(room::test4, 0);
-			//if (event.Key.Code == sf::Key::Num5) enter_room(room::edit1, 0);
-			//if (event.Key.Code == sf::Key::Num6) enter_room(room::empty, 0);
-			//if (event.Key.Code == sf::Key::Num0) save_save();
-			if (event.Key.Code == sf::Key::P) toggle_pause();
-			if (event.Key.Code >= 400) break;
-			key[event.Key.Code] = 1;
-			break;
-		}
-		case sf::Event::KeyReleased: {
-			if (event.Key.Code >= 400) break;
-			key[event.Key.Code] = 0;
-			break;
-		}
-		case sf::Event::MouseButtonPressed: {
-			if (event.MouseButton.Button >= 10) break;
-			button[event.MouseButton.Button] = 1;
-			break;
-		}
-		case sf::Event::MouseButtonReleased: {
-			if (event.MouseButton.Button >= 10) break;
-			button[event.MouseButton.Button] = 0;
-			break;
-		}
-		case sf::Event::MouseMoved: {
-			if (trap_cursor) {
-				cursor += Vec(
-					(event.MouseMove.X - window->GetWidth()/2.0),
-					-(event.MouseMove.Y - window->GetHeight()/2.0)
-				) * PX * cursor_scale / window_scale;
-				window->SetCursorPosition(window->GetWidth()/2, window->GetHeight()/2);
-				if (cursor.x > 19) cursor.x = 19;
-				else if (cursor.x < -19) cursor.x = -19;
-				if (cursor.y > 14) cursor.y = 14;
-				else if (cursor.y < -14) cursor.y = -14;
-			}
-			else {
-				cursor2 = Vec(
-					event.MouseMove.X,
-					(window->GetHeight() - event.MouseMove.Y)
-				) * PX / window_scale;
-			}
-			break;
-		}
-		case sf::Event::Closed: {
-			quit_game();
-			break;
-		}
-	}
+	glfwPollEvents();
 };
 
 void move_phase () {
@@ -236,7 +250,6 @@ void move_phase () {
 
 
 void main_loop () {
-	window->SetCursorPosition(window->GetWidth()/2, window->GetHeight()/2);
 	reset_attentions();
 	for (;;) {
 		frame_number++;

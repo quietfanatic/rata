@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <SOIL/SOIL.h>
-#include <SFML/System.hpp>
-#include <SFML/Window.hpp>
+#include <GL/glfw.h>
 #include <SFML/Audio.hpp>
 #include <Box2D/Box2D.h>
 //#define printf(...) (__VA_ARGS__)
