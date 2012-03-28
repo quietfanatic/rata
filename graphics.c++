@@ -1,17 +1,6 @@
 
 
-void set_video () {
-//	if (window_fullscreen) {
-//		window->Create(sf::VideoMode(640, 480, 32), "", sf::Style::Fullscreen);
-//	}
-//	else {
-		glfwOpenWindow(
-			320*window_scale, 240*window_scale,
-			8, 8, 8, 8, 0, 0, GLFW_WINDOW
-		);
-//	}
-	glfwSwapInterval(1);
-	start_trap();
+void init_graphics () {
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);

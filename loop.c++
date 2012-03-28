@@ -13,6 +13,16 @@ void quit_game () {
 	throw 0;
 }
 
+void set_video () {
+	glfwOpenWindow(
+		320*window_scale, 240*window_scale,
+		8, 8, 8, 8, 0, 0, GLFW_WINDOW
+	);
+	glfwSwapInterval(1);
+	start_trap();
+	init_graphics();
+}
+
 void start_trap () {
 	trap_cursor = true;
 	glfwDisable(GLFW_MOUSE_CURSOR);

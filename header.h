@@ -14,6 +14,7 @@ void quit_game ();
 void main_init ();
 void main_loop ();
 void toggle_pause ();
+void set_video ();
 void start_trap ();
 void stop_trap ();
 
@@ -566,7 +567,7 @@ RBullet* fire_rbullet_to (Object* owner, Vec pos, Vec to, float vel, int power =
 
 // GRAPHICS
 
-void set_video ();
+void init_graphics ();
 void reset_screen ();
 void camera_to_screen ();
 void debug_draw ();
