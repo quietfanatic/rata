@@ -20,6 +20,7 @@ void set_video () {
 	);
 	glfwSwapInterval(1);
 	start_trap();
+	init_shaders();
 	init_graphics();
 }
 
@@ -131,6 +132,7 @@ void draw_phase () {
 		return;
 	}
 	
+	glClear(GL_COLOR_BUFFER_BIT);
 	camera_to_screen();
 
 	 // Draw actors

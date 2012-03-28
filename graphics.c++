@@ -1,10 +1,78 @@
 
 
+
+const char* myshader =
+	"uniform int type;\n"
+	"uniform sampler2D tex;\n"
+	"void main () {\n"
+	"	if (type == 0) {\n"
+	"		gl_FragColor = gl_Color;\n"
+	"	} else {\n"
+	"		gl_FragColor = texture2D(tex,gl_TexCoord[0].st);\n"
+	"	}\n"
+	"}\n"
+;
+GLint uniform_tex;
+GLint uniform_type;
+
+int draw_type = 2;
+void set_draw_type (int type) {
+	if (type != draw_type) {
+		draw_type = type;
+		glUniform1i(uniform_type, type);
+	}
+}
+
+void init_shaders () {
+	GLuint program = glCreateProgram();
+	GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+	const GLint len = strlen(myshader);
+	glShaderSource(
+		frag_shader, 1,
+		&myshader, &len
+	);
+	glCompileShader(frag_shader);
+	GLint compile_status;
+	glGetShaderiv(frag_shader, GL_COMPILE_STATUS, &compile_status);
+	if (!compile_status) {
+		printf("Error: GL shader failed to compile...\n");
+	}
+	printf("GL shader info:\n");
+	GLint loglen;
+	glGetShaderiv(frag_shader, GL_INFO_LOG_LENGTH, &loglen);
+	GLchar log [loglen];
+	glGetShaderInfoLog(frag_shader, loglen, NULL, log);
+	puts(log);
+	
+	GLenum err;
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		printf("Error: GL error 0x%04x after compile\n", err);
+	}
+	glAttachShader(program, frag_shader);
+	glLinkProgram(program);
+	glUseProgram(program);
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		printf("Error: GL error 0x%04x after use program\n", err);
+	}
+	uniform_type = glGetUniformLocation(program, "type");
+	uniform_tex = glGetUniformLocation(program, "tex");
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		printf("Error: GL error 0x%04x after get uniforms\n", err);
+	}
+	
+	printf("GL program info:\n");
+	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &loglen);
+	GLchar log2 [loglen];
+	glGetProgramInfoLog(program, loglen, NULL, log2);
+	puts(log);
+}
+
 void init_graphics () {
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
 	glEnable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	reset_screen();
 	glfwSetTime(0);
@@ -28,6 +96,7 @@ void camera_to_screen () {
 }
 
 void debug_draw () {
+	set_draw_type(0);
 	if (debug_mode)
 	for (Actor* a=active_actors; a; a = a->next_active) {
 		if (a->has_body()) {
@@ -59,7 +128,6 @@ void debug_draw () {
 				case (b2Shape::e_polygon): {
 					b2PolygonShape* p = (b2PolygonShape*)f->GetShape();					
 					Color color = f->GetFilterData().categoryBits == 256 ? 0x0000ff4f : 0x00ff007f;
-					glDisable(GL_TEXTURE_2D);
 					color.setGL();
 					glBegin(GL_LINE_LOOP);
 					for (int i=0; i < p->m_vertexCount; i++) {
@@ -158,6 +226,10 @@ void finish_drawing () {
 		glPixelZoom(1.0, 1.0);
 		glEnable(GL_BLEND);
 	}
+	GLenum err;
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		printf("Error: GL error 0x%04x\n", err);
+	}
 }
 
 
@@ -172,9 +244,11 @@ void vertex (Vec v) {
 
 
 void draw_image_2 (img::Def* image, float tl, float tr, float tt, float tb, float x, float y, float iw, float ih) {
-	glEnable(GL_TEXTURE_2D);
+//	glEnable(GL_TEXTURE_2D);
+	set_draw_type(1);
 	glBindTexture(GL_TEXTURE_2D, image->tex);
-	glColor4f(1, 1, 1, 1);
+//	glColor4f(1, 1, 1, 1);
+//	glUniform1i(uniform_tex, 0);
 	glBegin(GL_QUADS);
 		glTexCoord2f(tl, tb); vertex(Vec(x,       y      ));
 		glTexCoord2f(tr, tb); vertex(Vec(x+iw*PX, y      ));
@@ -204,7 +278,8 @@ void draw_image (img::Def* image, Vec p, int sub, bool fliph, bool flipv) {
 	draw_image_2(image, tl, tr, tt, tb, x, y, iw, ih);
 }
 void draw_rect (const Rect& r, Color color) {
-	glDisable(GL_TEXTURE_2D);
+	//glDisable(GL_TEXTURE_2D);
+	set_draw_type(0);
 	color.setGL();
 	glRectf(
 		round(r.l*UNPX)*PX,
@@ -212,10 +287,11 @@ void draw_rect (const Rect& r, Color color) {
 		round(r.r*UNPX)*PX,
 		round(r.t*UNPX)*PX
 	);
-	//dbg_draw("Drawing rect at <%f v%f >%f ^%f\n", r.l, r.b, r.r, r.t);
+	dbg_draw("Drawing rect at <%f v%f >%f ^%f\n", r.l, r.b, r.r, r.t);
 };
 void draw_line (Vec a, Vec b, Color color) {
-	glDisable(GL_TEXTURE_2D);
+//	glDisable(GL_TEXTURE_2D);
+	set_draw_type(0);
 	color.setGL();
 	glBegin(GL_LINES);
 		vertex(a);
@@ -260,6 +336,7 @@ Vec circle_points [32] = {
 
 
 void draw_circle (Vec p, float r, Color color) {
+	set_draw_type(0);
 	color.setGL();
 	glBegin(GL_LINE_LOOP);
 	for (uint i=0; i < 32; i++) {
