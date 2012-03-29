@@ -1,31 +1,5 @@
 
 
-#ifdef HEADER
-
-struct Actor {
-	int16 type;
-	bool active;
-	bool awaiting_activation;
-	Actor* next_global;
-	Actor* next_active;
-
-	Actor (int16 type);
-	virtual void load (uint8** p) { }
-	virtual void save (uint8** p) { }
-
-	virtual void activate ();
-	virtual void deactivate ();
-
-	virtual void before_move () { }
-	virtual void after_move () { }
-	virtual void draw () { }
-	
-	bool has_body ();
-	void debug_print ();
-};
-
-#else
-
 Actor::Actor (int16 type) :
 	type(type),
 	active(false),
@@ -74,6 +48,5 @@ void Actor::debug_print () {
 
 
 
-#endif
 
 

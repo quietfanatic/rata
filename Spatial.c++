@@ -1,17 +1,3 @@
-#ifdef HEADER
-
-struct Spatial : Actor {
-	room::Def* loc;
-	Spatial* next;
-	Spatial* prev;
-	Vec pos;
-
-	Spatial (int16 type, room::Def* loc, Vec pos);
-	bool in_room (room::Def* r);
-	void change_room ();
-};
-
-#else
 
 Spatial::Spatial (int16 type, room::Def* loc, Vec pos) :
 	Actor(type),
@@ -36,4 +22,3 @@ void Spatial::change_room () {
 }
 
 
-#endif

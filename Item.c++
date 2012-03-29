@@ -1,15 +1,5 @@
 
 
-#ifdef HEADER
-
-struct Item : Spatial {
-	item::Def* def;
-	Item (room::Def* loc, Vec pos, item::Def* def);
-	void after_move ();
-	void draw ();
-};
-
-#else
 
 Item::Item (room::Def* loc, Vec pos, item::Def* def) :
 	Spatial(type::item, loc, pos),
@@ -32,7 +22,6 @@ void Item::draw () {
 
 
 
-#endif
 
 
 

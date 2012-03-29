@@ -1,37 +1,3 @@
-#ifdef HEADER
-struct Spatial;
-
-
-namespace room {
-	struct Def {
-		Vec pos;
-		uint16 width;
-		uint16 height;
-		const uint16* tiles;
-		uint32 n_neighbors;
-		room::Def*const* neighbors;
-		uint32 n_walls;
-		Circle* walls;
-		Line* sides;
-		void (& init ) ();
-		bool loaded;
-		Spatial* contents;
-
-		int16 tile (uint x, uint y) {
-			return tiles[y * width + x];
-		}
-		void receive (Spatial* a);
-		void release (Spatial* a);
-		void load ();
-		void unload ();
-		bool is_neighbor (room::Def* r);
-		void enter ();
-	};
-	extern Def def [];
-
-}
-
-#else
 
 namespace room {
 	void Def::receive (Spatial* a) {
@@ -124,5 +90,4 @@ namespace room {
 
 
 
-#endif
 

@@ -1,42 +1,5 @@
 
 
-#ifdef HEADER
-
- // Fixture properties
-
-struct FixProp {
-	bool is_standable;
-	bool stands;
-	float damage_factor;
-	int touch_damage;
-	bool damages_enemies;
-} default_FixProp = {true, false, 0.0, 0, false};
-
-
- // Collision filters
-
-namespace cf {
-	b2Filter disabled = {0, 0, 0};
-	b2Filter rata = {1, 2|4|8|16|32|256, 0};
-	b2Filter solid = {2, 1|4|8|16|32|128|256, 0};
-	b2Filter bullet = {4, 1|2|8|32, 0};
-	b2Filter enemy = {8, 1|2|4|8|32|128|256, 0};
-	b2Filter pickup = {16, 1|2|32|128, 0};
-	b2Filter movable = {32, 1|2|4|8|16|32|128|256, 0};
-	b2Filter scenery = {64, 2, 0};
-	b2Filter rata_invincible = {128, 2|8|16|32|256, 0};
-	b2Filter sensor = {256, 2|32, 0};
-	b2Filter sight_barrier = {512, 0, 0};
-};
-
-struct myCL : public b2ContactListener {
-	void PreSolve (b2Contact* contact, const b2Manifold* oldmanifold);
-	void PostSolve (b2Contact* contact, const b2ContactImpulse* ci);
-	void EndContact (b2Contact* contact);
-};
-
-
-#else
 
 #define DAMAGE_KNOCKBACK 12.0
 void apply_touch_damage (Object* a, Object* b, FixProp* afp, FixProp* bfp, b2Manifold* manifold) {
@@ -145,6 +108,5 @@ void myCL::EndContact (b2Contact* contact) {
 
 
 
-#endif
 
 

@@ -1,34 +1,5 @@
 
 
-#ifdef HEADER
-struct Object : Spatial {
-	Vec vel;
-	b2Body* body;
-	uint subimage;
-	int life;
-	int max_life;
-	int facing;
-
-	Object (int16 type, room::Def* loc, Vec pos, Vec vel = Vec(0, 0), int facing = 0);
-	void activate ();
-	void deactivate ();
-	void before_move ();
-	void after_move ();
-	void draw ();
-
-	virtual void damage (int d);
-	virtual void heal (int d);
-	virtual void kill ();
-	virtual char* describe ();
-
-	b2Body* make_body (b2BodyType btype = b2_staticBody, bool bullet=false);
-	void impulse (Vec i);
-	void mutual_impulse (Object* other, Vec i);
-};
-
-
-#else
-
 
 Object::Object (int16 type, room::Def* loc, Vec pos, Vec vel, int facing) :
 	Spatial(type, loc, pos),
@@ -113,6 +84,4 @@ void Object::mutual_impulse (Object* other, Vec i) {
 	}
 }
 
-
-#endif
 

@@ -1,10 +1,4 @@
 
-#ifdef HEADER
-
-void render_text (char* text, Vec p, uint lines=1, bool small=false, bool border=false, int align=1);
-
-#else
-
 
 
 const uint8 letter_width [256] = {
@@ -101,6 +95,5 @@ void render_text (char* text, Vec p, uint lines, bool small, bool border, int al
 
 
 
-#endif
 
 

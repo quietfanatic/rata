@@ -1,13 +1,4 @@
 
-#ifdef HEADER
-
-struct AI;
-struct Rat;
-struct Patroller;
-struct Flyer;
-
-#else
-
  // Base class for semi-intelligent enemies
 struct AI : Walking {
 	int decision_timer;
@@ -286,4 +277,3 @@ struct Flyer : AI {
 	}
 };
 
-#endif

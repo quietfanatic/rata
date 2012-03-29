@@ -2,20 +2,6 @@
 
 
 
-
-#ifdef HEADER
-
-struct Button {
-	Vec pos;
-	Vec size;
-	void (* click )();  // Executed immediately on click
-	void (* drag )();  // Executed each frame when dragging.
-};
-const uint n_pause_buttons = 2;
-extern Button pause_buttons [n_pause_buttons];
-
-#else
-
 void click_options () {
 	if (button[GLFW_MOUSE_BUTTON_LEFT] == 1) {
 		dragging = &pause_buttons[0];
@@ -90,9 +76,6 @@ Button pause_buttons [n_pause_buttons] = {
 
 
 
-
-
-#endif
 
 
 

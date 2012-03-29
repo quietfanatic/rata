@@ -31,14 +31,11 @@ int frame_number = -1;
 #include "header.h"
 
 
-#define HEADER
 
  // RESOURCES
 #include "img.c++"
 #include "snd.c++"
 #include "poses.c++"
-
-#undef HEADER
 
 
 #include "game.c++"

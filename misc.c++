@@ -1,14 +1,4 @@
 
-#ifdef HEADER
-
-struct Door : Spatial {
-	room::Def* destloc;
-	Vec destpos;
-	void before_move ();
-	Door (room::Def* loc, Vec pos, room::Def* destloc, Vec dest);
-};
-
-#else
 
 void Door::before_move () {
 	if (rata->floor)
@@ -152,9 +142,6 @@ struct BGColor : Spatial {
 
 
 
-
-
-#endif
 
 
 

@@ -1,23 +1,4 @@
 
-#ifdef HEADER
-struct RBullet {
-	int power;
-	float mass;
-	Vec pos0;
-	Vec pos1;
-	Vec pos2;
-	Vec vel;  // Measured in blocks per FRAME not second.
-	Object* owner;
-	int lifetime;
-	RBullet ();
-	void move ();
-	void draw ();
-};
-RBullet* fire_rbullet (Object* owner, Vec pos, Vec vel, int power = 48, float mass = 0.2);
-RBullet* fire_rbullet_dir (Object* owner, Vec pos, float angle, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
-RBullet* fire_rbullet_to (Object* owner, Vec pos, Vec to, float vel, int power = 48, float spread = 0.01, float mass = 0.2);
-#else
-
 RBullet::RBullet () :lifetime(-2) { }
 
 void RBullet::move () {
@@ -125,5 +106,4 @@ RBullet* fire_rbullet_to (Object* owner, Vec pos, Vec to, float vel, int power, 
 	return fire_rbullet_dir(owner, pos, ang(to - pos), vel, power, spread, mass);
 }
 
-#endif
 

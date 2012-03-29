@@ -1,21 +1,4 @@
 
-#ifdef HEADER
-
-Object* check_area (float l, float t, float r, float b, uint16 cat = 2|32);
-
-struct LineChecker : public b2RayCastCallback {
-	Object* owner;
-	uint16 mask;
-	float frac;
-	b2Fixture* hit;
-	Vec norm;
-	float32 ReportFixture (b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float32 f);
-};
-
-LineChecker check_line (Vec from, Vec to, uint16 mask = cf::solid.categoryBits, Object* owner = NULL);
-bool look_line (Vec from, Vec to, uint16 mask = cf::solid.categoryBits);
-
-#else
 	
  // Find one object (by default solid) in the area given by world coords
  // This has false positives.
@@ -99,5 +82,4 @@ bool look_line (Vec from, Vec to, uint16 mask) {
 
 
 
-#endif
 

@@ -1,12 +1,4 @@
 
-#ifdef HEADER
-
-void quit_game ();
-void main_init ();
-void main_loop ();
-
-#else
-
 void quit_game () {
 	//window->SetCursorPosition(cursor2.x*UNPX*window_scale, window->GetHeight() - cursor2.y*UNPX*window_scale);
 	glfwTerminate();
@@ -277,6 +269,4 @@ void main_loop () {
 	}
 }
 
-
-#endif
 

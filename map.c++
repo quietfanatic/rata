@@ -1,59 +1,4 @@
 
-#ifdef HEADER
-
-namespace map {
-	struct Tile {
-		uint16 tile1;
-		uint16 tile2;
-		Tile () :tile1(1), tile2(0) { }
-	};
-
-	const uint width = 128;
-	const uint height = 128;
-
-	Tile world [height][width];
-
-	struct Pos {
-		uint8 x;
-		uint8 y;
-		
-		Pos () { }
-		Pos (uint8 x, uint8 y) :x(x % width), y(y % height) { }
-		Pos (Vec v) :x((int)floor(v.x) % width), y((int)floor(v.y) % height) { }
-		Pos left () const { return Pos(x-1, y); }
-		Pos right () const { return Pos(x+1, y); }
-		Pos down () const { return Pos(x, y-1); }
-		Pos up () const { return Pos(x, y+1); }
-
-		bool operator == (Pos p) { return x == p.x && y == p.y; }
-	};
-
-	Tile& at (uint x, uint y) {
-		return world[y % height][x % width];
-	}
-	Tile& at (Pos p) {
-		return world[p.y][p.x];
-	}
-
-	void debug_print () {
-		for (uint y=0; y < height; y++) {
-			for (uint x=0; x < width; x++) {
-				if (world[height-y-1][x].tile1)
-					putchar('#');
-				else
-					putchar('.');
-			}
-			putchar('\n');
-		}
-	}
-
-	void load_room (room::Def*);
-	void unload_room (room::Def*);
-}
-
-
-#else
-
 namespace map {
 
 	 // Check if a point can be reached via jump (no obstacles)
@@ -97,5 +42,4 @@ namespace map {
 
 }
 
-#endif
 
