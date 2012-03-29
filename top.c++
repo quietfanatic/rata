@@ -45,7 +45,7 @@ int frame_number = -1;
 
 
  // GRAPHICS
-#include "graphics.c++"
+#include "draw.c++"
 #include "text.c++"
 
  // ACTORS

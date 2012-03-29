@@ -79,11 +79,11 @@ void RBullet::move () {
 void RBullet::draw () {
 	if (lifetime < -1) return;
 	if (pos1.x == -1/0.0)
-		draw_line(pos0, pos2);
+		draw::line(pos0, pos2);
 	else {
-		draw_line(pos0, pos1);
+		draw::line(pos0, pos1);
 		if (pos2.x != -1/0.0)
-			draw_line(pos1, pos2);
+			draw::line(pos1, pos2);
 		else
 			lifetime = -2;
 	}

@@ -77,7 +77,7 @@ void render_text (char* text, Vec p, uint lines, bool small, bool border, int al
 	  align > 0 ? p.x + lmargin
 	: align < 0 ? p.x - width - rmargin
 	:             p.x - width/2;
-	if (border) draw_rect(Rect(start - lmargin, p.y, start + width + rmargin, p.y - lines*lineheight), 0x2f2f2f7f);
+	if (border) draw::rect(Rect(start - lmargin, p.y, start + width + rmargin, p.y - lines*lineheight), 0x2f2f2f7f);
 
 	float pos = start;
 	img::Def* font = small ? img::font_small : img::font_proportional;
@@ -88,7 +88,7 @@ void render_text (char* text, Vec p, uint lines, bool small, bool border, int al
 			pos = start+lmargin;
 		}
 		else {
-			draw_image(font,
+			draw::image(font,
 				Vec(pos, p.y-linecount*lineheight),
 				*text, false
 			);

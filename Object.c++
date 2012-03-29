@@ -72,7 +72,7 @@ void Object::draw () {
 	if (pos.x - img->w*PX <= camera.x + 10)
 	if (pos.y + img->h*PX >= camera.y - 7.5)
 	if (pos.y - img->h*PX <= camera.y + 7.5)
-		draw_image(type::def[type].image, pos, subimage, facing == 1);
+		draw::image(type::def[type].image, pos, subimage, facing == 1);
 }
 
  // New things specific to object.

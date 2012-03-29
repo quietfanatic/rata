@@ -567,12 +567,6 @@ RBullet* fire_rbullet_to (Object* owner, Vec pos, Vec to, float vel, int power =
 
 // GRAPHICS
 
-void init_graphics ();
-void reset_screen ();
-void camera_to_screen ();
-void debug_draw ();
-void finish_drawing ();
-
 struct Color {  // Just let me use hexadecimal colors, okay?
 	uint32 x;
 	Color () { }
@@ -581,11 +575,22 @@ struct Color {  // Just let me use hexadecimal colors, okay?
 	bool visible () const { return (uint8)x; }
 	void setGL () const { glColor4ub(x>>24, x>>16, x>>8, x); }
 };
-void vertex (Vec v);
-void draw_image (img::Def* image, Vec p, int sub=0, bool fliph=false, bool flipv=false);
-void draw_rect (const Rect& r, Color color = 0x2f2f2f7f);
-void draw_line (Vec a, Vec b, Color color = 0xffffff7f);
-void draw_circle (Vec p, float r, Color color);
+
+namespace draw {
+	void init ();
+	void start ();
+	void set_camera ();
+	void unset_camera ();
+	void debug ();
+	void finish ();
+
+	void vertex (Vec v);  // Internal kinda
+	void image (img::Def* image, Vec p, int sub=0, bool fliph=false, bool flipv=false);
+	void rect (const Rect& r, Color color = 0x2f2f2f7f);
+	void line (Vec a, Vec b, Color color = 0xffffff7f);
+	void circle (Vec p, float r, Color color);
+};
+
 
 
 // TEXT

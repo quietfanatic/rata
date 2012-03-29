@@ -52,7 +52,7 @@ struct TileLayer : Actor {
 				bool flipv = tile & 0x4000;
 				tile &= 0x3fff;
 				if (type == type::front_tiles ? tile::def[tile].front : tile::def[tile].back) {
-					draw_image(
+					draw::image(
 						img::tiles,
 						Vec(x+.5, y+.5),
 						tile, fliph, flipv
@@ -65,7 +65,7 @@ struct TileLayer : Actor {
 				bool flipv = tile & 0x4000;
 				tile &= 0x3fff;
 				if (type == type::front_tiles ? tile::def[tile].front : tile::def[tile].back) {
-					draw_image(
+					draw::image(
 						img::tiles,
 						Vec(x+.5, y+.5),
 						tile, fliph, flipv
@@ -109,7 +109,7 @@ struct CursorLayer : Actor {
 				cx *= (camera.y - screen.y/2 - ay) / cy;
 				cy = camera.y - screen.y/2 - ay;
 			}
-			draw_image(cursor_img, Vec(cx+ax, cy+ay));
+			draw::image(cursor_img, Vec(cx+ax, cy+ay));
 		}
 	}
 	CursorLayer () : Actor(type::cursor_layer) { }
@@ -120,7 +120,7 @@ struct Shade : Spatial {
 	Vec size;
 	Color color;
 	void draw () {
-		draw_rect(
+		draw::rect(
 			Rect(pos, pos + size),
 			color
 		);
@@ -137,7 +137,7 @@ struct BGColor : Spatial {
 	Vec size;
 	Color color;
 	void draw () {
-		draw_rect(Rect(pos, pos + size), color);
+		draw::rect(Rect(pos, pos + size), color);
 	}
 	BGColor (room::Def* loc, Vec pos, Vec size, Color color) :
 		Spatial(type::bg_color, loc, pos),

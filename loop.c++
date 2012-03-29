@@ -20,8 +20,7 @@ void set_video () {
 	);
 	glfwSwapInterval(1);
 	start_trap();
-	init_shaders();
-	init_graphics();
+	draw::init();
 }
 
 void start_trap () {
@@ -131,9 +130,8 @@ void draw_phase () {
 		dbg_timing("Skipping frame.\n");
 		return;
 	}
-	
-	glClear(GL_COLOR_BUFFER_BIT);
-	camera_to_screen();
+	draw::start();
+	draw::set_camera();
 
 	 // Draw actors
 	for (Actor* a = active_actors; a; a = a->next_active) {
@@ -142,9 +140,14 @@ void draw_phase () {
 		a->draw();
 	}
 
-	debug_draw();
+	draw::debug();
+	 // Draw hud
+	draw::unset_camera();
+	if (draw_hud) {
+		(*draw_hud)();
+	}
 
-	finish_drawing();
+	draw::finish();
 
 	draw_latency += glfwGetTime();
 	glfwSetTime(0);

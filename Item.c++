@@ -21,7 +21,7 @@ void Item::after_move () {
 }
 void Item::draw () {
 	if (def)
-		draw_image(
+		draw::image(
 			def->appearance,
 			pos,
 			def->world_frame

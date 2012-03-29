@@ -882,15 +882,15 @@ void Rata::draw () {
 
 	 // Now to actually draw.
 
-	draw_image(img::rata_body, p, pose.body, flip);
+	draw::image(img::rata_body, p, pose.body, flip);
 	for (uint i=0; i<item::num_slots; i++)
 	if (equip_info(i))
 	if (equip_info(i)->body)
-		draw_image(equip_info(i)->body, p, pose.body, flip);
+		draw::image(equip_info(i)->body, p, pose.body, flip);
 
 	if (state == dead) goto draw_arm;
 	draw_head:
-	draw_image(
+	draw::image(
 		img::rata_head,
 		p + headp,
 		pose.head, flip
@@ -898,7 +898,7 @@ void Rata::draw () {
 	for (uint i=0; i<item::num_slots; i++)
 	if (equip_info(i))
 	if (equip_info(i)->head)
-		draw_image(
+		draw::image(
 			equip_info(i)->head,
 			p + headp,
 			pose.head, flip
@@ -906,7 +906,7 @@ void Rata::draw () {
 	for (uint i=0; i<item::num_slots; i++)
 	if (equip_info(i))
 	if (equip_info(i)->helmet)
-		draw_image(
+		draw::image(
 			equip_info(i)->helmet,
 			p + helmetp,
 			pose::head[pose.head].helmetf, flip
@@ -914,12 +914,12 @@ void Rata::draw () {
 
 	if (state == dead) goto draw_hand;
 	draw_arm:
-	draw_image(
+	draw::image(
 		img::rata_arm,
 		p + armp,
 		pose.arm, armflip
 	);
-	draw_image(
+	draw::image(
 		img::rata_forearm,
 		p + forearmp,
 		pose.forearm, forearmflip
@@ -927,7 +927,7 @@ void Rata::draw () {
 	for (uint i=0; i<item::num_slots; i++)
 	if (equip_info(i))
 	if (equip_info(i)->arm)
-		draw_image(
+		draw::image(
 			equip_info(i)->arm,
 			p + armp,
 			pose.arm, armflip
@@ -935,7 +935,7 @@ void Rata::draw () {
 	for (uint i=0; i<item::num_slots; i++)
 	if (equip_info(i))
 	if (equip_info(i)->forearm)
-		draw_image(
+		draw::image(
 			equip_info(i)->forearm,
 			p + forearmp,
 			pose.forearm, forearmflip
@@ -947,7 +947,7 @@ void Rata::draw () {
 	for (uint i=0; i<item::num_slots; i++)
 	if (equip_info(i))
 	if (equip_info(i)->hand)
-		draw_image(
+		draw::image(
 			equip_info(i)->hand,
 			p + hand_pos,
 			pose.hand, flip

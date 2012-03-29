@@ -58,7 +58,7 @@ void hud_play () {
 				subimage = 3;
 			else
 				subimage = 4;
-			draw_image(
+			draw::image(
 				img::heart,
 				Vec(19.5 - (i * 12*PX), 14.25),
 				subimage,
@@ -70,7 +70,7 @@ void hud_play () {
 
 void hud_pause () {
 	hud_play();
-	draw_rect(Rect(0, 0, 20, 15), 0x0000004f);
+	draw::rect(Rect(0, 0, 20, 15), 0x0000004f);
 	render_text("Options", pause_buttons[0].pos + Vec(0, 1));
 	render_text("Quit", Vec(20, 1), 1, false, false, -1);
 }
