@@ -42,99 +42,99 @@ b2FixtureDef make_fixdef (b2Shape* shape, b2Filter filter, float friction, float
 namespace type {
 
 Vec rata_poly_feet [] = {
-	Vec(-2.5*PX, 0*PX),
-	Vec(2.5*PX, 0*PX),
-	Vec(2.5*PX, 1*PX),
-	Vec(-2.5*PX, 1*PX)
+	PX*Vec(-2.5, 0),
+	PX*Vec( 2.5, 0),
+	PX*Vec( 2.5, 1),
+	PX*Vec(-2.5, 1)
 };
 Vec rata_poly_27 [] = {
-	Vec(-2.5*PX, 0.1*PX),
-	Vec(2.5*PX, 0.1*PX),
-	Vec(5.5*PX, 17*PX),
-	Vec(5.5*PX, 24*PX),
-	Vec(0*PX, 27*PX),
-	Vec(-5.5*PX, 24*PX),
-	Vec(-5.5*PX, 17*PX)
+	PX*Vec(-2.5, 0.1),
+	PX*Vec( 2.5, 0.1),
+	PX*Vec( 5.5, 17),
+	PX*Vec( 5.5, 24),
+	PX*Vec( 0  , 27),
+	PX*Vec(-5.5, 24),
+	PX*Vec(-5.5, 17)
 };
 Vec rata_poly_25 [] = {
-	Vec(-2.5*PX, 0.1*PX),
-	Vec(2.5*PX, 0.1*PX),
-	Vec(5.5*PX, 15*PX),
-	Vec(5.5*PX, 22*PX),
-	Vec(0*PX, 25*PX),
-	Vec(-5.5*PX, 22*PX),
-	Vec(-5.5*PX, 15*PX)
+	PX*Vec(-2.5, 0.1),
+	PX*Vec( 2.5, 0.1),
+	PX*Vec( 5.5, 15),
+	PX*Vec( 5.5, 22),
+	PX*Vec( 0  , 25),
+	PX*Vec(-5.5, 22),
+	PX*Vec(-5.5, 15)
 };
 Vec rata_poly_21 [] = {
-	Vec(-2.5*PX, 0.1*PX),
-	Vec(2.5*PX, 0.1*PX),
-	Vec(5.5*PX, 11*PX),
-	Vec(5.5*PX, 18*PX),
-	Vec(0*PX, 21*PX),
-	Vec(-5.5*PX, 18*PX),
-	Vec(-5.5*PX, 11*PX)
+	PX*Vec(-2.5, 0.1),
+	PX*Vec( 2.5, 0.1),
+	PX*Vec( 5.5, 11),
+	PX*Vec( 5.5, 18),
+	PX*Vec( 0  , 21),
+	PX*Vec(-5.5, 18),
+	PX*Vec(-5.5, 11)
 };
 Vec rata_poly_h7 [] = {
-	Vec(-8*PX, 0.1*PX),
-	Vec(8*PX, 0.1*PX),
-	Vec(4*PX, 7*PX),
-	Vec(-4*PX, 7*PX),
+	PX*Vec(-8, 0.1),
+	PX*Vec( 8, 0.1),
+	PX*Vec( 4, 7),
+	PX*Vec(-4, 7),
 };
 Vec rata_poly_crawl_r [] = {
-	Vec(-11*PX, 0.1*PX),
-	Vec(6*PX, 0.1*PX),
-	Vec(10*PX, 4*PX),
-	Vec(10*PX, 11*PX),
-	Vec(4*PX, 14*PX),
+	PX*Vec(-11, 0.1),
+	PX*Vec(  6, 0.1),
+	PX*Vec( 10,  4),
+	PX*Vec( 10, 11),
+	PX*Vec(  4, 14),
 };
 Vec rata_poly_crawl_l [] = {
-	Vec(-4*PX, 14*PX),
-	Vec(-10*PX, 11*PX),
-	Vec(-10*PX, 4*PX),
-	Vec(-6*PX, 0.1*PX),
-	Vec(11*PX, 0.1*PX),
+	PX*Vec( -4, 14),
+	PX*Vec(-10, 11),
+	PX*Vec(-10,  4),
+	PX*Vec( -6, 0.1),
+	PX*Vec( 11, 0.1),
 };
 Vec rata_poly_sensor_21 [] = {
-	Vec(-2.5*PX, 0.1*PX),
-	Vec(2.5*PX, 0.1*PX),
-	Vec(2.5*PX, 21*PX),
-	Vec(-2.5*PX, 21*PX),
+	PX*Vec(-2.5, 0.1),
+	PX*Vec( 2.5, 0.1),
+	PX*Vec( 2.5, 21),
+	PX*Vec(-2.5, 21),
 };
 Vec rata_poly_sensor_floor_r [] = {
-	Vec(4*PX, -4*PX),
-	Vec(12*PX, -4*PX),
-	Vec(12*PX, 4*PX),
-	Vec(4*PX, 4*PX),
+	PX*Vec( 4, -4),
+	PX*Vec(12, -4),
+	PX*Vec(12,  4),
+	PX*Vec( 4,  4),
 };
 Vec rata_poly_sensor_floor_l [] = {
-	Vec(-4*PX, 4*PX),
-	Vec(-12*PX, 4*PX),
-	Vec(-12*PX, -4*PX),
-	Vec(-4*PX, -4*PX),
+	PX*Vec( -4,  4),
+	PX*Vec(-12,  4),
+	PX*Vec(-12, -4),
+	PX*Vec( -4, -4),
 };
 Vec rata_poly_sensor_block_r [] = {
-	Vec(4*PX, 10*PX),
-	Vec(12*PX, 10*PX),
-	Vec(12*PX, 12*PX),
-	Vec(4*PX, 12*PX),
+	PX*Vec( 4, 10),
+	PX*Vec(12, 10),
+	PX*Vec(12, 12),
+	PX*Vec( 4, 12),
 };
 Vec rata_poly_sensor_block_l [] = {
-	Vec(-4*PX, 12*PX),
-	Vec(-12*PX, 12*PX),
-	Vec(-12*PX, 10*PX),
-	Vec(-4*PX, 10*PX),
+	PX*Vec( -4, 12),
+	PX*Vec(-12, 12),
+	PX*Vec(-12, 10),
+	PX*Vec( -4, 10),
 };
 Vec rata_poly_sensor_wall_r [] = {
-	Vec(4*PX, 17*PX),
-	Vec(12*PX, 17*PX),
-	Vec(12*PX, 19*PX),
-	Vec(4*PX, 19*PX),
+	PX*Vec( 4, 17),
+	PX*Vec(12, 17),
+	PX*Vec(12, 19),
+	PX*Vec( 4, 19),
 };
 Vec rata_poly_sensor_wall_l [] = {
-	Vec(-4*PX, 19*PX),
-	Vec(-12*PX, 19*PX),
-	Vec(-12*PX, 17*PX),
-	Vec(-4*PX, 17*PX),
+	PX*Vec( -4, 19),
+	PX*Vec(-12, 19),
+	PX*Vec(-12, 17),
+	PX*Vec( -4, 17),
 };
 
 FixProp rata_fixprop = {true, false, 1.0, 0, false};
