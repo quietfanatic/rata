@@ -9,12 +9,10 @@ Requirements (currently)
 	1.6GHz CPU
 	GPU that can do simple 2D OpenGL at 60fps, preferably with VSYNC
 	Opengl extension GL_ARB_texture_non_power_of_two
+	libsfml-audio.so.1.6
+	libSOIL.so.1
 	In lib folder:
 		libBox2D.so.2.1.0
-		libsfml-audio.so.1.6
-		libsfml-system.so.1.6
-		libsfml-window.so.1.6
-		libSOIL.so.1
 
 
 Instructions:
