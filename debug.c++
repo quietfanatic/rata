@@ -4,7 +4,7 @@
 extern uint frame_number;
 
 //#define dbg(...)
-#define dbg(...) { printf("[%d] ", frame_number); printf(__VA_ARGS__); }
+#define dbg(...) { printf("[%d %s] ", frame_number, __FILE__); printf(__VA_ARGS__); }
 
 
 //#define dbg_camera(...)

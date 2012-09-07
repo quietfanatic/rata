@@ -13,7 +13,6 @@ typedef int16_t int16;
 typedef int32_t int32;
 typedef int64_t int64;
 
-
  // Constants
 const float FPS = 60.0;
 const float FR = 1/60.0;
