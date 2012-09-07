@@ -1,0 +1,33 @@
+
+#ifdef HEADER
+
+struct Actor {
+	virtual uint id () = 0;
+	virtual CStr name () = 0;
+	virtual void act () = 0;
+	virtual void react () = 0;
+	virtual void draw () = 0;
+	virtual void serialize (Serializer s) = 0;
+};
+
+<% my @actorfiles = sort glob "actor/*.c++"; %>
+
+<% for (@actorfiles) { %>
+#include "<%= $_ %>"<% } %>
+
+typedef Actor* (* actor_maker ) ();
+actor_maker make_actor [<%= 0+@actorfiles %>] = {
+<% for (@actorfiles) {
+	$_ =~ /^actor\/(\d+)-(\w+).c++/ or die "Error: Malformed actor file name: $_\n";
+	%>	[](){ return new <%= $2 %>; },
+<% } %>};
+
+#else
+
+<% for (@actorfiles) { %>
+#include "<%= $_ %>"<% } %>
+
+#endif
+
+
+
