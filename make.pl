@@ -103,7 +103,7 @@ sub make {
 }
 
 if (defined $^S and $^S == 0) {
-	make(@ARGV);
+	make(@ARGV ? @ARGV : 'all');
 }
 
 
