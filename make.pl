@@ -52,7 +52,16 @@ sub makecmd {
 	my ($s, @args) = @_;
 	print "$s( ", (join ', ', @args), " );\n";
 	no strict 'refs';
-	return &{"$s"}(@args);
+	if (defined &{"$s"}) {
+		return &{"$s"}(@args);
+	}
+	else {  # builtin ops aren't routines :(
+		my $r = eval "$s(\@args)";
+		if ($@) {
+			die $@;
+		}
+		return $r;
+	}
 }
 
 my @allcpp = (glob('actor/*.c++'), glob('*.c++'));
@@ -78,10 +87,10 @@ sub make {
 		when('clean') {
 			for (glob('actor/*.c++'), glob('*.c++')) {
 				if (-e "$_.epl") {
-					print "unlink('$_');\n";
-					unlink($_);
+					makecmd 'unlink', $_;
 				}
 			}
+			makecmd 'unlink', 'rata';
 		}
 		when(/^(.*)\.epl$/) {
 			my ($to, $from) = ($1, $_);
