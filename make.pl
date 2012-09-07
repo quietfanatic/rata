@@ -7,15 +7,21 @@ use feature 'switch';
 do 'epl.pl';
 
 my $force = 0;
+my $v = 0;
 sub depend {
 	my ($to, $from, $command) = @_;
+	my @to = ref $to eq 'ARRAY' ? @$to : $to;
+	my @from = ref $from eq 'ARRAY' ? @$from : $from;
+	if ($v) {
+		print "@to <- @from\n\t";
+	}
 	if ($force) {
 		$command->();
 		return;
 	}
 	my $tom = 99**999;
 	my $fromm = -(99**999);
-	for (ref $to eq 'ARRAY' ? @$to : $to) {
+	for (@to) {
 		if (!-e $_) {
 			$command->();
 			return;
@@ -23,12 +29,15 @@ sub depend {
 		my $m = -(-M $_);
 		$tom = $m if $m < $tom;
 	}
-	for (ref $from eq 'ARRAY' ? @$from : $from) {
+	for (@from) {
 		my $m = -(-M $_);
 		$fromm = $m if $m > $fromm;
 	}
 	if ($fromm > $tom) {
 		$command->();
+	}
+	elsif ($v) {
+		print "# no need\n";
 	}
 }
 
@@ -46,10 +55,13 @@ sub makecmd {
 	return &{"$s"}(@args);
 }
 
-my @allcpp = glob('actor/*.c++'), glob('*.c++');
+my @allcpp = (glob('actor/*.c++'), glob('*.c++'));
 
 sub make {
 	for (@_) {
+		when ('-v') {
+			$v = 1;
+		}
 		when ('--force') {
 			$force = 1;
 		}
