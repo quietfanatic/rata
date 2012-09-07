@@ -10,12 +10,12 @@
 #include <Box2D/Box2D.h>
 
 
-
 #define HEADER
 #include "debug.c++"
 #include "utility.c++"
+#include "serialize.c++"
 #undef HEADER
 
-
+uint frame_number;
 
 
