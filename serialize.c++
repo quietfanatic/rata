@@ -1,8 +1,8 @@
 
-
-
+#ifdef HEADER
 
 struct Serializer {
+	virtual bool writing () = 0;
 	virtual void ser (int8&) = 0;
 	virtual void ser (int16&) = 0;
 	virtual void ser (int32&) = 0;
@@ -11,11 +11,16 @@ struct Serializer {
 //	virtual void ser (double&) = 0;
 	virtual void ser (Vec&) = 0;
 	virtual void ser (CStr&) = 0;
+	int depth = 0;
+	virtual void nl () { };
 };
+
+#else
 
 struct BinaryWriter : Serializer {
 	FILE* file;
 	BinaryWriter (FILE* file) :file(file) { }
+	virtual bool writing () const { return true; }
 	void put (int8 x) { fputc(x, file); }
 	void ser (int8& x) { put(x); }
 	void ser (int16& x) {
@@ -47,6 +52,7 @@ struct BinaryWriter : Serializer {
 struct BinaryReader : Serializer {
 	FILE* file;
 	BinaryReader (FILE* file) :file(file) { }
+	virtual bool writing () const { return false; }
 	char get () {
 		int c = fgetc(file);
 		static bool errored = false;
@@ -105,19 +111,34 @@ struct BinaryReader : Serializer {
 
 struct TextWriter : Serializer {
 	FILE* file;
+	bool nled = true;
 	TextWriter (FILE* file) :file(file) { }
-	void ser (int8& x) { fprintf(file, " %hhd", x); }
-	void ser (int16& x) { fprintf(file, " %hd", x); }
-	void ser (int32& x) { fprintf(file, " %d", x); }
-	void ser (int64& x) { fprintf(file, " %lld", x); }
-	void ser (float& x) { fprintf(file, " %10e", x); }
-	void ser (Vec& x) { fprintf(file, " %10e,%10e", x.x, x.y); }
+	void pad () {
+		if (nled) {
+			nled = false;
+		}
+		else {
+			fputc(' ', file);
+		}
+	}
+	virtual bool writing () const { return true; }
+	void ser (int8& x) { fprintf(file, "%hhd", x); }
+	void ser (int16& x) { fprintf(file, "%hd", x); }
+	void ser (int32& x) { fprintf(file, "%d", x); }
+	void ser (int64& x) { fprintf(file, "%lld", x); }
+	void ser (float& x) { fprintf(file, "%10e", x); }
+	void ser (Vec& x) { fprintf(file, "%10e,%10e", x.x, x.y); }
 	void ser (CStr& x) { fputs(x, file); fputc(0, file); }
+	void nl () {
+		fputc('\n', file);
+		for (uint i=0; i < n; i++) fputc('\t', file);
+	}
 };
 
 struct TextReader : Serializer {
 	FILE* file;
 	TextReader (FILE* file) :file(file) { }
+	virtual bool writing () const { return false; }
 	void ser (int8& x) { fscanf(file, " %hhd", &x); }
 	void ser (int16& x) { fscanf(file, " %hd", &x); }
 	void ser (int32& x) { long int r; fscanf(file, " %ld", &r); x = r; }
@@ -152,5 +173,5 @@ struct TextReader : Serializer {
 
 
 
-
+#endif
 

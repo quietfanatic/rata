@@ -310,11 +310,29 @@ Line operator & (const Line& l, const Circle& c) {
  // VARIABLE ARRAYS
 template <class T>
 struct VArray {
-	uint n;
-	T* p;
+	uint n = 0;
+	T* p = NULL;
 	CE VArray (uint n, T* p) :n(n), p(p) { }
 
 	CE T& operator [] (uint i) const { return p[i]; }
+	CE operator T* () const { return p; }
+	CE operator uint () const { return n; }
+	CE operator bool () const { return n; }
+	
+	void allocate (uint newn) {
+		n = newn;
+		p = new T [n];
+	}
+	void free () {
+		n = 0;
+		delete[] p;
+		p = 0;
+	}
+	void reallocate (uint newn) {
+		if (newn == n) return;
+		n = newn;
+		p = new (p) T [n];
+	}
 };
 
 
