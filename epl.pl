@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-my $EPL_IN_FILENAME = "(unknown file)";
-my $EPL_OUT_FILENAME = "(unknown file)";
+our $EPL_IN_FILENAME = "(unknown file)";
+our $EPL_OUT_FILENAME = "(unknown file)";
 
 sub epl {
 	my ($IN) = @_;
@@ -29,18 +29,18 @@ sub epl {
 	my $OUT = '';
 	eval $code;
 	if ($@) {
-		die $@;
+		die "$EPL_IN_FILENAME: $@";
 	}
 	return $OUT;
 }
 
 sub eplf {
 	my ($inf, $outf) = @_;
+	$EPL_IN_FILENAME = $inf;
+	$EPL_OUT_FILENAME = $outf;
 	open my $INF, '<', $inf or die "$0: Could not open $inf for reading: $!\n";
 	open my $OUTF, '>', $outf or die "$0: Could not open $outf for writing: $!\n";
 	local $/;
-	$EPL_IN_FILENAME = $inf;
-	$EPL_OUT_FILENAME = $outf;
 	print $OUTF epl(readline($INF));
 	$EPL_IN_FILENAME = '(unknown file)';
 	$EPL_OUT_FILENAME = '(unknown file)';

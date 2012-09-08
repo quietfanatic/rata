@@ -14,8 +14,11 @@
 #include "debug.c++"
 #include "utility.c++"
 #include "serialize.c++"
+#include "Actor.c++"
 #undef HEADER
 
-uint frame_number;
+#include "Actor.c++"
+
+int frame_number = -1;
 
 

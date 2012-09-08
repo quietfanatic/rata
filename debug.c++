@@ -1,7 +1,7 @@
 
 
 
-extern uint frame_number;
+extern int frame_number;
 
 //#define dbg(...)
 #define dbg(...) { printf("[%d %s] ", frame_number, __FILE__); printf(__VA_ARGS__); }

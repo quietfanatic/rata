@@ -3,7 +3,6 @@
 
 #define CE constexpr
 typedef const char* CStr;
-typedef unsigned int uint;
 typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
@@ -12,6 +11,7 @@ typedef int8_t int8;
 typedef int16_t int16;
 typedef int32_t int32;
 typedef int64_t int64;
+typedef uint32 uint;
 
  // Constants
 const float FPS = 60.0;
@@ -309,14 +309,16 @@ Line operator & (const Line& l, const Circle& c) {
  // VARIABLE ARRAYS
 template <class T>
 struct VArray {
-	uint n = 0;
-	T* p = NULL;
+	uint n;
+	T* p;
+	CE VArray () :n(0), p(NULL) { }
 	CE VArray (uint n, T* p) :n(n), p(p) { }
 
 	CE T& operator [] (uint i) const { return p[i]; }
+
 	CE operator T* () const { return p; }
 	CE operator uint () const { return n; }
-	CE operator bool () const { return n; }
+	//CE operator bool () const { return n; }
 	
 	void allocate (uint newn) {
 		n = newn;

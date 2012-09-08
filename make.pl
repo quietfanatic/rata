@@ -66,6 +66,15 @@ sub makecmd {
 
 my @allcpp = (glob('actor/*.c++'), glob('*.c++'));
 
+sub actor_info {
+	our $EPL_IN_FILENAME =~ /^actor\/(\d+)-(\w+)\.c\+\+\.epl$/ or die "$EPL_IN_FILENAME: actor_info called in a non-actor file\n";
+	my ($num, $name) = ($1, $2);
+	<<END
+	uint id () { return $1; }
+	CStr name () { return "$2"; }
+END
+}
+
 sub make {
 	for (@_) {
 		when ('-v') {
@@ -77,7 +86,7 @@ sub make {
 		when ('all') {
 			make('epls');
 			depend('rata', \@allcpp, sub{
-				makesys(qw(g++-4.7 -std=c++11 -O1 rata.c++ -o rata));
+				makesys(qw(g++-4.7 -std=c++11 -fmax-errors=10 -O1 rata.c++ -o rata));
 			});
 		}
 		when('epls') {

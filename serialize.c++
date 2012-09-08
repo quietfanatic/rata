@@ -4,13 +4,22 @@
 struct Serializer {
 	virtual bool writing () = 0;
 	virtual void ser (int8&) = 0;
+	void ser (uint8& x) { ser((int8&)x); }
 	virtual void ser (int16&) = 0;
+	void ser (uint16& x) { ser((int16&)x); }
 	virtual void ser (int32&) = 0;
+	void ser (uint32& x) { ser((int32&)x); }
 	virtual void ser (int64&) = 0;
+	void ser (uint64& x) { ser((int64&)x); }
 	virtual void ser (float&) = 0;
 //	virtual void ser (double&) = 0;
 	virtual void ser (Vec&) = 0;
 	virtual void ser (CStr&) = 0;
+	void ser (bool& x) {
+		int32 x2 = x;
+		ser(x2);
+		x = x2;
+	}
 	int depth = 0;
 	virtual void nl () { };
 };

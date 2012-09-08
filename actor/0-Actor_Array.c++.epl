@@ -1,0 +1,61 @@
+
+#ifdef HEADER
+
+struct Actor_Array : Actor {
+<%= actor_info %>
+	bool active;
+	bool reactive;
+	bool visible;
+	VArray<Actor*> children;
+
+	void serialize (Serializer* s);
+	void act ();
+	void react ();
+	void draw ();
+};
+
+#else
+void Actor_Array::serialize (Serializer* s) {
+	s->ser(active);
+	s->ser(reactive);
+	s->ser(visible);
+	uint newn = children.n;
+	s->ser(newn);
+	children.reallocate(newn);  // noop if same size
+	s->depth++;
+	for (uint i=0; i < children; i++) {
+		s->nl();
+		if (s->writing()) {
+			uint id;
+			s->ser(id);
+			children[i] = make_actor[id]();
+		}
+		else {
+			uint id = children[i]->id();
+			s->ser(id);
+		}
+		children[i]->serialize(s);
+	}
+	s->depth--;
+}
+
+void Actor_Array::act () {
+	if (!active) return;
+	for (uint i=0; i < children; i++)
+		children[i]->act();
+}
+void Actor_Array::react () {
+	if (!reactive) return;
+	for (uint i=0; i < children; i++)
+		children[i]->react();
+}
+void Actor_Array::draw () {
+	if (!visible) return;
+	for (uint i=0; i < children; i++)
+		children[i]->draw();
+}
+
+#endif
+
+
+
