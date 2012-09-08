@@ -6,7 +6,7 @@ struct Imgset {
 	CStr filename;
 	Vec size;
 	Vec tex_size;
-	VArray<Varray<Vec>> pts;
+	VArray<Varray<Vec>> pts;  // Not the same two dimensions
 	void load () {
 		tex = SOIL_load_OGL_texture(filename, 4, tex, 0);
 		if (!tex) {
@@ -16,7 +16,7 @@ struct Imgset {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
-	void draw (Vec pos, int pose, int variant);
+	void draw (Vec pos, int pose = 0, int variant = 0);
 };
 
 void init ();
