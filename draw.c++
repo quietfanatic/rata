@@ -16,7 +16,7 @@ struct Imgset {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
-	void draw (Vec pos, int sub);
+	void draw (Vec pos, int pose, int variant);
 };
 
 void init ();
@@ -47,11 +47,8 @@ Cstr vs_tex =
 	"#version 120\n"
 	"void main () {\n"
 	"	gl_Position = ftransform();\n"
-	"	gl_TexCoord[0] = vec4(\n"
-	"		gl_MultiTexCoord0.x,\n"
-	"		gl_MultiTexCoord0.y / gl_MultiTexCoord0.z,\n"
-	"		0, 0\n"
-	"	);\n"
+	"	gl_TexCoord[0].xy = gl_MultiTexCoord0.xy / gl_MultiTexCoord0.zw;\n"
+	"	gl_TexCoord[0].zw = vec2(0, 0);\n"
 	"}\n";
 CStr fs_tex =
 	"#version 120\n"
@@ -152,17 +149,17 @@ void start () {
 	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
 }
 
-void Imgset::draw (Vec pos, int sub) {
+void Imgset::draw (Vec pos, int pose, int variant) {
 	Rect r {
-		pos - pts[sub][0],
-		pos - pts[sub][0] + size
+		pos - pts[pose][0],
+		pos - pts[pose][0] + size
 	};
 	use_program(program_tex);
 	glBegin(GL_QUADS);
-		glVertex2f(r.l, r.b); glTexCoord3f(0, sub+1, tex_size.y);
-		glVertex2f(r.r, r.b); glTexCoord3f(1, sub+1, tex_size.y);
-		glVertex2f(r.r, r.t); glTexCoord3f(1, sub, tex_size.y);
-		glVertex2f(r.l, r.t); glTexCoord3f(0, sub, tex_size.y);
+		glTexCoord4f(variant  , pose+1, tex_size.x, tex_size.y); glVertex2f(r.l, r.b);
+		glTexCoord4f(variant+1, pose+1, tex_size.x, tex_size.y); glVertex2f(r.r, r.b);
+		glTexCoord4f(variant+1, pose  , tex_size.x, tex_size.y); glVertex2f(r.r, r.t);
+		glTexCoord4f(variant  , pose  , tex_size.x, tex_size.y); glVertex2f(r.l, r.t);
 	glEnd();
 }
 
