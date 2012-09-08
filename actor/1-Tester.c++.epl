@@ -1,0 +1,23 @@
+
+#ifdef HEADER
+
+struct Tester : Actor {
+<%= actor_info %>
+	void serialize (Serializer* s) {
+		dbg("Tester::serialize");
+	}
+	void act () {
+		dbg("Tester::act");
+	}
+	void react () {
+		dbg("Tester::react");
+	}
+	void draw () {
+		dbg("Tester::draw");
+	}
+};
+
+#else
+
+#endif
+

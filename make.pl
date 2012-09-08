@@ -65,6 +65,7 @@ sub makecmd {
 }
 
 my @allcpp = (glob('actor/*.c++'), glob('*.c++'));
+my @allactorcpps = map { /^(actor\/.*\.c\+\+)\.epl$/; $1 } glob('actor/*.c++.epl');
 
 sub actor_info {
 	our $EPL_IN_FILENAME =~ /^actor\/(\d+)-(\w+)\.c\+\+\.epl$/ or die "$EPL_IN_FILENAME: actor_info called in a non-actor file\n";
@@ -103,7 +104,8 @@ sub make {
 		}
 		when(/^(.*)\.epl$/) {
 			my ($to, $from) = ($1, $_);
-			depend($to, $from, sub{ makecmd 'eplf', $from, $to });
+			my $deps = $1 eq 'Actor.c++' ? [$from, @allactorcpps] : $from;
+			depend($to, $deps, sub{ makecmd 'eplf', $from, $to });
 		}
 		default {
 			die "$0: No rule for target: $_\n";
