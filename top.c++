@@ -15,10 +15,14 @@
 #include "utility.c++"
 #include "serialize.c++"
 #include "Actor.c++"
+#include "draw.c++"
 #undef HEADER
 
-#include "Actor.c++"
-
 int frame_number = -1;
+int window_scale = 1;
+
+#include "Actor.c++"
+#include "draw.c++"
+
 
 
