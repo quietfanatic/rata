@@ -16,7 +16,7 @@ struct Imgset {
 	void load () {
 		tex = SOIL_load_OGL_texture(filename, 4, tex, 0);
 		if (!tex) {
-			printf("Error: failed to load image %s\n", filename);
+			printf("Error: failed to load image %s: %s\n", filename, SOIL_last_result());
 		}
 		glBindTexture(GL_TEXTURE_2D, tex);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
