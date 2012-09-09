@@ -33,6 +33,8 @@ int8 btn_map [10][2];
 void init ();
 void check ();
 
+}
+using input::inputs;
 #else
 
 void GLFWCALL key_cb (int keycode, int action) {
@@ -93,5 +95,6 @@ void check () {
 	if (inputs[i]) inputs[i]++;
 }
 
-#endif
 }
+#endif
+

@@ -105,7 +105,7 @@ GLuint make_shader (GLenum type, CStr src) {
 GLuint make_program (CStr vs, CStr fs) {
 	GLuint program = glCreateProgram();
 	glAttachShader(program, make_shader(GL_VERTEX_SHADER, vs));
-	glAttachShader(program, make_shader(GL_FRAGMENT_SHADER, vs));
+	glAttachShader(program, make_shader(GL_FRAGMENT_SHADER, fs));
 	glLinkProgram(program);
 	GLint status;
 	glGetProgramiv(program, GL_LINK_STATUS, &status);
