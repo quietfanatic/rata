@@ -6,7 +6,7 @@ struct Actor_Array : Actor {
 	bool active;
 	bool reactive;
 	bool visible;
-	VArray<Actor*> children;
+	VArray<Upt<Actor>> children;
 
 	void serialize (Serializer* s);
 	void act ();
@@ -25,16 +25,7 @@ void Actor_Array::serialize (Serializer* s) {
 	s->depth++;
 	for (uint i=0; i < children; i++) {
 		s->nl();
-		if (s->writing()) {
-			uint id;
-			s->ser(id);
-			children[i] = make_actor[id]();
-		}
-		else {
-			uint id = children[i]->id();
-			s->ser(id);
-		}
-		children[i]->serialize(s);
+		serialize_actorp(children[i]);
 	}
 	s->depth--;
 }

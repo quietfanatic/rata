@@ -336,5 +336,13 @@ struct VArray {
 	}
 };
 
+template <class T>
+struct UPt {
+	T* p;
+	CE UPt () :p(NULL) { }
+	CE UPt (T* p) :p(p) { }
+	CE operator T* () { return p; }
+	~UPt () { if (p) delete p; }
+};
 
 #endif

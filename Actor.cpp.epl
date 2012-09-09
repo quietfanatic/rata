@@ -24,6 +24,18 @@ actor_maker make_actor [<%= 0+@actorfiles %>] = {
 
 #else
 
+void serialize_actorp (Serializer* s, Actor*& a) {
+	if (s->writing()) {
+		uint id = a->id();
+		s->ser(id);
+	}
+	else {
+		uint id;
+		s->ser(id);
+		a = make_actor[id]();
+	}
+}
+
 <% for (@actorfiles) { %>
 #include "<%= $_ %>"<% } %>
 
