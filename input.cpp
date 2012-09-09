@@ -91,7 +91,6 @@ void init () {
 void check () {
 	for (uint i=0; i < inputs.n; i++)
 	if (inputs[i]) inputs[i]++;
-	glfwPollEvents();
 }
 
 #endif

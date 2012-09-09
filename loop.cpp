@@ -1,15 +1,19 @@
 
 #ifdef HEADER
 
-extern int frame_numer;
+extern int frame_number;
+extern bool paused;
 extern Actor* prime_mover;
 void main_loop ();
+void toggle_pause ();
 
 #else
 
 int frame_number = -1;
+bool paused = false;
 
 void main_loop () {
+	glfwDisable(GLFW_AUTO_POLL_EVENTS);
 	double draw_latency = 0;
 	for (;;) {
 		frame_number++;
@@ -17,8 +21,7 @@ void main_loop () {
 		if (draw_latency > 1*FR) {
 			dbg_timing("Skipping frame.\n");
 		}
-		else {
-			 // Draw all the things
+		else { // Draw all the things
 			draw::start();
 			prime_mover.draw();
 			draw::finish();
@@ -31,9 +34,19 @@ void main_loop () {
 		glfwSwapBuffers();
 
 		input::check();
-		prime_mover.act();
-		 // TODO: physics
-		prime_mover.react();
+		if (paused) {
+			glfwWaitEvents();
+		}
+		else {
+			glfwPollEvents();
+			prime_mover.act();
+			 // TODO: physics
+			prime_mover.react();
+		}
+	}
+}
+void toggle_pause () {
+	if (paused = !paused) {
 	}
 }
 
