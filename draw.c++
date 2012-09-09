@@ -6,8 +6,8 @@ struct Imgset {
 	CStr filename;
 	Vec size;
 	uint n_variants;
-	VArray<Varray<Vec>> pts;  // Not the same two dimensions
-	CE Imgset (CStr filename, Vec size, Vec tex_size, uint n_variants, VArray<Varray<Vec>> pts) :
+	VArray<VArray<Vec>> pts;  // Not the same two dimensions
+	CE Imgset (CStr filename, Vec size, Vec tex_size, uint n_variants, VArray<VArray<Vec>> pts) :
 		filename(filename),
 		size(size),
 		n_variants(n_variants),
@@ -25,8 +25,8 @@ struct Imgset {
 	void draw (Vec pos, int pose = 0, int variant = 0);
 };
 
-void init ();
 void set_video ();
+void init ();
 void load_images ();
 void start ();
 //void mode_tiles ();
@@ -35,7 +35,7 @@ void start ();
 //void mode_hud ();
 void finish ();
 
-#include <imgs.c++>
+#include "imgs.c++"
 
 #else
 
@@ -49,7 +49,7 @@ bool check_error (CStr when = "") {
 	return whoops;
 }
 
-Cstr vs_tex =
+CStr vs_tex =
 	"#version 120\n"
 	"void main () {\n"
 	"	gl_Position = ftransform();\n"
@@ -91,7 +91,7 @@ GLuint make_shader (GLenum type, CStr src) {
 	glShaderSource(shader, 1, &src, &len);
 	glCompileShader(shader);
 	GLint status;
-	glGetGhaderiv(shader, GL_COMPILE_STATUS, &compile_status);
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 	if (!status) {
 		printf("Error: a shader failed to compile...\n");
 		GLint loglen;
@@ -134,7 +134,7 @@ void init () {
 	glfwInit();
 	set_video();
 	program_tex = make_program(vs_tex, fs_tex);
-	program_color = make_program(vs_color, cs_color);
+	program_color = make_program(vs_color, fs_color);
 	uniform_tex = glGetUniformLocation(program_tex, "tex");
 	if (check_error) exit(1);
 	glEnable(GL_DEPTH_TEST);
@@ -151,7 +151,7 @@ void start () {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glTranslatef(-1, -1, 0);
-	glScalef(1/10.0/window_scale, 1/7.5/window_scale, q);
+	glScalef(1/10.0/window_scale, 1/7.5/window_scale, 1);
 	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
 }
 
