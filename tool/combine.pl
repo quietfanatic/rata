@@ -97,7 +97,7 @@ for my $xcfk (sort keys %images) {
 			'-tile', "$imgset->{_N_VARS}x",
 			'-geometry', '100%+0+0',
 			'-background', 'none',
-			$imgset->{_FILE};
+			"png32:$imgset->{_FILE}";
 	}
 }
 
