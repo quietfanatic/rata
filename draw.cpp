@@ -25,6 +25,7 @@ struct Imgset {
 	void draw (Vec pos, int pose = 0, int variant = 0);
 };
 
+bool check_error (CStr when = "");
 void set_video ();
 void init ();
 void load_images ();
@@ -39,7 +40,7 @@ void finish ();
 
 #else
 
-bool check_error (CStr when = "") {
+bool check_error (CStr when) {
 	GLenum err;
 	bool whoops = false;
 	while ((err = glGetError()) != GL_NO_ERROR) {

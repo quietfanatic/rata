@@ -8,6 +8,7 @@ struct Actor {
 	virtual void react () = 0;
 	virtual void draw () = 0;
 	virtual void serialize (Serializer* s) = 0;
+	virtual ~Actor () { }
 };
 
 <% my @actorfiles = sort glob "actor/*.cpp"; %>

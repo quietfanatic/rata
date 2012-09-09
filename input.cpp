@@ -24,20 +24,20 @@ struct Inputs {
 	uint aim;
 	uint fire;
 	uint pause;
-	const uint n = N_INPUTS;
 	uint& operator [] (uint i) { return ((uint*)this)[i]; }
 } inputs;
 int8 key_map [400][2];
 int8 btn_map [10][2];
 
 void init ();
-void check ();
+void count ();
 
 }
 using input::inputs;
 #else
 
 void GLFWCALL key_cb (int keycode, int action) {
+	dbg("Key %d %d\n", keycode, action);
 	if (action == GLFW_PRESS) {
 		switch (keycode) {
 			case GLFW_KEY_ESC: quit_game();
@@ -53,6 +53,7 @@ void GLFWCALL key_cb (int keycode, int action) {
 }
 
 void GLFWCALL btn_cb (int btncode, int action) {
+	dbg("Button %d %d\n", btncode, action);
 	if (btncode < 10) {
 		if (btn_map[btncode][0] > -1)
 			inputs[btn_map[btncode][0]] = (action == GLFW_PRESS);
@@ -85,13 +86,14 @@ void init () {
 	key_map[GLFW_KEY_LSHIFT][0] = AIM;
 	btn_map[GLFW_MOUSE_BUTTON_LEFT][1] = FIRE;
 	key_map['P'][0] = PAUSE;
+
 	glfwSetKeyCallback(key_cb);
 	glfwSetMouseButtonCallback(btn_cb);
 	glfwSetWindowCloseCallback(close_cb);
 }
 
-void check () {
-	for (uint i=0; i < inputs.n; i++)
+void count () {
+	for (uint i=0; i < N_INPUTS; i++)
 	if (inputs[i]) inputs[i]++;
 }
 

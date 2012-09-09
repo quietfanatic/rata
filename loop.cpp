@@ -33,8 +33,9 @@ void main_loop () {
 		if (draw_latency < 0) glfwSleep(-draw_latency);
 		dbg_timing("%f\n", draw_latency);
 		glfwSwapBuffers();
+		draw::check_error();
 
-		input::check();
+		input::count();
 		if (paused) {
 			glfwWaitEvents();
 		}
@@ -47,7 +48,7 @@ void main_loop () {
 	}
 }
 void toggle_pause () {
-	if (paused = !paused) {
+	if ((paused = !paused)) {
 	}
 }
 void quit_game () {

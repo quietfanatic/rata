@@ -14,8 +14,8 @@ typedef int64_t int64;
 typedef uint32 uint;
 
  // Constants
-const float FPS = 60.0;
-const float FR = 1/60.0;
+const float FPS = 10.0;
+const float FR = 1/10.0;
 const float PX = 1/16.0;
 const float PI = M_PI;
 

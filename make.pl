@@ -12,7 +12,7 @@ BEGIN {
 
 my $cpp = 'g++-4.7';
 my @cpp_flags = qw(-std=c++11 -fmax-errors=10);
-my @test_flags = qw(-O1 -ggdb);
+my @test_flags = qw(-Wall -O1 -ggdb);
 my @prof_flags = qw(-O1 -pg);
 my @release_flags = qw(-O3);
 my @libs = qw(-lGL -lglfw -lSOIL);
