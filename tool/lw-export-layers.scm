@@ -30,9 +30,13 @@
     "2012"
     "RGB RGBA GRAY GRAYA INDEXED INDEXEDA"
     SF-IMAGE "Image" 0
-	SF-DIRNAME "Directory" ""
+    SF-DIRNAME "Directory" ""
 )
 
 (script-fu-menu-register "lw-export-layers" "<Image>/Layer")
 
+(define (lw-export-layers-cmd filename dir)
+  (define img (car (gimp-file-load RUN-NONINTERACTIVE filename filename)))
+  (lw-export-layers img dir)
+  (gimp-image-delete img))
 
