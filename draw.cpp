@@ -1,4 +1,3 @@
-namespace draw {
 #ifdef HEADER
 
 struct Imgset {
@@ -25,21 +24,21 @@ struct Imgset {
 	void draw (Vec pos, int pose = 0, int variant = 0);
 };
 
+namespace draw {
 bool check_error (CStr when = "");
 void set_video ();
 void init ();
 void load_images ();
 void start ();
-//void mode_tiles ();
-//void mode_normal ();
-//void mode_debug ();
-//void mode_hud ();
+void mode ();
 void finish ();
+}
 
 #include "imgs.cpp"
 
 #else
 
+namespace draw {
 bool check_error (CStr when) {
 	GLenum err;
 	bool whoops = false;
@@ -61,7 +60,7 @@ CStr fs_tex =
 	"#version 120\n"
 	"uniform sampler2D tex;\n"
 	"void main () {\n"
-	"	gl_FragColor = texture2D(tex,gl_TexCoord[0].st);\n"
+	"	gl_FragColor = texture2D(tex,gl_TexCoord[0].xy);\n"
 	"	gl_FragDepth = gl_FragColor.a;\n"
 	"}\n";
 CStr vs_color =
@@ -78,7 +77,7 @@ GLuint program_tex;
 GLint uniform_tex;
 GLuint program_color;
 
-void use_program (GLuint program) {
+void mode (GLuint program) {
 	static GLuint cur = 0xffffffff;
 	if (program != cur) {
 		glUseProgram(program);
@@ -136,8 +135,10 @@ void init () {
 	set_video();
 	program_tex = make_program(vs_tex, fs_tex);
 	program_color = make_program(vs_color, fs_color);
-	uniform_tex = glGetUniformLocation(program_tex, "tex");
 	if (check_error("after compiling program")) exit(1);
+	glUseProgram(program_tex);
+	uniform_tex = glGetUniformLocation(program_tex, "tex");
+	glUniform1i(uniform_tex, 0);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_GREATER);
 }
@@ -156,12 +157,20 @@ void start () {
 	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
 }
 
+
+void finish () {
+	check_error();
+}
+
+}
+
 void Imgset::draw (Vec pos, int pose, int variant) {
 	Rect r {
 		pos - pts[pose][0],
 		pos - pts[pose][0] + size
 	};
-	use_program(program_tex);
+	draw::mode(draw::program_tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
 	glBegin(GL_QUADS);
 		glTexCoord4f(variant  , pose+1, n_variants, pts.n); glVertex2f(r.l, r.b);
 		glTexCoord4f(variant+1, pose+1, n_variants, pts.n); glVertex2f(r.r, r.b);
@@ -170,9 +179,5 @@ void Imgset::draw (Vec pos, int pose, int variant) {
 	glEnd();
 }
 
-void finish () {
-	check_error();
-}
-
 #endif
-}
+

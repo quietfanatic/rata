@@ -12,12 +12,14 @@ struct Tester : Actor {
 	void react () {
 		dbg("Tester::react\n");
 	}
-	void draw () {
-		dbg("Tester::draw\n");
-	}
+	void draw ();
 };
 
 #else
+
+void Tester::draw () {
+	img::rata_4::head->draw(Vec(0, 0));
+}
 
 #endif
 
