@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use feature 'switch';
 
-do 'epl.pl';
+BEGIN { require 'tool/epl.pl' }
 
 my $force = 0;
 my $v = 0;
@@ -105,7 +105,7 @@ sub make {
 		when(/^(.*)\.epl$/) {
 			my ($to, $from) = ($1, $_);
 			my $deps = $1 eq 'Actor.c++' ? [$from, @allactorcpps] : $from;
-			depend($to, $deps, sub{ makecmd 'eplf', $from, $to });
+			depend($to, $deps, sub{ makecmd 'eplf', $to, $from });
 		}
 		default {
 			die "$0: No rule for target: $_\n";
@@ -118,4 +118,4 @@ if (defined $^S and $^S == 0) {
 }
 
 
-
+1;

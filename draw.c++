@@ -5,8 +5,14 @@ struct Imgset {
 	GLuint tex = 0;
 	CStr filename;
 	Vec size;
-	Vec tex_size;
+	uint n_variants;
 	VArray<Varray<Vec>> pts;  // Not the same two dimensions
+	CE Imgset (CStr filename, Vec size, Vec tex_size, uint n_variants, VArray<Varray<Vec>> pts) :
+		filename(filename),
+		size(size),
+		n_variants(n_variants),
+		pts(pts)
+	{ }
 	void load () {
 		tex = SOIL_load_OGL_texture(filename, 4, tex, 0);
 		if (!tex) {
