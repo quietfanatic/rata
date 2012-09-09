@@ -6,6 +6,7 @@ extern bool paused;
 extern Actor* prime_mover;
 void main_loop ();
 void toggle_pause ();
+void quit_game ();
 
 #else
 
@@ -23,7 +24,7 @@ void main_loop () {
 		}
 		else { // Draw all the things
 			draw::start();
-			prime_mover.draw();
+			prime_mover->draw();
 			draw::finish();
 		}
 		 // FPS cap.
@@ -39,15 +40,19 @@ void main_loop () {
 		}
 		else {
 			glfwPollEvents();
-			prime_mover.act();
+			prime_mover->act();
 			 // TODO: physics
-			prime_mover.react();
+			prime_mover->react();
 		}
 	}
 }
 void toggle_pause () {
 	if (paused = !paused) {
 	}
+}
+void quit_game () {
+	glfwTerminate();
+	exit(0);
 }
 
 #endif

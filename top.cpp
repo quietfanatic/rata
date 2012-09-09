@@ -16,11 +16,14 @@
 #include "serialize.cpp"
 #include "Actor.cpp"
 #include "draw.cpp"
+#include "input.cpp"
+#include "loop.cpp"
 #undef HEADER
 
-int frame_number = -1;
 int window_scale = 1;
 
+#include "input.cpp"
+#include "loop.cpp"
 #include "Actor.cpp"
 #include "draw.cpp"
 

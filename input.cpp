@@ -35,11 +35,11 @@ void check ();
 
 #else
 
-int GLFWCALL key_cb (int keycode, int action) {
+void GLFWCALL key_cb (int keycode, int action) {
 	if (action == GLFW_PRESS) {
 		switch (keycode) {
 			case GLFW_KEY_ESC: quit_game();
-			default:
+			default: { }
 		}
 	}
 	if (keycode < 400) {
@@ -50,12 +50,12 @@ int GLFWCALL key_cb (int keycode, int action) {
 	}
 }
 
-int GLFWCALL btn_cb (int btncode, int action) {
+void GLFWCALL btn_cb (int btncode, int action) {
 	if (btncode < 10) {
-		if (k_map[btncode][0] > -1)
-			inputs[btn_map[keycode][0]] = (action == GLFW_PRESS);
-		if (k_map[btncode][1] > -1)
-			inputs[btn_map[keycode][1]] = (action == GLFW_PRESS);
+		if (btn_map[btncode][0] > -1)
+			inputs[btn_map[btncode][0]] = (action == GLFW_PRESS);
+		if (btn_map[btncode][1] > -1)
+			inputs[btn_map[btncode][1]] = (action == GLFW_PRESS);
 	}
 }
 
