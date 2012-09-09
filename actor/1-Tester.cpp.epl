@@ -2,18 +2,18 @@
 #ifdef HEADER
 
 struct Tester : Actor {
-<%= actor_info %>
+	<%= actor_info %>
 	void serialize (Serializer* s) {
-		dbg("Tester::serialize");
+		dbg("Tester::serialize\n");
 	}
 	void act () {
-		dbg("Tester::act");
+		dbg("Tester::act\n");
 	}
 	void react () {
-		dbg("Tester::react");
+		dbg("Tester::react\n");
 	}
 	void draw () {
-		dbg("Tester::draw");
+		dbg("Tester::draw\n");
 	}
 };
 

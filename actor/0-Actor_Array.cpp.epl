@@ -2,7 +2,7 @@
 #ifdef HEADER
 
 struct Actor_Array : Actor {
-<%= actor_info %>
+	<%= actor_info %>
 	bool active;
 	bool reactive;
 	bool visible;
