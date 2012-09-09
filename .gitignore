@@ -1,13 +1,29 @@
+# binaries
 test
 test-opt
 test-dbg
 test-prof
 mapeditor
+rata
+
+# resource dirs
 lib
-demo
-demo.tar.gz
-gmon.out
 res
 img
 snd
 bgm
+xcf
+
+# intermediates
+Actor.cpp
+imgs.cpp
+tmpimg
+actor/*.cpp
+
+# testing
+filetester.cpp
+
+# misc
+demo
+demo.tar.gz
+gmon.out
