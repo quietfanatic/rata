@@ -18,9 +18,11 @@
         (if (search-substr name s 0)
             (gimp-item-set-visible layer v))))
  (define layers (gimp-image-get-layers img))
+ (gimp-image-undo-group-start img)
  (for-each (lambda (l) (show-matching img l s v))
            (vector->list (car (cdr layers))))
- (gimp-displays-flush))
+ (gimp-displays-flush)
+ (gimp-image-undo-group-end img))
 
 (script-fu-register "lw-show-matching"
     "Show matching..."

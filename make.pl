@@ -42,6 +42,20 @@ sub depend {
 	}
 }
 
+sub undepend {
+	my ($to, $command) = @_;
+	my @to = ref $to eq 'ARRAY' ? @$to : $to;
+	if ($v) {
+		print "@to !<-\n\t";
+	}
+	if ($force or grep { -e $_ } @to) {
+		$command->();
+		return;
+	}
+	elsif ($v) {
+		print "# no need\n";
+	}
+}
 sub makesys {
 	print "@_\n";
 	my $err = system(@_);
@@ -63,6 +77,22 @@ sub makecmd {
 		}
 		return $r;
 	}
+}
+sub dependcmd {
+	my ($to, $from, @cmd) = @_;
+	depend $to, $from, sub { makecmd @cmd };
+}
+sub dependsys {
+	my ($to, $from, @cmd) = @_;
+	depend $to, $from, sub { makesys @cmd };
+}
+sub undependcmd {
+	my ($to, @cmd) = @_;
+	undepend $to, sub { makecmd @cmd };
+}
+sub undependsys {
+	my ($to, @cmd) = @_;
+	undepend $to, sub { makecmd @cmd };
 }
 
 my @allcpp = (glob('actor/*.c++'), glob('*.c++'));
@@ -100,9 +130,8 @@ sub make {
 		}
 		when ('all') {
 			make 'epls';
-			depend 'rata', \@allcpp, sub {
-				makesys qw(g++-4.7 -std=c++11 -fmax-errors=10 -O1 rata.c++ -o rata);
-			};
+			dependsys 'rata', \@allcpp,
+				qw(g++-4.7 -std=c++11 -fmax-errors=10 -O1 rata.c++ -o rata);
 		}
 		when('epls') {
 			make glob 'actor/*.epl';
@@ -111,28 +140,33 @@ sub make {
 		when ('xcfs') {
 			make glob 'xcf/*.xcf';
 		}
-		when('clean') {
-			makecmd 'unlink', grep { -e "$_.epl" } glob('actor/*.c++'), glob('*.c++');
-			makecmd 'remove', 'tmpimgs';
-			makecmd 'remove', 'img';
+		when ('clean-tmp') {
+			undependcmd 'tmpimg', 'remove', 'tmpimg';
 		}
-		when('imgs.c++.epl') {
+		when ('clean') {
+			my @gencpps = grep { -e "$_.epl" } glob('actor/*.c++'), glob('*.c++');
+			undependcmd \@gencpps, 'unlink', @gencpps;
+			make 'clean-tmp';
+			undependcmd 'img', 'remove', 'img';
+			undependcmd 'rata', 'remove', 'rata';
+		}
+		when ('imgs.c++.epl') {
 			depend 'imgs.c++', ['imgs.c++.epl', glob('xcf/*.xcf')], sub {
 				make 'xcfs';
 				makecmd 'mkdir', 'img';
 				makecmd 'eplf', 'imgs.c++', 'imgs.c++.epl'
 			};
-			makecmd 'remove', 'tmpimgs';
+			make 'clean-tmp';
 		}
-		when(/^(.*)\.epl$/) {
+		when (/^(.*)\.epl$/) {
 			my ($to, $from) = ($1, $_);
 			my $deps = $1 eq 'Actor.c++' ? [$from, @allactorcpps] : $from;
-			depend $to, $deps, sub{ makecmd 'eplf', $to, $from };
+			dependcmd $to, $deps, 'eplf', $to, $from;
 		}
 		when (/^(.*)\.xcf$/) {
-			depend 'tmpimgs', [], sub { makecmd 'mkdir', 'tmpimgs' };
+			dependcmd 'tmpimg', [], 'mkdir', 'tmpimg';
 			makesys qw(gimp-2.8 --no-data --no-fonts --no-interface -b),
-				"(load \"tool/lw-export-layers.scm\") (lw-export-layers-cmd \"$_\" \"tmpimgs\") (gimp-quit 0)";
+				"(load \"tool/lw-export-layers.scm\") (lw-export-layers-cmd \"$_\" \"tmpimg\") (gimp-quit 0)";
 		}
 		default {
 			die "$0: No rule for target: $_\n";
