@@ -4,110 +4,21 @@ use strict;
 use warnings;
 use feature 'switch';
 
-BEGIN { require 'tool/epl.pl' }
-
-my $force = 0;
-my $v = 0;
-
-sub depend {
-	my ($to, $from, $command) = @_;
-	my @to = ref $to eq 'ARRAY' ? @$to : $to;
-	my @from = ref $from eq 'ARRAY' ? @$from : $from;
-	if ($v) {
-		print "@to <- @from\n\t";
-	}
-	if ($force) {
-		$command->();
-		return;
-	}
-	my $tom = 99**999;
-	my $fromm = -(99**999);
-	for (@to) {
-		if (!-e $_) {
-			$command->();
-			return;
-		}
-		my $m = -(-M $_);
-		$tom = $m if $m < $tom;
-	}
-	for (@from) {
-		my $m = -(-M $_);
-		$fromm = $m if $m > $fromm;
-	}
-	if ($fromm > $tom) {
-		$command->();
-	}
-	elsif ($v) {
-		print "# no need\n";
-	}
+BEGIN {
+	require 'tool/maker.pl';
+	require 'tool/epl.pl';
 }
 
-sub undepend {
-	my ($to, $command) = @_;
-	my @to = ref $to eq 'ARRAY' ? @$to : $to;
-	if ($v) {
-		print "@to !<-\n\t";
-	}
-	if ($force or grep { -e $_ } @to) {
-		$command->();
-		return;
-	}
-	elsif ($v) {
-		print "# no need\n";
-	}
-}
-sub makesys {
-	print "@_\n";
-	my $err = system(@_);
-	if ($err) {
-		die "$0: Stopping due to error code $err\n";
-	};
-}
-sub makecmd {
-	my ($s, @args) = @_;
-	print "$s( ", (join ', ', @args), " );\n";
-	no strict 'refs';
-	if (defined &{"$s"}) {
-		return &{"$s"}(@args);
-	}
-	else {  # builtin ops aren't routines :(
-		my $r = eval (@args == 1 ? "$s(\$args[0])" : "$s(\@args)");
-		if ($@) {
-			die $@;
-		}
-		return $r;
-	}
-}
-sub dependcmd {
-	my ($to, $from, @cmd) = @_;
-	depend $to, $from, sub { makecmd @cmd };
-}
-sub dependsys {
-	my ($to, $from, @cmd) = @_;
-	depend $to, $from, sub { makesys @cmd };
-}
-sub undependcmd {
-	my ($to, @cmd) = @_;
-	undepend $to, sub { makecmd @cmd };
-}
-sub undependsys {
-	my ($to, @cmd) = @_;
-	undepend $to, sub { makecmd @cmd };
-}
 
-sub remove;
-sub remove {
-	if (-d $_[0]) {
-		remove $_ for glob "$_[0]/*";
-		rmdir $_[0];
-	}
-	else {
-		unlink $_[0];
-	}
-}
+my $cpp = 'g++-4.7';
+my @cpp_flags = qw(-std=c++11 -fmax-errors=10);
+my @test_flags = qw(-O1 -ggdb);
+my @prof_flags = qw(-O1 -pg);
+my @release_flags = qw(-O3);
+my @libs = qw(-lGL -lglfw -lSOIL);
 
-my @allcpp = (glob('actor/*.c++'), glob('*.c++'));
-my @allactorcpps = map { /^(actor\/.*\.c\+\+)\.epl$/; $1 } glob('actor/*.c++.epl');
+my @allcpp = (glob('actor/*.cpp'), glob('*.cpp'));
+my @allactorcpps = map { /^(actor\/.*\.c\+\+)\.epl$/; $1 } glob('actor/*.cpp.epl');
 my @allxcfnames = map { /^xcf\/(.*)\.xcf/; $1 } glob('xcf/*.xcf');
 
 sub actor_info {
@@ -120,10 +31,8 @@ END
 }
 
 
-my $cpp = 'g++-4.7';
-my @cppflags = qw(-std=c++11 -fmax-errors=10);
-my @libs = qw(-lGL -lglfw -lSOIL);
-
+our $force = 0;
+our $v = 0;
 sub make;
 sub make {
 	for (@_) {
@@ -136,7 +45,7 @@ sub make {
 		when ('all') {
 			make 'epls';
 			dependsys 'rata', \@allcpp,
-				$cpp, @cppflags, 'rata.c++', @libs, '-o', 'rata';
+				$cpp, @cpp_flags, @test_flags, 'rata.cpp', @libs, '-o', 'rata';
 		}
 		when('epls') {
 			make glob 'actor/*.epl';
@@ -146,17 +55,17 @@ sub make {
 			depend ['tmpimg', glob 'tmpimg/*.png'], [glob 'xcf/*.xcf'], sub { make glob 'xcf/*.xcf' };
 		}
 		when ('clean') {
-			my @gencpps = grep { -e "$_.epl" } glob('actor/*.c++'), glob('*.c++');
+			my @gencpps = grep { -e "$_.epl" } glob('actor/*.cpp'), glob('*.cpp');
 			undependcmd \@gencpps, 'unlink', @gencpps;
 			undependcmd 'tmpimg', 'remove', 'tmpimg';
 			undependcmd 'img', 'remove', 'img';
 			undependcmd 'rata', 'remove', 'rata';
 		}
-		when ('imgs.c++.epl') {
-			depend 'imgs.c++', ['tool/combine.pl', 'imgs.c++.epl', glob('xcf/*.xcf')], sub {
+		when ('imgs.cpp.epl') {
+			depend 'imgs.cpp', ['tool/combine.pl', 'imgs.cpp.epl', glob('xcf/*.xcf')], sub {
 				make 'xcfs';
 				makecmd 'mkdir', 'img';
-				makecmd 'eplf', 'imgs.c++', 'imgs.c++.epl'
+				makecmd 'eplf', 'imgs.cpp', 'imgs.cpp.epl'
 			};
 		}
 		when (/^(.*)\.epl$/) {

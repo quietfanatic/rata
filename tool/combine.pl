@@ -39,8 +39,6 @@ for my $xcf (keys %images) {
 use Data::Dumper;
 #print Dumper(\%images);
 
-open my $IMGCPP, '>', 'imgs.c++' or die "$0: Cannot open imgs.c++ for writing: $!\n";
-
 sub sortify {
 	my ($h) = @_;
 	return
@@ -106,7 +104,7 @@ for my $xcfk (sort keys %images) {
 }
 
 
- # This will be used in imgs.c++.epl
+ # This will be used in imgs.cpp.epl
 
 1;
 
