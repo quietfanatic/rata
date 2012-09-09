@@ -54,7 +54,7 @@ CStr vs_tex =
 	"void main () {\n"
 	"	gl_Position = ftransform();\n"
 	"	gl_TexCoord[0].xy = gl_MultiTexCoord0.xy / gl_MultiTexCoord0.zw;\n"
-	"	gl_TexCoord[0].zw = vec2(0, 0);\n"
+//	"	gl_TexCoord[0].zw = vec2(0, 0);\n"
 	"}\n";
 CStr fs_tex =
 	"#version 120\n"
