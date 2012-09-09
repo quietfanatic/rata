@@ -7,7 +7,7 @@ struct Imgset {
 	Vec size;
 	uint n_variants;
 	VArray<VArray<Vec>> pts;  // Not the same two dimensions
-	CE Imgset (CStr filename, Vec size, Vec tex_size, uint n_variants, VArray<VArray<Vec>> pts) :
+	CE Imgset (CStr filename, Vec size, uint n_variants, VArray<VArray<Vec>> pts) :
 		filename(filename),
 		size(size),
 		n_variants(n_variants),
@@ -162,10 +162,10 @@ void Imgset::draw (Vec pos, int pose, int variant) {
 	};
 	use_program(program_tex);
 	glBegin(GL_QUADS);
-		glTexCoord4f(variant  , pose+1, tex_size.x, tex_size.y); glVertex2f(r.l, r.b);
-		glTexCoord4f(variant+1, pose+1, tex_size.x, tex_size.y); glVertex2f(r.r, r.b);
-		glTexCoord4f(variant+1, pose  , tex_size.x, tex_size.y); glVertex2f(r.r, r.t);
-		glTexCoord4f(variant  , pose  , tex_size.x, tex_size.y); glVertex2f(r.l, r.t);
+		glTexCoord4f(variant  , pose+1, n_variants, pts.n); glVertex2f(r.l, r.b);
+		glTexCoord4f(variant+1, pose+1, n_variants, pts.n); glVertex2f(r.r, r.b);
+		glTexCoord4f(variant+1, pose  , n_variants, pts.n); glVertex2f(r.r, r.t);
+		glTexCoord4f(variant  , pose  , n_variants, pts.n); glVertex2f(r.l, r.t);
 	glEnd();
 }
 

@@ -316,7 +316,7 @@ struct VArray {
 
 	CE T& operator [] (uint i) const { return p[i]; }
 
-	CE operator T* () const { return p; }
+	//CE operator T* () const { return p; }
 	CE operator uint () const { return n; }
 	//CE operator bool () const { return n; }
 	

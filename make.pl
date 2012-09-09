@@ -95,6 +95,17 @@ sub undependsys {
 	undepend $to, sub { makecmd @cmd };
 }
 
+sub remove;
+sub remove {
+	if (-d $_[0]) {
+		remove $_ for glob "$_[0]/*";
+		rmdir $_[0];
+	}
+	else {
+		unlink $_[0];
+	}
+}
+
 my @allcpp = (glob('actor/*.c++'), glob('*.c++'));
 my @allactorcpps = map { /^(actor\/.*\.c\+\+)\.epl$/; $1 } glob('actor/*.c++.epl');
 my @allxcfnames = map { /^xcf\/(.*)\.xcf/; $1 } glob('xcf/*.xcf');
@@ -108,16 +119,10 @@ sub actor_info {
 END
 }
 
-sub remove;
-sub remove {
-	if (-d $_[0]) {
-		remove $_ for glob "$_[0]/*";
-		rmdir $_[0];
-	}
-	else {
-		unlink $_[0];
-	}
-}
+
+my $cpp = 'g++-4.7';
+my @cppflags = qw(-std=c++11 -fmax-errors=10);
+my @libs = qw(-lGL -lglfw -lSOIL);
 
 sub make;
 sub make {
@@ -131,36 +136,32 @@ sub make {
 		when ('all') {
 			make 'epls';
 			dependsys 'rata', \@allcpp,
-				qw(g++-4.7 -std=c++11 -fmax-errors=10 -O1 rata.c++ -o rata);
+				$cpp, @cppflags, 'rata.c++', @libs, '-o', 'rata';
 		}
 		when('epls') {
 			make glob 'actor/*.epl';
 			make glob '*.epl';
 		}
 		when ('xcfs') {
-			make glob 'xcf/*.xcf';
-		}
-		when ('clean-tmp') {
-			undependcmd 'tmpimg', 'remove', 'tmpimg';
+			depend ['tmpimg', glob 'tmpimg/*.png'], [glob 'xcf/*.xcf'], sub { make glob 'xcf/*.xcf' };
 		}
 		when ('clean') {
 			my @gencpps = grep { -e "$_.epl" } glob('actor/*.c++'), glob('*.c++');
 			undependcmd \@gencpps, 'unlink', @gencpps;
-			make 'clean-tmp';
+			undependcmd 'tmpimg', 'remove', 'tmpimg';
 			undependcmd 'img', 'remove', 'img';
 			undependcmd 'rata', 'remove', 'rata';
 		}
 		when ('imgs.c++.epl') {
-			depend 'imgs.c++', ['imgs.c++.epl', glob('xcf/*.xcf')], sub {
+			depend 'imgs.c++', ['tool/combine.pl', 'imgs.c++.epl', glob('xcf/*.xcf')], sub {
 				make 'xcfs';
 				makecmd 'mkdir', 'img';
 				makecmd 'eplf', 'imgs.c++', 'imgs.c++.epl'
 			};
-			make 'clean-tmp';
 		}
 		when (/^(.*)\.epl$/) {
 			my ($to, $from) = ($1, $_);
-			my $deps = $1 eq 'Actor.c++' ? [$from, @allactorcpps] : $from;
+			my $deps = $1 eq 'Actor.c++' ? [$from, @allactorcpps, 'tool/epl.pl'] : [$from, 'tool/epl.pl'];
 			dependcmd $to, $deps, 'eplf', $to, $from;
 		}
 		when (/^(.*)\.xcf$/) {

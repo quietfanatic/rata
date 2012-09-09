@@ -7,8 +7,8 @@ use Carp;
 our %images;  # our for access in epl
 
 
-for (glob('tmpimgs/*.xcf-*.png')) {
-	/^tmpimgs\/([^.]+)\.xcf-(\d+)-([a-zA-Z0-9_\-]+)(?:@([a-zA-Z0-9_\-]+)(?:#([a-zA-Z0-9_\-]+))?)?((?:\s+-?\d+(?:\.\d+)?_-?\d+(?:\.\d+)?)*)\.png$/s
+for (glob('tmpimg/*.xcf-*.png')) {
+	/^tmpimg\/([^.]+)\.xcf-(\d+)-([a-zA-Z0-9_\-]+)(?:@([a-zA-Z0-9_\-]+)(?:#([a-zA-Z0-9_\-]+))?)?((?:\s+-?\d+(?:\.\d+)?_-?\d+(?:\.\d+)?)*)\.png$/s
 		or die "Unparsable filename: $_\n";
 	my ($xcf, $num, $imgset, $pose, $variant, $data) = ($1, $2, $3, $4, $5, $6);
 	my @data = map {/^(.*)_(.*)$/; [$1, $2]} (split /\s+/, $data);
@@ -27,6 +27,12 @@ for (glob('tmpimgs/*.xcf-*.png')) {
 		0+@data or die "$xcf: layer $imgset must have its size in its name.\n";
 		$images{$xcf}{$imgset}{_DATA} = [@data];
 		$images{$xcf}{$imgset}{_SIZE} = shift @{$images{$xcf}{$imgset}{_DATA}};
+	}
+}
+our $num_images = 0;
+for my $xcf (keys %images) {
+	for (grep { $_ !~ /^_/ } keys %{$images{$xcf}}) {
+		$num_images += $images{$xcf}{$_}{_NUM};
 	}
 }
 
@@ -90,7 +96,7 @@ for my $xcfk (sort keys %images) {
 				$imgset->{$posek}{$_}{_FILE};
 			} @{$imgset->{$posek}{_SORTED}}
 		} @{$imgset->{_SORTED}};
-		print "@infiles\n";
+		#print "@infiles\n";
 		system 'montage', @infiles,
 			'-tile', "$imgset->{_N_VARS}x",
 			'-geometry', '100%+0+0',

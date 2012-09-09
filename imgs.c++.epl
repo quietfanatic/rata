@@ -1,22 +1,22 @@
 
 <% require 'tool/combine.pl'; %>
 <% sub cppid { (my $r = $_[0]) =~ s/[^a-zA-Z0-9_]/_/g; $r } %>
-<% our %images; %>
-Imgset imgsets [] = {
+<% our (%images, $num_images); %>
+VArray<Imgset> imgsets (<%=$num_images%>, (Imgset[]){
 <% for my $xcf (map {$images{$_}} sort keys %images) {
    for my $imgset (map {$xcf->{$_}} @{$xcf->{_SORTED}}) {
-%>	Imgset("<%=$imgset->{_FILE}%>", <%=$imgset->{_SIZE}%>, <%=$imgset->{_N_VARS}%>, VArray<VArray<Vec>>(<%=$imgset->{_N_POSES}%>, (VArray<Vec>[]){
+%>	Imgset("<%=$imgset->{_FILE}%>", Vec(<%=$imgset->{_SIZE}[0]%>, <%=$imgset->{_SIZE}[1]%>), <%=$imgset->{_N_VARS}%>, VArray<VArray<Vec>>(<%=$imgset->{_N_POSES}%>, (VArray<Vec>[]){
 	<% for my $pose (map {$imgset->{$_}} @{$imgset->{_SORTED}}) {
 	%>	VArray<Vec>(<%=0+@{$pose->{_DATA}}%>, (Vec[]){<%= join ', ', map {"PX*Vec($_->[0], $_->[1])"} @{$pose->{_DATA}} %>}),
-	<% } %>},
-<% } } %>};
+	<% } %>})),
+<% } } %>});
 
 namespace img {<% my $counter = 0 %>
 <% for my $xcfk (sort keys %images) {
 %>	namespace <%=cppid($xcfk)%> {
 	<% for my $imgsetk (@{$images{$xcfk}{_SORTED}}) {
-	%>	Imgset* <%=cppid($imgsetk)%> = imgsets+<%=$counter++%>;
-		namespace <%=cppid($imgsetk)%> { enum { <%= join ', ', map {cppid $_} @{$images{$xcfk}{$imgsetk}{_VARS}} %> } }
+	%>	Imgset* <%=cppid($imgsetk)%> = imgsets.p+<%=$counter++%>;
+		namespace <%=cppid($imgsetk)%>p { enum { <%= join ', ', map {cppid $_} @{$images{$xcfk}{$imgsetk}{_VARS}} %> }; }
 	<% } %>}
 <% } %>}
 
