@@ -18,6 +18,7 @@
 #include "draw.cpp"
 #undef HEADER
 
+int frame_number = -1;
 int window_scale = 1;
 
 #include "Actor.cpp"
