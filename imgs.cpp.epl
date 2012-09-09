@@ -16,7 +16,8 @@ namespace img {<% my $counter = 0 %>
 %>	namespace <%=cppid($xcfk)%> {
 	<% for my $imgsetk (@{$images{$xcfk}{_SORTED}}) {
 	%>	Imgset* <%=cppid($imgsetk)%> = imgsets.p+<%=$counter++%>;
-		namespace <%=cppid($imgsetk)%>p { enum { <%= join ', ', map {cppid $_} @{$images{$xcfk}{$imgsetk}{_VARS}} %> }; }
+		namespace <%=cppid($imgsetk)%>p { enum { <%= join ', ', map {cppid $_} @{$images{$xcfk}{$imgsetk}{_SORTED}} %> }; }
+		namespace <%=cppid($imgsetk)%>v { enum { <%= join ', ', map {cppid $_} @{$images{$xcfk}{$imgsetk}{_VARS}} %> }; }
 	<% } %>}
 <% } %>}
 
