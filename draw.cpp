@@ -21,7 +21,7 @@ struct Imgset {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
-	void draw (Vec pos, int pose = 0, int variant = 0);
+	void draw (Vec pos, int pose = 0, int variant = 0, bool fliph = 0, bool flipv = 0);
 };
 
 namespace draw {
@@ -164,18 +164,21 @@ void finish () {
 
 }
 
-void Imgset::draw (Vec pos, int pose, int variant) {
+void Imgset::draw (Vec pos, int pose, int variant, bool fliph, bool flipv) {
 	draw::mode(draw::program_tex);
 	glBindTexture(GL_TEXTURE_2D, tex);
+	Vec ctr = pts[pose][0];
 	Rect r {
-		pos - pts[pose][0],
-		pos - pts[pose][0] + size
+		fliph ? pos.x + ctr.x - size.x : pos.x - ctr.x,
+		flipv ? pos.y + ctr.y - size.y : pos.y - ctr.y,
+		fliph ? pos.x + ctr.x : pos.x - ctr.x + size.x,
+		flipv ? pos.y + ctr.y : pos.x - ctr.x + size.y,
 	};
 	glBegin(GL_QUADS);
-		glTexCoord4f(variant  , pose+1, n_variants, pts.n); glVertex2f(r.l, r.b);
-		glTexCoord4f(variant+1, pose+1, n_variants, pts.n); glVertex2f(r.r, r.b);
-		glTexCoord4f(variant+1, pose  , n_variants, pts.n); glVertex2f(r.r, r.t);
-		glTexCoord4f(variant  , pose  , n_variants, pts.n); glVertex2f(r.l, r.t);
+		glTexCoord4f(variant+ fliph, pose+!flipv, n_variants, pts.n); glVertex2f(r.l, r.b);
+		glTexCoord4f(variant+!fliph, pose+!flipv, n_variants, pts.n); glVertex2f(r.r, r.b);
+		glTexCoord4f(variant+!fliph, pose+ flipv, n_variants, pts.n); glVertex2f(r.r, r.t);
+		glTexCoord4f(variant+ fliph, pose+ flipv, n_variants, pts.n); glVertex2f(r.l, r.t);
 	glEnd();
 }
 

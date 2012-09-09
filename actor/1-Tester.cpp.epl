@@ -18,7 +18,7 @@ struct Tester : Actor {
 #else
 
 void Tester::draw () {
-	img::rata_4::head->draw(Vec(1, 1), 0, 0);
+	img::rata_4::head->draw(Vec(1, 1), 0, 0, 1, 0);
 }
 
 #endif
