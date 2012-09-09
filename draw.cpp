@@ -35,7 +35,7 @@ void start ();
 //void mode_hud ();
 void finish ();
 
-#include "imgs.c++"
+#include "imgs.cpp"
 
 #else
 

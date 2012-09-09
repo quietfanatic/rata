@@ -19,16 +19,8 @@ my @libs = qw(-lGL -lglfw -lSOIL);
 
 my @allcpp = (glob('actor/*.cpp'), glob('*.cpp'));
 my @allactorcpps = map { /^(actor\/.*\.c\+\+)\.epl$/; $1 } glob('actor/*.cpp.epl');
-my @allxcfnames = map { /^xcf\/(.*)\.xcf/; $1 } glob('xcf/*.xcf');
-
-sub actor_info {
-	our $EPL_IN_FILENAME =~ /^actor\/(\d+)-(\w+)\.c\+\+\.epl$/ or die "$EPL_IN_FILENAME: actor_info called in a non-actor file\n";
-	my ($num, $name) = ($1, $2);
-	<<END
-	uint id () { return $1; }
-	CStr name () { return "$2"; }
-END
-}
+my @allautocpps = grep { -e "$_.epl" } glob('actor/*.cpp'), glob('*.cpp');
+my @allxcfs = glob 'xcf/*.xcf';
 
 
 our $force = 0;
@@ -52,17 +44,16 @@ sub make {
 			make glob '*.epl';
 		}
 		when ('xcfs') {
-			depend ['tmpimg', glob 'tmpimg/*.png'], [glob 'xcf/*.xcf'], sub { make glob 'xcf/*.xcf' };
+			depend ['tmpimg', glob 'tmpimg/*.png'], [@allxcfs], sub { make @allxcfs };
 		}
 		when ('clean') {
-			my @gencpps = grep { -e "$_.epl" } glob('actor/*.cpp'), glob('*.cpp');
-			undependcmd \@gencpps, 'unlink', @gencpps;
+			undependcmd \@allautocpps, 'unlink', @allautocpps;
 			undependcmd 'tmpimg', 'remove', 'tmpimg';
 			undependcmd 'img', 'remove', 'img';
 			undependcmd 'rata', 'remove', 'rata';
 		}
 		when ('imgs.cpp.epl') {
-			depend 'imgs.cpp', ['tool/combine.pl', 'imgs.cpp.epl', glob('xcf/*.xcf')], sub {
+			depend 'imgs.cpp', ['tool/combine.pl', 'imgs.cpp.epl', @allxcfs], sub {
 				make 'xcfs';
 				makecmd 'mkdir', 'img';
 				makecmd 'eplf', 'imgs.cpp', 'imgs.cpp.epl'

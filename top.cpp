@@ -11,18 +11,18 @@
 
 
 #define HEADER
-#include "debug.c++"
-#include "utility.c++"
-#include "serialize.c++"
-#include "Actor.c++"
-#include "draw.c++"
+#include "debug.cpp"
+#include "utility.cpp"
+#include "serialize.cpp"
+#include "Actor.cpp"
+#include "draw.cpp"
 #undef HEADER
 
 int frame_number = -1;
 int window_scale = 1;
 
-#include "Actor.c++"
-#include "draw.c++"
+#include "Actor.cpp"
+#include "draw.cpp"
 
 
 

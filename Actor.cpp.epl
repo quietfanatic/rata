@@ -10,7 +10,7 @@ struct Actor {
 	virtual void serialize (Serializer* s) = 0;
 };
 
-<% my @actorfiles = sort glob "actor/*.c++"; %>
+<% my @actorfiles = sort glob "actor/*.cpp"; %>
 
 <% for (@actorfiles) { %>
 #include "<%= $_ %>"<% } %>
@@ -18,7 +18,7 @@ struct Actor {
 typedef Actor* (* actor_maker ) ();
 actor_maker make_actor [<%= 0+@actorfiles %>] = {
 <% for (@actorfiles) {
-	$_ =~ /^actor\/(\d+)-(\w+)\.c\+\+/ or die "Error: Malformed actor file name: $_\n";
+	$_ =~ /^actor\/(\d+)-(\w+)\.cpp/ or die "Error: Malformed actor file name: $_\n";
 	%>	[](){ return (Actor*)new <%= $2 %>; },
 <% } %>};
 

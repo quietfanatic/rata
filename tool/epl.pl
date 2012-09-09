@@ -6,6 +6,16 @@ use warnings;
 our $EPL_IN_FILENAME = "(unknown file)";
 our $EPL_OUT_FILENAME = "(unknown file)";
 
+sub actor_info {
+	our $EPL_IN_FILENAME =~ /^actor\/(\d+)-(\w+)\.cpp.epl$/ or die "$EPL_IN_FILENAME: actor_info called in a non-actor file\n";
+	my ($num, $name) = ($1, $2);
+	<<END
+	uint id () { return $1; }
+	CStr name () { return "$2"; }
+END
+}
+
+
 sub epl {
 	my ($IN, $debug) = @_;
 	my $code;
