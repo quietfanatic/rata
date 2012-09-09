@@ -18,7 +18,7 @@ namespace imgset_data {
 Imgset imgsets_array [<%=$num_images%>] = {
 <% for my $xcfk (sort keys %images) { my $xcf = $images{$xcfk};
    for my $imgsetk (@{$xcf->{_SORTED}}) { my $imgset = $xcf->{$imgsetk};
-%>	Imgset("<%=$imgset->{_FILE}%>", Vec(<%=$imgset->{_SIZE}[0]%>, <%=$imgset->{_SIZE}[1]%>), <%=$imgset->{_N_VARS}%>, VArray<VArray<Vec> >(<%=$imgset->{_N_POSES}%>, imgset_data::<%=cppid("${xcfk}_${imgsetk}")%>)),
+%>	Imgset("<%=$imgset->{_FILE}%>", PX*Vec(<%=$imgset->{_SIZE}[0]%>, <%=$imgset->{_SIZE}[1]%>), <%=$imgset->{_N_VARS}%>, VArray<VArray<Vec> >(<%=$imgset->{_N_POSES}%>, imgset_data::<%=cppid("${xcfk}_${imgsetk}")%>)),
 <% } } %>};
 VArray<Imgset> imgsets (<%=$num_images%>, imgsets_array);
 

@@ -154,7 +154,7 @@ void start () {
 	glLoadIdentity();
 	glTranslatef(-1, -1, 0);
 	glScalef(1/10.0/window_scale, 1/7.5/window_scale, 1);
-	glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
+	glTranslatef(0.45*PX/window_scale, 0.45*PX/window_scale, 0);
 }
 
 
@@ -165,12 +165,12 @@ void finish () {
 }
 
 void Imgset::draw (Vec pos, int pose, int variant) {
+	draw::mode(draw::program_tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
 	Rect r {
 		pos - pts[pose][0],
 		pos - pts[pose][0] + size
 	};
-	draw::mode(draw::program_tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
 	glBegin(GL_QUADS);
 		glTexCoord4f(variant  , pose+1, n_variants, pts.n); glVertex2f(r.l, r.b);
 		glTexCoord4f(variant+1, pose+1, n_variants, pts.n); glVertex2f(r.r, r.b);
