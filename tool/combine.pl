@@ -31,9 +31,7 @@ for (glob('tmpimg/*.xcf-*.png')) {
 }
 our $num_images = 0;
 for my $xcf (keys %images) {
-	for (grep { $_ !~ /^_/ } keys %{$images{$xcf}}) {
-		$num_images += $images{$xcf}{$_}{_NUM};
-	}
+	$num_images += 0+(grep { $_ !~ /^_/ } keys %{$images{$xcf}});
 }
 
 use Data::Dumper;

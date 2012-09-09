@@ -305,7 +305,6 @@ Line operator & (const Line& l, const Circle& c) {
 	return r;
 }
 
-
  // VARIABLE ARRAYS
 template <class T>
 struct VArray {
@@ -335,6 +334,7 @@ struct VArray {
 		p = new (p) T [n];
 	}
 };
+
 
 template <class T>
 struct UPt {

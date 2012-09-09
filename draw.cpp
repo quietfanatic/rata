@@ -136,7 +136,7 @@ void init () {
 	program_tex = make_program(vs_tex, fs_tex);
 	program_color = make_program(vs_color, fs_color);
 	uniform_tex = glGetUniformLocation(program_tex, "tex");
-	if (check_error) exit(1);
+	if (check_error("after compiling program")) exit(1);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_GREATER);
 }
