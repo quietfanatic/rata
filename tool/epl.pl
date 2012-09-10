@@ -18,8 +18,8 @@ sub epl {
 	my $code;
 
 	while (length $IN and $IN =~ s/^(.*?)<%//s) {
-		(my $text = $1) =~ s/('|\\)/\\$1/sg;
-		$code .= "\$OUT.='$text';";
+		(my $text = $1) =~ s/("|\\(?!\$))/\\$1/sg;
+		$code .= "\$OUT.=\"$text\";";
 		if (length $IN and $IN =~ s/^(.*?)%>//s) {
 			my $perl = $1;
 			if ($perl =~ s/^=//s) {
@@ -30,8 +30,8 @@ sub epl {
 			}
 		}
 	};
-	$IN =~ s/('|\\)/\\$1/sg;
-	$code .= "\$OUT.='$IN';";
+	$IN =~ s/("|\\(?!\$))/\\$1/sg;
+	$code .= "\$OUT.=\"$IN\";";
 	
 	my $OUT = '';
 	if ($debug) { print STDERR $code; }
