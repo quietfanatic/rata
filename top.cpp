@@ -1,5 +1,7 @@
 
 #include <stdio.h>
+#include <math.h>
+#include <string.h>
 
 #include <SOIL/SOIL.h>
 #define GL_GLEXT_PROTOTYPES
@@ -7,7 +9,6 @@
 #include <GL/glext.h>
 #include <GL/glfw.h>
 #include <SFML/Audio.hpp>
-#include <Box2D/Box2D.h>
 
 
 #define HEADER

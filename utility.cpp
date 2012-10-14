@@ -78,8 +78,6 @@ struct Vec {
 	float y;
 	CE Vec () :x(0/0.0), y(0/0.0) { }
 	CE Vec (float x, float y) :x(x), y(y) { }
-	Vec (b2Vec2 v) :x(v.x), y(v.y) { }
-	operator const b2Vec2 () const { return b2Vec2(x, y); }
 
 	CE Vec scale (Vec s) const { return Vec(x*s.x, y*s.y); }
 	CE Vec scalex (float s) const { return Vec(s*x, y); }
