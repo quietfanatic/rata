@@ -12,7 +12,7 @@ res
 img
 snd
 bgm
-xcf
+#xcf
 
 # intermediates
 Actor.cpp
