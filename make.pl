@@ -17,11 +17,13 @@ my @prof_flags = qw(-O1 -pg);
 my @release_flags = qw(-O3);
 my @libs = qw(-lGL -lglfw -lSOIL);
 
-my @allcpp = (glob('actor/*.cpp'), glob('*.cpp'));
-my @allactorcpps = map { /^(actor\/.*\.c\+\+)\.epl$/; $1 } glob('actor/*.cpp.epl');
-my @allautocpps = grep { -e "$_.epl" } glob('actor/*.cpp'), glob('*.cpp');
-my @allxcfs = glob 'xcf/*.xcf';
-
+my @allepls = glob 'src/*/*.epl src/*.epl';
+my @allcpps = glob 'src/*/*.cpp src/*.cpp';
+my $maincpp = 'src/rata.cpp';
+my @allactorcpps = map { /^(src\/actor\/.*\.c\+\+)\.epl$/; $1 } glob 'src/actor/*.cpp.epl';
+my @allautocpps = grep { -e "$_.epl" } glob 'src/*/*.cpp src/*.cpp';
+my @allxcfs = glob 'src/xcf/*.xcf';
+my $mainprogram = 'built/rata';
 
 our $force = 0;
 our $v = 0;
@@ -36,38 +38,37 @@ sub make {
 		}
 		when ('all') {
 			make 'epls';
-			dependsys 'rata', \@allcpp,
-				$cpp, @cpp_flags, @test_flags, 'rata.cpp', @libs, '-o', 'rata';
+			dependsys $mainprogram, \@allcpps,
+				$cpp, @cpp_flags, @test_flags, $maincpp, @libs, '-o', $mainprogram;
 		}
 		when('epls') {
-			make glob 'actor/*.epl';
-			make glob '*.epl';
+			make @allepls;
 		}
 		when ('xcfs') {
-			depend ['tmpimg', glob 'tmpimg/*.png'], [@allxcfs], sub { make @allxcfs };
+			depend [glob 'tmp/img tmp/img/*.png'], [@allxcfs], sub { make @allxcfs };
 		}
 		when ('clean') {
 			undependcmd \@allautocpps, 'unlink', @allautocpps;
-			undependcmd 'tmpimg', 'remove', 'tmpimg';
-			undependcmd 'img', 'remove', 'img';
-			undependcmd 'rata', 'remove', 'rata';
+			undependcmd 'tmp/img', 'remove', 'tmp/img';
+			undependcmd 'built/img', 'remove', 'built/img';
+			undependcmd $mainprogram, 'remove', $mainprogram;
 		}
-		when ('imgs.cpp.epl') {
-			depend 'imgs.cpp', ['tool/combine.pl', 'imgs.cpp.epl', @allxcfs], sub {
+		when ('src/imgs.cpp.epl') {
+			depend 'src/imgs.cpp', ['tool/combine.pl', 'src/imgs.cpp.epl', @allxcfs], sub {
 				make 'xcfs';
-				makecmd 'mkdir', 'img';
-				makecmd 'eplf', 'imgs.cpp', 'imgs.cpp.epl'
+				makecmd 'mkdir', 'built/img';
+				makecmd 'eplf', 'src/imgs.cpp', 'src/imgs.cpp.epl'
 			};
 		}
 		when (/^(.*)\.epl$/) {
 			my ($to, $from) = ($1, $_);
-			my $deps = $1 eq 'Actor.c++' ? [$from, @allactorcpps, 'tool/epl.pl'] : [$from, 'tool/epl.pl'];
+			my $deps = $1 eq 'src/Actor.c++' ? [$from, @allactorcpps, 'tool/epl.pl'] : [$from, 'tool/epl.pl'];
 			dependcmd $to, $deps, 'eplf', $to, $from;
 		}
 		when (/^(.*)\.xcf$/) {
-			dependcmd 'tmpimg', [], 'mkdir', 'tmpimg';
+			dependcmd 'tmp/img', [], 'mkdir', 'tmp/img';
 			makesys qw(gimp-2.8 --no-data --no-fonts --no-interface -b),
-				"(load \"tool/lw-export-layers.scm\") (lw-export-layers-cmd \"$_\" \"tmpimg\") (gimp-quit 0)";
+				"(load \"tool/lw-export-layers.scm\") (lw-export-layers-cmd \"$_\" \"tmp/img\") (gimp-quit 0)";
 		}
 		default {
 			die "$0: No rule for target: $_\n";

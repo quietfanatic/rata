@@ -11,6 +11,7 @@ struct Actor {
 	virtual ~Actor () { }
 };
 
+<% print cwd, "\n"; %>
 <% my @actorfiles = sort glob "actor/*.cpp"; %>
 
 <% for (@actorfiles) {

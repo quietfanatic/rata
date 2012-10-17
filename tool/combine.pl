@@ -7,8 +7,8 @@ use Carp;
 our %images;  # our for access in epl
 
 
-for (glob('tmpimg/*.xcf-*.png')) {
-	/^tmpimg\/([^.]+)\.xcf-(\d+)-([a-zA-Z0-9_\-]+)(?:@([a-zA-Z0-9_\-]+)(?:#([a-zA-Z0-9_\-]+))?)?((?:\s+-?\d+(?:\.\d+)?_-?\d+(?:\.\d+)?)*)\.png$/s
+for (glob 'tmp/img/*.xcf-*.png') {
+	/^tmp\/img\/([^.]+)\.xcf-(\d+)-([a-zA-Z0-9_\-]+)(?:@([a-zA-Z0-9_\-]+)(?:#([a-zA-Z0-9_\-]+))?)?((?:\s+-?\d+(?:\.\d+)?_-?\d+(?:\.\d+)?)*)\.png$/s
 		or die "Unparsable filename: $_\n";
 	my ($xcf, $num, $imgset, $pose, $variant, $data) = ($1, $2, $3, $4, $5, $6);
 	my @data = map {/^(.*)_(.*)$/; [$1, $2]} (split /\s+/, $data);
@@ -72,7 +72,7 @@ for my $xcfk (keys %images) {
 			}
 			$pose->{_DATA} = [@{$imgset->{_DATA}}, @{$pose->{_DATA}}];
 		}
-		$imgset->{_FILE} = "img/$xcfk/$imgsetk.png";
+		$imgset->{_FILE} = "built/img/$xcfk/$imgsetk.png";
 		$imgset->{_N_POSES} = 0+@poses;
 		$imgset->{_N_VARS} = 0+@fvs;
 		$imgset->{_VARS} = [@fvs];
@@ -84,7 +84,7 @@ for my $xcfk (sort keys %images) {
 	my $xcf = $images{$xcfk};
 	for my $imgsetk (@{$xcf->{_SORTED}}) {
 		my $imgset = $xcf->{$imgsetk};
-		mkdir "img/$xcfk";
+		mkdir "built/img/$xcfk";
 		print "building $imgset->{_FILE}\n";
 		my @infiles = map {
 			my $posek = $_;

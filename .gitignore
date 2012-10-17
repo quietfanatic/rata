@@ -4,21 +4,18 @@ test-opt
 test-dbg
 test-prof
 mapeditor
-rata
+built/img
+built/rata
 
 # resource dirs
-lib
+built/lib
 res
-img
-snd
-bgm
-#xcf
+built/img
+built/snd
+built/bgm
 
 # intermediates
-Actor.cpp
-imgs.cpp
-tmpimg
-actor/*.cpp
+tmp
 
 # testing
 filetester.cpp

@@ -1,5 +1,5 @@
 
-<% require 'tool/combine.pl'; %>
+<% pushd '..'; require 'tool/combine.pl'; popd; %>
 <% sub cppid { (my $r = $_[0]) =~ s/[^a-zA-Z0-9_]/_/g; $r } %>
 <% our (%images, $num_images); %>
 
