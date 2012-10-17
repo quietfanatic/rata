@@ -34,7 +34,7 @@ void mode ();
 void finish ();
 }
 
-#include "imgs.cpp"
+#include "../tmp/imgs.cpp"
 
 #else
 

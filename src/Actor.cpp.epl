@@ -12,7 +12,7 @@ struct Actor {
 };
 
 <% print cwd, "\n"; %>
-<% my @actorfiles = sort glob "actor/*.cpp"; %>
+<% my @actorfiles = sort glob "../tmp/actor/*.cpp"; %>
 
 <% for (@actorfiles) {
 %>#include "$_"
@@ -21,7 +21,7 @@ struct Actor {
 typedef Actor* (* actor_maker ) ();
 actor_maker make_actor [<%= 0+@actorfiles %>] = {
 <% for (@actorfiles) {
-	$_ =~ /^actor\/(\d+)-(\w+)\.cpp/ or die "Error: Malformed actor file name: $_\n";
+	$_ =~ /^\.\.\/tmp\/actor\/(\d+)-(\w+)\.cpp/ or die "Error: Malformed actor file name: $_\n";
 	%>	[](){ return (Actor*)new $2; },
 <% } %>};
 

@@ -17,11 +17,19 @@ my @prof_flags = qw(-O1 -pg);
 my @release_flags = qw(-O3);
 my @libs = qw(-lGL -lglfw -lSOIL);
 
+sub epl_to_cpp {
+    $_[0] =~ /^src\/(.*)\.epl/;
+    return "tmp/$1";
+}
+sub cpp_to_epl {
+    $_[0] =~ /^tmp\/(.*)\.cpp/;
+    return "src/$1.cpp.epl";
+}
+
 my @allepls = glob 'src/*/*.epl src/*.epl';
 my @allcpps = glob 'src/*/*.cpp src/*.cpp';
 my $maincpp = 'src/rata.cpp';
-my @allactorcpps = map { /^(src\/actor\/.*\.c\+\+)\.epl$/; $1 } glob 'src/actor/*.cpp.epl';
-my @allautocpps = grep { -e "$_.epl" } glob 'src/*/*.cpp src/*.cpp';
+my @allactorcpps = map epl_to_cpp($_), glob 'src/actor/*.cpp.epl';
 my @allxcfs = glob 'src/xcf/*.xcf';
 my $mainprogram = 'built/rata';
 
@@ -38,35 +46,44 @@ sub make {
 		}
 		when ('all') {
 			make 'epls';
+	        makecmd 'mkdir', 'built';
 			dependsys $mainprogram, \@allcpps,
 				$cpp, @cpp_flags, @test_flags, $maincpp, @libs, '-o', $mainprogram;
 		}
 		when('epls') {
+            makecmd 'mkdir', 'tmp';
+            makecmd 'mkdir', 'tmp/actor';
 			make @allepls;
 		}
 		when ('xcfs') {
 			depend [glob 'tmp/img tmp/img/*.png'], [@allxcfs], sub { make @allxcfs };
 		}
 		when ('clean') {
-			undependcmd \@allautocpps, 'unlink', @allautocpps;
-			undependcmd 'tmp/img', 'remove', 'tmp/img';
+			undependcmd 'tmp', 'remove', 'tmp';
 			undependcmd 'built/img', 'remove', 'built/img';
 			undependcmd $mainprogram, 'remove', $mainprogram;
 		}
 		when ('src/imgs.cpp.epl') {
-			depend 'src/imgs.cpp', ['tool/combine.pl', 'src/imgs.cpp.epl', @allxcfs], sub {
+			my ($to, $from) = (epl_to_cpp($_), $_);
+			depend $to, [$from, 'tool/combine.pl', @allxcfs], sub {
 				make 'xcfs';
+				makecmd 'mkdir', 'built';
 				makecmd 'mkdir', 'built/img';
-				makecmd 'eplf', 'src/imgs.cpp', 'src/imgs.cpp.epl'
+				makecmd 'eplf', $to, $from;
 			};
 		}
-		when (/^(.*)\.epl$/) {
-			my ($to, $from) = ($1, $_);
-			my $deps = $1 eq 'src/Actor.c++' ? [$from, @allactorcpps, 'tool/epl.pl'] : [$from, 'tool/epl.pl'];
-			dependcmd $to, $deps, 'eplf', $to, $from;
+        when ('src/Actor.cpp.epl') {
+			my ($to, $from) = (epl_to_cpp($_), $_);
+            dependcmd $to, [$from, @allactorcpps, 'tool/epl.pl'],
+                'eplf', $to, $from;
+        }
+		when (/\.epl$/) {
+			my ($to, $from) = (epl_to_cpp($_), $_);
+			dependcmd $to, [$from, 'tool/epl.pl'], 'eplf', $to, $from;
 		}
-		when (/^(.*)\.xcf$/) {
-			dependcmd 'tmp/img', [], 'mkdir', 'tmp/img';
+		when (/\.xcf$/) {
+            makecmd 'mkdir', 'tmp';
+			makecmd 'mkdir', 'tmp/img';
 			makesys qw(gimp-2.8 --no-data --no-fonts --no-interface -b),
 				"(load \"tool/lw-export-layers.scm\") (lw-export-layers-cmd \"$_\" \"tmp/img\") (gimp-quit 0)";
 		}
