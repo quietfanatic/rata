@@ -72,7 +72,7 @@ for my $xcfk (keys %images) {
 			}
 			$pose->{_DATA} = [@{$imgset->{_DATA}}, @{$pose->{_DATA}}];
 		}
-		$imgset->{_FILE} = "built/img/$xcfk/$imgsetk.png";
+		$imgset->{_FILE} = "img/$xcfk/$imgsetk.png";
 		$imgset->{_N_POSES} = 0+@poses;
 		$imgset->{_N_VARS} = 0+@fvs;
 		$imgset->{_VARS} = [@fvs];
@@ -97,7 +97,7 @@ for my $xcfk (sort keys %images) {
 			'-tile', "$imgset->{_N_VARS}x",
 			'-geometry', '100%+0+0',
 			'-background', 'none',
-			"png32:$imgset->{_FILE}";
+			"png32:built/$imgset->{_FILE}";
 	}
 }
 
