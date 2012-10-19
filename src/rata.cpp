@@ -10,11 +10,12 @@ int main (int argc, char** argv) {
         if (*p == '/') lastslash = p;
     }
     if (lastslash) {
-        *lastslash = 0;  // lol, modifying argv[0], probably bad
+        *lastslash = 0;  // haha, modifying argv[0], probably bad
         if (chdir(argv[0]) == -1) {
             printf("chdir() failed with %d (%s)\n", errno, strerror(errno));
         }
     }  // else you'd better know what you're doing cause I don't
+
 	dbg("Starting\n");
 	glfwInit();
 	draw::init();
@@ -23,5 +24,4 @@ int main (int argc, char** argv) {
 	main_loop();
 	return 0;
 }
-
 

@@ -4,12 +4,14 @@
 struct Actor {
 	virtual uint32 id () = 0;
 	virtual CStr name () = 0;
-	virtual void act () = 0;
-	virtual void react () = 0;
+	virtual void act () = 0;  // Do this before each physics step
+	virtual void react () = 0;  // Do this after each physics step
 	virtual void draw () = 0;
-	virtual void serialize (Serializer* s) = 0;
-	virtual ~Actor () { }
+	virtual void serialize (Serializer* s) = 0;  // input or output
+    virtual ~Actor () { }
+    Actor () { }
 };
+
 
 <% print cwd, "\n"; %>
 <% my @actorfiles = sort glob "../tmp/actor/*.cpp"; %>
