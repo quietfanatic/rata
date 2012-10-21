@@ -336,12 +336,12 @@ struct VArray {
 
  // Intrusive linked lists by class
 template <class C>
-struct CLL {
+struct Linked {
     C* next;
     C* prev;
     static C* first;
     static C* last;
-    CLL () { 
+    void activate () { 
        prev = last;
        next = NULL;
        prev->next = (C*)this;
@@ -349,15 +349,18 @@ struct CLL {
        last = (C*)this;
        if (!first) first = (C*)this;
     }
-    ~CLL () {
+    void deactivate () {
         if (next) next->prev = prev;
         else last = prev;
         if (prev) prev->next = next;
         else first = next;
     }
+    Linked () { activate(); }
+    ~Linked () { deactivate(); }
+    Linked (bool active) { if (active) activate(); }
 };
-template <class C> C* CLL<C>::first = NULL;
-template <class C> C* CLL<C>::last = NULL;
+template <class C> C* Linked<C>::first = NULL;
+template <class C> C* Linked<C>::last = NULL;
 
 
 #endif

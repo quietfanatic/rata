@@ -42,7 +42,7 @@ struct Serializer {
 };
 
  // All serializable objects go in a linked list
-struct Serializable_Base : CLL<Serializable_Base> {
+struct Serializable_Base : Linked<Serializable_Base> {
 	virtual CStr name () = 0;
 	virtual void serialize (Serializer* s, uint version) = 0;  // input or output
 };
@@ -53,7 +53,7 @@ struct Serializable_Base : CLL<Serializable_Base> {
 uint64 x31_hash (const char*);
 
  // Maps hashes to classes
-struct Type_Decider : CLL<Type_Decider> {
+struct Type_Decider : Linked<Type_Decider> {
     uint64 name_hash;
     typedef Serializable_Base* (* creator )();
     creator create;
@@ -98,7 +98,7 @@ Serializer<name, T>::decider = Type_Decider(x31_hash(name), [](){ return new T; 
 void serialize_game (Serializer* s) {
     if (s->writing()) {
         s->ser(SERIALIZATION_VERSION);
-        for (auto p = CLL<Serializer_Base>::first; p; p = p->next) {
+        for (auto p = Linked<Serializer_Base>::first; p; p = p->next) {
             uint64 name_hash = x31_hash(p->name());
             s->ser(name_hash);
             p->serialize(s);
@@ -114,7 +114,7 @@ void serialize_game (Serializer* s) {
         uint64 name_hash;
         s->ser(name_hash);
         while (name_hash) {
-            for (auto d = CLL<Type_Decider>::first; d; d = d->next)
+            for (auto d = Linked<Type_Decider>::first; d; d = d->next)
             if (name_hash == d->name_hash) {
                 d->create()->serialize(s, file_version);
                 s->ser(name_hash);
