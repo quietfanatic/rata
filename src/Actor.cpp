@@ -13,19 +13,6 @@ struct Actor {
 };
 
 
-<% print cwd, "\n"; %>
-<% my @actorfiles = sort glob "../tmp/actor/*.cpp"; %>
-
-<% for (@actorfiles) {
-%>#include "$_"
-<% } %>
-
-typedef Actor* (* actor_maker ) ();
-actor_maker make_actor [<%= 0+@actorfiles %>] = {
-<% for (@actorfiles) {
-	$_ =~ /^\.\.\/tmp\/actor\/(\d+)-(\w+)\.cpp/ or die "Error: Malformed actor file name: $_\n";
-	%>	[](){ return (Actor*)new $2; },
-<% } %>};
 
 #else
 
@@ -40,10 +27,6 @@ void serialize_actorp (Serializer* s, Actor*& a) {
 		a = make_actor[id]();
 	}
 }
-
-<% for (@actorfiles) {
-%>#include "<%= $_ %>"
-<% } %>
 
 #endif
 

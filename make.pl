@@ -15,7 +15,7 @@ my @cpp_flags = qw(-std=c++11 -fmax-errors=10);
 my @test_flags = qw(-Wall -O1 -ggdb);
 my @prof_flags = qw(-O1 -pg);
 my @release_flags = qw(-O3);
-my @libs = qw(-lGL -lglfw -lSOIL);
+my @libs = qw(-lGL -lglfw -lSOIL built/lib/libBox2D.a);
 
 sub epl_to_cpp {
     $_[0] =~ /^src\/(.*)\.epl/;
@@ -72,7 +72,7 @@ sub make {
 				makecmd 'eplf', $to, $from;
 			};
 		}
-        when ('src/Actor.cpp.epl') {
+        when ('src/actorlist.cpp.epl') {
 			my ($to, $from) = (epl_to_cpp($_), $_);
             dependcmd $to, [$from, @allactorcpps, 'tool/epl.pl'],
                 'eplf', $to, $from;

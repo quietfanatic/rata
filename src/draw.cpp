@@ -34,8 +34,6 @@ void mode ();
 void finish ();
 }
 
-#include "../tmp/imgs.cpp"
-
 #else
 
 namespace draw {
