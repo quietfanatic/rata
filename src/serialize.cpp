@@ -1,7 +1,25 @@
 
+ // This file is about serialization and deserialization.  The format is simplistic
+ // and not very failproof.  Each class decides how it's serialized.  The file
+ // consists of a version number followed by a list of elements, each of which is a
+ // hash of the class's name followed by the class-specific data.  A name-hash of 0
+ // terminates the list and the file.  It's the responsibility of the class to detect
+ // older file versions and deserialize accordingly.
+ // Yes, if a single byte is missing or extra, it'll corrupt the entire file.
+
 #ifdef HEADER
 
+ // Bump this any time you change the serialization code of any class.
+const uint32 SERIALIZATION_VERSION = 1;
+ // For backwards compatibility, use:
+ // if (s->version < <new_version>) { ...old code...; return; }
+ // You can remove old serializations once you know there are no old-version
+ // files in existance.
+
+
+ // Interface for all methods of (de)serialization.
 struct Serializer {
+    uint version;
 	virtual bool writing () = 0;
 	virtual void ser (int8&) = 0;
 	void ser (uint8& x) { ser((int8&)x); }
@@ -20,15 +38,141 @@ struct Serializer {
 		ser(x2);
 		x = x2;
 	}
-	int depth = 0;
 	virtual void nl () { };
 };
 
+ // All serializable objects go in a linked list
+struct Serializable_Base : CLL<Serializable_Base> {
+	virtual CStr name () = 0;
+	virtual void serialize (Serializer* s, uint version) = 0;  // input or output
+};
+
+ // When we deserialize, we decide what it is based on a hash of its name
+ // Despite the fact that we're hashing the name, we're not using a hash table.
+ // Just a dumb list of hash values. :)
+uint64 x31_hash (const char*);
+
+ // Maps hashes to classes
+struct Type_Decider : CLL<Type_Decider> {
+    uint64 name_hash;
+    typedef Serializable_Base* (* creator )();
+    creator create;
+    Type_Decider (uint64 nh, creator create) : name_hash(nh), create(create) {
+        for (auto p = next; p; p = p->next) {
+            if (p->name_hash == name_hash) {
+                printf("Gerk!  Two names hashed the same!  %s = %016lx; %s = %016lx\n",
+                    p->create()->name(), p->name_hash, create()->name(), name_hash
+                );
+                exit(1);
+            }
+        }
+    }
+};
+
+ // Parameterize serializability by name and subclass, which is enough
+ // to make a type decider for it.
+template <CStr _name, class T>
+struct Serializable {
+    CStr name () { return _name; }
+    static Type_Decider decider;
+};
+
+void serialize_game (Serializer* s);
+void save_game_to_text (CStr filename);
+void load_game_from_text (CStr filename);
+void save_game_to_binary (CStr filename);
+void load_game_from_binary (CStr filename);
+
+
 #else
 
-struct BinaryWriter : Serializer {
+uint64 x31_hash (CStr s) {
+    uint64* r = 0;
+    for(; *s; s++) r = (r << 5) - r + *s;
+    return r;
+}
+
+template <CStr name, class T>
+Serializer<name, T>::decider = Type_Decider(x31_hash(name), [](){ return new T; });
+
+void serialize_game (Serializer* s) {
+    if (s->writing()) {
+        s->ser(SERIALIZATION_VERSION);
+        for (auto p = CLL<Serializer_Base>::first; p; p = p->next) {
+            uint64 name_hash = x31_hash(p->name());
+            s->ser(name_hash);
+            p->serialize(s);
+            s->nl();
+        }
+        uint32 zero = 0;
+        s->ser(zero);
+        
+    }
+    else {
+        uint32 file_version;
+        s->ser(file_version);
+        uint64 name_hash;
+        s->ser(name_hash);
+        while (name_hash) {
+            for (auto d = CLL<Type_Decider>::first; d; d = d->next)
+            if (name_hash == d->name_hash) {
+                d->create()->serialize(s, file_version);
+                s->ser(name_hash);
+                break;
+            }
+            printf("Error: No class has name_hash %016lx.\n", name_hash);
+            exit(1);
+        }
+    }
+}
+void save_game_to_text (CStr filename) {
+    FILE* f = fopen(filename, "w");
+    if (!f) {
+        printf("Error: Cannot open %s for writing: %s\n", strerror(errno));
+        return;
+    }
+    Text_Writer tw (f);
+    serialize_game(&bw);
+    if (0!=fclose(f))
+        printf("Error: Failed to close %s: %s\n", strerror(errno));
+}
+void load_game_from_text (CStr filename) {
+    FILE* f = fopen(filename, "r");
+    if (!f) {
+        printf("Error: Cannot open %s for reading: %s\n", strerror(errno));
+        return;
+    }
+    Text_Reader tr (f);
+    serialize_game(&tr);
+    if (0!=fclose(f))
+        printf("Error: Failed to close %s: %s\n", strerror(errno));
+}
+void save_game_to_binary (CStr filename) {
+    FILE* f = fopen(filename, "w");
+    if (!f) {
+        printf("Error: Cannot open %s for writing: %s\n", strerror(errno));
+        return;
+    }
+    Binary_Writer bw (f);
+    serialize_game(&bw);
+    if (0!=fclose(f))
+        printf("Error: Failed to close %s: %s\n", strerror(errno));
+}
+void load_game_from_binary (CStr filename) {
+    FILE* if = fopen(filename, "r");
+    if (!f) {
+        printf("Error: Cannot open %s for reading: %s\n", strerror(errno));
+        return;
+    }
+    Binary_Reader br (f);
+    serialize_game(&br);
+    if (0!=fclose(f))
+        printf("Error: Failed to close %s: %s\n", strerror(errno));
+}
+
+struct Binary_Writer : Serializer {
 	FILE* file;
-	BinaryWriter (FILE* file) :file(file) { }
+	Binary_Writer (FILE* file) :file(file) { }
 	virtual bool writing () const { return true; }
 	void put (int8 x) { fputc(x, file); }
 	void ser (int8& x) { put(x); }
@@ -58,9 +202,9 @@ struct BinaryWriter : Serializer {
 	void ser (CStr& x) { fputs(x, file); put(0); }
 };
 
-struct BinaryReader : Serializer {
+struct Binary_Reader : Serializer {
 	FILE* file;
-	BinaryReader (FILE* file) :file(file) { }
+	Binary_Reader (FILE* file) :file(file) { }
 	virtual bool writing () const { return false; }
 	char get () {
 		int c = fgetc(file);
@@ -118,10 +262,10 @@ struct BinaryReader : Serializer {
 
 };
 
-struct TextWriter : Serializer {
+struct Text_Writer : Serializer {
 	FILE* file;
 	bool nled = true;
-	TextWriter (FILE* file) :file(file) { }
+	Text_Writer (FILE* file) :file(file) { }
 	void pad () {
 		if (nled) {
 			nled = false;
@@ -138,15 +282,12 @@ struct TextWriter : Serializer {
 	void ser (float& x) { fprintf(file, "%10e", x); }
 	void ser (Vec& x) { fprintf(file, "%10e,%10e", x.x, x.y); }
 	void ser (CStr& x) { fputs(x, file); fputc(0, file); }
-	void nl () {
-		fputc('\n', file);
-		for (uint i=0; i < n; i++) fputc('\t', file);
-	}
+	void nl () { fputc('\n', file); }
 };
 
-struct TextReader : Serializer {
+struct Text_Reader : Serializer {
 	FILE* file;
-	TextReader (FILE* file) :file(file) { }
+	Text_Reader (FILE* file) :file(file) { }
 	virtual bool writing () const { return false; }
 	void ser (int8& x) { fscanf(file, " %hhd", &x); }
 	void ser (int16& x) { fscanf(file, " %hd", &x); }
@@ -177,7 +318,6 @@ struct TextReader : Serializer {
 		memcpy((void*)x, (void*)buf, index);
 	}
 };
-
 
 
 

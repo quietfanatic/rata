@@ -29,7 +29,6 @@ sub cpp_to_epl {
 my @allepls = glob 'src/*/*.epl src/*.epl';
 my @allcpps = glob 'src/*/*.cpp src/*.cpp';
 my $maincpp = 'src/rata.cpp';
-my @allactorcpps = map epl_to_cpp($_), glob 'src/actor/*.cpp.epl';
 my @allxcfs = glob 'src/xcf/*.xcf';
 my $mainprogram = 'built/rata';
 
@@ -72,11 +71,6 @@ sub make {
 				makecmd 'eplf', $to, $from;
 			};
 		}
-        when ('src/actorlist.cpp.epl') {
-			my ($to, $from) = (epl_to_cpp($_), $_);
-            dependcmd $to, [$from, @allactorcpps, 'tool/epl.pl'],
-                'eplf', $to, $from;
-        }
 		when (/\.epl$/) {
 			my ($to, $from) = (epl_to_cpp($_), $_);
 			dependcmd $to, [$from, 'tool/epl.pl'], 'eplf', $to, $from;

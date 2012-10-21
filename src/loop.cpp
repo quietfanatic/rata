@@ -3,7 +3,6 @@
 
 extern int frame_number;
 extern bool paused;
-extern Actor* prime_mover;
 void main_loop ();
 void toggle_pause ();
 void quit_game ();
@@ -24,7 +23,7 @@ void main_loop () {
 		}
 		else { // Draw all the things
 			draw::start();
-			prime_mover->draw();
+            dbg("Draw phase.\n");
 			draw::finish();
 		}
 		 // FPS cap.
@@ -41,9 +40,9 @@ void main_loop () {
 		}
 		else {
 			glfwPollEvents();
-			prime_mover->act();
-			 // TODO: physics
-			prime_mover->react();
+			dbg("Entity phase\n");
+			dbg("Physics phase\n");
+			dbg("Reaction phase?\n");
 		}
 	}
 }

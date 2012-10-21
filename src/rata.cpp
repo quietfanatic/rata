@@ -1,7 +1,6 @@
 
 #include "top.cpp"
 
-Actor* prime_mover = new Tester;
 
 int main (int argc, char** argv) {
      // Change directory to program

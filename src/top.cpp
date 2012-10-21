@@ -16,8 +16,6 @@
 #include "debug.cpp"
 #include "utility.cpp"
 #include "serialize.cpp"
-#include "Actor.cpp"
-#include "../tmp/actorlist.cpp"
 #include "draw.cpp"
 #include "input.cpp"
 #include "loop.cpp"
@@ -27,9 +25,7 @@ int window_scale = 1;
 
 #include "input.cpp"
 #include "loop.cpp"
-#include "Actor.cpp"
 #include "../tmp/imgs.cpp"
-#include "../tmp/actorlist.cpp"
 #include "draw.cpp"
 
 

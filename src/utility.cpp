@@ -303,45 +303,61 @@ Line operator & (const Line& l, const Circle& c) {
 	return r;
 }
 
- // VARIABLE ARRAYS
+
+ // VARIABLE WIDTH ARRAYS
 template <class T>
 struct VArray {
-	uint n;
-	T* p;
-	CE VArray () :n(0), p(NULL) { }
-	CE VArray (uint n, T* p) :n(n), p(p) { }
+    uint n;
+    T* p;
+    CE VArray () :n(0), p(NULL) { }
+    CE VArray (uint n, T* p) :n(n), p(p) { }
 
-	CE T& operator [] (uint i) const { return p[i]; }
+    CE T& operator [] (uint i) const { return p[i]; }
 
-	//CE operator T* () const { return p; }
-	CE operator uint () const { return n; }
-	//CE operator bool () const { return n; }
-	
-	void allocate (uint newn) {
-		n = newn;
-		p = new T [n];
-	}
-	void free () {
-		n = 0;
-		delete[] p;
-		p = 0;
-	}
-	void reallocate (uint newn) {
-		if (newn == n) return;
-		n = newn;
-		p = new (p) T [n];
-	}
+    //CE operator T* () const { return p; }
+    CE operator uint () const { return n; }
+    //CE operator bool () const { return n; }
+
+//    void allocate (uint newn) {
+//        n = newn;
+//        p = new T [n];
+//    }
+//    void free () {
+//        n = 0;
+//        delete[] p;
+//        p = 0;
+//    }
+//    void reallocate (uint newn) {
+//        if (newn == n) return;
+//        n = newn;
+//        p = new (p) T [n];
+//    }
 };
 
+ // Intrusive linked lists by class
+template <class C>
+struct CLL {
+    C* next;
+    C* prev;
+    static C* first;
+    static C* last;
+    CLL () { 
+       prev = last;
+       next = NULL;
+       prev->next = (C*)this;
 
-template <class T>
-struct UPt {
-	T* p;
-	CE UPt () :p(NULL) { }
-	CE UPt (T* p) :p(p) { }
-	operator T*& () { return p; }
-	CE T* operator -> () { return p; }
-	~UPt () { if (p) delete p; }
+       last = (C*)this;
+       if (!first) first = (C*)this;
+    }
+    ~CLL () {
+        if (next) next->prev = prev;
+        else last = prev;
+        if (prev) prev->next = next;
+        else first = next;
+    }
 };
+template <class C> C* CLL<C>::first = NULL;
+template <class C> C* CLL<C>::last = NULL;
+
 
 #endif
