@@ -19,22 +19,17 @@ sub popd {
     chdir pop @dirs;
 }
 
-sub actor_info {
-	our $EPL_IN_FILENAME =~ /^src\/actor\/(\d+)-(\w+)\.cpp.epl$/ or die "$EPL_IN_FILENAME: actor_info called in a non-actor file\n";
-	my ($num, $name) = ($1, $2);
-	"uint id () { return $1; } CStr name () { return \"$2\"; }"
-}
-
 
 sub epl {
 	my ($IN, $debug) = @_;
 	my $code;
-
+    my $nl = "";
 	while (length $IN and $IN =~ s/^(.*?)<%//s) {
 		(my $text = $1) =~ s/("|\\(?!\$))/\\$1/sg;
-		$code .= "\$OUT.=\"$text\";";
-		if (length $IN and $IN =~ s/^(.*?)%>//s) {
+		$code .= "\$OUT.=\"$nl$text\";";
+		if (length $IN and $IN =~ s/^(.*?)(-)?%>(\n)?//s) {
 			my $perl = $1;
+            $nl = ($3 and not $2) ? "\n" : "";
 			if ($perl =~ s/^=//s) {
 				$code .= "\$OUT.=do{$perl};";
 			}

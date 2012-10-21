@@ -5,31 +5,31 @@
 
 namespace imgset_data {
 <% for my $xcfk (sort keys %images) { my $xcf = $images{$xcfk};
-   for my $imgsetk (@{$xcf->{_SORTED}}) { my $imgset = $xcf->{$imgsetk};
-%>	Vec <%=cppid("${xcfk}_${imgsetk}_p")%> [$imgset->{_N_POSES}][$imgset->{_N_VARS}] = {
-	<% for my $pose (map {$imgset->{$_}} @{$imgset->{_SORTED}}) {
-	%>	{ <%= join ', ', map {"PX*Vec($_->[0], $_->[1])"} @{$pose->{_DATA}} %> },
-	<% } %>};
-	VArray<Vec> <%=cppid("${xcfk}_${imgsetk}")%> [$imgset->{_N_POSES}] = {
-	<% for (0..$#{$imgset->{_SORTED}}) { %>VArray<Vec>($imgset->{_N_VARS}, <%=cppid("${xcfk}_${imgsetk}_p")%>[$_]),<% } %>
-	};
+   for my $imgsetk (@{$xcf->{_SORTED}}) { my $imgset = $xcf->{$imgsetk}; -%>
+    Vec <%=cppid("${xcfk}_${imgsetk}_p")%> [$imgset->{_N_POSES}][$imgset->{_N_VARS}] = {
+    <% for my $pose (map {$imgset->{$_}} @{$imgset->{_SORTED}}) { -%>
+        { <%= join ', ', map {"PX*Vec($_->[0], $_->[1])"} @{$pose->{_DATA}} %> },
+    <% } %>};
+    VArray<Vec> <%=cppid("${xcfk}_${imgsetk}")%> [$imgset->{_N_POSES}] = {
+        <% for (0..$#{$imgset->{_SORTED}}) { %>VArray<Vec>($imgset->{_N_VARS}, <%=cppid("${xcfk}_${imgsetk}_p")%>[$_]),<% } %>
+    };
 <% } } %>}
 
 Imgset imgsets_array [$num_images] = {
 <% for my $xcfk (sort keys %images) { my $xcf = $images{$xcfk};
-   for my $imgsetk (@{$xcf->{_SORTED}}) { my $imgset = $xcf->{$imgsetk};
-%>	Imgset("$imgset->{_FILE}", PX*Vec($imgset->{_SIZE}[0], $imgset->{_SIZE}[1]), $imgset->{_N_VARS}, VArray<VArray<Vec> >($imgset->{_N_POSES}, imgset_data::<%=cppid("${xcfk}_${imgsetk}")%>)),
+   for my $imgsetk (@{$xcf->{_SORTED}}) { my $imgset = $xcf->{$imgsetk}; -%>
+    Imgset("$imgset->{_FILE}", PX*Vec($imgset->{_SIZE}[0], $imgset->{_SIZE}[1]), $imgset->{_N_VARS}, VArray<VArray<Vec> >($imgset->{_N_POSES}, imgset_data::<%=cppid("${xcfk}_${imgsetk}")%>)),
 <% } } %>};
 VArray<Imgset> imgsets ($num_images, imgsets_array);
 
 namespace img {<% my $counter = 0 %>
-<% for my $xcfk (sort keys %images) {
-%>	namespace <%=cppid($xcfk)%> {
-	<% for my $imgsetk (@{$images{$xcfk}{_SORTED}}) {
-	%>	Imgset* <%=cppid($imgsetk)%> = imgsets.p+<%=$counter++%>;
-		namespace <%=cppid($imgsetk)%>p { enum { <%= join ', ', map {cppid $_} @{$images{$xcfk}{$imgsetk}{_SORTED}} %> }; }
-		namespace <%=cppid($imgsetk)%>v { enum { <%= join ', ', map {cppid $_} @{$images{$xcfk}{$imgsetk}{_VARS}} %> }; }
-	<% } %>}
+<% for my $xcfk (sort keys %images) { -%>
+    namespace <%=cppid($xcfk)%> {
+    <% for my $imgsetk (@{$images{$xcfk}{_SORTED}}) { -%>
+        Imgset* <%=cppid($imgsetk)%> = imgsets.p+<%=$counter++%>;
+        namespace <%=cppid($imgsetk)%>p { enum { <%= join ', ', map {cppid $_} @{$images{$xcfk}{$imgsetk}{_SORTED}} %> }; }
+        namespace <%=cppid($imgsetk)%>v { enum { <%= join ', ', map {cppid $_} @{$images{$xcfk}{$imgsetk}{_VARS}} %> }; }
+    <% } %>}
 <% } %>}
 
 
