@@ -63,18 +63,22 @@ struct Serialized : Hashed<Serializable, _name> {
 void serialize_game (Serializer* s);
 
 
+ // In case your reading and writing require separate methods
+#define RWSER(s, name, read, write) do { if (s->writing()) { auto name = read; s->ser(name); } else { decltype(read) name; s->ser(name); write } } while (0)
+
+
 #else
 
 
 void serialize_game (Serializer* s) {
+    s->file_version = SERIALIZATION_VERSION;
+    s->ser(s->file_version);
     if (s->writing()) {
-        uint v = SERIALIZATION_VERSION;
-        s->ser(v);
         FOR_LINKED(p, Serializable) {
             CStr name = p->serialization_name();
             s->ser(name);
-            uint version = p->serialization_version();
-            s->ser(version);
+            s->class_version = p->serialization_version();
+            s->ser(s->class_version);
             p->serialize(s);
             s->nl();
         }
@@ -83,14 +87,11 @@ void serialize_game (Serializer* s) {
         s->nl();
     }
     else {
-        uint32 file_version;
-        s->ser(file_version);
         CStr name;
         for (s->ser(name); name[0]; s->ser(name)) {
             auto p = Class_Hash<Serializable>::lookup(name);
             if (!p) exit(1);
-            uint32 class_version;
-            s->ser(class_version);
+            s->ser(s->class_version);
             p->create()->serialize(s);
         }
     }
