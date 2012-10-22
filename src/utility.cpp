@@ -342,6 +342,31 @@ struct Link {
     Link<C>* tail;
 };
 
+
+ // CLASSES THAT AUTOMATICALLY POPULATE GLOBAL CONTAINERS
+
+ // Store a pointer to the only one of this type.
+template <class C>
+struct Unique {
+    static C* it;
+    void activate () {
+        if (it)
+            printf("Error: Duplicate instantiation of Unique class.\n");
+        it = static_cast<C*>(this); }
+    void deactivate () {
+        if (it != static_cast<C*>(this))
+            printf("Error: Tried to deactivate non-active member of Unique class.\n");
+        it = NULL;
+    }
+    Unique () { activate(); }
+    ~Unique () { deactivate(); }
+    Unique (bool active) { if (active) activate(); }
+};
+template <class C> C* Unique<C>::it = NULL;
+ // the<Game_Settings>()
+template <class C>
+inline C* the () { return Unique<C>::it; }
+
  // Intrusive linked lists by class
 template <class C>
 struct Linked {
@@ -359,9 +384,9 @@ struct Linked {
     }
     void deactivate () {
         if (next) next->prev = prev;
-        else last = prev;
+        else if (last == static_cast<C*>(this)) last = prev;
         if (prev) prev->next = next;
-        else first = next;
+        else if (first == static_cast<C*>(this)) first = next;
     }
     Linked () { activate(); }
     ~Linked () { deactivate(); }
@@ -385,19 +410,19 @@ struct Class_Hash {
         int r;
         auto iter = kh_put(class_hash, table, name, &r);
         if (r == 0)
-            printf("Error: Class_Hash<%s>::insert overwrote %s.\n", STRINGIFY(C), name);
+            printf("Error: Class_Hash<?>::insert overwrote %s.\n", name);
         kh_val(table, iter) = val;
     }
     static void remove (CStr name) {
         auto iter = kh_get(class_hash, table, name);
         if (iter == kh_end(table))
-            printf("Error: Class_Hash<%s>::remove did not find %s.\n", STRINGIFY(C), name);
+            printf("Error: Class_Hash<?>::remove did not find %s.\n", name);
         else kh_del(class_hash, table, iter);
     }
     static C* lookup (CStr name) {
         auto iter = kh_get(class_hash, table, name);
         if (iter == kh_end(table)) {
-            printf("Error: Class_Hash<%s>::lookup did not find %s.\n", STRINGIFY(C), name);
+            printf("Error: Class_Hash<?>::lookup did not find %s.\n", name);
             return NULL;
         }
         return (C*)(kh_val(table, iter));

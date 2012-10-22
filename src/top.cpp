@@ -3,6 +3,8 @@
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
+#define __STDC_FORMAT_MACROS  // The 'long' and 'short' system is so dumb
+#include <inttypes.h>
 
 #include <SOIL/SOIL.h>
 #define GL_GLEXT_PROTOTYPES

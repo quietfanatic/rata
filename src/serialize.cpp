@@ -225,10 +225,10 @@ struct Text_Writer : File_Serializer<true> {
 			fputc(' ', file);
 		}
 	}
-	void ser (int8& x) { pad(); fprintf(file, "%hhd", x); }
-	void ser (int16& x) { pad(); fprintf(file, "%hd", x); }
-	void ser (int32& x) { pad(); fprintf(file, "%d", x); }
-	void ser (int64& x) { pad(); fprintf(file, "%lld", x); }
+	void ser (int8& x) { pad(); fprintf(file, "%" PRIi8, x); }
+	void ser (int16& x) { pad(); fprintf(file, "%" PRIi16, x); }
+	void ser (int32& x) { pad(); fprintf(file, "%" PRIi32, x); }
+	void ser (int64& x) { pad(); fprintf(file, "%" PRIi64, x); }
 	void ser (float& x) { pad(); fprintf(file, "%10e", x); }
 	void ser (Vec& x) { pad(); fprintf(file, "%10e,%10e", x.x, x.y); }
 	void ser (CStr& x) { pad(); fputs(x, file); fputc(0, file); }
@@ -238,10 +238,10 @@ struct Text_Writer : File_Serializer<true> {
 struct Text_Reader : File_Serializer<false> {
 	Text_Reader (FILE* file) : File_Serializer(file) { }
     Text_Reader (const char* filename) : File_Serializer(filename) { }
-	void ser (int8& x) { if (fscanf(file, " %hhd", &x) != 1) failed = true; }
-	void ser (int16& x) { if (fscanf(file, " %hd", &x) != 1) failed = true; }
-	void ser (int32& x) { long int r; if (fscanf(file, " %ld", &r) != 1) failed = true; x = r; }
-	void ser (int64& x) { if (fscanf(file, " %lld", &x) != 1) failed = true; }
+	void ser (int8& x) { if (fscanf(file, " %" SCNi8, &x) != 1) failed = true; }
+	void ser (int16& x) { if (fscanf(file, " %" SCNi16, &x) != 1) failed = true; }
+	void ser (int32& x) { if (fscanf(file, " %" SCNi32, &x) != 1) failed = true; }
+	void ser (int64& x) { if (fscanf(file, " %" SCNi64, &x) != 1) failed = true; }
 	void ser (float& x) { if (fscanf(file, " %e", &x) != 1) failed = true; }
 	void ser (Vec& x) { if (fscanf(file, " %e,%e", &x.x, &x.y) != 2) failed = true; }
 	void ser (CStr& x) {
