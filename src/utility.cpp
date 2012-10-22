@@ -1,6 +1,7 @@
 
 #ifdef HEADER
 
+#define STRINGIFY(v) #v
 #define CE constexpr
 typedef const char* CStr;
 typedef uint8_t uint8;
@@ -334,6 +335,13 @@ struct VArray {
 //    }
 };
 
+ // Basic singly-linked list
+template <class C>
+struct Link {
+    C head;
+    Link<C>* tail;
+};
+
  // Intrusive linked lists by class
 template <class C>
 struct Linked {
@@ -344,10 +352,10 @@ struct Linked {
     void activate () { 
        prev = last;
        next = NULL;
-       prev->next = (C*)this;
+       prev->next = static_cast<C*>(this);
 
-       last = (C*)this;
-       if (!first) first = (C*)this;
+       last = static_cast<C*>(this);
+       if (!first) first = static_cast<C*>(this);
     }
     void deactivate () {
         if (next) next->prev = prev;
@@ -362,5 +370,55 @@ struct Linked {
 template <class C> C* Linked<C>::first = NULL;
 template <class C> C* Linked<C>::last = NULL;
 
+#define FOR_LINKED(i, C) for (auto i = Linked<C>::first; i; i = i->next)
+
+
+ // For code size we're just using one hash type
+KHASH_MAP_INIT_STR(class_hash, void*);
+
+ // Hash tables by class
+template <class C>
+struct Class_Hash {
+    static khash_t(class_hash)* table;
+    Class_Hash () { table = kh_init(class_hash); }
+    static void insert (CStr name, C* val) {
+        int r;
+        auto iter = kh_put(class_hash, table, name, &r);
+        if (r == 0)
+            printf("Error: Class_Hash<%s>::insert overwrote %s.\n", STRINGIFY(C), name);
+        kh_val(table, iter) = val;
+    }
+    static void remove (CStr name) {
+        auto iter = kh_get(class_hash, table, name);
+        if (iter == kh_end(table))
+            printf("Error: Class_Hash<%s>::remove did not find %s.\n", STRINGIFY(C), name);
+        else kh_del(class_hash, table, iter);
+    }
+    static C* lookup (CStr name) {
+        auto iter = kh_get(class_hash, table, name);
+        if (iter == kh_end(table)) {
+            printf("Error: Class_Hash<%s>::lookup did not find %s.\n", STRINGIFY(C), name);
+            return NULL;
+        }
+        return (C*)(kh_val(table, iter));
+    }
+    static inline khiter_t next_iter (khiter_t iter) {
+        while (!kh_exist(table, iter)) iter++;
+        return iter;
+    }
+};
+template <class C> khash_t(class_hash)* Class_Hash<C>::table = NULL;
+
+template <class C, CStr _name>
+struct Hashed {
+    static constexpr CStr name = _name;
+    void activate () { Class_Hash<C>::insert(name, static_cast<C*>(this)); }
+    void deactivate () { Class_Hash<C>::remove(name); }
+    Hashed () { activate(); }
+    ~Hashed () { deactivate(); }
+    Hashed (bool active) { if (active) activate(); }
+};
+
+#define FOR_HASHED(i, C) for (auto i##_iter = kh_begin(Class_Hash<C>::table), auto i = (C*)kh_val(Class_Hash<C>::table, i##_iter); i##_iter != kh_end(Class_Hash<C>::table); i##_iter = Class_Hash<C>::next_iter(i##_iter), i = kh_val(Class_Hash<C>::table, i##_iter))
 
 #endif

@@ -10,7 +10,7 @@
 #include <GL/glext.h>
 #include <GL/glfw.h>
 #include <SFML/Audio.hpp>
-
+#include "khash.h"
 
 #define HEADER
 #include "debug.cpp"
@@ -24,6 +24,7 @@
 int window_scale = 1;
 
 #include "input.cpp"
+#include "serialize.cpp"
 #include "loop.cpp"
 #include "../tmp/imgs.cpp"
 #include "draw.cpp"
