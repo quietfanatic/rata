@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use feature 'switch';
+use autodie;
 
 BEGIN {
 	require 'tool/maker.pl';
@@ -28,6 +29,8 @@ sub cpp_to_epl {
 
 my @allepls = glob 'src/*/*.epl src/*.epl';
 my @allcpps = glob 'src/*/*.cpp src/*.cpp';
+my @alltestcpps = glob 't/*.t.cpp';
+my @alltests = glob 't/*.t';
 my $maincpp = 'src/rata.cpp';
 my @allxcfs = glob 'src/xcf/*.xcf';
 my $mainprogram = 'built/rata';
@@ -43,13 +46,24 @@ sub make {
 		when ('--force') {
 			$force = 1;
 		}
-		when ('all') {
+        when ('all') {
+            make 'test';
+        }
+        when ('test') {
+            make 'program';
+            make 'testwrappers';
+            makesys 'prove', @alltests;
+        }
+		when ('program') {
 			make 'epls';
 	        makecmd 'mkdir', 'built';
 			dependsys $mainprogram, \@allcpps,
 				$cpp, @cpp_flags, @test_flags, $maincpp, @libs, '-o', $mainprogram;
 		}
-		when('epls') {
+        when ('testwrappers') {
+            make @alltestcpps;
+        }
+		when ('epls') {
             makecmd 'mkdir', 'tmp';
             makecmd 'mkdir', 'tmp/actor';
 			make @allepls;
@@ -71,6 +85,14 @@ sub make {
 				makecmd 'eplf', $to, $from;
 			};
 		}
+        when (/^(t\/(.*)\.t)\.cpp/) {
+            my ($to, $name) = ($1, $2);
+            depend $to, [], sub {
+                open my $TW, '>', $to;
+                print $TW "system '$mainprogram', '--test', '$name';";
+                close $TW;
+            }
+        }
 		when (/\.epl$/) {
 			my ($to, $from) = (epl_to_cpp($_), $_);
 			dependcmd $to, [$from, 'tool/epl.pl'], 'eplf', $to, $from;

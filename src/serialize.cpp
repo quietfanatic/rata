@@ -33,6 +33,7 @@ struct Serializer {
      // We're not using doubles, but we might eventually
 //	virtual void ser (double&) = 0;
 	virtual void ser (Vec&) = 0;
+    void ser (b2Vec2& bv) { ser(reinterpret_cast<Vec&>(bv)); }  // binary compatibility yay
 	virtual void ser (CStr&) = 0;
 	virtual void ser (bool& x) {
 		int8 x2 = x;
@@ -48,23 +49,29 @@ struct Serializer {
 struct Serializable : Linked<Serializable> {
     virtual uint serialization_version () { return 0; }
 	virtual CStr serialization_name () = 0;
-    virtual Serializable* create () = 0;
 	virtual void serialize (Serializer* s) = 0;  // input or output
 };
 
- // Parameterize serializability by name and subclass, which is enough
- // to make a type decider for it.
-template <class T, CStr _name>
-struct Serialized : Hashed<Serializable, _name> {
-    CStr serialization_name () { return _name; }
-    Serializable* create () { return new T; }
+ // 
+struct Creator : Hashed<Creator> {
+    Serializable* (* create ) ();
+    Creator (CStr name, Serializable* (* create ) ()) : Hashed(name), create(create) { }
 };
+
+ // Parameterize serializability by name and subclass, which is enough
+ // to make a creator for it.
+template <class T, CStr _name>
+struct Serialized : Serializable {
+    static Creator creator;
+    CStr serialization_name () { return _name; }
+};
+template <class T, CStr _name> Creator Serialized<T, _name>::creator = Creator(_name, [](){ return new T; });
 
 void serialize_game (Serializer* s);
 
 
  // In case your reading and writing require separate methods
-#define RWSER(s, name, read, write) do { if (s->writing()) { auto name = read; s->ser(name); } else { decltype(read) name; s->ser(name); write } } while (0)
+#define RWSER(s, name, read, write) do { if (s->writing()) { auto name = write; s->ser(name); } else { decltype(write) name; s->ser(name); read } } while (0)
 
 
 #else
@@ -73,6 +80,7 @@ void serialize_game (Serializer* s);
 void serialize_game (Serializer* s) {
     s->file_version = SERIALIZATION_VERSION;
     s->ser(s->file_version);
+    s->nl();
     if (s->writing()) {
         FOR_LINKED(p, Serializable) {
             CStr name = p->serialization_name();
@@ -89,16 +97,17 @@ void serialize_game (Serializer* s) {
     else {
         CStr name;
         for (s->ser(name); name[0]; s->ser(name)) {
-            auto p = Class_Hash<Serializable>::lookup(name);
-            if (!p) exit(1);
+            auto c = Hashed<Creator>::table.lookup(name);
+            if (!c) exit(1);
             s->ser(s->class_version);
-            p->create()->serialize(s);
+            c->create()->serialize(s);
+            s->nl();
         }
     }
 }
 
  // All the kinds of serializers (and shared code)
- // We may eventually have to seperate implementation out.
+ // We may eventually have to hc-split these.
 
 template <bool _writing>
 struct File_Serializer : Serializer {

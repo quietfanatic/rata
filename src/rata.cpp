@@ -1,6 +1,7 @@
 
 #include "top.cpp"
-
+#include "../t/testfiles.cpp"
+#include "../tmp/testlist.cpp"
 
 int main (int argc, char** argv) {
      // Change directory to program
@@ -14,6 +15,11 @@ int main (int argc, char** argv) {
             printf("chdir() failed with %d (%s)\n", errno, strerror(errno));
         }
     }  // else you'd better know what you're doing cause I don't
+     // Ghetto option parsing
+    if (argc >= 3 && 0==strcmp(argv[1], "--test")) {
+        do_test(argv[2]);
+        exit(0);
+    }
 
 	dbg("Starting\n");
 	glfwInit();

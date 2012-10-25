@@ -79,6 +79,9 @@ struct Vec {
 	float y;
 	CE Vec () :x(0/0.0), y(0/0.0) { }
 	CE Vec (float x, float y) :x(x), y(y) { }
+    Vec (b2Vec2 bv) :x(bv.x), y(bv.y) { }
+    operator b2Vec2& () { return reinterpret_cast<b2Vec2&>(*this); }
+    operator const b2Vec2& () const { return reinterpret_cast<const b2Vec2&>(*this); }
 
 	CE Vec scale (Vec s) const { return Vec(x*s.x, y*s.y); }
 	CE Vec scalex (float s) const { return Vec(s*x, y); }
@@ -340,8 +343,8 @@ template <class C>
 struct Link {
     C head;
     Link<C>* tail;
+    Link (C head, Link<C>* tail) : head(head), tail(tail) { }
 };
-
 
  // CLASSES THAT AUTOMATICALLY POPULATE GLOBAL CONTAINERS
 
@@ -399,51 +402,84 @@ template <class C> C* Linked<C>::last = NULL;
 
 
  // For code size we're just using one hash type
-KHASH_MAP_INIT_STR(class_hash, void*);
+KHASH_MAP_INIT_STR(hash, void*);
 
- // Hash tables by class
+ // Significantly simplify the interface to khash
+ // Our usage patterns will assume no failures, hence the warnings.
 template <class C>
-struct Class_Hash {
-    static khash_t(class_hash)* table;
-    Class_Hash () { table = kh_init(class_hash); }
-    static void insert (CStr name, C* val) {
+struct Hash {
+    khash_t(hash)* table;
+    Hash () :table(kh_init(hash)) { }
+    ~Hash () { kh_destroy(hash, table); }
+    void insert (CStr name, C* val) {
         int r;
-        auto iter = kh_put(class_hash, table, name, &r);
+        auto iter = kh_put(hash, table, name, &r);
         if (r == 0)
-            printf("Error: Class_Hash<?>::insert overwrote %s.\n", name);
+            printf("Warning: Hash<?>::insert overwrote %s.\n", name);
         kh_val(table, iter) = val;
     }
-    static void remove (CStr name) {
-        auto iter = kh_get(class_hash, table, name);
+    void remove (CStr name) {
+        auto iter = kh_get(hash, table, name);
         if (iter == kh_end(table))
-            printf("Error: Class_Hash<?>::remove did not find %s.\n", name);
-        else kh_del(class_hash, table, iter);
+            printf("Warning: Hash<?>::remove did not find %s.\n", name);
+        else kh_del(hash, table, iter);
     }
-    static C* lookup (CStr name) {
-        auto iter = kh_get(class_hash, table, name);
+    C* lookup (CStr name) {
+        auto iter = kh_get(hash, table, name);
         if (iter == kh_end(table)) {
-            printf("Error: Class_Hash<?>::lookup did not find %s.\n", name);
+            printf("Warning: Hash<?>::lookup did not find %s.\n", name);
             return NULL;
         }
         return (C*)(kh_val(table, iter));
     }
-    static inline khiter_t next_iter (khiter_t iter) {
+    inline khiter_t next_khiter (khiter_t iter) {
         while (!kh_exist(table, iter)) iter++;
         return iter;
     }
+/*    CStr create_string () {
+        CStr names [kh_size(table)];
+        CStr vals [kh_size(table)];
+        for (uint i = 0, auto iter = kh_begin(table); iter != kh_end(table); i++, iter = next_khiter(iter)) {
+            names[i] = kh_key(table, iter); vals[i] = kh_val(table, iter)->create_string();
+        }
+        uint len = 0;
+        for (uint i = 0; i < kh_size(table); i++) {
+            len += strlen(names[i]) + 1 + strlen(vals[i]) + 1;
+        }
+        if (len) len--;
+        char* r = malloc(len+1);
+        uint ri = 0;
+        for (uint i = 0; i < kh_size(table); i++) {
+            if (i != 0) r[ri++] = ' ';
+            for (uint ni = 0; names[i][ni]; ni++) r[ri++] = names[i][ni];
+            r[ri++] = '=';
+            for (uint vi = 0; vals[i][vi]; vi++) r[ri++] = vals[i][vi];
+        }
+        r[ri] = 0;
+        for (uint i = 0; i < kh_size(table); i++) {
+            delete vals[i];
+        }
+        return r;
+    }*/
 };
-template <class C> khash_t(class_hash)* Class_Hash<C>::table = NULL;
 
-template <class C, CStr _name>
+ // Keep a hash of every member of this class.
+template <class C>
 struct Hashed {
-    static constexpr CStr name = _name;
-    void activate () { Class_Hash<C>::insert(name, static_cast<C*>(this)); }
-    void deactivate () { Class_Hash<C>::remove(name); }
-    Hashed () { activate(); }
+    static Hash<C> table;
+    CStr name;
+    void activate () { if (name) table.insert(name, static_cast<C*>(this)); }
+    void deactivate () { if (name) table.remove(name); }
+    void set_name (CStr newname) { deactivate(); name = newname; activate(); }
+    Hashed (CStr name = NULL) :name(name) { activate(); }
     ~Hashed () { deactivate(); }
-    Hashed (bool active) { if (active) activate(); }
 };
+template <class C> Hash<C> Hashed<C>::table;
 
-#define FOR_HASHED(i, C) for (auto i##_iter = kh_begin(Class_Hash<C>::table), auto i = (C*)kh_val(Class_Hash<C>::table, i##_iter); i##_iter != kh_end(Class_Hash<C>::table); i##_iter = Class_Hash<C>::next_iter(i##_iter), i = kh_val(Class_Hash<C>::table, i##_iter))
+
+#define FOR_HASH(i, h) for (auto i##_iter = kh_begin((h).table), auto i = (C*)kh_val((h).table, i##_iter); i##_iter != kh_end((h).table); i##_iter = (h).next_khiter(i##_iter), i = (C*)kh_val((h).table, i##_iter))
+#define FOR_HASHED(i, C) FOR_HASH(i, Hashed<C>::table)
+
+
 
 #endif
