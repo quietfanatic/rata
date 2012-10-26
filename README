@@ -1,38 +1,5 @@
 
-(NOTICE: If you're viewing this from Github, you may not have the things
- required to build or run this.  See http://wall.org/~lewis/games/rata for
- some runnable demo tarballs.  This project is not at this time intended
- for public consumption, so use only at your own risk.)
-
-
-Requirements (currently)
-	1.6GHz CPU
-	GPU that can do simple 2D OpenGL at 60fps, preferably with VSYNC
-	Opengl extension GL_ARB_texture_non_power_of_two
-	libglfw
-	libSOIL
-	libsfml-audio.so.1.6
-
-
-Instructions:
-    ./make.pl
-	./rata
-
-
-Controls:
-              A :  move left
-              D :  move right
-              W :  jump
-              S :  kneel, crawl
-          Space :  action (enter, pick up, etc.)
-     Move Mouse :  look around
-        L-click :  examine
-R-click/L-Shift :  aim weapon
-        L-click :  (while aiming) fire weapon
-              P :  pause
-         Escape :  quit
-
-
+Currently under massive rewrite
 
 
 
