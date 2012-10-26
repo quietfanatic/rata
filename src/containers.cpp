@@ -48,11 +48,11 @@ KHASH_MAP_INIT_STR(hash, void*);
  // Significantly simplify the interface to khash
  // Our usage patterns will assume no failures, hence the warnings.
 template <class C>
-struct Hash { char can_only_hash_pointers [sizeof(C) ? -1 : -1]; };
+struct Hash;
 template <class C>
 struct Hash<C*> {
     khash_t(hash)* table;
-    Hash () :table(kh_init(hash)) { }
+    Hash () : table(kh_init(hash)) { }
     ~Hash () { kh_destroy(hash, table); }
     void insert (CStr name, C* val) {
         int r;

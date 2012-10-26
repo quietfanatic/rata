@@ -10,9 +10,9 @@
 
 #endif
 
-#include "debug.cpp"
 #include "utility.cpp"
 #include "containers.cpp"
 #include "registries.cpp"
-#include "game_state.cpp"
+#include "debug.cpp"
+#include "math.cpp"
 
