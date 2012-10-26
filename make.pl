@@ -6,15 +6,27 @@ use lib 'tool';
 use make;
 use autodie;
 
-rule 'a', 'b', sub {
-    system 'cp', 'b', 'a';
+
+my $cppc = 'g++-4.7';
+my @cppc_flags = qw(-std=c++11 -fmax-errors=5);
+my @devel_flags = qw(-Wall -O1 -ggdb);
+my @libs = qw(-lGL -lglfw -lSOIL lib/libBox2D.a);
+my @cppc_output_flag = qw(-o);
+
+my $main_program = 'rata';
+my $main_cpp = 'src/main.cpp';
+my @all_cpps = (glob 'src/*.cpp src/*.h');
+
+rule $main_program, \@all_cpps, sub {
+    system $cppc, @cppc_flags, @devel_flags, $main_cpp, @libs, @cppc_output_flag, $main_program;
 };
-rule 'b', 'c', sub {
-    system 'cp', 'c', 'b';
-};
-rule 'c', 'a', sub {
-    system 'cp', 'a', 'c';
-};
+
+
+
+
+
+
+
 
 exit(!make(@ARGV));
 

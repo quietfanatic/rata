@@ -76,7 +76,7 @@ sub getfun {
     no strict 'refs';
     given (ref $_[0]) {
         return $_[0] when 'CODE';
-        return \&{"$_[0]"} when undef;
+        return \&{"$_[0]"} when '';
         default { croak "Expected a CODE but got a $_"; }
     }
 }
@@ -86,7 +86,7 @@ sub validate_recipe {
     my ($recipe, @args) = @_;
     defined $recipe or croak "$0: Recipe command was undefined";
     given (ref $recipe) {
-        when (undef) { }  # okay (string name of function)
+        when ('') { }  # okay (string name of function)
         when ('CODE') { }  # okay
         when ('ARRAY') {
             
