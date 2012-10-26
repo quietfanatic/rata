@@ -21,7 +21,10 @@ rule $main_program, \@all_cpps, sub {
     system $cppc, @cppc_flags, @devel_flags, $main_cpp, @libs, @cppc_output_flag, $main_program;
 };
 
-
+phony 'clean', [], sub {
+    no autodie;
+    unlink $main_program;
+};
 
 
 

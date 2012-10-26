@@ -24,13 +24,13 @@ sub reset_plan () {
 }
 
  # Declaring rules
-sub rule_with_caller ($$$@) {
-    my ($package, $file, $line, $to, $from, @recipe) = @_;
-    validate_recipe(@recipe);
+sub rule_with_caller ($$$$$$) {
+    my ($package, $file, $line, $to, $from, $recipe) = @_;
+    ref $recipe eq 'CODE' or croak "Non-code recipe given to rule";
     my $rule = {
         to => [ref $to eq 'ARRAY' ? @$to : $to],
         from => [ref $from eq 'ARRAY' ? @$from : $from],
-        recipe => [@recipe],
+        recipe => $recipe,
         package => $package,
         file => $file,
         line => $line,
@@ -47,62 +47,26 @@ sub show_rule ($) {
 sub debug_rule ($) {
     return "$_[0]{file}:$_[0]{line}: " . show_rule($_[0]);
 }
-sub rule ($$@) {
+sub rule ($$$) {
     my ($package, $file, $line) = caller;
-    rule_with_caller($package, $file, $line, @_);
+    my ($to, $from, $recipe) = @_;
+    rule_with_caller($package, $file, $line, $to, $from, $recipe);
 }
-sub phony ($;$@) {
+sub phony ($;$$) {
     my ($package, $file, $line) = caller;
-    my ($phony, $from, @recipe) = @_;
+    my ($phony, $from, $recipe) = @_;
     my @phony = ref $phony eq 'ARRAY' ? @$phony : $phony;
     for (@phony) {
         $phony{$_} = 1;
     }
     if (defined $from) {
-        rule_with_caller($package, $file, $line, $phony, $from, @recipe);
+        rule_with_caller($package, $file, $line, $phony, $from, $recipe);
     }
 }
  # Dealing with defaults
 sub default {
     $picked_defaults = 1;
     push @defaults, @_;
-}
-sub fabricate_target {
-    $rules_by_to{_DEFAULT_BECAUSE_FIRST} = {
-    }
-}
- # Executing
-sub getfun {
-    no strict 'refs';
-    given (ref $_[0]) {
-        return $_[0] when 'CODE';
-        return \&{"$_[0]"} when '';
-        default { croak "Expected a CODE but got a $_"; }
-    }
-}
-
-sub validate_recipe {
-    @_ == 0 and croak "$0: No recipe given";
-    my ($recipe, @args) = @_;
-    defined $recipe or croak "$0: Recipe command was undefined";
-    given (ref $recipe) {
-        when ('') { }  # okay (string name of function)
-        when ('CODE') { }  # okay
-        when ('ARRAY') {
-            
-        }
-        default { croak "$0: Recipe command was a $_ instead of a CODE, ARRAY, or scalar" }
-    }
-}
-
-sub do_recipe {
-    if (ref $_[0] eq 'ARRAY') {
-        &do_recipe(@$_) for @_;
-    }
-    else {
-        my ($code, @args) = @_;
-        getfun($code)->(@args);
-    }
 }
  # Testing staleness
 sub fexists {
@@ -124,36 +88,20 @@ sub stale {
 }
 
  # Making
-sub plan_make (@) {
-    my @targets = @_;
-    if (!@targets) {
-        if ($picked_defaults) {
-            @targets = @defaults;
+sub plan_target {
+    my ($target) = @_;
+     # Make sure the file exists or there's a rule for it
+    unless ($rules_by_to{$target} or fexists($target)) {
+        my $mess = "$0: Cannot find or make $target" . (@plan_stack ? ", required by\n" : "\n");
+        for (@plan_stack) {
+            $mess .= "\t" . debug_rule($_) . "\n";
         }
-        else {
-            return plan_check_rule($rules[0]);
-        }
+        die $mess;
     }
-    my $stale = 0;
-    for my $target (@targets) {
-         # Make sure the file exists or there's a rule for it
-        unless ($rules_by_to{$target}
-             or $phony{$target}
-             or -e $target) {
-            my $mess = "$0: Cannot find or make $target" . (@plan_stack ? ", required by\n" : "\n");
-            for (@plan_stack) {
-                $mess .= "\t" . debug_rule($_) . "\n";
-            }
-            die $mess;
-        }
-         # In general, there should be only rule per target, but there can be more.
-        for my $rule (@{$rules_by_to{$target}}) {
-            plan_check_rule($rule) and $stale = 1;
-        }
-    }
-    return $stale;
+     # In general, there should be only rule per target, but there can be more.
+    return grep plan_rule($_), @{$rules_by_to{$target}};
 }
-sub plan_check_rule {
+sub plan_rule {
     my ($rule) = @_;
      # detect loops
     if (not defined $rule->{planned}) {
@@ -170,16 +118,11 @@ sub plan_check_rule {
     push @plan_stack, $rule;
     $rule->{planned} = undef;  # Mark that we're currently planning this
      # always recurse
-    my $stale = plan_make(@{$rule->{from}});
-    if (!$stale) {
-        for my $to (@{$rule->{to}}) {
-            for my $from (@{$rule->{from}}) {
-                if (modtime($to) < modtime($from)) {
-                    $stale = 1;
-                }
-            }
-        }
-    }
+    my $stale = grep plan_target($_), @{$rule->{from}};
+    $stale ||= grep {
+        my $to = $_;
+        !fexists($to) or grep modtime($to) < modtime($_), @{$rule->{from}}
+    } @{$rule->{to}};
     push @plan, $rule if $stale;
      # Done planning this rule
     $rule->{planned} = 1;
@@ -187,13 +130,26 @@ sub plan_check_rule {
     return $stale;
 }
 
-sub make {
+sub plan_make (@) {
     reset_plan();
+    if (@_) {
+        grep plan_target($_), @_;
+    }
+    elsif ($picked_defaults) {
+        grep plan_target($_), @defaults;
+    }
+    else {
+        plan_rule($rules[0]);
+    }
+    return @plan;
+}
+
+sub make {
     if (not @rules) {
         say "$0: No rules have been specified yet.";
         return 0;
     }
-    eval { plan_make(@_) };
+    my @plan = eval { plan_make(@_) };
     if ($@) {
         warn $@;
         say "$0: Nothing was done due to error.";
@@ -205,7 +161,7 @@ sub make {
     }
     for (@plan) {
         say "$0: " . show_rule($_);
-        eval { do_recipe($_->{recipe}) };
+        eval { $_->{recipe}->($_->{to}, $_->{from}) };
         if ($@) {
             warn $@;
             say "$0: Did not finish due to error.";
