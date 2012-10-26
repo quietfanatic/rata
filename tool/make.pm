@@ -5,8 +5,7 @@ use warnings;
 use feature qw(switch say);
 use Exporter qw(import);
 use Carp qw(croak);
-our @EXPORT = qw(rule phony make make_argv);
-our @EXPORT_OK = qw(visibly stale modtime default);
+our @EXPORT_OK = qw(rule phony make make_argv stale modtime default);
 
 my %modtime;
 my %phony;
@@ -173,7 +172,7 @@ sub make {
 }
 
 sub make_argv () {
-    make(@ARGV);
+    exit(!make(@ARGV));
 }
 
 

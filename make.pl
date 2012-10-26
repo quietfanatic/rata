@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use lib 'tool';
-use make;
+use make qw(rule phony make_argv);
 use autodie;
 
 
@@ -17,6 +17,7 @@ my $main_program = 'rata';
 my $main_cpp = 'src/main.cpp';
 my @all_cpps = (glob 'src/*.cpp src/*.h');
 
+
 rule $main_program, \@all_cpps, sub {
     system $cppc, @cppc_flags, @devel_flags, $main_cpp, @libs, @cppc_output_flag, $main_program;
 };
@@ -27,10 +28,6 @@ phony 'clean', [], sub {
 };
 
 
-
-
-
-
-exit(!make(@ARGV));
+make_argv;
 
 
