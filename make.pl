@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use lib 'tool';
 use make qw(rule phony make_argv);
-use autodie;
+use autodie qw(:all);
 
 
 my $cppc = 'g++-4.7';
@@ -15,7 +15,7 @@ my @cppc_output_flag = qw(-o);
 
 my $main_program = 'rata';
 my $main_cpp = 'src/main.cpp';
-my @all_cpps = (glob 'src/*.cpp src/*.h');
+my @all_cpps = glob 'src/*.cpp src/*.h';
 
 
 rule $main_program, \@all_cpps, sub {
