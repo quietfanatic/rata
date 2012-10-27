@@ -190,22 +190,28 @@ struct Ref : Atom {
 struct Attr {
     std::string key;
     Hacc* value;
-
+    Attr () { }
     Attr (std::string key, Hacc* value) : key(key), value(value) { }
-//    ~Attr () { delete value; }
+// do this manually   ~Attr () { delete value; }
 };
-void destroy_Attrs (Link<Attr>* attrs) {
+void destroy_Links_Attrs (Link<Attr>* attrs) {
     if (attrs) {
+        destroy_Links_Attrs(attrs->tail);
         delete attrs->head.value;
-        destroy_Attrs(attrs->tail);
         delete attrs;
     }
 };
+
 struct Object : Composite {
     VArray<Attr> attrs;
 
     Object (VArray<Attr> attrs, std::string cl = "", std::string addr = "") : Composite(OBJECT, cl, addr), attrs(attrs) { }
-    ~Object () { destroy_VArray(attrs); }
+    ~Object () {
+        for (uint i = 0; i < attrs; i++) {
+            delete attrs[i].value;
+        }
+        destroy_VArray(attrs);
+    }
     std::string to_string () {
         std::string r = "{";
         for (uint i = 0; i < attrs; i++) {
@@ -442,7 +448,7 @@ struct Parser {
                 }
             }
         }
-        fail: destroy_Attrs(attrs); return NULL;
+        fail: destroy_Links_Attrs(attrs); return NULL;
     }
     Hacc* parse_parens () {
         p++;  // for the (
@@ -562,7 +568,7 @@ void hacc_string_test (std::string from, std::string to) {
 }
 
 Tester hacc_tester ("hacc", [](){
-    plan(25);
+    plan(26);
      printf(" # Bool\n");
     hacc_string_test("true", "true");
     hacc_string_test("false", "false");
@@ -594,6 +600,8 @@ Tester hacc_tester ("hacc", [](){
     hacc_string_test("[~3f800000, -45, \"asdf]\", nil]", "[1~3f800000, -45, \"asdf]\", nil]");
     hacc_string_test("[[[][]][[]][][][][[[[[[]]]]]]]", "[[[], []], [[]], [], [], [], [[[[[[]]]]]]]");
     hacc_string_test("[1, 2, [3, 4, 5], 6, 7]", "[1, 2, [3, 4, 5], 6, 7]");
+     printf(" # Object\n");
+    hacc_string_test("{}", "{}");
 // not yet    printf(" # Ref\n");
 //    hacc_string_test("&@an_addr3432", "&@an_addr3432");
 //    hacc_string_test("&@a_class@an_addr", "&@a_class@an_addr");

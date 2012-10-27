@@ -55,7 +55,9 @@ struct Link {
     VArray<C> to_VArray () {
         VArray<C> r;
         r.n = length();
-        r.p = (C*)malloc(r.n * sizeof(C));
+        r.p = new C [r.n];
+         // We're wasting time constructing by doing new then copying, but what can you do.
+         // std::string is reference counted so it needs to not be confused about constructing.
         uint i = 0;
         for (auto a = this; a; a = a->tail) {
             r[i++] = a->head;
