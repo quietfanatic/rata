@@ -550,22 +550,30 @@ void hacc_string_test (std::string from, std::string to) {
 }
 
 Tester hacc_tester ("hacc", [](){
-    plan(12);
-     // Integers
+    plan(18);
+     printf(" # Bool\n");
+    hacc_string_test("true", "true");
+    hacc_string_test("false", "false");
+     printf(" # Nil\n");
+    hacc_string_test("nil", "nil");
+     printf(" # Integer\n");
     hacc_string_test("1", "1");
     hacc_string_test("5425432", "5425432");
     hacc_string_test("\t 5425432 \n", "5425432");
     hacc_string_test("-532", "-532");
     hacc_string_test("+54", "54");
-     // Floats
+     printf(" # Float\n");
     hacc_string_test("1~3f800000", "1~3f800000");
     hacc_string_test("1.0~3f800000", "1~3f800000");
     hacc_string_test("1.0", "1~3f800000");
     hacc_string_test("~3f800000", "1~3f800000");
     hacc_string_test("2.0", "2~40000000");
     hacc_string_test("0.5", "0.5~3f000000");
-     // Strings
+     printf(" # String\n");
     is(hacc::escape("\"\\\b\f\n\r\t"), "\\\"\\\\\\b\\f\\n\\r\\t", "hacc::escape does its job");
+    hacc_string_test("\"asdfasdf\"", "\"asdfasdf\"");
+    hacc_string_test("\"\"", "\"\"");
+    hacc_string_test("\"\\\"\\\\\\b\\f\\n\\r\\t\"", "\"\\\"\\\\\\b\\f\\n\\r\\t\"");
 });
 
 #endif
