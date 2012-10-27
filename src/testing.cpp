@@ -1,6 +1,5 @@
 
 #ifdef HEADER
-
 #include "tap.hpp"
 
 struct Tester : Named<Tester> {

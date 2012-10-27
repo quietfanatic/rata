@@ -1,6 +1,6 @@
 
 #ifdef HEADER
-
+#define HAVE_HACC
 /*
     Humans And Computers Cooperating
     
@@ -78,6 +78,27 @@ enum TYPE {
 };
 
 
+ // Escaping strings according to HACC rules
+
+std::string escape (std::string unesc) {
+    std::string r = "";
+    for (auto p = unesc.begin(); p != unesc.end(); p++) {
+        switch (*p) {
+            case '"': r += "\\\""; break;
+            case '\\': r += "\\\\"; break;
+            case '\b': r += "\\b"; break;
+            case '\f': r += "\\f"; break;
+            case '\n': r += "\\n"; break;
+            case '\r': r += "\\r"; break;
+            case '\t': r += "\\t"; break;
+            default: r += std::string(1, *p); break;
+        }
+    }
+    return r;
+}
+ // unescape is harder to abstract out, so we'll wait till we need it.
+
+
  // Freeing a Hacc tree will free all subtrees.
 struct Hacc {
     TYPE type;
@@ -152,20 +173,7 @@ struct String : Atom {
     String (std::string val, std::string cl = "", std::string addr = "") : Atom(STRING, cl, addr), val(val) { }
      // No destructor
     std::string to_string () {
-        std::string r = "\"";
-        for (auto p = val.begin(); p != val.end(); p++) {
-            switch (*p) {
-                case '"': r += "\\\"";
-                case '\\': r += "\\\\";
-                case '\b': r += "\b";
-                case '\f': r += "\f";
-                case '\n': r += "\n";
-                case '\r': r += "\r";
-                case '\t': r += "\t";
-                default: r += std::string(1, *p);
-            }
-        }
-        return add_prefix(r + "\"");
+        return add_prefix("\"" + escape(val) + "\"");
     }
 };
 struct Ref : Atom {
@@ -536,11 +544,28 @@ struct Parser {
 
 #ifndef DISABLE_TESTS
 
+ // Yes, this leaks memory, but we're just testing
+void hacc_string_test (std::string from, std::string to) {
+    is(hacc::Parser(from).parse_all()->to_string(), to, (hacc::escape(from) + " -> " + hacc::escape(to)).c_str());
+}
+
 Tester hacc_tester ("hacc", [](){
-    plan(2);
-     // Yes, we are leaking memory, because this is all that'll be run.
-    is(hacc::Parser("1").parse_all()->to_string(), "1", "Round-trip 1");
-    is(hacc::Parser("~3f800000").parse_all()->to_string(), "1~3f800000", "~3f800000 => 1~3f800000");
+    plan(12);
+     // Integers
+    hacc_string_test("1", "1");
+    hacc_string_test("5425432", "5425432");
+    hacc_string_test("\t 5425432 \n", "5425432");
+    hacc_string_test("-532", "-532");
+    hacc_string_test("+54", "54");
+     // Floats
+    hacc_string_test("1~3f800000", "1~3f800000");
+    hacc_string_test("1.0~3f800000", "1~3f800000");
+    hacc_string_test("1.0", "1~3f800000");
+    hacc_string_test("~3f800000", "1~3f800000");
+    hacc_string_test("2.0", "2~40000000");
+    hacc_string_test("0.5", "0.5~3f000000");
+     // Strings
+    is(hacc::escape("\"\\\b\f\n\r\t"), "\\\"\\\\\\b\\f\\n\\r\\t", "hacc::escape does its job");
 });
 
 #endif
