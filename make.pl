@@ -18,6 +18,10 @@ my $main_cpp = 'src/main.cpp';
 my @all_cpps = glob 'src/*.cpp src/*.h';
 
 
+phony 'test', $main_program, sub {
+    system 'prove';
+};
+
 rule $main_program, \@all_cpps, sub {
     system $cppc, @cppc_flags, @devel_flags, $main_cpp, @libs, @cppc_output_flag, $main_program;
 };

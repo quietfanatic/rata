@@ -1,5 +1,4 @@
 
-#include <stdio.h>
 
 #define HEADER
 #include "index.cpp"
@@ -8,7 +7,12 @@
 #include "index.cpp"
 #undef IMPLEMENTATION
 
-int main () {
+
+int main (int argc, char** argv) {
+    if (argc > 2 && 0==strcmp(argv[1], "--test")) {
+        run_test(argv[2]);
+        exit(0);
+    }
     printf("hello\n");
     return 0;
 }
