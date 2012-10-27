@@ -11,3 +11,8 @@ tmp
 
 # misc
 gmon.out
+
+# vim
+.*.swp
+*/.*.swp
+*/*/.*.swp
