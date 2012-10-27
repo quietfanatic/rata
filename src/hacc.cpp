@@ -215,7 +215,7 @@ struct Object : Composite {
     std::string to_string () {
         std::string r = "{";
         for (uint i = 0; i < attrs; i++) {
-            r += attrs[i].key + ": " + attrs[i].value->to_string();
+            r += "\"" + escape(attrs[i].key) + "\": " + attrs[i].value->to_string();
             if (i < attrs - 1) r += ", ";
         }
         return add_prefix(r + "}");
@@ -413,17 +413,18 @@ struct Parser {
         Link<Attr>* attrs = NULL;
         Link<Attr>** tailp = &attrs;
         p++;  // for the left brace
-        eat_ws();
         std::string key;
         for (;;) {
+           find_key:
+            eat_ws();
             switch (look()) {
                 case EOF: mess = "Object not terminated"; goto fail;
                 case ':': mess = "No key found before : in object"; goto fail;
-                case ',': p++; break;
+                case ',': p++; goto find_key;
                 case '}': {
                     p++;
                     auto attrsa = attrs->to_VArray();
-                    destroy_Links(attrs);
+                    /*destroy_Links(attrs);*/
                     return new Object(attrsa);
                 }
                 case '"': key = parse_stringly(); if (!mess.empty()) goto fail; break;
@@ -432,9 +433,11 @@ struct Parser {
                     else { mess = "Key is not string or identifier"; goto fail; }
                 }
             }
+           find_separator:
             eat_ws();
             if (look() != ':') { mess = "Expected : after key"; goto fail; }
             p++;
+           find_value:
             eat_ws();
             switch (look()) {
                 case EOF: mess = "Object not terminated"; goto fail;
@@ -448,7 +451,7 @@ struct Parser {
                 }
             }
         }
-        fail: destroy_Links_Attrs(attrs); return NULL;
+        fail: /*destroy_Links_Attrs(attrs);*/ return NULL;
     }
     Hacc* parse_parens () {
         p++;  // for the (
@@ -462,6 +465,7 @@ struct Parser {
     }
 
     Hacc* add_prefix (Hacc* r, std::string cl, std::string addr) {
+        if (!r) return NULL;
         if ((!cl.empty() && !r->cl.empty())
          || (!addr.empty() && !r->addr.empty())) {
             delete r;
@@ -520,6 +524,7 @@ struct Parser {
     }
     Hacc* parse_all () {
         Hacc* r = parse_thing();
+        if (!r) return NULL;
         eat_ws();
         if (look() == EOF)
             return r;
@@ -568,7 +573,7 @@ void hacc_string_test (std::string from, std::string to) {
 }
 
 Tester hacc_tester ("hacc", [](){
-    plan(26);
+    plan(30);
      printf(" # Bool\n");
     hacc_string_test("true", "true");
     hacc_string_test("false", "false");
@@ -594,6 +599,7 @@ Tester hacc_tester ("hacc", [](){
     hacc_string_test("\"\\\"\\\\\\b\\f\\n\\r\\t\"", "\"\\\"\\\\\\b\\f\\n\\r\\t\"");
      printf(" # Array\n");
     hacc_string_test("[]", "[]");
+    hacc_string_test("[1]", "[1]");
     hacc_string_test("[1, 2, 3]", "[1, 2, 3]");
     hacc_string_test("[ 1, 2, 3 ]", "[1, 2, 3]");
     hacc_string_test("[, 1 2,,,, 3 ]", "[1, 2, 3]");
@@ -602,6 +608,9 @@ Tester hacc_tester ("hacc", [](){
     hacc_string_test("[1, 2, [3, 4, 5], 6, 7]", "[1, 2, [3, 4, 5], 6, 7]");
      printf(" # Object\n");
     hacc_string_test("{}", "{}");
+    hacc_string_test("{\"a\": 1}", "{\"a\": 1}");
+    hacc_string_test("{a: 1}", "{\"a\": 1}");
+    hacc_string_test("{a: 1, b: 2, c: 3}", "{\"a\": 1, \"b\": 2, \"c\": 3}");
 // not yet    printf(" # Ref\n");
 //    hacc_string_test("&@an_addr3432", "&@an_addr3432");
 //    hacc_string_test("&@a_class@an_addr", "&@a_class@an_addr");
