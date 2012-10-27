@@ -87,5 +87,15 @@ struct Named {
 #define FOR_IN_NAMED(i, C) FOR_IN_HASH(i, Named<C>::table())
 
 
+#else
+
+#ifndef DISABLE_TESTS
+
+struct Named_Tester : Named<Named_Tester> {
+    uint x;
+}
+
+#endif
+
 
 #endif
