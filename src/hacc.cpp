@@ -382,20 +382,23 @@ struct Parser {
         Link<Hacc*>* elems = NULL;
         Link<Hacc*>** tailp = &elems;
         p++;  // for the [
-        eat_ws();
-        for (;;) switch (look()) {
-            case EOF: mess = "Array not terminated"; goto fail;
-            case ':': mess = "Cannot have : in an array"; goto fail;
-            case ',': p++; break;
-            case ']': {
-                auto elemsa = elems->to_VArray();
-                destroy_Links(elems);
-                return new Array(elemsa);
-            }
-            default: {
-                if (Hacc* thing = parse_thing())
-                    build_tail(tailp, thing);
-                else goto fail;
+        for (;;) {
+            eat_ws();
+            switch (look()) {
+                case EOF: mess = "Array not terminated"; goto fail;
+                case ':': mess = "Cannot have : in an array"; goto fail;
+                case ',': p++; break;
+                case ']': {
+                    p++;
+                    auto elemsa = elems->to_VArray();
+                    destroy_Links(elems);
+                    return new Array(elemsa);
+                }
+                default: {
+                    if (Hacc* thing = parse_thing())
+                        build_tail(tailp, thing);
+                    else goto fail;
+                }
             }
         }
         fail: destroy_Links_ptrs(elems); return NULL;
@@ -412,6 +415,7 @@ struct Parser {
                 case ':': mess = "No key found before : in object"; goto fail;
                 case ',': p++; break;
                 case '}': {
+                    p++;
                     auto attrsa = attrs->to_VArray();
                     destroy_Links(attrs);
                     return new Object(attrsa);
@@ -484,6 +488,7 @@ struct Parser {
             case '[': return add_prefix(parse_array(), cl, addr);
             case '{': return add_prefix(parse_object(), cl, addr);
             case '(': return add_prefix(parse_parens(), cl, addr);
+//            case '&': return add_prefix(parse_ref(), cl, addr);
             case '@':
                 if (addr.empty()) {
                     p++; addr = parse_ident(); break;
@@ -544,13 +549,20 @@ struct Parser {
 
 #ifndef DISABLE_TESTS
 
- // Yes, this leaks memory, but we're just testing
 void hacc_string_test (std::string from, std::string to) {
-    is(hacc::Parser(from).parse_all()->to_string(), to, (hacc::escape(from) + " -> " + hacc::escape(to)).c_str());
+    auto parser = hacc::Parser(from);
+    hacc::Hacc* tree = parser.parse_all();
+    const char* name = (hacc::escape(from) + " -> " + hacc::escape(to)).c_str();
+    if (!tree) {
+        fail(name);
+        printf(" # Parse failed: %s\n", parser.diagnose().c_str());
+    }
+    else is(tree->to_string(), to, name);
+    delete tree;
 }
 
 Tester hacc_tester ("hacc", [](){
-    plan(18);
+    plan(25);
      printf(" # Bool\n");
     hacc_string_test("true", "true");
     hacc_string_test("false", "false");
@@ -574,6 +586,17 @@ Tester hacc_tester ("hacc", [](){
     hacc_string_test("\"asdfasdf\"", "\"asdfasdf\"");
     hacc_string_test("\"\"", "\"\"");
     hacc_string_test("\"\\\"\\\\\\b\\f\\n\\r\\t\"", "\"\\\"\\\\\\b\\f\\n\\r\\t\"");
+     printf(" # Array\n");
+    hacc_string_test("[]", "[]");
+    hacc_string_test("[1, 2, 3]", "[1, 2, 3]");
+    hacc_string_test("[ 1, 2, 3 ]", "[1, 2, 3]");
+    hacc_string_test("[, 1 2,,,, 3 ]", "[1, 2, 3]");
+    hacc_string_test("[~3f800000, -45, \"asdf]\", nil]", "[1~3f800000, -45, \"asdf]\", nil]");
+    hacc_string_test("[[[][]][[]][][][][[[[[[]]]]]]]", "[[[], []], [[]], [], [], [], [[[[[[]]]]]]]");
+    hacc_string_test("[1, 2, [3, 4, 5], 6, 7]", "[1, 2, [3, 4, 5], 6, 7]");
+// not yet    printf(" # Ref\n");
+//    hacc_string_test("&@an_addr3432", "&@an_addr3432");
+//    hacc_string_test("&@a_class@an_addr", "&@a_class@an_addr");
 });
 
 #endif
