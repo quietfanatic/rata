@@ -81,6 +81,7 @@ struct Named {
     ~Named () { deactivate(); }
 
     static C* lookup (CStr n) { return table().lookup(n); }
+    static bool exists (CStr n) { return table().exists(n); }
 };
 
 
@@ -93,7 +94,28 @@ struct Named {
 
 struct Named_Tester : Named<Named_Tester> {
     uint x;
-}
+    Named_Tester (CStr name, uint x) : Named(name), x(x) { }
+};
+struct Named_Tester_2 : Named<Named_Tester_2> {
+    Named_Tester_2 (CStr name) : Named(name) { }
+};
+
+Tester registries_tester ("registries", [](){
+    plan(8);
+    {
+        Named_Tester t1 ("t1", 51);
+        pass("Can create a Named object");
+        ok(Named<Named_Tester>::exists("t1"), "Created Named object exists");
+        ok(!Named<Named_Tester>::exists("t2"), "Uncreated Named object unexists");
+        Named_Tester* t1p = Named<Named_Tester>::lookup("t1");
+        ok(t1p, "Looked-up Named object is not NULL");
+        is(t1p, &t1, "Looked-up Named object is correct");
+        Named_Tester_2 t2 ("t2");
+        is(Named<Named_Tester_2>::lookup("t2"), &t2, "Can create a Named object of a different class");
+        ok(!Named<Named_Tester>::exists("t2"), "Different Named classes do not interfere");
+    }
+    ok(!Named<Named_Tester>::exists("t1"), "Named object was removed upon destruction");
+});
 
 #endif
 

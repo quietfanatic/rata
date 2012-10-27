@@ -63,16 +63,16 @@ struct Hash<C*> {
     }
     void remove (CStr name) {
         auto iter = kh_get(hash, table, name);
-        if (!kh_exist(table, iter))
+        if (iter == kh_end(table))
             WARN("Warning: Hash<?>::remove did not find %s.\n", name);
         else kh_del(hash, table, iter);
     }
     bool exists (CStr name) {
-        return kh_exist(table, kh_get(hash, table, name));
+        return kh_get(hash, table, name) != kh_end(table);
     }
     C* lookup (CStr name) {
         auto iter = kh_get(hash, table, name);
-        if (!kh_exist(table, iter)) {
+        if (iter == kh_end(table)) {
             WARN("Warning: Hash<?>::lookup did not find %s.\n", name);
             return NULL;
         }
@@ -92,17 +92,18 @@ struct Hash<C*> {
 #ifndef DISABLE_TESTS
 
 Tester containers_tester ("containers", [](){
-    plan(6);
+    plan(7);
     Hash<int*> it;
+    ok(!it.exists("xyz"), "Hash<>::exists() reports false on noninserted element");
     it.insert("xyz", new int (234));
     pass("Can insert element into hash");
-    ok(it.exists("xyz"), "hash exists() reports true on inserted element");
+    ok(it.exists("xyz"), "Hash<>::exists() reports true on inserted element");
     int* p = it.lookup("xyz");
     ok(p, "Lookup of inserted element is not NULL");
     is(*p, 234, "Looked-up element is the one inserted");
     it.remove("xyz");
     pass("Can remove element");
-    ok(!it.exists("xyz"), "hash exists() reports false on removed element");
+    ok(!it.exists("xyz"), "Hash<>::exists() reports false on removed element");
     delete p;
 });
 
