@@ -520,6 +520,7 @@ struct Parser {
                         else return error("Too many classes");
                     }
                 }
+                else return error("Confused");
         }
     }
     Hacc* parse_all () {
@@ -573,47 +574,56 @@ void hacc_string_test (std::string from, std::string to) {
 }
 
 Tester hacc_tester ("hacc", [](){
-    plan(30);
-     printf(" # Bool\n");
+    plan(40);
+     printf(" # Bools\n");
     hacc_string_test("true", "true");
     hacc_string_test("false", "false");
      printf(" # Nil\n");
     hacc_string_test("nil", "nil");
-     printf(" # Integer\n");
+     printf(" # Integers\n");
     hacc_string_test("1", "1");
     hacc_string_test("5425432", "5425432");
     hacc_string_test("\t 5425432 \n", "5425432");
     hacc_string_test("-532", "-532");
     hacc_string_test("+54", "54");
-     printf(" # Float\n");
+    hacc_string_test("0x7f", "127");
+    hacc_string_test("-0x80", "-128");
+    hacc_string_test("+0x100", "256");
+     printf(" # Floats\n");
     hacc_string_test("1~3f800000", "1~3f800000");
     hacc_string_test("1.0~3f800000", "1~3f800000");
     hacc_string_test("1.0", "1~3f800000");
     hacc_string_test("~3f800000", "1~3f800000");
     hacc_string_test("2.0", "2~40000000");
     hacc_string_test("0.5", "0.5~3f000000");
-     printf(" # String\n");
+     printf(" # Strings\n");
     is(hacc::escape("\"\\\b\f\n\r\t"), "\\\"\\\\\\b\\f\\n\\r\\t", "hacc::escape does its job");
     hacc_string_test("\"asdfasdf\"", "\"asdfasdf\"");
     hacc_string_test("\"\"", "\"\"");
     hacc_string_test("\"\\\"\\\\\\b\\f\\n\\r\\t\"", "\"\\\"\\\\\\b\\f\\n\\r\\t\"");
-     printf(" # Array\n");
+     printf(" # Arrays\n");
     hacc_string_test("[]", "[]");
     hacc_string_test("[1]", "[1]");
     hacc_string_test("[1, 2, 3]", "[1, 2, 3]");
     hacc_string_test("[ 1, 2, 3 ]", "[1, 2, 3]");
-    hacc_string_test("[, 1 2,,,, 3 ]", "[1, 2, 3]");
+    hacc_string_test("[, 1 2,,,, 3,]", "[1, 2, 3]");
     hacc_string_test("[~3f800000, -45, \"asdf]\", nil]", "[1~3f800000, -45, \"asdf]\", nil]");
     hacc_string_test("[[[][]][[]][][][][[[[[[]]]]]]]", "[[[], []], [[]], [], [], [], [[[[[[]]]]]]]");
     hacc_string_test("[1, 2, [3, 4, 5], 6, 7]", "[1, 2, [3, 4, 5], 6, 7]");
-     printf(" # Object\n");
+     printf(" # Objects\n");
     hacc_string_test("{}", "{}");
     hacc_string_test("{\"a\": 1}", "{\"a\": 1}");
     hacc_string_test("{a: 1}", "{\"a\": 1}");
-    hacc_string_test("{a: 1, b: 2, c: 3}", "{\"a\": 1, \"b\": 2, \"c\": 3}");
-// not yet    printf(" # Ref\n");
-//    hacc_string_test("&@an_addr3432", "&@an_addr3432");
-//    hacc_string_test("&@a_class@an_addr", "&@a_class@an_addr");
+    hacc_string_test("{a: 1, b: 2, ccc: 3}", "{\"a\": 1, \"b\": 2, \"ccc\": 3}");
+    hacc_string_test("{ , a: -32 b:\"sadf\" ,,,,,,,c:nil,}", "{\"a\": -32, \"b\": \"sadf\", \"c\": nil}");
+    hacc_string_test("{\"\\\"\\\\\\b\\f\\n\\r\\t\": nil}", "{\"\\\"\\\\\\b\\f\\n\\r\\t\": nil}");
+    hacc_string_test("{a: {b: {c: {} d: {}} e: {}}}", "{\"a\": {\"b\": {\"c\": {}, \"d\": {}}, \"e\": {}}}");
+     printf(" # Arrays and Objects\n");
+    hacc_string_test("[{a: 1, b: []} [4, {c: {d: []}}]]", "[{\"a\": 1, \"b\": []}, [4, {\"c\": {\"d\": []}}]]");
+    hacc_string_test("{a: []}", "{\"a\": []}");
+     printf(" # Refs\n");
+    hacc_string_test("&@an_addr3432", "&@an_addr3432");
+    hacc_string_test("&a_class@an_addr", "&a_class@an_addr");
 });
 
 #endif
