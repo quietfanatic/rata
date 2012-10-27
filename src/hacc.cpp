@@ -8,7 +8,7 @@
     computers.  It's designed to allow a program to dump its entire state to
     a file, let that file be saved somewhere or edited by a hacker, and then
     read the state in again and resume as if nothing had happened.
-    
+
     HACC is mostly a superset of JSON.  There are some additions:
      - All datatypes may be prefixed with class and/or address.
         - prefix{...} for objects
@@ -18,14 +18,25 @@
             Class_name
             Class_name@address
             @address
-        - A Class_name can contain C++ namespace separators and C++ template
-           parameter lists, for mapping onto a C++ namespace.  It may also contain
-           the * character.  It may not contain parentheses or square brackets
-           unless those are in a template parameter list.  Template parameter lists
-           are parsed simply, recognizing nested <> pairs but nothing else.
-        - An address is an identifier containing alphanumerics and _.  If it's
-           a hexadecimal number, it may be a valid memory address.
-        - Class names are usually optional, but sometimes they may be necessary.
+        - A Class_name may contain alphanumerics, _, *, ::, or nested <> brackets
+           (which may themselves contain anything), but must not start with a
+           digit.  This selection is chosen to make it easy for humans to map
+           class names to C++ identifiers, yet easy for a program to parse.  Not
+           all C++ types can be represented literally; function pointer, member
+           pointer, and array types cannot be represented literally.  You can work
+           around this by wrapping exotic types in a pair of angle brackets.
+           Keep in mind that class names must match character-for-character,
+           including spaces in angle brackets.
+        - An address is parsed identically to classes but indicates a unique id of
+           some sort.  If it's a hexadecimal number, it may be a valid memory
+           address.  No two prefixes in one document should have the same address,
+           unless the values that they prefix are exactly identical, and would
+           occupy the same memory location in a program (i.e. the same object got
+           serialized twice somehow).  This should be rare, and may indicate a bug.
+        - If you're reading in C++ objects, the class names are usually optional,
+           due to C++'s statically-typed nature.  But sometimes they may be
+           necessary, especially near the top level of the document if you're
+           representing a process's entire state.
      - A new datatype is a reference.  It looks like one of:
         &Class_name@address
         &@address
@@ -100,7 +111,7 @@ std::string escape (std::string unesc) {
  // unescape is harder to abstract out, so we'll wait till we need it.
 
 
- // Freeing a Hacc tree will free all subtrees.
+ // Deleting a Hacc tree will delete all subtrees.
 struct Hacc {
     TYPE type;
     std::string cl;
@@ -297,16 +308,20 @@ struct Parser {
     std::string parse_class () {
         const char* start = p;
         for (;;) {
-            eat_ident();
             switch (look()) {
                 case '<': if (!eat_params()) return ""; break;
+                case '*': p++; break;
                 case ':':
                     if (p+1 != end && p[1] == ':') {
                         p += 2; break;
-                    }  // else fall through
-                default: return std::string(start, p - start);
+                    }  else goto finish;
+                default:
+                    if (isalnum(look()) || look() == '_') {
+                        eat_ident();
+                    } else goto finish;
             }
         }
+        finish: return std::string(start, p - start);
     }
 
      // Parsing of specific types.
@@ -645,7 +660,7 @@ Tester hacc_tester ("hacc", [](){
     hacc_string_test("bool(false)", "bool(false)");
     hacc_string_test("VArray<int32>[1, 2, 3]", "VArray<int32>[1, 2, 3]");
     hacc_string_test("int32@one(1)", "int32@one(1)");
-    hacc_string_test("int8*@cp(int8@c)", "int8*@cp(int8@c)");
+    hacc_string_test("int8*@cp(&int8@c)", "int8*@cp(&int8@c)");
 });
 
 #endif
