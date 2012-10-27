@@ -30,11 +30,12 @@
         &Class_name@address
         &@address
         nil
-        - A reference is pretty much just a pointer.  The address may be the memory
-           location where the pointed object resided in the originating process.
+        - A reference usually represents a pointer.  If the document was produced
+           by a program, the address might be a memory location.  If it was
+           produced by a human, it might be a symbol.
         - If a document is produced intending to be read by another process, all
-           referenced addresses must exist elsewhere in the document (except @0,
-           or nil which is an alias for it).  The reading process will update all
+           referenced addresses must exist elsewhere in the document, except @0 (or
+           nil, which is an alias for @0).  The reading process will update all
            the pointers to suit its own memory layout.
         - No space is allowed after the & or around the @.
      - Floating point literals may be suffixed or replaced with a precise bit
@@ -54,10 +55,10 @@
      - Numbers support 0xdeadbeef hexadecimal format and possibly 0377 octal format.
      - Strings used as keys in an object don't have to be quoted if they're simple.
      - Commas are not required between elements of arrays and objects.  No really!
-        But a program should put them in anyway.
+        A space will suffice.  But a well-behaved program should put them in anyway.
      - Any character except " and \ may be unescaped in a string.
    There is one feature JSON has that HACC doesn't:
-     - The \uxxxx construct is not allowed in strings.  To put unicode in a string,
+     - The \uxxxx construct in strings is not supported.  To put unicode in a string,
         just put it in the string.  Control characters and even NUL are allowed to
         be in a string.  There simply must be no unescaped backslashes and quotes.
 
@@ -177,13 +178,15 @@ struct String : Atom {
     }
 };
 struct Ref : Atom {
-    std::string target;
-    std::string ref;
+    std::string target_cl;
+    std::string target_addr;
 
-    Ref (std::string target, std::string ref, std::string cl = "", std::string addr = "") : Atom(REF, cl, addr), target(target), ref(ref) { }
+    Ref (std::string target_cl, std::string target_addr, std::string cl = "", std::string addr = "")
+        : Atom(REF, cl, addr), target_cl(target_cl), target_addr(target_addr)
+    { }
      // No destructor
     std::string to_string () {
-        return add_prefix(!target.empty() ? "&" + target + "@" + ref : "&" + ref);
+        return add_prefix(!target_cl.empty() ? "&" + target_cl + "@" + target_addr : "&@" + target_addr);
     }
 };
  // key: value pair
@@ -384,6 +387,19 @@ struct Parser {
         if (!mess.empty()) return NULL;
         else return new String(r);
     }
+    Hacc* parse_ref () {
+        p++;  // For the &
+        std::string target_cl = "";
+        if (isalpha(look()) || look() == '_') {
+            target_cl = parse_class();
+        }
+        if (look() != '@') return error("Ref didn't have an address starting with &");
+        p++;
+        if (!isalpha(look()) && look() != '_')
+            return error("Ref didn't have an address after the @");
+        std::string target_addr = parse_class();
+        return new Ref(target_cl, target_addr);
+    }
     Hacc* parse_array () {
         Link<Hacc*>* elems = NULL;
         Link<Hacc*>** tailp = &elems;
@@ -498,7 +514,7 @@ struct Parser {
             case '[': return add_prefix(parse_array(), cl, addr);
             case '{': return add_prefix(parse_object(), cl, addr);
             case '(': return add_prefix(parse_parens(), cl, addr);
-//            case '&': return add_prefix(parse_ref(), cl, addr);
+            case '&': return add_prefix(parse_ref(), cl, addr);
             case '@':
                 if (addr.empty()) {
                     p++; addr = parse_ident(); break;
