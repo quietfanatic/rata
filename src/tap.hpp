@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
+
+#include <string>  // Meh, don't want this as a dependency, but whatever
+ // C++ needs an abstraction like Haskell's Show.
+ // I guess that's part of what HACC is for.
+
 typedef unsigned int uint;
 typedef int32_t int32;
 typedef uint32_t uint32;
@@ -94,6 +99,20 @@ void is (const char* a, const char* b, const char* name) {
     else {
         fail(name);
         printf(" # expected \"%s\"\n #  but got \"%s\"\n", b, a);
+    }
+}
+void is (std::string a, std::string b, const char* name) {
+    if (a == b) pass(name);
+    else {
+        fail(name);
+        puts((" # expected \"" + b + "\"\n #  but got \"" + a + "\"").c_str());
+    }
+}
+void is (std::string a, const char* b, const char* name) {
+    if (a == b) pass(name);
+    else {
+        fail(name);
+        puts((" # expected \"" + std::string(b) + "\"\n #  but got \"" + a + "\"").c_str());
     }
 }
 

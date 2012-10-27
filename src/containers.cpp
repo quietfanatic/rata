@@ -13,25 +13,34 @@ struct VArray {
 
     CE T& operator [] (uint i) const { return p[i]; }
 
+    T* begin () { return p; }
+    T* end () { return p; }
+
     //CE operator T* () const { return p; }
     CE operator uint () const { return n; }
     //CE operator bool () const { return n; }
 
-//    void allocate (uint newn) {
+//    void create (uint newn) {
 //        n = newn;
 //        p = new T [n];
 //    }
-//    void free () {
+//    void destroy () {
 //        n = 0;
 //        delete[] p;
 //        p = 0;
 //    }
-//    void reallocate (uint newn) {
-//        if (newn == n) return;
-//        n = newn;
-//        p = new (p) T [n];
-//    }
 };
+template <class C>
+void destroy_VArray (VArray<C> a) {
+    delete[] a.p;
+}
+
+template <class C>
+void destroy_VArray_ptrs (VArray<C*> a) {
+    for (auto p = a.begin(); p != a.end(); p++)
+        delete *p;
+}
+
 
  // Basic singly-linked list
 template <class C>
@@ -39,7 +48,45 @@ struct Link {
     C head;
     Link<C>* tail;
     Link (C head, Link<C>* tail) : head(head), tail(tail) { }
+
+    uint length () {
+        return this ? 1 + tail->length() : 0;
+    }
+    VArray<C> to_VArray () {
+        VArray<C> r;
+        r.n = length();
+        r.p = (C*)malloc(r.n * sizeof(C));
+        uint i = 0;
+        for (auto a = this; a; a = a->tail) {
+            r[i++] = a->head;
+        }
+        return r;
+    }
 };
+template <class C>
+void destroy_Links (Link<C>* l) {
+    if (l) {
+       destroy_Links(l->tail);
+       delete l;
+    }
+}
+template <class C>
+void destroy_Links_ptrs (Link<C*>* l) {
+    if (l) {
+        destroy_Links_ptrs(l->tail);
+        delete l->head;
+        delete l;
+    }
+}
+template <class C>
+void encons (Link<C>*& l, C n) {
+    l = new Link<C> (n, l);
+}
+template <class C>
+void build_tail (Link<C>**& t, C n) {
+    encons(*t, n);
+    t = &(*t)->tail;
+}
 
 
  // For code size we're just using one hash type

@@ -15,9 +15,9 @@ void run_test (CStr name) {
     if (Tester* t = Named<Tester>::lookup(name)) {
         if (t->code)
             t->code();
-        else printf("not ok # The tester named %s doesn't have real code\n", name);
-    }
-    else printf("not ok # There is no tester named %s\n", name);
+        else printf("1..1\nnot ok 1 - The tester named %s has real code\n", name);
+    }  // The convention for tests we're using produces false statements when tests fail.
+    else printf("1..1\nnot ok 1 - There is a tester named %s\n", name);
 #endif
 }
 

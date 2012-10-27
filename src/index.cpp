@@ -14,6 +14,7 @@
 #include "utility.cpp"
 #include "containers.cpp"
 #include "registries.cpp"
+#include "hacc.cpp"
 #include "testing.cpp"
 #include "debug.cpp"
 #include "math.cpp"

@@ -15,11 +15,11 @@ my @cppc_output_flag = qw(-o);
 
 my $main_program = 'rata';
 my $main_cpp = 'src/main.cpp';
-my @all_cpps = glob 'src/*.cpp src/*.h';
+my @all_cpps = glob 'src/*.cpp src/*.h src/*.hpp';
 
 
 phony 'test', $main_program, sub {
-    system 'prove';
+    system 'prove', '-f';
 };
 
 rule $main_program, \@all_cpps, sub {
