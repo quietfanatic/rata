@@ -156,12 +156,11 @@ struct Error : std::exception {
     { }
 };
 struct Hacc {
-    Hacc_Contents* contents;
+     // Giving up and using std yet again.
+    std::shared_ptr<Hacc_Contents> contents;
 
     template <class V> Hacc (const V& v);
     template <class V> Hacc (String type, String id, const V& v);
-    Hacc (const Hacc& other);
-    ~Hacc ();
     String type () const;
     String id () const;
     Valtype valtype () const;
@@ -258,15 +257,15 @@ String escape_ident (String unesc) {
 template <class V>
 Hacc::Hacc (const V& v) : contents(new Hacc_Value<V>("", "", v)) { }
 template <class V>
-Hacc::Hacc (String type, String id, const V& v) : contents(new Hacc_Value<V>(type, id, v)) { }
-Hacc::Hacc (const Hacc& other) : contents(other.contents) { }  // TODO reference count
-Hacc::~Hacc () { }  // Noop for testing right now
+Hacc::Hacc (String type, String id, const V& v) :
+    contents(new Hacc_Value<V>(type, id, v))
+{ }
 
 String Hacc::type () const { return contents->type; }
 String Hacc::id () const { return contents->id; }
 Valtype Hacc::valtype () const { return contents->valtype; }
 template <class V>
-const V& Hacc::assume () const { return static_cast<Hacc_Value<V>*>(contents)->value; }
+const V& Hacc::assume () const { return static_cast<Hacc_Value<V>&>(*contents).value; }
 template <class V>
 const V& Hacc::get () const {
     if (valtype() == valtype_of<V>())
