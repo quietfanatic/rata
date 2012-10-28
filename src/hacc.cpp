@@ -1,99 +1,231 @@
 
 #ifdef HEADER
 #define HAVE_HACC
-/*
-    Humans And Computers Cooperating
-    
-    This is a data language intended to be read-writable by both humans and
-    computers.  It's designed to allow a program to dump its entire state to
-    a file, let that file be saved somewhere or edited by a hacker, and then
-    read the state in again and resume as if nothing had happened.
 
-    HACC is mostly a superset of JSON.  There are some additions:
-     - All datatypes may be prefixed with class and/or address.
-        - prefix{...} for objects
-        - prefix[...] for arrays
-        - prefix(...) for atoms
-        - A prefix may look like one of:
-            Class_name
-            Class_name@address
-            @address
-        - A Class_name may contain alphanumerics, _, *, ::, or nested <> brackets
-           (which may themselves contain anything), but must not start with a
-           digit.  This selection is chosen to make it easy for humans to map
-           class names to C++ identifiers, yet easy for a program to parse.  Not
-           all C++ types can be represented literally; function pointer, member
-           pointer, and array types cannot be represented literally.  You can work
-           around this by wrapping exotic types in a pair of angle brackets.
-           Keep in mind that class names must match character-for-character,
-           including spaces in angle brackets.
-        - An address is parsed identically to classes but indicates a unique id of
-           some sort.  If it's a hexadecimal number, it may be a valid memory
-           address.  No two prefixes in one document should have the same address,
-           unless the values that they prefix are exactly identical, and would
-           occupy the same memory location in a program (i.e. the same object got
-           serialized twice somehow).  This should be rare, and may indicate a bug.
-        - If you're reading in C++ objects, the class names are usually optional,
-           due to C++'s statically-typed nature.  But sometimes they may be
-           necessary, especially near the top level of the document if you're
-           representing a process's entire state.
-     - A new datatype is a reference.  It looks like one of:
-        &Class_name@address
-        &@address
-        nil
-        - A reference usually represents a pointer.  If the document was produced
-           by a program, the address might be a memory location.  If it was
-           produced by a human, it might be a symbol.
-        - If a document is produced intending to be read by another process, all
-           referenced addresses must exist elsewhere in the document, except @0 (or
-           nil, which is an alias for @0).  The reading process will update all
-           the pointers to suit its own memory layout.
-        - No space is allowed after the & or around the @.
-     - Floating point literals may be suffixed or replaced with a precise bit
-        representation, so they look like one of:
-         1.0
-         1.0~3f800000
-         ~3f800000
-        - The bit representation is a hexadecimal number that must be 8 digits long
-           for a 32-bit float and 16 digits long for a 64-bit double.  Floats and
-           doubles might be interconverted when reading a document, but when writing
-           one, its bit representation must match the type used to write it.
-        - Programs should always provide a bit representation, but humans don't have
-           to.  If a bit representation is present, a program reading it will ignore
-           the informal decimal representation.  So if a human changes the value,
-           they must erase the bit representation for the program to notice.
-        - No space is allowed around the ~.
-     - Numbers support 0xdeadbeef hexadecimal format and possibly 0377 octal format.
-     - Strings used as keys in an object don't have to be quoted if they're simple.
-     - Commas are not required between elements of arrays and objects.  No really!
-        A space will suffice.  But a well-behaved program should put them in anyway.
-     - Any character except " and \ may be unescaped in a string.
-   There is one feature JSON has that HACC doesn't:
-     - The \uxxxx construct in strings is not supported.  To put unicode in a string,
-        just put it in the string.  Control characters and even NUL are allowed to
-        be in a string.  There simply must be no unescaped backslashes and quotes.
+//  Humans And Computers Cooperating
+//  
+//  This is a data language intended to be read-writable by both humans and
+//  computers.  It's designed to allow a program to dump its entire state to
+//  a file, let that file be saved somewhere or edited by a hacker, and then
+//  read the state in again and resume as if nothing had happened.
+//
+//  HACC is basically just JSON with types, references, and precise floating
+//  point values.  This spec assumes you know JSON and its terminology.
+//
+//  Clarification of terms:
+//   - An 'ident' is a bareword consisting of ASCII letters or digits, underscores,
+//      and hyphens.  An ident may begin with any of these, including a digit or
+//      a hyphen.  Any place where you have an ident you may replace it with a
+//      quoted string containing anything.  "This" is equivalent to This.
+//   - A 'reader' is something that reads a HACC document, either a program or a
+//      human.
+//   - Likewise, a 'writer' is either a program or a human.
+//   - A 'value' is a JSON-like thing, such as a number or an array
+//   - A 'type' is a string representing the meaning of a JSON-like value.  This
+//      can be any string.
+//   - A 'valtype' is the JSON-like type of a value.  Supported valtypes are
+//      nulls, booleans, integers, floats, doubles, strings, references, arrays, and
+//      objects.
+//   - An 'atom' is a null, a boolean, an number, a string, or a reference.
+//
+//  Features HACC has that JSON doesn't:
+//   - All values may be prefixed with a type and/or an id:
+//         - prefix{object}
+//         - prefix[array]
+//         - prefix(atom)
+//      - The 'extra' part looks like one of these:
+//         - #type
+//         - #type@id
+//         - @id
+//         - @id#type
+//      - A type is either an ident or a quoted string.  This clarifies the meaning
+//         of the value that follows.  If the reader will know what type the value
+//         is supposed to be, the #type is optional.
+//      - An id is also an ident or a quoted string.  If the document
+//         was written by a program, this might be a memory address.  If it was
+//         written by a human, this might be a symbol.  No two values in one
+//         document should have the same id unless those values are exactly
+//         identical and would occupy the same memory location in a program (in other
+//         words, the same object got serialized twice somehow).  This should be
+//         rare, and may indicate a bug.
+//      - No space is allowed between these tokens.
+//   - A new atomic valtype is a reference.
+//      - It looks like one of these:
+//         - &@id
+//         - &#type@id
+//         - &@id#type
+//      - A reference can represent a pointer in a program, or anything that
+//         refers to another object but is not that object itself.
+//      - The #type is usually optional, but a writing program may want to add it
+//         anyway for the convenience of a reading human.
+//      - If a document is written to a file, then every id that is referenced must
+//         exist elsewhere in the document.  If it is not written in a file, then
+//         references may rely on shared knowledge.  For example, an interactive
+//         program might use memory locations as its ids, and allow a human to
+//         reference a location that the program informed them of earlier.
+//      - The id 0 is not special.  If memory addresses are being used as ids, then
+//         the NULL pointer should be displayed as null instead of a reference.
+//      - No space is allowed between these tokens.
+//   - Hacc differentiates between integers and floats.  The maximum precision of
+//      integers is implementation-specific, but must be at least 32 bits signed.
+//   - Floating point literals may be suffixed or replaced with a precise bit
+//      representation.
+//      - So they look like one of these:
+//         - 1.0
+//         - 1.0~3f800000
+//         - ~3f800000
+//      - The bit representation is a hexadecimal number that must be 8 digits long
+//         for a 32-bit float and 16 digits long for a 64-bit double.  Floats and
+//         doubles might be interconverted when reading a document, but when writing
+//         one, its bit representation must match the type used to write it.
+//      - Programs should always provide a bit representation, but humans don't have
+//         to.  If a bit representation is present, a program reading it will ignore
+//         the informal decimal representation.  So if a human changes the value,
+//         they must erase the bit representation for the program to notice.
+//      - No space is allowed around the ~.
+//      - If there is no precise bit representation, a floating point literal will be
+//         taken to have double precision.
+//   - Integers can be converted into floats and doubles, but floats and doubles
+//      cannot be converted into integers.  Floats can be converted to doubles and
+//      doubles can be converted to floats, but in the interest of maintaining
+//      precision, the differentiation between floats and doubles should be
+//      maintained as long as possible.
+//   - The names of pairs in an object may be either quoted strings or idents.
+//   - Any character except " and \ may be unescaped in a string, but it is
+//      recommended that writers escape \b, \r, \n, \f, and \t.
+//
+//  Features JSON has that HACC doesn't:
+//   - The \uxxxx construct in strings is not supported.  To put unicode in a string,
+//      just put it in the string.  Control characters and even NUL are allowed to
+//      be in a string.  There simply must be no unescaped backslashes and quotes.
 
 
-*/
 
 namespace hacc {
 
-enum TYPE {
+struct Hacc_Contents;  // TODO: make this reference-counted
+struct Hacc;
+
+ // All the types of values.
+enum Valtype {
+    VALNULL,
     BOOL,
-    NIL,
     INTEGER,
     FLOAT,
+    DOUBLE,
     STRING,
     REF,
-    OBJECT,
     ARRAY,
+    OBJECT,
+    ERROR
 };
 
 
- // Escaping strings according to HACC rules
+ // TODO: allow the includer to redefine these
+typedef std::nullptr_t Null;
+const auto null = nullptr;
+typedef bool Bool;
+typedef int64 Integer;
+typedef float Float;
+typedef double Double;
+typedef std::string String;
+struct Ref {
+    String type;
+    String id;
+};
+struct Error : std::exception {
+    String mess;
+    String file;
+    uint line;
+    uint col;
+    const char* what () const throw() {
+        char ls [32]; sprintf((char*)ls, "%" PRIu32, line);
+        char cs [32]; sprintf((char*)cs, "%" PRIu32, col);
+        String r = line
+            ? file.empty()
+                ? mess + " at line " + (const char*)ls
+                       + " col " + (const char*)cs
+                : mess + " at " + file
+                       + " line " + (const char*)ls
+                       + " col " + (const char*)cs
+            : mess;
+        return r.c_str();
+    }
+    Error (String mess, String file = "", uint line = 0, uint col = 0) :
+        mess(mess), file(file), line(line), col(col)
+    { }
+};
+struct Hacc {
+    Hacc_Contents* contents;
 
-std::string escape (std::string unesc) {
-    std::string r = "";
+    template <class V> Hacc (const V& v);
+    template <class V> Hacc (String type, String id, const V& v);
+    Hacc (const Hacc& other);
+    ~Hacc ();
+    String type () const;
+    String id () const;
+    Valtype valtype () const;
+
+    operator Bool () const;  // returns true if not Error.
+    String error_message () const;
+
+    template <class V> const V& assume () const;
+    template <class V> const V& get () const;
+
+    String to_string () const;
+    String value_to_string () const;
+};
+typedef std::vector<Hacc> Array;
+struct Pair {
+    String name;
+    Hacc value;
+};
+typedef std::vector<Pair> Object;
+ // Here we're mapping types to their valtypes.
+template <class VTYPE> Valtype valtype_of () {
+    static_assert(sizeof(VTYPE)?false:false, "The aforementioned VTYPE isn't a HACC value type.");
+    return VALNULL;
+}
+template <> Valtype valtype_of<Null   > () { return VALNULL; }
+template <> Valtype valtype_of<Bool   > () { return BOOL   ; }
+template <> Valtype valtype_of<Integer> () { return INTEGER; }
+template <> Valtype valtype_of<Float  > () { return FLOAT  ; }
+template <> Valtype valtype_of<Double > () { return DOUBLE ; }
+template <> Valtype valtype_of<String > () { return STRING ; }
+template <> Valtype valtype_of<Ref    > () { return REF    ; }
+template <> Valtype valtype_of<Array  > () { return ARRAY  ; }
+template <> Valtype valtype_of<Object > () { return OBJECT ; }
+template <> Valtype valtype_of<Error  > () { return ERROR  ; }
+
+ // So, I tried a bunch of ways of implementing this with a union.  Made a big
+ //  mess because of reference-counted strings and whatnot.  In the end we're
+ //  just resorting to subtyping.
+ 
+struct Hacc_Contents {
+    String type;
+    String id;
+    Valtype valtype;
+    Hacc_Contents (String type, String id, Valtype valtype) :
+        type(type), id(id), valtype(valtype)
+    { }
+};
+
+ // Ooh, I forgot we could do things like this.  This isn't so bad after all
+ //  In fact why didn't I think of templates before, when I had so much code
+ //  repitition going on?
+template <class T>
+struct Hacc_Value : Hacc_Contents {
+    T value;
+    Hacc_Value (String type, String id, const T& value) :
+        Hacc_Contents(type, id, valtype_of<T>()), value(value)
+    { }
+};
+
+
+ // Escape string according to HACC rules
+ // Does not add quotes
+String escape_string (String unesc) {
+    String r = "";
     for (auto p = unesc.begin(); p != unesc.end(); p++) {
         switch (*p) {
             case '"': r += "\\\""; break;
@@ -103,172 +235,120 @@ std::string escape (std::string unesc) {
             case '\n': r += "\\n"; break;
             case '\r': r += "\\r"; break;
             case '\t': r += "\\t"; break;
-            default: r += std::string(1, *p); break;
+            default: r += String(1, *p); break;
         }
     }
     return r;
 }
  // unescape is harder to abstract out, so we'll wait till we need it.
 
-
- // Deleting a Hacc tree will delete all subtrees.
-struct Hacc {
-    TYPE type;
-    std::string cl;
-    std::string addr;
-
-    Hacc (TYPE type, std::string cl, std::string addr) : type(type), cl(cl), addr(addr) { }
-    virtual ~Hacc () { }
-    virtual std::string to_string () = 0;
-
-    std::string add_prefix (std::string s) {
-        std::string p = cl;
-        if (!addr.empty()) p += "@" + addr;
-        return p + s;
+ // Escape ident according to HACC rules
+ // Does add quotes if necessary
+String escape_ident (String unesc) {
+    if (unesc.empty()) return "\"\"";
+    for (auto p = unesc.begin(); p != unesc.end(); p++) {
+        if (!isalnum(*p) && *p != '_' && *p != '-')
+            return "\"" + escape_string(unesc) + "\"";
     }
-};
+    return unesc;
+}
 
- // Numbers, strings, refs
-struct Atom : Hacc {
-    Atom (TYPE type, std::string cl, std::string addr) : Hacc(type, cl, addr) { }
-    std::string add_prefix (std::string s) {
-        if (!cl.empty() || !addr.empty())
-            return Hacc::add_prefix("(" + s + ")");
-        else return s;
-    }
-};
- // Arrays and structs
-struct Composite : Hacc {
-    Composite (TYPE type, std::string cl, std::string addr) : Hacc(type, cl, addr) { }
-};
 
-struct Bool : Atom {
-    bool val;
+ // Actually implement Hacc's methods
+template <class V>
+Hacc::Hacc (const V& v) : contents(new Hacc_Value<V>("", "", v)) { }
+template <class V>
+Hacc::Hacc (String type, String id, const V& v) : contents(new Hacc_Value<V>(type, id, v)) { }
+Hacc::Hacc (const Hacc& other) : contents(other.contents) { }  // TODO reference count
+Hacc::~Hacc () { }  // Noop for testing right now
 
-    Bool (int64 val, std::string cl = "", std::string addr = "") : Atom(BOOL, cl, addr), val(val) { }
-     // No destructor
-    std::string to_string () {
-        return add_prefix(val ? "true" : "false");
-    }
-};
-struct Nil : Atom {
-    Nil (std::string cl = "", std::string addr = "") : Atom(NIL, cl, addr) { }
-    std::string to_string () {
-        return add_prefix("nil");
-    }
-};
-struct Integer : Atom {
-    int64 val;
+String Hacc::type () const { return contents->type; }
+String Hacc::id () const { return contents->id; }
+Valtype Hacc::valtype () const { return contents->valtype; }
+template <class V>
+const V& Hacc::assume () const { return static_cast<Hacc_Value<V>*>(contents)->value; }
+template <class V>
+const V& Hacc::get () const {
+    if (valtype() == valtype_of<V>())
+        return assume<V>();
+    else if (valtype() == ERROR) throw valtype();
+    else throw "Valtype mismatch";
+}
 
-    Integer (int64 val, std::string cl = "", std::string addr = "") : Atom(INTEGER, cl, addr), val(val) { }
-     // No destructor
-    std::string to_string () {
-        char s [32];
-        sprintf(s, "%" PRIi64, val);
-        return add_prefix(s);
-    }
-};
-struct Float : Atom {
-    float val;
-
-    Float (float val, std::string cl = "", std::string addr = "") : Atom(FLOAT, cl, addr), val(val) { }
-     // No destructor
-    std::string to_string () {
-        char s [32];
-        sprintf(s, "%g~%08" PRIx32, val, *(uint32*)&val);
-        return add_prefix(s);
-    }
-};
-struct String : Atom {
-    std::string val;
-
-    String (std::string val, std::string cl = "", std::string addr = "") : Atom(STRING, cl, addr), val(val) { }
-     // No destructor
-    std::string to_string () {
-        return add_prefix("\"" + escape(val) + "\"");
-    }
-};
-struct Ref : Atom {
-    std::string target_cl;
-    std::string target_addr;
-
-    Ref (std::string target_cl, std::string target_addr, std::string cl = "", std::string addr = "")
-        : Atom(REF, cl, addr), target_cl(target_cl), target_addr(target_addr)
-    { }
-     // No destructor
-    std::string to_string () {
-        return add_prefix(!target_cl.empty() ? "&" + target_cl + "@" + target_addr : "&@" + target_addr);
-    }
-};
- // key: value pair
-struct Attr {
-    std::string key;
-    Hacc* value;
-    Attr () { }
-    Attr (std::string key, Hacc* value) : key(key), value(value) { }
-// do this manually   ~Attr () { delete value; }
-};
-void destroy_Links_Attrs (Link<Attr>* attrs) {
-    if (attrs) {
-        destroy_Links_Attrs(attrs->tail);
-        delete attrs->head.value;
-        delete attrs;
-    }
-};
-
-struct Object : Composite {
-    VArray<Attr> attrs;
-
-    Object (VArray<Attr> attrs, std::string cl = "", std::string addr = "") : Composite(OBJECT, cl, addr), attrs(attrs) { }
-    ~Object () {
-        for (uint i = 0; i < attrs; i++) {
-            delete attrs[i].value;
+ // Serialize the value part to a string
+String Hacc::value_to_string () const {
+    switch (valtype()) {
+        case VALNULL: return "null";
+        case BOOL: return assume<Bool>() ? "true" : "false";
+        case INTEGER: {
+            char r[32];
+            sprintf(r, "%" PRIi64, assume<Integer>());
+            return r;
         }
-        destroy_VArray(attrs);
-    }
-    std::string to_string () {
-        std::string r = "{";
-        for (uint i = 0; i < attrs; i++) {
-            r += "\"" + escape(attrs[i].key) + "\": " + attrs[i].value->to_string();
-            if (i < attrs - 1) r += ", ";
+        case FLOAT: {
+            char r[32];
+            sprintf(r, "%g~%08" PRIx32, assume<Float>(), *(uint32*)&assume<Float>());
+            return r;
         }
-        return add_prefix(r + "}");
-    }
-};
-struct Array : Composite {
-    VArray<Hacc*> elems;
-
-    Array (VArray<Hacc*> elems, std::string cl = "", std::string addr = "") : Composite(ARRAY, cl, addr), elems(elems) { }
-    ~Array () { destroy_VArray_ptrs(elems); }
-    std::string to_string () {
-        std::string r = "[";
-        for (uint i = 0; i < elems; i++) {
-            r += elems[i]->to_string();
-            if (i < elems - 1) r += ", ";
+        case DOUBLE: {
+            char r [64];
+            sprintf(r, "%lg~%016" PRIx64, assume<Double>(), *(uint64*)&assume<Double>());
+            return r;
         }
-        return add_prefix(r + "]");
+        case STRING: return "\"" + escape_string(assume<String>()) + "\"";
+        case REF: {
+            const Ref& r = assume<Ref>();
+            return (r.type.empty() ? "&" : "&#" + escape_ident(r.type))
+                 + "@" + escape_ident(r.id);
+        }
+        case ARRAY: {
+            const Array& a = assume<Array>();
+            String r = "[";
+            for (auto i = a.begin(); i != a.end(); i++) {
+                r += i->to_string();
+                if (i + 1 != a.end()) r += ", ";
+            }
+            return r + "]";
+        }
+        case OBJECT: {
+            const Object& o = assume<Object>();
+            String r = "{";
+            for (auto i = o.begin(); i != o.end(); i++) {
+                r += escape_ident(i->name);
+                r += ": ";
+                r += i->value.to_string();
+                if (i + 1 != o.end()) r += ", ";
+            }
+            return r + "}";
+        }
+        case ERROR: throw assume<Error>();
+        default: throw Error("Corrupted Hacc tree\n");
     }
-};
+}
+String Hacc::to_string () const {
+    String r = value_to_string();
+    if ((!type().empty() || !id().empty())
+     && valtype() != ARRAY && valtype() != OBJECT)
+        r = "(" + r + ")";
+    if (!id().empty()) r = "@" + escape_ident(id()) + r;
+    if (!type().empty()) r = "#" + escape_ident(type()) + r;
+    return r;
+}
 
+Hacc::operator Bool () const { return valtype() != ERROR; }
+String Hacc::error_message () const { return *this ? "" : assume<Error>().what(); }
 
  // Simple enough we don't need a separate lexer.
 struct Parser {
+    const char* file;
     const char* begin;
     const char* p;
     const char* end;
-    std::string mess = "";
-    Parser (std::string s) : begin(s.data()), p(s.data()), end(s.data()+s.length()) { }
-    Parser (const char* s) : begin(s), p(s), end(s + strlen(s)) { }
+    Parser (String s) : file(""), begin(s.data()), p(s.data()), end(s.data()+s.length()) { }
+    Parser (const char* s) : file(""), begin(s), p(s), end(s + strlen(s)) { }
 
     int look () { return p == end ? EOF : *p; }
 
-    void eat_ws () {
-        while (isspace(look())) p++;
-        if (p[0] == '/' && p+1 != end && p[1] == '/') {
-            while (look() != '\n' && look() != EOF) p++;
-            eat_ws();
-        }
-    }
      // This allows us to safely use scanf, which is so much more
      // convenient than parsing numbers by hand.  Speed is not a
      // big priority here.
@@ -284,96 +364,42 @@ struct Parser {
         return safebuf_array;
     }
 
-    Hacc* error (std::string s) {
-        mess = s;
-        return NULL;
-    }
-    void eat_ident () {
-        while (isalnum(look()) || look() == '_') p++;
-    }
-    std::string parse_ident () {
-        const char* start = p;
-        eat_ident();
-        return std::string(start, p - start);
-    }
-    bool eat_params () {
-        uint depth = 0;
-        for (;;) switch (look()) {
-            case '<': p++; depth++; break;
-            case '>': p++; if (--depth == 0) return true; else break;
-            case EOF: mess = "Template parameter list not terminated"; return false;
-            default: p++;
-        }
-    }
-    std::string parse_class () {
-        const char* start = p;
-        for (;;) {
-            switch (look()) {
-                case '<': if (!eat_params()) return ""; break;
-                case '*': p++; break;
-                case ':':
-                    if (p+1 != end && p[1] == ':') {
-                        p += 2; break;
-                    }  else goto finish;
-                default:
-                    if (isalnum(look()) || look() == '_') {
-                        eat_ident();
-                    } else goto finish;
+    Error error (String s) {
+         // Diagnose line and column number
+         // I'm not sure the col is exactly right
+        uint line = 1;
+        const char* nl = begin - 1;
+        for (const char* p2 = begin; p2 != p; p2++) {
+            if (*p2 == '\n') {
+                line++;
+                nl = p2;
             }
         }
-        finish: return std::string(start, p - start);
+        uint col = p - nl;
+        return Error(s, file, line, col);
     }
 
-     // Parsing of specific types.
-     // Any specific type parser may assume the first character is valid.
-    Hacc* parse_numeric () {
-        int64 val;
-        uint len;
-        if (!sscanf(safebuf(), "%" SCNi64 "%n", &val, &len))
-            return error("Weird number");
-        p += len;
-        switch (look()) {
-            case '~': return parse_bitrep();
-            case '.':
-            case 'e':
-            case 'E':
-            case 'p':
-            case 'P': p -= len; return parse_float();
-            default: return new Integer(val);
+     // The following are subparsers.
+     // Most parsers assume the first character is already correct.
+     // If a parse fails, just throw an exception, because we've got
+     // datatypes with proper destructors now.
+     // Utility parsers for multiple situations.
+
+    void parse_ws () {
+        while (isspace(look())) p++;
+        if (p[0] == '/' && p+1 != end && p[1] == '/') {
+            while (look() != '\n' && look() != EOF) p++;
+            parse_ws();
         }
     }
-    Hacc* parse_float () {
-        float val;
-        uint len;
-        if (!sscanf(safebuf(), "%f%n", &val, &len))
-            return error("Weird number");
-        p += len;
-        switch (look()) {
-            case '~': return parse_bitrep();
-            default: return new Float(val);
-        }
-    }
-    Hacc* parse_bitrep () {
-        p++;  // for the ~
-        uint64 rep;
-        uint len;
-        if (!sscanf(safebuf(), "%" SCNx64 "%n", &rep, &len))
-            return error("No precise bitrep found after ~");
-        p += len;
-        switch (len) {
-            case  8: return new Float(*(float*)&rep);
-            case 16: return new Float(*(double*)&rep);
-            default: return error("Precise bitrep doesn't have 8 or 16 digits");
-        }
-    }
-    std::string parse_stringly () {
+    String parse_stringly () {
         p++;  // for the "
-        std::string r = "";
+        String r = "";
         bool escaped = false;
         for (;;) {
             if (escaped) {
                 switch (look()) {
-                    case EOF: mess = "String not terminated"; return "";
+                    case EOF: throw error("String not terminated by end of input");
                     case '"': r += '"'; break;
                     case '\\': r += "\\"; break;
                     case '/': r += "/"; break;
@@ -382,135 +408,164 @@ struct Parser {
                     case 'n': r += "\n"; break;
                     case 'r': r += "\r"; break;
                     case 't': r += "\t"; break;
-                    default: mess = "Unrecognized escape \\" + std::string(p, 1); return "";
+                    default: throw error("Unrecognized escape sequence \\" + String(p, 1));
                 }
                 escaped = false;
             }
             else {
                 switch (look()) {
-                    case EOF: mess = "String not terminated"; return "";
+                    case EOF: throw error("String not terminated by end of input");
                     case '"': p++; return r;
                     case '\\': escaped = true; break;
-                    default: r += std::string(p, 1);
+                    default: r += String(p, 1);
                 }
             }
             p++;
         }
     }
-    Hacc* parse_string () {
-        std::string r = parse_stringly();
-        if (!mess.empty()) return NULL;
-        else return new String(r);
-    }
-    Hacc* parse_ref () {
-        p++;  // For the &
-        std::string target_cl = "";
-        if (isalpha(look()) || look() == '_') {
-            target_cl = parse_class();
-        }
-        if (look() != '@') return error("Ref didn't have an address starting with &");
-        p++;
-        if (!isalpha(look()) && look() != '_')
-            return error("Ref didn't have an address after the @");
-        std::string target_addr = parse_class();
-        return new Ref(target_cl, target_addr);
-    }
-    Hacc* parse_array () {
-        Link<Hacc*>* elems = NULL;
-        Link<Hacc*>** tailp = &elems;
-        p++;  // for the [
-        for (;;) {
-            eat_ws();
-            switch (look()) {
-                case EOF: mess = "Array not terminated"; goto fail;
-                case ':': mess = "Cannot have : in an array"; goto fail;
-                case ',': p++; break;
-                case ']': {
-                    p++;
-                    auto elemsa = elems->to_VArray();
-                    destroy_Links(elems);
-                    return new Array(elemsa);
-                }
-                default: {
-                    if (Hacc* thing = parse_thing())
-                        build_tail(tailp, thing);
-                    else goto fail;
-                }
+    String parse_ident (String what) {
+        switch (look()) {
+            case EOF: throw error("Expected " + what + ", but ran into the end of input");
+            case '"': return parse_stringly();
+            default: {
+                const char* start = p;
+                while (isalnum(look()) || look() == '_' || look() == '-') p++;
+                if (p == start) throw error("Expected " + what + ", but saw " + String(1, look()));
+                return String(start, p - start);
             }
         }
-        fail: destroy_Links_ptrs(elems); return NULL;
     }
-    Hacc* parse_object () {
-        Link<Attr>* attrs = NULL;
-        Link<Attr>** tailp = &attrs;
-        p++;  // for the left brace
-        std::string key;
-        for (;;) {
-           find_key:
-            eat_ws();
-            switch (look()) {
-                case EOF: mess = "Object not terminated"; goto fail;
-                case ':': mess = "No key found before : in object"; goto fail;
-                case ',': p++; goto find_key;
-                case '}': {
-                    p++;
-                    auto attrsa = attrs->to_VArray();
-                    /*destroy_Links(attrs);*/
-                    return new Object(attrsa);
-                }
-                case '"': key = parse_stringly(); if (!mess.empty()) goto fail; break;
-                default: {
-                    if (isalpha(look())) key = parse_ident();
-                    else { mess = "Key is not string or identifier"; goto fail; }
-                }
-            }
-           find_separator:
-            eat_ws();
-            if (look() != ':') { mess = "Expected : after key"; goto fail; }
-            p++;
-           find_value:
-            eat_ws();
-            switch (look()) {
-                case EOF: mess = "Object not terminated"; goto fail;
-                case ':': mess = "Extra : in object"; goto fail;
-                case ',': mess = "Misplaced comma after : in object"; goto fail;
-                case '}': mess = "No value found after : in object"; goto fail;
-                default: {
-                    if (Hacc* value = parse_thing())
-                        build_tail(tailp, Attr(key, value));
-                    else goto fail;
-                }
-            }
-        }
-        fail: /*destroy_Links_Attrs(attrs);*/ return NULL;
+    String parse_type () {
+        p++;  // For the #
+        return parse_ident("a type after #");
     }
-    Hacc* parse_parens () {
-        p++;  // for the (
-        eat_ws();
-        Hacc* v = parse_thing();
-        if (!v) return NULL;
-        eat_ws();
-        if (look() != ')') return error("Extra stuff in parens");
-        p++;
-        return v;
+    String parse_id () {
+        p++;  // For the @
+        return parse_ident("an id after @");
     }
 
-    Hacc* add_prefix (Hacc* r, std::string cl, std::string addr) {
-        if (!r) return NULL;
-        if ((!cl.empty() && !r->cl.empty())
-         || (!addr.empty() && !r->addr.empty())) {
-            delete r;
-            return error("Too many prefixes");
+     // Parsing of specific valtypes.
+     // This one could return an int, float, or double.
+    Hacc parse_numeric () {
+        int64 val;
+        uint len;
+        if (!sscanf(safebuf(), "%" SCNi64 "%n", &val, &len))
+            throw error("Weird number");
+        p += len;
+        switch (look()) {
+            case '~': return parse_bitrep();
+            case '.':
+            case 'e':
+            case 'E':
+            case 'p':  // backtrack!
+            case 'P': p -= len; return parse_floating();
+            default: return Hacc(val);
         }
-        if (r->cl.empty()) r->cl = cl;
-        if (r->addr.empty()) r->addr = addr;
+    }
+    Hacc parse_floating () {
+        double val;
+        uint len;
+        if (!sscanf(safebuf(), "%lg%n", &val, &len))
+            throw error("Weird number");
+        p += len;
+        switch (look()) {
+            case '~': return parse_bitrep();
+            default: return Hacc(val);
+        }
+    }
+    Hacc parse_bitrep () {
+        p++;  // for the ~
+        uint64 rep;
+        uint len;
+        if (!sscanf(safebuf(), "%" SCNx64 "%n", &rep, &len))
+            throw error("Missing precise bitrep after ~");
+        p += len;
+        switch (len) {
+            case  8: return Hacc(*(float*)&rep);
+            case 16: return Hacc(*(double*)&rep);
+            default: throw error("Precise bitrep doesn't have 8 or 16 digits");
+        }
+    }
+    Hacc parse_string () {
+        return Hacc(parse_stringly());
+    }
+    Hacc parse_ref () {
+        String type;
+        String id;
+        p++;  // For the &
+        if (look() == '#') type = parse_type();
+        if (look() == '@') id = parse_id();
+        else throw error("Ref is missing an @id");
+        return Hacc(Ref{type, id});
+    }
+    Hacc parse_array () {
+        Array a;
+        p++;  // for the [
+        for (;;) {
+            parse_ws();
+            switch (look()) {
+                case EOF: throw error("Array not terminated");
+                case ':': throw error("Cannot have : in an array");
+                case ',': p++; break;
+                case ']': p++; return Hacc(a);
+                default: a.push_back(parse_thing()); break;
+            }
+        }
+    }
+    Hacc parse_object () {
+        Object o;
+        p++;  // for the left brace
+        String key;
+        for (;;) {
+          find_key:
+            parse_ws();
+            switch (look()) {
+                case EOF: throw error("Object not terminated");
+                case ':': throw error("Missing name before : in object");
+                case ',': p++; goto find_key;
+                case '}': p++; return Hacc(o);
+                default: key = parse_ident("an attribute name or the end of the object"); break;
+            }
+          find_separator:
+            parse_ws();
+            if (look() == ':') p++;
+            else throw error("Missing : after name");
+          find_value:
+            parse_ws();
+            switch (look()) {
+                case EOF: throw error("Object not terminated");
+                case ':': throw error("Extra : in object");
+                case ',': throw error("Misplaced comma after : in object");
+                case '}': throw error("Missing value after : in object");
+                default: o.push_back(Pair{key, parse_thing()}); break;
+            }
+        }
+    }
+    Hacc parse_parens () {
+        p++;  // for the (
+        Hacc r = parse_thing();
+        parse_ws();
+        if (look() == ')') p++;
+        else throw error("Extra stuff in parens");
         return r;
     }
 
-    Hacc* parse_thing () {
-        eat_ws();
-        std::string cl = "";
-        std::string addr = "";
+    Hacc add_prefix (Hacc r, String type, String id) {
+        if (!type.empty()) {
+            if (r.type().empty()) r.contents->type = type;
+            else throw error("Too many #types");
+        }
+        if (!id.empty()) {
+            if (r.id().empty()) r.contents->id = id;
+            else throw error("Too many @ids");
+        }
+        return r;
+    }
+
+    Hacc parse_thing () {
+        parse_ws();
+        String type = "";
+        String id = "";
         for (;;) switch (look()) {
             case '+':
             case '-':
@@ -523,68 +578,53 @@ struct Parser {
             case '6':
             case '7':
             case '8':
-            case '9': return add_prefix(parse_numeric(), cl, addr);
-            case '~': return add_prefix(parse_bitrep(), cl, addr);
-            case '"': return add_prefix(parse_string(), cl, addr);
-            case '[': return add_prefix(parse_array(), cl, addr);
-            case '{': return add_prefix(parse_object(), cl, addr);
-            case '(': return add_prefix(parse_parens(), cl, addr);
-            case '&': return add_prefix(parse_ref(), cl, addr);
+            case '9': return add_prefix(parse_numeric(), type, id);
+            case '~': return add_prefix(parse_bitrep(), type, id);
+            case '"': return add_prefix(parse_string(), type, id);
+            case '[': return add_prefix(parse_array(), type, id);
+            case '{': return add_prefix(parse_object(), type, id);
+            case '(': return add_prefix(parse_parens(), type, id);
+            case '&': return add_prefix(parse_ref(), type, id);
+            case '#':
+                if (type.empty()) type = parse_type();
+                else throw error("Too many #classes");
+                break;
             case '@':
-                if (addr.empty()) {
-                    p++; addr = parse_ident(); break;
+                if (id.empty()) id = parse_id();
+                else throw error("Too many @ids");
+                break;
+            default: {
+                if (end - p >= 4 && 0==strncmp(p, "null", 4)) {
+                    p += 4;
+                    return add_prefix(Hacc(null), type, id);
                 }
-                else return error("Too many @addresses");
-            default:
-                if (isalpha(look()) || look() == '_') {
-                    std::string cl_or_sym = parse_class();
-                    if (cl_or_sym == "true")
-                        return new Bool(true, cl, addr);
-                    else if (cl_or_sym == "false")
-                        return new Bool(false, cl, addr);
-                    else if (cl_or_sym == "nil")
-                        return new Nil(cl, addr);
-                    else {
-                        if (cl.empty()) {
-                            cl = cl_or_sym; break;
-                        }
-                        else return error("Too many classes");
-                    }
+                if (end - p >= 4 && 0==strncmp(p, "true", 4)) {
+                    p += 4;
+                    return add_prefix(Hacc(true), type, id);
                 }
-                else return error("Confused");
-        }
-    }
-    Hacc* parse_all () {
-        Hacc* r = parse_thing();
-        if (!r) return NULL;
-        eat_ws();
-        if (look() == EOF)
-            return r;
-        else {
-            delete r;
-            return error("Extra stuff at end of document");
-        }
-    }
-    std::string diagnose () {
-        uint line = 1;
-        const char* nl = begin - 1;
-        for (const char* p2 = begin; p2 != p; p2++) {
-            if (*p2 == '\n') {
-                line++;
-                nl = p2;
+                if (end - p >= 5 && 0==strncmp(p, "false", 5)) {
+                    p += 5;
+                    return add_prefix(Hacc(false), type, id);
+                }
+                else throw error("Unknown sequence");
             }
         }
-        uint col = p - nl;
-        char* ls = new char [17];  // max length of a uint
-        sprintf(ls, "%" PRIu32, line);
-        char* cs = new char [17];
-        sprintf(cs, "%" PRIu32, col);
-        std::string r = mess + " at line " + ls + ", col " + cs;
-        delete[] ls;
-        delete[] cs;
-        return r;
+    }
+    Hacc parse_all () {
+        Hacc r = parse_thing();
+        parse_ws();
+        if (look() == EOF) return r;
+        else throw error("Extra stuff at end of document");
+    }
+    Hacc parse () {
+        try { return parse_all(); }
+        catch (Error e) { return Hacc(e); }
     }
 };
+
+ // Finally:
+Hacc parse (String s) { return Parser(s).parse(); }
+Hacc parse (const char* s) { return Parser(s).parse(); }
 
 }
 
@@ -592,25 +632,23 @@ struct Parser {
 
 #ifndef DISABLE_TESTS
 
-void hacc_string_test (std::string from, std::string to) {
-    auto parser = hacc::Parser(from);
-    hacc::Hacc* tree = parser.parse_all();
-    const char* name = (hacc::escape(from) + " -> " + hacc::escape(to)).c_str();
+void hacc_string_test (hacc::String from, hacc::String to) {
+    hacc::Hacc tree = hacc::parse(from);
+    const char* name = (hacc::escape_string(from) + " -> " + hacc::escape_string(to)).c_str();
     if (!tree) {
         fail(name);
-        printf(" # Parse failed: %s\n", parser.diagnose().c_str());
+        printf(" # Parse failed: %s\n", tree.error_message().c_str());
     }
-    else is(tree->to_string(), to, name);
-    delete tree;
+    else is(tree.to_string(), to, name);
 }
 
 Tester hacc_tester ("hacc", [](){
-    plan(45);
+    plan(46);
      printf(" # Bools\n");  // 2
     hacc_string_test("true", "true");
     hacc_string_test("false", "false");
-     printf(" # Nil\n");  // 1
-    hacc_string_test("nil", "nil");
+     printf(" # Null\n");  // 1
+    hacc_string_test("null", "null");
      printf(" # Integers\n");  // 8
     hacc_string_test("1", "1");
     hacc_string_test("5425432", "5425432");
@@ -623,12 +661,13 @@ Tester hacc_tester ("hacc", [](){
      printf(" # Floats\n");  // 6
     hacc_string_test("1~3f800000", "1~3f800000");
     hacc_string_test("1.0~3f800000", "1~3f800000");
-    hacc_string_test("1.0", "1~3f800000");
+    hacc_string_test("1.0", "1~3ff0000000000000");
     hacc_string_test("~3f800000", "1~3f800000");
-    hacc_string_test("2.0", "2~40000000");
-    hacc_string_test("0.5", "0.5~3f000000");
+    hacc_string_test("~3ff0000000000000", "1~3ff0000000000000");
+    hacc_string_test("2.0", "2~4000000000000000");
+    hacc_string_test("0.5", "0.5~3fe0000000000000");
      printf(" # Strings\n");  // 4
-    is(hacc::escape("\"\\\b\f\n\r\t"), "\\\"\\\\\\b\\f\\n\\r\\t", "hacc::escape does its job");
+    is(hacc::escape_string("\"\\\b\f\n\r\t"), "\\\"\\\\\\b\\f\\n\\r\\t", "hacc::escape_string does its job");
     hacc_string_test("\"asdfasdf\"", "\"asdfasdf\"");
     hacc_string_test("\"\"", "\"\"");
     hacc_string_test("\"\\\"\\\\\\b\\f\\n\\r\\t\"", "\"\\\"\\\\\\b\\f\\n\\r\\t\"");
@@ -638,29 +677,29 @@ Tester hacc_tester ("hacc", [](){
     hacc_string_test("[1, 2, 3]", "[1, 2, 3]");
     hacc_string_test("[ 1, 2, 3 ]", "[1, 2, 3]");
     hacc_string_test("[, 1 2,,,, 3,]", "[1, 2, 3]");
-    hacc_string_test("[~3f800000, -45, \"asdf]\", nil]", "[1~3f800000, -45, \"asdf]\", nil]");
+    hacc_string_test("[~3f800000, -45, \"asdf]\", null]", "[1~3f800000, -45, \"asdf]\", null]");
     hacc_string_test("[[[][]][[]][][][][[[[[[]]]]]]]", "[[[], []], [[]], [], [], [], [[[[[[]]]]]]]");
     hacc_string_test("[1, 2, [3, 4, 5], 6, 7]", "[1, 2, [3, 4, 5], 6, 7]");
      printf(" # Objects\n");  // 7
     hacc_string_test("{}", "{}");
-    hacc_string_test("{\"a\": 1}", "{\"a\": 1}");
-    hacc_string_test("{a: 1}", "{\"a\": 1}");
-    hacc_string_test("{a: 1, b: 2, ccc: 3}", "{\"a\": 1, \"b\": 2, \"ccc\": 3}");
-    hacc_string_test("{ , a: -32 b:\"sadf\" ,,,,,,,c:nil,}", "{\"a\": -32, \"b\": \"sadf\", \"c\": nil}");
-    hacc_string_test("{\"\\\"\\\\\\b\\f\\n\\r\\t\": nil}", "{\"\\\"\\\\\\b\\f\\n\\r\\t\": nil}");
-    hacc_string_test("{a: {b: {c: {} d: {}} e: {}}}", "{\"a\": {\"b\": {\"c\": {}, \"d\": {}}, \"e\": {}}}");
+    hacc_string_test("{\"a\": 1}", "{a: 1}");
+    hacc_string_test("{a: 1}", "{a: 1}");
+    hacc_string_test("{a: 1, b: 2, ccc: 3}", "{a: 1, b: 2, ccc: 3}");
+    hacc_string_test("{ , a: -32 b:\"sadf\" ,,,,,,,c:null,}", "{a: -32, b: \"sadf\", c: null}");
+    hacc_string_test("{\"\\\"\\\\\\b\\f\\n\\r\\t\": null}", "{\"\\\"\\\\\\b\\f\\n\\r\\t\": null}");
+    hacc_string_test("{a: {b: {c: {} d: {}} e: {}}}", "{a: {b: {c: {}, d: {}}, e: {}}}");
      printf(" # Arrays and Objects\n");  // 2
-    hacc_string_test("[{a: 1, b: []} [4, {c: {d: []}}]]", "[{\"a\": 1, \"b\": []}, [4, {\"c\": {\"d\": []}}]]");
-    hacc_string_test("{a: []}", "{\"a\": []}");
+    hacc_string_test("[{a: 1, b: []} [4, {c: {d: []}}]]", "[{a: 1, b: []}, [4, {c: {d: []}}]]");
+    hacc_string_test("{a: []}", "{a: []}");
      printf(" # Refs\n");  // 2
     hacc_string_test("&@an_addr3432", "&@an_addr3432");
-    hacc_string_test("&a_class@an_addr", "&a_class@an_addr");
+    hacc_string_test("&#a_class@an_addr", "&#a_class@an_addr");
      printf(" # Prefixes\n");  // 5
-    hacc_string_test("int32(1)", "int32(1)");
-    hacc_string_test("bool(false)", "bool(false)");
-    hacc_string_test("VArray<int32>[1, 2, 3]", "VArray<int32>[1, 2, 3]");
-    hacc_string_test("int32@one(1)", "int32@one(1)");
-    hacc_string_test("int8*@cp(&int8@c)", "int8*@cp(&int8@c)");
+    hacc_string_test("#int32(1)", "#int32(1)");
+    hacc_string_test("#bool(false)", "#bool(false)");
+    hacc_string_test("#\"VArray<int32>\"[1, 2, 3]", "#\"VArray<int32>\"[1, 2, 3]");
+    hacc_string_test("#int32@one(1)", "#int32@one(1)");
+    hacc_string_test("#\"int8*\"@cp(&#int8@c)", "#\"int8*\"@cp(&#int8@c)");
 });
 
 #endif

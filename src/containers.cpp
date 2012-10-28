@@ -39,6 +39,7 @@ template <class C>
 void destroy_VArray_ptrs (VArray<C*> a) {
     for (auto p = a.begin(); p != a.end(); p++)
         delete *p;
+    delete[] a.p;
 }
 
 
