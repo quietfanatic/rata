@@ -72,7 +72,15 @@ void is (A a, B b, const char* name) {
 }
 
  // special cased for diagnostic convenience.
- // Eventually we'll want to run a and b through RSON to diagnose.
+ // Eventually we'll want to run a and b through HACC to diagnose.
+template <class C>
+void is (C* a, C* b, const char* name) {
+    if (a == b) pass(name);
+    else {
+        fail(name);
+        printf(" # expected %lx\n #  but got %lx\n", (unsigned long)b, (unsigned long)a);
+    }
+}
 void is (int32 a, int32 b, const char* name) {
     if (a == b) pass(name);
     else {

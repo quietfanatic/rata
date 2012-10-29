@@ -137,24 +137,26 @@ template <class C> Generic_Haccability Haccability<C>::generic (
 
  // Default haccables
 
-#define HACCABLE_INTEGER(t) \
+#define HACCABLE_CONVERTIBLE(t, valtype) \
 template <> struct Haccable<t> : hacc::Haccability<t> { \
     static hacc::String hacctype () { return #t; } \
     static hacc::Hacc to (const t& i) { return hacc::Hacc(i); } \
-    static t from (hacc::Hacc hacc) { return hacc.get_integer(); } \
+    static t from (hacc::Hacc hacc) { return hacc.get_##valtype(); } \
 };
 
 typedef char char8;
-HACCABLE_INTEGER(char8);
-HACCABLE_INTEGER(int8);
-HACCABLE_INTEGER(uint8);
-HACCABLE_INTEGER(int16);
-HACCABLE_INTEGER(uint16);
-HACCABLE_INTEGER(int32);
-HACCABLE_INTEGER(uint32);
-HACCABLE_INTEGER(int64);
-HACCABLE_INTEGER(uint64);
-
+HACCABLE_CONVERTIBLE(char8, integer);
+HACCABLE_CONVERTIBLE(int8, integer);
+HACCABLE_CONVERTIBLE(uint8, integer);
+HACCABLE_CONVERTIBLE(int16, integer);
+HACCABLE_CONVERTIBLE(uint16, integer);
+HACCABLE_CONVERTIBLE(int32, integer);
+HACCABLE_CONVERTIBLE(uint32, integer);
+HACCABLE_CONVERTIBLE(int64, integer);
+HACCABLE_CONVERTIBLE(uint64, integer);
+HACCABLE_CONVERTIBLE(float, float);
+HACCABLE_CONVERTIBLE(double, double);
+HACCABLE_CONVERTIBLE(hacc::String, string);
 
 
 
@@ -165,25 +167,28 @@ HACCABLE_INTEGER(uint64);
 
 Tester haccable_tester ("haccable", [](){
     using namespace hacc;
-    plan(27);
+    plan(36);
 
-#define HACCABLE_TEST_INTEGER(t) \
+#define HACCABLE_TEST_ROUNDTRIP(t, value) \
     { \
-        is(from_hacc<t>(to_hacc<t>(32)), (t)32, #t " to and from Hacc"); \
-        t x = 0; \
-        update_from_hacc<t>(x, to_hacc<t>(32)); \
-        is(x, (t)32, #t " to and update from Hacc"); \
-        is(*new_from_hacc<t>(to_hacc<t>(32)), (t)32, #t " to and new from Hacc"); \
+        is(from_hacc<t>(to_hacc<t>(t(value))), t(value), #t " to and from Hacc"); \
+        t x; \
+        update_from_hacc<t>(x, to_hacc<t>(t(value))); \
+        is(x, t(value), #t " to and update from Hacc"); \
+        is(*new_from_hacc<t>(to_hacc<t>(t(value))), t(value), #t " to and new from Hacc"); \
     }
-    HACCABLE_TEST_INTEGER(char)
-    HACCABLE_TEST_INTEGER(int8)
-    HACCABLE_TEST_INTEGER(uint8)
-    HACCABLE_TEST_INTEGER(int16)
-    HACCABLE_TEST_INTEGER(uint16)
-    HACCABLE_TEST_INTEGER(int32)
-    HACCABLE_TEST_INTEGER(uint32)
-    HACCABLE_TEST_INTEGER(int64)
-    HACCABLE_TEST_INTEGER(uint64)
+    HACCABLE_TEST_ROUNDTRIP(char, 32)
+    HACCABLE_TEST_ROUNDTRIP(int8, -54)
+    HACCABLE_TEST_ROUNDTRIP(uint8, 132)
+    HACCABLE_TEST_ROUNDTRIP(int16, -1234)
+    HACCABLE_TEST_ROUNDTRIP(uint16, 53154)
+    HACCABLE_TEST_ROUNDTRIP(int32, -2000000000)
+    HACCABLE_TEST_ROUNDTRIP(uint32, 4000000000)
+    HACCABLE_TEST_ROUNDTRIP(int64, -1000000000000)
+    HACCABLE_TEST_ROUNDTRIP(uint64, 1000000000000)
+    HACCABLE_TEST_ROUNDTRIP(float, 3.14159)
+    HACCABLE_TEST_ROUNDTRIP(double, 3.1415926535)
+    HACCABLE_TEST_ROUNDTRIP(std::string, "asdf")
 });
 
 #endif

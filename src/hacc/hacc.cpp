@@ -119,7 +119,7 @@ enum Valtype {
     OBJECT,
     ERROR
 };
-
+const char* valtype_name (Valtype);
 
  // TODO: allow the includer to redefine these
 typedef std::nullptr_t Null;
@@ -214,7 +214,7 @@ struct Hacc {
 
     Error valtype_error (String what) const {
         if (valtype() == ERROR) return assume_error();
-        else return Error("This Hacc is not " + what);
+        else return Error("This Hacc is not " + what + ", it's of type " + valtype_name(valtype()));
     }
 };
 typedef std::vector<Hacc> Array;
@@ -238,6 +238,21 @@ template <> Valtype valtype_of<Ref    > () { return REF    ; }
 template <> Valtype valtype_of<Array  > () { return ARRAY  ; }
 template <> Valtype valtype_of<Object > () { return OBJECT ; }
 template <> Valtype valtype_of<Error  > () { return ERROR  ; }
+const char* valtype_name (Valtype t) {
+    switch (t) {
+        case VALNULL: return "null";
+        case BOOL: return "bool";
+        case INTEGER: return "integer";
+        case FLOAT: return "float";
+        case DOUBLE: return "double";
+        case STRING: return "string";
+        case REF: return "ref";
+        case ARRAY: return "array";
+        case OBJECT: return "object";
+        case ERROR: return "error";
+        default: return "corrupted";
+    }
+}
 
  // So, I tried a bunch of ways of implementing this with a union.  Made a big
  //  mess because of reference-counted strings and whatnot.  In the end we're
@@ -350,10 +365,10 @@ const Error&  Hacc::assume_error   () const { return static_cast<Hacc_Value<Erro
         default: throw valtype_error("a number");
     }
 }
-const String& Hacc::get_string  () const { if (valtype() != STRING) return assume_string(); else throw valtype_error("a string"); }
-const Ref&    Hacc::get_ref     () const { if (valtype() != REF) return assume_ref(); else throw valtype_error("a ref"); }
-const Array&  Hacc::get_array   () const { if (valtype() != ARRAY) return assume_array(); else throw valtype_error("an array"); }
-const Object& Hacc::get_object  () const { if (valtype() != OBJECT) return assume_object(); else throw valtype_error("an object"); }
+const String& Hacc::get_string  () const { if (valtype() == STRING) return assume_string(); else throw valtype_error("a string"); }
+const Ref&    Hacc::get_ref     () const { if (valtype() == REF) return assume_ref(); else throw valtype_error("a ref"); }
+const Array&  Hacc::get_array   () const { if (valtype() == ARRAY) return assume_array(); else throw valtype_error("an array"); }
+const Object& Hacc::get_object  () const { if (valtype() == OBJECT) return assume_object(); else throw valtype_error("an object"); }
  // Phew!  So many lines for such simple concepts.
 
 
