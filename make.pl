@@ -15,7 +15,7 @@ my @cppc_output_flag = qw(-o);
 
 my $main_program = 'rata';
 my $main_cpp = 'src/main.cpp';
-my @all_cpps = glob 'src/*.cpp src/*.h src/*.hpp';
+my @all_cpps = glob 'src/*.cpp src/*/*.cpp src/*.h src/*.hpp';
 
 
 phony 'test', $main_program, sub {
