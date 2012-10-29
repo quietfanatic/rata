@@ -85,16 +85,16 @@ struct Generic_Haccability {
 
  // Now the usage API, which is comparatively so much simpler.
 
-template <class C>
-Hacc to_hacc (const C& thing) { return Haccable<C>::to(thing); }
-template <class C>
-C from_hacc (Hacc hacc) { return Haccable<C>::from(hacc); }
-
+template <class C> String hacctype () { return Haccable<C>::hacctype(); }
+template <class C> Hacc to_hacc (const C& thing) { return Haccable<C>::to(thing); }
+template <class C> C from_hacc (Hacc hacc) { return Haccable<C>::from(hacc); }
+template <class C> void update_from_hacc (C& thing, Hacc hacc) { Haccable<C>::update_from(thing, hacc); }
+template <class C> C* new_from_hacc (Hacc hacc) { return Haccable<C>::new_from(hacc); }
 
 template <class C>
 struct Haccability {
      // The class doesn't actually have to have a type name.
-    static String hacctype;
+    static String hacctype () { return ""; }
      // Provide defaults
     static Hacc to (const C& thing) {
         throw std::logic_error(
@@ -127,7 +127,7 @@ struct Haccability {
 
  // Create
 template <class C> Generic_Haccability Haccability<C>::generic (
-    Haccable<C>::hacctype, typeid(C),
+    Haccable<C>::hacctype(), typeid(C),
     reinterpret_cast<to_f*>(Haccable<C>::to),
     reinterpret_cast<update_f*>(Haccable<C>::update_from),
     reinterpret_cast<new_f*>(Haccable<C>::new_from)
@@ -135,13 +135,55 @@ template <class C> Generic_Haccability Haccability<C>::generic (
 
 }
 
+ // Default haccables
+
+#define HACCABLE_INTEGER(t) \
+template <> struct Haccable<t> : hacc::Haccability<t> { \
+    static hacc::String hacctype () { return #t; } \
+    static hacc::Hacc to (const t& i) { return hacc::Hacc(i); } \
+    static t from (hacc::Hacc hacc) { return hacc.get_integer(); } \
+};
+
+typedef char char8;
+HACCABLE_INTEGER(char8);
+HACCABLE_INTEGER(int8);
+HACCABLE_INTEGER(uint8);
+HACCABLE_INTEGER(int16);
+HACCABLE_INTEGER(uint16);
+HACCABLE_INTEGER(int32);
+HACCABLE_INTEGER(uint32);
+HACCABLE_INTEGER(int64);
+HACCABLE_INTEGER(uint64);
+
+
+
+
+
 #else
 
 #ifndef DISABLE_TESTS
 
 Tester haccable_tester ("haccable", [](){
-    plan(1);
-    pass("Start testing haccables.");
+    using namespace hacc;
+    plan(27);
+
+#define HACCABLE_TEST_INTEGER(t) \
+    { \
+        is(from_hacc<t>(to_hacc<t>(32)), (t)32, #t " to and from Hacc"); \
+        t x = 0; \
+        update_from_hacc<t>(x, to_hacc<t>(32)); \
+        is(x, (t)32, #t " to and update from Hacc"); \
+        is(*new_from_hacc<t>(to_hacc<t>(32)), (t)32, #t " to and new from Hacc"); \
+    }
+    HACCABLE_TEST_INTEGER(char)
+    HACCABLE_TEST_INTEGER(int8)
+    HACCABLE_TEST_INTEGER(uint8)
+    HACCABLE_TEST_INTEGER(int16)
+    HACCABLE_TEST_INTEGER(uint16)
+    HACCABLE_TEST_INTEGER(int32)
+    HACCABLE_TEST_INTEGER(uint32)
+    HACCABLE_TEST_INTEGER(int64)
+    HACCABLE_TEST_INTEGER(uint64)
 });
 
 #endif
