@@ -9,9 +9,10 @@
 
 
 int main (int argc, char** argv) {
-    if (argc > 2 && 0==strcmp(argv[1], "--test")) {
-        run_test(argv[2]);
-        exit(0);
+    if (argc >= 3) {
+        if (0==strcmp(argv[1], "--test")) {
+            tap::run_tester_named(argv[2]);
+        }
     }
     printf("hello\n");
     return 0;

@@ -1,26 +1,9 @@
 
-#ifdef HEADER
+#include "strings.h"
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+#include <string.h>
 
-namespace hacc {
-
- // Escape string according to HACC rules
- // Does not add quotes
-String escape_string (String);
- // Escape ident according to HACC rules
- // Does add quotes if necessary
-String escape_ident (String);
- // unescape is harder to abstract out, so we'll wait till we need it.
- // Serialize the value part to a string
-String hacc_value_to_string (Hacc);
-
- // Write a Hacc to a string
-String hacc_to_string (Hacc);
- // Read a Hacc from a string
-Hacc hacc_from_string (String);
-
-}
-
-#else
 
 namespace hacc {
 
@@ -63,7 +46,7 @@ String hacc_value_to_string (Hacc h) {
         case FLOAT: {
             char r[32];
             float f = h.assume_float();
-            sprintf(r, "%g~%08" PRIx32, f, *(uint32*)&f);
+            sprintf(r, "%g~%08x", f, *(uint32*)&f);
             return r;
         }
         case DOUBLE: {
@@ -328,11 +311,11 @@ struct Parser {
 
     Hacc add_prefix (Hacc r, String type, String id) {
         if (!type.empty()) {
-            if (r.type().empty()) r.contents->type = type;
+            if (r.type().empty()) r.set_type(type);
             else throw error("Too many #types");
         }
         if (!id.empty()) {
-            if (r.id().empty()) r.contents->id = id;
+            if (r.id().empty()) r.set_id(id);
             else throw error("Too many @ids");
         }
         return r;
@@ -406,9 +389,11 @@ Hacc hacc_from_string (const char* s) { return Parser(s).parse(); }
 }
 
 #ifndef DISABLE_TESTS
+#include "tap.h"
 
 void hacc_string_test (hacc::String from, hacc::String to) {
     using namespace hacc;
+    using namespace tap;
     Hacc tree = hacc_from_string(from);
     const char* name = (escape_string(from) + " -> " + escape_string(to)).c_str();
     if (!tree) {
@@ -418,7 +403,8 @@ void hacc_string_test (hacc::String from, hacc::String to) {
     else is(hacc_to_string(tree), to, name);
 }
 
-Tester hacc_strings_tester ("hacc-strings", [](){
+tap::Tester hacc_strings_tester ("hacc-strings", [](){
+    using namespace tap;
     plan(46);
      printf(" # Bools\n");  // 2
     hacc_string_test("true", "true");
@@ -480,5 +466,4 @@ Tester hacc_strings_tester ("hacc-strings", [](){
 
 #endif
 
-#endif
 

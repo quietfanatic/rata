@@ -8,14 +8,13 @@
 
 #include <Box2D/Box2D.h>
 #include "khash.h"
+#include "hacc/everything.h"
 
 #endif
 
 #include "utility.cpp"
 #include "containers.cpp"
 #include "registries.cpp"
-#include "hacc/everything.cpp"
-#include "testing.cpp"
 #include "debug.cpp"
 #include "math.cpp"
 

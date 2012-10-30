@@ -91,6 +91,7 @@ struct Named {
 #else
 
 #ifndef DISABLE_TESTS
+#include "hacc/tap.h"
 
 struct Named_Tester : Named<Named_Tester> {
     uint x;
@@ -100,7 +101,8 @@ struct Named_Tester_2 : Named<Named_Tester_2> {
     Named_Tester_2 (CStr name) : Named(name) { }
 };
 
-Tester registries_tester ("registries", [](){
+tap::Tester registries_tester ("registries", [](){
+    using namespace tap;
     plan(8);
     {
         Named_Tester t1 ("t1", 51);

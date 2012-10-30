@@ -140,8 +140,10 @@ struct Hash<C*> {
 #else
 
 #ifndef DISABLE_TESTS
+#include "hacc/tap.h"
 
-Tester containers_tester ("containers", [](){
+tap::Tester containers_tester ("containers", [](){
+    using namespace tap;
     plan(7);
     Hash<int*> it;
     ok(!it.exists("xyz"), "Hash<>::exists() reports false on noninserted element");
