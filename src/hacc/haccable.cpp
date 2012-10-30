@@ -50,7 +50,6 @@ using to_f = Hacc (const void*);
 using update_f = void (void*, Hacc);
 using new_f = void* (Hacc);
 
-
 struct Generic_Haccability {
     String hacctype;
     String cpptype;  // Non-portable, so don't look! :)
@@ -83,10 +82,21 @@ struct Generic_Haccability {
     }
 };
 
+ // Utility for generating an id based on the memory location of a thing
+String id_from_address (const void* p) {
+    char r [17];
+    sprintf(r, "%lx", (unsigned long)p);
+    return (const char*)r;
+}
+
  // Now the usage API, which is comparatively so much simpler.
 
 template <class C> String hacctype () { return Haccable<C>::hacctype(); }
-template <class C> Hacc to_hacc (const C& thing) { return Haccable<C>::to(thing); }
+template <class C> Hacc to_hacc (const C& thing) {
+    Hacc r = Haccable<C>::to(thing);
+    r.default_type_id(Haccable<C>::hacctype(), id_from_address(&thing));
+    return r;
+}
 template <class C> C from_hacc (Hacc hacc) { return Haccable<C>::from(hacc); }
 template <class C> void update_from_hacc (C& thing, Hacc hacc) { Haccable<C>::update_from(thing, hacc); }
 template <class C> C* new_from_hacc (Hacc hacc) { return Haccable<C>::new_from(hacc); }
@@ -167,7 +177,7 @@ HACCABLE_CONVERTIBLE(hacc::String, string);
 
 Tester haccable_tester ("haccable", [](){
     using namespace hacc;
-    plan(36);
+    plan(39);
 
 #define HACCABLE_TEST_ROUNDTRIP(t, value) \
     { \
@@ -177,7 +187,7 @@ Tester haccable_tester ("haccable", [](){
         is(x, t(value), #t " to and update from Hacc"); \
         is(*new_from_hacc<t>(to_hacc<t>(t(value))), t(value), #t " to and new from Hacc"); \
     }
-    HACCABLE_TEST_ROUNDTRIP(char, 32)
+    HACCABLE_TEST_ROUNDTRIP(char8, 32)
     HACCABLE_TEST_ROUNDTRIP(int8, -54)
     HACCABLE_TEST_ROUNDTRIP(uint8, 132)
     HACCABLE_TEST_ROUNDTRIP(int16, -1234)
@@ -189,6 +199,7 @@ Tester haccable_tester ("haccable", [](){
     HACCABLE_TEST_ROUNDTRIP(float, 3.14159)
     HACCABLE_TEST_ROUNDTRIP(double, 3.1415926535)
     HACCABLE_TEST_ROUNDTRIP(std::string, "asdf")
+    HACCABLE_TEST_ROUNDTRIP(std::string, "\n\\\"")
 });
 
 #endif

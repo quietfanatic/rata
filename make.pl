@@ -9,7 +9,7 @@ use autodie qw(:all);
 
 my $cppc = 'g++-4.7';
 my @cppc_flags = qw(-std=c++11 -fmax-errors=5);
-my @devel_flags = qw(-Wall -Wno-format-security -Wno-unused-label -ggdb);
+my @devel_flags = qw(-Wall -Wno-format-security -Wno-unused-label -fwhole-program -ggdb);
 my @libs = qw(-lGL -lglfw -lSOIL lib/libBox2D.a);
 my @cppc_output_flag = qw(-o);
 
