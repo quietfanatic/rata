@@ -14,11 +14,11 @@ This package:
        C++ types, through a mechanism called Haccable
     - Provides default Haccable bindings for many standard C++ types, including:
         - Unboxed integers and floating point numbers of various sizes
-        - std::string, std::vector, std::unordered_map, and std::tuple
-        - Pointers and references to Haccable types
-    - Provides functions to easily serialize C++ objects to and from strings
+    TODO- std::string, std::vector, std::unordered_map, and std::tuple
+    TODO- Pointers and references to Haccable types
+TODO- Provides functions to easily serialize C++ objects to and from strings
        and files, using Haccable bindings
-    - Provides a base class called Saved that lets all instantiations be collected
+TODO- Provides a base class called Saved that lets all instantiations be collected
        and saved to a file simultaneously
     - Provides a tiny TAP testing library that uses HACC to display debugging
        information

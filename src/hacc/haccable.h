@@ -13,28 +13,6 @@
  // Aren't you glad I got over my hatred of RTTI instead?
 
 
- // Well, you're still gonna populate a pseudo-namespace with static functions,
- // but that shouldn't be hard to figure out.  Basically, for any type you're gonna:
- //
- // template <>
- // struct Haccable<My_Thing> : Haccabililty<My_Thing> {
- //     String hacctype = "My_Thing";
- //     static Hacc to (const My_Thing& thing) {
- //         return Hacc(Object({
- //             Pair("x", to_hacc(thing.get_x())),
- //             Pair("y", to_hacc(thing.get_y())),
- //         });
- //     }
- //     static My_Thing from (Hacc hacc) {
- //         return My_Thing(
- //             from_hacc<int>(hacc.find("x")),
- //             from_hacc<int>(hacc.find("y"))
- //         );
- //     }
- // }
- //
- // Well, that's a bit more clunky than I'd hoped, but once we get the object
- // syntax sugar happening it'll be nicer.
 
 #include "hacc.h"
 #include <unordered_map>
