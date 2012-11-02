@@ -9,6 +9,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string>
+#include <unordered_map>
+#include <typeinfo>
+#include <type_traits>
 
 namespace tap {
 using namespace std;
@@ -182,7 +186,7 @@ bool about (double (* code )(), double expected, const char* name) {
     return within(code, expected*0.01, expected, name);
 }
 static bool doesnt_throw_handler (void (* code )(), const char* name) {
-    code(); pass(name);
+    code(); return pass(name);
 }
 bool doesnt_throw (void (* code )(), const char* name) {
     using namespace internal;
@@ -190,7 +194,7 @@ bool doesnt_throw (void (* code )(), const char* name) {
 }
 
 
-static bool pass_fail_message (bool succeeded, uint num) {
+static void pass_fail_message (bool succeeded, uint num) {
     if (inverted ? succeeded : !succeeded) {
         printf("not ");
     }
@@ -259,8 +263,7 @@ void BAIL_OUT (const char* reason) {
     exit(1);
 }
 
-static void diag_type (const type_info& t);
-static void diag_dyn (const type_info& t, void* v);
+static void diag_dyn (const char* prefix, const type_info& t, void* p);
 static void diag_extype (const char* prefix, const type_info& t);
 static void diag_ex (const char* prefix, std::exception& e);
 
@@ -331,6 +334,40 @@ namespace internal {
 }
 
 
+std::unordered_map<std::string, void (*)(void*)> printers = {
+    {typeid(char).name(), [](void* p){ printf("'%c'", *(char*)p); } },
+    {typeid(signed char).name(), [](void* p){ printf("%hhd", *(signed char*)p); } },
+    {typeid(unsigned char).name(), [](void* p){ printf("%hhu", *(unsigned char*)p); } },
+    {typeid(signed short).name(), [](void* p){ printf("%hd", *(signed short*)p); } },
+    {typeid(unsigned short).name(), [](void* p){ printf("%hu", *(unsigned short*)p); } },
+    {typeid(signed).name(), [](void* p){ printf("%d", *(signed*)p); } },
+    {typeid(unsigned).name(), [](void* p){ printf("%u", *(unsigned*)p); } },
+    {typeid(signed long).name(), [](void* p){ printf("%ld", *(signed long*)p); } },
+    {typeid(unsigned long).name(), [](void* p){ printf("%lu", *(unsigned long*)p); } },
+    {typeid(signed long long).name(), [](void* p){ printf("%lld", *(signed long long*)p); } },
+    {typeid(unsigned long long).name(), [](void* p){ printf("%llu", *(unsigned long long*)p); } },
+    {typeid(float).name(), [](void* p){ printf("%g", *(float*)p); } },
+    {typeid(double).name(), [](void* p){ printf("%lg", *(double*)p); } },
+    {typeid(const char*).name(), [](void* p){ if (*(void**)p) printf("\"%s\"", *(const char**)p); else printf("NULL"); } },
+    {typeid(std::string).name(), [](void* p){ printf("\"%s\"", ((std::string*)p)->c_str()); } },
+};
+
+bool default_can_print (const type_info& t, void* p) {
+    return printers.count(t.name()) || t.name()[0] == 'P';  // This is pretty bad, I know.
+}
+void default_print (const type_info& t, void* p) {
+    auto iter = printers.find(t.name());
+    if (iter != printers.end()) {
+        iter->second(p);
+        return;
+    }
+    else if (t.name()[0] == 'P') {
+        if (*(void**)p) printf("0x%lx", *(long*)p);
+        else printf("NULL");
+        return;
+    }
+}
+
 void diag (const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
@@ -339,11 +376,19 @@ void diag (const char* fmt, ...) {
     printf("\n");
     va_end(args);
 }
+
 static void diag_dyn (const char* prefix, const type_info& t, void* v) {
-    diag("%s (TODO: dynamically typed printing)", prefix);
+    printf(" # %s ", prefix);
+    if (default_can_print(t, v)) {
+        default_print(t, v);
+        printf("\n");
+    }
+    else {
+        printf("<unprintable value of mangled-type %s>\n", t.name());
+    }
 }
 static void diag_extype (const char* prefix, const type_info& t) {
-    diag("%s an exception of (mangled) type %s", prefix, t.name());
+    diag("%s an exception of mangled-type %s", prefix, t.name());
 }
 static void diag_ex (const char* prefix, std::exception& e) {
     diag_extype(prefix, typeid(e));

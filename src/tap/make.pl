@@ -7,10 +7,8 @@ use make qw(rule phony make_argv);
 use autodie qw(:all);
 
 
-my @compile = qw(g++-4.7 -c);
-my @compile_flags = qw(-fmax-errors=5);
+my @compile = qw(g++-4.7 -std=c++11 -fmax-errors=5 -c);
 my @link = qw(g++-4.7);
-my @link_flags = qw();
 my @devel_flags = qw(-Wall -ggdb);
 my @libs = qw();
 my $run_testmain = './tap_testmain';
@@ -22,8 +20,8 @@ my %modules = (
 );
 my @objects = map "$_.o", keys %modules;
 
-sub compile { my @args = @_; system @compile, @compile_flags, @args }
-sub _link { my @args = @_; system @link, @link_flags, @args }
+sub compile { my @args = @_; system @compile, @args }
+sub _link { my @args = @_; system @link, @args }
 
 
 phony 'test', 'tap_testmain', sub {
