@@ -3,17 +3,15 @@ package make;
 use strict;
 use warnings;
 use feature qw(switch say);
+use autodie;
+no autodie 'chdir';
 use Exporter qw(import);
 use Carp qw(croak);
-use Cwd;
+use Cwd qw(cwd realpath);
 use File::Spec::Functions qw(:ALL);
-our @EXPORT_OK = qw(workflow rule phony defaults include chdir run);
 
-my $dirsep = '/';  # TODO: detect windows
-
-sub chdir;  # all's fair
-
-
+our @EXPORT_OK = qw(workflow rule rules phony defaults include chdir targetmatch run);
+our %EXPORT_TAGS = ('all' => \@EXPORT_OK);
 
  # A "target" is a reference to either a file or a phony.
  # A "rule" has one or more "to" targets and zero or more "from" targets.
@@ -29,6 +27,8 @@ our %workflow;
 our $this_is_root = 1;
  # Set once only.
 our $original_base = cwd;
+ # Prevent double-inclusion; can't use %INC because it does relative paths.
+our @included = realpath($0);
  # A cache of file modification times.  It's probably safe to keep until exit.
 my %modtimes;
 
@@ -69,7 +69,7 @@ sub rule_with_caller ($$$$$$) {
     my $rule = {
         base => cwd,
         to => [arrayify($to)],
-        from => [arrayify($from)],
+        from => lazify($from),
         recipe => $recipe,
         caller_file => $file,
         caller_line => $line,
@@ -82,63 +82,92 @@ sub rule_with_caller ($$$$$$) {
 }
 sub rule ($$$) {
     %workflow or croak "rule was called outside of a workflow";
-    my ($package, $file, $line) = caller;
     my ($to, $from, $recipe) = @_;
+    my ($package, $file, $line) = caller;
     rule_with_caller($package, $file, $line, $to, $from, $recipe);
 }
 sub phony ($;$$) {
     %workflow or croak "phony was called outside of a workflow";
-    my ($package, $file, $line) = caller;
+    @_ == 2 and croak "phony was given 2 arguments, but it must have either 1 or 3";
     my ($phony, $from, $recipe) = @_;
     for my $p (arrayify($phony)) {
         $workflow{phonies}{rel2abs($p)} = 1;
     }
     if (defined $from) {
+        my ($package, $file, $line) = caller;
         rule_with_caller($package, $file, $line, $phony, $from, $recipe);
+    }
+}
+sub rules ($$) {
+    %workflow or croak "rules was called outside of a workflow";
+    my ($tofroms, $recipe) = @_;
+    ref $tofroms eq 'ARRAY' or croak "First argument to rules wasn't an ARRAY ref";
+    for (@{$tofroms}) {
+        @$_ == 2 or croak "Each of the elements of the first argument to rules must have two elements";
+        my ($package, $file, $line) = caller;
+        rule_with_caller($package, $file, $line, $_->[0], $_->[1], $recipe);
     }
 }
 sub arrayify {
     return ref $_[0] eq 'ARRAY' ? @{$_[0]} : $_[0];
+}
+sub lazify {
+    my ($dep) = @_;
+    return ref $dep eq 'CODE' ? $dep : [arrayify($dep)];
+}
+sub delazify {
+    my ($dep, @args) = @_;
+    return ref $dep eq 'CODE' ? $dep->(@args) : @$dep;
 }
 
 
 ##### OTHER DECLARATIONS
 
 sub defaults {
-    push @{$workflow{defaults}}, @_;
+    push @{$workflow{defaults}}, map rel2abs($_), @_;
 }
 sub include {
-    my ($file) = @_;
-    my $this_workflow = \%workflow;
+    for (@_) {
+        my $file = $_;
+        -e $file or croak "Cannot include $file because it doesn't exist.";
+        if (-d $file) {
+            my $makepl = catfile($file, 'make.pl');
+            next unless -e $makepl;
+            $file = $makepl;
+        }
+         # Skip already-included files
+        my $real = realpath($file);
+        next if grep $real eq $_, @included;
+        push @included, $real;
 
-    local $this_is_root = 0;
-    local %workflow = undef;
-    do $file;
-     # merge workflows
-    push @{$this_workflow->{rules}}, @{$workflow{rules}};
-    for (keys %{$workflow{targets}}) {
-        push @{$this_workflow->{targets}{$_}}, $workflow{targets}{$_};
+        my $this_workflow = \%workflow;
+        local $this_is_root = 0;
+        local %workflow;
+        do {
+            package main;
+            do $file;
+            $@ and die $@;
+        };
+        return unless %workflow;  # Oops, it wasn't a make.pl, but we did it anyway
+         # merge workflows
+        push @{$this_workflow->{rules}}, @{$workflow{rules}};
+        for (keys %{$workflow{targets}}) {
+            push @{$this_workflow->{targets}{$_}}, @{$workflow{targets}{$_}};
+        }
+        $this_workflow->{phonies} = {%{$this_workflow->{phonies}}, %{$workflow{phonies}}};
     }
-    $this_workflow->{phonies} = {%{$this_workflow->{phonies}}, %{$workflow{phonies}}};
 }
 
-sub chdir {
+sub chdir (;$) {
     goto &Cwd::chdir;  # Re-export, basically
 }
 
-##### PRINTING RULES
+##### UTILITIES
 
-sub show_rule ($) {
-    my $prefix = $_[0]{base} eq $original_base
-        ? ''
-        : '[' . abs2rel($_[0]{base}, $original_base) . '] ';
-    return "$prefix@{$_[0]{to}} <- @{$_[0]{from}}";
+sub targetmatch {
+    my ($rx) = @_;
+    return grep $_ =~ $rx, map abs2rel($_), keys %{$workflow{targets}};
 }
-sub debug_rule ($) {
-    return "$_[0]{caller_file}:$_[0]{caller_line}: " . show_rule($_[0]);
-}
-
-##### RUNNING COMMANDS
 
 sub run (@) {
     require IPC::System::Simple;
@@ -156,6 +185,19 @@ sub run (@) {
     }
 }
 
+##### PRINTING RULES
+
+sub show_rule ($) {
+    my $prefix = $_[0]{base} eq $original_base
+        ? ''
+        : '[' . abs2rel($_[0]{base}, $original_base) . '/] ';
+    return "$prefix• @{$_[0]{to}} ← " . join ' ', delazify($_[0]{from}, $_[0]{to});
+}
+sub debug_rule ($) {
+    return "$_[0]{caller_file}:$_[0]{caller_line}: " . show_rule($_[0]);
+}
+
+
 ##### FILE INSPECTION UTILITIES
  # These work with absolute paths.
 
@@ -164,7 +206,7 @@ sub fexists {
     return -e $_[0];
 }
 sub modtime {
-    return $modtimes{$_[0]} //= (fexists($_[0]) ? (stat $_[0])[9] : 0);
+    return $modtimes{realpath($_[0])} //= (fexists(realpath($_[0])) ? (stat realpath($_[0]))[9] : 0);
 }
 
  # This routine is stale.
@@ -203,6 +245,7 @@ sub plan_target {
 }
 sub plan_rule {
     my ($plan, $rule) = @_;
+    Cwd::chdir rel2abs($rule->{base});
      # detect loops
     if (not defined $rule->{planned}) {
         my $mess = "$0: Dependency loop\n";
@@ -210,18 +253,22 @@ sub plan_rule {
             $mess .= "\t" . debug_rule($old) . "\n";
             die $mess if $rule eq $old;  # reference compare
         }
-        Carp::confess $mess . "\t...oh wait, false alarm.  Which means there's a bug in make.pm.";
+        Carp::confess $mess . "\t...oh wait, false alarm.  Which means there's a bug in make.pm.\nDetected";
     }
     elsif ($rule->{planned}) {
         return 1;  # Already planned, but we'll still cause updates
     }
     push @{$plan->{stack}}, $rule;
     $rule->{planned} = undef;  # Mark that we're currently planning this
+
+     # Now is when we officially collapse lazy dependencies.
+    $rule->{from} = [delazify($rule->{from}, $rule->{to})];
+    my @from = map rel2abs($_), @{$rule->{from}};
      # always recurse to plan_target
-    my $stale = grep plan_target($plan, rel2abs($_, $rule->{base})), @{$rule->{from}};
+    my $stale = grep plan_target($plan, $_), @from;
     $stale ||= grep {
         my $abs = rel2abs($_, $rule->{base});
-        !fexists($abs) or grep modtime($abs) < modtime(rel2abs($_, $rule->{base})), @{$rule->{from}}
+        !fexists($abs) or grep modtime($abs) < modtime($_), @from;
     } @{$rule->{to}};
     push @{$plan->{program}}, $rule if $stale;
      # Done planning this rule
@@ -237,7 +284,7 @@ sub plan_workflow(@) {
         grep plan_target($plan, rel2abs($_)), @args;
     }
     elsif ($workflow{defaults}) {
-        grep plan_target($plan, rel2abs($_)), @{$workflow{defaults}};
+        grep plan_target($plan, $_), @{$workflow{defaults}};
     }
     else {
         plan_rule($plan, $workflow{rules}[0]);
