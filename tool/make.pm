@@ -7,7 +7,7 @@ use Exporter qw(import);
 use Carp qw(croak);
 use Cwd;
 use File::Spec::Functions qw(:ALL);
-our @EXPORT_OK = qw(workflow rule phony default include chdir run);
+our @EXPORT_OK = qw(workflow rule phony defaults include chdir run);
 
 my $dirsep = '/';  # TODO: detect windows
 
@@ -104,7 +104,7 @@ sub arrayify {
 
 ##### OTHER DECLARATIONS
 
-sub default {
+sub defaults {
     push @{$workflow{defaults}}, @_;
 }
 sub include {
@@ -135,7 +135,7 @@ sub show_rule ($) {
     return "$prefix@{$_[0]{to}} <- @{$_[0]{from}}";
 }
 sub debug_rule ($) {
-    return "$_[0]{file}:$_[0]{line}: " . show_rule($_[0]);
+    return "$_[0]{caller_file}:$_[0]{caller_line}: " . show_rule($_[0]);
 }
 
 ##### RUNNING COMMANDS
@@ -196,7 +196,7 @@ sub plan_target {
         for my $rule (@{$plan->{stack}}) {
             $mess .= "\t" . debug_rule($rule) . "\n";
         }
-        Carp::confess $mess;
+        die $mess;
     }
      # In general, there should be only rule per target, but there can be more.
     return grep plan_rule($plan, $_), @{$workflow{targets}{$target}};
@@ -237,7 +237,7 @@ sub plan_workflow(@) {
         grep plan_target($plan, rel2abs($_)), @args;
     }
     elsif ($workflow{defaults}) {
-        grep plan_target($plan, rel2abs($_)), $workflow{defaults};
+        grep plan_target($plan, rel2abs($_)), @{$workflow{defaults}};
     }
     else {
         plan_rule($plan, $workflow{rules}[0]);

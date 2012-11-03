@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use lib 'tool';
-use make qw(rule phony make_argv);
+use make qw(workflow rule phony defaults);
 use autodie qw(:all);
 
 
