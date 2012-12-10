@@ -77,7 +77,7 @@ sub rule_with_caller ($$$$$$) {
     };
     push @{$workflow{rules}}, $rule;
     for my $to (@{$rule->{to}}) {
-        push @{$workflow{targets}{rel2abs($to)}}, $rule;
+        push @{$workflow{targets}{realpath($to)}}, $rule;
     }
 }
 sub rule ($$$) {
@@ -91,7 +91,7 @@ sub phony ($;$$) {
     @_ == 2 and croak "phony was given 2 arguments, but it must have either 1 or 3";
     my ($phony, $from, $recipe) = @_;
     for my $p (arrayify($phony)) {
-        $workflow{phonies}{rel2abs($p)} = 1;
+        $workflow{phonies}{realpath($p)} = 1;
     }
     if (defined $from) {
         my ($package, $file, $line) = caller;
@@ -124,7 +124,7 @@ sub delazify {
 ##### OTHER DECLARATIONS
 
 sub defaults {
-    push @{$workflow{defaults}}, map rel2abs($_), @_;
+    push @{$workflow{defaults}}, map realpath($_), @_;
 }
 sub include {
     for (@_) {
@@ -146,7 +146,7 @@ sub include {
         do {
             package main;
             do $file;
-            $@ and die $@;
+            $@ and die_status $@;
         };
         return unless %workflow;  # Oops, it wasn't a make.pl, but we did it anyway
          # merge workflows
@@ -173,6 +173,7 @@ sub run (@) {
     require IPC::System::Simple;
     eval { IPC::System::Simple::system(@_) };
     if ($@) {
+        warn $@;
         my @command = @_;
         ref $_[0] eq 'ARRAY' and shift @command;
         for (@command) {
@@ -181,22 +182,34 @@ sub run (@) {
                 $_ = "'$_'";
             }
         }
-        die "$0: Command failed: @command\n";
+        status("☢ Command failed: @command\n");
+        die "\n";
     }
 }
 
-##### PRINTING RULES
+##### PRINTING ETC.
 
-sub show_rule ($) {
-    my $prefix = $_[0]{base} eq $original_base
+sub directory_prefix {
+    my ($d, $base) = @_;
+    $d //= cwd;
+    $base //= $original_base;
+    return $d eq $base
         ? ''
-        : '[' . abs2rel($_[0]{base}, $original_base) . '/] ';
-    return "$prefix• @{$_[0]{to}} ← " . join ' ', delazify($_[0]{from}, $_[0]{to});
+        : '[' . abs2rel($d, $base) . '/] ';
+}
+sub status {
+    say directory_prefix(), @_;
+}
+sub die_status {
+    status @_;
+    die "\n";
+}
+sub show_rule ($) {
+    return "@{$_[0]{to}} ← " . join ' ', delazify($_[0]{from}, $_[0]{to});
 }
 sub debug_rule ($) {
-    return "$_[0]{caller_file}:$_[0]{caller_line}: " . show_rule($_[0]);
+    return "$_[0]{caller_file}:$_[0]{caller_line}: " . directory_prefix($_[0]{base}) . show_rule($_[0]);
 }
-
 
 ##### FILE INSPECTION UTILITIES
  # These work with absolute paths.
@@ -234,11 +247,11 @@ sub plan_target {
      # Make sure the file exists or there's a rule for it
     my $rel = abs2rel($target, $original_base);
     unless ($workflow{targets}{$target} or fexists($target)) {
-        my $mess = "$0: Cannot find or make $rel" . (@{$plan->{stack}} ? ", required by\n" : "\n");
+        my $mess = "☢ Cannot find or make $rel" . (@{$plan->{stack}} ? ", required by\n" : "\n");
         for my $rule (@{$plan->{stack}}) {
             $mess .= "\t" . debug_rule($rule) . "\n";
         }
-        die $mess;
+        die_status $mess;
     }
      # In general, there should be only rule per target, but there can be more.
     return grep plan_rule($plan, $_), @{$workflow{targets}{$target}};
@@ -248,10 +261,10 @@ sub plan_rule {
     Cwd::chdir rel2abs($rule->{base});
      # detect loops
     if (not defined $rule->{planned}) {
-        my $mess = "$0: Dependency loop\n";
+        my $mess = "☢ Dependency loop\n";
         for my $old (reverse @{$plan->{stack}}) {
             $mess .= "\t" . debug_rule($old) . "\n";
-            die $mess if $rule eq $old;  # reference compare
+            die_status $mess if $rule eq $old;  # reference compare
         }
         Carp::confess $mess . "\t...oh wait, false alarm.  Which means there's a bug in make.pm.\nDetected";
     }
@@ -263,11 +276,11 @@ sub plan_rule {
 
      # Now is when we officially collapse lazy dependencies.
     $rule->{from} = [delazify($rule->{from}, $rule->{to})];
-    my @from = map rel2abs($_), @{$rule->{from}};
+    my @from = map realpath($_), @{$rule->{from}};
      # always recurse to plan_target
     my $stale = grep plan_target($plan, $_), @from;
     $stale ||= grep {
-        my $abs = rel2abs($_, $rule->{base});
+        my $abs = realpath(rel2abs($_, $rule->{base}));
         !fexists($abs) or grep modtime($abs) < modtime($_), @from;
     } @{$rule->{to}};
     push @{$plan->{program}}, $rule if $stale;
@@ -281,7 +294,7 @@ sub plan_workflow(@) {
     my (@args) = @_;
     my $plan = init_plan();
     if (@args) {
-        grep plan_target($plan, rel2abs($_)), @args;
+        grep plan_target($plan, realpath($_)), @args;
     }
     elsif ($workflow{defaults}) {
         grep plan_target($plan, $_), @{$workflow{defaults}};
@@ -297,32 +310,32 @@ sub plan_workflow(@) {
 sub run_workflow {
     my (@args) = @_;
     if (not @{$workflow{rules}}) {
-        say "$0: Nothing was done because no rules have been declared.";
-        return 0;
+        say "✓ Nothing was done because no rules have been declared.";
+        return 1;
     }
     my @program = eval { plan_workflow(@args) };
     if ($@) {
-        warn $@;
-        say "$0: Nothing was done due to error.";
+        warn $@ unless $@ eq "\n";
+        say "✗ Nothing was done due to error.";
         return 0;
     }
     if (not @program) {
-        say "$0: All up to date.";
+        say "✓ All up to date.";
         return 1;
     }
     my $old_cwd = cwd;
     for my $rule (@program) {
         Cwd::chdir rel2abs($rule->{base});
-        say show_rule($rule);
+        status "⚙ ", show_rule($rule);
         eval { $rule->{recipe}->($rule->{to}, $rule->{from}) };
         if ($@) {
-            warn $@;
-            say "$0: Did not finish due to error.";
+            warn $@ unless $@ eq "\n";
+            say "✗ Did not finish due to error.";
             Cwd::chdir $old_cwd;
             return 0;
         }
     }
-    say "$0: Done.";
+    say "✓ Done.";
     Cwd::chdir $old_cwd;
     return 1;
 }

@@ -3,7 +3,7 @@
 #error tap.cpp cannot be compiled with DISABLE_TESTS
 #else
 
-#include "../include/tap.h"
+#include "../inc/tap.h"
 
 #include <stdio.h>
 #include <string.h>

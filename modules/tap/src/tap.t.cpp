@@ -1,5 +1,5 @@
 
-#include "../include/tap.h"
+#include "../inc/tap.h"
 #include <string>
 #include <stdexcept>
 
@@ -68,9 +68,4 @@ void tap_test_f () {
     is(deadly_int, 32, "is catches and fails on exception");
 }
 tap::Tester tap_test ("tap", tap_test_f);
-
-int main (int argc, char** argv) {
-    tap::allow_testing(argc, argv, "--test");
-    return 0;
-}
 

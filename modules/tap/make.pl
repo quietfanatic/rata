@@ -10,32 +10,22 @@ BEGIN {
     make->import(':all');
 }
 use autodie qw<:all>;
-use File::Path qw<remove_tree>;
 
 
 workflow {
 
     include '../..';
     
-    rules [
-        ['tmp/tap.o', ['src/tap.cpp', 'include/tap.h']],
-        ['tmp/tap_testmain.o', ['src/tap_testmain.cpp', 'include/tap.h']],
-    ], sub {
-        cppc($_[1][0], output($_[0][0]))
-    };
+    
+    cppc_rule('tmp/tap.o', ['src/tap.cpp', 'inc/tap.h']);
+    cppc_rule('tmp/t.o', ['src/tap.t.cpp', 'inc/tap.h']);
+    cppc_rule('tmp/tap_make_test_main.o', ['src/tap_make_test_main.cpp', 'inc/tap.h']);
 
-    rule 'tmp/tap_testmain', ['tmp/tap.o', 'tmp/tap_testmain.o'], sub {
-        ld('tmp/tap.o', 'tmp/tap_testmain.o', output('tmp/tap_testmain'));
-    };
+    ld_rule('tmp/t', ['tmp/tap.o', 'tmp/t.o', 'tmp/tap_make_test_main.o']);
 
-    phony 'test', 'tmp/tap_testmain', sub {
-        run "tmp/tap_testmain --test | prove -e '' -";
-    };
-
-    phony 'clean', [], sub {
-        no autodie;
-        remove_tree glob 'tmp/*';
-    };
+    test_rule('tmp/t');
+    
+    clean_rule(glob 'tmp/*');
 
     defaults 'test';
 
