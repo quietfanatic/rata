@@ -24,7 +24,6 @@ typedef uint64_t uint64;
 #include <memory>  // For shared_ptr
 #include <vector>
 #include <string>
-#include <unordered_map>
 
 
 namespace hacc {
@@ -62,8 +61,8 @@ typedef std::string String;
 struct Ref;
 template <class T> using VArray = std::vector<T>;
 typedef VArray<Hacc> Array;
-template <class T> using Map = std::unordered_map<String, T>;
 template <class T> using Pair = std::pair<String, T>;
+template <class T> using Map = std::vector<Pair<T>>;
 typedef Map<Hacc> Object;
 struct Error;
 

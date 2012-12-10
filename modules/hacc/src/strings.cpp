@@ -298,7 +298,7 @@ struct Parser {
                 case ':': throw error("Extra : in object");
                 case ',': throw error("Misplaced comma after : in object");
                 case '}': throw error("Missing value after : in object");
-                default: o.insert(Pair<Hacc>(key, parse_thing())); break;
+                default: o.push_back(Pair<Hacc>(key, parse_thing())); break;
             }
         }
     }
