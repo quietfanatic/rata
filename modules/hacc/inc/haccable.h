@@ -21,16 +21,16 @@ namespace hacc {
 
  // This needs to be declared here so that Haccability<> can access it.
 struct HaccTable {
-    const std::type_info& cpptype_t;
-    String type_s;
-    String (* get_type_p ) (void*);
-    void* (* allocate_p ) ();
-    void (* deallocate_p ) (void*);
-    Hacc (* to_hacc_p ) (const void*);
+    const std::type_info& cpptype;
+    String hacctype;
+    String (* get_hacctype ) (void*);
+    void* (* allocate ) ();
+    void (* deallocate ) (void*);
+    Hacc (* to_hacc ) (const void*);
      // From_hacc_p is a little dangerous because more of its type has to be erased.
-    void* from_hacc_p;
-    void (* update_from_hacc_p ) (void*, Hacc);
-    void* (* new_from_hacc_p ) (Hacc);
+    void* from_hacc;
+    void (* update_from_hacc ) (void*, Hacc);
+    void* (* new_from_hacc ) (Hacc);
      // TODO
     // String (* generate_id_p ) (void*);
     // void* (* find_by_id_p ) (String);
@@ -39,19 +39,19 @@ struct HaccTable {
 
      // Instead of exposing the hash tables, we're wrapping them in these functions
     void reg_cpptype (const std::type_info& t);
-    void reg_type (String s);
+    void reg_hacctype (String s);
      // require_* versions throw an exception if the table isn't found.
     static HaccTable* by_cpptype (const std::type_info& t);
     static HaccTable* require_cpptype (const std::type_info& t);
-    static HaccTable* by_type (String s);
-    static HaccTable* require_type (String s);
+    static HaccTable* by_hacctype (String s);
+    static HaccTable* require_hacctype (String s);
 
      // A constructor template can't actually be called, boo!
-    HaccTable (const std::type_info& cpptype_t) :
-        cpptype_t(cpptype_t), type_s(""), allocate_p(NULL), deallocate_p(NULL),
-        to_hacc_p(NULL), update_from_hacc_p(NULL), new_from_hacc_p(NULL)
+    HaccTable (const std::type_info& cpptype) :
+        cpptype(cpptype), hacctype(""), get_hacctype(NULL), allocate(NULL), deallocate(NULL),
+        to_hacc(NULL), update_from_hacc(NULL), new_from_hacc(NULL)
     {
-        reg_cpptype(cpptype_t);
+        reg_cpptype(cpptype);
     }
      // So we have to delegate the fancy stuff elsewhere.
     
@@ -72,39 +72,39 @@ struct Haccability {
         return true;
     }
 
-    static void type (String s) {
-        if (table->type_s.empty())
-            table->type_s = s;
-        table->reg_type(s);
+    static void hacctype (String s) {
+        if (table->hacctype.empty())
+            table->hacctype = s;
+        table->reg_hacctype(s);
     }
-    static void get_type (String (* get_type_p )(const C&)) {
-        table->get_type_p = (String(*)(void*))get_type_p;
+    static void hacctype (String (* p )(const C&)) {
+        table->get_hacctype = (String(*)(void*))p;
     }
-    static void allocate (C* (* allocate_p )()) {
-        table->allocate_p = (void*(*)())allocate_p;
+    static void allocate (C* (* p )()) {
+        table->allocate = (void*(*)())p;
     }
-    static void deallocate (void (* deallocate_p )(C*)) {
-        table->deallocate_p = (void(*)(void*))deallocate_p;
+    static void deallocate (void (* p )(C*)) {
+        table->deallocate = (void(*)(void*))p;
     }
-    static void to (Hacc (* to_hacc_p )(const C&)) {
-        table->to_hacc_p = (Hacc(*)(const void*))to_hacc_p;
+    static void to_hacc (Hacc (* p )(const C&)) {
+        table->to_hacc = (Hacc(*)(const void*))p;
     }
-    static void from (C (* from_hacc_p_ )(Hacc)) {
-        table->from_hacc_p = (void*)from_hacc_p_;
+    static void from_hacc (C (* p )(Hacc)) {
+        table->from_hacc = (void*)p;
     }
-    static void update_from (void (* update_from_hacc_p )(C&, Hacc)) {
-        table->update_from_hacc_p = (void(*)(void*, Hacc))update_from_hacc_p;
+    static void update_from_hacc (void (* p )(C&, Hacc)) {
+        table->update_from_hacc = (void(*)(void*, Hacc))p;
     }
-    static void new_from (C* (* new_from_hacc_p )(Hacc)) {
-        table->new_from_hacc_p = (void*(*)(Hacc))new_from_hacc_p;
+    static void new_from_hacc (C* (* p )(Hacc)) {
+        table->new_from_hacc = (void*(*)(Hacc))p;
     }
      // It's easy to hacc types that can be converted to and from an atomic type.
      // Just use these functions, e.g. like_integer();
      // Make sure the conversion to the atomic type is 'const' on 'this'.
 #define HACCABLE_BUILD_LIKE_FUNCTION(lc, uc) \
     static void like_##lc () { \
-        to([](const C& x)->Hacc{ return Hacc(static_cast<uc>(x)); }); \
-        from([](Hacc h)->C{ return static_cast<C>(h.get_##lc()); }); \
+        to_hacc([](const C& x)->Hacc{ return Hacc(static_cast<uc>(x)); }); \
+        from_hacc([](Hacc h)->C{ return static_cast<C>(h.get_##lc()); }); \
     }
     HACCABLE_BUILD_LIKE_FUNCTION(null, Null)
     HACCABLE_BUILD_LIKE_FUNCTION(bool, Bool)
@@ -136,8 +136,8 @@ template <class C> String best_type_name () {
     HaccTable* htp = HACCABLE_Definition<C>::registered
         ? Haccability<C>::table
         : HaccTable::by_cpptype(typeid(C));
-    if (htp && !htp->type_s.empty())
-        return htp->type_s;
+    if (htp && !htp->hacctype.empty())
+        return htp->hacctype;
     return String("<mangled: ") + typeid(C).name() + ">";
 }
 
@@ -146,48 +146,48 @@ template <class C> String best_type_name (const C& v) {
         ? Haccability<C>::table
         : HaccTable::by_cpptype(typeid(C));
     if (htp) {
-        if (htp->get_type_p)
-            return ((String(*)(const C&))htp->get_type_p)(v);
-        if (!htp->type_s.empty())
-            return htp->type_s;
+        if (htp->get_hacctype)
+            return ((String(*)(const C&))htp->get_hacctype)(v);
+        if (!htp->hacctype.empty())
+            return htp->hacctype;
     }
     return String("<mangled: ") + typeid(C).name() + ">";
 }
 
-template <class C> bool has_type () {
+template <class C> bool has_hacctype () {
     HaccTable* htp = HACCABLE_Definition<C>::registered
         ? Haccability<C>::table
         : HaccTable::by_cpptype(typeid(C));
-    return htp && !htp->type_s.empty();
+    return htp && !htp->hacctype.empty();
 }
-template <class C> bool has_type (const C& v) {
+template <class C> bool has_hacctype (const C& v) {
     HaccTable* htp = HACCABLE_Definition<C>::registered
         ? Haccability<C>::table
         : HaccTable::by_cpptype(typeid(C));
-    return htp && (htp->get_type_p || !htp->type_s.empty());
+    return htp && (htp->get_hacctype || !htp->hacctype.empty());
 }
 
-template <class C> String get_type () {
+template <class C> String hacctype () {
     HaccTable* htp = require_HaccTable<C>();
-    if (!htp->type_s.empty())
-        return htp->type_s;
-    if (htp->get_type_p)
-        throw Error("Tried to get type of <mangled: " + String(typeid(C).name()) + ">, but no 'type' was given in its haccable description.  However, the haccable description did contain 'get_type'; to use that you must call hacc::get_type on a particular instance of this type.");
-    throw Error("Tried to get type of <mangled: " + String(typeid(C).name()) + ">, but no 'type' was given in its haccable description.");
+    if (!htp->hacctype.empty())
+        return htp->hacctype;
+    if (htp->get_hacctype)
+        throw Error("Tried to get type of <mangled: " + String(typeid(C).name()) + ">, but this type requires that you call hacctype on a particular instance of this type.");
+    throw Error("Tried to get type of <mangled: " + String(typeid(C).name()) + ">, but no 'hacctype' was given in its haccable description.");
 }
-template <class C> String get_type (const C& v) {
+template <class C> String hacctype (const C& v) {
     HaccTable* htp = require_HaccTable<C>();
-    if (htp->get_type_p)
-        return ((String(*)(const C&))htp->get_type_p)(v);
-    if (!htp->type_s.empty())
-        return htp->type_s;
-    throw Error("Tried to get type of an instance of <mangled: " + String(typeid(C).name()) + ">, but its haccable description doesn't have 'type' or 'get_type'.");
+    if (htp->get_hacctype)
+        return ((String(*)(const C&))htp->get_hacctype)(v);
+    if (!htp->hacctype.empty())
+        return htp->hacctype;
+    throw Error("Tried to get type of an instance of <mangled: " + String(typeid(C).name()) + ">, but its haccable description doesn't have 'hacctype'.");
 }
 
 template <class C> C* allocate () {
     HaccTable* htp = require_HaccTable<C>();
-    if (htp->allocate_p) {
-        return (C*)htp->allocate_p();
+    if (htp->allocate) {
+        return (C*)htp->allocate();
     }
     else {
         return new C;
@@ -195,8 +195,8 @@ template <class C> C* allocate () {
 }
 template <class C> void deallocate (C* p) {
     HaccTable* htp = require_HaccTable<C>();
-    if (htp->deallocate_p) {
-        htp->deallocate_p((void*)p);
+    if (htp->deallocate) {
+        htp->deallocate((void*)p);
     }
     else {
         delete p;
@@ -204,48 +204,48 @@ template <class C> void deallocate (C* p) {
 }
 template <class C> Hacc to_hacc (const C& v) {
     HaccTable* htp = require_HaccTable<C>();
-    if (htp->to_hacc_p) {
-        return htp->to_hacc_p((void*)&v);
+    if (htp->to_hacc) {
+        return htp->to_hacc((void*)&v);
     }
     throw Error("Tried to call to_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'to'.");
 }
 template <class C> C from_hacc (Hacc hacc) {
     HaccTable* htp = require_HaccTable<C>();
-    if (htp->from_hacc_p) {
-        return ((C(*)(Hacc))htp->from_hacc_p)(hacc);
+    if (htp->from_hacc) {
+        return ((C(*)(Hacc))htp->from_hacc)(hacc);
     }
-    if (htp->update_from_hacc_p) {
+    if (htp->update_from_hacc) {
         C r;
-        htp->update_from_hacc_p((void*)&r, hacc);
+        htp->update_from_hacc((void*)&r, hacc);
         return r;
     }
     throw Error("Tried to call from_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'from' or 'update_from'.");
 }
 template <class C> void update_from_hacc (C* p, Hacc hacc) {
     HaccTable* htp = require_HaccTable<C>();
-    if (htp->update_from_hacc_p) {
-        htp->update_from_hacc_p((void*)p, hacc);
+    if (htp->update_from_hacc) {
+        htp->update_from_hacc((void*)p, hacc);
         return;
     }
-    if (htp->from_hacc_p) {
-        *p = ((C(*)(Hacc))htp->from_hacc_p)(hacc);
+    if (htp->from_hacc) {
+        *p = ((C(*)(Hacc))htp->from_hacc)(hacc);
         return;
     }
     throw Error("Tried to call update_from_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'update_from' or 'from'.");
 }
 template <class C> C* new_from_hacc (Hacc hacc) {
     HaccTable* htp = require_HaccTable<C>();
-    if (htp->new_from_hacc_p) {
-        return (C*)htp->new_from_hacc_p(hacc);
+    if (htp->new_from_hacc) {
+        return (C*)htp->new_from_hacc(hacc);
     }
-    if (htp->update_from_hacc_p) {
+    if (htp->update_from_hacc) {
         C* r = allocate<C>();
-        htp->update_from_hacc_p((void*)r, hacc);
+        htp->update_from_hacc((void*)r, hacc);
         return r;
     }
-    if (htp->from_hacc_p) {
+    if (htp->from_hacc) {
         C* r = allocate<C>();
-        *r = ((C(*)(Hacc))htp->from_hacc_p)(hacc);
+        *r = ((C(*)(Hacc))htp->from_hacc)(hacc);
         return r;
     }
     throw Error("Tried to call update_from_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'new_from', 'update_from', or 'from'.");
@@ -325,9 +325,9 @@ namespace { \
 
  // example:
  // HACCABLE(mything, {
- //     type("mything");
- //     to([](mything x){ return Hacc(x.as_integer); });
- //     from([](Hacc h){ return mything(h.get_integer); });
+ //     d::type("mything");
+ //     d::to_hacc([](mything x){ return Hacc(x.as_integer); });
+ //     d::from_hacc([](Hacc h){ return mything(h.get_integer); });
  // })
 
 

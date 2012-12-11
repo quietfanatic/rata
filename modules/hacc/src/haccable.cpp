@@ -8,7 +8,7 @@ namespace hacc {
         static Hash_by<const std::type_info*> r;
         return r;
     }
-    static Hash_by<String>& ht_type_hash () {
+    static Hash_by<String>& ht_hacctype_hash () {
         static Hash_by<String> r;
         return r;
     }
@@ -18,16 +18,16 @@ namespace hacc {
             throw Error(String("Uh oh, the Haccability for cpptype <mangled: ") + t.name() + "> was instantiated in two different object files.  Currently, the Hacc library can't handle this situation.  If it's a problem, contact me and I might be able to fix this.");
         }
     }
-    void HaccTable::reg_type (String s) {
-        auto result = ht_type_hash().emplace(s, this);
+    void HaccTable::reg_hacctype (String s) {
+        auto result = ht_hacctype_hash().emplace(s, this);
         if (!result.second) {
-            throw Error("The type '" + s + "' was registered twice, once for cpptype <mangled: " + cpptype_t.name() + ">, and once for cpptype <mangled: " + ht_type_hash().find(s)->second->cpptype_t.name() + ">");
+            throw Error("The type '" + s + "' was registered twice, once for cpptype <mangled: " + cpptype.name() + ">, and once for cpptype <mangled: " + ht_hacctype_hash().find(s)->second->cpptype.name() + ">");
         }
     }
     HaccTable* HaccTable::by_cpptype (const std::type_info& t) {
         auto iter = ht_cpptype_hash().find(&t);
         if (iter == ht_cpptype_hash().end()) {
-            return NULL;
+            return null;
         }
         else {
             return iter->second;
@@ -38,17 +38,17 @@ namespace hacc {
         if (r) return r;
         throw Error("Type <mangled: " + String(t.name()) + "> has no haccable definition.");
     }
-    HaccTable* HaccTable::by_type (String s) {
-        auto iter = ht_type_hash().find(s);
-        if (iter == ht_type_hash().end()) {
-            return NULL;
+    HaccTable* HaccTable::by_hacctype (String s) {
+        auto iter = ht_hacctype_hash().find(s);
+        if (iter == ht_hacctype_hash().end()) {
+            return null;
         }
         else {
             return iter->second;
         }
     }
-    HaccTable* HaccTable::require_type (String s) {
-        HaccTable* r = by_type(s);
+    HaccTable* HaccTable::require_hacctype (String s) {
+        HaccTable* r = by_hacctype(s);
         if (r) return r;
         throw Error("No haccable type was defined with a type name of '" + s + "'");
     }
