@@ -152,7 +152,7 @@ struct Error : std::exception {
     String file;
     uint line;
     uint col;
-    const char* what () const throw();
+    const char* what () const noexcept(true);
     Error (String mess, String file = "", uint line = 0, uint col = 0) :
         mess(mess), file(file), line(line), col(col)
     { }

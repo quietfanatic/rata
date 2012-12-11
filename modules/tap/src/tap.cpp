@@ -303,32 +303,32 @@ namespace internal {
     }
     bool glove_1 (void* code, void* p1, const char* name) {
         try { return reinterpret_cast<bool(*)(void*,const char*)>(code)(p1, name); }
-        catch (scary_exception e) { return catch_scary(e, name); }
-        catch (std::exception e) { return catch_std(e, name); }
+        catch (scary_exception& e) { return catch_scary(e, name); }
+        catch (std::exception& e) { return catch_std(e, name); }
         catch (...) { return catch_weird(name); }
     }
     bool glove_2 (void* code, void* p1, void* p2, const char* name) {
         try { return reinterpret_cast<bool(*)(void*,void*,const char*)>(code)(p1, p2, name); }
-        catch (scary_exception e) { return catch_scary(e, name); }
-        catch (std::exception e) { return catch_std(e, name); }
+        catch (scary_exception& e) { return catch_scary(e, name); }
+        catch (std::exception& e) { return catch_std(e, name); }
         catch (...) { return catch_weird(name); }
     }
     bool glove_3 (void* code, void* p1, void* p2, void* p3, const char* name) {
         try { return reinterpret_cast<bool(*)(void*,void*,void*,const char*)>(code)(p1, p2, p3, name); }
-        catch (scary_exception e) { return catch_scary(e, name); }
-        catch (std::exception e) { return catch_std(e, name); }
+        catch (scary_exception& e) { return catch_scary(e, name); }
+        catch (std::exception& e) { return catch_std(e, name); }
         catch (...) { return catch_weird(name); }
     }
     bool glove_1_wanted (const type_info& et, void* code, void* p1, const char* name) {
         try { return reinterpret_cast<bool(*)(void*,const char*)>(code)(p1, name); }
-        catch (scary_exception e) { return diffex_scary(et, e, name); }
-        catch (std::exception e) { return diffex_std(et, e, name); }
+        catch (scary_exception& e) { return diffex_scary(et, e, name); }
+        catch (std::exception& e) { return diffex_std(et, e, name); }
         catch (...) { return diffex_weird(et, name); }
     }
     bool glove_2_wanted (const type_info& et, void* code, void* p1, void* p2, const char* name) {
         try { return reinterpret_cast<bool(*)(void*,void*,const char*)>(code)(p1, p2, name); }
-        catch (scary_exception e) { return diffex_scary(et, e, name); }
-        catch (std::exception e) { return diffex_std(et, e, name); }
+        catch (scary_exception& e) { return diffex_scary(et, e, name); }
+        catch (std::exception& e) { return diffex_std(et, e, name); }
         catch (...) { return diffex_weird(et, name); }
     }
 }

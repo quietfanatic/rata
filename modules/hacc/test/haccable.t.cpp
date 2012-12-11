@@ -55,12 +55,21 @@ HACCABLE_TEMPLATE(<class C>, MyWrapper<C>, {
 })
  // Let's try it without an explicit instantiation.
 
+struct NoConstructor {
+    int x;
+    NoConstructor (int x) : x(x) { };
+};
+HACCABLE(NoConstructor, {
+    d::update_from_hacc([](NoConstructor& v, hacc::Hacc h){
+        v.x = h.get_integer();
+    });
+})
 
 #include "../../tap/inc/tap.h"
 tap::Tester haccable_tester ("haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(13);
+    plan(14);
     diag("Using custom Haccable<int> with 'to' and 'from'");
     is(hacc_from((int)4).get_integer(), 4, "hacc_from<int> works");
     is(string_from((int)552), "552", "string_from<int> works");
@@ -75,5 +84,6 @@ tap::Tester haccable_tester ("haccable", [](){
     is(string_from(MyWrapper<int>{54}), "54", "to in a HACCABLE_TEMPLATE works");
     is(string_to<MyWrapper<int>>("192"), MyWrapper<int>{192}, "from in a HACCABLE_TEMPLATE works");
     is(hacctype<MyWrapper<int>>(), "MyWrapper<int, yo!>", "hacctype in a HACCABLE_TEMPLATE works");
+    throws<hacc::Error>([](){ from_hacc<NoConstructor>(Hacc(42)); }, "Throw runtime exception if nullary constructor is required but unavailable.");
 });
 

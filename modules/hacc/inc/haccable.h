@@ -118,8 +118,6 @@ struct Haccability {
  // Dummy initialization.
 template <class C> HaccTable* Haccability<C>::table = Haccability<C>::table;
 
-
-
  // The primary purpose of this is not actually to get a HaccTable.  It's
  //  to force instantiation of the HACCABLE_Definition.  As a bonus, if
  //  the definition has been given in this compilation unit, it'll skip
@@ -129,9 +127,6 @@ template <class C> HaccTable* require_HaccTable () {
         return Haccability<C>::table;
     else return HaccTable::require_cpptype(typeid(C));
 }
-
-
- // THIS BEGINS the API you use to manipulate haccable objects.
 
  // Name a type by any means possible
 template <class C> String best_type_name () {
@@ -149,6 +144,37 @@ template <class C> String best_type_name () {
 template <class C> String best_type_name (const C& v) {
     return best_type_name<C>();
 }
+
+ // Make decisions based on whether a type has a nullary constructor
+template <class C, bool has_nc> struct _nc_decide { };
+template <class C> struct _nc_decide<C, true> {
+    static inline C* default_allocate () {
+        return new C;
+    }
+    static inline C from_from_update_from (void (* p ) (void*, Hacc), Hacc h) {
+        C r;
+        ((void(*)(C*, Hacc))p)(&r, h);
+        return r;
+    }
+};
+template <class C> struct _nc_decide<C, false> {
+    static inline C* default_allocate () {
+        throw Error("Cannot provide a default 'allocate' for type " + best_type_name<C>() + " because it does not have a nullary constructor.");
+    }
+    static inline C from_from_update_from (void (* p ) (void*, Hacc), Hacc h) {
+        throw Error("Cannot transform 'update_from_hacc' into 'from_hacc' for type " + best_type_name<C>() + " because it does not have a nullary constructor.");
+    }
+};
+template <class C> inline C* default_allocate () {
+    return _nc_decide<C, std::is_constructible<C>::value>::default_allocate();
+}
+template <class C> inline C from_from_update_from (void (* p ) (void*, Hacc), Hacc h) {
+    return _nc_decide<C, std::is_constructible<C>::value>::from_from_update_from(p, h);
+}
+
+
+ // THIS BEGINS the API you use to manipulate haccable objects.
+
 
 template <class C> bool has_hacctype () {
     HaccTable* htp = HACCABLE_Definition<C>::registered
@@ -177,7 +203,7 @@ template <class C> C* allocate () {
         return (C*)htp->allocate();
     }
     else {
-        return new C;
+        return default_allocate<C>();
     }
 }
 template <class C> void deallocate (C* p) {
@@ -202,9 +228,7 @@ template <class C> C from_hacc (Hacc hacc) {
         return ((C(*)(Hacc))htp->from_hacc)(hacc);
     }
     if (htp->update_from_hacc) {
-        C r;
-        htp->update_from_hacc((void*)&r, hacc);
-        return r;
+        return from_from_update_from<C>(htp->update_from_hacc, hacc);
     }
     throw Error("Tried to call from_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'from' or 'update_from'.");
 }

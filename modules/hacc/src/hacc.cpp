@@ -24,7 +24,7 @@ struct Hacc::Value : Hacc::Contents {
 };
 
  // Produce error message
-const char* Error::what () const throw() {
+const char* Error::what () const noexcept(true) {
     char ls [32]; sprintf((char*)ls, "%d", line);
     char cs [32]; sprintf((char*)cs, "%d", col);
     String r = line
