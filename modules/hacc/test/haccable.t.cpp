@@ -2,11 +2,11 @@
 #include "../inc/haccable.h"
 
 HACCABLE(int, {
-    type("int, yo!");
-    to([](const int& i) {
+    d::type("int, yo!");
+    d::to([](const int& i) {
         return hacc::Hacc(i);
     });
-    from([](hacc::Hacc h) {
+    d::from([](hacc::Hacc h) {
         return (int)h.get_integer();
     });
 })
@@ -17,14 +17,14 @@ struct MyThing {
     bool operator == (MyThing o) const { return x==o.x && y==o.y; }
 };
 HACCABLE(MyThing, {
-    type("MyThing");
-    to([](const MyThing& t){
+    d::type("MyThing");
+    d::to([](const MyThing& t){
         hacc::Array a (2);
         a[0] = hacc::to_hacc<int>(t.x);
         a[1] = hacc::to_hacc<int>(t.y);
         return hacc::Hacc(a);
     });
-    from([](hacc::Hacc h) {
+    d::from([](hacc::Hacc h) {
         auto a = h.get_array();
         return MyThing{ hacc::from_hacc<int>(a[0]), hacc::from_hacc<int>(a[1]) };
     });
@@ -37,7 +37,7 @@ struct MyFloat {
     MyFloat () { }
     bool operator == (MyFloat o) const { return val==o.val; }
 };
-HACCABLE(MyFloat, { like_float(); })
+HACCABLE(MyFloat, { d::like_float(); })
 
 template <class C>
 struct MyWrapper {
@@ -46,11 +46,11 @@ struct MyWrapper {
 template <class C>
 bool operator == (MyWrapper<C> a, MyWrapper<C> b) { return a.val==b.val; }
 HACCABLE_TEMPLATE(<class C>, MyWrapper<C>, {
-    get_type([](const MyWrapper<C>& v){
+    d::get_type([](const MyWrapper<C>& v){
         return "MyWrapper<" + hacc::get_type(v.val) + ">";
     });
-    to([](const MyWrapper<C>& v){ return hacc::to_hacc(v.val); });
-    from([](hacc::Hacc h){ return MyWrapper<C>{hacc::from_hacc<C>(h)}; });
+    d::to([](const MyWrapper<C>& v){ return hacc::to_hacc(v.val); });
+    d::from([](hacc::Hacc h){ return MyWrapper<C>{hacc::from_hacc<C>(h)}; });
 })
  // Let's try it without an explicit instantiation.
 

@@ -295,7 +295,8 @@ template <class C> C* string_to_new (String s) {
  // Finally, this is how you make a haccable definition.
 #define HACCABLE_BEGIN(C) \
 namespace { \
-    template <> struct HACCABLE_Definition<C> : hacc::Haccability<C> { \
+    template <> struct HACCABLE_Definition<C> { \
+        typedef hacc::Haccability<C> d; \
         static void describe ()
 #define HACCABLE_END(C) \
         static bool registered; \
@@ -309,22 +310,8 @@ namespace { \
  // So we need to manually import all the DSL names in Haccability<C>.
 #define HACCABLE_TEMPLATE_BEGIN(params, C) \
 namespace { \
-    template params struct HACCABLE_Definition<C> : hacc::Haccability<C> { \
-        typedef hacc::Haccability<C> ht; \
-        using ht::type; \
-        using ht::get_type; \
-        using ht::allocate; \
-        using ht::deallocate; \
-        using ht::to; \
-        using ht::from; \
-        using ht::update_from; \
-        using ht::new_from; \
-        using ht::like_null; \
-        using ht::like_bool; \
-        using ht::like_integer; \
-        using ht::like_float; \
-        using ht::like_double; \
-        using ht::like_string; \
+    template params struct HACCABLE_Definition<C> { \
+        typedef hacc::Haccability<C> d; \
         static void describe ()
 #define HACCABLE_TEMPLATE_END(params, C) \
         static bool registered; \
