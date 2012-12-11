@@ -397,8 +397,8 @@ static void diag_ex (const char* prefix, std::exception& e) {
 
 namespace internal {
     void diag_unexpected_dyn (const type_info& gt, void* g, const type_info& et, void* e) {
-        diag_dyn("expected", gt, g);
-        diag_dyn(" but got", et, e);
+        diag_dyn("expected", et, e);
+        diag_dyn(" but got", gt, g);
     }
     bool fail_is (const type_info& gt, void* g, const type_info& et, void* e, const char* name) {
         fail(name);
