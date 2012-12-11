@@ -9,23 +9,21 @@ HACCABLE_TEMPLATE_BEGIN(<class C>, C*) {
     });
     d::to_hacc([](C* const& v){
         if (v) {
-            char id [17];
-            sprintf(id, "%lx", (unsigned long)v);
             String type = has_hacctype(*v) ? hacctype(*v) : "";
-            return Hacc(Ref{type, String(id, strlen(id))});
+            return Hacc(Ref{type, address_to_id((void*)v)});
         }
         else {
             return Hacc(null);
         }
     });
-    d::update_from_hacc([](C*& p, Hacc h){
+    d::from_hacc([](Hacc h){
         if (h.valtype() == VALNULL) {
-            p = nullptr;
+            return (C*)null;
         }
         else {
              // NOTE: We aren't fixing ids right now,
              //  so this address had better be valid!
-            sscanf(h.get_ref().id.c_str(), "%lx", (unsigned long*)&p);
+            return (C*)id_to_address(h.get_ref().id);
         }
     });
 } HACCABLE_TEMPLATE_END(<class C>, C*)

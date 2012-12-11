@@ -145,6 +145,20 @@ template <class C> String best_type_name (const C& v) {
     return best_type_name<C>();
 }
 
+ // If you don't provide an interpretation for the ids of a particular type,
+ // its ids will be based on the memory addresses of its values
+String address_to_id (void* addr) {
+    char id [17];
+    sprintf(id, "%lx", (unsigned long)addr);
+    return String(id, strlen(id);
+}
+void* id_to_address (String id) {
+    void* r;
+    sscanf(id.c_str(), "%lx", (unsigned long*)&p);
+    return r;
+}
+
+
  // Make decisions based on whether a type has a nullary constructor
 template <class C, bool has_nc> struct _nc_decide { };
 template <class C> struct _nc_decide<C, true> {
@@ -218,7 +232,8 @@ template <class C> void deallocate (C* p) {
 template <class C> Hacc to_hacc (const C& v) {
     HaccTable* htp = require_HaccTable<C>();
     if (htp->to_hacc) {
-        return htp->to_hacc((void*)&v);
+        Hacc r = htp->to_hacc((void*)&v);
+        r.default_type_id(htp->get_hacctype(), &v)
     }
     throw Error("Tried to call to_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'to'.");
 }
