@@ -4,6 +4,7 @@
 struct MyThing {
     int x;
     int y;
+    bool operator == (MyThing o) { return x==o.x && y==o.y; }
 };
 
 HACCABLE(int, {
@@ -25,7 +26,7 @@ HACCABLE(MyThing, {
     });
     from([](hacc::Hacc h) {
         auto a = h.get_array();
-        return MyThing { hacc::from_hacc<int>(a[0]), hacc::from_hacc<int>(a[1]) };
+        return MyThing{ hacc::from_hacc<int>(a[0]), hacc::from_hacc<int>(a[1]) };
     });
 })
 
@@ -33,11 +34,13 @@ HACCABLE(MyThing, {
 tap::Tester haccable_tester ("haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(4);
+    plan(6);
     diag("Using custom Haccable<int> with 'to' and 'from'");
     is(hacc_from((int)4).get_integer(), 4, "hacc_from<int> works.");
     is(string_from((int)552), "552", "string_from<int> works.");
     is(hacc_to<int>(Hacc(35)), 35, "hacc_to<int> works.");
     is(string_to<int>("-789"), -789, "string_to<int> works.");
+    is(string_from(MyThing{324, 425}), "[324, 425]", "string_from<MyThing> works.");
+    is(string_to<MyThing>("[-51, 20]"), MyThing{-51, 20}, "string_to<MyThing> works.");
 });
 
