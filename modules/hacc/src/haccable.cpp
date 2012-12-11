@@ -52,4 +52,11 @@ namespace hacc {
         if (r) return r;
         throw Error("No haccable type was defined with a type name of '" + s + "'");
     }
+
+    String HaccTable::get_hacctype () {
+        if (hacctype.empty() && calc_hacctype)
+            hacctype = calc_hacctype();
+        return hacctype;
+    }
+
 }

@@ -23,7 +23,7 @@ namespace hacc {
 struct HaccTable {
     const std::type_info& cpptype;
     String hacctype;
-    String (* get_hacctype ) (void*);
+    String (* calc_hacctype ) ();
     void* (* allocate ) ();
     void (* deallocate ) (void*);
     Hacc (* to_hacc ) (const void*);
@@ -37,6 +37,9 @@ struct HaccTable {
     // std::vector<Haccribute> attrs;
     // std::vector<Hacclement> elems;
 
+     // If hacctype doesn't exist, set it to calc_hacctype()
+    String get_hacctype ();
+
      // Instead of exposing the hash tables, we're wrapping them in these functions
     void reg_cpptype (const std::type_info& t);
     void reg_hacctype (String s);
@@ -48,7 +51,7 @@ struct HaccTable {
 
      // A constructor template can't actually be called, boo!
     HaccTable (const std::type_info& cpptype) :
-        cpptype(cpptype), hacctype(""), get_hacctype(NULL), allocate(NULL), deallocate(NULL),
+        cpptype(cpptype), hacctype(""), calc_hacctype(NULL), allocate(NULL), deallocate(NULL),
         to_hacc(NULL), update_from_hacc(NULL), new_from_hacc(NULL)
     {
         reg_cpptype(cpptype);
@@ -75,10 +78,9 @@ struct Haccability {
     static void hacctype (String s) {
         if (table->hacctype.empty())
             table->hacctype = s;
-        table->reg_hacctype(s);
     }
-    static void hacctype (String (* p )(const C&)) {
-        table->get_hacctype = (String(*)(void*))p;
+    static void hacctype (String (* p )()) {
+        table->calc_hacctype = p;
     }
     static void allocate (C* (* p )()) {
         table->allocate = (void*(*)())p;
@@ -136,52 +138,37 @@ template <class C> String best_type_name () {
     HaccTable* htp = HACCABLE_Definition<C>::registered
         ? Haccability<C>::table
         : HaccTable::by_cpptype(typeid(C));
-    if (htp && !htp->hacctype.empty())
-        return htp->hacctype;
+    if (htp) {
+        String hts = htp->get_hacctype();
+        if (!hts.empty())
+            return htp->hacctype;
+    }
     return String("<mangled: ") + typeid(C).name() + ">";
 }
 
 template <class C> String best_type_name (const C& v) {
-    HaccTable* htp = HACCABLE_Definition<C>::registered
-        ? Haccability<C>::table
-        : HaccTable::by_cpptype(typeid(C));
-    if (htp) {
-        if (htp->get_hacctype)
-            return ((String(*)(const C&))htp->get_hacctype)(v);
-        if (!htp->hacctype.empty())
-            return htp->hacctype;
-    }
-    return String("<mangled: ") + typeid(C).name() + ">";
+    return best_type_name<C>();
 }
 
 template <class C> bool has_hacctype () {
     HaccTable* htp = HACCABLE_Definition<C>::registered
         ? Haccability<C>::table
         : HaccTable::by_cpptype(typeid(C));
-    return htp && !htp->hacctype.empty();
+    return htp && (htp->calc_hacctype || !htp->hacctype.empty());
 }
 template <class C> bool has_hacctype (const C& v) {
-    HaccTable* htp = HACCABLE_Definition<C>::registered
-        ? Haccability<C>::table
-        : HaccTable::by_cpptype(typeid(C));
-    return htp && (htp->get_hacctype || !htp->hacctype.empty());
+    return has_hacctype<C>();
 }
 
 template <class C> String hacctype () {
     HaccTable* htp = require_HaccTable<C>();
-    if (!htp->hacctype.empty())
-        return htp->hacctype;
-    if (htp->get_hacctype)
-        throw Error("Tried to get type of <mangled: " + String(typeid(C).name()) + ">, but this type requires that you call hacctype on a particular instance of this type.");
-    throw Error("Tried to get type of <mangled: " + String(typeid(C).name()) + ">, but no 'hacctype' was given in its haccable description.");
+    String hts = htp->get_hacctype();
+    if (!hts.empty())
+        return hts;
+    throw Error("Tried to get hacctype of <mangled: " + String(typeid(C).name()) + ">, but no 'hacctype' was given in its haccable description.");
 }
 template <class C> String hacctype (const C& v) {
-    HaccTable* htp = require_HaccTable<C>();
-    if (htp->get_hacctype)
-        return ((String(*)(const C&))htp->get_hacctype)(v);
-    if (!htp->hacctype.empty())
-        return htp->hacctype;
-    throw Error("Tried to get type of an instance of <mangled: " + String(typeid(C).name()) + ">, but its haccable description doesn't have 'hacctype'.");
+    return hacctype<C>();
 }
 
 template <class C> C* allocate () {

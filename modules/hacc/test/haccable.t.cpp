@@ -47,8 +47,8 @@ struct MyWrapper {
 template <class C>
 bool operator == (MyWrapper<C> a, MyWrapper<C> b) { return a.val==b.val; }
 HACCABLE_TEMPLATE(<class C>, MyWrapper<C>, {
-    d::hacctype([](const MyWrapper<C>& v){
-        return "MyWrapper<" + hacc::hacctype(v.val) + ">";
+    d::hacctype([](){
+        return "MyWrapper<" + hacc::hacctype<C>() + ">";
     });
     d::to_hacc([](const MyWrapper<C>& v){ return hacc::to_hacc(v.val); });
     d::from_hacc([](hacc::Hacc h){ return MyWrapper<C>{hacc::from_hacc<C>(h)}; });
@@ -74,6 +74,6 @@ tap::Tester haccable_tester ("haccable", [](){
     is(string_to<MyFloat>("32.0"), MyFloat(32.0), "like_float() defines a from");
     is(string_from(MyWrapper<int>{54}), "54", "to in a HACCABLE_TEMPLATE works");
     is(string_to<MyWrapper<int>>("192"), MyWrapper<int>{192}, "from in a HACCABLE_TEMPLATE works");
-    is(hacctype(MyWrapper<int>{54}), "MyWrapper<int, yo!>", "get_type in a HACCABLE_TEMPLATE works");
+    is(hacctype<MyWrapper<int>>(), "MyWrapper<int, yo!>", "hacctype in a HACCABLE_TEMPLATE works");
 });
 

@@ -4,11 +4,8 @@
 
 HACCABLE_TEMPLATE_BEGIN(<class C>, C*) {
     using namespace hacc;
-    d::hacctype([](C* const& v) {
-        if (v)
-            return hacctype(*v) + "*";
-        else
-            return String("<get_type on null pointer NYI>");
+    d::hacctype([](){
+        return hacctype<C>() + "*";
     });
     d::to_hacc([](C* const& v){
         if (v) {
