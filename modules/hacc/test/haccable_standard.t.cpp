@@ -6,7 +6,7 @@
 tap::Tester haccable_standard_tester ("haccable_standard", [](){
     using namespace hacc;
     using namespace tap;
-    plan(28);
+    plan(29);
 #define TEST_CONVERTIBLE(type, value, valtype) \
     is((type)hacc_from((type)value).get_##valtype(), (type)value, "standard hacc_from on " #type); \
     is((type)hacc_to<type>(Hacc((type)value)), (type)value, "standard hacc_to on " #type);
@@ -24,5 +24,7 @@ tap::Tester haccable_standard_tester ("haccable_standard", [](){
     TEST_CONVERTIBLE(float, 2.0, float);
     TEST_CONVERTIBLE(double, -2.0, double);
     TEST_CONVERTIBLE(std::string, "asdf", string);
+    float f = 32.0;
+    is(hacc_to<float*>(hacc_from(&f)), &f, "round-trip on float*");
 });
 

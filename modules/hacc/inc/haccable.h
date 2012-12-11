@@ -128,6 +128,7 @@ template <class C> HaccTable* require_HaccTable () {
     else return HaccTable::require_cpptype(typeid(C));
 }
 
+
  // THIS BEGINS the API you use to manipulate haccable objects.
 
  // Name a type by any means possible
@@ -151,6 +152,19 @@ template <class C> String best_type_name (const C& v) {
             return htp->type_s;
     }
     return String("<mangled: ") + typeid(C).name() + ">";
+}
+
+template <class C> bool has_type () {
+    HaccTable* htp = HACCABLE_Definition<C>::registered
+        ? Haccability<C>::table
+        : HaccTable::by_cpptype(typeid(C));
+    return htp && !htp->type_s.empty();
+}
+template <class C> bool has_type (const C& v) {
+    HaccTable* htp = HACCABLE_Definition<C>::registered
+        ? Haccability<C>::table
+        : HaccTable::by_cpptype(typeid(C));
+    return htp && (htp->get_type_p || !htp->type_s.empty());
 }
 
 template <class C> String get_type () {
@@ -279,19 +293,21 @@ template <class C> C* string_to_new (String s) {
 #define HACCABLE_INSTANCE(C) HACCABLE_INSTANCE_CTR1(C, __COUNTER__)
 
  // Finally, this is how you make a haccable definition.
-#define HACCABLE(C, ...) \
+#define HACCABLE_BEGIN(C) \
 namespace { \
     template <> struct HACCABLE_Definition<C> : hacc::Haccability<C> { \
-        static void describe () __VA_ARGS__ \
+        static void describe ()
+#define HACCABLE_END(C) \
         static bool registered; \
     }; \
     bool HACCABLE_Definition<C>::registered = hacc::Haccability<C>::create_table(describe); \
     HACCABLE_INSTANCE(C) \
 }
+#define HACCABLE(C, ...) HACCABLE_BEGIN(C) __VA_ARGS__ HACCABLE_END(C)
  // Apparently looking up names in a parent class that depends on a template
  // parameter to a template specialization template is too much for C++ to handle.
  // So we need to manually import all the DSL names in Haccability<C>.
-#define HACCABLE_TEMPLATE(params, C, ...) \
+#define HACCABLE_TEMPLATE_BEGIN(params, C) \
 namespace { \
     template params struct HACCABLE_Definition<C> : hacc::Haccability<C> { \
         typedef hacc::Haccability<C> ht; \
@@ -309,11 +325,13 @@ namespace { \
         using ht::like_float; \
         using ht::like_double; \
         using ht::like_string; \
-        static void describe () __VA_ARGS__ \
+        static void describe ()
+#define HACCABLE_TEMPLATE_END(params, C) \
         static bool registered; \
     }; \
     template params bool HACCABLE_Definition<C>::registered = hacc::Haccability<C>::create_table(describe); \
 }
+#define HACCABLE_TEMPLATE(params, C, ...) HACCABLE_TEMPLATE_BEGIN(params, C) __VA_ARGS__ HACCABLE_TEMPLATE_END(params, C)
 
  // To allow commas in type names or template parameter lists given to macros.
 #define GRP(...) __VA_ARGS__
