@@ -18,7 +18,7 @@ workflow {
      # Arch specific stuff.  Currently only g++-4.7 is nominally supported, because
      # we require advanced C++11 features.  All module's make.pls should include
      # this file.
-    sub cppc { run qw<g++-4.7 -std=c++11 -fmax-errors=5 -c -Wall -Wno-format-security -ggdb>, @_; }
+    sub cppc { run qw<g++-4.7 -std=c++11 -fmax-errors=10 -c -Wall -Wno-format-security -ggdb>, @_; }
     sub ld { run qw<g++-4.7>, @_; }
     sub output { '-o', $_[0]; }
 
