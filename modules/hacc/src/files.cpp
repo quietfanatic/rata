@@ -7,7 +7,7 @@
 
 namespace hacc {
 
-void string_to_file (String s, const char* filename, write_options opts) {
+void string_to_file (String s, Either_String filename, write_options opts) {
     opts = hf::default_options | opts;
     FILE* outf;
     if (opts.overwrite_file()) {
@@ -38,19 +38,13 @@ void string_to_file (String s, const char* filename, write_options opts) {
     }
     return;
 }
-void string_to_file (String s, String filename, write_options opts) {
-    string_to_file(s, filename.c_str(), opts);
-}
-void file_from_string (const char* filename, String s, write_options opts) {
+void file_from_string (Either_String filename, String s, write_options opts) {
     string_to_file(s, filename, opts);
 }
-void file_from_string (String filename, String s, write_options opts) {
-    string_to_file(s, filename.c_str(), opts);
-}
 
 
 
-String string_from_file (const char* filename) {
+String string_from_file (Either_String filename) {
     FILE* inf = fopen(filename, "r");
     if (!inf) {
         throw Error("Could not open " + String(filename) + " for reading: " + strerror(errno));
@@ -70,14 +64,8 @@ String string_from_file (const char* filename) {
     }
     return String(data, size);
 }
-String string_from_file (String filename) {
-    return string_from_file(filename.c_str());
-}
-String file_to_string (const char* filename) {
+String file_to_string (Either_String filename) {
     return string_from_file(filename);
-}
-String file_to_string (String filename) {
-    return string_from_file(filename.c_str());
 }
 
 }
