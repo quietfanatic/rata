@@ -23,6 +23,15 @@ namespace {
 
 namespace hacc {
 
+struct Haccribute {
+    const std::type_info& cpptype;
+    String name;
+    void* (* ref ) (void*);
+    Haccribute (const std::type_info& cpptype, String name, void* (* ref ) (void*)) :
+        cpptype(cpptype), name(name), ref(ref)
+    { }
+};
+
  // This needs to be declared here so that Haccability<> can access it.
 struct HaccTable {
     const std::type_info& cpptype;
@@ -38,11 +47,9 @@ struct HaccTable {
     void* from_hacc;
     void (* update_from_hacc ) (void*, Hacc);
     void* (* new_from_hacc ) (Hacc);
+    VArray<Haccribute> attrs;
      // TODO
-    // String (* generate_id_p ) (void*);
-    // void* (* find_by_id_p ) (String);
-    // std::vector<Haccribute> attrs;
-    // std::vector<Hacclement> elems;
+    //VArray<Hacclement> elems;
 
      // If hacctype doesn't exist, set it to calc_hacctype()
     String get_hacctype ();
@@ -122,6 +129,10 @@ struct Haccability {
     }
     static void new_from_hacc (C* (* p )(Hacc)) {
         table->new_from_hacc = (void*(*)(Hacc))p;
+    }
+    template <class M>
+    static void attr (String name, M& (* ref )(C&)) {
+        table->attrs.push_back(Haccribute(typeid(M), name, (void*(*)(void*))ref));
     }
      // It's easy to hacc types that can be converted to and from an atomic type.
      // Just use these functions, e.g. like_integer();
