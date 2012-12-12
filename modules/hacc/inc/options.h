@@ -2,7 +2,6 @@
  // Yeah, all the options code is in the header, because absolutely everything here is constexpr.
  // If this turns out to make compile times too slow, I guess we could hc-separate it some.
 namespace hacc {
-namespace {  // anonymous namespace weirdly equivalent to C-like 'static'
 
  // Are you ready for higher-order macros?
  // macro( name                    , value, def  , conflicts                                    )
@@ -74,7 +73,6 @@ struct write_options {
         return *this;
     }
 };
-}  // anon namespace
 
 namespace hf {
     static constexpr write_options default_options = write_options();

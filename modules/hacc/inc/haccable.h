@@ -28,6 +28,7 @@ struct HaccTable {
     String (* calc_hacctype ) ();
     String (* haccid ) (void*);
     void* (* find_by_haccid ) (String);
+    write_options options;
     void* (* allocate ) ();
     void (* deallocate ) (void*);
     Hacc (* to_hacc ) (const void*);
@@ -55,8 +56,8 @@ struct HaccTable {
 
      // A constructor template can't actually be called, boo!
     HaccTable (const std::type_info& cpptype) :
-        cpptype(cpptype), hacctype(""), calc_hacctype(null),
-        haccid(null), find_by_haccid(null), allocate(null), deallocate(null),
+        cpptype(cpptype), hacctype(""), calc_hacctype(null), haccid(null),
+        find_by_haccid(null), options(write_options(0)), allocate(null), deallocate(null),
         to_hacc(null), update_from_hacc(null), new_from_hacc(null)
     {
         reg_cpptype(cpptype);
@@ -95,6 +96,9 @@ struct Haccability {
     }
     static void find_by_haccid (C* (* p )(String)) {
         table->find_by_haccid = (void*(*)(String))p;
+    }
+    static void options (write_options opts) {
+        table->options = opts;
     }
     static void deallocate (void (* p )(C*)) {
         table->deallocate = (void(*)(void*))p;
@@ -253,6 +257,7 @@ template <class C> Hacc to_hacc (const C& v) {
         Hacc r = htp->to_hacc((void*)&v);
         String id = htp->haccid ? htp->haccid((void*)&v) : address_to_id((void*)&v);
         r.default_type_id(htp->get_hacctype(), id);
+        r.default_options(htp->options);
         return r;
     }
     throw Error("Tried to call to_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'to'.");
