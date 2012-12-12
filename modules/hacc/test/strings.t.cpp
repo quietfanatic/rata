@@ -13,7 +13,7 @@ void hacc_string_test (hacc::String from, hacc::String to) {
         fail(name);
         printf(" # Parse failed: %s\n", tree.error_message().c_str());
     }
-    else is(hacc_to_string(tree), to, name);
+    else is(hacc_to_string(tree, hf::always_show_types|hf::always_show_ids), to, name);
 }
 
 tap::Tester hacc_strings_tester ("hacc-strings", [](){
