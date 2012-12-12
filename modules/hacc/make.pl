@@ -19,16 +19,19 @@ workflow {
 
     subdep('inc/hacc.h', 'inc/options.h');
     subdep('inc/strings.h', 'inc/hacc.h');
+    subdep('inc/files.h', 'inc/hacc.h');
     subdep('inc/haccable.h', 'inc/hacc.h');
     subdep('inc/haccable_standard.h', 'inc/haccable.h');
 
     cppc_rule('tmp/hacc.o', [qw<src/hacc.cpp inc/hacc.h>]);
     cppc_rule('tmp/strings.o', [qw<src/strings.cpp inc/strings.h>]);
+    cppc_rule('tmp/files.o', [qw<src/files.cpp inc/files.h>]);
     cppc_rule('tmp/haccable.o', [qw<src/haccable.cpp inc/haccable.h>]);
     cppc_rule('tmp/haccable_standard.o', [qw<src/haccable_standard.cpp inc/haccable_standard.h>]);
     cppc_rule('tmp/options.t.o', [qw<test/options.t.cpp inc/options.h>]);
     cppc_rule('tmp/hacc.t.o', [qw<test/hacc.t.cpp inc/hacc.h>]);
     cppc_rule('tmp/strings.t.o', [qw<test/strings.t.cpp inc/strings.h>]);
+    cppc_rule('tmp/files.t.o', [qw<test/files.t.cpp inc/files.h>]);
     cppc_rule('tmp/haccable.t.o', [qw<test/haccable.t.cpp inc/haccable.h>]);
     cppc_rule('tmp/haccable_standard.t.o', [qw<test/haccable_standard.t.cpp inc/haccable_standard.h>]);
     ld_rule('tmp/t', [targetmatch(qr/^tmp\/[^\/]*\.o$/), '../tap/tmp/tap.o', '../tap/tmp/tap_make_test_main.o']);

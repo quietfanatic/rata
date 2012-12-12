@@ -108,7 +108,13 @@ struct Haccability {
     static void to_hacc (Hacc (* p )(const C&)) {
         table->to_hacc = (Hacc(*)(const void*))p;
     }
+    static void hacc_from (Hacc (* p )(const C&)) {
+        table->to_hacc = (Hacc(*)(const void*))p;
+    }
     static void from_hacc (C (* p )(Hacc)) {
+        table->from_hacc = (void*)p;
+    }
+    static void hacc_to (C (* p )(Hacc)) {
         table->from_hacc = (void*)p;
     }
     static void update_from_hacc (void (* p )(C&, Hacc)) {
