@@ -103,6 +103,9 @@ String hacc_to_string (Hacc h, write_options opts) {
     if (show_type) r = "#" + escape_ident(h.type()) + r;
     return r;
 }
+String string_from_hacc (Hacc h, write_options opts) {
+    return hacc_to_string(h, opts);
+}
 
 
  // Parsing is simple enough that we don't need a separate lexer step
@@ -393,7 +396,8 @@ struct Parser {
  // Finally:
 Hacc hacc_from_string (String s) { return Parser(s).parse(); }
 Hacc hacc_from_string (const char* s) { return Parser(s).parse(); }
-
+Hacc string_to_hacc (String s) { return hacc_from_string(s); }
+Hacc string_to_hacc (const char* s) { return hacc_from_string(s); }
 
 }
 

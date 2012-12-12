@@ -19,6 +19,11 @@ String hacc_value_to_string (Hacc, write_options opts = write_options(0));
 String hacc_to_string (Hacc, write_options opts = write_options(0));
  // Read a Hacc from a string
 Hacc hacc_from_string (String);
+Hacc hacc_from_string (const char*);
+
+String string_from_hacc (Hacc, write_options opts = write_options(0));
+Hacc string_to_hacc (String);
+Hacc string_to_hacc (const char*);
 
 }
 
