@@ -10,7 +10,7 @@ use Carp qw(croak);
 use Cwd qw(cwd realpath);
 use File::Spec::Functions qw(:ALL);
 
-our @EXPORT_OK = qw(workflow rule rules phony defaults include chdir targetmatch run);
+our @EXPORT_OK = qw(workflow rule rules phony subdep defaults include chdir targetmatch run);
 our %EXPORT_TAGS = ('all' => \@EXPORT_OK);
 
  # A "target" is a reference to either a file or a phony.
@@ -44,6 +44,7 @@ sub workflow (&) {
         caller_line => $line,
         rules => [],
         targets => {},
+        subdeps => {},
         phonies => {},
         defaults => undef,
     );
@@ -106,6 +107,18 @@ sub rules ($$) {
         @$_ == 2 or croak "Each of the elements of the first argument to rules must have two elements";
         my ($package, $file, $line) = caller;
         rule_with_caller($package, $file, $line, $_->[0], $_->[1], $recipe);
+    }
+}
+sub subdep ($$) {
+    %workflow or croak "subdep was called outside of a workflow";
+    my ($to, $from) = @_;
+    my $subdep = {
+        base => cwd,
+        to => [arrayify($to)],
+        from => lazify($from),
+    };
+    for my $to (@{$subdep->{to}}) {
+        push @{$workflow{subdeps}{realpath($to)}}, $subdep;
     }
 }
 sub arrayify {
@@ -186,6 +199,7 @@ sub run (@) {
         die "\n";
     }
 }
+sub realpaths (@) { return map realpath($_), @_; }
 
 ##### PRINTING ETC.
 
@@ -219,7 +233,7 @@ sub fexists {
     return -e $_[0];
 }
 sub modtime {
-    return $modtimes{realpath($_[0])} //= (fexists(realpath($_[0])) ? (stat realpath($_[0]))[9] : 0);
+    return $modtimes{$_[0]} //= (fexists($_[0]) ? (stat $_[0])[9] : 0);
 }
 
  # This routine is stale.
@@ -256,6 +270,20 @@ sub plan_target {
      # In general, there should be only rule per target, but there can be more.
     return grep plan_rule($plan, $_), @{$workflow{targets}{$target}};
 }
+sub add_subdeps {
+    my @deps = @_;
+    my $old_cwd = cwd;
+     # Using this style of loop because @deps will keep expanding.
+    for (my $i = 0; $i < @deps; $i++) {
+        for my $subdep (@{$workflow{subdeps}{$deps[$i]}}) {
+            Cwd::chdir rel2abs($subdep->{base});
+            $subdep->{from} = [delazify($subdep->{from}, $subdep->{to})];
+            push @deps, grep { my $d = $_; not grep $d eq $_, @deps } realpaths(@{$subdep->{from}});
+        }
+    }
+    Cwd::chdir $old_cwd;
+    return @deps;
+}
 sub plan_rule {
     my ($plan, $rule) = @_;
     Cwd::chdir rel2abs($rule->{base});
@@ -276,12 +304,13 @@ sub plan_rule {
 
      # Now is when we officially collapse lazy dependencies.
     $rule->{from} = [delazify($rule->{from}, $rule->{to})];
-    my @from = map realpath($_), @{$rule->{from}};
+     # Get the realpaths of all dependencies and their subdeps
+    my @deps = add_subdeps(realpaths(@{$rule->{from}}));
      # always recurse to plan_target
-    my $stale = grep plan_target($plan, $_), @from;
+    my $stale = grep plan_target($plan, $_), @deps;
     $stale ||= grep {
         my $abs = realpath(rel2abs($_, $rule->{base}));
-        !fexists($abs) or grep modtime($abs) < modtime($_), @from;
+        !fexists($abs) or grep modtime($abs) < modtime($_), @deps;
     } @{$rule->{to}};
     push @{$plan->{program}}, $rule if $stale;
      # Done planning this rule
