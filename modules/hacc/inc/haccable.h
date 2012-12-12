@@ -1,7 +1,9 @@
 
+#include <typeinfo>
+#include <string.h>
+
 #include "hacc.h"
 #include "strings.h"
-#include <typeinfo>
 
 
 
@@ -24,6 +26,8 @@ struct HaccTable {
     const std::type_info& cpptype;
     String hacctype;
     String (* calc_hacctype ) ();
+    String (* haccid ) (void*);
+    void* (* find_by_haccid ) (String);
     void* (* allocate ) ();
     void (* deallocate ) (void*);
     Hacc (* to_hacc ) (const void*);
@@ -51,8 +55,9 @@ struct HaccTable {
 
      // A constructor template can't actually be called, boo!
     HaccTable (const std::type_info& cpptype) :
-        cpptype(cpptype), hacctype(""), calc_hacctype(NULL), allocate(NULL), deallocate(NULL),
-        to_hacc(NULL), update_from_hacc(NULL), new_from_hacc(NULL)
+        cpptype(cpptype), hacctype(""), calc_hacctype(null),
+        haccid(null), find_by_haccid(null), allocate(null), deallocate(null),
+        to_hacc(null), update_from_hacc(null), new_from_hacc(null)
     {
         reg_cpptype(cpptype);
     }
@@ -68,7 +73,7 @@ struct Haccability {
     static bool create_table (void(* desc )()) {
          // Prevent duplicate definitions.
         if (HaccTable::by_cpptype(typeid(C))) return false;
-         // We can't know whether table will be initialized to NULL before or after,
+         // We can't know whether table will be initialized to null before or after,
          // but it won't be in the middle of this call, I hope.
         table = new HaccTable(typeid(C));
         desc();
@@ -84,6 +89,12 @@ struct Haccability {
     }
     static void allocate (C* (* p )()) {
         table->allocate = (void*(*)())p;
+    }
+    static void haccid (String (* p )(const C&)) {
+        table->haccid = (String(*)(void*))p;
+    }
+    static void find_by_haccid (C* (* p )(String)) {
+        table->find_by_haccid = (void*(*)(String))p;
     }
     static void deallocate (void (* p )(C*)) {
         table->deallocate = (void(*)(void*))p;
@@ -147,16 +158,8 @@ template <class C> String best_type_name (const C& v) {
 
  // If you don't provide an interpretation for the ids of a particular type,
  // its ids will be based on the memory addresses of its values
-String address_to_id (void* addr) {
-    char id [17];
-    sprintf(id, "%lx", (unsigned long)addr);
-    return String(id, strlen(id);
-}
-void* id_to_address (String id) {
-    void* r;
-    sscanf(id.c_str(), "%lx", (unsigned long*)&p);
-    return r;
-}
+String address_to_id (void* addr);
+void* id_to_address (String id);
 
 
  // Make decisions based on whether a type has a nullary constructor
@@ -211,6 +214,21 @@ template <class C> String hacctype (const C& v) {
     return hacctype<C>();
 }
 
+template <class C> String haccid (const C& v) {
+    HaccTable* htp = require_HaccTable<C>();
+    if (htp->haccid)
+        return htp->haccid((void*)&v);
+    else
+        return address_to_id((void*)&v);
+}
+template <class C> C* find_by_haccid (String id) {
+    HaccTable* htp = require_HaccTable<C>();
+    if (htp->find_by_haccid)
+        return (C*)htp->find_by_haccid(id);
+    else
+        return (C*)id_to_address(id);
+}
+
 template <class C> C* allocate () {
     HaccTable* htp = require_HaccTable<C>();
     if (htp->allocate) {
@@ -233,7 +251,9 @@ template <class C> Hacc to_hacc (const C& v) {
     HaccTable* htp = require_HaccTable<C>();
     if (htp->to_hacc) {
         Hacc r = htp->to_hacc((void*)&v);
-        r.default_type_id(htp->get_hacctype(), &v)
+        String id = htp->haccid ? htp->haccid((void*)&v) : address_to_id((void*)&v);
+        r.default_type_id(htp->get_hacctype(), id);
+        return r;
     }
     throw Error("Tried to call to_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'to'.");
 }

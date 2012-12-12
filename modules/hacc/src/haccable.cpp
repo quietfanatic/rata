@@ -59,4 +59,15 @@ namespace hacc {
         return hacctype;
     }
 
+    String address_to_id (void* addr) {
+        char id [17];
+        sprintf(id, "%lx", (unsigned long)addr);
+        return String(id, strlen(id));
+    }
+    void* id_to_address (String id) {
+        void* r;
+        sscanf(id.c_str(), "%lx", (unsigned long*)&r);
+        return r;
+    }
+
 }

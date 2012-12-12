@@ -1,6 +1,5 @@
 
 #include "haccable.h"
-#include "string.h"
 
 HACCABLE_TEMPLATE_BEGIN(<class C>, C*) {
     using namespace hacc;
