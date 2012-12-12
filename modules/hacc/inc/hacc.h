@@ -25,6 +25,7 @@ typedef uint64_t uint64;
 #include <vector>
 #include <string>
 
+#include "options.h"
 
 namespace hacc {
 
