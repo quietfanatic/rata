@@ -13,10 +13,10 @@ String escape_string (String);
 String escape_ident (String);
  // unescape is harder to abstract out, so we'll wait till we need it.
  // Serialize the value part to a string
-String hacc_value_to_string (Hacc);
+String hacc_value_to_string (Hacc, write_options opts = write_options(0));
 
  // Write a Hacc to a string
-String hacc_to_string (Hacc);
+String hacc_to_string (Hacc, write_options opts = write_options(0));
  // Read a Hacc from a string
 Hacc hacc_from_string (String);
 

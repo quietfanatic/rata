@@ -250,13 +250,14 @@ template <class C> void deallocate (C* p) {
         delete p;
     }
 }
-template <class C> Hacc to_hacc (const C& v) {
+template <class C> Hacc to_hacc (const C& v, write_options opts = write_options(0)) {
     HaccTable* htp = require_HaccTable<C>();
     if (htp->to_hacc) {
         Hacc r = htp->to_hacc((void*)&v);
         String id = htp->haccid ? htp->haccid((void*)&v) : address_to_id((void*)&v);
         r.default_type_id(htp->get_hacctype(), id);
         r.default_options(htp->options);
+        r.add_options(opts);
         return r;
     }
     throw Error("Tried to call to_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'to'.");
@@ -302,8 +303,8 @@ template <class C> C* new_from_hacc (Hacc hacc) {
 }
 
  // Backwards-named aliases
-template <class C> Hacc hacc_from (const C& v) {
-    return to_hacc<C>(v);
+template <class C> Hacc hacc_from (const C& v, write_options opts = write_options(0)) {
+    return to_hacc<C>(v, opts);
 }
 template <class C> C hacc_to (Hacc hacc) {
     return from_hacc<C>(hacc);

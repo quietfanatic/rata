@@ -34,7 +34,7 @@ String escape_ident (String unesc) {
 }
 
 
-String hacc_value_to_string (Hacc h) {
+String hacc_value_to_string (Hacc h, write_options opts) {
     switch (h.valtype()) {
         case VALNULL: return "null";
         case BOOL: return h.assume_bool() ? "true" : "false";
@@ -87,8 +87,8 @@ String hacc_value_to_string (Hacc h) {
         default: throw Error("Corrupted Hacc tree\n");
     }
 }
-String hacc_to_string (Hacc h) {
-    String r = hacc_value_to_string(h);
+String hacc_to_string (Hacc h, write_options opts) {
+    String r = hacc_value_to_string(h, opts);
     if ((!h.type().empty() || !h.id().empty())
      && h.valtype() != ARRAY && h.valtype() != OBJECT)
         r = "(" + r + ")";
