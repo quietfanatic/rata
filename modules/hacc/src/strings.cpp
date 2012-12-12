@@ -88,12 +88,19 @@ String hacc_value_to_string (Hacc h, write_options opts) {
     }
 }
 String hacc_to_string (Hacc h, write_options opts) {
+    opts = hf::default_options | opts;
     String r = hacc_value_to_string(h, opts);
-    if ((!h.type().empty() || !h.id().empty())
+    bool show_type = ((opts.require_type() && !opts.never_show_types())
+                   || opts.always_show_types())
+                  && !h.type().empty();
+    bool show_id = ((opts.require_id() && !opts.never_show_ids())
+                 || opts.always_show_ids())
+                && !h.id().empty();
+    if ((show_type || show_id)
      && h.valtype() != ARRAY && h.valtype() != OBJECT)
         r = "(" + r + ")";
-    if (!h.id().empty()) r = "@" + escape_ident(h.id()) + r;
-    if (!h.type().empty()) r = "#" + escape_ident(h.type()) + r;
+    if (show_id) r = "@" + escape_ident(h.id()) + r;
+    if (show_type) r = "#" + escape_ident(h.type()) + r;
     return r;
 }
 
