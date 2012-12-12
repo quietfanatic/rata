@@ -69,14 +69,17 @@ struct write_options {
             opt.set_indent_string() ? opt._indent_string : _indent_string
         );
     }
-
+    write_options& operator |= (write_options opt) {
+        *this = *this | opt;
+        return *this;
+    }
 };
 }  // anon namespace
 
 namespace hf {
     static constexpr write_options default_options = write_options();
 #define HACC_OPTIONS_WHF(name, value, def, conflicts) \
-    static constexpr write_options name = write_options(write_options::combine_flags(write_options::default_flags, write_options::f::name));
+    static constexpr write_options name = write_options(write_options::f::name);
     HACC_OPTIONS_FORALL_WFLAGS(HACC_OPTIONS_WHF, ;);
     static constexpr write_options indent_levels (int8 levels) {
         return write_options(write_options::default_flags, levels); 

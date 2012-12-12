@@ -119,9 +119,13 @@ struct Hacc {
      // Manipulating type and id
     String type () const;
     String id () const;
+    write_options options () const;
      // These do update in place.  You shouldn't need them often.
     void set_type (String);
     void set_id (String);
+    void set_options (write_options);
+    void add_options (write_options);
+    void default_options (write_options);
      // This sets each only if it has not already been set.
     void default_type_id (String, String);
      // Error handling
