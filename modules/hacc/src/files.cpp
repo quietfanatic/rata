@@ -39,15 +39,13 @@ void string_to_file (String s, const char* filename, write_options opts) {
     return;
 }
 void string_to_file (String s, String filename, write_options opts) {
-    char cstr [filename.length() + 1];
-    memcpy(cstr, filename.c_str(), filename.length() + 1);
-    string_to_file(s, cstr, opts);
+    string_to_file(s, filename.c_str(), opts);
 }
 void file_from_string (const char* filename, String s, write_options opts) {
     string_to_file(s, filename, opts);
 }
 void file_from_string (String filename, String s, write_options opts) {
-    string_to_file(s, filename, opts);
+    string_to_file(s, filename.c_str(), opts);
 }
 
 
@@ -73,15 +71,13 @@ String string_from_file (const char* filename) {
     return String(data, size);
 }
 String string_from_file (String filename) {
-    char cstr [filename.length() + 1];
-    memcpy(cstr, filename.c_str(), filename.length() + 1);
-    return string_from_file(cstr);
+    return string_from_file(filename.c_str());
 }
 String file_to_string (const char* filename) {
     return string_from_file(filename);
 }
 String file_to_string (String filename) {
-    return string_from_file(filename);
+    return string_from_file(filename.c_str());
 }
 
 }
