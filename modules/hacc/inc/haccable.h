@@ -1,3 +1,6 @@
+#ifndef HAVE_HACC_HACCABLE_H
+#define HAVE_HACC_HACCABLE_H
+
 
 #include <typeinfo>
 #include <string.h>
@@ -365,3 +368,4 @@ namespace { \
 
  // Wow, I gotta say, it's crazy that all this stuff actually works.
 
+#endif

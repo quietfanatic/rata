@@ -1,3 +1,5 @@
+#ifndef HAVE_HACC_OPTIONS_H
+#define HAVE_HACC_OPTIONS_H
 
  // Yeah, all the options code is in the header, because absolutely everything here is constexpr.
  // If this turns out to make compile times too slow, I guess we could hc-separate it some.
@@ -90,4 +92,4 @@ namespace hf {
 
 }
 
-
+#endif
