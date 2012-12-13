@@ -44,8 +44,9 @@ struct HaccTable {
     F<String (void*)>* haccid { null };
     F<void* (String)>* find_by_haccid { null };
     write_options options = write_options(0);
-    F<void* ()>* allocate {null };
+    F<void* ()>* allocate { null };
     F<void (void*)>* deallocate { null };
+    F<void (void*)>* construct { null };
     F<Hacc (void*)>* to_hacc { null };
     void* from_hacc { null };  // Unboxedness screws things up.
     F<void (void*, Hacc)>* update_from_hacc { null };
@@ -54,7 +55,7 @@ struct HaccTable {
      // TODO
     //VArray<Hacclement> elems;
 
-     // If hacctype doesn't exist, set it to calc_hacctype()
+     // Accessors that do a little bit of magic.
     String get_hacctype ();
 
      // Instead of exposing the hash tables, we're wrapping them in these functions
@@ -65,6 +66,7 @@ struct HaccTable {
     static HaccTable* require_cpptype (const std::type_info& t);
     static HaccTable* by_hacctype (String s);
     static HaccTable* require_hacctype (String s);
+
 
     HaccTable (const std::type_info& cpptype, size_t cppsize) : cpptype(cpptype), cppsize(cppsize) { }
     
@@ -88,11 +90,12 @@ struct Haccability {
             table->hacctype = s;
     }
     static void hacctype (F<String ()>* p) { table->calc_hacctype = p; }
-    static void allocate (F<C* ()>* p) { table->allocate = (F<void* ()>*)p; }
     static void haccid (F<String (const C&)>* p) { table->haccid = (F<String (void*)>*)p; }
     static void find_by_haccid (F<C* (String)>* p) { table->find_by_haccid = (F<void* (String)>*)p; }
     static void options (write_options opts) { table->options = opts; }
+    static void allocate (F<C* ()>* p) { table->allocate = (F<void* ()>*)p; }
     static void deallocate (F<void (C*)>* p) { table->deallocate = (F<void (void*)>*)p; }
+    static void construct (F<void (C&)>* p) { table->construct = (F<void (void*)>*)p; }
     static void to_hacc (F<Hacc (const C&)>* p) { table->to_hacc = (F<Hacc (void*)>*)p; }
     static void hacc_from (F<Hacc (const C&)>* p) { table->to_hacc = (F<Hacc(void*)>)p; }
     static void from_hacc (F<C (Hacc)>* p) { table->from_hacc = (void*)p; }
@@ -161,11 +164,11 @@ void* id_to_address (String id);
 template <class C, bool has_nc> struct _constructibility;
 template <class C> struct _constructibility<C, true> {
     static inline C* allocate () { return new C; }
-    static inline void construct (C* p) { new (p) C; }
+    static inline void construct (C& p) { new (&p) C; }
 };
 template <class C> struct _constructibility<C, false> {
     static constexpr F<C* ()>* allocate { null };
-    static constexpr F<void (C*)>* construct { null };
+    static constexpr F<void (C&)>* construct { null };
 };
 template <class C>
 using constructibility = _constructibility<C, std::is_constructible<C>::value>;
@@ -246,7 +249,7 @@ template <class C> C from_hacc (Hacc hacc) {
     if (htp->update_from_hacc) {
         char dat [sizeof(C)];
         C* p = (C*)dat;
-        constructibility<C>::construct(p);
+        constructibility<C>::construct(*p);
         htp->update_from_hacc((void*)p, hacc);
         return *p;
     }
