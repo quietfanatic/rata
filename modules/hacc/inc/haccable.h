@@ -7,18 +7,18 @@
 
 #include "hacc.h"
 
-
+namespace hacc { struct HaccTable; }
 
  // Base implementation of the thing that implements HACCABLE definitions.
  // The HACCABLE macro creates a specialization of this.
 namespace {
     template <class C> struct HACCABLE_Definition {
-         // If this is true, it means that the haccable definition for this type
+         // If this is not null, it means that the haccable definition for this type
          // has been defined in this compilation unit, and hasn't been overridden
          // by a definition in a different compilation unit.
-        static bool registered;
+        static hacc::HaccTable* table;
     };
-    template <class C> bool HACCABLE_Definition<C>::registered = false;
+    template <class C> hacc::HaccTable* HACCABLE_Definition<C>::table = hacc::null;
 }
 
 namespace hacc {
@@ -57,7 +57,7 @@ struct HaccTable {
     String get_hacctype ();
 
      // Instead of exposing the hash tables, we're wrapping them in these functions
-    void reg_cpptype (const std::type_info& t);
+    static HaccTable* new_with_cpptype (const std::type_info& cpptype);
     void reg_hacctype (String s);
      // require_* versions throw an exception if the table isn't found.
     static HaccTable* by_cpptype (const std::type_info& t);
@@ -65,13 +65,7 @@ struct HaccTable {
     static HaccTable* by_hacctype (String s);
     static HaccTable* require_hacctype (String s);
 
-     // A constructor template can't actually be called, boo!
-    HaccTable (const std::type_info& cpptype) :
-        cpptype(cpptype)
-    {
-        reg_cpptype(cpptype);
-    }
-     // So we have to delegate the fancy stuff elsewhere.
+    HaccTable (const std::type_info& cpptype) : cpptype(cpptype) { }
     
 };
 
@@ -80,14 +74,12 @@ struct HaccTable {
 template <class C>
 struct Haccability {
     static HaccTable* table;
-    static bool create_table (F<void ()>* desc) {
-         // Prevent duplicate definitions.
-        if (HaccTable::by_cpptype(typeid(C))) return false;
-         // We can't know whether table will be initialized to null before or after,
-         // but it won't be in the middle of this call, I hope.
-        table = new HaccTable(typeid(C));
-        desc();
-        return true;
+    static HaccTable* describe (F<void (Haccability<C>)>* desc) {
+        table = HaccTable::new_with_cpptype(typeid(C));
+        if (table) {
+            desc(Haccability<C>());
+        }
+        return table;
     }
 
     static void hacctype (String s) {
@@ -132,17 +124,20 @@ template <class C> HaccTable* Haccability<C>::table = Haccability<C>::table;
  //  to force instantiation of the HACCABLE_Definition.  As a bonus, if
  //  the definition has been given in this compilation unit, it'll skip
  //  one hashtable lookup.
+template <class C> HaccTable* get_HaccTable () {
+    if (!HACCABLE_Definition<C>::table)
+        HACCABLE_Definition<C>::table = HaccTable::by_cpptype(typeid(C));
+    return HACCABLE_Definition<C>::table;
+}
 template <class C> HaccTable* require_HaccTable () {
-    if (HACCABLE_Definition<C>::registered)
-        return Haccability<C>::table;
-    else return HaccTable::require_cpptype(typeid(C));
+    if (!HACCABLE_Definition<C>::table)
+        HACCABLE_Definition<C>::table = HaccTable::require_cpptype(typeid(C));
+    return HACCABLE_Definition<C>::table;
 }
 
  // Name a type by any means possible
 template <class C> String best_type_name () {
-    HaccTable* htp = HACCABLE_Definition<C>::registered
-        ? Haccability<C>::table
-        : HaccTable::by_cpptype(typeid(C));
+    HaccTable* htp = get_HaccTable<C>();
     if (htp) {
         String hts = htp->get_hacctype();
         if (!hts.empty())
@@ -193,9 +188,7 @@ template <class C> inline C from_from_update_from (void (* p ) (void*, Hacc), Ha
 
 
 template <class C> bool has_hacctype () {
-    HaccTable* htp = HACCABLE_Definition<C>::registered
-        ? Haccability<C>::table
-        : HaccTable::by_cpptype(typeid(C));
+    HaccTable* htp = get_HaccTable<C>();
     return htp && (htp->calc_hacctype || !htp->hacctype.empty());
 }
 template <class C> bool has_hacctype (const C& v) {
@@ -313,7 +306,7 @@ template <class C> C* hacc_to_new (Hacc hacc) {
 }
 
  // Manually force instantiation of an instance
-#define HACCABLE_INSTANCE_CTR2(C, ctr) static bool HACCABLE_instance_##ctr = HACCABLE_Definition<C>::registered;
+#define HACCABLE_INSTANCE_CTR2(C, ctr) static bool HACCABLE_instance_##ctr = HACCABLE_Definition<C>::table;
 #define HACCABLE_INSTANCE_CTR1(C, ctr) HACCABLE_INSTANCE_CTR2(C, ctr)
 #define HACCABLE_INSTANCE(C) HACCABLE_INSTANCE_CTR1(C, __COUNTER__)
 
@@ -321,12 +314,11 @@ template <class C> C* hacc_to_new (Hacc hacc) {
 #define HACCABLE_BEGIN(C) \
 namespace { \
     template <> struct HACCABLE_Definition<C> { \
-        typedef hacc::Haccability<C> d; \
-        static void describe ()
+        static void desc (hacc::Haccability<C> d)
 #define HACCABLE_END(C) \
-        static bool registered; \
+        static hacc::HaccTable* table; \
     }; \
-    bool HACCABLE_Definition<C>::registered = hacc::Haccability<C>::create_table(describe); \
+    hacc::HaccTable* HACCABLE_Definition<C>::table = hacc::Haccability<C>::describe(desc); \
     HACCABLE_INSTANCE(C) \
 }
 #define HACCABLE(C, ...) HACCABLE_BEGIN(C) __VA_ARGS__ HACCABLE_END(C)
@@ -336,12 +328,11 @@ namespace { \
 #define HACCABLE_TEMPLATE_BEGIN(params, C) \
 namespace { \
     template params struct HACCABLE_Definition<C> { \
-        typedef hacc::Haccability<C> d; \
-        static void describe ()
+        static void desc (hacc::Haccability<C> d)
 #define HACCABLE_TEMPLATE_END(params, C) \
-        static bool registered; \
+        static hacc::HaccTable* table; \
     }; \
-    template params bool HACCABLE_Definition<C>::registered = hacc::Haccability<C>::create_table(describe); \
+    template params hacc::HaccTable* HACCABLE_Definition<C>::table = hacc::Haccability<C>::describe(desc); \
 }
 #define HACCABLE_TEMPLATE(params, C, ...) HACCABLE_TEMPLATE_BEGIN(params, C) __VA_ARGS__ HACCABLE_TEMPLATE_END(params, C)
 
@@ -350,9 +341,9 @@ namespace { \
 
  // example:
  // HACCABLE(mything, {
- //     d::type("mything");
- //     d::to_hacc([](mything x){ return Hacc(x.as_integer); });
- //     d::from_hacc([](Hacc h){ return mything(h.get_integer); });
+ //     d.hacctype("mything");
+ //     d.to_hacc([](mything x){ return Hacc(x.as_integer); });
+ //     d.from_hacc([](Hacc h){ return mything(h.get_integer); });
  // })
 
 

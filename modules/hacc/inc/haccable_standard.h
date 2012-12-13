@@ -5,10 +5,10 @@
 
 HACCABLE_TEMPLATE_BEGIN(<class C>, C*) {
     using namespace hacc;
-    d::hacctype([](){
+    d.hacctype([](){
         return hacctype<C>() + "*";
     });
-    d::to_hacc([](C* const& v){
+    d.to_hacc([](C* const& v){
         if (v) {
             String type = has_hacctype(*v) ? hacctype(*v) : "";
             return Hacc(Ref{type, address_to_id((void*)v)});
@@ -17,7 +17,7 @@ HACCABLE_TEMPLATE_BEGIN(<class C>, C*) {
             return Hacc(null);
         }
     });
-    d::from_hacc([](Hacc h){
+    d.from_hacc([](Hacc h){
         if (h.valtype() == VALNULL) {
             return (C*)null;
         }

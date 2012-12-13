@@ -2,11 +2,11 @@
 #include "../inc/haccable.h"
 
 HACCABLE(int, {
-    d::hacctype("int, yo!");
-    d::to_hacc([](const int& i) {
+    d.hacctype("int, yo!");
+    d.to_hacc([](const int& i) {
         return hacc::Hacc(i);
     });
-    d::from_hacc([](hacc::Hacc h) {
+    d.from_hacc([](hacc::Hacc h) {
         return (int)h.get_integer();
     });
 })
@@ -18,14 +18,14 @@ struct MyThing {
 };
 HACCABLE(MyThing, {
     using namespace hacc;
-    d::hacctype("MyThing");
-    d::to_hacc([](const MyThing& t){
+    d.hacctype("MyThing");
+    d.to_hacc([](const MyThing& t){
         hacc::Array a (2);
         a[0] = to_hacc<int>(t.x);
         a[1] = to_hacc<int>(t.y);
         return Hacc(a);
     });
-    d::from_hacc([](Hacc h) {
+    d.from_hacc([](Hacc h) {
         auto a = h.get_array();
         return MyThing{ from_hacc<int>(a[0]), from_hacc<int>(a[1]) };
     });
@@ -38,7 +38,7 @@ struct MyFloat {
     MyFloat () { }
     bool operator == (MyFloat o) const { return val==o.val; }
 };
-HACCABLE(MyFloat, { d::like_float(); })
+HACCABLE(MyFloat, { d.like_float(); })
 
 template <class C>
 struct MyWrapper {
@@ -47,11 +47,11 @@ struct MyWrapper {
 template <class C>
 bool operator == (MyWrapper<C> a, MyWrapper<C> b) { return a.val==b.val; }
 HACCABLE_TEMPLATE(<class C>, MyWrapper<C>, {
-    d::hacctype([](){
+    d.hacctype([](){
         return "MyWrapper<" + hacc::hacctype<C>() + ">";
     });
-    d::to_hacc([](const MyWrapper<C>& v){ return hacc::to_hacc(v.val); });
-    d::from_hacc([](hacc::Hacc h){ return MyWrapper<C>{hacc::from_hacc<C>(h)}; });
+    d.to_hacc([](const MyWrapper<C>& v){ return hacc::to_hacc(v.val); });
+    d.from_hacc([](hacc::Hacc h){ return MyWrapper<C>{hacc::from_hacc<C>(h)}; });
 })
  // Let's try it without an explicit instantiation.
 
@@ -60,7 +60,7 @@ struct NoConstructor {
     NoConstructor (int x) : x(x) { };
 };
 HACCABLE(NoConstructor, {
-    d::update_from_hacc([](NoConstructor& v, hacc::Hacc h){
+    d.update_from_hacc([](NoConstructor& v, hacc::Hacc h){
         v.x = h.get_integer();
     });
 })
@@ -69,8 +69,8 @@ struct ID_Tester {
     int x;
 } id_tester {43};
 HACCABLE(ID_Tester, {
-    d::haccid([](const ID_Tester& v){ return hacc::String("The only!"); });
-    d::find_by_haccid([](hacc::String s){
+    d.haccid([](const ID_Tester& v){ return hacc::String("The only!"); });
+    d.find_by_haccid([](hacc::String s){
         if (s == "The only!") return &id_tester;
         else return (ID_Tester*)hacc::null;
     });

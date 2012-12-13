@@ -12,11 +12,15 @@ namespace hacc {
         static Hash_by<String> r;
         return r;
     }
-    void HaccTable::reg_cpptype (const std::type_info& t) {
-        auto result = ht_cpptype_hash().emplace(&t, this);
-        if (!result.second) {
-            throw Error(String("Uh oh, the Haccability for cpptype <mangled: ") + t.name() + "> was instantiated in two different object files.  Currently, the Hacc library can't handle this situation.  If it's a problem, contact me and I might be able to fix this.");
+
+    HaccTable* HaccTable::new_with_cpptype (const std::type_info& cpptype) {
+        auto result = ht_cpptype_hash().emplace(&cpptype, null);
+         // Return null if this is a duplicate registration.
+        if (result.second) {
+            result.first->second = new HaccTable (cpptype);
+            return result.first->second;
         }
+        else return null;
     }
     void HaccTable::reg_hacctype (String s) {
         auto result = ht_hacctype_hash().emplace(s, this);
