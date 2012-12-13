@@ -57,6 +57,15 @@ struct HaccTable {
 
      // Accessors that do a little bit of magic.
     String get_hacctype ();
+    String do_haccid (void* p);
+    void* do_find_by_haccid (String id);
+    void* do_allocate ();
+    void do_deallocate (void*);
+    void do_construct (void*);
+    Hacc do_to_hacc (void*);
+    void* do_from_hacc (Hacc);
+    void do_update_from_hacc (void*, Hacc);
+    void* do_new_from_hacc (Hacc);
 
      // Instead of exposing the hash tables, we're wrapping them in these functions
     static HaccTable* gen (const std::type_info& cpptype, size_t cppsize);
@@ -66,7 +75,6 @@ struct HaccTable {
     static HaccTable* require_cpptype (const std::type_info& t);
     static HaccTable* by_hacctype (String s);
     static HaccTable* require_hacctype (String s);
-
 
     HaccTable (const std::type_info& cpptype, size_t cppsize) : cpptype(cpptype), cppsize(cppsize) { }
     
