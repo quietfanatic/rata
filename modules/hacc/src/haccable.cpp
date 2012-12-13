@@ -13,11 +13,11 @@ namespace hacc {
         return r;
     }
 
-    HaccTable* HaccTable::new_with_cpptype (const std::type_info& cpptype) {
+    HaccTable* HaccTable::gen (const std::type_info& cpptype, size_t cppsize) {
         auto result = ht_cpptype_hash().emplace(&cpptype, null);
          // Return null if this is a duplicate registration.
         if (result.second) {
-            result.first->second = new HaccTable (cpptype);
+            result.first->second = new HaccTable (cpptype, cppsize);
             return result.first->second;
         }
         else return null;

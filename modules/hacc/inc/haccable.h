@@ -38,6 +38,7 @@ struct Haccribute {
  // This needs to be declared here so that Haccability<> can access it.
 struct HaccTable {
     const std::type_info& cpptype;
+    size_t cppsize;
     String hacctype = "";
     F<String ()>* calc_hacctype { null };  // Using = null triggers a compiler bug.
     F<String (void*)>* haccid { null };
@@ -57,7 +58,7 @@ struct HaccTable {
     String get_hacctype ();
 
      // Instead of exposing the hash tables, we're wrapping them in these functions
-    static HaccTable* new_with_cpptype (const std::type_info& cpptype);
+    static HaccTable* gen (const std::type_info& cpptype, size_t cppsize);
     void reg_hacctype (String s);
      // require_* versions throw an exception if the table isn't found.
     static HaccTable* by_cpptype (const std::type_info& t);
@@ -65,7 +66,7 @@ struct HaccTable {
     static HaccTable* by_hacctype (String s);
     static HaccTable* require_hacctype (String s);
 
-    HaccTable (const std::type_info& cpptype) : cpptype(cpptype) { }
+    HaccTable (const std::type_info& cpptype, size_t cppsize) : cpptype(cpptype), cppsize(cppsize) { }
     
 };
 
@@ -75,7 +76,7 @@ template <class C>
 struct Haccability {
     static HaccTable* table;
     static HaccTable* describe (F<void (Haccability<C>)>* desc) {
-        table = HaccTable::new_with_cpptype(typeid(C));
+        table = HaccTable::gen(typeid(C), sizeof(C));
         if (table) {
             desc(Haccability<C>());
         }
@@ -157,31 +158,17 @@ void* id_to_address (String id);
 
 
  // Make decisions based on whether a type has a nullary constructor
-template <class C, bool has_nc> struct _nc_decide { };
-template <class C> struct _nc_decide<C, true> {
-    static inline C* default_allocate () {
-        return new C;
-    }
-    static inline C from_from_update_from (void (* p ) (void*, Hacc), Hacc h) {
-        C r;
-        ((F<void (C*, Hacc)>*)p)(&r, h);
-        return r;
-    }
+template <class C, bool has_nc> struct _constructibility;
+template <class C> struct _constructibility<C, true> {
+    static inline C* allocate () { return new C; }
+    static inline void construct (C* p) { new (p) C; }
 };
-template <class C> struct _nc_decide<C, false> {
-    static inline C* default_allocate () {
-        throw Error("Cannot provide a default 'allocate' for type " + best_type_name<C>() + " because it does not have a nullary constructor.");
-    }
-    static inline C from_from_update_from (void (* p ) (void*, Hacc), Hacc h) {
-        throw Error("Cannot transform 'update_from_hacc' into 'from_hacc' for type " + best_type_name<C>() + " because it does not have a nullary constructor.");
-    }
+template <class C> struct _constructibility<C, false> {
+    static constexpr F<C* ()>* allocate { null };
+    static constexpr F<void (C*)>* construct { null };
 };
-template <class C> inline C* default_allocate () {
-    return _nc_decide<C, std::is_constructible<C>::value>::default_allocate();
-}
-template <class C> inline C from_from_update_from (void (* p ) (void*, Hacc), Hacc h) {
-    return _nc_decide<C, std::is_constructible<C>::value>::from_from_update_from(p, h);
-}
+template <class C>
+using constructibility = _constructibility<C, std::is_constructible<C>::value>;
 
 
  // THIS BEGINS the API you use to manipulate haccable objects.
@@ -227,7 +214,7 @@ template <class C> C* allocate () {
         return (C*)htp->allocate();
     }
     else {
-        return default_allocate<C>();
+        return constructibility<C>::allocate();
     }
 }
 template <class C> void deallocate (C* p) {
@@ -257,7 +244,11 @@ template <class C> C from_hacc (Hacc hacc) {
         return ((F<C (Hacc)>*)htp->from_hacc)(hacc);
     }
     if (htp->update_from_hacc) {
-        return from_from_update_from<C>(htp->update_from_hacc, hacc);
+        char dat [sizeof(C)];
+        C* p = (C*)dat;
+        constructibility<C>::construct(p);
+        htp->update_from_hacc((void*)p, hacc);
+        return *p;
     }
     throw Error("Tried to call from_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'from' or 'update_from'.");
 }
