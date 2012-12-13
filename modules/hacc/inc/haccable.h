@@ -23,11 +23,14 @@ namespace {
 
 namespace hacc {
 
+template <class T>
+using F = T;  // Makes function pointers nicer.
+
 struct Haccribute {
     const std::type_info& cpptype;
     String name;
-    void* (* ref ) (void*);
-    Haccribute (const std::type_info& cpptype, String name, void* (* ref ) (void*)) :
+    F<void* (void*)>* ref;
+    Haccribute (const std::type_info& cpptype, String name, F<void* (void*)>* ref) :
         cpptype(cpptype), name(name), ref(ref)
     { }
 };
@@ -35,18 +38,17 @@ struct Haccribute {
  // This needs to be declared here so that Haccability<> can access it.
 struct HaccTable {
     const std::type_info& cpptype;
-    String hacctype;
-    String (* calc_hacctype ) ();
-    String (* haccid ) (void*);
-    void* (* find_by_haccid ) (String);
-    write_options options;
-    void* (* allocate ) ();
-    void (* deallocate ) (void*);
-    Hacc (* to_hacc ) (const void*);
-     // From_hacc_p is a little dangerous because more of its type has to be erased.
-    void* from_hacc;
-    void (* update_from_hacc ) (void*, Hacc);
-    void* (* new_from_hacc ) (Hacc);
+    String hacctype = "";
+    F<String ()>* calc_hacctype { null };
+    F<String (void*)>* haccid { null };
+    F<void* (String)>* find_by_haccid { null };
+    write_options options = write_options(0);
+    F<void* ()>* allocate {null };
+    F<void (void*)>* deallocate { null };
+    F<Hacc (void*)>* to_hacc { null };
+    void* from_hacc { null };  // Unboxedness screws things up.
+    F<void (void*, Hacc)>* update_from_hacc { null };
+    F<void* (Hacc)>* new_from_hacc { null };
     VArray<Haccribute> attrs;
      // TODO
     //VArray<Hacclement> elems;
@@ -65,9 +67,7 @@ struct HaccTable {
 
      // A constructor template can't actually be called, boo!
     HaccTable (const std::type_info& cpptype) :
-        cpptype(cpptype), hacctype(""), calc_hacctype(null), haccid(null),
-        find_by_haccid(null), options(write_options(0)), allocate(null), deallocate(null),
-        to_hacc(null), update_from_hacc(null), new_from_hacc(null)
+        cpptype(cpptype)
     {
         reg_cpptype(cpptype);
     }
@@ -80,7 +80,7 @@ struct HaccTable {
 template <class C>
 struct Haccability {
     static HaccTable* table;
-    static bool create_table (void(* desc )()) {
+    static bool create_table (F<void ()>* desc) {
          // Prevent duplicate definitions.
         if (HaccTable::by_cpptype(typeid(C))) return false;
          // We can't know whether table will be initialized to null before or after,
@@ -94,45 +94,45 @@ struct Haccability {
         if (table->hacctype.empty())
             table->hacctype = s;
     }
-    static void hacctype (String (* p )()) {
+    static void hacctype (F<String ()>* p) {
         table->calc_hacctype = p;
     }
-    static void allocate (C* (* p )()) {
-        table->allocate = (void*(*)())p;
+    static void allocate (F<C* ()>* p) {
+        table->allocate = (F<void* ()>*)p;
     }
-    static void haccid (String (* p )(const C&)) {
-        table->haccid = (String(*)(void*))p;
+    static void haccid (F<String (const C&)>* p) {
+        table->haccid = (F<String (void*)>*)p;
     }
-    static void find_by_haccid (C* (* p )(String)) {
-        table->find_by_haccid = (void*(*)(String))p;
+    static void find_by_haccid (F<C* (String)>* p) {
+        table->find_by_haccid = (F<void* (String)>*)p;
     }
     static void options (write_options opts) {
         table->options = opts;
     }
-    static void deallocate (void (* p )(C*)) {
-        table->deallocate = (void(*)(void*))p;
+    static void deallocate (F<void (C*)>* p) {
+        table->deallocate = (F<void (void*)>*)p;
     }
-    static void to_hacc (Hacc (* p )(const C&)) {
-        table->to_hacc = (Hacc(*)(const void*))p;
+    static void to_hacc (F<Hacc (const C&)>* p) {
+        table->to_hacc = (F<Hacc (void*)>*)p;
     }
-    static void hacc_from (Hacc (* p )(const C&)) {
-        table->to_hacc = (Hacc(*)(const void*))p;
+    static void hacc_from (F<Hacc (const C&)>* p) {
+        table->to_hacc = (F<Hacc(void*)>)p;
     }
-    static void from_hacc (C (* p )(Hacc)) {
+    static void from_hacc (F<C (Hacc)>* p) {
         table->from_hacc = (void*)p;
     }
-    static void hacc_to (C (* p )(Hacc)) {
+    static void hacc_to (F<C (Hacc)>* p) {
         table->from_hacc = (void*)p;
     }
-    static void update_from_hacc (void (* p )(C&, Hacc)) {
-        table->update_from_hacc = (void(*)(void*, Hacc))p;
+    static void update_from_hacc (F<void (C&, Hacc)>* p) {
+        table->update_from_hacc = (F<void (void*, Hacc)>*)p;
     }
-    static void new_from_hacc (C* (* p )(Hacc)) {
-        table->new_from_hacc = (void*(*)(Hacc))p;
+    static void new_from_hacc (F<C* (Hacc)>* p) {
+        table->new_from_hacc = (F<void* (Hacc)>*)p;
     }
     template <class M>
-    static void attr (String name, M& (* ref )(C&)) {
-        table->attrs.push_back(Haccribute(typeid(M), name, (void*(*)(void*))ref));
+    static void attr (String name, F<M& (C&)>* ref) {
+        table->attrs.push_back(Haccribute(typeid(M), name, (F<void* (void*)>*)ref));
     }
      // It's easy to hacc types that can be converted to and from an atomic type.
      // Just use these functions, e.g. like_integer();
@@ -193,7 +193,7 @@ template <class C> struct _nc_decide<C, true> {
     }
     static inline C from_from_update_from (void (* p ) (void*, Hacc), Hacc h) {
         C r;
-        ((void(*)(C*, Hacc))p)(&r, h);
+        ((F<void (C*, Hacc)>*)p)(&r, h);
         return r;
     }
 };
@@ -285,7 +285,7 @@ template <class C> Hacc to_hacc (const C& v, write_options opts = write_options(
 template <class C> C from_hacc (Hacc hacc) {
     HaccTable* htp = require_HaccTable<C>();
     if (htp->from_hacc) {
-        return ((C(*)(Hacc))htp->from_hacc)(hacc);
+        return ((F<C (Hacc)>*)htp->from_hacc)(hacc);
     }
     if (htp->update_from_hacc) {
         return from_from_update_from<C>(htp->update_from_hacc, hacc);
@@ -299,7 +299,7 @@ template <class C> void update_from_hacc (C* p, Hacc hacc) {
         return;
     }
     if (htp->from_hacc) {
-        *p = ((C(*)(Hacc))htp->from_hacc)(hacc);
+        *p = ((F<C (Hacc)>*)htp->from_hacc)(hacc);
         return;
     }
     throw Error("Tried to call update_from_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'update_from' or 'from'.");
@@ -316,7 +316,7 @@ template <class C> C* new_from_hacc (Hacc hacc) {
     }
     if (htp->from_hacc) {
         C* r = allocate<C>();
-        *r = ((C(*)(Hacc))htp->from_hacc)(hacc);
+        *r = ((F<C (Hacc)>*)htp->from_hacc)(hacc);
         return r;
     }
     throw Error("Tried to call update_from_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'new_from', 'update_from', or 'from'.");
