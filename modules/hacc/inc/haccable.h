@@ -39,7 +39,7 @@ struct Haccribute {
 struct HaccTable {
     const std::type_info& cpptype;
     String hacctype = "";
-    F<String ()>* calc_hacctype { null };
+    F<String ()>* calc_hacctype { null };  // Using = null triggers a compiler bug.
     F<String (void*)>* haccid { null };
     F<void* (String)>* find_by_haccid { null };
     write_options options = write_options(0);
@@ -94,42 +94,18 @@ struct Haccability {
         if (table->hacctype.empty())
             table->hacctype = s;
     }
-    static void hacctype (F<String ()>* p) {
-        table->calc_hacctype = p;
-    }
-    static void allocate (F<C* ()>* p) {
-        table->allocate = (F<void* ()>*)p;
-    }
-    static void haccid (F<String (const C&)>* p) {
-        table->haccid = (F<String (void*)>*)p;
-    }
-    static void find_by_haccid (F<C* (String)>* p) {
-        table->find_by_haccid = (F<void* (String)>*)p;
-    }
-    static void options (write_options opts) {
-        table->options = opts;
-    }
-    static void deallocate (F<void (C*)>* p) {
-        table->deallocate = (F<void (void*)>*)p;
-    }
-    static void to_hacc (F<Hacc (const C&)>* p) {
-        table->to_hacc = (F<Hacc (void*)>*)p;
-    }
-    static void hacc_from (F<Hacc (const C&)>* p) {
-        table->to_hacc = (F<Hacc(void*)>)p;
-    }
-    static void from_hacc (F<C (Hacc)>* p) {
-        table->from_hacc = (void*)p;
-    }
-    static void hacc_to (F<C (Hacc)>* p) {
-        table->from_hacc = (void*)p;
-    }
-    static void update_from_hacc (F<void (C&, Hacc)>* p) {
-        table->update_from_hacc = (F<void (void*, Hacc)>*)p;
-    }
-    static void new_from_hacc (F<C* (Hacc)>* p) {
-        table->new_from_hacc = (F<void* (Hacc)>*)p;
-    }
+    static void hacctype (F<String ()>* p) { table->calc_hacctype = p; }
+    static void allocate (F<C* ()>* p) { table->allocate = (F<void* ()>*)p; }
+    static void haccid (F<String (const C&)>* p) { table->haccid = (F<String (void*)>*)p; }
+    static void find_by_haccid (F<C* (String)>* p) { table->find_by_haccid = (F<void* (String)>*)p; }
+    static void options (write_options opts) { table->options = opts; }
+    static void deallocate (F<void (C*)>* p) { table->deallocate = (F<void (void*)>*)p; }
+    static void to_hacc (F<Hacc (const C&)>* p) { table->to_hacc = (F<Hacc (void*)>*)p; }
+    static void hacc_from (F<Hacc (const C&)>* p) { table->to_hacc = (F<Hacc(void*)>)p; }
+    static void from_hacc (F<C (Hacc)>* p) { table->from_hacc = (void*)p; }
+    static void hacc_to (F<C (Hacc)>* p) { table->from_hacc = (void*)p; }
+    static void update_from_hacc (F<void (C&, Hacc)>* p) { table->update_from_hacc = (F<void (void*, Hacc)>*)p; }
+    static void new_from_hacc (F<C* (Hacc)>* p) { table->new_from_hacc = (F<void* (Hacc)>*)p; }
     template <class M>
     static void attr (String name, F<M& (C&)>* ref) {
         table->attrs.push_back(Haccribute(typeid(M), name, (F<void* (void*)>*)ref));
