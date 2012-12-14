@@ -53,7 +53,7 @@ const char* valtype_name (Valtype);
  // These are the C++ versions of all the value types
  // TODO: allow the includer to redefine these
 typedef std::nullptr_t Null;
- const auto null = nullptr;
+constexpr Null null = nullptr;
 typedef bool Bool;
 typedef int64 Integer;
 typedef float Float;

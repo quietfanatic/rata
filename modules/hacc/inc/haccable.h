@@ -38,12 +38,12 @@ struct Haccribute {
  // Make decisions based on whether a type has a nullary constructor
 template <class C, bool has_nc> struct _constructibility;
 template <class C> struct _constructibility<C, true> {
-    static inline C* allocate () { return new C; }
-    static inline void construct (C& p) { new (&p) C; }
+    static inline void* allocate () { return (void*)new C; }
+    static inline void construct (void* p) { new ((C*)p) C; }
 };
 template <class C> struct _constructibility<C, false> {
-    static constexpr F<C* ()>* allocate { null };
-    static constexpr F<void (C&)>* construct { null };
+    static constexpr F<void* ()>* allocate { null };
+    static constexpr F<void (void*)>* construct { null };
 };
 template <class C>
 using constructibility = _constructibility<C, std::is_constructible<C>::value>;
@@ -102,7 +102,32 @@ template <class C> struct Haccability {
     static HaccTable* describe (F<void (Haccability<C>)>* desc) {
         table = HaccTable::gen(typeid(C), sizeof(C));
         if (table) {
+             // Gotta provide some of these things here.
             desc(Haccability<C>());
+            if (!table->allocate)
+                table->allocate = constructibility<C>::allocate;
+            if (!table->deallocate)
+                table->deallocate = [](void* p){ delete (C*)p; };
+            if (!table->construct)
+                table->construct = constructibility<C>::construct;
+            if (!table->from_hacc) {
+                if (table->update_from_hacc && table->construct) {
+                    F<C (Hacc)>* def = [](Hacc h){
+                        char dat [sizeof(C)];
+                        table->construct((void*)&dat);
+                        *(C*)dat = ((F<C (Hacc)>*)table->from_hacc)(h);
+                        return *(C*)dat;
+                    };
+                    table->from_hacc = (void*)def;
+                }
+            }
+            if (!table->update_from_hacc) {
+                if (table->from_hacc) {
+                    table->update_from_hacc = [](void* p, Hacc h){
+                        *(C*)p = ((F<C (Hacc)>*)table->from_hacc)(h);
+                    };
+                }
+            }
             table->finalize();
         }
         return table;
