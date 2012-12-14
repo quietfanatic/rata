@@ -12,7 +12,7 @@ int* kp2 = NULL;
 tap::Tester haccable_integration_tester ("haccable_integration", [](){
     using namespace hacc;
     using namespace tap;
-    plan(19);
+    plan(21);
 
     is(to_string<int>(12), String("12"), "to_string");
     is(from_string<int>("90"), (int)90, "from_string");

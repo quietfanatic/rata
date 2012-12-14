@@ -113,9 +113,10 @@ template <class C> struct Haccability {
             if (!table->from_hacc) {
                 if (table->update_from_hacc && table->construct) {
                     F<C (Hacc)>* def = [](Hacc h){
+                        HaccTable* htp = HaccTable::require_cpptype(typeid(C));
                         char dat [sizeof(C)];
-                        table->construct((void*)&dat);
-                        *(C*)dat = ((F<C (Hacc)>*)table->from_hacc)(h);
+                        htp->construct((void*)&dat);
+                        *(C*)dat = ((F<C (Hacc)>*)htp->from_hacc)(h);
                         return *(C*)dat;
                     };
                     table->from_hacc = (void*)def;
@@ -124,7 +125,8 @@ template <class C> struct Haccability {
             if (!table->update_from_hacc) {
                 if (table->from_hacc) {
                     table->update_from_hacc = [](void* p, Hacc h){
-                        *(C*)p = ((F<C (Hacc)>*)table->from_hacc)(h);
+                        HaccTable* htp = HaccTable::require_cpptype(typeid(C));
+                        *(C*)p = ((F<C (Hacc)>*)htp->from_hacc)(h);
                     };
                 }
             }
