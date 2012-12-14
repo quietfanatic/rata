@@ -60,8 +60,8 @@ namespace hacc {
 
     String best_type_name (HaccTable* htp) {
         if (htp) {
-            String hts = htp->get_hacctype();
-            if (!hts.empty())
+            if (htp->hacctype.empty() && htp->calc_hacctype) htp->hacctype = htp->calc_hacctype();
+            if (!htp->hacctype.empty())
                 return htp->hacctype;
         }
         return String("<mangled: ") + htp->cpptype.name() + ">";

@@ -35,6 +35,20 @@ struct Haccribute {
     { }
 };
 
+ // Make decisions based on whether a type has a nullary constructor
+template <class C, bool has_nc> struct _constructibility;
+template <class C> struct _constructibility<C, true> {
+    static inline C* allocate () { return new C; }
+    static inline void construct (C& p) { new (&p) C; }
+};
+template <class C> struct _constructibility<C, false> {
+    static constexpr F<C* ()>* allocate { null };
+    static constexpr F<void (C&)>* construct { null };
+};
+template <class C>
+using constructibility = _constructibility<C, std::is_constructible<C>::value>;
+
+
  /// This needs to be declared here so that Haccability<> can access it.
 struct HaccTable {
     const std::type_info& cpptype;
@@ -160,20 +174,6 @@ template <class C> String best_type_name (const C& v) {
  // its ids will be based on the memory addresses of its values
 String address_to_id (void* addr);
 void* id_to_address (String id);
-
-
- // Make decisions based on whether a type has a nullary constructor
-template <class C, bool has_nc> struct _constructibility;
-template <class C> struct _constructibility<C, true> {
-    static inline C* allocate () { return new C; }
-    static inline void construct (C& p) { new (&p) C; }
-};
-template <class C> struct _constructibility<C, false> {
-    static constexpr F<C* ()>* allocate { null };
-    static constexpr F<void (C&)>* construct { null };
-};
-template <class C>
-using constructibility = _constructibility<C, std::is_constructible<C>::value>;
 
 
  // THIS BEGINS the API you use to manipulate haccable objects.
