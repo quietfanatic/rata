@@ -75,12 +75,13 @@ HACCABLE(ID_Tester, {
         else return (ID_Tester*)hacc::null;
     });
 })
+MyWrapper<int> wi;
 
 #include "../../tap/inc/tap.h"
 tap::Tester haccable_tester ("haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(9);
+    plan(13);
     diag("Using custom Haccable<int> with 'to' and 'from'");
     is(hacc_from((int)4).get_integer(), 4, "hacc_from<int> works");
 //    is(string_from((int)552), "552", "string_from<int> works");
@@ -95,6 +96,10 @@ tap::Tester haccable_tester ("haccable", [](){
 //    is(string_from(MyWrapper<int>{54}), "54", "to in a HACCABLE_TEMPLATE works");
 //    is(string_to<MyWrapper<int>>("192"), MyWrapper<int>{192}, "from in a HACCABLE_TEMPLATE works");
     is(hacctype<MyWrapper<int>>(), "MyWrapper<int, yo!>", "hacctype in a HACCABLE_TEMPLATE works");
+    doesnt_throw([](){ wi = from_hacc<MyWrapper<int>>(Hacc(34)); }, "from_hacc in a HACCABLE_TEMPLATE");
+    is(wi.val, 34, "...works");
+    doesnt_throw([](){ update_from_hacc(wi, Hacc(52)); }, "Can transform from_hacc into update_from_hacc");
+    is(wi.val, 52, "...and it works");
     throws<hacc::Error>([](){ from_hacc<NoConstructor>(Hacc(42)); }, "Throw runtime exception if nullary constructor is required but unavailable.");
     is(haccid(id_tester), "The only!", "haccid appears to work");
     is(find_by_haccid<ID_Tester>(String("The only!"))->x, 43, "find_by_haccid appears to work");
