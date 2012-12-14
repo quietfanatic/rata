@@ -22,7 +22,8 @@ namespace hacc {
         }
         else return null;
     }
-    void HaccTable::reg_hacctype (String s) {
+    void HaccTable::add_hacctype (String s) {
+        if (hacctype.empty()) hacctype = s;
         auto result = ht_hacctype_hash().emplace(s, this);
         if (!result.second) {
             throw Error("The type '" + s + "' was registered twice, once for cpptype <mangled: " + cpptype.name() + ">, and once for cpptype <mangled: " + ht_hacctype_hash().find(s)->second->cpptype.name() + ">");
@@ -57,10 +58,16 @@ namespace hacc {
         throw Error("No haccable type was defined with a type name of '" + s + "'");
     }
 
-    String HaccTable::get_hacctype () {
-        if (hacctype.empty() && calc_hacctype)
-            hacctype = calc_hacctype();
-        return hacctype;
+    String best_type_name (HaccTable* htp) {
+        if (htp) {
+            String hts = htp->get_hacctype();
+            if (!hts.empty())
+                return htp->hacctype;
+        }
+        return String("<mangled: ") + htp->cpptype.name() + ">";
+    }
+    String best_type_name (const std::type_info& t) {
+        return best_type_name(HaccTable::by_cpptype(t));
     }
 
     String address_to_id (void* addr) {
@@ -73,5 +80,69 @@ namespace hacc {
         sscanf(id.c_str(), "%lx", (unsigned long*)&r);
         return r;
     }
+
+    void HaccTable::finalize () {
+        if (!haccid) haccid = address_to_id;
+        if (!find_by_haccid) find_by_haccid = id_to_address;
+    }
+
+    String HaccTable::get_hacctype () {
+        if (hacctype.empty() && calc_hacctype)
+            hacctype = calc_hacctype();
+        if (hacctype.empty()) throw Error("No hacctype was provided for " + best_type_name(this) + ".");
+        return hacctype;
+    }
+    String HaccTable::do_haccid (void* p) {
+         // This should be given a default.
+        return haccid(p);
+    }
+    void* HaccTable::do_find_by_haccid (String id) {
+        return find_by_haccid(id);
+    }
+    void* HaccTable::do_allocate () {
+        if (allocate) return allocate();
+        else throw Error("There is no provided way to allocate a " + best_type_name(this) + ".  A default couldn't be provided because it has no nullary constructor.");
+    }
+    void HaccTable::do_deallocate (void* p) {
+        deallocate(p);
+    }
+    void HaccTable::do_construct (void* p) {
+        if (construct) construct(p);
+        else throw Error("There is no provided way to construct a " + best_type_name(this) + ".  A default couldn't be provided because it has no nullary constructor.");
+    }
+    Hacc HaccTable::do_to_hacc (void* p, write_options opts) {
+        if (to_hacc) {
+            Hacc r = to_hacc(p);
+            r.default_type_id(get_hacctype(), haccid(p));
+            r.default_options(options);
+            r.add_options(opts);
+            return r;
+        }
+        else throw Error("There is no provided way to turn a " + best_type_name(this) + " into a Hacc.");
+    }
+    void* HaccTable::get_from_hacc () {
+        if (from_hacc) return from_hacc;
+        else throw Error("There is no provided way to get a " + best_type_name(this) + " from a Hacc.");
+    }
+    void HaccTable::do_update_from_hacc (void* p, Hacc h) {
+        if (update_from_hacc) update_from_hacc(p, h);
+        else throw Error("There is no provided way to update a " + best_type_name(this) + " from a Hacc.");
+    }
+    void* HaccTable::do_new_from_hacc (Hacc h) {
+        if (new_from_hacc) return new_from_hacc(h);
+        else if (update_from_hacc) {
+            if (allocate) {
+                void* r = allocate();
+                update_from_hacc(r, h);
+                return r;
+            }
+            else throw Error("There is no provided way to make a new " + best_type_name(this) + " from a Hacc.  One couldn't be made from update_from_hacc because it has no nullary constructor.");
+        }
+        else throw Error("There is no provided way to make a new " + best_type_name(this) + " from a Hacc.");
+    }
+
+
+
+
 
 }

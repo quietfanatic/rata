@@ -35,7 +35,7 @@ struct Haccribute {
     { }
 };
 
- // This needs to be declared here so that Haccability<> can access it.
+ /// This needs to be declared here so that Haccability<> can access it.
 struct HaccTable {
     const std::type_info& cpptype;
     size_t cppsize;
@@ -62,14 +62,15 @@ struct HaccTable {
     void* do_allocate ();
     void do_deallocate (void*);
     void do_construct (void*);
-    Hacc do_to_hacc (void*);
-    void* do_from_hacc (Hacc);
+    Hacc do_to_hacc (void*, write_options);
+    void* get_from_hacc ();
     void do_update_from_hacc (void*, Hacc);
     void* do_new_from_hacc (Hacc);
 
      // Instead of exposing the hash tables, we're wrapping them in these functions
     static HaccTable* gen (const std::type_info& cpptype, size_t cppsize);
-    void reg_hacctype (String s);
+    void add_hacctype (String s);
+    void finalize ();
      // require_* versions throw an exception if the table isn't found.
     static HaccTable* by_cpptype (const std::type_info& t);
     static HaccTable* require_cpptype (const std::type_info& t);
@@ -81,22 +82,19 @@ struct HaccTable {
 };
 
 
- // This defines the HACCABLE pseudo-DSL.  It's mixed in via inheritance.
-template <class C>
-struct Haccability {
+ /// This defines the HACCABLE pseudo-DSL.  It's mixed in via inheritance.
+template <class C> struct Haccability {
     static HaccTable* table;
     static HaccTable* describe (F<void (Haccability<C>)>* desc) {
         table = HaccTable::gen(typeid(C), sizeof(C));
         if (table) {
             desc(Haccability<C>());
+            table->finalize();
         }
         return table;
     }
 
-    static void hacctype (String s) {
-        if (table->hacctype.empty())
-            table->hacctype = s;
-    }
+    static void hacctype (String s) { table->add_hacctype(s); }
     static void hacctype (F<String ()>* p) { table->calc_hacctype = p; }
     static void haccid (F<String (const C&)>* p) { table->haccid = (F<String (void*)>*)p; }
     static void find_by_haccid (F<C* (String)>* p) { table->find_by_haccid = (F<void* (String)>*)p; }
@@ -148,14 +146,10 @@ template <class C> HaccTable* require_HaccTable () {
 }
 
  // Name a type by any means possible
+String best_type_name (HaccTable*);
+String best_type_name (const std::type_info&);
 template <class C> String best_type_name () {
-    HaccTable* htp = get_HaccTable<C>();
-    if (htp) {
-        String hts = htp->get_hacctype();
-        if (!hts.empty())
-            return htp->hacctype;
-    }
-    return String("<mangled: ") + typeid(C).name() + ">";
+    return best_type_name(typeid(C));
 }
 
 template <class C> String best_type_name (const C& v) {
@@ -194,103 +188,36 @@ template <class C> bool has_hacctype (const C& v) {
 }
 
 template <class C> String hacctype () {
-    HaccTable* htp = require_HaccTable<C>();
-    String hts = htp->get_hacctype();
-    if (!hts.empty())
-        return hts;
-    throw Error("Tried to get hacctype of <mangled: " + String(typeid(C).name()) + ">, but no 'hacctype' was given in its haccable description.");
+    return require_HaccTable<C>()->get_hacctype();
 }
 template <class C> String hacctype (const C& v) {
     return hacctype<C>();
 }
 
 template <class C> String haccid (const C& v) {
-    HaccTable* htp = require_HaccTable<C>();
-    if (htp->haccid)
-        return htp->haccid((void*)&v);
-    else
-        return address_to_id((void*)&v);
+    return require_HaccTable<C>()->do_haccid((void*)&v);
 }
 template <class C> C* find_by_haccid (String id) {
-    HaccTable* htp = require_HaccTable<C>();
-    if (htp->find_by_haccid)
-        return (C*)htp->find_by_haccid(id);
-    else
-        return (C*)id_to_address(id);
+    return (C*)require_HaccTable<C>()->do_find_by_haccid(id);
 }
 
 template <class C> C* allocate () {
-    HaccTable* htp = require_HaccTable<C>();
-    if (htp->allocate) {
-        return (C*)htp->allocate();
-    }
-    else {
-        return constructibility<C>::allocate();
-    }
+    return (C*)require_HaccTable<C>()->do_allocate();
 }
 template <class C> void deallocate (C* p) {
-    HaccTable* htp = require_HaccTable<C>();
-    if (htp->deallocate) {
-        htp->deallocate((void*)p);
-    }
-    else {
-        delete p;
-    }
+    return require_HaccTable<C>()->do_deallocate((void*)p);
 }
 template <class C> Hacc to_hacc (const C& v, write_options opts = write_options(0)) {
-    HaccTable* htp = require_HaccTable<C>();
-    if (htp->to_hacc) {
-        Hacc r = htp->to_hacc((void*)&v);
-        String id = htp->haccid ? htp->haccid((void*)&v) : address_to_id((void*)&v);
-        r.default_type_id(htp->get_hacctype(), id);
-        r.default_options(htp->options);
-        r.add_options(opts);
-        return r;
-    }
-    throw Error("Tried to call to_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'to'.");
+    return require_HaccTable<C>()->do_to_hacc((void*)&v, opts);
 }
 template <class C> C from_hacc (Hacc hacc) {
-    HaccTable* htp = require_HaccTable<C>();
-    if (htp->from_hacc) {
-        return ((F<C (Hacc)>*)htp->from_hacc)(hacc);
-    }
-    if (htp->update_from_hacc) {
-        char dat [sizeof(C)];
-        C* p = (C*)dat;
-        constructibility<C>::construct(*p);
-        htp->update_from_hacc((void*)p, hacc);
-        return *p;
-    }
-    throw Error("Tried to call from_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'from' or 'update_from'.");
+    return ((F<C(Hacc)>*)require_HaccTable<C>()->get_from_hacc())(hacc);
 }
-template <class C> void update_from_hacc (C* p, Hacc hacc) {
-    HaccTable* htp = require_HaccTable<C>();
-    if (htp->update_from_hacc) {
-        htp->update_from_hacc((void*)p, hacc);
-        return;
-    }
-    if (htp->from_hacc) {
-        *p = ((F<C (Hacc)>*)htp->from_hacc)(hacc);
-        return;
-    }
-    throw Error("Tried to call update_from_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'update_from' or 'from'.");
+template <class C> void update_from_hacc (C& p, Hacc hacc) {
+    return require_HaccTable<C>()->do_update_from_hacc((void*)&p, hacc);
 }
 template <class C> C* new_from_hacc (Hacc hacc) {
-    HaccTable* htp = require_HaccTable<C>();
-    if (htp->new_from_hacc) {
-        return (C*)htp->new_from_hacc(hacc);
-    }
-    if (htp->update_from_hacc) {
-        C* r = allocate<C>();
-        htp->update_from_hacc((void*)r, hacc);
-        return r;
-    }
-    if (htp->from_hacc) {
-        C* r = allocate<C>();
-        *r = ((F<C (Hacc)>*)htp->from_hacc)(hacc);
-        return r;
-    }
-    throw Error("Tried to call update_from_hacc on type " + best_type_name<C>() + ", but its Haccable description doesn't have 'new_from', 'update_from', or 'from'.");
+    return (C*)require_HaccTable<C>()->do_new_from_hacc(hacc);
 }
 
  // Backwards-named aliases
