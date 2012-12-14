@@ -12,19 +12,19 @@ int* kp2 = NULL;
 tap::Tester haccable_integration_tester ("haccable_integration", [](){
     using namespace hacc;
     using namespace tap;
-    plan(18);
+    plan(19);
 
     is(to_string<int>(12), String("12"), "to_string");
     is(from_string<int>("90"), (int)90, "from_string");
     is(string_to<int>("445"), (int)445, "string_to");
     is(string_from<int>(-34), String("-34"), "string_from");
-    update_from_string(&k, String("992"));
+    doesnt_throw([](){update_from_string(k, String("992"));});
     is(k, 992, "update_from_string");
-    kp = new_from_string<int>(String("104"));
+    doesnt_throw([](){kp = new_from_string<int>(String("104"));});
     is(kp ? *kp : -99, 104, "new_from_string");
     free(kp);
     kp = NULL;
-    kp = string_to_new<int>(String("-12341234"));
+    doesnt_throw([](){kp = string_to_new<int>(String("-12341234"));});
     is(kp ? *kp : -99, -12341234, "string_to_new");
     free(kp);
 
@@ -39,7 +39,7 @@ tap::Tester haccable_integration_tester ("haccable_integration", [](){
     doesnt_throw([](){file_from<int>("integration_test_file", -15);}, "file_from and...");
     is(SIRT(int, (), file_to<int>("integration_test_file")), -15, "... file_to");
     is(static_cast<int(*)()>([](){
-        update_from_file(&k, "integration_test_file");
+        update_from_file(k, "integration_test_file");
         return k;
     }), -15, "update_from_file");
     is(static_cast<int(*)()>([](){
