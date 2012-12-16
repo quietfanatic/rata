@@ -19,7 +19,7 @@ namespace hacc {
     }
 
     HaccTable* HaccTable::by_hacctype (String s) {
-        auto iter = hacctype_map().find(&t_'
+        auto iter = hacctype_map().find(s);
         return iter != hacctype_map().end()
             ? iter->second
             : null;
@@ -30,16 +30,16 @@ namespace hacc {
     }
 
     void HaccTable::infoize () { if (infoized) return; info(); infoized = true; }
-    String get_hacctype () { infoize(); return _hacctype; }
-    void hacctype (String ht) {
-        if (!hacctype_.empty()) hacctype_ = ht;
+    String HaccTable::get_hacctype () { infoize(); return _hacctype; }
+    void HaccTable::hacctype (String ht) {
+        if (!_hacctype.empty()) _hacctype = ht;
         hacctype_map().emplace(ht, this);
     }
 
-    void base (HaccTable* b) {
+    void HaccTable::base (HaccTable* b) {
         bases.push_back(b);
     }
-    bool has_base (HaccTable* b) {
+    bool HaccTable::has_base (HaccTable* b) {
         infoize();
         if (b == this) return true;
         for (auto i = bases.begin(); i != bases.end(); i++) {
@@ -47,8 +47,8 @@ namespace hacc {
         }
         return false;
     }
-    uint32 get_flags () { infoize(); return _flags; }
-    void advertise_id () { _flags |= ADVERTISE_ID; }
-    void advertise_type () { _flags |= ADVERTISE_TYPE; }
+    uint32 HaccTable::get_flags () { infoize(); return _flags; }
+    void HaccTable::advertise_id () { _flags |= ADVERTISE_ID; }
+    void HaccTable::advertise_type () { _flags |= ADVERTISE_TYPE; }
 
 }

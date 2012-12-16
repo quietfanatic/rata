@@ -34,7 +34,7 @@ String escape_ident (String unesc) {
 }
 
 
-String hacc_value_to_string (Hacc h, write_options opts) {
+String hacc_value_to_string (Hacc h) {
     switch (h.valtype()) {
         case VALNULL: return "null";
         case BOOL: return h.assume_bool() ? "true" : "false";
@@ -87,15 +87,10 @@ String hacc_value_to_string (Hacc h, write_options opts) {
         default: throw Error("Corrupted Hacc tree\n");
     }
 }
-String hacc_to_string (Hacc h, write_options opts) {
-    opts = hf::default_options | opts;
-    String r = hacc_value_to_string(h, opts);
-    bool show_type = ((opts.require_type() && !opts.never_show_types())
-                   || opts.always_show_types())
-                  && !h.type().empty();
-    bool show_id = ((opts.require_id() && !opts.never_show_ids())
-                 || opts.always_show_ids())
-                && !h.id().empty();
+String hacc_to_string (Hacc h) {
+    String r = hacc_value_to_string(h);
+    bool show_type = !h.type().empty();
+    bool show_id = !h.id().empty();
     if ((show_type || show_id)
      && h.valtype() != ARRAY && h.valtype() != OBJECT)
         r = "(" + r + ")";
@@ -103,8 +98,8 @@ String hacc_to_string (Hacc h, write_options opts) {
     if (show_type) r = "#" + escape_ident(h.type()) + r;
     return r;
 }
-String string_from_hacc (Hacc h, write_options opts) {
-    return hacc_to_string(h, opts);
+String string_from_hacc (Hacc h) {
+    return hacc_to_string(h);
 }
 
 

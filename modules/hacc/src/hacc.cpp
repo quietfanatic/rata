@@ -9,7 +9,6 @@ struct Hacc::Contents {
     String type;
     String id;
     Valtype valtype;
-    write_options options;
     Contents (String type, String id, Valtype valtype) :
         type(type), id(id), valtype(valtype)
     { }
@@ -152,10 +151,6 @@ void Hacc::default_type_id (String type, String id) {
     if (contents->type.empty()) contents->type = type;
     if (contents->id.empty()) contents->id = id;
 }
-write_options Hacc::options () const { return contents->options; }
-void Hacc::set_options (write_options opts) { contents->options = opts; }
-void Hacc::add_options (write_options opts) { contents->options |= opts; }
-void Hacc::default_options (write_options opts) { contents->options = opts | contents->options; }
 
 Hacc::operator Bool () const { return valtype() != ERROR; }
 String Hacc::error_message () const { return *this ? "" : assume_error().what(); }

@@ -7,16 +7,15 @@
 
 namespace hacc {
 
-void string_to_file (String s, Either_String filename, write_options opts) {
-    opts = hf::default_options | opts;
+void string_to_file (String s, Either_String filename, uint32 mode) {
     FILE* outf;
-    if (opts.overwrite_file()) {
+    if (mode == OVERWRITE) {
         outf = fopen(filename, "w");
     }
-    else if (opts.append_file()) {
+    else if (mode == APPEND) {
         outf = fopen(filename, "a");
     }
-    else {
+    else {  // mode == CREATE
          // Check if it exists by opening it for reading.
         outf = fopen(filename, "r");
         if (outf) {
@@ -38,8 +37,8 @@ void string_to_file (String s, Either_String filename, write_options opts) {
     }
     return;
 }
-void file_from_string (Either_String filename, String s, write_options opts) {
-    string_to_file(s, filename, opts);
+void file_from_string (Either_String filename, String s, uint32 mode) {
+    string_to_file(s, filename, mode);
 }
 
 

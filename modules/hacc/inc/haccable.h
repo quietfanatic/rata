@@ -59,6 +59,7 @@ struct HaccTable {
 
      // Creation
     static HaccTable* by_cpptype (const std::type_info&);
+    static HaccTable* by_hacctype (String);
     HaccTable () : cpptype(typeid(null)) { }
     HaccTable (const std::type_info& t);
 };
@@ -86,7 +87,7 @@ namespace hacc {
 template <class C, uint flags = 0> struct Haccability : HaccTable {
     virtual void info () { }
     virtual void describe (Haccer&, C&) {
-        throw Error ("The Haccable for <mangled: " + typeid(C) + "> has no describe.");
+        throw Error ("The Haccable for <mangled: " + String(typeid(C).name()) + "> has no describe.");
     }
     void describe (void* h, void* it) { describe(*(Haccer*)h, *(C*)it); }
     virtual String haccid (const C& v) { return ""; }
@@ -130,17 +131,14 @@ namespace hacc {
         t->describe((void*)&h, (void*)&it);
     }
 
-    template <class C> Hacc to_hacc (C& v) {
+    template <class C> Hacc to_hacc (const C& v) {
         Haccer::Writer w;
-        run_description(w, v);
+        run_description(w, const_cast<C&>(v));
         return w.hacc;
     }
 
-    template <class C> Hacc hacc_from (C& v) {
-        return to_hacc<C>(v);
-    }
-    template <class C> Hacc hacc_from (C v) {
-        return to_hacc<C>(v);
+    template <class C> Hacc hacc_from (const C& v) {
+        return to_hacc(v);
     }
 
     template <class C> void update_from_hacc (C& v, Hacc h) {
