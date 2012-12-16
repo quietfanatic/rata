@@ -29,8 +29,35 @@ namespace hacc {
 
 struct HaccTable {
     const std::type_info& cpptype;
+    virtual void info () = 0;
     virtual void describe (void*, void*) = 0;
+    virtual String haccid (void*) = 0;
+    virtual void* g_find_by_haccid (String) = 0;
 
+    bool infoized = false;
+    void infoize ();
+
+    String _hacctype;
+    String get_hacctype ();
+    void hacctype (String s);
+
+    std::vector<HaccTable*> bases;
+    void base (HaccTable*);  // Adds a base.
+    bool has_base (HaccTable* b);
+    
+    uint32 _flags = 0;
+    uint32 get_flags ();
+    enum {
+        ADVERTISE_ID,
+        ADVERTISE_TYPE,
+    };
+    void advertise_id ();
+    void advertise_type ();
+
+     // This calls new_from_hacc.
+    void* manifest ();
+
+     // Creation
     static HaccTable* by_cpptype (const std::type_info&);
     HaccTable () : cpptype(typeid(null)) { }
     HaccTable (const std::type_info& t);
@@ -57,8 +84,21 @@ template <class C> struct Haccable {
 namespace hacc {
 
 template <class C, uint flags = 0> struct Haccability : HaccTable {
-    virtual void describe (Haccer&, C&) = 0;  // Erase type via virtual method transfer
+    virtual void info () { }
+    virtual void describe (Haccer&, C&) {
+        throw Error ("The Haccable for <mangled: " + typeid(C) + "> has no describe.");
+    }
     void describe (void* h, void* it) { describe(*(Haccer*)h, *(C*)it); }
+    virtual String haccid (const C& v) { return ""; }
+    String haccid (void* p) { return haccid(*(const C*)p); }
+    virtual C* find_by_haccid (String s) { return null; }
+    void* g_find_by_haccid (String s) { return (void*)find_by_haccid(s); }
+
+    template <class B> void base () {
+        HaccTable* t = HaccTable::by_cpptype(typeid(B));
+        if (t) base(t);
+        else throw Error("Base type <mangled: " + String(typeid(B).name()) + "> is not haccable.");
+    }
 
      // Bookkeeping
     static HaccTable* table;

@@ -9,6 +9,7 @@ namespace hacc {
     // Hahaha, deleting 150 lines of code is so satisfying.
 
     INIT_SAFE(cpptype_map, std::unordered_map<const std::type_info*, HaccTable*>)
+    INIT_SAFE(hacctype_map, std::unordered_map<String, HaccTable*>)
 
     HaccTable* HaccTable::by_cpptype (const std::type_info& t) {
         auto iter = cpptype_map().find(&t);
@@ -17,8 +18,37 @@ namespace hacc {
             : null;
     }
 
+    HaccTable* HaccTable::by_hacctype (String s) {
+        auto iter = hacctype_map().find(&t_'
+        return iter != hacctype_map().end()
+            ? iter->second
+            : null;
+    }
+
     HaccTable::HaccTable (const std::type_info& t) : cpptype(t) {
         cpptype_map().emplace(&t, this);
     }
+
+    void HaccTable::infoize () { if (infoized) return; info(); infoized = true; }
+    String get_hacctype () { infoize(); return _hacctype; }
+    void hacctype (String ht) {
+        if (!hacctype_.empty()) hacctype_ = ht;
+        hacctype_map().emplace(ht, this);
+    }
+
+    void base (HaccTable* b) {
+        bases.push_back(b);
+    }
+    bool has_base (HaccTable* b) {
+        infoize();
+        if (b == this) return true;
+        for (auto i = bases.begin(); i != bases.end(); i++) {
+            if ((*i)->has_base(b)) return true;
+        }
+        return false;
+    }
+    uint32 get_flags () { infoize(); return _flags; }
+    void advertise_id () { _flags |= ADVERTISE_ID; }
+    void advertise_type () { _flags |= ADVERTISE_TYPE; }
 
 }
