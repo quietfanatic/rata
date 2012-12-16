@@ -4,9 +4,8 @@
 tap::Tester hacc_tester ("hacc", [](){
     using namespace hacc;
     using namespace tap;
-    plan(14);
+    plan(13);
     is(Hacc(null).get_null(), null, "null roundtrip");
-    is(Hacc().get_null(), null, "Default hacc is null");
     is(Hacc(true).get_bool(), true, "true roundtrip");
     is(Hacc(false).get_bool(), false, "false roundtrip");
     is(Hacc(45).get_integer(), 45, "integer roundtrip");

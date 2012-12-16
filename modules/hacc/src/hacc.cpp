@@ -9,8 +9,9 @@ struct Hacc::Contents {
     String type;
     String id;
     Valtype valtype;
-    Contents (String type, String id, Valtype valtype) :
-        type(type), id(id), valtype(valtype)
+    uint32 flags;
+    Contents (String type, String id, Valtype valtype, uint32 flags) :
+        type(type), id(id), valtype(valtype), flags(flags)
     { }
 };
 
@@ -18,8 +19,8 @@ struct Hacc::Contents {
 template <class T>
 struct Hacc::Value : Hacc::Contents {
     T value;
-    Value (String type, String id, const T& value) :
-        Contents(type, id, valtype_of<T>()), value(value)
+    Value (String type, String id, const T& value, uint32 flags) :
+        Contents(type, id, valtype_of<T>(), flags), value(value)
     { }
 };
 
@@ -73,24 +74,24 @@ const char* valtype_name (Valtype t) {
 
 
  // Constructors
-Hacc::Hacc (      Null    n, String type, String id) : contents(new Value<Null   >(type, id, n)) { }
-Hacc::Hacc (      Bool    b, String type, String id) : contents(new Value<Bool   >(type, id, b)) { }
-Hacc::Hacc (      char    i, String type, String id) : contents(new Value<Integer>(type, id, i)) { }
-Hacc::Hacc (      int8    i, String type, String id) : contents(new Value<Integer>(type, id, i)) { }
-Hacc::Hacc (      uint8   i, String type, String id) : contents(new Value<Integer>(type, id, i)) { }
-Hacc::Hacc (      int16   i, String type, String id) : contents(new Value<Integer>(type, id, i)) { }
-Hacc::Hacc (      uint16  i, String type, String id) : contents(new Value<Integer>(type, id, i)) { }
-Hacc::Hacc (      int32   i, String type, String id) : contents(new Value<Integer>(type, id, i)) { }
-Hacc::Hacc (      uint32  i, String type, String id) : contents(new Value<Integer>(type, id, i)) { }
-Hacc::Hacc (      int64   i, String type, String id) : contents(new Value<Integer>(type, id, i)) { }
-Hacc::Hacc (      uint64  i, String type, String id) : contents(new Value<Integer>(type, id, i)) { }
-Hacc::Hacc (      Float   f, String type, String id) : contents(new Value<Float  >(type, id, f)) { }
-Hacc::Hacc (      Double  d, String type, String id) : contents(new Value<Double >(type, id, d)) { }
-Hacc::Hacc (const String& s, String type, String id) : contents(new Value<String >(type, id, s)) { }
-Hacc::Hacc (const Ref&    r, String type, String id) : contents(new Value<Ref    >(type, id, r)) { }
-Hacc::Hacc (const Array&  a, String type, String id) : contents(new Value<Array  >(type, id, a)) { }
-Hacc::Hacc (const Object& o, String type, String id) : contents(new Value<Object >(type, id, o)) { }
-Hacc::Hacc (const Error&  e, String type, String id) : contents(new Value<Error  >(type, id, e)) { }
+Hacc::Hacc (      Null    n, String type, String id, uint32 flags) : contents(new Value<Null   >(type, id, n, flags)) { }
+Hacc::Hacc (      Bool    b, String type, String id, uint32 flags) : contents(new Value<Bool   >(type, id, b, flags)) { }
+Hacc::Hacc (      char    i, String type, String id, uint32 flags) : contents(new Value<Integer>(type, id, i, flags)) { }
+Hacc::Hacc (      int8    i, String type, String id, uint32 flags) : contents(new Value<Integer>(type, id, i, flags)) { }
+Hacc::Hacc (      uint8   i, String type, String id, uint32 flags) : contents(new Value<Integer>(type, id, i, flags)) { }
+Hacc::Hacc (      int16   i, String type, String id, uint32 flags) : contents(new Value<Integer>(type, id, i, flags)) { }
+Hacc::Hacc (      uint16  i, String type, String id, uint32 flags) : contents(new Value<Integer>(type, id, i, flags)) { }
+Hacc::Hacc (      int32   i, String type, String id, uint32 flags) : contents(new Value<Integer>(type, id, i, flags)) { }
+Hacc::Hacc (      uint32  i, String type, String id, uint32 flags) : contents(new Value<Integer>(type, id, i, flags)) { }
+Hacc::Hacc (      int64   i, String type, String id, uint32 flags) : contents(new Value<Integer>(type, id, i, flags)) { }
+Hacc::Hacc (      uint64  i, String type, String id, uint32 flags) : contents(new Value<Integer>(type, id, i, flags)) { }
+Hacc::Hacc (      Float   f, String type, String id, uint32 flags) : contents(new Value<Float  >(type, id, f, flags)) { }
+Hacc::Hacc (      Double  d, String type, String id, uint32 flags) : contents(new Value<Double >(type, id, d, flags)) { }
+Hacc::Hacc (const String& s, String type, String id, uint32 flags) : contents(new Value<String >(type, id, s, flags)) { }
+Hacc::Hacc (const Ref&    r, String type, String id, uint32 flags) : contents(new Value<Ref    >(type, id, r, flags)) { }
+Hacc::Hacc (const Array&  a, String type, String id, uint32 flags) : contents(new Value<Array  >(type, id, a, flags)) { }
+Hacc::Hacc (const Object& o, String type, String id, uint32 flags) : contents(new Value<Object >(type, id, o, flags)) { }
+Hacc::Hacc (const Error&  e, String type, String id, uint32 flags) : contents(new Value<Error  >(type, id, e, flags)) { }
 
 Valtype Hacc::valtype () const { return contents->valtype; }
 
@@ -151,6 +152,8 @@ void Hacc::default_type_id (String type, String id) {
     if (contents->type.empty()) contents->type = type;
     if (contents->id.empty()) contents->id = id;
 }
+uint32& Hacc::flags () { return contents->flags; }
+
 
 Hacc::operator Bool () const { return valtype() != ERROR; }
 String Hacc::error_message () const { return *this ? "" : assume_error().what(); }

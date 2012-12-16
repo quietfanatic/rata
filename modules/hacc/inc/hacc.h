@@ -58,37 +58,49 @@ typedef int64 Integer;
 typedef float Float;
 typedef double Double;
 typedef std::string String;
-struct Ref;
+struct Ref {
+    String type;
+    String id;
+};
 template <class T> using VArray = std::vector<T>;
 typedef VArray<Hacc> Array;
 template <class T> using Pair = std::pair<String, T>;
 template <class T> using Map = std::vector<Pair<T>>;
 typedef Map<Hacc> Object;
-struct Error;
+struct Error : std::exception {
+    String mess;
+    String file;
+    uint line;
+    uint col;
+    const char* what () const noexcept(true);
+    Error (String mess, String file = "", uint line = 0, uint col = 0) :
+        mess(mess), file(file), line(line), col(col)
+    { }
+};
 
  // Now the definition of the main Hacc type
 struct Hacc {
     
      // Constructors for all the C++-version-valtypes
-    Hacc (      Null    n = null, String type = "", String id = "");
-    Hacc (      Bool    b, String type = "", String id = "");
+    Hacc (      Null    n, String type = "", String id = "", uint32 flags = 0);
+    Hacc (      Bool    b, String type = "", String id = "", uint32 flags = 0);
      // Oh gosh we have to do all the integers
-    Hacc (      char    i, String type = "", String id = "");
-    Hacc (      int8    i, String type = "", String id = "");
-    Hacc (      uint8   i, String type = "", String id = "");
-    Hacc (      int16   i, String type = "", String id = "");
-    Hacc (      uint16  i, String type = "", String id = "");
-    Hacc (      int32   i, String type = "", String id = "");
-    Hacc (      uint32  i, String type = "", String id = "");
-    Hacc (      int64   i, String type = "", String id = "");
-    Hacc (      uint64  i, String type = "", String id = "");
-    Hacc (      Float   f, String type = "", String id = "");
-    Hacc (      Double  d, String type = "", String id = "");
-    Hacc (const String& s, String type = "", String id = "");
-    Hacc (const Ref&    r, String type = "", String id = "");
-    Hacc (const Array&  a, String type = "", String id = "");
-    Hacc (const Object& o, String type = "", String id = "");
-    Hacc (const Error&  e, String type = "", String id = "");
+    Hacc (      char    i, String type = "", String id = "", uint32 flags = 0);
+    Hacc (      int8    i, String type = "", String id = "", uint32 flags = 0);
+    Hacc (      uint8   i, String type = "", String id = "", uint32 flags = 0);
+    Hacc (      int16   i, String type = "", String id = "", uint32 flags = 0);
+    Hacc (      uint16  i, String type = "", String id = "", uint32 flags = 0);
+    Hacc (      int32   i, String type = "", String id = "", uint32 flags = 0);
+    Hacc (      uint32  i, String type = "", String id = "", uint32 flags = 0);
+    Hacc (      int64   i, String type = "", String id = "", uint32 flags = 0);
+    Hacc (      uint64  i, String type = "", String id = "", uint32 flags = 0);
+    Hacc (      Float   f, String type = "", String id = "", uint32 flags = 0);
+    Hacc (      Double  d, String type = "", String id = "", uint32 flags = 0);
+    Hacc (const String& s, String type = "", String id = "", uint32 flags = 0);
+    Hacc (const Ref&    r, String type = "", String id = "", uint32 flags = 0);
+    Hacc (const Array&  a, String type = "", String id = "", uint32 flags = 0);
+    Hacc (const Object& o, String type = "", String id = "", uint32 flags = 0);
+    Hacc (const Error&  e = Error("Undefined Hacc"), String type = "", String id = "", uint32 flags = 0);
      // Get the valtype
     Valtype valtype () const;
      // Extracting values
@@ -125,6 +137,8 @@ struct Hacc {
     void set_id (String);
      // This sets each only if it has not already been set.
     void default_type_id (String, String);
+     // Flag handling
+    uint32& flags ();
      // Error handling
     operator Bool () const;  // is true if not Error.
     String error_message () const;  // Returns "" if not Error.
@@ -142,23 +156,11 @@ struct Hacc {
     std::shared_ptr<Contents> contents;
 };
 
- // Now we define the types that depend on Hacc
-struct Ref {
-    String type;
-    String id;
+enum Flags {
+    ADVERTISE_ID = 1,
+    ADVERTISE_TYPE = 2
 };
 
- // This can be the contents of a Hacc or it can be thrown
-struct Error : std::exception {
-    String mess;
-    String file;
-    uint line;
-    uint col;
-    const char* what () const noexcept(true);
-    Error (String mess, String file = "", uint line = 0, uint col = 0) :
-        mess(mess), file(file), line(line), col(col)
-    { }
-};
 
 
 }
