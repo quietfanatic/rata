@@ -2,7 +2,7 @@
 #define HAVE_HACC_HACCABLE_STANDARD_H
 
 #include "haccable.h"
-
+/*
 HACCABLE_TEMPLATE_BEGIN(<class C>, C*) {
     using namespace hacc;
     d.hacctype([](){
@@ -28,5 +28,6 @@ HACCABLE_TEMPLATE_BEGIN(<class C>, C*) {
         }
     });
 } HACCABLE_TEMPLATE_END(<class C>, C*)
+*/
 
 #endif

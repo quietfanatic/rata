@@ -103,8 +103,8 @@ Valtype Hacc::valtype () const { return contents->valtype; }
       Double  Hacc::assume_double  () const { return static_cast<Value<Double >&>(*contents).value; }
 const String& Hacc::assume_string  () const { return static_cast<Value<String >&>(*contents).value; }
 const Ref&    Hacc::assume_ref     () const { return static_cast<Value<Ref    >&>(*contents).value; }
-const Array&  Hacc::assume_array   () const { return static_cast<Value<Array  >&>(*contents).value; }
-const Object& Hacc::assume_object  () const { return static_cast<Value<Object >&>(*contents).value; }
+      Array&  Hacc::assume_array   () const { return static_cast<Value<Array  >&>(*contents).value; }
+      Object& Hacc::assume_object  () const { return static_cast<Value<Object >&>(*contents).value; }
 const Error&  Hacc::assume_error   () const { return static_cast<Value<Error  >&>(*contents).value; }
       Null    Hacc::get_null    () const { if (valtype() == VALNULL) return assume_null(); else throw valtype_error("a null"); }
       Bool    Hacc::get_bool    () const { if (valtype() == BOOL) return assume_bool(); else throw valtype_error("a bool"); }
@@ -129,10 +129,20 @@ const Error&  Hacc::assume_error   () const { return static_cast<Value<Error  >&
 }
 const String& Hacc::get_string  () const { if (valtype() == STRING) return assume_string(); else throw valtype_error("a string"); }
 const Ref&    Hacc::get_ref     () const { if (valtype() == REF) return assume_ref(); else throw valtype_error("a ref"); }
-const Array&  Hacc::get_array   () const { if (valtype() == ARRAY) return assume_array(); else throw valtype_error("an array"); }
-const Object& Hacc::get_object  () const { if (valtype() == OBJECT) return assume_object(); else throw valtype_error("an object"); }
+      Array&  Hacc::get_array   () const { if (valtype() == ARRAY) return assume_array(); else throw valtype_error("an array"); }
+      Object& Hacc::get_object  () const { if (valtype() == OBJECT) return assume_object(); else throw valtype_error("an object"); }
  // Phew!  So many lines for such simple concepts.
 
+Hacc* Hacc::get_attr (String name) const {
+    if (valtype() != OBJECT) throw valtype_error("an object");
+    Object& o = assume_object();
+    for (auto it = o.begin(); it != o.end(); it++) {
+        if (it->first == name) {
+            return &it->second;
+        }
+    }
+    return null;
+}
 
 String Hacc::type () const { return contents->type; }
 void Hacc::set_type (String s) { contents->type = s; }

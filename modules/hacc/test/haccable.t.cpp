@@ -1,35 +1,33 @@
 
 #include "../inc/haccable.h"
 
-HACCABLE(int, {
-    d.hacctype("int, yo!");
-    d.to_hacc([](const int& i) {
-        return hacc::Hacc(i);
-    });
-    d.from_hacc([](hacc::Hacc h) {
-        return (int)h.get_integer();
-    });
-})
+using namespace hacc;
 
-struct MyThing {
-    int x;
-    int y;
-    bool operator == (MyThing o) const { return x==o.x && y==o.y; }
+template <> struct Haccable<int> : Haccability<int> {
+    void describe (Haccer& h, int& it) {
+        h.as_integer(it);
+    }
 };
-HACCABLE(MyThing, {
-    using namespace hacc;
-    d.hacctype("MyThing");
-    d.to_hacc([](const MyThing& t){
-        hacc::Array a (2);
-        a[0] = to_hacc<int>(t.x);
-        a[1] = to_hacc<int>(t.y);
-        return Hacc(a);
-    });
-    d.from_hacc([](Hacc h) {
-        auto a = h.get_array();
-        return MyThing{ from_hacc<int>(a[0]), from_hacc<int>(a[1]) };
-    });
-})
+template <> struct Haccable<float> : Haccability<float> {
+    void describe (Haccer& h, float& it) {
+        h.as_float(it);
+    }
+};
+
+struct Vectorly {
+    float x;
+    float y;
+    bool operator == (Vectorly o) const { return x==o.x && y==o.y; }
+};
+
+template <> struct Haccable<Vectorly> : Haccability<Vectorly> {
+    void describe (Haccer& h, Vectorly& it) {
+        h.elem(it.x, 0.f);
+        h.elem(it.y, 0.f);
+        h.attr("x", it.x, 0.f);
+        h.attr("y", it.y, 0.f);
+    }
+};
 
 struct MyFloat {
     float val;
@@ -38,7 +36,13 @@ struct MyFloat {
     MyFloat () { }
     bool operator == (MyFloat o) const { return val==o.val; }
 };
-HACCABLE(MyFloat, { d.like_float(); })
+template <> struct Haccable<MyFloat> : Haccability<MyFloat> {
+    void describe (Haccer& h, MyFloat& it) {
+        float f = it;  // Too encapsulated to get a reference.
+        h.as_float(f);
+        it = MyFloat(f);
+    }
+};
 
 template <class C>
 struct MyWrapper {
@@ -46,64 +50,26 @@ struct MyWrapper {
 };
 template <class C>
 bool operator == (MyWrapper<C> a, MyWrapper<C> b) { return a.val==b.val; }
-HACCABLE_TEMPLATE(<class C>, MyWrapper<C>, {
-    d.hacctype([](){
-        return "MyWrapper<" + hacc::hacctype<C>() + ">";
-    });
-    d.to_hacc([](const MyWrapper<C>& v){ return hacc::to_hacc(v.val); });
-    d.from_hacc([](hacc::Hacc h){ return MyWrapper<C>{hacc::from_hacc<C>(h)}; });
-})
- // Let's try it without an explicit instantiation.
 
-struct NoConstructor {
-    int x;
-    NoConstructor (int x) : x(x) { };
+template <class C> struct Haccable<MyWrapper<C>> : Haccability<MyWrapper<C>> {
+    void describe (Haccer& h, MyWrapper<C>& it) {
+        run_description(h, it.val);  // manual delegation
+    }
 };
-HACCABLE(NoConstructor, {
-    d.update_from_hacc([](NoConstructor& v, hacc::Hacc h){
-        v.x = h.get_integer();
-    });
-})
 
-struct ID_Tester {
-    int x;
-} id_tester {43};
-HACCABLE(ID_Tester, {
-    d.haccid([](const ID_Tester& v){ return hacc::String("The only!"); });
-    d.find_by_haccid([](hacc::String s){
-        if (s == "The only!") return &id_tester;
-        else return (ID_Tester*)hacc::null;
-    });
-})
-MyWrapper<int> wi;
+MyWrapper<int> wi {0};
 
 #include "../../tap/inc/tap.h"
 tap::Tester haccable_tester ("haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(13);
-    diag("Using custom Haccable<int> with 'to' and 'from'");
+    plan(7);
     is(hacc_from((int)4).get_integer(), 4, "hacc_from<int> works");
-//    is(string_from((int)552), "552", "string_from<int> works");
     is(hacc_to<int>(Hacc(35)), 35, "hacc_to<int> works");
-//    is(string_to<int>("-789"), -789, "string_to<int> works");
-    is(hacctype<int>(), "int, yo!", "hacctype<int> works");
-    is(hacctype((int)443), "int, yo!", "hacctype works on instance of int");
-//    is(string_from(MyThing{324, 425}), "[324, 425]", "string_from<MyThing> works");
-//    is(string_to<MyThing>("[-51, 20]"), MyThing{-51, 20}, "string_to<MyThing> works");
-//    is(string_from(MyFloat(2.0)), "2~40000000", "like_float() defines a to");
-//    is(string_to<MyFloat>("32.0"), MyFloat(32.0), "like_float() defines a from");
-//    is(string_from(MyWrapper<int>{54}), "54", "to in a HACCABLE_TEMPLATE works");
-//    is(string_to<MyWrapper<int>>("192"), MyWrapper<int>{192}, "from in a HACCABLE_TEMPLATE works");
-    is(hacctype<MyWrapper<int>>(), "MyWrapper<int, yo!>", "hacctype in a HACCABLE_TEMPLATE works");
-    doesnt_throw([](){ wi = from_hacc<MyWrapper<int>>(Hacc(34)); }, "from_hacc in a HACCABLE_TEMPLATE");
+    doesnt_throw([](){ wi = from_hacc<MyWrapper<int>>(Hacc(34)); }, "from_hacc on a template haccable");
     is(wi.val, 34, "...works");
-    doesnt_throw([](){ update_from_hacc(wi, Hacc(52)); }, "Can transform from_hacc into update_from_hacc");
+    doesnt_throw([](){ update_from_hacc(wi, Hacc(52)); }, "update_from_hacc on a template haccable");
     is(wi.val, 52, "...and it works");
-    throws<hacc::Error>([](){ from_hacc<NoConstructor>(Hacc(42)); }, "Throw runtime exception if nullary constructor is required but unavailable.");
-    is(haccid(id_tester), "The only!", "haccid appears to work");
-    is(find_by_haccid<ID_Tester>(String("The only!"))->x, 43, "find_by_haccid appears to work");
-    int x = 32;
-    is(find_by_haccid<int>(haccid(x)), &x, "Default haccid and find_by_haccid appear to work, at least together");
+    is(from_hacc<Vectorly>(Hacc(Array {Hacc(34.4), Hacc(52.123)})), Vectorly{34.4, 52.123}, "Vectorly accepts Array");
 });
 

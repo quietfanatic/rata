@@ -101,9 +101,11 @@ struct Hacc {
           Double  get_double  () const;
     const String& get_string  () const;
     const Ref&    get_ref     () const;
-    const Array&  get_array   () const;
-    const Object& get_object  () const;
+          Array&  get_array   () const;
+          Object& get_object  () const;
     const Error&  get_error   () const;
+
+          Hacc*   get_attr    (String) const;
      // The assume_* functions do not do checking or coercions.
      // Only use these when you're switching over the valtype()
           Null    assume_null    () const;
@@ -113,8 +115,8 @@ struct Hacc {
           Double  assume_double  () const;
     const String& assume_string  () const;
     const Ref&    assume_ref     () const;
-    const Array&  assume_array   () const;
-    const Object& assume_object  () const;
+          Array&  assume_array   () const;
+          Object& assume_object  () const;
     const Error&  assume_error   () const;
      // Manipulating type and id
     String type () const;
