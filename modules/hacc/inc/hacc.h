@@ -10,6 +10,7 @@
 #define HAVE_HACC
 #endif
 
+
 #include <stdint.h>
  // Do we really still have to do this?
 typedef char char8;
@@ -21,7 +22,7 @@ typedef int32_t int32;
 typedef uint32_t uint32;
 typedef int64_t int64;
 typedef uint64_t uint64;
-#include <memory>  // For shared_ptr
+#include <memory>  // For unique_ptr
 #include <vector>
 #include <string>
 
@@ -62,10 +63,10 @@ struct Ref {
     String id;
 };
 template <class T> using VArray = std::vector<T>;
-typedef VArray<Hacc*> Array;
+typedef VArray<std::unique_ptr<Hacc>> Array;
 template <class T> using Pair = std::pair<String, T>;
 template <class T> using Map = std::vector<Pair<T>>;
-typedef Map<Hacc*> Object;
+typedef Map<std::unique_ptr<Hacc>> Object;
 struct Error : std::exception {
     String mess;
     String file;
@@ -113,13 +114,13 @@ struct Value {
     Value (Float f) : form(FLOAT), f(f) { }
     Value (Double d) : form(DOUBLE), d(d) { }
     Value (const String& s) : form(STRING), s(s) { }
-    Value (String&& s) : form(STRING), s(s) { }
+    Value (String&& s) : form(STRING), s(std::forward<String>(s)) { }
     Value (const Ref& r) : form(REF), r(r) { }
-    Value (Ref&& r) : form(REF), r(r) { }
-    Value (const Array& a) : form(ARRAY), a(a) { }
-    Value (Array&& a) : form(ARRAY), a(a) { }
-    Value (const Object& o) : form(OBJECT), o(o) { }
-    Value (Object&& o) : form(OBJECT), o(o) { }
+    Value (Ref&& r) : form(REF), r(std::forward<Ref>(r)) { }
+    //Value (const Array& a) : form(ARRAY), a(a) { }
+    Value (Array&& a) : form(ARRAY), a(std::forward<Array>(a)) { }
+    //Value (const Object& o) : form(OBJECT), o(o) { }
+    Value (Object&& o) : form(OBJECT), o(std::forward<Object>(o)) { }
     Value (Error e) : form(ERROR), e(e) { }
     Value () : form(UNDEFINED) { }
 };
@@ -142,8 +143,8 @@ struct Hacc {
     const Ref&     get_ref () const;
     const Array&   get_array () const;
     const Object&  get_object () const;
-    Hacc* get_elem (uint);
-    Hacc* get_attr (String);
+    Hacc& get_elem (uint);
+    Hacc& get_attr (String);
     void add_elem (Hacc&&);
     void add_attr (String, Hacc&&);
 

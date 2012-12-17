@@ -7,7 +7,7 @@
 
 namespace hacc {
 
-String escape_string (String unesc) {
+String escape_string (const String& unesc) {
     String r = "";
     for (auto p = unesc.begin(); p != unesc.end(); p++) {
         switch (*p) {
@@ -24,7 +24,7 @@ String escape_string (String unesc) {
     return r;
 }
 
-String escape_ident (String unesc) {
+String escape_ident (const String& unesc) {
     if (unesc.empty()) return "\"\"";
     for (auto p = unesc.begin(); p != unesc.end(); p++) {
         if (!isalnum(*p) && *p != '_' && *p != '-')
@@ -34,71 +34,66 @@ String escape_ident (String unesc) {
 }
 
 
-String hacc_value_to_string (Hacc h) {
-    switch (h.valtype()) {
-        case VALNULL: return "null";
-        case BOOL: return h.assume_bool() ? "true" : "false";
+String hacc_value_to_string (const Value& v) {
+    switch (v.form) {
+        case NULLFORM: return "null";
+        case BOOL: return v.b ? "true" : "false";
         case INTEGER: {
             char r[32];
-            sprintf(r, "%" PRIi64, h.assume_integer());
+            sprintf(r, "%" PRIi64, v.i);
             return r;
         }
         case FLOAT: {
             char r[32];
-            float f = h.assume_float();
-            sprintf(r, "%g~%08x", f, *(uint32*)&f);
+            sprintf(r, "%g~%08x", v.f, *(uint32*)&v.f);
             return r;
         }
         case DOUBLE: {
             char r [64];
-            double d = h.assume_double();
-            sprintf(r, "%lg~%016" PRIx64, h.assume_double(), *(uint64*)&d);
+            sprintf(r, "%lg~%016" PRIx64, v.d, *(uint64*)&v.d);
             return r;
         }
-        case STRING: return "\"" + escape_string(h.assume_string()) + "\"";
+        case STRING: return "\"" + escape_string(v.s) + "\"";
         case REF: {
-            const Ref& r = h.assume_ref();
-            return (r.type.empty() ? "&" : "&#" + escape_ident(r.type))
-                 + "@" + escape_ident(r.id);
+            return (v.r.type.empty() ? "&" : "&#" + escape_ident(v.r.type))
+                 + "@" + escape_ident(v.r.id);
         }
         case ARRAY: {
-            const Array& a = h.assume_array();
             String r = "[";
-            for (auto i = a.begin(); i != a.end(); i++) {
+            for (auto i = v.a.begin(); i != v.a.end(); i++) {
                 r += hacc_to_string(*i);
-                if (i + 1 != a.end()) r += ", ";
+                if (i + 1 != v.a.end()) r += ", ";
             }
             return r + "]";
         }
         case OBJECT: {
-            const Object& o = h.assume_object();
             String r = "{";
-            auto nexti = o.begin();
-            for (auto i = nexti; i != o.end(); i = nexti) {
+            auto nexti = v.o.begin();
+            for (auto i = nexti; i != v.o.end(); i = nexti) {
                 r += escape_ident(i->first);
                 r += ": ";
                 r += hacc_to_string(i->second);
                 nexti++;
-                if (nexti != o.end()) r += ", ";
+                if (nexti != v.o.end()) r += ", ";
             }
             return r + "}";
         }
-        case ERROR: throw h.assume_error();
+        case ERROR: throw v.e;
         default: throw Error("Corrupted Hacc tree\n");
     }
 }
-String hacc_to_string (Hacc h) {
-    String r = hacc_value_to_string(h);
-    bool show_type = !h.type().empty();
-    bool show_id = !h.id().empty();
+String hacc_to_string (const Hacc& h) {
+    String r = hacc_value_to_string(h.value);
+    bool show_type = !h.type.empty();
+    bool show_id = !h.id.empty();
     if ((show_type || show_id)
-     && h.valtype() != ARRAY && h.valtype() != OBJECT)
+     && h.value.form != ARRAY && h.value.form != OBJECT)
         r = "(" + r + ")";
-    if (show_id) r = "@" + escape_ident(h.id()) + r;
-    if (show_type) r = "#" + escape_ident(h.type()) + r;
+    if (show_id) r = "@" + escape_ident(h.id) + r;
+    if (show_type) r = "#" + escape_ident(h.type) + r;
     return r;
 }
-String string_from_hacc (Hacc h) {
+String string_from_hacc (const Hacc& h) {
     return hacc_to_string(h);
 }
 
@@ -212,7 +207,7 @@ struct Parser {
 
      // Parsing of specific valtypes.
      // This one could return an int, float, or double.
-    Hacc parse_numeric () {
+    Hacc&& parse_numeric () {
         int64 val;
         uint len;
         if (!sscanf(safebuf(), "%" SCNi64 "%n", &val, &len))
@@ -228,7 +223,7 @@ struct Parser {
             default: return Hacc(val);
         }
     }
-    Hacc parse_floating () {
+    Hacc&& parse_floating () {
         double val;
         uint len;
         if (!sscanf(safebuf(), "%lg%n", &val, &len))
@@ -239,7 +234,7 @@ struct Parser {
             default: return Hacc(val);
         }
     }
-    Hacc parse_bitrep () {
+    Hacc&& parse_bitrep () {
         p++;  // for the ~
         uint64 rep;
         uint len;
@@ -252,10 +247,10 @@ struct Parser {
             default: throw error("Precise bitrep doesn't have 8 or 16 digits");
         }
     }
-    Hacc parse_string () {
+    Hacc&& parse_string () {
         return Hacc(parse_stringly());
     }
-    Hacc parse_ref () {
+    Hacc&& parse_ref () {
         String type;
         String id;
         p++;  // For the &
@@ -264,7 +259,7 @@ struct Parser {
         else throw error("Ref is missing an @id");
         return Hacc(Ref{type, id});
     }
-    Hacc parse_array () {
+    Hacc&& parse_array () {
         Array a;
         p++;  // for the [
         for (;;) {
@@ -273,12 +268,12 @@ struct Parser {
                 case EOF: throw error("Array not terminated");
                 case ':': throw error("Cannot have : in an array");
                 case ',': p++; break;
-                case ']': p++; return Hacc(a);
+                case ']': p++; return Hacc(std::move(a));
                 default: a.push_back(parse_thing()); break;
             }
         }
     }
-    Hacc parse_object () {
+    Hacc&& parse_object () {
         Object o;
         p++;  // for the left brace
         String key;
@@ -289,7 +284,7 @@ struct Parser {
                 case EOF: throw error("Object not terminated");
                 case ':': throw error("Missing name before : in object");
                 case ',': p++; goto find_key;
-                case '}': p++; return Hacc(o);
+                case '}': p++; return Hacc(std::move(o));
                 default: key = parse_ident("an attribute name or the end of the object"); break;
             }
           find_separator:
@@ -307,7 +302,7 @@ struct Parser {
             }
         }
     }
-    Hacc parse_parens () {
+    Hacc&& parse_parens () {
         p++;  // for the (
         Hacc r = parse_thing();
         parse_ws();
@@ -316,7 +311,7 @@ struct Parser {
         return r;
     }
 
-    Hacc add_prefix (Hacc r, String type, String id) {
+    Hacc&& add_prefix (Hacc r, String type, String id) {
         if (!type.empty()) {
             if (r.type().empty()) r.set_type(type);
             else throw error("Too many #types");
@@ -328,7 +323,7 @@ struct Parser {
         return r;
     }
 
-    Hacc parse_thing () {
+    Hacc&& parse_thing () {
         parse_ws();
         String type = "";
         String id = "";
@@ -376,23 +371,23 @@ struct Parser {
             }
         }
     }
-    Hacc parse_all () {
+    Hacc&& parse_all () {
         Hacc r = parse_thing();
         parse_ws();
         if (look() == EOF) return r;
         else throw error("Extra stuff at end of document");
     }
-    Hacc parse () {
+    Hacc&& parse () {
         try { return parse_all(); }
         catch (Error e) { return Hacc(e); }
     }
 };
 
  // Finally:
-Hacc hacc_from_string (String s) { return Parser(s).parse(); }
-Hacc hacc_from_string (const char* s) { return Parser(s).parse(); }
-Hacc string_to_hacc (String s) { return hacc_from_string(s); }
-Hacc string_to_hacc (const char* s) { return hacc_from_string(s); }
+Hacc&& hacc_from_string (String s) { return Parser(s).parse(); }
+Hacc&& hacc_from_string (const char* s) { return Parser(s).parse(); }
+Hacc&& string_to_hacc (String s) { return hacc_from_string(s); }
+Hacc&& string_to_hacc (const char* s) { return hacc_from_string(s); }
 
 }
 

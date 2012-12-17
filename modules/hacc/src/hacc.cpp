@@ -88,21 +88,21 @@ const Array&   Hacc::get_array   () const { if (value.form == ARRAY) return valu
 const Object&  Hacc::get_object  () const { if (value.form == OBJECT) return value.o; else throw form_error("an object"); }
  // Phew!  So many lines for such simple concepts.
 
-Hacc* Hacc::get_elem (uint i) {
+Hacc& Hacc::get_elem (uint i) {
     if (value.form != ARRAY) throw form_error("an array");
     if (i >= value.a.size()) throw Error("Index out of range");
-    return value.a[i];
+    return *value.a[i];
 }
 
-Hacc* Hacc::get_attr (String name) {
+Hacc& Hacc::get_attr (String name) {
     if (value.form != OBJECT) throw form_error("an object");
     Object& o = value.o;
     for (auto it = o.begin(); it != o.end(); it++) {
         if (it->first == name) {
-            return it->second;
+            return *it->second;
         }
     }
-    return null;
+    throw Error("No element '" + name + "'");
 }
 
 

@@ -133,9 +133,9 @@ bool ok (bool (* code )(), const char* name = "");
  // As a special case, you can use is() with const char* and it'll do a strcmp (with
  //  NULL checks).
 template <class A, class B>
-bool is (A got, B expected, const char* name = "");
+bool is (const A& got, const B& expected, const char* name = "");
 template <class A, class B>
-bool is (A (* code )(), B expected, const char* name = "");
+bool is (A (* code )(), const B& expected, const char* name = "");
  // You can call the special case directly if you want.
 bool is_strcmp(const char* got, const char* expected, const char* name = "");
 bool is_strcmp(const char* (* code )(), const char* expected, const char* name = "");
@@ -240,13 +240,13 @@ namespace internal {
 
      // These implement the logic that goes inside a glove.
     template <class A, class B>
-    bool is_handler_pp (A* got, B* expected, const char* name) {
+    bool is_handler_pp (const A* got, const B* expected, const char* name) {
         return *got == *expected
             ? pass(name)
-            : fail_is(typeid(A), got, typeid(B), expected, name);
+            : fail_is(typeid(A), (void*)got, typeid(B), (void*)expected, name);
     }
     template <class A, class B>
-    bool is_handler_cp (A (* code )(), B* expected, const char* name) {
+    bool is_handler_cp (A (* code )(), const B* expected, const char* name) {
         A got = code();
         return is_handler_pp(&got, expected, name);
     }
@@ -269,14 +269,14 @@ namespace internal {
 
  // Filling out of the templated wrappers.
 template <class A, class B>
-inline bool is (A got, B expected, const char* name) {
+inline bool is (const A& got, const B& expected, const char* name) {
     using namespace internal;
-    return glove_2((void*)is_handler_pp<A, B>, &got, &expected, name);
+    return glove_2((void*)is_handler_pp<A, B>, (void*)&got, (void*)&expected, name);
 }
 template <class A, class B>
-inline bool is (A (* code )(), B expected, const char* name) {
+inline bool is (A (* code )(), const B& expected, const char* name) {
     using namespace internal;
-    return glove_2((void*)is_handler_cp<A, B>, (void*)code, &expected, name);
+    return glove_2((void*)is_handler_cp<A, B>, (void*)code, (void*)&expected, name);
 }
  // simply aliases for is_strcmp
 inline bool is (const char* got, const char* expected, const char* name) {
