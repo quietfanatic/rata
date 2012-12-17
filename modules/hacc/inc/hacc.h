@@ -32,8 +32,9 @@ namespace hacc {
 struct Hacc;
 
  // All the types of values.
-enum Valtype {
-    VALNULL,
+enum Form {
+    UNDEFINED,
+    NULLFORM,
     BOOL,
     INTEGER,
     FLOAT,
@@ -44,10 +45,8 @@ enum Valtype {
     OBJECT,
     ERROR
 };
- // Map C++-version valtypes to valtypes
-template <class VTYPE> Valtype valtype_of ();
- // Get the string name of the type
-const char* valtype_name (Valtype);
+
+const char* form_name (Form);
 
  // These are the C++ versions of all the value types
  // TODO: allow the includer to redefine these
@@ -63,10 +62,10 @@ struct Ref {
     String id;
 };
 template <class T> using VArray = std::vector<T>;
-typedef VArray<Hacc> Array;
+typedef VArray<Hacc*> Array;
 template <class T> using Pair = std::pair<String, T>;
 template <class T> using Map = std::vector<Pair<T>>;
-typedef Map<Hacc> Object;
+typedef Map<Hacc*> Object;
 struct Error : std::exception {
     String mess;
     String file;
@@ -78,89 +77,78 @@ struct Error : std::exception {
     { }
 };
 
- // Now the definition of the main Hacc type
-struct Hacc {
-    
-     // Constructors for all the C++-version-valtypes
-    Hacc (      Null    n, String type = "", String id = "", uint32 flags = 0);
-    Hacc (      Bool    b, String type = "", String id = "", uint32 flags = 0);
-     // Oh gosh we have to do all the integers
-    Hacc (      char    i, String type = "", String id = "", uint32 flags = 0);
-    Hacc (      int8    i, String type = "", String id = "", uint32 flags = 0);
-    Hacc (      uint8   i, String type = "", String id = "", uint32 flags = 0);
-    Hacc (      int16   i, String type = "", String id = "", uint32 flags = 0);
-    Hacc (      uint16  i, String type = "", String id = "", uint32 flags = 0);
-    Hacc (      int32   i, String type = "", String id = "", uint32 flags = 0);
-    Hacc (      uint32  i, String type = "", String id = "", uint32 flags = 0);
-    Hacc (      int64   i, String type = "", String id = "", uint32 flags = 0);
-    Hacc (      uint64  i, String type = "", String id = "", uint32 flags = 0);
-    Hacc (      Float   f, String type = "", String id = "", uint32 flags = 0);
-    Hacc (      Double  d, String type = "", String id = "", uint32 flags = 0);
-    Hacc (const String& s, String type = "", String id = "", uint32 flags = 0);
-    Hacc (const Ref&    r, String type = "", String id = "", uint32 flags = 0);
-    Hacc (const Array&  a, String type = "", String id = "", uint32 flags = 0);
-    Hacc (const Object& o, String type = "", String id = "", uint32 flags = 0);
-    Hacc (const Error&  e = Error("Undefined Hacc"), String type = "", String id = "", uint32 flags = 0);
-     // Get the valtype
-    Valtype valtype () const;
-     // Extracting values
-     // The get_* functions do type checking and number coercion
-          Null    get_null    () const;
-          Bool    get_bool    () const;
-          Integer get_integer () const;
-          Float   get_float   () const;
-          Double  get_double  () const;
-    const String& get_string  () const;
-    const Ref&    get_ref     () const;
-          Array&  get_array   () const;
-          Object& get_object  () const;
-    const Error&  get_error   () const;
-
-          Hacc*   get_attr    (String) const;
-     // The assume_* functions do not do checking or coercions.
-     // Only use these when you're switching over the valtype()
-          Null    assume_null    () const;
-          Bool    assume_bool    () const;
-          Integer assume_integer () const;
-          Float   assume_float   () const;
-          Double  assume_double  () const;
-    const String& assume_string  () const;
-    const Ref&    assume_ref     () const;
-          Array&  assume_array   () const;
-          Object& assume_object  () const;
-    const Error&  assume_error   () const;
-     // Manipulating type and id
-    String type () const;
-    String id () const;
-     // These do update in place.  You shouldn't need them often.
-    void set_type (String);
-    void set_id (String);
-     // This sets each only if it has not already been set.
-    void default_type_id (String, String);
-     // Flag handling
-    uint32& flags ();
-     // Error handling
-    operator Bool () const;  // is true if not Error.
-    String error_message () const;  // Returns "" if not Error.
-
-     // For convenience, 
-    Error valtype_error (String expected) const;
-
-     // The following are the innards of a Hacc object
-
-    struct Contents;
-
-    template <class T> struct Value;
-
-     // We're giving up and using std yet again.
-    std::shared_ptr<Contents> contents;
-};
-
 enum Flags {
     ADVERTISE_ID = 1,
     ADVERTISE_TYPE = 2
 };
 
+
+struct Value {
+    Form form;
+    union {
+        Null n;
+        Bool b;
+        Integer i;
+        Float f;
+        Double d;
+        String s;
+        Ref r;
+        Array a;
+        Object o;
+        Error e;
+    };
+    ~Value ();
+    Value (Value&& rv);
+    Value (Null n) : form(NULLFORM), n(n) { }
+    Value (Bool b) : form(BOOL), b(b) { }
+    Value (char i) : form(INTEGER), i(i) { }
+    Value (int8 i) : form(INTEGER), i(i) { }
+    Value (uint8 i) : form(INTEGER), i(i) { }
+    Value (int16 i) : form(INTEGER), i(i) { }
+    Value (uint16 i) : form(INTEGER), i(i) { }
+    Value (int32 i) : form(INTEGER), i(i) { }
+    Value (uint32 i) : form(INTEGER), i(i) { }
+    Value (int64 i) : form(INTEGER), i(i) { }
+    Value (uint64 i) : form(INTEGER), i(i) { }
+    Value (Float f) : form(FLOAT), f(f) { }
+    Value (Double d) : form(DOUBLE), d(d) { }
+    Value (const String& s) : form(STRING), s(s) { }
+    Value (String&& s) : form(STRING), s(s) { }
+    Value (const Ref& r) : form(REF), r(r) { }
+    Value (Ref&& r) : form(REF), r(r) { }
+    Value (const Array& a) : form(ARRAY), a(a) { }
+    Value (Array&& a) : form(ARRAY), a(a) { }
+    Value (const Object& o) : form(OBJECT), o(o) { }
+    Value (Object&& o) : form(OBJECT), o(o) { }
+    Value (Error e) : form(ERROR), e(e) { }
+    Value () : form(UNDEFINED) { }
+};
+
+struct Hacc {
+    Value value;
+    String type;
+    String id;
+    uint32 flags = 0;
+    Hacc (Value&& value, String type = "", String id = "", uint32 flags = 0) :
+        value(std::forward<Value>(value)), type(type), id(id), flags(flags)
+    { }
+    Form form () { return value.form; }
+    Null     get_null () const;
+    Bool     get_bool () const;
+    Integer  get_integer () const;
+    Float    get_float () const;
+    Double   get_double () const;
+    const String&   get_string () const;
+    const Ref&     get_ref () const;
+    const Array&   get_array () const;
+    const Object&  get_object () const;
+    Hacc* get_elem (uint);
+    Hacc* get_attr (String);
+    void add_elem (Hacc&&);
+    void add_attr (String, Hacc&&);
+
+    Error form_error (String) const;
+};
 
 
 }

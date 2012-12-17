@@ -132,7 +132,7 @@ namespace hacc {
     }
 
     template <class C> Hacc to_hacc (const C& v) {
-        Haccer::Writer w;
+        Haccer::Writer w (;
         run_description(w, const_cast<C&>(v));
         return w.hacc;
     }

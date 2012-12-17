@@ -59,29 +59,31 @@ struct Haccer::Writer : Haccer {
     Writer* writer () { return this; }
 
     bool picked = false;
-    Hacc hacc = Hacc(hacc::null);
-    Writer () { }
+    Hacc hacc;
+    Writer (HaccTable* t) :
+        hacc(Error("Undefined Hacc"), t->get_hacctype(), "", t->get_flags())
+    { }
 
     void as_null () { }
-    void as_bool (Bool& b) { if (picked) return; hacc = Hacc(b); picked = true; }
+    void as_bool (Bool& b) { if (picked) return; hacc.set_value(b); picked = true; }
     void as_integer_s (uint size, void* p) {
         if (picked) return;
         switch (size) {
-            case 1: hacc = Hacc(*(int8*)p); break;
-            case 2: hacc = Hacc(*(int16*)p); break;
-            case 3: hacc = Hacc(*(int32*)p); break;
-            case 4: hacc = Hacc(*(int64*)p); break;
+            case 1: hacc.set_value((Integer)*(int8*)p); break;
+            case 2: hacc.set_value((Integer)*(int16*)p); break;
+            case 3: hacc.set_value((Integer)*(int32*)p); break;
+            case 4: hacc.set_value((Integer)*(int64*)p); break;
             default: break;
         }
     }
-    void as_float (Float& f) { if (picked) return; hacc = Hacc(f); picked = true; }
-    void as_double (Double& d) { if (picked) return; hacc = Hacc(d); picked = true; }
-    void as_string (String& s) { if (picked) return; hacc = Hacc(s); picked = true; }
+    void as_float (Float& f) { if (picked) return; hacc.set_value(f); picked = true; }
+    void as_double (Double& d) { if (picked) return; hacc.set_value(d); picked = true; }
+    void as_string (String& s) { if (picked) return; hacc.set_value(s); picked = true; }
 
     bool elems_left () { return false; }
 
     template <class C> void elem (C& v) {
-        if (!picked) { hacc = Hacc(Array()); picked = true; }
+        if (!picked) { hacc.set_value(Array()); picked = true; }
         if (hacc.valtype() == ARRAY) {
             Writer w;
             run_description(w, v);
@@ -91,7 +93,7 @@ struct Haccer::Writer : Haccer {
     template <class C> void elem (C& v, C def) { elem(v); }
 
     template <class C> void attr (String name, C& v) {
-        if (!picked) { hacc = Hacc(Object()); picked = true; }
+        if (!picked) { hacc.set_value(Object()); picked = true; }
         if (hacc.valtype() == OBJECT) {
             Writer w;
             run_description(w, v);
