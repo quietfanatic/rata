@@ -149,6 +149,8 @@ struct Hacc {
     void add_attr (String, Hacc&&);
 
     Error form_error (String) const;
+    String error_message () const;
+    bool defined () { return value.form != UNDEFINED; }
 };
 
 

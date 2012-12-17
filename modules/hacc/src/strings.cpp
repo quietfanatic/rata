@@ -61,7 +61,7 @@ String hacc_value_to_string (const Value& v) {
         case ARRAY: {
             String r = "[";
             for (auto i = v.a.begin(); i != v.a.end(); i++) {
-                r += hacc_to_string(*i);
+                r += hacc_to_string(**i);
                 if (i + 1 != v.a.end()) r += ", ";
             }
             return r + "]";
@@ -72,7 +72,7 @@ String hacc_value_to_string (const Value& v) {
             for (auto i = nexti; i != v.o.end(); i = nexti) {
                 r += escape_ident(i->first);
                 r += ": ";
-                r += hacc_to_string(i->second);
+                r += hacc_to_string(*i->second);
                 nexti++;
                 if (nexti != v.o.end()) r += ", ";
             }
@@ -207,7 +207,7 @@ struct Parser {
 
      // Parsing of specific valtypes.
      // This one could return an int, float, or double.
-    Hacc&& parse_numeric () {
+    Hacc parse_numeric () {
         int64 val;
         uint len;
         if (!sscanf(safebuf(), "%" SCNi64 "%n", &val, &len))
@@ -223,7 +223,7 @@ struct Parser {
             default: return Hacc(val);
         }
     }
-    Hacc&& parse_floating () {
+    Hacc parse_floating () {
         double val;
         uint len;
         if (!sscanf(safebuf(), "%lg%n", &val, &len))
@@ -234,7 +234,7 @@ struct Parser {
             default: return Hacc(val);
         }
     }
-    Hacc&& parse_bitrep () {
+    Hacc parse_bitrep () {
         p++;  // for the ~
         uint64 rep;
         uint len;
@@ -242,15 +242,15 @@ struct Parser {
             throw error("Missing precise bitrep after ~");
         p += len;
         switch (len) {
-            case  8: return Hacc(*(float*)&rep);
-            case 16: return Hacc(*(double*)&rep);
+            case  8: return std::move(Hacc(*(float*)&rep));
+            case 16: return std::move(Hacc(*(double*)&rep));
             default: throw error("Precise bitrep doesn't have 8 or 16 digits");
         }
     }
-    Hacc&& parse_string () {
+    Hacc parse_string () {
         return Hacc(parse_stringly());
     }
-    Hacc&& parse_ref () {
+    Hacc parse_ref () {
         String type;
         String id;
         p++;  // For the &
@@ -259,7 +259,7 @@ struct Parser {
         else throw error("Ref is missing an @id");
         return Hacc(Ref{type, id});
     }
-    Hacc&& parse_array () {
+    Hacc parse_array () {
         Array a;
         p++;  // for the [
         for (;;) {
@@ -269,11 +269,11 @@ struct Parser {
                 case ':': throw error("Cannot have : in an array");
                 case ',': p++; break;
                 case ']': p++; return Hacc(std::move(a));
-                default: a.push_back(parse_thing()); break;
+                default: a.push_back(std::unique_ptr<Hacc>(new Hacc(parse_thing()))); break;
             }
         }
     }
-    Hacc&& parse_object () {
+    Hacc parse_object () {
         Object o;
         p++;  // for the left brace
         String key;
@@ -298,32 +298,30 @@ struct Parser {
                 case ':': throw error("Extra : in object");
                 case ',': throw error("Misplaced comma after : in object");
                 case '}': throw error("Missing value after : in object");
-                default: o.push_back(Pair<Hacc>(key, parse_thing())); break;
+                default: o.push_back(Pair<std::unique_ptr<Hacc>>(key, std::unique_ptr<Hacc>(new Hacc(parse_thing())))); break;
             }
         }
     }
-    Hacc&& parse_parens () {
+    Hacc parse_parens () {
         p++;  // for the (
-        Hacc r = parse_thing();
+        Hacc&& r = parse_thing();
         parse_ws();
         if (look() == ')') p++;
         else throw error("Extra stuff in parens");
-        return r;
+        return std::move(r);
     }
 
-    Hacc&& add_prefix (Hacc r, String type, String id) {
-        if (!type.empty()) {
-            if (r.type().empty()) r.set_type(type);
-            else throw error("Too many #types");
-        }
-        if (!id.empty()) {
-            if (r.id().empty()) r.set_id(id);
-            else throw error("Too many @ids");
-        }
-        return r;
+    Hacc add_prefix (Hacc&& r, String type, String id) {
+        if (r.type.empty()) r.type = type;
+        else if (!type.empty())
+            throw error("Too many #types");
+        if (r.id.empty()) r.id = id;
+        else if (!id.empty())
+            throw error("Too many @ids");
+        return std::move(r);
     }
 
-    Hacc&& parse_thing () {
+    Hacc parse_thing () {
         parse_ws();
         String type = "";
         String id = "";
@@ -371,23 +369,23 @@ struct Parser {
             }
         }
     }
-    Hacc&& parse_all () {
+    Hacc parse_all () {
         Hacc r = parse_thing();
         parse_ws();
         if (look() == EOF) return r;
         else throw error("Extra stuff at end of document");
     }
-    Hacc&& parse () {
+    Hacc parse () {
         try { return parse_all(); }
         catch (Error e) { return Hacc(e); }
     }
 };
 
  // Finally:
-Hacc&& hacc_from_string (String s) { return Parser(s).parse(); }
-Hacc&& hacc_from_string (const char* s) { return Parser(s).parse(); }
-Hacc&& string_to_hacc (String s) { return hacc_from_string(s); }
-Hacc&& string_to_hacc (const char* s) { return hacc_from_string(s); }
+Hacc hacc_from_string (const String& s) { return Parser(s).parse(); }
+Hacc hacc_from_string (const char* s) { return Parser(s).parse(); }
+Hacc string_to_hacc (const String& s) { return hacc_from_string(s); }
+Hacc string_to_hacc (const char* s) { return hacc_from_string(s); }
 
 }
 

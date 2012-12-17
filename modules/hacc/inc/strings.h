@@ -7,10 +7,10 @@ namespace hacc {
 
  // Escape string according to HACC rules
  // Does not add quotes
-String escape_string (String);
+String escape_string (const String&);
  // Escape ident according to HACC rules
  // Does add quotes if necessary
-String escape_ident (String);
+String escape_ident (const String&);
  // unescape is harder to abstract out, so we'll wait till we need it.
  // Serialize the value part to a string
 String hacc_value_to_string (const Value&);
@@ -18,12 +18,12 @@ String hacc_value_to_string (const Value&);
  // Write a Hacc to a string
 String hacc_to_string (const Hacc&);
  // Read a Hacc from a string
-Hacc&& hacc_from_string (String);
-Hacc&& hacc_from_string (const char*);
+Hacc hacc_from_string (const String&);
+Hacc hacc_from_string (const char*);
 
 String string_from_hacc (const Hacc&);
-Hacc&& string_to_hacc (String);
-Hacc&& string_to_hacc (const char*);
+Hacc string_to_hacc (const String&);
+Hacc string_to_hacc (const char*);
 
 }
 

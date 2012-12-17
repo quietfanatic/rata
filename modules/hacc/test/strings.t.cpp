@@ -9,9 +9,9 @@ void hacc_string_test (hacc::String from, hacc::String to) {
     using namespace tap;
     Hacc tree = hacc_from_string(from);
     const char* name = (escape_string(from) + " -> " + escape_string(to)).c_str();
-    if (!tree) {
+    if (tree.form() == ERROR) {
         fail(name);
-        printf(" # Parse failed: %s\n", tree.error_message().c_str());
+        printf(" # Parse failed: %s\n", tree.value.e.what());
     }
     else is(hacc_to_string(tree), to, name);
 }
