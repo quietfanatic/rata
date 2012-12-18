@@ -133,6 +133,7 @@ namespace hacc {
 
     template <class C> Hacc to_hacc (const C& v) {
         HaccTable* t = Haccable<C>::get_table();
+        if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
         Haccer::Writer w (t);
         run_description(w, const_cast<C&>(v));
         return std::move(w.hacc);
@@ -178,6 +179,24 @@ namespace hacc {
     template <class C> C* hacc_to_new (const Hacc& h) {
         return new_from_hacc<C>(h);
     }
+
+    template <class C> String hacctype () {
+        HaccTable* t = Haccable<C>::get_table();
+        if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+        return t->get_hacctype();
+    }
+
+    template <class C> String haccid (const C& v) {
+        HaccTable* t = Haccable<C>::get_table();
+        if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+        return t->haccid((void*)&v);
+    }
+    template <class C> C* find_by_haccid (String id) {
+        HaccTable* t = Haccable<C>::get_table();
+        if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+        return (C*)t->g_find_by_haccid(id);
+    }
+    template <class C> C* find_by_id (String id) { return find_by_haccid<C>(id); }
 
 }
 

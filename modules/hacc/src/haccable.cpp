@@ -32,7 +32,7 @@ namespace hacc {
     void HaccTable::infoize () { if (infoized) return; info(); infoized = true; }
     String HaccTable::get_hacctype () { infoize(); return _hacctype; }
     void HaccTable::hacctype (String ht) {
-        if (!_hacctype.empty()) _hacctype = ht;
+        if (_hacctype.empty()) _hacctype = ht;
         hacctype_map().emplace(ht, this);
     }
 
