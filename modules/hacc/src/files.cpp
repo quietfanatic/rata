@@ -27,7 +27,7 @@ void string_to_file (String s, Either_String filename, uint32 mode) {
     if (!outf) {
         throw Error("Could not open " + String(filename) + " for writing: " + strerror(errno));
     }
-    int writ = fwrite(s.data(), 1, s.length(), outf);
+    uint writ = fwrite(s.data(), 1, s.length(), outf);
     if (writ < s.length()) {
         fclose(outf);
         throw Error("Could not write to " + String(filename) + ": " + strerror(errno));

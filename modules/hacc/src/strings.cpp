@@ -287,11 +287,9 @@ struct Parser {
                 case '}': p++; return Hacc(std::move(o));
                 default: key = parse_ident("an attribute name or the end of the object"); break;
             }
-          find_separator:
             parse_ws();
             if (look() == ':') p++;
             else throw error("Missing : after name");
-          find_value:
             parse_ws();
             switch (look()) {
                 case EOF: throw error("Object not terminated");
