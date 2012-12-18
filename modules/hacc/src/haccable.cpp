@@ -51,4 +51,16 @@ namespace hacc {
     void HaccTable::advertise_id () { _flags |= ADVERTISE_ID; }
     void HaccTable::advertise_type () { _flags |= ADVERTISE_TYPE; }
 
+
+
+    void g_update_from_hacc (HaccTable* t, void* p, const Hacc& h) {
+        Haccer::Validator validator (h);
+        t->describe((void*)&validator, p);
+        validator.finish();
+        Haccer::Reader reader (h);
+        t->describe((void*)&reader, p);
+        Haccer::Finisher finisher (h);
+        t->describe((void*)&finisher, p);
+    }
+
 }

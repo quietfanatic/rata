@@ -142,15 +142,12 @@ namespace hacc {
     template <class C> Hacc hacc_from (const C& v) {
         return to_hacc(v);
     }
-
+    
+    void g_update_from_hacc (HaccTable* t, void* p, const Hacc& h);
     template <class C> void update_from_hacc (C& v, const Hacc& h) {
-        Haccer::Validator validator (h);
-        run_description(validator, v);
-        validator.finish();
-        Haccer::Reader reader (h);
-        run_description(reader, v);
-        Haccer::Finisher finisher (h);
-        run_description(finisher, v);
+        HaccTable* t = Haccable<C>::get_table();
+        if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+        g_update_from_hacc(t, (void*)&v, h);
     }
     template <class C> C from_hacc (const Hacc& h) {
         C r;
