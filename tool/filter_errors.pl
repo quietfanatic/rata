@@ -15,8 +15,10 @@ while ($selector->count) {
         when ($out) {
             my $_ = readline($out);
             if (defined $_) {
-                s/error:/\e[31merror\e[0m:/g;
-                s/required from here/required from \e[31mhere\e[0m/g;
+                s/error:/\e[1m\e[31merror\e[0m:/g;
+                s/warning:/\e[1m\e[33mwarning\e[0m:/g;
+                s/note:/\e[1m\e[33mwarning\e[0m:/g;
+                s/required from here/required from \e[1m\e[31mhere\e[0m/g;
                 print;
             }
             else {
@@ -26,8 +28,10 @@ while ($selector->count) {
         when ($err) {
             my $_ = readline($out);
             if (defined $_) {
-                s/error:/\e[31merror\e[0m:/g;
-                s/required from here/required from \e[31mhere\e[0m/g;
+                s/error:/\e[1m\e[31merror\e[0m:/g;
+                s/warning:/\e[1m\e[33mwarning\e[0m:/g;
+                s/note:/\e[1m\e[33mwarning\e[0m:/g;
+                s/required from here/required from \e[1m\e[31mhere\e[0m/g;
                 warn $_;
             }
             else {
