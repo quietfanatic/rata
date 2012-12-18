@@ -60,6 +60,13 @@ Value::Value (Value&& rv) {
     *((storage<sizeof(Value)>*)&rv);
     rv.form = UNDEFINED;
 }
+void Value::set (Value&& rv) {
+    this->~Value();
+    *((storage<sizeof(Value)>*)this)
+     =
+    *((storage<sizeof(Value)>*)&rv);
+    rv.form = UNDEFINED;
+}
 
 Null    Hacc::get_null    () const { if (value.form == NULLFORM) return value.n; else throw form_error("a null"); }
 Bool    Hacc::get_bool    () const { if (value.form == BOOL) return value.b; else throw form_error("a bool"); }
@@ -88,21 +95,39 @@ const Array&   Hacc::get_array   () const { if (value.form == ARRAY) return valu
 const Object&  Hacc::get_object  () const { if (value.form == OBJECT) return value.o; else throw form_error("an object"); }
  // Phew!  So many lines for such simple concepts.
 
-Hacc& Hacc::get_elem (uint i) {
+Hacc& Hacc::get_elem (uint i) const {
     if (value.form != ARRAY) throw form_error("an array");
     if (i >= value.a.size()) throw Error("Index out of range");
     return *value.a[i];
 }
 
-Hacc& Hacc::get_attr (String name) {
+bool Hacc::has_attr (String name) const {
+    if (value.form != OBJECT) return false;
+    for (auto it = value.o.begin(); it != value.o.end(); it++) {
+        if (it->first == name) {
+            return true;
+         }
+    }
+    return false;
+}
+
+Hacc& Hacc::get_attr (String name) const {
     if (value.form != OBJECT) throw form_error("an object");
-    Object& o = value.o;
-    for (auto it = o.begin(); it != o.end(); it++) {
+    for (auto it = value.o.begin(); it != value.o.end(); it++) {
         if (it->first == name) {
             return *it->second;
         }
     }
     throw Error("No element '" + name + "'");
+}
+
+void Hacc::add_elem (Hacc&& h) {
+    if (value.form != ARRAY) throw form_error("an array");
+    value.a.push_back(std::unique_ptr<Hacc>(new Hacc (std::forward<Hacc>(h))));
+}
+void Hacc::add_attr (String name, Hacc&& h) {
+    if (value.form != OBJECT) throw form_error("an object");
+    value.o.push_back(Pair<std::unique_ptr<Hacc>>(name, std::unique_ptr<Hacc>(new Hacc (std::forward<Hacc>(h)))));
 }
 
 

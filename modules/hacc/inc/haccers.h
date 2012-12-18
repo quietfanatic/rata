@@ -65,39 +65,39 @@ struct Haccer::Writer : Haccer {
     { }
 
     void as_null () { }
-    void as_bool (Bool& b) { if (picked) return; hacc.set_value(b); picked = true; }
+    void as_bool (Bool& b) { if (picked) return; hacc.value.set(b); picked = true; }
     void as_integer_s (uint size, void* p) {
         if (picked) return;
         switch (size) {
-            case 1: hacc.set_value((Integer)*(int8*)p); break;
-            case 2: hacc.set_value((Integer)*(int16*)p); break;
-            case 3: hacc.set_value((Integer)*(int32*)p); break;
-            case 4: hacc.set_value((Integer)*(int64*)p); break;
+            case 1: hacc.value.set(*(int8*)p); break;
+            case 2: hacc.value.set(*(int16*)p); break;
+            case 3: hacc.value.set(*(int32*)p); break;
+            case 4: hacc.value.set(*(int64*)p); break;
             default: break;
         }
     }
-    void as_float (Float& f) { if (picked) return; hacc.set_value(f); picked = true; }
-    void as_double (Double& d) { if (picked) return; hacc.set_value(d); picked = true; }
-    void as_string (String& s) { if (picked) return; hacc.set_value(s); picked = true; }
+    void as_float (Float& f) { if (picked) return; hacc.value.set(f); picked = true; }
+    void as_double (Double& d) { if (picked) return; hacc.value.set(d); picked = true; }
+    void as_string (String& s) { if (picked) return; hacc.value.set(s); picked = true; }
 
     bool elems_left () { return false; }
 
     template <class C> void elem (C& v) {
-        if (!picked) { hacc.set_value(Array()); picked = true; }
-        if (hacc.valtype() == ARRAY) {
-            Writer w;
+        if (!picked) { hacc.value.set(Array()); picked = true; }
+        if (hacc.value.form == ARRAY) {
+            Writer w (Haccable<C>::get_table());
             run_description(w, v);
-            hacc.assume_array().push_back(w.hacc);
+            hacc.add_elem(std::move(w.hacc));
         }
     }
     template <class C> void elem (C& v, C def) { elem(v); }
 
     template <class C> void attr (String name, C& v) {
-        if (!picked) { hacc.set_value(Object()); picked = true; }
-        if (hacc.valtype() == OBJECT) {
-            Writer w;
+        if (!picked) { hacc.value.set(Object()); picked = true; }
+        if (hacc.value.form == OBJECT) {
+            Writer w (Haccable<C>::get_table());
             run_description(w, v);
-            hacc.assume_object().push_back(Pair<Hacc>(name, w.hacc));
+            hacc.add_attr(name, std::move(w.hacc));
         }
     }
     template <class C> void attr (String name, C& v, C def) { attr(name, v); }
@@ -108,12 +108,12 @@ struct Haccer::Validator : Haccer {
     uint mode () { return VALIDATING; }
     Validator* validator () { return this; }
 
-    Hacc hacc;
+    const Hacc& hacc;
     uint accepts = 0;
     uint n_elems = 0;
-    Validator (Hacc hacc) : hacc(hacc) { }
+    Validator (const Hacc& hacc) : hacc(hacc) { }
 
-    void as_null () { accepts |= 1 << VALNULL; }
+    void as_null () { accepts |= 1 << NULLFORM; }
     void as_bool (Bool& b) { accepts |= 1 << BOOL; }
     void as_integer_s (uint s, void* p) { accepts |= 1 << INTEGER; }
     void as_float (Float& f) { accepts |= 1 << FLOAT | 1 << DOUBLE | 1 << INTEGER; }
@@ -122,9 +122,9 @@ struct Haccer::Validator : Haccer {
 
     template <class C> void elem (C& v) {
         accepts |= 1 << ARRAY;
-        if (hacc.valtype() == ARRAY) {
-            if (hacc.assume_array().size() > n_elems) {
-                Validator va (hacc.assume_array()[n_elems]);
+        if (hacc.value.form == ARRAY) {
+            if (hacc.value.a.size() > n_elems) {
+                Validator va (hacc.value.a[n_elems]);
                 run_description(va, v);
                 va.finish();
                 n_elems++;
@@ -136,9 +136,9 @@ struct Haccer::Validator : Haccer {
     }
     template <class C> void elem (C& v, C def) {
         accepts |= 1 << ARRAY;
-        if (hacc.valtype() == ARRAY) {
-            if (hacc.assume_array().size() > n_elems) {
-                Validator va (hacc.assume_array()[n_elems]);
+        if (hacc.value.form == ARRAY) {
+            if (hacc.value.a.size() > n_elems) {
+                Validator va (hacc.get_elem(n_elems));
                 run_description(va, v);
                 va.finish();
             }
@@ -146,22 +146,13 @@ struct Haccer::Validator : Haccer {
         }
     }
 
-    bool elems_left () { return hacc.valtype() == ARRAY && hacc.assume_array().size() > n_elems; }
+    bool elems_left () { return hacc.value.form == ARRAY && hacc.value.a.size() > n_elems; }
 
     template <class C> void attr (String name, const C& v) {
         accepts |= 1 << OBJECT;
-        if (hacc.valtype() == OBJECT) {
-            Object& o = hacc.assume_object();
-            bool found = false;
-            auto it = o.begin();
-            for (o.begin(); it != o.end(); it++) {
-                if (it->first == name) {
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
-                Validator va (it->second);
+        if (hacc.value.form == OBJECT) {
+            if (auto att = hacc.get_attr(name)) {
+                Validator va (att);
                 run_description(va, v);
                 va.finish();
             }
@@ -172,9 +163,10 @@ struct Haccer::Validator : Haccer {
     }
     template <class C> void attr (String name, C& v, C def) {
         accepts |= 1 << OBJECT;
-        if (hacc.valtype() == OBJECT) {
-            if (Hacc* a = hacc.get_attr(name)) {
-                Validator va (*a);
+        if (hacc.value.form == OBJECT) {
+            const Hacc& att = hacc.get_attr(name);
+            if (att.defined()) {
+                Validator va (att);
                 run_description(va, v);
                 va.finish();
             }
@@ -182,8 +174,8 @@ struct Haccer::Validator : Haccer {
     }
 
     void finish () {
-        if (!(accepts & 1<<hacc.valtype())) {
-            throw Error("This type does not accept " + String(valtype_name(hacc.valtype())) + ".");
+        if (!(accepts & 1<<hacc.value.form)) {
+            throw Error("This type does not accept " + String(form_name(hacc.value.form)) + ".");
         }
         if (elems_left()) {
             throw Error("Array has too many elements for this type.");
@@ -195,45 +187,43 @@ struct Haccer::Reader : Haccer {
     uint mode () { return READING; }
     Reader* reader () { return this; }
 
-    Hacc hacc;
+    const Hacc& hacc;
     uint elem_i = 0;
-    Reader (Hacc hacc) : hacc(hacc) { }
+    Reader (const Hacc& hacc) : hacc(hacc) { }
 
     void as_null () { }
-    void as_bool (Bool& b) { if (hacc.valtype() == BOOL) b = hacc.assume_bool(); }
+    void as_bool (Bool& b) { if (hacc.value.form == BOOL) b = hacc.value.b; }
     void as_integer_s (uint size, void* p) {
-        if (hacc.valtype() != INTEGER) return;
+        if (hacc.value.form != INTEGER) return;
         switch (size) {
-            case 1: { *(int8*)p = hacc.assume_integer(); break; }
-            case 2: { *(int16*)p = hacc.assume_integer(); break; }
-            case 3: { *(int32*)p = hacc.assume_integer(); break; }
-            case 4: { *(int64*)p = hacc.assume_integer(); break; }
+            case 1: { *(int8*)p = hacc.value.i; break; }
+            case 2: { *(int16*)p = hacc.value.i; break; }
+            case 3: { *(int32*)p = hacc.value.i; break; }
+            case 4: { *(int64*)p = hacc.value.i; break; }
             default: break;
         }
     }
     void as_float (Float& f) {
-        if (hacc.valtype() & (FLOAT|DOUBLE|INTEGER)) f = hacc.get_float();
+        if (hacc.value.form & (FLOAT|DOUBLE|INTEGER)) f = hacc.get_float();
     }
     void as_double (Double& d) {
-        if (hacc.valtype() & (FLOAT|DOUBLE|INTEGER)) d = hacc.get_double();
+        if (hacc.value.form & (FLOAT|DOUBLE|INTEGER)) d = hacc.get_double();
     }
-    void as_string (String& s) { if (hacc.valtype() == STRING) s = hacc.assume_string(); }
+    void as_string (String& s) { if (hacc.value.form == STRING) s = hacc.value.s; }
 
     template <class C> void elem (C& v) {
-        if (hacc.valtype() != ARRAY) return;
-        Array& a = hacc.assume_array();
-        if (elem_i < a.size()) {
-            run_description(Reader(a[elem_i]), v);
+        if (hacc.value.form != ARRAY) return;
+        if (elem_i < hacc.value.a.size()) {
+            run_description(Reader(hacc.get_elem(elem_i)), v);
         }
          // else something's fishy, but let's try not to leave the program
          // in an inconsistent state by throwing an exception.
         elem_i++;
     }
     template <class C> void elem (C& v, C def) {
-        if (hacc.valtype() != ARRAY) return;
-        Array& a = hacc.assume_array();
-        if (elem_i < a.size()) {
-            Reader reader (a[elem_i]);
+        if (hacc.value.form != ARRAY) return;
+        if (elem_i < hacc.value.a.size()) {
+            Reader reader (hacc.get_elem(elem_i));
             run_description(reader, v);
         }
         else {
@@ -242,22 +232,17 @@ struct Haccer::Reader : Haccer {
         elem_i++;
     }
 
-    bool elems_left () { return hacc.valtype() == ARRAY && elem_i < hacc.assume_array().size(); }
+    bool elems_left () { return hacc.value.form == ARRAY && elem_i < hacc.value.a.size(); }
 
     template <class C> void attr (String name, C& v) {
-        if (hacc.valtype() != OBJECT) return;
-        if (Hacc* a = hacc.get_attr(name)) {
-            Reader reader (*a);
-            run_description(reader, v);
-        }
-        else {
-            // err...
-        }
+        if (hacc.value.form != OBJECT) return;
+        Reader reader (hacc.get_attr(name));
+        run_description(reader, v);
     }
     template <class C> void attr (String name, C& v, C def) {
-        if (hacc.valtype() != OBJECT) return;
-        if (Hacc* a = hacc.get_attr(name)) {
-            Reader reader (*a);
+        if (hacc.value.form != OBJECT) return;
+        if (hacc.has_attr(name)) {
+            Reader reader (hacc.get_attr(name));
             run_description(reader, v);
         }
         else {
@@ -270,9 +255,9 @@ struct Haccer::Finisher : Haccer {
     uint mode () { return FINISHING; }
     Finisher* finisher () { return this; }
 
-    Hacc hacc;
+    const Hacc& hacc;
     uint elem_i = 0;
-    Finisher (Hacc hacc) : hacc(hacc) { }
+    Finisher (const Hacc& hacc) : hacc(hacc) { }
 
     void as_null () { }
     void as_bool (Bool& b) { }
@@ -282,24 +267,19 @@ struct Haccer::Finisher : Haccer {
     void as_string (String& s) { }
 
     template <class C> void elem (C& v) {
-        if (hacc.valtype() != ARRAY) return;
-        Array& a = hacc.assume_array();
-        if (elem_i < a.size()) {
-            Finisher finisher (a[elem_i]);
-            run_description(finisher, v);
-        }
+        if (hacc.value.form != ARRAY) return;
+        Finisher finisher (hacc.get_elem(elem_i));
+        run_description(finisher, v);
         elem_i++;
     }
     template <class C> void elem (C& v, C def) { elem(v); }
 
-    bool elems_left () { return hacc.valtype() == ARRAY && elem_i < hacc.assume_array().size(); }
+    bool elems_left () { return hacc.value.form == ARRAY && elem_i < hacc.value.a.size(); }
 
     template <class C> void attr (String name, C& v) {
-        if (hacc.valtype() != OBJECT) return;
-        if (Hacc* a = hacc.get_attr(name)) {
-            Finisher finisher (*a);
-            run_description(finisher, v);
-        }
+        if (hacc.value.form != OBJECT) return;
+        Finisher finisher (hacc.get_attr(name));
+        run_description(finisher, v);
     }
     template <class C> void attr (String name, C& v, C def) { attr(name, v); }
 };

@@ -132,16 +132,17 @@ namespace hacc {
     }
 
     template <class C> Hacc to_hacc (const C& v) {
-        Haccer::Writer w (;
+        HaccTable* t = Haccable<C>::get_table();
+        Haccer::Writer w (t);
         run_description(w, const_cast<C&>(v));
-        return w.hacc;
+        return std::move(w.hacc);
     }
 
     template <class C> Hacc hacc_from (const C& v) {
-        return to_hacc(v);
+        return std::move(to_hacc(v));
     }
 
-    template <class C> void update_from_hacc (C& v, Hacc h) {
+    template <class C> void update_from_hacc (C& v, const Hacc& h) {
         Haccer::Validator validator (h);
         run_description(validator, v);
         validator.finish();
@@ -150,32 +151,31 @@ namespace hacc {
         Haccer::Finisher finisher (h);
         run_description(finisher, v);
     }
-    template <class C> C from_hacc (Hacc h) {
+    template <class C> C from_hacc (const Hacc& h) {
         C r;
         update_from_hacc(r, h);
         return r;
     }
-    template <class C> C hacc_to (Hacc h) {
+    template <class C> C hacc_to (const Hacc& h) {
         C r;
         update_from_hacc(r, h);
         return r;
     }
      // Auto-deallocate a pointer if an exception happens.
-    template <class C>
-    struct Bomb {
+    namespace { template <class C> struct Bomb {
         C* p;
         Bomb (C* p) :p(p) { }
         ~Bomb () { if (p) delete p; }
         void defuse () { p = null; }
-    };
-    template <class C> C* new_from_hacc (Hacc h) {
+    }; }
+    template <class C> C* new_from_hacc (const Hacc& h) {
         C* r = new C;
         Bomb<C> b (r);
         update_from_hacc(*r, h);
         b.defuse();
         return r;
     }
-    template <class C> C* hacc_to_new (Hacc h) {
+    template <class C> C* hacc_to_new (const Hacc& h) {
         return new_from_hacc<C>(h);
     }
 

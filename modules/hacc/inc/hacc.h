@@ -100,6 +100,7 @@ struct Value {
     };
     ~Value ();
     Value (Value&& rv);
+    void set (Value&& rv);
     Value (Null n) : form(NULLFORM), n(n) { }
     Value (Bool b) : form(BOOL), b(b) { }
     Value (char i) : form(INTEGER), i(i) { }
@@ -143,14 +144,15 @@ struct Hacc {
     const Ref&     get_ref () const;
     const Array&   get_array () const;
     const Object&  get_object () const;
-    Hacc& get_elem (uint);
-    Hacc& get_attr (String);
+    Hacc& get_elem (uint) const;
+    bool has_attr (String) const;
+    Hacc& get_attr (String) const;
     void add_elem (Hacc&&);
     void add_attr (String, Hacc&&);
 
     Error form_error (String) const;
     String error_message () const;
-    bool defined () { return value.form != UNDEFINED; }
+    bool defined () const { return value.form != UNDEFINED; }
 };
 
 

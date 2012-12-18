@@ -70,6 +70,7 @@ tap::Tester haccable_tester ("haccable", [](){
     is(wi.val, 34, "...works");
     doesnt_throw([](){ update_from_hacc(wi, Hacc(52)); }, "update_from_hacc on a template haccable");
     is(wi.val, 52, "...and it works");
-    is(from_hacc<Vectorly>(Hacc(Array {Hacc(34.4), Hacc(52.123)})), Vectorly{34.4, 52.123}, "Vectorly accepts Array");
+    Hacc* ahcs [2] = {new Hacc(34.4), new Hacc(52.123)};
+    is(from_hacc<Vectorly>(Hacc(Array(ahcs, ahcs+2))), Vectorly{34.4, 52.123}, "Vectorly accepts Array");
 });
 
