@@ -139,7 +139,7 @@ namespace hacc {
     }
 
     template <class C> Hacc hacc_from (const C& v) {
-        return std::move(to_hacc(v));
+        return to_hacc(v);
     }
 
     template <class C> void update_from_hacc (C& v, const Hacc& h) {

@@ -8,7 +8,7 @@ tap::Tester haccable_standard_tester ("haccable_standard", [](){
     using namespace tap;
     plan(28);
 #define TEST_STD(type, value, valtype) \
-    is((type(*)())([](){return (type)hacc_from((type)value).get_##valtype();}), (type)value, "standard hacc_from on " #type); \
+    is((type(*)())([](){return (type)to_hacc<type>((type)value).get_##valtype();}), (type)value, "standard hacc_from on " #type); \
     is((type(*)())([](){return (type)hacc_to<type>(Hacc((type)value));}), (type)value, "standard hacc_to on " #type);
     TEST_STD(Null, null, null);
     TEST_STD(bool, true, bool);

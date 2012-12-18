@@ -61,10 +61,10 @@ struct Haccer::Writer : Haccer {
     bool picked = false;
     Hacc hacc;
     Writer (HaccTable* t) :
-        hacc(Error("Undefined Hacc"), t->get_hacctype(), "", t->get_flags())
+        hacc(Value(), t->get_hacctype(), "", t->get_flags())
     { }
 
-    void as_null () { }
+    void as_null () { if (picked) return; hacc.value.set(null); picked = true; }
     void as_bool (Bool& b) { if (picked) return; hacc.value.set(b); picked = true; }
     void as_integer_s (uint size, void* p) {
         if (picked) return;
