@@ -1,9 +1,9 @@
 #include "../inc/haccable_standard.h"
 
  // This defines haccabilities for most builtin types.
-#define HCB_LIT(cpptype, valtype) \
+#define HCB_LIT(cpptype, form) \
 HCB_BEGIN(cpptype) { \
-    void describe (hacc::Haccer& h, cpptype& it) { h.as_##valtype(it); } \
+    void describe (hacc::Haccer& h, cpptype& it) { h.as_##form(it); } \
 } HCB_END(cpptype)
 
 
