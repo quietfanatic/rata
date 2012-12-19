@@ -187,15 +187,15 @@ struct Haccer::Validator : Haccer {
     template <class C> void attr (String name, const C& v) {
         accepts |= 1 << OBJECT;
         if (hacc.value.form == OBJECT) {
+            HaccTable* t = Haccable<C>::get_table();
+            if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
             if (auto att = hacc.get_attr(name)) {
-                HaccTable* t = Haccable<C>::get_table();
-                if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
                 Validator va (t, hacc.get_attr(name), id_situation);
                 run_description(va, v);
                 va.finish();
             }
             else {
-                throw Error("Object does not have required attribute '" + name + "' for <mangled: " + String(typeid(C).name()) + ">.");
+                throw Error("Object does not have required attribute '" + name + "' for type " + t->get_hacctype());
             }
         }
     }

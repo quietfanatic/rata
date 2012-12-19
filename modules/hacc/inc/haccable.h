@@ -89,7 +89,7 @@ namespace hacc {
 template <class C, uint flags = 0> struct Haccability : HaccTable {
     virtual void info () { }
     virtual void describe (Haccer&, C&) {
-        throw Error ("The Haccable for <mangled: " + String(typeid(C).name()) + "> has no describe.");
+        throw Error ("The Haccable for " + get_hacctype() + " has no describe.");
     }
     void describe (void* h, void* it) { describe(*(Haccer*)h, *(C*)it); }
     virtual String haccid (const C& v) { return ""; }
