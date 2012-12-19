@@ -28,7 +28,7 @@ const char* form_name (Form form) {
         case FLOAT: return "float";
         case DOUBLE: return "double";
         case STRING: return "string";
-        case REF: return "ref";
+        case POINTER: return "pointer";
         case ARRAY: return "array";
         case OBJECT: return "object";
         case ERROR: return "error";
@@ -44,7 +44,7 @@ Error Hacc::form_error (String expected) const {
 Value::~Value () {
     switch (form) {
         case STRING: s.~String(); return;
-        case REF: r.~Ref(); return;
+        case POINTER: p.~Pointer(); return;
         case ARRAY: a.~Array(); return;
         case OBJECT: o.~Object(); return;
         case ERROR: e.~Error(); return;
@@ -90,7 +90,7 @@ Double  Hacc::get_double () const {
     }
 }
 const String&  Hacc::get_string  () const { if (value.form == STRING) return value.s; else throw form_error("a string"); }
-const Ref&     Hacc::get_ref     () const { if (value.form == REF) return value.r; else throw form_error("a ref"); }
+const Pointer& Hacc::get_pointer () const { if (value.form == POINTER) return value.p; else throw form_error("a pointer"); }
 const Array&   Hacc::get_array   () const { if (value.form == ARRAY) return value.a; else throw form_error("an array"); }
 const Object&  Hacc::get_object  () const { if (value.form == OBJECT) return value.o; else throw form_error("an object"); }
  // Phew!  So many lines for such simple concepts.

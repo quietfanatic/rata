@@ -17,7 +17,7 @@ tap::Tester hacc_tester ("hacc", [](){
     is(Hacc(32).get_float(), 32.f, "integer -> float");
     is(Hacc(32).get_double(), 32.F, "integer -> double");
     is(Hacc(String("hello")).get_string(), std::string("hello"), "string roundtrip");
-    is(Hacc(Ref{"type", "id", null}).get_ref(), Ref{"type", "id", null});
+    is(Hacc(Pointer("type", "id", (void*)null)).get_pointer(), Pointer("type", "id", (void*)null), "pointer roundtrip");
     is(Hacc(Array()).get_array(), Array(), "Empty array roundtrip");
 });
 

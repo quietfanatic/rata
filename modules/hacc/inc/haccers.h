@@ -34,7 +34,7 @@ struct Haccer {
     virtual void as_float (Float&) = 0;
     virtual void as_double (Double&) = 0;
     virtual void as_string (String&) = 0;
-    virtual void as_ref (Ref&) = 0;
+    virtual void as_pointer (Pointer&) = 0;
 
     virtual bool elems_left () = 0;
 
@@ -52,6 +52,11 @@ struct Haccer {
     void as_integer (uint32& i) { return as_integer_s(3, &i); }
     void as_integer (int64& i) { return as_integer_s(4, &i); }
     void as_integer (uint64& i) { return as_integer_s(4, &i); }
+    template <class C> void as_pointer (C*& p) {
+        Pointer pp (p);
+        as_pointer(pp);
+        p = (C*)pp.addr;
+    }
 
 };
 
@@ -80,7 +85,7 @@ struct Haccer::Writer : Haccer {
     void as_float (Float& f) { if (picked) return; hacc.value.set(f); picked = true; }
     void as_double (Double& d) { if (picked) return; hacc.value.set(d); picked = true; }
     void as_string (String& s) { if (picked) return; hacc.value.set(s); picked = true; }
-    void as_ref (Ref& r) { if (picked) return; hacc.value.set(r); picked = true; }
+    void as_pointer (Pointer& p) { if (picked) return; hacc.value.set(p); picked = true; }
 
     bool elems_left () { return false; }
 
@@ -143,12 +148,12 @@ struct Haccer::Validator : Haccer {
     void as_float (Float& f) { accepts |= 1 << FLOAT | 1 << DOUBLE | 1 << INTEGER; }
     void as_double (Double& d) { accepts |= 1 << DOUBLE | 1 << FLOAT | 1 << INTEGER; }
     void as_string (String& d) { accepts |= 1 << STRING; }
-    void as_ref (Ref& r) {
-        accepts |= 1 << REF;
-        if (r.type.empty()) throw Error("Cannot write a Ref that contains no #type.");
-        HaccTable* reftable = HaccTable::by_hacctype(r.type);
-        if (!reftable) throw Error("Referenced type '" + r.type + "' has not been registered.");
-        id_situation.emplace(r.type + String(1, '\0') + r.id, null);
+    void as_pointer (Pointer& p) {
+        accepts |= 1 << POINTER;
+        if (p.type.empty()) throw Error("Cannot write a Pointer that contains no #type.");
+        HaccTable* ptdtable = HaccTable::by_hacctype(p.type);
+        if (!ptdtable) throw Error("Referenced type '" + p.type + "' has not been registered.");
+        id_situation.emplace(p.type + String(1, '\0') + p.id, null);
          // If this id already exists, that's ok.
     }
 
@@ -249,7 +254,7 @@ struct Haccer::Reader : Haccer {
         if (hacc.value.form & (FLOAT|DOUBLE|INTEGER)) d = hacc.get_double();
     }
     void as_string (String& s) { if (hacc.value.form == STRING) s = hacc.value.s; }
-    void as_ref (Ref& r) {
+    void as_pointer (Pointer& p) {
          // Actually...we aren't doing anything at all right here.
     }
 
@@ -321,11 +326,11 @@ struct Haccer::Finisher : Haccer {
     void as_float (Float& f) { }
     void as_double (Double& d) { }
     void as_string (String& s) { }
-    void as_ref (Ref& r) {
-        if (hacc.value.form != REF) return;
-        auto iter = id_situation.find(hacc.value.r.type + String(1, '\0') + hacc.value.r.id);
+    void as_pointer (Pointer& p) {
+        if (hacc.value.form != POINTER) return;
+        auto iter = id_situation.find(hacc.value.p.type + String(1, '\0') + hacc.value.p.id);
         if (iter != id_situation.end()) {
-            r.p = iter->second;
+            p.addr = iter->second;
         }
         else {
             throw Error("Hmm, it seems that " + table->get_hacctype() + "'s description didn't provide the same Ref during both validate and finish phases.");

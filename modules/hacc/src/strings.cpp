@@ -54,9 +54,9 @@ String hacc_value_to_string (const Value& v) {
             return r;
         }
         case STRING: return "\"" + escape_string(v.s) + "\"";
-        case REF: {
-            return (v.r.type.empty() ? "&" : "&#" + escape_ident(v.r.type))
-                 + "@" + escape_ident(v.r.id);
+        case POINTER: {
+            return (v.p.type.empty() ? "&" : "&#" + escape_ident(v.p.type))
+                 + "@" + escape_ident(v.p.id);
         }
         case ARRAY: {
             String r = "[";
@@ -250,14 +250,14 @@ struct Parser {
     Hacc parse_string () {
         return Hacc(parse_stringly());
     }
-    Hacc parse_ref () {
+    Hacc parse_pointer () {
         String type;
         String id;
         p++;  // For the &
         if (look() == '#') type = parse_type();
         if (look() == '@') id = parse_id();
         else throw error("Ref is missing an @id");
-        return Hacc(Ref{type, id});
+        return Hacc(Pointer(type, id));
     }
     Hacc parse_array () {
         Array a;
@@ -347,7 +347,7 @@ struct Parser {
             case '[': return add_prefix(parse_array(), type, id);
             case '{': return add_prefix(parse_object(), type, id);
             case '(': return add_prefix(parse_parens(), type, id);
-            case '&': return add_prefix(parse_ref(), type, id);
+            case '&': return add_prefix(parse_pointer(), type, id);
             case '#':
                 if (type.empty()) type = parse_type();
                 else throw error("Too many #classes");

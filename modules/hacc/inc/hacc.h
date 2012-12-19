@@ -41,7 +41,7 @@ enum Form {
     FLOAT,
     DOUBLE,
     STRING,
-    REF,
+    POINTER,
     ARRAY,
     OBJECT,
     ERROR
@@ -58,17 +58,6 @@ typedef int64 Integer;
 typedef float Float;
 typedef double Double;
 typedef std::string String;
-struct Ref {
-    String type;
-    String id;
-    void* p;
-    bool operator== (Ref o) const { return (p && p == o.p) || (type == o.type && id == o.id); }
-};
-template <class T> using VArray = std::vector<T>;
-typedef VArray<std::unique_ptr<Hacc>> Array;
-template <class T> using Pair = std::pair<String, T>;
-template <class T> using Map = std::vector<Pair<T>>;
-typedef Map<std::unique_ptr<Hacc>> Object;
 struct Error : std::exception {
     String mess;
     String file;
@@ -79,6 +68,35 @@ struct Error : std::exception {
         mess(mess), file(file), line(line), col(col)
     { }
 };
+struct Pointer {
+    String type;
+    String id;
+    const std::type_info* cpptype;
+    void* addr;
+    bool operator== (Pointer o) const { return (cpptype && o.cpptype && *cpptype == *o.cpptype && addr == o.addr) || (type == o.type && id == o.id); }
+    template <class C>
+    Pointer (String type, String id, C* addr) :
+        type(type), id(id), cpptype(&typeid(C)), addr(addr)
+    { }
+    Pointer (String type, String id, void* addr = null) :
+        type(type), id(id), cpptype(null), addr(addr)
+    { }
+    template <class C>
+    Pointer (C* addr) : type(""), id(""), cpptype(&typeid(C)), addr(addr) { }
+    template <class C>
+    C* get_ptr () const {
+       if (!cpptype)
+           throw Error("This Pointer Hacc is not associated with a memory address.");
+       if (*cpptype != typeid(C))
+           throw Error("This Pointer Hacc is not of type <mangled: " + String(typeid(C).name()) + ">.");
+       return (C*)addr;
+    }
+};
+template <class T> using VArray = std::vector<T>;
+typedef VArray<std::unique_ptr<Hacc>> Array;
+template <class T> using Pair = std::pair<String, T>;
+template <class T> using Map = std::vector<Pair<T>>;
+typedef Map<std::unique_ptr<Hacc>> Object;
 
 enum Flags {
     ADVERTISE_ID = 1,
@@ -95,7 +113,7 @@ struct Value {
         Float f;
         Double d;
         String s;
-        Ref r;
+        Pointer p;
         Array a;
         Object o;
         Error e;
@@ -118,8 +136,8 @@ struct Value {
     Value (Double d) : form(DOUBLE), d(d) { }
     Value (const String& s) : form(STRING), s(s) { }
     Value (String&& s) : form(STRING), s(std::forward<String>(s)) { }
-    Value (const Ref& r) : form(REF), r(r) { }
-    Value (Ref&& r) : form(REF), r(std::forward<Ref>(r)) { }
+    Value (const Pointer& p) : form(POINTER), p(p) { }
+    Value (Pointer&& p) : form(POINTER), p(std::forward<Pointer>(p)) { }
     //Value (const Array& a) : form(ARRAY), a(a) { }
     Value (Array&& a) : form(ARRAY), a(std::forward<Array>(a)) { }
     //Value (const Object& o) : form(OBJECT), o(o) { }
@@ -142,8 +160,8 @@ struct Hacc {
     Integer  get_integer () const;
     Float    get_float () const;
     Double   get_double () const;
-    const String&   get_string () const;
-    const Ref&     get_ref () const;
+    const String&  get_string () const;
+    const Pointer& get_pointer () const;
     const Array&   get_array () const;
     const Object&  get_object () const;
     Hacc& get_elem (uint) const;
