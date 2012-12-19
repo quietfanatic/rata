@@ -61,6 +61,8 @@ typedef std::string String;
 struct Ref {
     String type;
     String id;
+    void* p;
+    bool operator== (Ref o) const { return (p && p == o.p) || (type == o.type && id == o.id); }
 };
 template <class T> using VArray = std::vector<T>;
 typedef VArray<std::unique_ptr<Hacc>> Array;

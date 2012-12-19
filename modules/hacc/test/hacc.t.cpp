@@ -4,7 +4,7 @@
 tap::Tester hacc_tester ("hacc", [](){
     using namespace hacc;
     using namespace tap;
-    plan(13);
+    plan(14);
     is(Hacc(null).get_null(), null, "null roundtrip");
     is(Hacc(true).get_bool(), true, "true roundtrip");
     is(Hacc(false).get_bool(), false, "false roundtrip");
@@ -17,6 +17,7 @@ tap::Tester hacc_tester ("hacc", [](){
     is(Hacc(32).get_float(), 32.f, "integer -> float");
     is(Hacc(32).get_double(), 32.F, "integer -> double");
     is(Hacc(String("hello")).get_string(), std::string("hello"), "string roundtrip");
+    is(Hacc(Ref{"type", "id", null}).get_ref(), Ref{"type", "id", null});
     is(Hacc(Array()).get_array(), Array(), "Empty array roundtrip");
 });
 
