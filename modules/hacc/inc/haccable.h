@@ -1,10 +1,12 @@
 #ifndef HAVE_HACC_HACCABLE_H
 #define HAVE_HACC_HACCABLE_H
 
+#include <unordered_map>
 #include "hacc.h"
 
 namespace hacc {
 struct Haccer;
+typedef std::unordered_map<String, void*> ID_Map;
 }
 
 namespace hacc {

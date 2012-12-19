@@ -34,6 +34,7 @@ struct Haccer {
     virtual void as_float (Float&) = 0;
     virtual void as_double (Double&) = 0;
     virtual void as_string (String&) = 0;
+    virtual void as_ref (Ref&) = 0;
 
     virtual bool elems_left () = 0;
 
@@ -79,6 +80,7 @@ struct Haccer::Writer : Haccer {
     void as_float (Float& f) { if (picked) return; hacc.value.set(f); picked = true; }
     void as_double (Double& d) { if (picked) return; hacc.value.set(d); picked = true; }
     void as_string (String& s) { if (picked) return; hacc.value.set(s); picked = true; }
+    void as_ref (Ref& r) { if (picked) return; hacc.value.set(r); picked = true; }
 
     bool elems_left () { return false; }
 
@@ -108,10 +110,32 @@ struct Haccer::Validator : Haccer {
     uint mode () { return VALIDATING; }
     Validator* validator () { return this; }
 
+    HaccTable* table;
     const Hacc& hacc;
+    ID_Map& id_situation;
     uint accepts = 0;
     uint n_elems = 0;
-    Validator (const Hacc& hacc) : hacc(hacc) { }
+    Validator (HaccTable* table, const Hacc& hacc, ID_Map& id_sitch) :
+        table(table), hacc(hacc), id_situation(id_sitch)
+    {
+        if (!hacc.id.empty()) {
+            String type = hacc.type.empty() ? table->get_hacctype() : hacc.type;
+            if (type.empty()) throw Error("Sorry, types without hacctypes cannot currently have haccids either.");
+            auto res = id_situation.emplace(table->get_hacctype() + String(1, '\0') + hacc.id, (void*)-1);
+            if (!res.second) {
+                throw Error("Multiple declarations of id '" + hacc.id + "' for type '" + table->get_hacctype());
+            }
+        }
+    }
+
+    void finish () {
+        if (!(accepts & 1<<hacc.value.form)) {
+            throw Error("This type does not accept " + String(form_name(hacc.value.form)) + ".");
+        }
+        if (elems_left()) {
+            throw Error("Array has too many elements for this type.");
+        }
+    }
 
     void as_null () { accepts |= 1 << NULLFORM; }
     void as_bool (Bool& b) { accepts |= 1 << BOOL; }
@@ -119,12 +143,22 @@ struct Haccer::Validator : Haccer {
     void as_float (Float& f) { accepts |= 1 << FLOAT | 1 << DOUBLE | 1 << INTEGER; }
     void as_double (Double& d) { accepts |= 1 << DOUBLE | 1 << FLOAT | 1 << INTEGER; }
     void as_string (String& d) { accepts |= 1 << STRING; }
+    void as_ref (Ref& r) {
+        accepts |= 1 << REF;
+        if (r.type.empty()) throw Error("Cannot write a Ref that contains no #type.");
+        HaccTable* reftable = HaccTable::by_hacctype(r.type);
+        if (!reftable) throw Error("Referenced type '" + r.type + "' has not been registered.");
+        id_situation.emplace(r.type + String(1, '\0') + r.id, null);
+         // If this id already exists, that's ok.
+    }
 
     template <class C> void elem (C& v) {
         accepts |= 1 << ARRAY;
         if (hacc.value.form == ARRAY) {
             if (hacc.value.a.size() > n_elems) {
-                Validator va (hacc.value.a[n_elems]);
+                HaccTable* t = Haccable<C>::get_table();
+                if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+                Validator va (t, hacc.get_elem(n_elems), id_situation);
                 run_description(va, v);
                 va.finish();
                 n_elems++;
@@ -138,7 +172,9 @@ struct Haccer::Validator : Haccer {
         accepts |= 1 << ARRAY;
         if (hacc.value.form == ARRAY) {
             if (hacc.value.a.size() > n_elems) {
-                Validator va (hacc.get_elem(n_elems));
+                HaccTable* t = Haccable<C>::get_table();
+                if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+                Validator va (t, hacc.get_elem(n_elems), id_situation);
                 run_description(va, v);
                 va.finish();
             }
@@ -152,7 +188,9 @@ struct Haccer::Validator : Haccer {
         accepts |= 1 << OBJECT;
         if (hacc.value.form == OBJECT) {
             if (auto att = hacc.get_attr(name)) {
-                Validator va (att);
+                HaccTable* t = Haccable<C>::get_table();
+                if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+                Validator va (t, hacc.get_attr(name), id_situation);
                 run_description(va, v);
                 va.finish();
             }
@@ -166,19 +204,12 @@ struct Haccer::Validator : Haccer {
         if (hacc.value.form == OBJECT) {
             const Hacc& att = hacc.get_attr(name);
             if (att.defined()) {
-                Validator va (att);
+                HaccTable* t = Haccable<C>::get_table();
+                if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+                Validator va (t, hacc.get_attr(name), id_situation);
                 run_description(va, v);
                 va.finish();
             }
-        }
-    }
-
-    void finish () {
-        if (!(accepts & 1<<hacc.value.form)) {
-            throw Error("This type does not accept " + String(form_name(hacc.value.form)) + ".");
-        }
-        if (elems_left()) {
-            throw Error("Array has too many elements for this type.");
         }
     }
 };
@@ -187,9 +218,17 @@ struct Haccer::Reader : Haccer {
     uint mode () { return READING; }
     Reader* reader () { return this; }
 
+    HaccTable* table;
     const Hacc& hacc;
+    void* p;
     uint elem_i = 0;
-    Reader (const Hacc& hacc) : hacc(hacc) { }
+    Reader (HaccTable* table, const Hacc& hacc, void* p) : table(table), hacc(hacc), p(p) { }
+
+    void finish () {
+//        table->register(p);
+  //      table->register_type(p, hacc.type);
+    //    table->register_id(p, hacc.id);
+    }
 
     void as_null () { }
     void as_bool (Bool& b) { if (hacc.value.form == BOOL) b = hacc.value.b; }
@@ -210,6 +249,9 @@ struct Haccer::Reader : Haccer {
         if (hacc.value.form & (FLOAT|DOUBLE|INTEGER)) d = hacc.get_double();
     }
     void as_string (String& s) { if (hacc.value.form == STRING) s = hacc.value.s; }
+    void as_ref (Ref& r) {
+         // Actually...we aren't doing anything at all right here.
+    }
 
     template <class C> void elem (C& v) {
         if (hacc.value.form != ARRAY) return;
@@ -223,8 +265,11 @@ struct Haccer::Reader : Haccer {
     template <class C> void elem (C& v, C def) {
         if (hacc.value.form != ARRAY) return;
         if (elem_i < hacc.value.a.size()) {
-            Reader reader (hacc.get_elem(elem_i));
+            HaccTable* t = Haccable<C>::get_table();
+            if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+            Reader reader (t, hacc.get_elem(elem_i), (void*)&v);
             run_description(reader, v);
+            reader.finish();
         }
         else {
             v = def;
@@ -236,14 +281,20 @@ struct Haccer::Reader : Haccer {
 
     template <class C> void attr (String name, C& v) {
         if (hacc.value.form != OBJECT) return;
-        Reader reader (hacc.get_attr(name));
+        HaccTable* t = Haccable<C>::get_table();
+        if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+        Reader reader (t, hacc.get_attr(name), (void*)&v);
         run_description(reader, v);
+        reader.finish();
     }
     template <class C> void attr (String name, C& v, C def) {
         if (hacc.value.form != OBJECT) return;
         if (hacc.has_attr(name)) {
-            Reader reader (hacc.get_attr(name));
+            HaccTable* t = Haccable<C>::get_table();
+            if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+            Reader reader (t, hacc.get_attr(name), (void*)&v);
             run_description(reader, v);
+            reader.finish();
         }
         else {
             v = def;
@@ -255,9 +306,14 @@ struct Haccer::Finisher : Haccer {
     uint mode () { return FINISHING; }
     Finisher* finisher () { return this; }
 
+    HaccTable* table;
     const Hacc& hacc;
+    ID_Map& id_situation;
     uint elem_i = 0;
-    Finisher (const Hacc& hacc) : hacc(hacc) { }
+    Finisher (HaccTable* table, const Hacc& hacc, ID_Map& id_sitch) :
+        table(table), hacc(hacc), id_situation(id_sitch)
+    { }
+    void finish () { }
 
     void as_null () { }
     void as_bool (Bool& b) { }
@@ -265,11 +321,17 @@ struct Haccer::Finisher : Haccer {
     void as_float (Float& f) { }
     void as_double (Double& d) { }
     void as_string (String& s) { }
+    void as_ref (Ref& r) {
+         // TODO
+    }
 
     template <class C> void elem (C& v) {
         if (hacc.value.form != ARRAY) return;
-        Finisher finisher (hacc.get_elem(elem_i));
+        HaccTable* t = Haccable<C>::get_table();
+        if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+        Finisher finisher (t, hacc.get_elem(elem_i), id_situation);
         run_description(finisher, v);
+        finisher.finish();
         elem_i++;
     }
     template <class C> void elem (C& v, C def) { elem(v); }
@@ -278,8 +340,11 @@ struct Haccer::Finisher : Haccer {
 
     template <class C> void attr (String name, C& v) {
         if (hacc.value.form != OBJECT) return;
-        Finisher finisher (hacc.get_attr(name));
+        HaccTable* t = Haccable<C>::get_table();
+        if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+        Finisher finisher (t, hacc.get_attr(name), id_situation);
         run_description(finisher, v);
+        finisher.finish();
     }
     template <class C> void attr (String name, C& v, C def) { attr(name, v); }
 };

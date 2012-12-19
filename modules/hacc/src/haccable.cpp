@@ -54,13 +54,16 @@ namespace hacc {
 
 
     void g_update_from_hacc (HaccTable* t, void* p, const Hacc& h) {
-        Haccer::Validator validator (h);
+        ID_Map id_situation;
+        Haccer::Validator validator (t, h, id_situation);
         t->describe((void*)&validator, p);
         validator.finish();
-        Haccer::Reader reader (h);
+        Haccer::Reader reader (t,h, p);
         t->describe((void*)&reader, p);
-        Haccer::Finisher finisher (h);
+        reader.finish();
+        Haccer::Finisher finisher (t, h, id_situation);
         t->describe((void*)&finisher, p);
+        finisher.finish();
     }
 
 }
