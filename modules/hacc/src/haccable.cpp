@@ -61,6 +61,18 @@ namespace hacc {
         Haccer::Validator validator (t, h, id_situation);
         t->describe(validator, p);
         validator.finish();
+         // Fill out the ids that weren't declared in this hacc
+        for (auto iter = id_situation.begin(); iter != id_situation.end(); iter++) {
+            if (!iter->second) {
+                 // Split on \0
+                String type = String(iter->first.c_str());
+                String id = String(iter->first.c_str() + type.length() + 1);
+                HaccTable* t = HaccTable::by_hacctype(type);  // Guaranteed not null
+                void* addr = t->g_find_by_haccid(id);
+                if (!addr) throw Error("No " + type + " was found with id " + id + ".");
+                iter->second = addr;
+            }
+        }
         Haccer::Reader reader (t, h, id_situation, p);
         t->describe(reader, p);
         reader.finish();

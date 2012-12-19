@@ -132,7 +132,10 @@ struct Haccer::Validator : Haccer {
             if (type.empty()) throw Error("Sorry, types without hacctypes cannot currently have haccids either.");
             auto res = id_situation.emplace(table->get_hacctype() + String(1, '\0') + hacc.id, (void*)-1);
             if (!res.second) {
-                throw Error("Multiple declarations of id '" + hacc.id + "' for type '" + table->get_hacctype());
+                if (res.first->second) {
+                    throw Error("Multiple declarations of id '" + hacc.id + "' for type '" + table->get_hacctype());
+                }
+                res.first->second = (void*)-1;
             }
         }
     }
@@ -343,11 +346,11 @@ struct Haccer::Finisher : Haccer {
     void as_pointer (Pointer& p) {
         if (hacc.value.form != POINTER) return;
         auto iter = id_situation.find(hacc.value.p.type + String(1, '\0') + hacc.value.p.id);
-        if (iter != id_situation.end()) {
+        if (iter != id_situation.end() && (long)iter->second != (long)-1) {
             p.addr = iter->second;
         }
         else {
-            throw Error("Hmm, it seems that " + table->get_hacctype() + "'s description didn't provide the same Ref during both validate and finish phases.");
+            throw Error("Hmm, it seems that " + table->get_hacctype() + "'s description didn't provide the same Pointer during both validate and finish phases.");
         }
     }
 
