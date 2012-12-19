@@ -92,8 +92,10 @@ struct Haccer::Writer : Haccer {
     template <class C> void elem (C& v) {
         if (!picked) { hacc.value.set(Array()); picked = true; }
         if (hacc.value.form == ARRAY) {
+            HaccTable* t = Haccable<C>::get_table();
+            if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
             Writer w (Haccable<C>::get_table());
-            run_description(w, v);
+            t->describe(w, (void*)&v);
             hacc.add_elem(std::move(w.hacc));
         }
     }
@@ -102,8 +104,10 @@ struct Haccer::Writer : Haccer {
     template <class C> void attr (String name, C& v) {
         if (!picked) { hacc.value.set(Object()); picked = true; }
         if (hacc.value.form == OBJECT) {
+            HaccTable* t = Haccable<C>::get_table();
+            if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
             Writer w (Haccable<C>::get_table());
-            run_description(w, v);
+            t->describe(w, (void*)&v);
             hacc.add_attr(name, std::move(w.hacc));
         }
     }
@@ -164,7 +168,7 @@ struct Haccer::Validator : Haccer {
                 HaccTable* t = Haccable<C>::get_table();
                 if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
                 Validator va (t, hacc.get_elem(n_elems), id_situation);
-                run_description(va, v);
+                t->describe(va, (void*)&v);
                 va.finish();
                 n_elems++;
             }
@@ -180,7 +184,7 @@ struct Haccer::Validator : Haccer {
                 HaccTable* t = Haccable<C>::get_table();
                 if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
                 Validator va (t, hacc.get_elem(n_elems), id_situation);
-                run_description(va, v);
+                t->describe(va, (void*)&v);
                 va.finish();
             }
             n_elems++;
@@ -196,7 +200,7 @@ struct Haccer::Validator : Haccer {
             if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
             if (auto att = hacc.get_attr(name)) {
                 Validator va (t, hacc.get_attr(name), id_situation);
-                run_description(va, v);
+                t->describe(va, (void*)&v);
                 va.finish();
             }
             else {
@@ -212,7 +216,7 @@ struct Haccer::Validator : Haccer {
                 HaccTable* t = Haccable<C>::get_table();
                 if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
                 Validator va (t, hacc.get_attr(name), id_situation);
-                run_description(va, v);
+                t->describe(va, (void*)&v);
                 va.finish();
             }
         }
@@ -225,14 +229,20 @@ struct Haccer::Reader : Haccer {
 
     HaccTable* table;
     const Hacc& hacc;
+    ID_Map& id_situation;
     void* p;
     uint elem_i = 0;
-    Reader (HaccTable* table, const Hacc& hacc, void* p) : table(table), hacc(hacc), p(p) { }
+    Reader (HaccTable* table, const Hacc& hacc, ID_Map& id_sitch, void* p) :
+        table(table), hacc(hacc), id_situation(id_sitch), p(p)
+    { }
 
     void finish () {
 //        table->register(p);
   //      table->register_type(p, hacc.type);
     //    table->register_id(p, hacc.id);
+         // Using this form because we want to either create or overwrite.
+        if (!hacc.id.empty())
+            id_situation[hacc.id] = p;
     }
 
     void as_null () { }
@@ -261,7 +271,11 @@ struct Haccer::Reader : Haccer {
     template <class C> void elem (C& v) {
         if (hacc.value.form != ARRAY) return;
         if (elem_i < hacc.value.a.size()) {
-            run_description(Reader(hacc.get_elem(elem_i)), v);
+            HaccTable* t = Haccable<C>::get_table();
+            if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
+            Reader reader (t, hacc.get_elem(elem_i), id_situation, (void*)&v);
+            t->describe(reader, (void*)&v);
+            reader.finish();
         }
          // else something's fishy, but let's try not to leave the program
          // in an inconsistent state by throwing an exception.
@@ -272,8 +286,8 @@ struct Haccer::Reader : Haccer {
         if (elem_i < hacc.value.a.size()) {
             HaccTable* t = Haccable<C>::get_table();
             if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
-            Reader reader (t, hacc.get_elem(elem_i), (void*)&v);
-            run_description(reader, v);
+            Reader reader (t, hacc.get_elem(elem_i), id_situation, (void*)&v);
+            t->describe(reader, (void*)&v);
             reader.finish();
         }
         else {
@@ -288,8 +302,8 @@ struct Haccer::Reader : Haccer {
         if (hacc.value.form != OBJECT) return;
         HaccTable* t = Haccable<C>::get_table();
         if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
-        Reader reader (t, hacc.get_attr(name), (void*)&v);
-        run_description(reader, v);
+        Reader reader (t, hacc.get_attr(name), id_situation, (void*)&v);
+        t->describe(reader, (void*)&v);
         reader.finish();
     }
     template <class C> void attr (String name, C& v, C def) {
@@ -297,8 +311,8 @@ struct Haccer::Reader : Haccer {
         if (hacc.has_attr(name)) {
             HaccTable* t = Haccable<C>::get_table();
             if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
-            Reader reader (t, hacc.get_attr(name), (void*)&v);
-            run_description(reader, v);
+            Reader reader (t, hacc.get_attr(name), id_situation, (void*)&v);
+            t->describe(reader, (void*)&v);
             reader.finish();
         }
         else {
@@ -342,7 +356,7 @@ struct Haccer::Finisher : Haccer {
         HaccTable* t = Haccable<C>::get_table();
         if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
         Finisher finisher (t, hacc.get_elem(elem_i), id_situation);
-        run_description(finisher, v);
+        t->describe(finisher, (void*)&v);
         finisher.finish();
         elem_i++;
     }
@@ -355,7 +369,7 @@ struct Haccer::Finisher : Haccer {
         HaccTable* t = Haccable<C>::get_table();
         if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
         Finisher finisher (t, hacc.get_attr(name), id_situation);
-        run_description(finisher, v);
+        t->describe(finisher, (void*)&v);
         finisher.finish();
     }
     template <class C> void attr (String name, C& v, C def) { attr(name, v); }

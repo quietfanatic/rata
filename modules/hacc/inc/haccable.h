@@ -32,7 +32,7 @@ namespace hacc {
 struct HaccTable {
     const std::type_info& cpptype;
     virtual void info () = 0;
-    virtual void describe (void*, void*) = 0;
+    virtual void describe (Haccer&, void*) = 0;
     virtual String haccid (void*) = 0;
     virtual void* g_find_by_haccid (String) = 0;
 
@@ -91,7 +91,7 @@ template <class C, uint flags = 0> struct Haccability : HaccTable {
     virtual void describe (Haccer&, C&) {
         throw Error ("The Haccable for " + get_hacctype() + " has no describe.");
     }
-    void describe (void* h, void* it) { describe(*(Haccer*)h, *(C*)it); }
+    void describe (Haccer& h, void* it) { describe(h, *(C*)it); }
     virtual String haccid (const C& v) { return ""; }
     String haccid (void* p) { return haccid(*(const C*)p); }
     virtual C* find_by_haccid (String s) { return null; }
@@ -130,7 +130,7 @@ namespace hacc {
     void run_description (Haccer& h, C& it) {
         HaccTable* t = Haccable<C>::get_table();
         if (!t) throw Error("No Haccable was defined for type <mangled: " + String(typeid(C).name()) + ">.");
-        t->describe((void*)&h, (void*)&it);
+        t->describe(h, (void*)&it);
     }
 
     template <class C> Hacc to_hacc (const C& v) {
