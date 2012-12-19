@@ -84,8 +84,8 @@ String hacc_value_to_string (const Value& v) {
 }
 String hacc_to_string (const Hacc& h) {
     String r = hacc_value_to_string(h.value);
-    bool show_type = !h.type.empty();
-    bool show_id = !h.id.empty();
+    bool show_type = h.flags & ADVERTISE_TYPE;
+    bool show_id = h.flags & ADVERTISE_ID;
     if ((show_type || show_id)
      && h.value.form != ARRAY && h.value.form != OBJECT)
         r = "(" + r + ")";
@@ -310,12 +310,18 @@ struct Parser {
     }
 
     Hacc add_prefix (Hacc&& r, String type, String id) {
-        if (r.type.empty()) r.type = type;
-        else if (!type.empty())
-            throw error("Too many #types");
-        if (r.id.empty()) r.id = id;
-        else if (!id.empty())
-            throw error("Too many @ids");
+        if (!type.empty()) {
+            if (!r.type.empty())
+                throw error("Too many #types");
+            r.type = type;
+            r.flags |= ADVERTISE_TYPE;
+        }
+        if (!id.empty()) {
+            if (!r.id.empty())
+                throw error("Too many @ids");
+            r.id = id;
+            r.flags |= ADVERTISE_ID;
+        }
         return std::move(r);
     }
 
