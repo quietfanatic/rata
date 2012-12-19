@@ -322,7 +322,14 @@ struct Haccer::Finisher : Haccer {
     void as_double (Double& d) { }
     void as_string (String& s) { }
     void as_ref (Ref& r) {
-         // TODO
+        if (hacc.value.form != REF) return;
+        auto iter = id_situation.find(hacc.value.r.type + String(1, '\0') + hacc.value.r.id);
+        if (iter != id_situation.end()) {
+            r.p = iter->second;
+        }
+        else {
+            throw Error("Hmm, it seems that " + table->get_hacctype() + "'s description didn't provide the same Ref during both validate and finish phases.");
+        }
     }
 
     template <class C> void elem (C& v) {
