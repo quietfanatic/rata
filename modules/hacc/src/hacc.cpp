@@ -93,7 +93,6 @@ const String&  Hacc::get_string  () const { if (value.form == STRING) return val
 const Pointer& Hacc::get_pointer () const { if (value.form == POINTER) return value.p; else throw form_error("a pointer"); }
 const Array&   Hacc::get_array   () const { if (value.form == ARRAY) return value.a; else throw form_error("an array"); }
 const Object&  Hacc::get_object  () const { if (value.form == OBJECT) return value.o; else throw form_error("an object"); }
- // Phew!  So many lines for such simple concepts.
 
 Hacc& Hacc::get_elem (uint i) const {
     if (value.form != ARRAY) throw form_error("an array");

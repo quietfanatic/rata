@@ -74,6 +74,9 @@ struct Pointer {
     const std::type_info* cpptype;
     void* addr;
     bool operator== (Pointer o) const { return (cpptype && o.cpptype && *cpptype == *o.cpptype && addr == o.addr) || (type == o.type && id == o.id); }
+    Pointer (String type, String id, const std::type_info& cpptype, void* addr) :
+        type(type), id(id), cpptype(&cpptype), addr(addr)
+    { }
     template <class C>
     Pointer (String type, String id, C* addr) :
         type(type), id(id), cpptype(&typeid(C)), addr(addr)
