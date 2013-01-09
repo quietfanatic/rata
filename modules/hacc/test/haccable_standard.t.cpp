@@ -23,6 +23,13 @@ tap::Tester haccable_standard_tester ("haccable_standard", [](){
     TEST_STD(uint64, 12, integer);
     TEST_STD(float, 2.0, float);
     TEST_STD(double, -2.0, double);
-    TEST_STD(std::string, "asdf", string);
+    std::vector<int> v {1, 2, 3, 4, 5};
+    is(hacc_from(v).get_array()[2]->get_integer(), 3, "Hacc from std::vector seems to work");
+    Array a;
+    a.push_back(std::move(std::unique_ptr<Hacc>(new Hacc(3))));
+    a.push_back(std::move(std::unique_ptr<Hacc>(new Hacc(4))));
+    a.push_back(std::move(std::unique_ptr<Hacc>(new Hacc(5))));
+    Hacc h (std::move(a));
+    is(hacc_to<std::vector<int>>(h)[1], 4, "Hacc to std::vector seems to work");
 });
 
