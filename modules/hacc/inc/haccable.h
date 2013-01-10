@@ -11,50 +11,22 @@ typedef std::unordered_map<String, void*> ID_Map;
 
 namespace hacc {
 
- // Okay, the mechanics of how haccabilities get registered is a little difficult to follow.
-
- // A custom Haccable<C> should from Haccability<C>
- //  If it does, Haccability<C> is instantiated if Haccable<C> is instantiated.
- //  When Haccability<C> is instantiated, it registers a HaccTable under typeid(C).
- //  It sets its static variable table to that.  Haccable<C> inherits it.
- // The default Haccable<C> does not inherit from Haccability<C>.
- //  When instantiated, it (lazily) looks for a HaccTable registered under typeid(C).
- //  It sets its static variable table to that.
-
- // When you want to hacc a type, the haccing procedures will look for Haccable<C>::table.
- //  This will instantiate Haccable<C>, causing one of the above two scenarios to happen
- //   at init-time.
- //  In either case, Haccable<C> ends up with a ::table.
-
- // When you define a Haccable<C>, the behaviors you specify trickle down via virtual methods
- // through Haccability<C> to HaccTable.
-
 struct HaccTable {
     const std::type_info& cpptype;
+     // This defines a bunch of things.  Like, a lot.
     virtual void info () = 0;
-    virtual void describe (Haccer&, void*) = 0;
-    virtual String haccid (void*) = 0;
-    virtual void* g_find_by_haccid (String) = 0;
+     // Nullary allocator.
+    virtual void* g_allocate () = 0;
+     // Working with ids
+    virtual String get_id (void*) = 0;
+    virtual void* g_find_by_id (String) = 0;
+
+     // Update_from is the only internal way of reading from hacc
+    virtual void update_from_hacc (void*, Hacc) = 0;
+    virtual Hacc&& to_hacc (void*) = 0;
 
     bool infoized = false;
     void infoize ();
-
-    String _hacctype;
-    String get_hacctype ();
-    void hacctype (String s);
-
-    std::vector<HaccTable*> bases;
-    void base (HaccTable*);  // Adds a base.
-    bool has_base (HaccTable* b);
-    
-    uint32 _flags = 0;
-    uint32 get_flags ();
-    enum {
-        ADVERTISE_ID,
-        ADVERTISE_TYPE,
-    };
-    void advertise_id ();
-    void advertise_type ();
 
      // This calls new_from_hacc.
     void* manifest ();
@@ -89,14 +61,22 @@ template <class C> struct Haccable {
 namespace hacc {
 
 template <class C, uint flags = 0> struct Haccability : HaccTable {
-    virtual void info () { }
-    virtual void describe (Haccer&, C&) {
-        throw Error ("The Haccable for " + get_hacctype() + " has no describe.");
-    }
-    void describe (Haccer& h, void* it) { describe(h, *(C*)it); }
-    virtual String haccid (const C& v) { return ""; }
-    String haccid (void* p) { return haccid(*(const C*)p); }
-    virtual C* find_by_haccid (String s) { return null; }
+     // Okay, here are a bunch of function pointer thingies.
+    GetSet<C> id;  // The inner type must be string.
+     // Leave it to something else.
+     // If the inner type of this is Hacc, it defines a direct transition.
+    GetSet<C> delegate;
+     // Defined by attributes with names
+    Map<GetSet<C>> attrs;
+     // Defined by a fixed number of elements
+    VArray<GetSet<C>> elems;
+     // Variants with names specific to this interface
+     // Note that this will only be used if following a pointer.
+    Map<GetSet<C>> variants;
+    
+     // Implement all the 
+    virtual void info () = 0;
+    String get_id (void* p) { return id.; }
     void* g_find_by_haccid (String s) { return (void*)find_by_haccid(s); }
 
     template <class B> void base () {

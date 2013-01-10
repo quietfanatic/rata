@@ -24,7 +24,8 @@ HCB_BEGIN(Game_State) {
         if (Haccer::Validator v = h.validator()) {
             auto a = v->hacc.get_array();
             for (auto iter = a.begin(); iter != a.end(); iter++) {
-                elem
+                Str name;
+                elem(name);
             }
         }
     }
