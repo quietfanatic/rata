@@ -78,10 +78,12 @@ template <class C> struct Haccable {
 #define HCB_UNQ2(a, b) a##b
 #define HCB_UNQ1(a, b) HCB_UNQ2(a, b)
 #define HCB_INSTANCE(type) static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::table;
-#define HCB_BEGIN(type) template <> struct Haccable<type> : hacc::Haccability<type>
+#define HCB_W_BASE(type, base) template <> struct Haccable<type> : base
+#define HCB_BEGIN(type) HCB_W_BASE(type, hacc::Haccability<type>)
 #define HCB_END(type) ; HCB_INSTANCE(type)
 #define HCB_PARAMS(...) __VA_ARGS__
-#define HCB_TEMPLATE_BEGIN(params, type) template params struct Haccable<type> : hacc::Haccability<type>
+#define HCB_TEMPLATE_W_BASE(params, type, base) template params struct Haccable<type> : base
+#define HCB_TEMPLATE_BEGIN(params, type) HCB_TEMPLATE_W_BASE(params, type, hacc::Haccability<type>)
 #define HCB_TEMPLATE_END(params, type) ;  // Reserved in case we need to do some magic static-var wrangling
 
 namespace hacc {
