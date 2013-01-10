@@ -15,7 +15,20 @@ struct Stateful : Linkable<Stateful> {
     virtual ~Stateful (); // Gotta be polymorphic.
 };
 
-extern INIT_SAFE(Hash<const type_id*>, stateful_types);
+struct Stateful_Type_info {
+    const std::type_info& cpptype;
+    Stateful* (* allocate )();
+};
+
+extern INIT_SAFE(Hash<Stateful_Type_Info>, stateful_types);
+
+template <class C>
+Stateful* allocate_to_stateful () { return new C; }
+
+template <class C>
+struct Stateful_Type {
+    Stateful_Type (Str name) { stateful_types.emplace(name, Stateful_Type_Info{typeid(C), allocate_to_stateful<C>}); }
+};
 
 
 HCB_BEGIN(Game_State) {
