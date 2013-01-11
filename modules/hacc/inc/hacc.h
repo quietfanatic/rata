@@ -22,6 +22,7 @@ typedef int32_t int32;
 typedef uint32_t uint32;
 typedef int64_t int64;
 typedef uint64_t uint64;
+#include <functional>
 #include <vector>
 #include <string>
 
@@ -82,6 +83,7 @@ typedef VArray<const Hacc*> Array;
 template <class T> using Map = std::vector<std::pair<String, T>>;
 typedef Map<const Hacc*> Object;
 
+template <class T> using Func = std::function<T>;
 
 struct Hacc {
     hacc::String id;
@@ -180,6 +182,17 @@ HACC_NEW_DECL_MOVE(Object, o, Object)
 HACC_NEW_DECL(std::initializer_list<const Hacc*>, l, Array)
 static inline const Hacc* new_hacc (std::initializer_list<std::pair<std::basic_string<char>, const Hacc*>> l) { return new const Hacc::Object(l); }
 
+}
+
+ // Here's a utility that's frequently used with hacc.
+namespace {
+     // Auto-deallocate a pointer if an exception happens.
+    struct Bomb {
+        const hacc::Func<void ()>* detonate;
+        Bomb (const hacc::Func<void ()>& d) :detonate(&d) { }
+        ~Bomb () { if (detonate) (*detonate)(); }
+        void defuse () { detonate = NULL; }
+    };
 }
 
 #endif

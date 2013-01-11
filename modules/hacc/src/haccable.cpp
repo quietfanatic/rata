@@ -3,17 +3,6 @@
 
 
 #define INIT_SAFE(name, ...) static __VA_ARGS__& name () { static __VA_ARGS__ r; return r; }
-
-namespace {
-     // Auto-deallocate a pointer if an exception happens.
-    struct Bomb {
-        const Func<void ()>* detonate;
-        Bomb (const Func<void ()>& d) :detonate(&d) { }
-        ~Bomb () { if (detonate) (*detonate)(); }
-        void defuse () { detonate = NULL; }
-    };
-}
-
 namespace hacc {
 
     // Hahaha, deleting 150 lines of code is so satisfying.

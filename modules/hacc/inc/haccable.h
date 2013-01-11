@@ -160,15 +160,15 @@ template <class C> C* find_by_id (String id) {
 #define HCB_END(type) } }; HCB_INSTANCE(type)
 #define HCB_PARAMS(...) __VA_ARGS__
 #define HCB_TEMPLATE_BEGIN(params, type) template params struct Haccable<type> : hacc::Haccability<type> { \
-    using Haccability<type>::allocate; \
-    using Haccability<type>::get_id; \
-    using Haccability<type>::find_by_id; \
-    using Haccability<type>::to; \
-    using Haccability<type>::update_from; \
-    using Haccability<type>::delegate; \
-    using Haccability<type>::attr; \
-    using Haccability<type>::elem; \
-    using Haccability<type>::variant; \
+    using hacc::Haccability<type>::allocate; \
+    using hacc::Haccability<type>::get_id; \
+    using hacc::Haccability<type>::find_by_id; \
+    using hacc::Haccability<type>::to; \
+    using hacc::Haccability<type>::update_from; \
+    using hacc::Haccability<type>::delegate; \
+    using hacc::Haccability<type>::attr; \
+    using hacc::Haccability<type>::elem; \
+    using hacc::Haccability<type>::variant; \
     static void describe () {
 #define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
 
