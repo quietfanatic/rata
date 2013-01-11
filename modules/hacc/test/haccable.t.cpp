@@ -69,7 +69,7 @@ MyWrapper<int> wi {0};
 tap::Tester haccable_tester ("haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(11);
+    plan(13);
     is(hacc_from((int)4)->get_integer(), 4, "hacc_from<int> works");
     is(hacc_to<int>(new_hacc(35)), 35, "hacc_to<int> works");
     doesnt_throw([](){ wi = from_hacc<MyWrapper<int>>(new_hacc(34)); }, "from_hacc on a template haccable");
@@ -78,6 +78,8 @@ tap::Tester haccable_tester ("haccable", [](){
     is(wi.val, 52, "...and it works");
     is(from_hacc<Vectorly>(new_hacc({new_hacc(34.0), new_hacc(52.0)})), Vectorly{34.0, 52.0}, "Vectorly accepts Array");
     is(from_hacc<Vectorly>(new_hacc({std::pair<String, const Hacc*>("x", new_hacc(32.0)), std::pair<String, const Hacc*>("y", new_hacc(54.0))})), Vectorly{32.0, 54.0}, "Vectorly accepts Object");
+    is(to_hacc(Vectorly{2.0, 4.0})->form(), OBJECT, "Vectorly turns into Object by default");
+    is(to_hacc(Vectorly{2.0, 4.0})->as_object()->attr("y")->as_float()->f, 4.f, "Vectorly Object has atribute 'y'");
     is(get_id(vy1), String("vy1"), "get_id");
     is(get_id(vy2), String("vy2"), "get_id");
     is(find_by_id<Vectorly>("vy1"), &vy1, "find_by_id");
