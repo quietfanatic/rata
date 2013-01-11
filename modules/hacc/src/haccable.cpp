@@ -9,7 +9,6 @@ namespace hacc {
     // Hahaha, deleting 150 lines of code is so satisfying.
 
     INIT_SAFE(cpptype_map, std::unordered_map<const std::type_info*, HaccTable*>)
-    INIT_SAFE(hacctype_map, std::unordered_map<String, HaccTable*>)
 
     HaccTable* HaccTable::by_cpptype (const std::type_info& t) {
         auto iter = cpptype_map().find(&t);
@@ -17,68 +16,58 @@ namespace hacc {
             ? iter->second
             : null;
     }
-
-    HaccTable* HaccTable::by_hacctype (String s) {
-        auto iter = hacctype_map().find(s);
-        return iter != hacctype_map().end()
-            ? iter->second
-            : null;
+    HaccTable* HaccTable::require_cpptype (const std::type_info& t) {
+        auto r = by_cpptype(t);
+        if (!r) throw Error("Unhaccable type <mangled: " + String(t.name()) + ">");
+        return r;
     }
 
     HaccTable::HaccTable (const std::type_info& t) : cpptype(t) {
         cpptype_map().emplace(&t, this);
     }
 
-    void HaccTable::infoize () { if (infoized) return; info(); infoized = true; }
-    String HaccTable::get_hacctype () {
-        infoize();
-        return _hacctype.empty() ? "<mangled: " + String(cpptype.name()) + ">" : _hacctype;
-    }
-    void HaccTable::hacctype (String ht) {
-        if (_hacctype.empty()) _hacctype = ht;
-        hacctype_map().emplace(ht, this);
-    }
-
-    void HaccTable::base (HaccTable* b) {
-        bases.push_back(b);
-    }
-    bool HaccTable::has_base (HaccTable* b) {
-        infoize();
-        if (b == this) return true;
-        for (auto i = bases.begin(); i != bases.end(); i++) {
-            if ((*i)->has_base(b)) return true;
+    const Hacc* HaccTable::to_hacc (void* p) {
+        if (to_hacc) { to_hacc(p); }
+         // TODO: Like an object first
+         // TODO: Like an array next
+         // TODO: Then like a polymorphic thing
+         // Plain delegation last.
+        else if (delegate.mtype) {
+            HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
+            const Hacc* r;
+            delegate.get(p, [t, &r](void* mp){ r = t->to_hacc(mp); });
+            return r;
         }
-        return false;
+        else throw Error("Haccability description for <mangled: " + String(cpptype.name()) + "did not provide any way to turn into a hacc.");
     }
-    uint32 HaccTable::get_flags () { infoize(); return _flags; }
-    void HaccTable::advertise_id () { _flags |= ADVERTISE_ID; }
-    void HaccTable::advertise_type () { _flags |= ADVERTISE_TYPE; }
 
-
-
-    void g_update_from_hacc (HaccTable* t, void* p, const Hacc& h) {
-        ID_Map id_situation;
-        Haccer::Validator validator (t, h, id_situation);
-        t->describe(validator, p);
-        validator.finish();
-         // Fill out the ids that weren't declared in this hacc
-        for (auto iter = id_situation.begin(); iter != id_situation.end(); iter++) {
-            if (!iter->second) {
-                 // Split on \0
-                String type = String(iter->first.c_str());
-                String id = String(iter->first.c_str() + type.length() + 1);
-                HaccTable* t = HaccTable::by_hacctype(type);  // Guaranteed not null
-                void* addr = t->g_find_by_haccid(id);
-                if (!addr) throw Error("No " + type + " was found with id " + id + ".");
-                iter->second = addr;
-            }
+    void HaccTable::update_from_hacc (void* p, const Hacc* h) {
+        if (update_from_hacc) { update_from_hacc(p, h); }
+         // TODO: Like an object first
+         // TODO: Like an array next
+         // TODO: Then like a polymorphic thing
+         // Plain delegation last.
+        else if (delegate.mtype) {
+            HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
+            delegate.set(p, [t, h](void* mp){ t->update_from_hacc(mp, h); });
         }
-        Haccer::Reader reader (t, h, id_situation, p);
-        t->describe(reader, p);
-        reader.finish();
-        Haccer::Finisher finisher (t, h, id_situation);
-        t->describe(finisher, p);
-        finisher.finish();
+        else throw Error("Haccability description for <mangled: " + String(cpptype.name()) + "did not provide any way to update from hacc.");
+    }
+
+     // Auto-deallocate a pointer if an exception happens.
+    namespace { struct Bomb {
+        const Func<void ()>* detonate;
+        Bomb (const Func<void ()>& d) :detonate(&d) { }
+        ~Bomb () { if (detonate) (*detonate)(); }
+        void defuse () { detonate = null; }
+    }; }
+
+    void* HaccTable::new_from_hacc (const Hacc* h) {
+        void* r = allocate();
+        Bomb b ([this, r](){ deallocate(r); });
+        update_from_hacc(r, h);
+        b.defuse();
+        return r;
     }
 
 }

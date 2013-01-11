@@ -60,7 +60,7 @@ const Hacc* Hacc::Object::attr (hacc::String name) const {
     throw Error("No atttribute '" + name + "'");
 }
 
-#define HACC_AS_IMPL(type, name, theform) const Hacc::type* Hacc::as_##name () const { if (form() == hacc::theform) throw form_error(#name); return static_cast<const Hacc::type*>(this); }
+#define HACC_AS_IMPL(type, name, theform) const Hacc::type* Hacc::as_##name () const { if (form() != hacc::theform) throw form_error(#name); return static_cast<const Hacc::type*>(this); }
 #define HACC_GETTER_IMPL(type, name, letter) const hacc::type& Hacc::get_##name () const { return as_##name()->letter; }
 #define HACC_GETTER_R_IMPL(type, name, letter) hacc::type Hacc::get_##name () const { return as_##name()->letter; }
 HACC_AS_IMPL(Null, null, NULLFORM)

@@ -77,12 +77,10 @@ struct Ref {
     template <class C>
     Ref (C* addr) : id(""), addr(addr) { }
 };
-typedef std::vector<const Hacc*> Array;
-typedef std::vector<std::pair<String, const Hacc*>> Object;
-
-enum Flags {
-    ADVERTISE_ID = 1,
-};
+template <class T> using VArray = std::vector<T>;
+typedef VArray<const Hacc*> Array;
+template <class T> using Map = std::vector<std::pair<String, T>>;
+typedef Map<const Hacc*> Object;
 
 
 struct Hacc {
