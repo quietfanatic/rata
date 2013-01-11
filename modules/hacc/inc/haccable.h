@@ -18,8 +18,8 @@ struct HaccTable {
      // Pretty much no reason to override this.  It calls delete by default.
     Func<void (void*)> deallocate;
      // ID manipulation turns out to be important.
-    Func<String (void*)> get_id;
-    Func<void* (String)> find_by_id;
+    Func<String (void*)> get_id_p;
+    Func<void* (String)> find_by_id_p;
      // Leave haccification to something else.
      // If the inner type of this is const Hacc*, it defines a direct transition.
     GetSet delegate;
@@ -38,6 +38,9 @@ struct HaccTable {
     const Hacc* to_hacc (void*);
     void update_from_hacc (void*, const Hacc*);
     void* new_from_hacc (const Hacc* h);
+    String get_id (void*);
+    void* find_by_id (String);
+    void* require_id (String);
 
      // Shortcut for allocate and update_from_hacc.
     void* manifest ();
@@ -89,8 +92,8 @@ template <class C, uint flags = 0> struct Haccability {
      // Alright, here's the DSL for when you're defining haccabilities.
     static void allocate (const Func<C* ()>& f) { get_table()->allocate = *(Func<void* ()>*)&f; }
     static void deallocate (const Func<void (C*)>& f) { get_table()->deallocate = *(Func<void* ()>*)&f; }
-    static void get_id (const Func<String (const C&)>& f) { get_table()->get_id = *(Func<String (void*)>*)&f; }
-    static void find_by_id (const Func<C* (String)>& f) { get_table()->find_by_id = *(Func<void* (String)>*)&f; }
+    static void get_id (const Func<String (const C&)>& f) { get_table()->get_id_p = *(Func<String (void*)>*)&f; }
+    static void find_by_id (const Func<C* (String)>& f) { get_table()->find_by_id_p = *(Func<void* (String)>*)&f; }
     static void to (const Func<const Hacc* (const C&)>& f) { get_table()->to = *(Func<const Hacc* (void*)>*)&f; }
     static void update_from (const Func<void (C&, const Hacc*)>& f) { get_table()->update_from = *(Func<void (void*, const Hacc*)>*)&f; }
     static void delegate (const GetSet& gs) { get_table()->delegate = gs; }
@@ -147,17 +150,21 @@ template <class C> String get_id (const C& v) {
 template <class C> C* find_by_id (String id) {
     return (C*)require_hacctable<C>()->find_by_id(id);
 }
+template <class C> C* require_id (String id) {
+    return (C*)require_hacctable<C>()->require_id(id);
+}
 
 }
 
  // I guess we need to use some macros after all.
  // These are for convenience in defining haccabilities.  The non-template version also forces
  //  instantiation of the haccability just defined.
+#define HCB_COMMA ,
 #define HCB_UNQ2(a, b) a##b
 #define HCB_UNQ1(a, b) HCB_UNQ2(a, b)
 #define HCB_INSTANCE(type) static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::table;
 #define HCB_BEGIN(type) template <> struct Haccable<type> : hacc::Haccability<type> { static void describe () {
-#define HCB_END(type) } }; HCB_INSTANCE(type)
+#define HCB_END(type) } }; static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::table;
 #define HCB_PARAMS(...) __VA_ARGS__
 #define HCB_TEMPLATE_BEGIN(params, type) template params struct Haccable<type> : hacc::Haccability<type> { \
     using hacc::Haccability<type>::allocate; \

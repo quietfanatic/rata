@@ -5,9 +5,9 @@
 #define INIT_SAFE(name, ...) static __VA_ARGS__& name () { static __VA_ARGS__ r; return r; }
 namespace hacc {
 
-    // Hahaha, deleting 150 lines of code is so satisfying.
-
     INIT_SAFE(cpptype_map, std::unordered_map<const std::type_info*, HaccTable*>)
+     // This is used to wrangle IDs into pointers when processing haccs.
+    std::unordered_map<std::string, void*>* id_map = null;
 
     HaccTable* HaccTable::by_cpptype (const std::type_info& t) {
         auto iter = cpptype_map().find(&t);
@@ -121,6 +121,18 @@ namespace hacc {
         Bomb b ([this, r](){ deallocate(r); });
         update_from_hacc(r, h);
         b.defuse();
+        return r;
+    }
+
+    String HaccTable::get_id (void* p) {
+        return get_id_p ? get_id_p(p) : "";
+    }
+    void* HaccTable::find_by_id (String s) {
+        return find_by_id_p ? find_by_id_p(s) : NULL;
+    }
+    void* HaccTable::require_id (String s) {
+        void* r = find_by_id(s);
+        if (!r) throw Error("No <mangled: " + String(cpptype.name()) + "> was found with id '" + s + "'.");
         return r;
     }
 

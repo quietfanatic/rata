@@ -1,8 +1,7 @@
 #ifndef HAVE_HACC_EVERYTHING_H
 #define HAVE_HACC_EVERYTHING_H
 
-#include "hacc.h"
-#include "strings.h"
-#include "haccable.h"
+ // Currently this is all we need.
+#include "haccable_integration.h"
 
 #endif
