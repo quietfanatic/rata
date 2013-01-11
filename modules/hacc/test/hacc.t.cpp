@@ -4,21 +4,26 @@
 tap::Tester hacc_tester ("hacc", [](){
     using namespace hacc;
     using namespace tap;
-    plan(14);
-    is(Hacc(null).get_null(), null, "null roundtrip");
-    is(Hacc(true).get_bool(), true, "true roundtrip");
-    is(Hacc(false).get_bool(), false, "false roundtrip");
-    is(Hacc(45).get_integer(), 45, "integer roundtrip");
-    is(Hacc(-45).get_integer(), -45, "negative integer roundtrip");
-    is(Hacc(32.f).get_float(), 32.f, "float roundtrip");
-    is(Hacc(32.F).get_double(), 32.F, "double roundtrip");
-    is(Hacc(32.f).get_double(), 32.F, "float -> double");
-    is(Hacc(32.F).get_float(), 32.f, "double -> float");
-    is(Hacc(32).get_float(), 32.f, "integer -> float");
-    is(Hacc(32).get_double(), 32.F, "integer -> double");
-    is(Hacc(String("hello")).get_string(), std::string("hello"), "string roundtrip");
-    is(Hacc(Pointer("type", "id", (void*)null)).get_pointer(), Pointer("type", "id", (void*)null), "pointer roundtrip");
-    is(Hacc(Array()).get_array(), Array(), "Empty array roundtrip");
+    plan(18);
+    is(Hacc::Null().n, null, "null roundtrip");
+    is(Hacc::Bool(true).b, true, "true roundtrip");
+    is(Hacc::Bool(false).b, false, "false roundtrip");
+    is(Hacc::Integer(45).i, 45, "integer roundtrip");
+    is(Hacc::Integer(-45).i, -45, "negative integer roundtrip");
+    is(Hacc::Float(32.f).f, 32.f, "float roundtrip");
+    is(Hacc::Double(32.F).d, 32.F, "double roundtrip");
+    is(Hacc::String(String("hello")).s, std::string("hello"), "string roundtrip");
+    is(Hacc::Ref(Ref("id", (void*)null)).r, Ref("id", (void*)null), "reference roundtrip");
+    is(Hacc::Array(Array()).a, Array(), "Empty array roundtrip");
+    is(Hacc::Array{}.a, Array(), "Empty array roundtrip w/ initializer_list");
+    initializer_list<const Hacc*> testlist = {new_hacc(3), new_hacc(4.f)};
+    is(Hacc::Array(testlist).a, Array(testlist), "Full array roundtrip w/ initializer_list");
+    is(Hacc::Array{new_hacc(4)}.elem(0)->form(), INTEGER, "Hacc::Array::elem appears to work");
+    is(Hacc::Array{new_hacc(4)}.n_elems(), (size_t)1, "Hacc::Array::n_elems appears to work");
+    is(Hacc::Object{{String("asdf"), new_hacc(4)}}.n_attrs(), (size_t)1, "Hacc::Object::n_attrs appears to work");
+    is(Hacc::Object{{String("asdf"), new_hacc(4)}}.name_at(0), String("asdf"), "Hacc::Object::name_at appears to work");
+    is(Hacc::Object{{String("asdf"), new_hacc(4)}}.value_at(0)->form(), INTEGER, "Hacc::Object::value_at appears to work");
+    is(Hacc::Object{{String("asdf"), new_hacc(4)}}.attr("asdf")->form(), INTEGER, "Hacc::Object::attr appears to work");
 });
 
 

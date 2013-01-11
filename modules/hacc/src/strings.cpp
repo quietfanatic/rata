@@ -32,68 +32,68 @@ String escape_ident (const String& unesc) {
     }
     return unesc;
 }
+String escape_id (const String& unesc) {
+    String r = escape_ident(unesc);
+    if (r[0] == '"') r = "&" + r;
+    return r;
+}
 
 
-String hacc_value_to_string (const Value& v) {
-    switch (v.form) {
+String hacc_value_to_string (const Hacc* h) {
+    switch (h->form()) {
         case NULLFORM: return "null";
-        case BOOL: return v.b ? "true" : "false";
+        case BOOL: return static_cast<const Hacc::Bool*>(h)->b ? "true" : "false";
         case INTEGER: {
             char r[32];
-            sprintf(r, "%" PRIi64, v.i);
+            sprintf(r, "%" PRIi64, static_cast<const Hacc::Integer*>(h)->i);
             return r;
         }
         case FLOAT: {
+            auto fh = static_cast<const Hacc::Float*>(h);
             char r[32];
-            sprintf(r, "%g~%08x", v.f, *(uint32*)&v.f);
+            sprintf(r, "%g~%08x", fh->f, *(uint32*)&fh->f);
             return r;
         }
         case DOUBLE: {
             char r [64];
-            sprintf(r, "%lg~%016" PRIx64, v.d, *(uint64*)&v.d);
+            auto dh = static_cast<const Hacc::Double*>(h);
+            sprintf(r, "%lg~%016" PRIx64, dh->d, *(uint64*)&dh->d);
             return r;
         }
-        case STRING: return "\"" + escape_string(v.s) + "\"";
-        case POINTER: {
-            return (v.p.type.empty() ? "&" : "&#" + escape_ident(v.p.type))
-                 + "@" + escape_ident(v.p.id);
-        }
+        case STRING: return "\"" + escape_string(static_cast<const Hacc::String*>(h)->s) + "\"";
+        case REF: return escape_id(static_cast<const Hacc::Ref*>(h)->r.id);
         case ARRAY: {
             String r = "[";
-            for (auto i = v.a.begin(); i != v.a.end(); i++) {
-                r += hacc_to_string(**i);
-                if (i + 1 != v.a.end()) r += ", ";
+            auto& a = static_cast<const Hacc::Array*>(h)->a;
+            for (auto i = a.begin(); i != a.end(); i++) {
+                r += hacc_to_string(*i);
+                if (i + 1 != a.end()) r += ", ";
             }
             return r + "]";
         }
         case OBJECT: {
             String r = "{";
-            auto nexti = v.o.begin();
-            for (auto i = nexti; i != v.o.end(); i = nexti) {
+            auto& o = static_cast<const Hacc::Object*>(h)->o;
+            auto nexti = o.begin();
+            for (auto i = nexti; i != o.end(); i = nexti) {
                 r += escape_ident(i->first);
                 r += ": ";
-                r += hacc_to_string(*i->second);
+                r += hacc_to_string(i->second);
                 nexti++;
-                if (nexti != v.o.end()) r += ", ";
+                if (nexti != o.end()) r += ", ";
             }
             return r + "}";
         }
-        case ERROR: throw v.e;
+        case ERROR: throw static_cast<const Hacc::Error*>(h)->e;
         default: throw Error("Corrupted Hacc tree\n");
     }
 }
-String hacc_to_string (const Hacc& h) {
-    String r = hacc_value_to_string(h.value);
-    bool show_type = h.flags & ADVERTISE_TYPE;
-    bool show_id = h.flags & ADVERTISE_ID;
-    if ((show_type || show_id)
-     && h.value.form != ARRAY && h.value.form != OBJECT)
-        r = "(" + r + ")";
-    if (show_id) r = "@" + escape_ident(h.id) + r;
-    if (show_type) r = "#" + escape_ident(h.type) + r;
+String hacc_to_string (const Hacc* h) {
+    String r = hacc_value_to_string(h);
+    if (!h->id.empty()) r = escape_id(h->id) + " = " + r;
     return r;
 }
-String string_from_hacc (const Hacc& h) {
+String string_from_hacc (const Hacc* h) {
     return hacc_to_string(h);
 }
 
@@ -196,45 +196,41 @@ struct Parser {
             }
         }
     }
-    String parse_type () {
-        p++;  // For the #
-        return parse_ident("a type after #");
-    }
     String parse_id () {
-        p++;  // For the @
-        return parse_ident("an id after @");
+        p++;  // For the &
+        return parse_ident("an identifier after &");
     }
 
      // Parsing of specific valtypes.
      // This one could return an int, float, or double.
-    Hacc parse_numeric () {
+    const Hacc* parse_numeric (String id) {
         int64 val;
         uint len;
         if (!sscanf(safebuf(), "%" SCNi64 "%n", &val, &len))
             throw error("Weird number");
         p += len;
         switch (look()) {
-            case '~': return parse_bitrep();
+            case '~': return parse_bitrep(id);
             case '.':
             case 'e':
             case 'E':
             case 'p':  // backtrack!
-            case 'P': p -= len; return parse_floating();
-            default: return Hacc(val);
+            case 'P': p -= len; return parse_floating(id);
+            default: return new_hacc(val, id);
         }
     }
-    Hacc parse_floating () {
+    const Hacc* parse_floating (String id) {
         double val;
         uint len;
         if (!sscanf(safebuf(), "%lg%n", &val, &len))
             throw error("Weird number");
         p += len;
         switch (look()) {
-            case '~': return parse_bitrep();
-            default: return Hacc(val);
+            case '~': return parse_bitrep(id);
+            default: return new_hacc(val, id);
         }
     }
-    Hacc parse_bitrep () {
+    const Hacc* parse_bitrep (String id) {
         p++;  // for the ~
         uint64 rep;
         uint len;
@@ -242,25 +238,23 @@ struct Parser {
             throw error("Missing precise bitrep after ~");
         p += len;
         switch (len) {
-            case  8: return std::move(Hacc(*(float*)&rep));
-            case 16: return std::move(Hacc(*(double*)&rep));
+            case  8: return new_hacc(*(float*)&rep, id);
+            case 16: return new_hacc(*(double*)&rep, id);
             default: throw error("Precise bitrep doesn't have 8 or 16 digits");
         }
     }
-    Hacc parse_string () {
-        return Hacc(parse_stringly());
+    const Hacc* parse_string (String id) {
+        return new_hacc(parse_stringly(), id);
     }
-    Hacc parse_pointer () {
-        String type;
-        String id;
-        p++;  // For the &
-        if (look() == '#') type = parse_type();
-        if (look() == '@') id = parse_id();
-        else throw error("Ref is missing an @id");
-        return Hacc(Pointer(type, id));
-    }
-    Hacc parse_array () {
+    struct ArrayBomb {
+        Array* a;
+        ArrayBomb (Array* a) : a(a) { }
+        void defuse () { a = null; }
+        ~ArrayBomb () { if (a) for (auto p : *a) delete p; }
+    };
+    const Hacc* parse_array (String id) {
         Array a;
+        ArrayBomb ab (&a);
         p++;  // for the [
         for (;;) {
             parse_ws();
@@ -268,23 +262,35 @@ struct Parser {
                 case EOF: throw error("Array not terminated");
                 case ':': throw error("Cannot have : in an array");
                 case ',': p++; break;
-                case ']': p++; return Hacc(std::move(a));
-                default: a.push_back(std::unique_ptr<Hacc>(new Hacc(parse_thing()))); break;
+                case ']': p++; {
+                    ab.defuse();
+                    return new_hacc(std::move(a), id);
+                }
+                default: a.push_back(parse_thing(id)); break;
             }
         }
     }
-    Hacc parse_object () {
+    struct ObjectBomb {
+        Object* o;
+        ObjectBomb (Object* o) : o(o) { }
+        void defuse () { o = null; }
+        ~ObjectBomb () { if (o) for (auto& p : *o) delete p.second; }
+    };
+    const Hacc* parse_object (String id) {
         Object o;
+        ObjectBomb ob (&o);
         p++;  // for the left brace
         String key;
         for (;;) {
-          find_key:
             parse_ws();
             switch (look()) {
                 case EOF: throw error("Object not terminated");
                 case ':': throw error("Missing name before : in object");
-                case ',': p++; goto find_key;
-                case '}': p++; return Hacc(std::move(o));
+                case ',': p++; continue;
+                case '}': p++; {
+                    ob.defuse();
+                    return new_hacc(std::move(o), id);
+                }
                 default: key = parse_ident("an attribute name or the end of the object"); break;
             }
             parse_ws();
@@ -296,40 +302,36 @@ struct Parser {
                 case ':': throw error("Extra : in object");
                 case ',': throw error("Misplaced comma after : in object");
                 case '}': throw error("Missing value after : in object");
-                default: o.push_back(Pair<std::unique_ptr<Hacc>>(key, std::unique_ptr<Hacc>(new Hacc(parse_thing())))); break;
+                default: o.push_back(std::pair<String, const Hacc*>(key, parse_thing(id))); break;
             }
         }
     }
-    Hacc parse_parens () {
+    const Hacc* parse_parens (String id) {
         p++;  // for the (
-        Hacc&& r = parse_thing();
+        const Hacc* r = parse_thing(id);
         parse_ws();
         if (look() == ')') p++;
-        else throw error("Extra stuff in parens");
-        return std::move(r);
-    }
-
-    Hacc add_prefix (Hacc&& r, String type, String id) {
-        if (!type.empty()) {
-            if (!r.type.empty())
-                throw error("Too many #types");
-            r.type = type;
-            r.flags |= ADVERTISE_TYPE;
+        else {
+            delete r;
+            throw error("Extra stuff in parens");
         }
-        if (!id.empty()) {
-            if (!r.id.empty())
-                throw error("Too many @ids");
-            r.id = id;
-            r.flags |= ADVERTISE_ID;
-        }
-        return std::move(r);
+        return r;
     }
-
-    Hacc parse_thing () {
+    const Hacc* parse_id_or_ref (String id) {
+        String gotid = look() == '&' ? parse_id() : parse_ident("An ID of some sort (this shouldn't happen)");
         parse_ws();
-        String type = "";
-        String id = "";
-        for (;;) switch (look()) {
+        if (look() == '=') {
+            p++;
+            return id.empty()
+                ? parse_thing(gotid)
+                : throw error("Too many IDs were assigned");
+        }
+        else return new_hacc(Ref(gotid), id);
+    }
+
+    const Hacc* parse_thing (String id) {
+        parse_ws();
+        for (;;) switch (char next = look()) {
             case '+':
             case '-':
             case '0':
@@ -341,55 +343,64 @@ struct Parser {
             case '6':
             case '7':
             case '8':
-            case '9': return add_prefix(parse_numeric(), type, id);
-            case '~': return add_prefix(parse_bitrep(), type, id);
-            case '"': return add_prefix(parse_string(), type, id);
-            case '[': return add_prefix(parse_array(), type, id);
-            case '{': return add_prefix(parse_object(), type, id);
-            case '(': return add_prefix(parse_parens(), type, id);
-            case '&': return add_prefix(parse_pointer(), type, id);
-            case '#':
-                if (type.empty()) type = parse_type();
-                else throw error("Too many #classes");
-                break;
-            case '@':
-                if (id.empty()) id = parse_id();
-                else throw error("Too many @ids");
-                break;
-            default: {
+            case '9': return parse_numeric(id);
+            case '~': return parse_bitrep(id);
+            case '"': return parse_string(id);
+            case '[': return parse_array(id);
+            case '{': return parse_object(id);
+            case '(': return parse_parens(id);
+            case 'n': {
                 if (end - p >= 4 && 0==strncmp(p, "null", 4)) {
                     p += 4;
-                    return add_prefix(Hacc(null), type, id);
+                    return new_hacc(null, id);
                 }
+                else return parse_id_or_ref(id);
+            }
+            case 't': {
                 if (end - p >= 4 && 0==strncmp(p, "true", 4)) {
                     p += 4;
-                    return add_prefix(Hacc(true), type, id);
+                    return new_hacc(true, id);
                 }
+                else return parse_id_or_ref(id);
+            }
+            case 'f': {
                 if (end - p >= 5 && 0==strncmp(p, "false", 5)) {
                     p += 5;
-                    return add_prefix(Hacc(false), type, id);
+                    return new_hacc(false, id);
                 }
-                else throw error("Unknown sequence");
+                else return parse_id_or_ref(id);
             }
+             // Yeah, yeah, I know, I'm weird.
+            case '&': case '_': case 'a': case 'b': case 'c': case 'd': case 'e': case 'g':
+            case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'o': case 'p':
+            case 'q': case 'r': case 's': case 'u': case 'v': case 'w': case 'x': case 'y':
+            case 'z': case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G':
+            case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'O':
+            case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W':
+            case 'X': case 'Y': case 'Z': return parse_id_or_ref(id);
+            default: throw Error("Unrecognized character " + String(1, next));
         }
     }
-    Hacc parse_all () {
-        Hacc r = parse_thing();
+    const Hacc* parse_all () {
+        const Hacc* r = parse_thing("");
         parse_ws();
         if (look() == EOF) return r;
-        else throw error("Extra stuff at end of document");
+        else {
+            delete r;
+            throw error("Extra stuff at end of document");
+        }
     }
-    Hacc parse () {
+    const Hacc* parse () {
         try { return parse_all(); }
-        catch (Error e) { return Hacc(e); }
+        catch (Error e) { return new const Hacc::Error(e); }
     }
 };
 
  // Finally:
-Hacc hacc_from_string (const String& s) { return Parser(s).parse(); }
-Hacc hacc_from_string (const char* s) { return Parser(s).parse(); }
-Hacc string_to_hacc (const String& s) { return hacc_from_string(s); }
-Hacc string_to_hacc (const char* s) { return hacc_from_string(s); }
+const Hacc* hacc_from_string (const String& s) { return Parser(s).parse(); }
+const Hacc* hacc_from_string (const char* s) { return Parser(s).parse(); }
+const Hacc* string_to_hacc (const String& s) { return hacc_from_string(s); }
+const Hacc* string_to_hacc (const char* s) { return hacc_from_string(s); }
 
 }
 
