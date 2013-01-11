@@ -2,10 +2,12 @@
 
  // This defines haccabilities for most builtin types.
 #define HCB_LIT(cpptype, form) \
-HCB_BEGIN(cpptype) { \
-    void describe (hacc::Haccer& h, cpptype& it) { h.as_##form(it); } \
-} HCB_END(cpptype)
+HCB_BEGIN(cpptype) \
+    to([](const cpptype& x){ return new_hacc(x); }); \
+    update_from([](cpptype& x, const Hacc* h){ x = h->get_##form(); }); \
+HCB_END(cpptype)
 
+using namespace hacc;
 
 
 HCB_LIT(hacc::Null, null)

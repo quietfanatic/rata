@@ -29,10 +29,10 @@ tap::Tester haccable_integration_tester ("haccable_integration", [](){
     free(kp);
 
     remove("integration_test_file");
-    doesnt_throw([](){hacc_to_file(Hacc(100), "integration_test_file");}, "hacc_to_file and...");
-    is(SIRT(int, (), hacc_from_file("integration_test_file").get_integer()), (int)100, "... hacc_from_file");
-    doesnt_throw([](){file_from_hacc("integration_test_file", Hacc(999));}, "file_from_hacc and...");
-    is(SIRT(int, (), file_to_hacc("integration_test_file").get_integer()), 999, "... file_to_hacc");
+    doesnt_throw([](){hacc_to_file(new_hacc(100), "integration_test_file");}, "hacc_to_file and...");
+    is(SIRT(int, (), hacc_from_file("integration_test_file")->get_integer()), (int)100, "... hacc_from_file");
+    doesnt_throw([](){file_from_hacc("integration_test_file", new_hacc(999));}, "file_from_hacc and...");
+    is(SIRT(int, (), file_to_hacc("integration_test_file")->get_integer()), 999, "... file_to_hacc");
 
     doesnt_throw([](){to_file<int>(13, "integration_test_file");}, "to_file and...");
     is(SIRT(int, (), from_file<int>("integration_test_file")), (int)13, "... from_file");

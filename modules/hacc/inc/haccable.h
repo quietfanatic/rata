@@ -156,10 +156,10 @@ template <class C> C* find_by_id (String id) {
 #define HCB_UNQ2(a, b) a##b
 #define HCB_UNQ1(a, b) HCB_UNQ2(a, b)
 #define HCB_INSTANCE(type) static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::table;
-#define HCB_BEGIN(type) template <> struct Haccable<type> : Haccability<type> { static void describe () {
+#define HCB_BEGIN(type) template <> struct Haccable<type> : hacc::Haccability<type> { static void describe () {
 #define HCB_END(type) } }; HCB_INSTANCE(type)
 #define HCB_PARAMS(...) __VA_ARGS__
-#define HCB_TEMPLATE_BEGIN(params, type) template params struct Haccable<type> : Haccability<type> { \
+#define HCB_TEMPLATE_BEGIN(params, type) template params struct Haccable<type> : hacc::Haccability<type> { \
     using Haccability<type>::allocate; \
     using Haccability<type>::get_id; \
     using Haccability<type>::find_by_id; \

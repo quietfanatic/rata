@@ -37,7 +37,7 @@ namespace hacc {
     }
 
     const Hacc* HaccTable::to_hacc (void* p) {
-        if (to) { to(p); }
+        if (to) { return to(p); }
          // Like an object first
         else if (attrs.size()) {
             hacc::Object o;
@@ -70,8 +70,8 @@ namespace hacc {
                     pair.second.get(p, [t, &r](void* mp){ r = t->to_hacc(mp); });
                     return r;
                 }
-                throw Error("Selected variant '" + v + "' was not listed in variants.");
             }
+            throw Error("Selected variant '" + v + "' was not listed in variants.");
         }
          // Plain delegation last.
         else if (delegate.mtype) {
