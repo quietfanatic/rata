@@ -33,6 +33,10 @@ HCB_BEGIN(Vectorly)
         else if (id == "vy2") return &vy2;
         else return (Vectorly*)null;
     });
+    attr("x", GS<Vectorly, float>(&Vectorly::x));
+    attr("y", GS<Vectorly, float>(&Vectorly::y));
+    elem(GS<Vectorly, float>(&Vectorly::x));
+    elem(GS<Vectorly, float>(&Vectorly::y));
 HCB_END(Vectorly)
 
 struct MyFloat {
@@ -65,15 +69,15 @@ MyWrapper<int> wi {0};
 tap::Tester haccable_tester ("haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(9);
+    plan(11);
     is(hacc_from((int)4)->get_integer(), 4, "hacc_from<int> works");
     is(hacc_to<int>(new_hacc(35)), 35, "hacc_to<int> works");
     doesnt_throw([](){ wi = from_hacc<MyWrapper<int>>(new_hacc(34)); }, "from_hacc on a template haccable");
     is(wi.val, 34, "...works");
     doesnt_throw([](){ update_from_hacc(wi, new_hacc(52)); }, "update_from_hacc on a template haccable");
     is(wi.val, 52, "...and it works");
-//    Hacc* ahcs [2] = {new Hacc(34.4), new Hacc(52.123)};
-//    is(from_hacc<Vectorly>(Hacc(Array(ahcs, ahcs+2))), Vectorly{34.4, 52.123}, "Vectorly accepts Array");
+    is(from_hacc<Vectorly>(new_hacc({new_hacc(34.0), new_hacc(52.0)})), Vectorly{34.0, 52.0}, "Vectorly accepts Array");
+    is(from_hacc<Vectorly>(new_hacc({std::pair<String, const Hacc*>("x", new_hacc(32.0)), std::pair<String, const Hacc*>("y", new_hacc(54.0))})), Vectorly{32.0, 54.0}, "Vectorly accepts Object");
     is(get_id(vy1), String("vy1"), "get_id");
     is(get_id(vy2), String("vy2"), "get_id");
     is(find_by_id<Vectorly>("vy1"), &vy1, "find_by_id");

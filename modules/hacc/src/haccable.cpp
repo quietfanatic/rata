@@ -4,6 +4,16 @@
 
 #define INIT_SAFE(name, ...) static __VA_ARGS__& name () { static __VA_ARGS__ r; return r; }
 
+namespace {
+     // Auto-deallocate a pointer if an exception happens.
+    struct Bomb {
+        const Func<void ()>* detonate;
+        Bomb (const Func<void ()>& d) :detonate(&d) { }
+        ~Bomb () { if (detonate) (*detonate)(); }
+        void defuse () { detonate = NULL; }
+    };
+}
+
 namespace hacc {
 
     // Hahaha, deleting 150 lines of code is so satisfying.
@@ -27,10 +37,42 @@ namespace hacc {
     }
 
     const Hacc* HaccTable::to_hacc (void* p) {
-        if (to_hacc) { to_hacc(p); }
-         // TODO: Like an object first
-         // TODO: Like an array next
-         // TODO: Then like a polymorphic thing
+        if (to) { to(p); }
+         // Like an object first
+        else if (attrs.size()) {
+            hacc::Object o;
+            Bomb b ([&o](){ for (auto& p : o) delete p.second; });
+            for (auto& pair : attrs) {
+                HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
+                pair.second.get(p, [&pair, &o, t](void* mp){ o.push_back(std::pair<String, const Hacc*>(pair.first, t->to_hacc(mp))); });
+            }
+            b.defuse();
+            return new_hacc(std::move(o));
+        }
+         // Like an array next
+        else if (elems.size()) {
+            hacc::Array a;
+            Bomb b ([&a](){ for (auto& p : a) delete p; });
+            for (auto& gs : elems) {
+                HaccTable* t = HaccTable::require_cpptype(*gs.mtype);
+                gs.get(p, [&a, t](void* mp){ a.push_back(t->to_hacc(mp)); });
+            }
+            b.defuse();
+            return new_hacc(std::move(a));
+        }
+         // Then like a union
+        else if (variants.size() && select_variant) {
+            String v = select_variant(p);
+            for (auto& pair : variants) {
+                if (pair.first == v) {
+                    HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
+                    const Hacc* r;
+                    pair.second.get(p, [t, &r](void* mp){ r = t->to_hacc(mp); });
+                    return r;
+                }
+                throw Error("Selected variant '" + v + "' was not listed in variants.");
+            }
+        }
          // Plain delegation last.
         else if (delegate.mtype) {
             HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
@@ -42,10 +84,42 @@ namespace hacc {
     }
 
     void HaccTable::update_from_hacc (void* p, const Hacc* h) {
-        if (update_from_hacc) { update_from_hacc(p, h); }
-         // TODO: Like an object first
-         // TODO: Like an array next
-         // TODO: Then like a polymorphic thing
+        if (update_from) { update_from(p, h); }
+         // Like an object first
+        else if (h->form() == OBJECT && attrs.size()) {
+            auto oh = h->as_object();
+            for (auto& pair : attrs) {
+                HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
+                const Hacc* attr = oh->attr(pair.first);
+                pair.second.set(p, [attr, t](void* mp){ t->update_from_hacc(mp, attr); });
+            }
+        }
+         // Like an array next
+        else if (h->form() == ARRAY && elems.size()) {
+            auto ah = h->as_array();
+            for (uint i = 0; i < elems.size(); i++) {
+                HaccTable* t = HaccTable::require_cpptype(*elems[i].mtype);
+                const Hacc* elem = ah->elem(i);
+                elems[i].set(p, [t, elem](void* mp){ t->update_from_hacc(mp, elem); });
+            }
+        }
+         // Then like a union
+        else if (variants.size()) {
+            if (h->form() == OBJECT) {
+                auto oh = h->as_object();
+                if (oh->n_attrs() != 1) {
+                    throw Error("An object Hacc representing a union type must contain only one attribute.");
+                }
+                for (auto& pair : variants) {
+                    if (pair.first == oh->name_at(0)) {
+                        HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
+                        const Hacc* val = oh->value_at(0);
+                        pair.second.set(p, [val, t](void* mp){ t->update_from_hacc(mp, val); });
+                        return;
+                    }
+                }
+            }
+        }
          // Plain delegation last.
         else if (delegate.mtype) {
             HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
@@ -53,15 +127,6 @@ namespace hacc {
         }
         else throw Error("Haccability description for <mangled: " + String(cpptype.name()) + "did not provide any way to update from hacc.");
     }
-
-     // Auto-deallocate a pointer if an exception happens.
-    namespace { struct Bomb {
-        const Func<void ()>* detonate;
-        Bomb (const Func<void ()>& d) :detonate(&d) { }
-        ~Bomb () { if (detonate) (*detonate)(); }
-        void defuse () { detonate = null; }
-    }; }
-
     void* HaccTable::new_from_hacc (const Hacc* h) {
         void* r = allocate();
         Bomb b ([this, r](){ deallocate(r); });

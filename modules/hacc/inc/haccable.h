@@ -30,6 +30,8 @@ struct HaccTable {
      // Variants with names specific to this interface
      // Note that this will only be used if following a pointer.
     Map<GetSet> variants;
+    Func<String (void*)> select_variant;
+     // Direct translation
     Func<const Hacc* (void*)> to;
     Func<void (void*, const Hacc*)> update_from;
     
@@ -89,8 +91,8 @@ template <class C, uint flags = 0> struct Haccability {
     static void deallocate (const Func<void (C*)>& f) { get_table()->deallocate = *(Func<void* ()>*)&f; }
     static void get_id (const Func<String (const C&)>& f) { get_table()->get_id = *(Func<String (void*)>*)&f; }
     static void find_by_id (const Func<C* (String)>& f) { get_table()->find_by_id = *(Func<void* (String)>*)&f; }
-    static void to (const Func<const Hacc* (const C&)>& f) { get_table()->to_hacc = *(Func<const Hacc* (void*)>*)&f; }
-    static void update_from (const Func<void (C&, const Hacc*)>& f) { get_table()->update_from_hacc = *(Func<void (void*, const Hacc*)>*)&f; }
+    static void to (const Func<const Hacc* (const C&)>& f) { get_table()->to = *(Func<const Hacc* (void*)>*)&f; }
+    static void update_from (const Func<void (C&, const Hacc*)>& f) { get_table()->update_from = *(Func<void (void*, const Hacc*)>*)&f; }
     static void delegate (const GetSet& gs) { get_table()->delegate = gs; }
     static void attr (String name, const GetSet& gs) { get_table()->attrs.push_back(std::pair<String, GetSet>(name, gs)); }
     static void elem (const GetSet& gs) { get_table()->elems.push_back(gs); }
