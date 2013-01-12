@@ -15,8 +15,8 @@ tap::Tester haccable_integration_tester ("haccable_integration", [](){
     plan(21);
 
     is(to_string<int>(12), String("12"), "to_string");
-    is(from_string<int>("90"), (int)90, "from_string");
-    is(string_to<int>("445"), (int)445, "string_to");
+    is(value_from_string<int>("90"), (int)90, "from_string");
+    is(string_to_value<int>("445"), (int)445, "string_to");
     is(string_from<int>(-34), String("-34"), "string_from");
     doesnt_throw([](){update_from_string(k, String("992"));});
     is(k, 992, "update_from_string");
@@ -35,9 +35,9 @@ tap::Tester haccable_integration_tester ("haccable_integration", [](){
     is(SIRT(int, (), file_to_hacc("integration_test_file")->get_integer()), 999, "... file_to_hacc");
 
     doesnt_throw([](){to_file<int>(13, "integration_test_file");}, "to_file and...");
-    is(SIRT(int, (), from_file<int>("integration_test_file")), (int)13, "... from_file");
+    is(SIRT(int, (), value_from_file<int>("integration_test_file")), (int)13, "... from_file");
     doesnt_throw([](){file_from<int>("integration_test_file", -15);}, "file_from and...");
-    is(SIRT(int, (), file_to<int>("integration_test_file")), -15, "... file_to");
+    is(SIRT(int, (), file_to_value<int>("integration_test_file")), -15, "... file_to");
     is(static_cast<int(*)()>([](){
         update_from_file(k, "integration_test_file");
         return k;

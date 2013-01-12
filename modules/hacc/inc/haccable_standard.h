@@ -19,9 +19,9 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::VArray<C>)
     update_from([](VArray<C>& v, const Hacc* h){
         auto ah = h->as_array();
         v.clear();
-        v.reserve(ah->n_elems());
+        v.resize(ah->n_elems());
         for (uint i = 0; i < ah->n_elems(); i++) {
-            v.push_back(hacc_to<C>(ah->elem(i)));
+            update_from_hacc(v[i], ah->elem(i));
         }
     });
 HCB_TEMPLATE_END(<class C>, hacc::VArray<C>)
@@ -40,9 +40,10 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::Map<C>)
     update_from([](Map<C>& v, const Hacc* h){
         auto oh = h->as_object();
         v.clear();
-        v.reserve(oh->n_attrs());
+        v.resize(oh->n_attrs());
         for (uint i = 0; i < oh->n_attrs(); i++) {
-            v.push_back(std::pair<String, const Hacc*>(oh->name_at(i), hacc_from(oh->value_at(i))));
+            v[i].first = oh->name_at(i);
+            update_from_hacc(v[i].second, oh->value_at(i));
         }
     });
 HCB_TEMPLATE_END(<class C>, hacc::Map<C>)
@@ -63,7 +64,7 @@ HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
         v.clear();
         v.reserve(oh->n_attrs());
         for (uint i = 0; i < oh->n_attrs(); i++) {
-            v.emplace(std::pair<String, const Hacc*>(oh->name_at(i), hacc_from(oh->value_at(i))));
+            update_from_hacc(v[oh->name_at(i)], oh->value_at(i));
         }
     });
 HCB_TEMPLATE_END(<class C>, std::unordered_map<std::string HCB_COMMA C>)

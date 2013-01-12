@@ -15,14 +15,14 @@ template <class C> String to_string (const C& v) {
     delete h;
     return r;
 }
-template <class C> C from_string (String s) {
+template <class C> C value_from_string (String s) {
     const Hacc* h = hacc_from_string(s);
-    C r = from_hacc<C>(h);
+    const C& r = value_from_hacc<C>(h);
     delete h;
     return r;
 }
-template <class C> C string_to (String s) {
-    return from_string<C>(s);
+template <class C> C string_to_value (String s) {
+    return value_from_string<C>(s);
 }
 template <class C> String string_from (const C& v) {
     return to_string<C>(v);
@@ -62,9 +62,9 @@ template <class C> void to_file (const C& v, Either_String f) {
     hacc_to_file(h, f);
     delete h;
 }
-template <class C> C from_file (Either_String f) {
+template <class C> C value_from_file (Either_String f) {
     const Hacc* h = hacc_from_file(f);
-    C r = from_hacc<C>(h);
+    const C& r = value_from_hacc<C>(h);
     delete h;
     return r;
 }
@@ -73,8 +73,8 @@ template <class C> void update_from_file (C& p, Either_String f) {
     update_from_hacc<C>(p, h);
     delete h;
 }
-template <class C> C file_to (Either_String f) {
-    return from_file<C>(f);
+template <class C> C file_to_value (Either_String f) {
+    return value_from_file<C>(f);
 }
 template <class C> void file_from (Either_String f, const C& v) {
     to_file<C>(v, f);

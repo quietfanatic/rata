@@ -22,14 +22,14 @@ struct HaccTable {
     Func<void* (String)> find_by_id_p;
      // Leave haccification to something else.
      // If the inner type of this is const Hacc*, it defines a direct transition.
-    GetSet delegate;
+    GetSet0 delegate;
      // Defined by attributes with names, defaults are TODO
-    Map<GetSet> attrs;
+    Map<GetSet0> attrs;
      // Defined by a fixed number of elements
-    VArray<GetSet> elems;
+    VArray<GetSet0> elems;
      // Variants with names specific to this interface
      // Note that this will only be used if following a pointer.
-    Map<GetSet> variants;
+    Map<GetSet0> variants;
     Func<String (void*)> select_variant;
      // Direct translation
     Func<const Hacc* (void*)> to;
@@ -73,7 +73,7 @@ template <class C> struct per_nc<C, false> { static void* allocate () {
 
  // This class provides the DSL for creating HaccTables.  Every specialization of Haccable
  //  must inherit from this.  Flags are here in case a default
-template <class C, uint flags = 0> struct Haccability {
+template <class C, uint flags = 0> struct Haccability : GetSet_Builders<C> {
     
     static HaccTable* table;
     static HaccTable* get_table () { return table; }
@@ -96,11 +96,10 @@ template <class C, uint flags = 0> struct Haccability {
     static void find_by_id (const Func<C* (String)>& f) { get_table()->find_by_id_p = *(Func<void* (String)>*)&f; }
     static void to (const Func<const Hacc* (const C&)>& f) { get_table()->to = *(Func<const Hacc* (void*)>*)&f; }
     static void update_from (const Func<void (C&, const Hacc*)>& f) { get_table()->update_from = *(Func<void (void*, const Hacc*)>*)&f; }
-    static void delegate (const GetSet& gs) { get_table()->delegate = gs; }
-    static void attr (String name, const GetSet& gs) { get_table()->attrs.push_back(std::pair<String, GetSet>(name, gs)); }
-    static void elem (const GetSet& gs) { get_table()->elems.push_back(gs); }
-    static void variant (String name, const GetSet& gs) { get_table()->variants.push_back(std::pair<String, GetSet>(name, gs)); }
-
+    static void delegate (const GetSet1<C>& gs) { get_table()->delegate = gs; }
+    static void attr (String name, const GetSet1<C>& gs) { get_table()->attrs.emplace_back(name, gs); }
+    static void elem (const GetSet1<C>& gs) { get_table()->elems.push_back(gs); }
+    static void variant (String name, const GetSet1<C>& gs) { get_table()->variants.emplace_back(name, gs); }
 };
 template <class C, uint flags> HaccTable* Haccability<C, flags>::table = gen_table();
 
@@ -127,12 +126,12 @@ template <class C>
 void update_from_hacc (C& v, const Hacc* h) {
     return require_hacctable<C>()->update_from_hacc((void*)&v, h);
 }
-template <class C> C from_hacc (const Hacc* h) {
+template <class C> C value_from_hacc (const Hacc* h) {
     C r;
     update_from_hacc(r, h);
     return r;
 }
-template <class C> C hacc_to (const Hacc* h) {
+template <class C> C hacc_to_value (const Hacc* h) {
     C r;
     update_from_hacc(r, h);
     return r;
@@ -176,6 +175,14 @@ template <class C> C* require_id (String id) {
     using hacc::Haccability<type>::attr; \
     using hacc::Haccability<type>::elem; \
     using hacc::Haccability<type>::variant; \
+    using hacc::Haccability<type>::value_functions; \
+    using hacc::Haccability<type>::ref_functions; \
+    using hacc::Haccability<type>::ref_function; \
+    using hacc::Haccability<type>::assignable; \
+    using hacc::Haccability<type>::member; \
+    using hacc::Haccability<type>::value_methods; \
+    using hacc::Haccability<type>::ref_methods; \
+    using hacc::Haccability<type>::ref_method; \
     static void describe () {
 #define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
 
