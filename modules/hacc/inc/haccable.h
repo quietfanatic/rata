@@ -37,13 +37,15 @@ struct HaccTable {
     Func<void (void*, const Hacc*)> update_from;
      // Records binary-compatible subtypes of the type pointed to by this type, under names.
     std::unordered_map<String, Caster0> subtypes;
-     // Allows this to be treated as a transparent (possibly polymorphic) pointer.
-    GetSet0 canonical_pointer;
-     // These will be automatically set with canonical_pointer
+     // Allows this to be treated as a pointer.
+    GetSet0 pointer;
+    bool follow_pointer;
+     // These will be automatically set with pointer
     const std::type_info* pointee_type = null;
     const std::type_info* (* pointee_realtype ) (void*) = null;
     
     const Hacc* to_hacc (void*);
+    const Hacc* to_hacc_inner (void*);
     void update_from_hacc (void*, const Hacc*);
     void* new_from_hacc (const Hacc* h);
     String get_id (void*);
@@ -132,10 +134,16 @@ template <class C> struct Haccability : GetSet_Builders<C> {
         Haccable<B>::get_table()->subtypes.emplace(name, Caster2<B, C>());
     }
     template <class P>
-    static void canonical_pointer (const GetSet2<C, P*>& gs) {
-        get_table()->canonical_pointer = gs;
+    static void follow_pointer (const GetSet2<C, P*>& gs) {
+        get_table()->pointer = gs;
+        get_table()->follow_pointer = true;
         get_table()->pointee_type = &typeid(P);
         get_table()->pointee_realtype = [](void* p) { return &typeid(*(P*)p); };
+    }
+    template <class P>
+    static void reference_pointer (const GetSet2<C, P*>& gs) {
+        get_table()->pointer = gs;
+        get_table()->pointee_type = &typeid(P);
     }
 };
 
@@ -202,27 +210,29 @@ template <class C> C* require_id (String id) {
 #define HCB_END(type) } }; static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::get_table();
 #define HCB_PARAMS(...) __VA_ARGS__
 #define HCB_TEMPLATE_BEGIN(params, type) template params struct Haccable<type> : hacc::Haccability<type> { \
-    using hacc::Haccability<type>::allocate; \
-    using hacc::Haccability<type>::get_id; \
-    using hacc::Haccability<type>::find_by_id; \
-    using hacc::Haccability<type>::to; \
-    using hacc::Haccability<type>::update_from; \
-    using hacc::Haccability<type>::delegate; \
-    using hacc::Haccability<type>::attr; \
-    using hacc::Haccability<type>::elem; \
-    using hacc::Haccability<type>::variant; \
-    using hacc::Haccability<type>::select_variant; \
-    using hacc::Haccability<type>::base; \
-    using hacc::Haccability<type>::value_functions; \
-    using hacc::Haccability<type>::ref_functions; \
-    using hacc::Haccability<type>::ref_function; \
-    using hacc::Haccability<type>::assignable; \
-    using hacc::Haccability<type>::supertype; \
-    using hacc::Haccability<type>::member; \
-    using hacc::Haccability<type>::value_methods; \
-    using hacc::Haccability<type>::ref_methods; \
-    using hacc::Haccability<type>::ref_method; \
-    using hacc::Haccability<type>::canonical_pointer; \
+    using hcb = hacc::Haccability<type>; \
+    using hcb::allocate; \
+    using hcb::get_id; \
+    using hcb::find_by_id; \
+    using hcb::to; \
+    using hcb::update_from; \
+    using hcb::delegate; \
+    using hcb::attr; \
+    using hcb::elem; \
+    using hcb::variant; \
+    using hcb::select_variant; \
+    using hcb::base; \
+    using hcb::value_functions; \
+    using hcb::ref_functions; \
+    using hcb::ref_function; \
+    using hcb::assignable; \
+    using hcb::supertype; \
+    using hcb::member; \
+    using hcb::value_methods; \
+    using hcb::ref_methods; \
+    using hcb::ref_method; \
+    using hcb::follow_pointer; \
+    using hcb::reference_pointer; \
     static void describe () {
 #define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
 

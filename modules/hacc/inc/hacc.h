@@ -85,6 +85,7 @@ typedef Map<const Hacc*> Object;
 
 template <class T> using Func = std::function<T>;
 
+
 struct Hacc {
     hacc::String id;
     virtual Form form () const = 0;

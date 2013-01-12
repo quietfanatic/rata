@@ -2,12 +2,25 @@
 #include "../inc/haccable.h"
 
 
-#define INIT_SAFE(name, ...) static __VA_ARGS__& name () { static __VA_ARGS__ r; return r; }
 namespace hacc {
 
-    INIT_SAFE(cpptype_map, std::unordered_map<const std::type_info*, HaccTable*>)
-     // This is used to wrangle IDs into pointers when processing haccs.
-    std::unordered_map<std::string, void*>* id_map = null;
+     // The global list of all hacctables.
+    typedef std::unordered_map<const std::type_info*, HaccTable*> Type_Map;
+    static Type_Map cpptype_map () {
+        static Type_Map cpptype_map;
+        return cpptype_map;
+    }
+
+     // These are used to wrangle IDs to/from pointers when processing haccs.
+    struct write_id_info {
+        std::string id;
+        HaccTable* table = null;
+        Hacc* written = null;
+        bool referenced = false;
+    };
+    std::unordered_map<void*, write_id_info> write_history;
+    uint writing = 0;
+
 
     HaccTable* HaccTable::by_cpptype (const std::type_info& t) {
         auto& r = cpptype_map()[&t];
@@ -26,6 +39,25 @@ namespace hacc {
     HaccTable::HaccTable (const std::type_info& t) : cpptype(t) { }
 
     const Hacc* HaccTable::to_hacc (void* p) {
+         // create a temporary id system if one doesn't currently exist.
+        if (!writing++) /* no-op */;
+
+        const Hacc* h = to_hacc_inner(p);
+         // Save id if this address has been referenced
+        auto& hist = write_history[p];
+        hist.written = const_cast<Hacc*>(h);
+        hist.table = this;
+        if (hist.referenced) {
+            hist.written->id = hist.id;
+        }
+        
+         // write_history takes too much memory to just keep forever.
+        if (!--have_id_map)
+            write_history.clear();
+        return const_cast<const Hacc*>(h);
+    }
+
+    const Hacc* HaccTable::to_hacc_inner (void* p) {
         if (to) { return to(p); }
          // Like a union first
         else if (variants.size() && select_variant) {
@@ -65,29 +97,41 @@ namespace hacc {
             return new_hacc(std::move(a));
         }
          // Following a pointer happens somewhere in here.
-        else if (canonical_pointer) {
+        else if (pointer) {
+             // Get the effective address
             HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
-            if (pointee_t->subtypes.empty()) { // Non-polymorphic
-                const Hacc* r;
-                canonical_pointer.get(p, [pointee_t, &r](void* mp){ r = pointee_t->to_hacc(mp); });
-                return r;
+            void* pp;
+            pointer.get(p, [&pp](void* mp){ pp = *(void**)mp; });
+             // All pointer types can be null
+            if (!pp) return new_hacc(null);
+             // Make sure all references to this address are on the same page
+            auto& hist = write_history[pp];
+            if (!hist.referenced) {
+                hist.referenced = true;
+                hist.id = pointee_t->get_id(pp);
+                if (hist.written)
+                    hist.written->id = hist.id;
+                else hist.table = pointee_t;
             }
-            else { // Polymorphic
-                void* superptr;
-                canonical_pointer.get(p, [&superptr](void* mp){ superptr = *(void**)mp; });
-                if (!superptr) return new_hacc(null);
-                if (!pointee_realtype) throw Error("Uh oh, canonical_pointer was set without pointee_realtype.");
-                const std::type_info* realtype = pointee_realtype(superptr);
-                for (auto& pair : pointee_t->subtypes) {
-                    auto& caster = pair.second;
-                    if (realtype == &caster.subtype) {
-                        HaccTable* t = HaccTable::require_cpptype(caster.subtype);
-                        void* subptr = caster.down(superptr);
-                        const Hacc* val = t->to_hacc(subptr);
-                        return new_hacc({hacc_attr(pair.first, val)});
-                    }
+            if (follow_pointer) {
+                if (pointee_t->subtypes.empty()) { // Non-polymorphic
+                    return pointee_t->to_hacc(pp);
                 }
-                throw Error("Unrecognized subtype <mangled: " + String(realtype->name()) + "> of <mangled: " + String(cpptype.name()) + ">");
+                else { // Polymorphic, needs casting and tagging
+                    const std::type_info* realtype = pointee_realtype(pp);
+                    for (auto& pair : pointee_t->subtypes) {
+                        auto& caster = pair.second;
+                        if (realtype == &caster.subtype) {
+                            HaccTable* sub_t = HaccTable::require_cpptype(caster.subtype);
+                            const Hacc* val = sub_t->to_hacc(caster.down(pp));
+                            return new_hacc({hacc_attr(pair.first, val)});
+                        }
+                    }
+                    throw Error("Unrecognized subtype <mangled: " + String(realtype->name()) + "> of <mangled: " + String(cpptype.name()) + ">");
+                }
+            }
+            else {
+                return new_hacc(hacc::Ref(hist.id, pp));
             }
         }
          // Plain delegation last.
@@ -102,30 +146,32 @@ namespace hacc {
 
     void HaccTable::update_from_hacc (void* p, const Hacc* h) {
         if (update_from) { update_from(p, h); }
-         // Ah, what the heck, let's do canonical_pointer first.
-        else if (canonical_pointer) {
-            if (h->form() == OBJECT) {
-                auto oh = h->as_object();
-                if (oh->n_attrs() != 1) {
-                    throw Error("An object Hacc representing a polymorphic type must contain only one attribute.");
-                }
-                String sub = oh->name_at(0);
-                HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
-                auto iter = pointee_t->subtypes.find(sub);
-                if (iter == pointee_t->subtypes.end()) {
-                    throw Error("Unknown subtype '" + sub + "' of <mangled: " + String(pointee_t->cpptype.name()) + ">");
-                }
-                else {
-                    auto& caster = iter->second;
-                    HaccTable* t = HaccTable::require_cpptype(caster.subtype);
-                    const Hacc* val = oh->value_at(0);
-                    canonical_pointer.set(p, [&caster, val, t](void* basep){
-                        *(void**)basep = caster.up(t->new_from_hacc(val));
-                    });
-                    return;
+         // Ah, what the heck, let's do pointers first.
+        else if (pointer) {
+            HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
+            if (follow_pointer) {
+                if (h->form() == OBJECT) {
+                    auto oh = h->as_object();
+                    if (oh->n_attrs() != 1) {
+                        throw Error("An object Hacc representing a polymorphic type must contain only one attribute.");
+                    }
+                    String sub = oh->name_at(0);
+                    auto iter = pointee_t->subtypes.find(sub);
+                    if (iter == pointee_t->subtypes.end()) {
+                        throw Error("Unknown subtype '" + sub + "' of <mangled: " + String(pointee_t->cpptype.name()) + ">");
+                    }
+                    else {
+                        auto& caster = iter->second;
+                        HaccTable* t = HaccTable::require_cpptype(caster.subtype);
+                        const Hacc* val = oh->value_at(0);
+                        pointer.set(p, [&caster, val, t](void* basep){
+                            *(void**)basep = caster.up(t->new_from_hacc(val));
+                        });
+                        return;
+                    }
                 }
             }
-            else throw Error("A polymorphic type can only be represented by an Object hacc or an Array hacc.");
+            throw Error("A polymorphic type can only be represented by an Object hacc or an Array hacc.");
         }
          // Like a union next
         else if (variants.size()) {
@@ -179,7 +225,12 @@ namespace hacc {
     }
 
     String HaccTable::get_id (void* p) {
-        return get_id_p ? get_id_p(p) : "";
+        if (get_id_p) return get_id_p(p);
+        else {
+            char r [17];
+            sprintf(r, "@%lx", (unsigned long)p);
+            return String(r, strlen(r));
+        }
     }
     void* HaccTable::find_by_id (String s) {
         return find_by_id_p ? find_by_id_p(s) : NULL;
