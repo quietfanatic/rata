@@ -12,6 +12,7 @@ namespace hacc {
  // This stores all the info for one type.
 struct HaccTable {
     const std::type_info& cpptype;
+    bool initialized = false;
 
      // How to allocate this type.  Generally set to "new X ()"
     Func<void* ()> allocate;
@@ -42,12 +43,10 @@ struct HaccTable {
     void* find_by_id (String);
     void* require_id (String);
 
-     // Shortcut for allocate and update_from_hacc.
-    void* manifest ();
-
-     // Creating and accessing hacctables.
-    static HaccTable* by_cpptype (const std::type_info&);
+     // This throws an error when not found
     static HaccTable* require_cpptype (const std::type_info&);
+     // This autovivifies.
+    static HaccTable* by_cpptype (const std::type_info&);
     HaccTable (const std::type_info& t);
 };
 
@@ -100,8 +99,8 @@ template <class C> struct Haccability : GetSet_Builders<C> {
      // This needs to be, and I hope is, reentrant.
     static HaccTable* get_table () {
         static HaccTable* table = HaccTable::by_cpptype(typeid(C));
-        if (!table) {
-            table = new HaccTable(typeid(C));
+        if (!table->initialized) {
+            table->initialized = true;
             table->allocate = per_nc<C>::allocate;
             table->deallocate = [](void* p){ delete (C*)p; };
             Haccable<C>::describe();
@@ -121,7 +120,7 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     static void elem (const GetSet1<C>& gs) { get_table()->elems.push_back(gs); }
     static void variant (String name, const GetSet1<C>& gs) { get_table()->variants.emplace_back(name, gs); }
     static void select_variant (const Func<String (const C&)>& f) { get_table()->select_variant = *(Func<String (void*)>*)&f; }
-    template <class B>
+/*    template <class B>
     static void base (String name) {
         HaccTable* t = get_table();
         Haccable<PolyP<B>>::get_table()->variants.emplace_back(name, GetSet2<B, C>(
@@ -132,7 +131,7 @@ template <class C> struct Haccability : GetSet_Builders<C> {
                 c(*static_cast<B*>(x));
             }
         ));
-    }
+    }*/
 };
 
 template <class C>
@@ -208,7 +207,7 @@ template <class C> C* require_id (String id) {
     using hacc::Haccability<type>::elem; \
     using hacc::Haccability<type>::variant; \
     using hacc::Haccability<type>::select_variant; \
-    using hacc::Haccability<type>::base; \
+    /*using hacc::Haccability<type>::base;*/ \
     using hacc::Haccability<type>::value_functions; \
     using hacc::Haccability<type>::ref_functions; \
     using hacc::Haccability<type>::ref_function; \
@@ -219,12 +218,6 @@ template <class C> C* require_id (String id) {
     using hacc::Haccability<type>::ref_method; \
     static void describe () {
 #define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
-
-
- // The Haccable for PolyPs.
-HCB_TEMPLATE_BEGIN(<class C>, hacc::PolyP<C>)
-    // variants will be provided from elsewhere.
-HCB_TEMPLATE_END(<class C>, hacc::PolyP<C>)
 
 
 #endif

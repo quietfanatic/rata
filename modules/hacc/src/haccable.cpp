@@ -10,20 +10,17 @@ namespace hacc {
     std::unordered_map<std::string, void*>* id_map = null;
 
     HaccTable* HaccTable::by_cpptype (const std::type_info& t) {
-        auto iter = cpptype_map().find(&t);
-        return iter != cpptype_map().end()
-            ? iter->second
-            : null;
-    }
-    HaccTable* HaccTable::require_cpptype (const std::type_info& t) {
-        auto r = by_cpptype(t);
-        if (!r) throw Error("Unhaccable type <mangled: " + String(t.name()) + ">");
+        auto& r = cpptype_map()[&t];
+        if (!r) r = new HaccTable(t);
         return r;
     }
-
-    HaccTable::HaccTable (const std::type_info& t) : cpptype(t) {
-        cpptype_map().emplace(&t, this);
+    HaccTable* HaccTable::require_cpptype (const std::type_info& t) {
+        auto iter = cpptype_map().find(&t);
+        if (iter == cpptype_map().end()) throw Error("Unhaccable type <mangled: " + String(t.name()) + ">");
+        return iter->second;
     }
+
+    HaccTable::HaccTable (const std::type_info& t) : cpptype(t) { }
 
     const Hacc* HaccTable::to_hacc (void* p) {
         if (to) { return to(p); }
