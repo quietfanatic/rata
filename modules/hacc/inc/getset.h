@@ -94,6 +94,13 @@ namespace hacc {
                 [](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); x = tmp; }
             );
         }
+        template <class M>
+        static GetSet2<C, M> supertype () {
+            return GetSet2<C, M>(
+                [](const C& x, const Func<void (const M&)>& c){ c(x); },
+                [](C& x, const Func<void (M&)>& c){ c(x); }
+            );
+        }
     };
     template <class C> struct GetSet_Builders<C, true> : GetSet_Builders<C, false> {
         template <class M>
@@ -136,8 +143,8 @@ namespace hacc {
     struct Caster2 {
         operator Caster0 () { return Caster0{
             typeid(Sub),
-            [](void* p){ static_cast<Base*>((Sub*)p); },
-            [](void* p){ return static_cast<Sub*>((Base*)p); }
+            [](void* p){ return (void*)static_cast<Base*>((Sub*)p); },
+            [](void* p){ return (void*)static_cast<Sub*>((Base*)p); }
         }; }
     };
 

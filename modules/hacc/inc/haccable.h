@@ -35,12 +35,13 @@ struct HaccTable {
      // Manual direct translation
     Func<const Hacc* (void*)> to;
     Func<void (void*, const Hacc*)> update_from;
-     // Records binary-compatible subtypes of this type, under names.
+     // Records binary-compatible subtypes of the type pointed to by this type, under names.
     std::unordered_map<String, Caster0> subtypes;
      // Allows this to be treated as a transparent (possibly polymorphic) pointer.
     GetSet0 canonical_pointer;
-     // This should be automatically set.
-    const std::type_info* (* real_typeid ) (void*);
+     // These will be automatically set with canonical_pointer
+    const std::type_info* pointee_type = null;
+    const std::type_info* (* pointee_realtype ) (void*) = null;
     
     const Hacc* to_hacc (void*);
     void update_from_hacc (void*, const Hacc*);
@@ -109,7 +110,6 @@ template <class C> struct Haccability : GetSet_Builders<C> {
             table->initialized = true;
             table->allocate = per_nc<C>::allocate;
             table->deallocate = [](void* p){ delete (C*)p; };
-            table->real_typeid = [](void* p) { return &typeid(*(C*)p); };
             Haccable<C>::describe();
         }
         return table;
@@ -129,10 +129,14 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     static void select_variant (const Func<String (const C&)>& f) { get_table()->select_variant = *(Func<String (void*)>*)&f; }
     template <class B>
     static void base (String name) {
-        HaccTable* t = get_table();
         Haccable<B>::get_table()->subtypes.emplace(name, Caster2<B, C>());
     }
-    static void canonical_pointer (const GetSet1<C>& gs) { get_table()->canonical_pointer = gs; }
+    template <class P>
+    static void canonical_pointer (const GetSet2<C, P*>& gs) {
+        get_table()->canonical_pointer = gs;
+        get_table()->pointee_type = &typeid(P);
+        get_table()->pointee_realtype = [](void* p) { return &typeid(*(P*)p); };
+    }
 };
 
 template <class C>
@@ -213,6 +217,7 @@ template <class C> C* require_id (String id) {
     using hacc::Haccability<type>::ref_functions; \
     using hacc::Haccability<type>::ref_function; \
     using hacc::Haccability<type>::assignable; \
+    using hacc::Haccability<type>::supertype; \
     using hacc::Haccability<type>::member; \
     using hacc::Haccability<type>::value_methods; \
     using hacc::Haccability<type>::ref_methods; \

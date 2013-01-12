@@ -11,7 +11,10 @@ namespace hacc {
 
     HaccTable* HaccTable::by_cpptype (const std::type_info& t) {
         auto& r = cpptype_map()[&t];
-        if (!r) r = new HaccTable(t);
+        if (!r) {
+            //fprintf(stderr, " # Creating HaccTable for <mangled: %s>\n", t.name());
+            r = new HaccTable(t);
+        }
         return r;
     }
     HaccTable* HaccTable::require_cpptype (const std::type_info& t) {
@@ -63,22 +66,23 @@ namespace hacc {
         }
          // Following a pointer happens somewhere in here.
         else if (canonical_pointer) {
-            HaccTable* t = HaccTable::require_cpptype(*canonical_pointer.mtype);
-            if (subtypes.empty()) { // Non-polymorphic
+            HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
+            if (pointee_t->subtypes.empty()) { // Non-polymorphic
                 const Hacc* r;
-                canonical_pointer.get(p, [t, &r](void* mp){ r = t->to_hacc(mp); });
+                canonical_pointer.get(p, [pointee_t, &r](void* mp){ r = pointee_t->to_hacc(mp); });
                 return r;
             }
             else { // Polymorphic
-                const std::type_info* realtype = t->real_typeid(p);
-                for (auto& pair : subtypes) {
+                void* superptr;
+                canonical_pointer.get(p, [&superptr](void* mp){ superptr = *(void**)mp; });
+                if (!superptr) return new_hacc(null);
+                if (!pointee_realtype) throw Error("Uh oh, canonical_pointer was set without pointee_realtype.");
+                const std::type_info* realtype = pointee_realtype(superptr);
+                for (auto& pair : pointee_t->subtypes) {
                     auto& caster = pair.second;
                     if (realtype == &caster.subtype) {
                         HaccTable* t = HaccTable::require_cpptype(caster.subtype);
-                        void* subptr;
-                        canonical_pointer.get(p, [&caster, &subptr](void* mp){
-                            subptr = caster.down(mp);
-                        });
+                        void* subptr = caster.down(superptr);
                         const Hacc* val = t->to_hacc(subptr);
                         return new_hacc({hacc_attr(pair.first, val)});
                     }
@@ -93,7 +97,7 @@ namespace hacc {
             delegate.get(p, [t, &r](void* mp){ r = t->to_hacc(mp); });
             return r;
         }
-        else throw Error("Haccability description for <mangled: " + String(cpptype.name()) + "did not provide any way to turn into a hacc.");
+        else throw Error("Haccability description for <mangled: " + String(cpptype.name()) + "> did not provide any way to turn into a hacc.");
     }
 
     void HaccTable::update_from_hacc (void* p, const Hacc* h) {
@@ -106,9 +110,10 @@ namespace hacc {
                     throw Error("An object Hacc representing a polymorphic type must contain only one attribute.");
                 }
                 String sub = oh->name_at(0);
-                auto iter = subtypes.find(sub);
-                if (iter == subtypes.end()) {
-                    throw Error("Unknown subtype '" + sub + "' of <mangled: " + String(cpptype.name()) + ">");
+                HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
+                auto iter = pointee_t->subtypes.find(sub);
+                if (iter == pointee_t->subtypes.end()) {
+                    throw Error("Unknown subtype '" + sub + "' of <mangled: " + String(pointee_t->cpptype.name()) + ">");
                 }
                 else {
                     auto& caster = iter->second;

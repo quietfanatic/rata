@@ -15,20 +15,22 @@
 namespace hacc {
     template <class C>
     struct canonical_ptr {
-        C* p = null;
-        canonical_ptr (C* p) : p(p) { }
+        C* p;
+        canonical_ptr (C* p = null) : p(p) { }
         ~canonical_ptr () { if (p) { delete p; p = null; } }
-        canonical_ptr& operator = (C* newp) { if (p) delete p; p = newp; }
+        canonical_ptr& operator = (C* newp) { if (p) delete p; p = newp; return *this; }
         canonical_ptr (canonical_ptr&& o) { o.~canonical_ptr(); operator=(o.p); }
-        operator C*& () { return p; }
+        operator C* () const { return p; }
         C& operator * () { return *p; }
-        C& operator -> () { return *p; }
+        C* operator -> () { return p; }
     };
 }
 
 HCB_TEMPLATE_BEGIN(<class C>, hacc::canonical_ptr<C>)
-    canonical_pointer(coerce<C*>());
+     // BLERGH!  What the heck, C++, making me stick 'template' in the middle of this
+    canonical_pointer(hacc::Haccability<hacc::canonical_ptr<C>>::template assignable<C*>());
 HCB_TEMPLATE_END(<class C>, hacc::canonical_ptr<C>)
+
 
 HCB_TEMPLATE_BEGIN(<class C>, std::unique_ptr<C>)
     canonical_pointer(value_functions(
