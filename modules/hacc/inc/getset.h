@@ -61,6 +61,7 @@ namespace hacc {
         GetSet0 (const GetSet2<X, M>& gs2) :
             xtype(&typeid(X)), mtype(&typeid(M)), get(*(Get*)&gs2.get), set(*(Set*)&gs2.set)
         { }
+        operator bool () { return mtype; }
     };
 
     template <class C, bool has_members = std::is_class<C>::value || std::is_union<C>::value> struct GetSet_Builders;
@@ -124,6 +125,23 @@ namespace hacc {
             );
         }
     };
+
+     // For reifying subtype relationships.
+    struct Caster0 {
+        const std::type_info& (* subtype )();
+        void* (* up ) (void*);
+        void* (* down ) (void*);
+    };
+    template <class Base, class Sub>
+    struct Caster2 {
+        operator Caster0 () { return Caster0{
+            typeid(Sub),
+            [](void* p){ static_cast<Base*>((Sub*)p); },
+            [](void* p){ return static_cast<Sub*>((Base*)p); }
+        }; }
+    };
+
+
 
 }
 

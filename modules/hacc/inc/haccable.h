@@ -30,11 +30,17 @@ struct HaccTable {
     VArray<GetSet0> elems;
      // Variants with names specific to this interface
      // Note that this will only be used if following a pointer.
-    Map<GetSet0> variants;
+    std::unordered_map<String, GetSet0> variants;
     Func<String (void*)> select_variant;
-     // Direct translation
+     // Manual direct translation
     Func<const Hacc* (void*)> to;
     Func<void (void*, const Hacc*)> update_from;
+     // Records binary-compatible subtypes of this type, under names.
+    std::unordered_map<String, Caster0> subtypes;
+     // Allows this to be treated as a transparent (possibly polymorphic) pointer.
+    GetSet0 follow_pointer;
+     // This should be automatically set.
+    const std::type_info* (* real_typeid ) (void*);
     
     const Hacc* to_hacc (void*);
     void update_from_hacc (void*, const Hacc*);
@@ -103,6 +109,7 @@ template <class C> struct Haccability : GetSet_Builders<C> {
             table->initialized = true;
             table->allocate = per_nc<C>::allocate;
             table->deallocate = [](void* p){ delete (C*)p; };
+            table->real_typeid = [](void* p) { return &typeid(*(C*)p); };
             Haccable<C>::describe();
         }
         return table;
@@ -118,20 +125,14 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     static void delegate (const GetSet1<C>& gs) { get_table()->delegate = gs; }
     static void attr (String name, const GetSet1<C>& gs) { get_table()->attrs.emplace_back(name, gs); }
     static void elem (const GetSet1<C>& gs) { get_table()->elems.push_back(gs); }
-    static void variant (String name, const GetSet1<C>& gs) { get_table()->variants.emplace_back(name, gs); }
+    static void variant (String name, const GetSet1<C>& gs) { get_table()->variants.emplace(name, gs); }
     static void select_variant (const Func<String (const C&)>& f) { get_table()->select_variant = *(Func<String (void*)>*)&f; }
-/*    template <class B>
+    template <class B>
     static void base (String name) {
         HaccTable* t = get_table();
-        Haccable<PolyP<B>>::get_table()->variants.emplace_back(name, GetSet2<B, C>(
-            [](const B& x, const Func<void (const C&)>& c){ c(*x); },
-            [t](B& x, const Func<void (C&)>& c){
-                if (x) t->deallocate(x);
-                x = (B*)t->allocate();
-                c(*static_cast<B*>(x));
-            }
-        ));
-    }*/
+        Haccable<B>::get_table()->subtypes.emplace(name, Caster2<B, C>());
+    }
+    static void follow_pointer (const GetSet1<C>& gs) { get_table()->follow_pointer = gs; }
 };
 
 template <class C>
@@ -207,7 +208,7 @@ template <class C> C* require_id (String id) {
     using hacc::Haccability<type>::elem; \
     using hacc::Haccability<type>::variant; \
     using hacc::Haccability<type>::select_variant; \
-    /*using hacc::Haccability<type>::base;*/ \
+    using hacc::Haccability<type>::base; \
     using hacc::Haccability<type>::value_functions; \
     using hacc::Haccability<type>::ref_functions; \
     using hacc::Haccability<type>::ref_function; \

@@ -24,7 +24,22 @@ namespace hacc {
 
     const Hacc* HaccTable::to_hacc (void* p) {
         if (to) { return to(p); }
-         // Like an object first
+         // Like a union first
+        else if (variants.size() && select_variant) {
+            String v = select_variant(p);
+            auto iter = variants.find(v);
+            if (iter == variants.end()) {
+                throw Error("Selected variant '" + v + "' was not listed in variants.");
+            }
+            else {
+                auto& gs = iter->second;
+                HaccTable* t = HaccTable::require_cpptype(*gs.mtype);
+                const Hacc* val;
+                gs.get(p, [t, &val](void* mp){ val = t->to_hacc(mp); });
+                return new_hacc({std::pair<String, const Hacc*>(v, val)});
+            }
+        }
+         // Then like an object
         else if (attrs.size()) {
             hacc::Object o;
             Bomb b ([&o](){ for (auto& p : o) delete p.second; });
@@ -46,21 +61,29 @@ namespace hacc {
             b.defuse();
             return new_hacc(std::move(a));
         }
-         // Then like a union
-        else if (variants.size() && select_variant) {
-            String v = select_variant(p);
-            for (auto& pair : variants) {
-                if (pair.first == v) {
-                    HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                    const Hacc* val;
-                    pair.second.get(p, [t, &val](void* mp){ val = t->to_hacc(mp); });
-                    return new_hacc({std::pair<String, const Hacc*>(pair.first, val)});
-                }
+         // Following a pointer happens somewhere in here.
+        else if (follow_pointer) {
+            HaccTable* t = HaccTable::require_cpptype(*follow_pointer.mtype);
+            if (subtypes.empty()) { // Non-polymorphic
+                const Hacc* r;
+                follow_pointer.get(p, [t, &r](void* mp){ r = t->to_hacc(mp); });
+                return r;
             }
-            throw Error("Selected variant '" + v + "' was not listed in variants.");
+            else { // Polymorphic
+                const std::type_info* realtype = t->real_typeid(p);
+                for (auto& pair : subtypes) {
+                    auto& caster = pair.second;
+                    if (realtype == &caster.subtype()) {
+                        HaccTable* t = HaccTable::require_cpptype(caster.subtype());
+                        const Hacc* val = t->to_hacc(caster.down(p));
+                        return new_hacc({std::pair<String, const Hacc*>(pair.first, val)});
+                    }
+                }
+                throw Error("Unrecognized subtype <mangled: " + String(realtype->name()) + "> of <mangled: " + String(cpptype.name()) + ">");
+            }
         }
          // Plain delegation last.
-        else if (delegate.mtype) {
+        else if (delegate) {
             HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
             const Hacc* r;
             delegate.get(p, [t, &r](void* mp){ r = t->to_hacc(mp); });
@@ -71,7 +94,24 @@ namespace hacc {
 
     void HaccTable::update_from_hacc (void* p, const Hacc* h) {
         if (update_from) { update_from(p, h); }
-         // Like an object first
+         // Like a union next
+        else if (variants.size()) {
+            if (h->form() == OBJECT) {
+                auto oh = h->as_object();
+                if (oh->n_attrs() != 1) {
+                    throw Error("An object Hacc representing a union type must contain only one attribute.");
+                }
+                for (auto& pair : variants) {
+                    if (pair.first == oh->name_at(0)) {
+                        HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
+                        const Hacc* val = oh->value_at(0);
+                        pair.second.set(p, [val, t](void* mp){ t->update_from_hacc(mp, val); });
+                        return;
+                    }
+                }
+            }
+        }
+         // Then like an object
         else if (h->form() == OBJECT && attrs.size()) {
             auto oh = h->as_object();
             for (auto& pair : attrs) {
@@ -89,25 +129,8 @@ namespace hacc {
                 elems[i].set(p, [t, elem](void* mp){ t->update_from_hacc(mp, elem); });
             }
         }
-         // Then like a union
-        else if (variants.size()) {
-            if (h->form() == OBJECT) {
-                auto oh = h->as_object();
-                if (oh->n_attrs() != 1) {
-                    throw Error("An object Hacc representing a union type must contain only one attribute.");
-                }
-                for (auto& pair : variants) {
-                    if (pair.first == oh->name_at(0)) {
-                        HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                        const Hacc* val = oh->value_at(0);
-                        pair.second.set(p, [val, t](void* mp){ t->update_from_hacc(mp, val); });
-                        return;
-                    }
-                }
-            }
-        }
          // Plain delegation last.
-        else if (delegate.mtype) {
+        else if (delegate) {
             HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
             delegate.set(p, [t, h](void* mp){ t->update_from_hacc(mp, h); });
         }
