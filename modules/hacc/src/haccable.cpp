@@ -55,9 +55,9 @@ namespace hacc {
             for (auto& pair : variants) {
                 if (pair.first == v) {
                     HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                    const Hacc* r;
-                    pair.second.get(p, [t, &r](void* mp){ r = t->to_hacc(mp); });
-                    return r;
+                    const Hacc* val;
+                    pair.second.get(p, [t, &val](void* mp){ val = t->to_hacc(mp); });
+                    return new_hacc({std::pair<String, const Hacc*>(pair.first, val)});
                 }
             }
             throw Error("Selected variant '" + v + "' was not listed in variants.");

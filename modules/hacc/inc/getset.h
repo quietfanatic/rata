@@ -63,7 +63,7 @@ namespace hacc {
         { }
     };
 
-    template <class C, bool has_members = std::is_class<C>::value || std::is_class<C>::value> struct GetSet_Builders;
+    template <class C, bool has_members = std::is_class<C>::value || std::is_union<C>::value> struct GetSet_Builders;
     template <class C> struct GetSet_Builders<C, false> {
         template <class M>
         static GetSet2<C, M> value_functions (const Func<M (const C&)>& g, const Func<void (C&, M)>& s) {
@@ -103,24 +103,24 @@ namespace hacc {
             );
         }
         template <class M>
-        static GetSet2<C, M> value_methods (M (C::* g )(), void (C::* s )(M)) {
+        static GetSet2<C, M> value_methods (M (C::* g )()const, void (C::* s )(M)) {
             return GetSet2<C, M>(
-                [g, s](const C& x, const Func<void (const M&)>& c){ c(x.*g()); },
-                [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); x.*s(tmp); }
+                [g, s](const C& x, const Func<void (const M&)>& c){ c((x.*g)()); },
+                [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); (x.*s)(tmp); }
             );
         }
         template <class M>
-        static GetSet2<C, M> ref_methods (const M& (C::* g )(), void (C::* s )(const M&)) {
+        static GetSet2<C, M> ref_methods (const M& (C::* g )()const, void (C::* s )(const M&)) {
             return GetSet2<C, M>(
-                [g, s](const C& x, const Func<void (const M&)>& c){ c(x.*g()); },
-                [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); x.*s(tmp); }
+                [g, s](const C& x, const Func<void (const M&)>& c){ c((x.*g)()); },
+                [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); (x.*s)(tmp); }
             );
         }
         template <class M>
         static GetSet2<C, M> ref_method (M& (C::* m )()) {
             return GetSet2<C, M>(
-                [m](const C& x, const Func<void (const M&)>& c){ c(x.*m()); },
-                [m](C& x, const Func<void (M&)>& c){ c(x.*m()); }
+                [m](const C& x, const Func<void (const M&)>& c){ c((x.*m)()); },
+                [m](C& x, const Func<void (M&)>& c){ c((x.*m)()); }
             );
         }
     };

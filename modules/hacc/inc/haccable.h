@@ -120,6 +120,7 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     static void attr (String name, const GetSet1<C>& gs) { get_table()->attrs.emplace_back(name, gs); }
     static void elem (const GetSet1<C>& gs) { get_table()->elems.push_back(gs); }
     static void variant (String name, const GetSet1<C>& gs) { get_table()->variants.emplace_back(name, gs); }
+    static void select_variant (const Func<String (const C&)>& f) { get_table()->select_variant = *(Func<String (void*)>*)&f; }
     template <class B>
     static void base (String name) {
         HaccTable* t = get_table();
@@ -189,7 +190,7 @@ template <class C> C* require_id (String id) {
  // I guess we need to use some macros after all.
  // These are for convenience in defining haccabilities.  The non-template version also forces
  //  instantiation of the haccability just defined.
-#define HCB_COMMA ,
+#define HCB_COMMA ,  // because literal commas confuse function-like macros.
 #define HCB_UNQ2(a, b) a##b
 #define HCB_UNQ1(a, b) HCB_UNQ2(a, b)
 #define HCB_INSTANCE(type) static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::get_table();
@@ -206,6 +207,7 @@ template <class C> C* require_id (String id) {
     using hacc::Haccability<type>::attr; \
     using hacc::Haccability<type>::elem; \
     using hacc::Haccability<type>::variant; \
+    using hacc::Haccability<type>::select_variant; \
     using hacc::Haccability<type>::base; \
     using hacc::Haccability<type>::value_functions; \
     using hacc::Haccability<type>::ref_functions; \
@@ -218,6 +220,8 @@ template <class C> C* require_id (String id) {
     static void describe () {
 #define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
 
+
+ // The Haccable for PolyPs.
 HCB_TEMPLATE_BEGIN(<class C>, hacc::PolyP<C>)
     // variants will be provided from elsewhere.
 HCB_TEMPLATE_END(<class C>, hacc::PolyP<C>)

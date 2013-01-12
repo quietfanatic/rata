@@ -62,14 +62,49 @@ HCB_TEMPLATE_BEGIN(<class C>, MyWrapper<C>)
     delegate(member(&MyWrapper<C>::val));
 HCB_TEMPLATE_END(<class C>, MyWrapper<C>)
 
-
 MyWrapper<int> wi {0};
+
+union MyUnion {
+    enum Type {
+        NONE,
+        INT,
+        FLOAT,
+    } type;
+    struct I {
+        Type type;
+        int i;
+    } i;
+    struct F {
+        Type type;
+        float f;
+    } f;
+    MyUnion () : type{NONE} { }
+    MyUnion (int i) : i{INT, i} { }
+    MyUnion (float f) : f{FLOAT, f} { }
+    void set_i (int i_) { type = INT; i.i = i_; }
+    void set_f (float f_) { type = FLOAT; f.f = f_; }
+    int get_i () const { return i.i; }
+    float get_f () const { return f.f; }
+};
+
+HCB_BEGIN(MyUnion)
+    variant("i", value_methods(&MyUnion::get_i, &MyUnion::set_i));
+    variant("f", value_methods(&MyUnion::get_f, &MyUnion::set_f));
+    select_variant([](const MyUnion& u)->String{
+        switch (u.type) {
+            case MyUnion::INT: return "i";
+            case MyUnion::FLOAT: return "f";
+            default: return "";
+        }
+    });
+HCB_END(MyUnion)
+
 
 #include "../../tap/inc/tap.h"
 tap::Tester haccable_tester ("haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(13);
+    plan(20);
     is(hacc_from((int)4)->get_integer(), 4, "hacc_from<int> works");
     is(hacc_to_value<int>(new_hacc(35)), 35, "hacc_to<int> works");
     doesnt_throw([](){ wi = value_from_hacc<MyWrapper<int>>(new_hacc(34)); }, "from_hacc on a template haccable");
@@ -83,5 +118,12 @@ tap::Tester haccable_tester ("haccable", [](){
     is(get_id(vy1), String("vy1"), "get_id");
     is(get_id(vy2), String("vy2"), "get_id");
     is(find_by_id<Vectorly>("vy1"), &vy1, "find_by_id");
+    is(value_from_hacc<MyUnion>(new_hacc({std::pair<String, const Hacc*>("i", new_hacc(35))})).i.i, 35, "Union with declared variants can be read from hacc");
+    is(value_from_hacc<MyUnion>(new_hacc({std::pair<String, const Hacc*>("f", new_hacc(32.f))})).f.f, 32.f, "Union with declared variants can be read from hacc");
+    is(hacc_from(MyUnion(71))->form(), OBJECT, "Union with declared variants is written as object");
+    is(hacc_from(MyUnion(71))->as_object()->name_at(0), "i", "Union with declared variants can be written to hacc");
+    is(hacc_from(MyUnion(71))->as_object()->value_at(0)->get_integer(), 71, "Union with declared variants can be written to hacc");
+    is(hacc_from(MyUnion(4.f))->as_object()->name_at(0), "f", "Union with declared variants can be written to hacc");
+    is(hacc_from(MyUnion(4.f))->as_object()->value_at(0)->get_float(), 4.f, "Union with declared variants can be written to hacc");
 });
 
