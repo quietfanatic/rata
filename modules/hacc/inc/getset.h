@@ -128,7 +128,7 @@ namespace hacc {
 
      // For reifying subtype relationships.
     struct Caster0 {
-        const std::type_info& (* subtype )();
+        const std::type_info& subtype;
         void* (* up ) (void*);
         void* (* down ) (void*);
     };

@@ -182,6 +182,14 @@ HACC_NEW_DECL_MOVE(Object, o, Object)
 HACC_NEW_DECL(std::initializer_list<const Hacc*>, l, Array)
 static inline const Hacc* new_hacc (std::initializer_list<std::pair<std::basic_string<char>, const Hacc*>> l) { return new const Hacc::Object(l); }
 
+static inline std::pair<String, const Hacc*> hacc_attr (String name, const Hacc* val) {
+    return std::pair<String, const Hacc*>(name, val);
+}
+template <class... Args>
+static inline std::pair<String, const Hacc*> new_attr (String name, Args... args) {
+    return std::pair<String, const Hacc*>(name, new_hacc(args...));
+}
+
 }
 
  // Here's a utility that's frequently used with hacc.

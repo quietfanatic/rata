@@ -27,11 +27,11 @@ namespace hacc {
 }
 
 HCB_TEMPLATE_BEGIN(<class C>, hacc::canonical_ptr<C>)
-    follow_pointer(coerce<C*>());
+    canonical_pointer(coerce<C*>());
 HCB_TEMPLATE_END(<class C>, hacc::canonical_ptr<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, std::unique_ptr<C>)
-    follow_pointer(value_functions(
+    canonical_pointer(value_functions(
         [](const std::unique_ptr<C>& up){ return up.get(); },
         [](std::unique_ptr<C>& up, C*const& p){ up.reset(); up = std::unique_ptr<C>(p); }
     ));

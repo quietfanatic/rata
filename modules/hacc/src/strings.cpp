@@ -302,7 +302,7 @@ struct Parser {
                 case ':': throw error("Extra : in object");
                 case ',': throw error("Misplaced comma after : in object");
                 case '}': throw error("Missing value after : in object");
-                default: o.push_back(std::pair<String, const Hacc*>(key, parse_thing(id))); break;
+                default: o.push_back(hacc_attr(key, parse_thing(id))); break;
             }
         }
     }

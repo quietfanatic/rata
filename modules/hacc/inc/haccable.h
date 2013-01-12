@@ -38,7 +38,7 @@ struct HaccTable {
      // Records binary-compatible subtypes of this type, under names.
     std::unordered_map<String, Caster0> subtypes;
      // Allows this to be treated as a transparent (possibly polymorphic) pointer.
-    GetSet0 follow_pointer;
+    GetSet0 canonical_pointer;
      // This should be automatically set.
     const std::type_info* (* real_typeid ) (void*);
     
@@ -132,7 +132,7 @@ template <class C> struct Haccability : GetSet_Builders<C> {
         HaccTable* t = get_table();
         Haccable<B>::get_table()->subtypes.emplace(name, Caster2<B, C>());
     }
-    static void follow_pointer (const GetSet1<C>& gs) { get_table()->follow_pointer = gs; }
+    static void canonical_pointer (const GetSet1<C>& gs) { get_table()->canonical_pointer = gs; }
 };
 
 template <class C>
@@ -217,6 +217,7 @@ template <class C> C* require_id (String id) {
     using hacc::Haccability<type>::value_methods; \
     using hacc::Haccability<type>::ref_methods; \
     using hacc::Haccability<type>::ref_method; \
+    using hacc::Haccability<type>::canonical_pointer; \
     static void describe () {
 #define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
 

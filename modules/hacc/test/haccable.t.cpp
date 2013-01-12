@@ -112,14 +112,14 @@ tap::Tester haccable_tester ("haccable", [](){
     doesnt_throw([](){ update_from_hacc(wi, new_hacc(52)); }, "update_from_hacc on a template haccable");
     is(wi.val, 52, "...and it works");
     is(value_from_hacc<Vectorly>(new_hacc({new_hacc(34.0), new_hacc(52.0)})), Vectorly{34.0, 52.0}, "Vectorly accepts Array");
-    is(value_from_hacc<Vectorly>(new_hacc({std::pair<String, const Hacc*>("x", new_hacc(32.0)), std::pair<String, const Hacc*>("y", new_hacc(54.0))})), Vectorly{32.0, 54.0}, "Vectorly accepts Object");
+    is(value_from_hacc<Vectorly>(new_hacc({new_attr("x", 32.0), new_attr("y", 54.0)})), Vectorly{32.0, 54.0}, "Vectorly accepts Object");
     is(to_hacc(Vectorly{2.0, 4.0})->form(), OBJECT, "Vectorly turns into Object by default");
     is(to_hacc(Vectorly{2.0, 4.0})->as_object()->attr("y")->as_float()->f, 4.f, "Vectorly Object has atribute 'y'");
     is(get_id(vy1), String("vy1"), "get_id");
     is(get_id(vy2), String("vy2"), "get_id");
     is(find_by_id<Vectorly>("vy1"), &vy1, "find_by_id");
-    is(value_from_hacc<MyUnion>(new_hacc({std::pair<String, const Hacc*>("i", new_hacc(35))})).i.i, 35, "Union with declared variants can be read from hacc");
-    is(value_from_hacc<MyUnion>(new_hacc({std::pair<String, const Hacc*>("f", new_hacc(32.f))})).f.f, 32.f, "Union with declared variants can be read from hacc");
+    is(value_from_hacc<MyUnion>(new_hacc({new_attr("i", 35)})).i.i, 35, "Union with declared variants can be read from hacc");
+    is(value_from_hacc<MyUnion>(new_hacc({new_attr("f", 32.f)})).f.f, 32.f, "Union with declared variants can be read from hacc");
     is(hacc_from(MyUnion(71))->form(), OBJECT, "Union with declared variants is written as object");
     is(hacc_from(MyUnion(71))->as_object()->name_at(0), "i", "Union with declared variants can be written to hacc");
     is(hacc_from(MyUnion(71))->as_object()->value_at(0)->get_integer(), 71, "Union with declared variants can be written to hacc");

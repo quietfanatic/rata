@@ -36,7 +36,7 @@ namespace hacc {
                 HaccTable* t = HaccTable::require_cpptype(*gs.mtype);
                 const Hacc* val;
                 gs.get(p, [t, &val](void* mp){ val = t->to_hacc(mp); });
-                return new_hacc({std::pair<String, const Hacc*>(v, val)});
+                return new_hacc({hacc_attr(v, val)});
             }
         }
          // Then like an object
@@ -45,7 +45,7 @@ namespace hacc {
             Bomb b ([&o](){ for (auto& p : o) delete p.second; });
             for (auto& pair : attrs) {
                 HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                pair.second.get(p, [&pair, &o, t](void* mp){ o.push_back(std::pair<String, const Hacc*>(pair.first, t->to_hacc(mp))); });
+                pair.second.get(p, [&pair, &o, t](void* mp){ o.emplace_back(pair.first, t->to_hacc(mp)); });
             }
             b.defuse();
             return new_hacc(std::move(o));
@@ -62,21 +62,25 @@ namespace hacc {
             return new_hacc(std::move(a));
         }
          // Following a pointer happens somewhere in here.
-        else if (follow_pointer) {
-            HaccTable* t = HaccTable::require_cpptype(*follow_pointer.mtype);
+        else if (canonical_pointer) {
+            HaccTable* t = HaccTable::require_cpptype(*canonical_pointer.mtype);
             if (subtypes.empty()) { // Non-polymorphic
                 const Hacc* r;
-                follow_pointer.get(p, [t, &r](void* mp){ r = t->to_hacc(mp); });
+                canonical_pointer.get(p, [t, &r](void* mp){ r = t->to_hacc(mp); });
                 return r;
             }
             else { // Polymorphic
                 const std::type_info* realtype = t->real_typeid(p);
                 for (auto& pair : subtypes) {
                     auto& caster = pair.second;
-                    if (realtype == &caster.subtype()) {
-                        HaccTable* t = HaccTable::require_cpptype(caster.subtype());
-                        const Hacc* val = t->to_hacc(caster.down(p));
-                        return new_hacc({std::pair<String, const Hacc*>(pair.first, val)});
+                    if (realtype == &caster.subtype) {
+                        HaccTable* t = HaccTable::require_cpptype(caster.subtype);
+                        void* subptr;
+                        canonical_pointer.get(p, [&caster, &subptr](void* mp){
+                            subptr = caster.down(mp);
+                        });
+                        const Hacc* val = t->to_hacc(subptr);
+                        return new_hacc({hacc_attr(pair.first, val)});
                     }
                 }
                 throw Error("Unrecognized subtype <mangled: " + String(realtype->name()) + "> of <mangled: " + String(cpptype.name()) + ">");
@@ -94,6 +98,30 @@ namespace hacc {
 
     void HaccTable::update_from_hacc (void* p, const Hacc* h) {
         if (update_from) { update_from(p, h); }
+         // Ah, what the heck, let's do canonical_pointer first.
+        else if (canonical_pointer) {
+            if (h->form() == OBJECT) {
+                auto oh = h->as_object();
+                if (oh->n_attrs() != 1) {
+                    throw Error("An object Hacc representing a polymorphic type must contain only one attribute.");
+                }
+                String sub = oh->name_at(0);
+                auto iter = subtypes.find(sub);
+                if (iter == subtypes.end()) {
+                    throw Error("Unknown subtype '" + sub + "' of <mangled: " + String(cpptype.name()) + ">");
+                }
+                else {
+                    auto& caster = iter->second;
+                    HaccTable* t = HaccTable::require_cpptype(caster.subtype);
+                    const Hacc* val = oh->value_at(0);
+                    canonical_pointer.set(p, [&caster, val, t](void* basep){
+                        *(void**)basep = caster.up(t->new_from_hacc(val));
+                    });
+                    return;
+                }
+            }
+            else throw Error("A polymorphic type can only be represented by an Object hacc or an Array hacc.");
+        }
          // Like a union next
         else if (variants.size()) {
             if (h->form() == OBJECT) {
@@ -110,6 +138,7 @@ namespace hacc {
                     }
                 }
             }
+            else throw Error("A union type can only be represented by an Object hacc or an Array hacc.");
         }
          // Then like an object
         else if (h->form() == OBJECT && attrs.size()) {
