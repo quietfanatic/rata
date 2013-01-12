@@ -64,6 +64,26 @@ template <class C> struct Haccable {
 };
 namespace hacc {
 
+ // This class is essential enough to be included in every Haccable.
+ //  It represents the canonical path to a polymorphic object.
+ //  Basically, it's an auto_ptr, without the auto part. :)
+ //  It has builtin haccability of a variant type, which is automatically
+ //  built up from 'base' declarations in its variants' HCBs.
+template <class C> struct PolyP {
+    C* p;
+    operator C*& () { return p; }
+    C& operator * () { return *p; }
+    C& operator -> () { return *p; }
+    PolyP (C* p = NULL) : p(p) { }
+
+    static std::unordered_map<std::string, GetSet0>*& variants () {
+        static std::unordered_map<std::string, GetSet0> variants_pre;
+        static std::unordered_map<std::string, GetSet0>* variants = &variants_pre;
+        return variants;
+    }
+};
+
+
  // Select based on whether C has a nullary constructor.
 template <class C, bool has_nc = std::is_constructible<C>::value> struct per_nc;
 template <class C> struct per_nc<C, true> { static void* allocate () { return new C; } };
@@ -71,15 +91,15 @@ template <class C> struct per_nc<C, false> { static void* allocate () {
     throw Error("Cannot allocate <mangled: " + String(typeid(C).name()) + "> because it has no nullary constructor.");
 } };
 
- // This class provides the DSL for creating HaccTables.  Every specialization of Haccable
- //  must inherit from this.  Flags are here in case a default
-template <class C, uint flags = 0> struct Haccability : GetSet_Builders<C> {
+ // This class provides the DSL for creating HaccTables.
+ //  Every specialization of Haccable must inherit from this.
+template <class C> struct Haccability : GetSet_Builders<C> {
     
-    static HaccTable* table;
-    static HaccTable* get_table () { return table; }
-     // This calls the description code that builds the hacctable.
-    static HaccTable* gen_table () {
-        table = HaccTable::by_cpptype(typeid(C));
+     // If a table was already allocated (possibly in another compilation unit),
+     //  this returns that.  Otherwise, it builds one from C's HCB.
+     // This needs to be, and I hope is, reentrant.
+    static HaccTable* get_table () {
+        static HaccTable* table = HaccTable::by_cpptype(typeid(C));
         if (!table) {
             table = new HaccTable(typeid(C));
             table->allocate = per_nc<C>::allocate;
@@ -100,8 +120,19 @@ template <class C, uint flags = 0> struct Haccability : GetSet_Builders<C> {
     static void attr (String name, const GetSet1<C>& gs) { get_table()->attrs.emplace_back(name, gs); }
     static void elem (const GetSet1<C>& gs) { get_table()->elems.push_back(gs); }
     static void variant (String name, const GetSet1<C>& gs) { get_table()->variants.emplace_back(name, gs); }
+    template <class B>
+    static void base (String name) {
+        HaccTable* t = get_table();
+        Haccable<PolyP<B>>::get_table()->variants.emplace_back(name, GetSet2<B, C>(
+            [](const B& x, const Func<void (const C&)>& c){ c(*x); },
+            [t](B& x, const Func<void (C&)>& c){
+                if (x) t->deallocate(x);
+                x = (B*)t->allocate();
+                c(*static_cast<B*>(x));
+            }
+        ));
+    }
 };
-template <class C, uint flags> HaccTable* Haccability<C, flags>::table = gen_table();
 
 template <class C>
 HaccTable* require_hacctable () {
@@ -161,9 +192,9 @@ template <class C> C* require_id (String id) {
 #define HCB_COMMA ,
 #define HCB_UNQ2(a, b) a##b
 #define HCB_UNQ1(a, b) HCB_UNQ2(a, b)
-#define HCB_INSTANCE(type) static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::table;
+#define HCB_INSTANCE(type) static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::get_table();
 #define HCB_BEGIN(type) template <> struct Haccable<type> : hacc::Haccability<type> { static void describe () {
-#define HCB_END(type) } }; static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::table;
+#define HCB_END(type) } }; static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::get_table();
 #define HCB_PARAMS(...) __VA_ARGS__
 #define HCB_TEMPLATE_BEGIN(params, type) template params struct Haccable<type> : hacc::Haccability<type> { \
     using hacc::Haccability<type>::allocate; \
@@ -175,6 +206,7 @@ template <class C> C* require_id (String id) {
     using hacc::Haccability<type>::attr; \
     using hacc::Haccability<type>::elem; \
     using hacc::Haccability<type>::variant; \
+    using hacc::Haccability<type>::base; \
     using hacc::Haccability<type>::value_functions; \
     using hacc::Haccability<type>::ref_functions; \
     using hacc::Haccability<type>::ref_function; \
@@ -185,6 +217,10 @@ template <class C> C* require_id (String id) {
     using hacc::Haccability<type>::ref_method; \
     static void describe () {
 #define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
+
+HCB_TEMPLATE_BEGIN(<class C>, hacc::PolyP<C>)
+    // variants will be provided from elsewhere.
+HCB_TEMPLATE_END(<class C>, hacc::PolyP<C>)
 
 
 #endif
