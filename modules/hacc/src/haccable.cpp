@@ -6,7 +6,7 @@ namespace hacc {
 
      // The global list of all hacctables.
     typedef std::unordered_map<const std::type_info*, HaccTable*> Type_Map;
-    static Type_Map cpptype_map () {
+    static Type_Map& cpptype_map () {
         static Type_Map cpptype_map;
         return cpptype_map;
     }
@@ -25,7 +25,7 @@ namespace hacc {
     HaccTable* HaccTable::by_cpptype (const std::type_info& t) {
         auto& r = cpptype_map()[&t];
         if (!r) {
-            //fprintf(stderr, " # Creating HaccTable for <mangled: %s>\n", t.name());
+            //fprintf(stderr, " # Creating HaccTable for <mangled: %s>, &typeid: %lx\n", t.name(), (unsigned long)&t);
             r = new HaccTable(t);
         }
         return r;
@@ -52,7 +52,7 @@ namespace hacc {
         }
         
          // write_history takes too much memory to just keep forever.
-        if (!--have_id_map)
+        if (!--writing)
             write_history.clear();
         return const_cast<const Hacc*>(h);
     }
@@ -229,7 +229,7 @@ namespace hacc {
         else {
             char r [17];
             sprintf(r, "@%lx", (unsigned long)p);
-            return String(r, strlen(r));
+            return String((const char*)r);
         }
     }
     void* HaccTable::find_by_id (String s) {

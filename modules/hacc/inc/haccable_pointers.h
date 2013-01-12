@@ -28,14 +28,14 @@ namespace hacc {
     template <class C>
     struct canonical_ptr {
         C* p;
-        follow_ptr (C* p = null) : p(p) { }
+        canonical_ptr (C* p = null) : p(p) { }
         operator C* () const { return p; }
         C& operator * () const { return *p; }
         C* operator -> () const { return p; }
         ~canonical_ptr () { if (p) { delete p; p = null; } }
         canonical_ptr& operator = (C* newp) { if (p) delete p; p = newp; return *this; }
         canonical_ptr (canonical_ptr&& o) { o.~canonical_ptr(); operator=(o.p); }
-    }
+    };
 
 }
 
