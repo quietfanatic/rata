@@ -12,7 +12,7 @@ namespace core {
         printf("Command: ");
         std::string cmdline;
         std::getline(std::cin, cmdline);
-        Command* cmd = hacc::value_from_string<hacc::follow_ptr<Command>>(cmdline);
+        Command* cmd = hacc::value_from_string<hacc::follow_ptr<Command>>("[" + cmdline + "]");
         (*cmd)();
     }
 
