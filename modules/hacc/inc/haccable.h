@@ -42,6 +42,8 @@ struct HaccTable {
      // These will be automatically set with pointer
     const std::type_info* pointee_type = null;
     const std::type_info* (* pointee_realtype ) (void*) = null;
+     // This allows the type to accept and empty array or hash
+    bool empty;
     
     const Hacc* to_hacc (void*);
     void update_from_hacc (void*, const Hacc*);
@@ -134,6 +136,7 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     static void elem (const GetSet1<C>& gs) { get_table()->elems.push_back(gs); }
     static void variant (String name, const GetSet1<C>& gs) { get_table()->variants.emplace(name, gs); }
     static void select_variant (const Func<String (const C&)>& f) { get_table()->select_variant = *(Func<String (void*)>*)&f; }
+    static void empty () { get_table()->empty = true; }
     template <class B>
     static void base (String name) {
         Haccable<B>::get_table()->subtypes.emplace(name, Caster2<B, C>());
@@ -226,6 +229,7 @@ template <class C> C* require_id (String id) {
     using hcb::elem; \
     using hcb::variant; \
     using hcb::select_variant; \
+    using hcb::empty; \
     using hcb::base; \
     using hcb::value_functions; \
     using hcb::ref_functions; \

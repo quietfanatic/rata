@@ -155,6 +155,9 @@ namespace hacc {
                 return new_hacc(hacc::Ref(hist.id, pp));
             }
         }
+        else if (empty) {
+            return new_hacc(Array());
+        }
          // Plain delegation last.
         else if (delegate) {
             HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
@@ -326,6 +329,9 @@ namespace hacc {
                 HaccTable* t = HaccTable::require_cpptype(*elems[i].mtype);
                 t->update_with_getset(p, ah->elem(i), elems[i]);
             }
+        }
+        else if (empty) {
+             // Shh, don't tell anyone we're not doing anything
         }
          // Plain delegation last.
         else if (delegate) {
