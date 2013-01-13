@@ -34,13 +34,4 @@ struct Resource {
     Resource (Str name) : name(name) { }
 };
 
-struct ReloadAllCommand : Command {
-    ResourceGroup* grp;
-    void operator() () { if (grp) grp->reload(); }
-};
-HCB_BEGIN(ReloadAllCommand)
-    base<Command>("reload_all");
-    elem(member(&ReloadAllCommand::grp));
-HCB_END(ReloadAllCommand)
-
 #endif

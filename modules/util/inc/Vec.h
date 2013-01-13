@@ -1,6 +1,7 @@
 
-#include "honestly.h"
 #include <Box2D/Box2D.h>
+#include "honestly.h"
+#include "../../hacc/inc/haccable.h"
 
  // Our wheels are better.
 struct Vec {
@@ -43,12 +44,9 @@ CE float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
 CE Vec Vec::norm () const { return *this / mag(); }
 CE Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
 
-HCB_BEGIN(Vec) {
-    static void describe (hacc::Haccer& h, Vec& it) {
-        attr("x", it.x);
-        attr("y", it.y);
-        elem(it.x);
-        elem(it.y);
-    }
-} HCB_END(Vec)
+ // Let's just have vecs be array-like, I think.
+HCB_BEGIN(Vec)
+    elem(member(&Vec::x));
+    elem(member(&Vec::y));
+HCB_END(Vec)
 

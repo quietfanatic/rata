@@ -24,3 +24,14 @@ HCB_BEGIN(ResourceGroup)
     });
 HCB_END(ResourceGroup)
 
+struct ReloadAllCommand : Command {
+    ResourceGroup* grp;
+    void operator() () { if (grp) grp->reload(); }
+};
+HCB_BEGIN(ReloadAllCommand)
+    base<Command>("reload_all");
+    elem(member(&ReloadAllCommand::grp));
+HCB_END(ReloadAllCommand)
+
+
+

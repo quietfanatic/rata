@@ -5,6 +5,8 @@
 
 #include "../../core/inc/resources.h"
 
+#define PX (1/16.0)
+
 namespace vis {
 
     struct Image : Resource {
@@ -23,6 +25,7 @@ namespace vis {
     };
 
     void start_draw ();
+    void draw_image (Image* img, Vec p, bool fliph, bool flipv);
     void finish_draw ();
 }
 
