@@ -67,7 +67,6 @@ namespace hacc {
         if (hist.referenced) {
             hist.written->id = hist.id;
         }
-        printf(" # Returning %lx\n", (unsigned long)h);
         return h;
     }
 
