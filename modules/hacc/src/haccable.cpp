@@ -133,7 +133,8 @@ namespace hacc {
                     hist.written->id = hist.id;
                 else hist.table = pointee_t;
             }
-            if (follow_pointer) {
+             // Follow pointer only once.
+            if (follow_pointer && !hist.written) {
                 if (pointee_t->subtypes.empty()) { // Non-polymorphic
                     return pointee_t->to_hacc(pp);
                 }
