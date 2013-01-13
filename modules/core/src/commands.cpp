@@ -5,6 +5,7 @@
 
 #include "../../hacc/inc/everything.h"
 #include "../inc/commands.h"
+#include "../inc/loop.h"
 
 namespace core {
 
@@ -30,12 +31,13 @@ HCB_BEGIN(EchoCommand)
     elem(member(&EchoCommand::s));
 HCB_END(EchoCommand)
 
-//struct QuitImmediatelyCommand {
-//    operator () { quit_game(); }
-//};
+struct QuitImmediatelyCommand : Command {
+    void operator() () { core::quit_game(); }
+};
 
-//HCB_BEGIN(QuitImmediatelyCommand)
-//    empty();
-//HCB_END(QuitImmediatelyCommand)
+HCB_BEGIN(QuitImmediatelyCommand)
+    base<Command>("quit_immediately");
+    empty();
+HCB_END(QuitImmediatelyCommand)
 
 
