@@ -38,7 +38,7 @@ namespace hacc {
         Set set;
         bool copies_on_get;
         bool copies_on_set;
-        GetSet1 (const std::type_info& mtype, Get get, Set set, bool gs = true, bool cs == true) :
+        GetSet1 (const std::type_info& mtype, Get get, Set set, bool gs = true, bool cs = true) :
             mtype(&mtype), get(get), set(set), copies_on_get(gs), copies_on_set(cs)
         { }
         template <class M>
@@ -69,7 +69,7 @@ namespace hacc {
         template <class X, class M>
         GetSet0 (const GetSet2<X, M>& gs2) :
             xtype(&typeid(X)), mtype(&typeid(M)), get(*(Get*)&gs2.get), set(*(Set*)&gs2.set),
-            copies_on_get(gs1.copies_on_get), copies_on_set(gs2.copies_on_set)
+            copies_on_get(gs2.copies_on_get), copies_on_set(gs2.copies_on_set)
         { }
         operator bool () { return mtype; }
     };
@@ -121,6 +121,14 @@ namespace hacc {
                 false
             );
         }
+        template <class M>
+        static GetSet2<C, M> member (const M&) { throw Error("hcb::member is not available for non-class types."); }
+        template <class M, class M2>
+        static GetSet2<C, M> value_methods (const M&, const M2&) { throw Error("hcb::value_methods is not available for non-class types."); }
+        template <class M, class M2>
+        static GetSet2<C, M> ref_methods (const M&, const M2&) { throw Error("hcb::ref_methods is not available for non-class types."); }
+        template <class M>
+        static GetSet2<C, M> ref_method (const M&) { throw Error("hcb::ref_method is not available for non-class types."); }
     };
     template <class C> struct GetSet_Builders<C, true> : GetSet_Builders<C, false> {
         template <class M>

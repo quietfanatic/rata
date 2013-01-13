@@ -73,10 +73,11 @@ struct Ref {
     void* addr;
     bool operator== (Ref o) const { return addr == o.addr || id == o.id; }
     template <class C>
-    Ref (String id, C* addr) : id(id), addr(addr) { }
+    Ref (String id, C* addr) : id(id), addr((void*)addr) { }
     Ref (String id) : id(id), addr(null) { }
+    Ref (const char* id) : id(id), addr(null) { }
     template <class C>
-    Ref (C* addr) : id(""), addr(addr) { }
+    Ref (C* addr) : id(""), addr((void*)addr) { }
 };
 template <class T> using VArray = std::vector<T>;
 typedef VArray<const Hacc*> Array;

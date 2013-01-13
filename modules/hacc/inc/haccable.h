@@ -45,13 +45,15 @@ struct HaccTable {
     const std::type_info* (* pointee_realtype ) (void*) = null;
     
     const Hacc* to_hacc (void*);
-    const Hacc* to_hacc_inner (void*);
     void update_from_hacc (void*, const Hacc*);
-    void update_from_hacc_inner (void*, const Hacc*);
     void* new_from_hacc (const Hacc* h);
     String get_id (void*);
     void* find_by_id (String);
     void* require_id (String);
+     // Helpers that I'd like to not have to declare here but C++.
+    const Hacc* to_hacc_inner (void*);
+    void update_from_hacc_inner (void*, const Hacc*);
+    void update_with_getset (void*, const Hacc*, const GetSet0&);
 
      // This throws an error when not found
     static HaccTable* require_cpptype (const std::type_info&);
