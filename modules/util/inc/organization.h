@@ -24,15 +24,42 @@ template <class C, uint which = 0>
 struct Links {
     Linkable_Link<C, which> first_pseudo;
     Linkable_Link<C, which> last_pseudo;
-    C* first () { return empty() ? NULL : first_pseudo.next; }
-    C* last () { return empty() ? NULL : last_pseudo.prev; }
-    bool empty () {
-        return first_pesudo.next == static_cast<C*>(last_pseudo);
+    C* first () const { return empty() ? NULL : first_pseudo.next; }
+    C* last () const { return empty() ? NULL : last_pseudo.prev; }
+    bool empty () const {
+        return first_pseudo.next == static_cast<C*>(last_pseudo);
     }
-    operator bool () { return !empty(); }
+    operator bool () const { return !empty(); }
+    void clear () {
+        C* nextp;
+        for (C* p = first; p && !p->is_last(); p = nextp) {
+            nextp = p->next;
+            delete p;
+        }
+    }
 };
-
 // for (C* x = list.first(); x && !x.is_last(); x = x->next) ...
+
+HCB_TEMPLATE_BEGIN(<class C>, Links<C>)
+    using namespace hacc;
+    to([](const Links<C>& v){
+        VArray<const Hacc*> a;
+        Bomb b ([&a](){ for (auto& p : a) delete p; });
+        for (C* p = v.first; p && !p->is_last(); p = p->next) {
+            a.push_back(hacc_from(p));
+        }
+        b.defuse();
+        return new_hacc(std::move(a));
+    });
+    update_from([](Links<C>& v, const Hacc* h){
+        auto ah = h->as_array();
+        v.clear();
+        for (uint i = 0; i < ah->n_elems(); i++) {
+            C* n = new_from_hacc<C>(ah->elem(i));
+            n->link(v);
+        }
+    });
+HCB_TEMPLATE_END(<class C>, Links<C>)
 
 template <class C, uint which = 0>
 struct Linkable : Linkable_Link<C, which> {

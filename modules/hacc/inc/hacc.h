@@ -22,7 +22,7 @@ typedef int32_t int32;
 typedef uint32_t uint32;
 typedef int64_t int64;
 typedef uint64_t uint64;
-#include <memory>  // For unique_ptr
+#include <functional>
 #include <vector>
 #include <string>
 
@@ -41,7 +41,7 @@ enum Form {
     FLOAT,
     DOUBLE,
     STRING,
-    POINTER,
+    REF,
     ARRAY,
     OBJECT,
     ERROR
@@ -68,117 +68,141 @@ struct Error : std::exception {
         mess(mess), file(file), line(line), col(col)
     { }
 };
-struct Pointer {
-    String type;
+struct Ref {
     String id;
-    const std::type_info* cpptype;
     void* addr;
-    bool operator== (Pointer o) const { return (cpptype && o.cpptype && *cpptype == *o.cpptype && addr == o.addr) || (type == o.type && id == o.id); }
-    Pointer (String type, String id, const std::type_info& cpptype, void* addr) :
-        type(type), id(id), cpptype(&cpptype), addr(addr)
-    { }
+    bool operator== (Ref o) const { return addr == o.addr || id == o.id; }
     template <class C>
-    Pointer (String type, String id, C* addr) :
-        type(type), id(id), cpptype(&typeid(C)), addr(addr)
-    { }
-    Pointer (String type, String id, void* addr = null) :
-        type(type), id(id), cpptype(null), addr(addr)
-    { }
+    Ref (String id, C* addr) : id(id), addr((void*)addr) { }
+    Ref (String id) : id(id), addr(null) { }
+    Ref (const char* id) : id(id), addr(null) { }
     template <class C>
-    Pointer (C* addr) : type(""), id(""), cpptype(&typeid(C)), addr(addr) { }
-    template <class C>
-    C* get_ptr () const {
-       if (!cpptype)
-           throw Error("This Pointer Hacc is not associated with a memory address.");
-       if (*cpptype != typeid(C))
-           throw Error("This Pointer Hacc is not of type <mangled: " + String(typeid(C).name()) + ">.");
-       return (C*)addr;
-    }
+    Ref (C* addr) : id(""), addr((void*)addr) { }
 };
 template <class T> using VArray = std::vector<T>;
-typedef VArray<std::unique_ptr<Hacc>> Array;
-template <class T> using Pair = std::pair<String, T>;
-template <class T> using Map = std::vector<Pair<T>>;
-typedef Map<std::unique_ptr<Hacc>> Object;
+typedef VArray<const Hacc*> Array;
+template <class T> using Map = std::vector<std::pair<String, T>>;
+typedef Map<const Hacc*> Object;
 
-enum Flags {
-    ADVERTISE_ID = 1,
-    ADVERTISE_TYPE = 2
-};
+template <class T> using Func = std::function<T>;
 
-
-struct Value {
-    Form form;
-    union {
-        Null n;
-        Bool b;
-        Integer i;
-        Float f;
-        Double d;
-        String s;
-        Pointer p;
-        Array a;
-        Object o;
-        Error e;
-    };
-    ~Value ();
-    Value (Value&& rv);
-    void set (Value&& rv);
-    Value (Null n) : form(NULLFORM), n(n) { }
-    Value (Bool b) : form(BOOL), b(b) { }
-    Value (char i) : form(INTEGER), i(i) { }
-    Value (int8 i) : form(INTEGER), i(i) { }
-    Value (uint8 i) : form(INTEGER), i(i) { }
-    Value (int16 i) : form(INTEGER), i(i) { }
-    Value (uint16 i) : form(INTEGER), i(i) { }
-    Value (int32 i) : form(INTEGER), i(i) { }
-    Value (uint32 i) : form(INTEGER), i(i) { }
-    Value (int64 i) : form(INTEGER), i(i) { }
-    Value (uint64 i) : form(INTEGER), i(i) { }
-    Value (Float f) : form(FLOAT), f(f) { }
-    Value (Double d) : form(DOUBLE), d(d) { }
-    Value (const String& s) : form(STRING), s(s) { }
-    Value (String&& s) : form(STRING), s(std::forward<String>(s)) { }
-    Value (const Pointer& p) : form(POINTER), p(p) { }
-    Value (Pointer&& p) : form(POINTER), p(std::forward<Pointer>(p)) { }
-    //Value (const Array& a) : form(ARRAY), a(a) { }
-    Value (Array&& a) : form(ARRAY), a(std::forward<Array>(a)) { }
-    //Value (const Object& o) : form(OBJECT), o(o) { }
-    Value (Object&& o) : form(OBJECT), o(std::forward<Object>(o)) { }
-    Value (Error e) : form(ERROR), e(e) { }
-    Value () : form(UNDEFINED) { }
-};
 
 struct Hacc {
-    Value value;
-    String type;
-    String id;
-    uint32 flags = 0;
-    Hacc (Value&& value, String type = "", String id = "", uint32 flags = 0) :
-        value(std::forward<Value>(value)), type(type), id(id), flags(flags)
-    { }
-    Form form () { return value.form; }
-    Null     get_null () const;
-    Bool     get_bool () const;
-    Integer  get_integer () const;
-    Float    get_float () const;
-    Double   get_double () const;
-    const String&  get_string () const;
-    const Pointer& get_pointer () const;
-    const Array&   get_array () const;
-    const Object&  get_object () const;
-    Hacc& get_elem (uint) const;
-    bool has_attr (String) const;
-    Hacc& get_attr (String) const;
-    void add_elem (Hacc&&);
-    void add_attr (String, Hacc&&);
-
-    Error form_error (String) const;
-    String error_message () const;
-    bool defined () const { return value.form != UNDEFINED; }
+    hacc::String id;
+    virtual Form form () const = 0;
+    virtual ~Hacc () { }
+    struct Null;
+    struct Bool;
+    struct Integer;
+    struct Float;
+    struct Double;
+    struct String;
+    struct Ref;
+    struct Array;
+    struct Object;
+    struct Error;
+    struct Undefined;
+    Hacc (hacc::String id) : id(id) { }
+    hacc::Error form_error (hacc::String expected) const;
+#define HACC_GETTER_DECL(type, name, letter) const type* as_##name () const; const hacc::type& get_##name () const;
+#define HACC_GETTER_R_DECL(type, name, letter) const type* as_##name () const; hacc::type get_##name () const;
+    HACC_GETTER_R_DECL(Null, null, n)
+    HACC_GETTER_R_DECL(Bool, bool, b)
+    HACC_GETTER_R_DECL(Integer, integer, i)
+    HACC_GETTER_R_DECL(Float, float, f)
+    HACC_GETTER_R_DECL(Double, double, d)
+    HACC_GETTER_DECL(String, string, s)
+    HACC_GETTER_DECL(Ref, ref, r)
+    HACC_GETTER_DECL(Array, array, a)
+    HACC_GETTER_DECL(Object, object, o)
+    HACC_GETTER_DECL(Error, error, e)
 };
+#define HACC_VARIANT(name, theform, ...) struct Hacc::name : Hacc { Form form () const { return theform; } __VA_ARGS__ };
+#define HACC_VARIANT_S(name, theform, type, letter, ...) \
+HACC_VARIANT(name, theform, \
+    hacc::type letter; \
+    operator hacc::type () { return letter; } \
+    name (hacc::type letter, hacc::String id = "") : Hacc(id), letter(letter) { } \
+    __VA_ARGS__ \
+)
+HACC_VARIANT_S(Null, NULLFORM, Null, n, Null (hacc::String id = "") : Hacc(id), n(null) { })
+HACC_VARIANT_S(Bool, BOOL, Bool, b)
+HACC_VARIANT_S(Integer, INTEGER, Integer, i)
+HACC_VARIANT_S(Float, FLOAT, Float, f)
+HACC_VARIANT_S(Double, DOUBLE, Double, d)
+HACC_VARIANT_S(String, STRING, String, s)
+HACC_VARIANT_S(Ref, REF, Ref, r)
+HACC_VARIANT(Array, ARRAY,
+    hacc::Array a;
+    operator const hacc::Array& () const { return a; }
+    Array (const hacc::Array& a, hacc::String id = "") : Hacc(id), a(a) { }
+    Array (hacc::Array&& a, hacc::String id = "") : Hacc(id), a(a) { }
+    Array (std::initializer_list<const Hacc*> l, hacc::String id = "") : Hacc(id), a(l) { }
+    size_t n_elems () const { return a.size(); }
+    const Hacc* elem (uint i) const { return a.at(i); }
+    ~Array () { for (auto p : a) delete p; }
+)
+HACC_VARIANT(Object, OBJECT,
+    hacc::Object o;
+    operator const hacc::Object& () const { return o; }
+    Object (const hacc::Object& o, hacc::String id = "") : Hacc(id), o(o) { }
+    Object (hacc::Object&& o, hacc::String id = "") : Hacc(id), o(o) { }
+    Object (std::initializer_list<std::pair<hacc::String, const Hacc*>> l, hacc::String id = "") : Hacc(id), o(l) { }
+    size_t n_attrs () const { return o.size(); }
+    hacc::String name_at (uint i) const { return o.at(i).first; }
+    const Hacc* value_at (uint i) const { return o.at(i).second; }
+    bool has_attr (hacc::String s) const;
+    const Hacc* attr (hacc::String s) const;
+    ~Object () { for (auto& pair : o) delete pair.second; }
+)
+HACC_VARIANT_S(Error, ERROR, Error, e)
 
+ // Because ugh
+#define HACC_NEW_DECL(type, letter, name) static inline const Hacc* new_hacc (type letter, String id = "") { return new const Hacc::name(letter, id); }
+#define HACC_NEW_DECL_COPY(type, letter, name) static inline const Hacc* new_hacc (const type& letter, String id = "") { return new const Hacc::name(letter, id); }
+#define HACC_NEW_DECL_MOVE(type, letter, name) static inline const Hacc* new_hacc (type&& letter, String id = "") { return new const Hacc::name(std::forward<type>(letter), id); }
+static inline const Hacc* new_hacc () { return new const Hacc::Null(); }
+HACC_NEW_DECL(Null, n, Null)
+HACC_NEW_DECL(Bool, b, Bool)
+HACC_NEW_DECL(char, i, Integer)
+HACC_NEW_DECL(int8, i, Integer)
+HACC_NEW_DECL(uint8, i, Integer)
+HACC_NEW_DECL(int16, i, Integer)
+HACC_NEW_DECL(uint16, i, Integer)
+HACC_NEW_DECL(int32, i, Integer)
+HACC_NEW_DECL(uint32, i, Integer)
+HACC_NEW_DECL(int64, i, Integer)
+HACC_NEW_DECL(uint64, i, Integer)
+HACC_NEW_DECL(Float, f, Float)
+HACC_NEW_DECL(Double, d, Double)
+HACC_NEW_DECL(String, s, String)
+HACC_NEW_DECL(Ref, r, Ref)
+HACC_NEW_DECL_COPY(Array, a, Array)
+HACC_NEW_DECL_MOVE(Array, a, Array)
+HACC_NEW_DECL_COPY(Object, o, Object)
+HACC_NEW_DECL_MOVE(Object, o, Object)
+HACC_NEW_DECL(std::initializer_list<const Hacc*>, l, Array)
+static inline const Hacc* new_hacc (std::initializer_list<std::pair<std::basic_string<char>, const Hacc*>> l) { return new const Hacc::Object(l); }
 
+static inline std::pair<String, const Hacc*> hacc_attr (String name, const Hacc* val) {
+    return std::pair<String, const Hacc*>(name, val);
+}
+template <class... Args>
+static inline std::pair<String, const Hacc*> new_attr (String name, Args... args) {
+    return std::pair<String, const Hacc*>(name, new_hacc(args...));
+}
+
+}
+
+ // Here's a utility that's frequently used with hacc.
+namespace {
+     // Auto-deallocate a pointer if an exception happens.
+    struct Bomb {
+        const hacc::Func<void ()>* detonate;
+        Bomb (const hacc::Func<void ()>& d) :detonate(&d) { }
+        ~Bomb () { if (detonate) (*detonate)(); }
+        void defuse () { detonate = NULL; }
+    };
 }
 
 #endif

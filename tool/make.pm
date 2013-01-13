@@ -199,7 +199,16 @@ sub run (@) {
         die "\n";
     }
 }
-sub realpaths (@) { return map realpath($_), @_; }
+sub realpaths (@) {
+    return map {
+        my $r = realpath($_);
+        unless (defined $r) {
+            my $abs = rel2abs($_);
+            croak "\"$abs\" doesn't seem to be a real path";
+        }
+        $r;
+    } @_;
+}
 
 ##### PRINTING ETC.
 

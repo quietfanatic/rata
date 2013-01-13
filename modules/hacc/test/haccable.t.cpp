@@ -3,20 +3,15 @@
 
 using namespace hacc;
 
-template <> struct Haccable<int> : Haccability<int> {
-    void describe (Haccer& h, int& it) {
-        h.as_integer(it);
-    }
-};
-template <> struct Haccable<float> : Haccability<float> {
-    void info () {
-        hacctype("float");
-        hacctype("Float");
-    }
-    void describe (Haccer& h, float& it) {
-        h.as_float(it);
-    }
-};
+HCB_BEGIN(int)
+    to([](const int& x){ return new_hacc(x); });
+    update_from([](int& x, const Hacc* h){ x = h->get_integer(); });
+HCB_END(int)
+
+HCB_BEGIN(float)
+    to([](const float& x){ return new_hacc(x); });
+    update_from([](float& x, const Hacc* h){ x = h->get_float(); });
+HCB_END(float)
 
 struct Vectorly {
     float x;
@@ -27,24 +22,22 @@ struct Vectorly {
 Vectorly vy1 { 1, 2 };
 Vectorly vy2 { 3, 4 };
 
-template <> struct Haccable<Vectorly> : Haccability<Vectorly> {
-    String haccid (const Vectorly& vy) {
+HCB_BEGIN(Vectorly)
+    get_id([](const Vectorly& vy){
         if (&vy == &vy1) return "vy1";
         else if (&vy == &vy2) return "vy2";
         else return "";
-    }
-    Vectorly* find_by_haccid (String id) {
+    });
+    find_by_id([](String id){
         if (id == "vy1") return &vy1;
         else if (id == "vy2") return &vy2;
-        else return null;
-    }
-    void describe (Haccer& h, Vectorly& it) {
-        h.elem(it.x, 0.f);
-        h.elem(it.y, 0.f);
-        h.attr("x", it.x, 0.f);
-        h.attr("y", it.y, 0.f);
-    }
-};
+        else return (Vectorly*)null;
+    });
+    attr("x", member(&Vectorly::x));
+    attr("y", member(&Vectorly::y));
+    elem(member(&Vectorly::x));
+    elem(member(&Vectorly::y));
+HCB_END(Vectorly)
 
 struct MyFloat {
     float val;
@@ -53,13 +46,10 @@ struct MyFloat {
     MyFloat () { }
     bool operator == (MyFloat o) const { return val==o.val; }
 };
-template <> struct Haccable<MyFloat> : Haccability<MyFloat> {
-    void describe (Haccer& h, MyFloat& it) {
-        float f = it;  // Too encapsulated to get a reference.
-        h.as_float(f);
-        it = MyFloat(f);
-    }
-};
+
+HCB_BEGIN(MyFloat)
+    delegate(member(&MyFloat::val));
+HCB_END(MyFloat)
 
 template <class C>
 struct MyWrapper {
@@ -68,35 +58,72 @@ struct MyWrapper {
 template <class C>
 bool operator == (MyWrapper<C> a, MyWrapper<C> b) { return a.val==b.val; }
 
-template <class C> struct Haccable<MyWrapper<C>> : Haccability<MyWrapper<C>> {
-    void describe (Haccer& h, MyWrapper<C>& it) {
-        run_description(h, it.val);  // manual delegation
-    }
-};
-
+HCB_TEMPLATE_BEGIN(<class C>, MyWrapper<C>)
+    delegate(member(&MyWrapper<C>::val));
+HCB_TEMPLATE_END(<class C>, MyWrapper<C>)
 
 MyWrapper<int> wi {0};
+
+union MyUnion {
+    enum Type {
+        NONE,
+        INT,
+        FLOAT,
+    } type;
+    struct I {
+        Type type;
+        int i;
+    } i;
+    struct F {
+        Type type;
+        float f;
+    } f;
+    MyUnion () : type{NONE} { }
+    MyUnion (int i) : i{INT, i} { }
+    MyUnion (float f) : f{FLOAT, f} { }
+    void set_i (int i_) { type = INT; i.i = i_; }
+    void set_f (float f_) { type = FLOAT; f.f = f_; }
+    int get_i () const { return i.i; }
+    float get_f () const { return f.f; }
+};
+
+HCB_BEGIN(MyUnion)
+    variant("i", value_methods(&MyUnion::get_i, &MyUnion::set_i));
+    variant("f", value_methods(&MyUnion::get_f, &MyUnion::set_f));
+    select_variant([](const MyUnion& u)->String{
+        switch (u.type) {
+            case MyUnion::INT: return "i";
+            case MyUnion::FLOAT: return "f";
+            default: return "";
+        }
+    });
+HCB_END(MyUnion)
+
 
 #include "../../tap/inc/tap.h"
 tap::Tester haccable_tester ("haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(15);
-    is(hacc_from((int)4).get_integer(), 4, "hacc_from<int> works");
-    is(hacc_to<int>(Hacc(35)), 35, "hacc_to<int> works");
-    doesnt_throw([](){ wi = from_hacc<MyWrapper<int>>(Hacc(34)); }, "from_hacc on a template haccable");
+    plan(20);
+    is(hacc_from((int)4)->get_integer(), 4, "hacc_from<int> works");
+    is(hacc_to_value<int>(new_hacc(35)), 35, "hacc_to<int> works");
+    doesnt_throw([](){ wi = value_from_hacc<MyWrapper<int>>(new_hacc(34)); }, "from_hacc on a template haccable");
     is(wi.val, 34, "...works");
-    doesnt_throw([](){ update_from_hacc(wi, Hacc(52)); }, "update_from_hacc on a template haccable");
+    doesnt_throw([](){ update_from_hacc(wi, new_hacc(52)); }, "update_from_hacc on a template haccable");
     is(wi.val, 52, "...and it works");
-    Hacc* ahcs [2] = {new Hacc(34.4), new Hacc(52.123)};
-    is(from_hacc<Vectorly>(Hacc(Array(ahcs, ahcs+2))), Vectorly{34.4, 52.123}, "Vectorly accepts Array");
-    is(hacctype<float>(), String("float"), "hacctype declaration and query from cpptype works");
-    ok(HaccTable::by_hacctype("float"), "Can get HaccTables by primary hacctype");
-    ok(HaccTable::by_hacctype("Float"), "Can get HaccTables by secondary hacctype");
-    is(HaccTable::by_hacctype("FLOAT"), null, "HaccTable::by_hacctype with a non-existant hacctype returns null");
-    is(haccid(vy1), String("vy1"), "haccid");
-    is(haccid(vy2), String("vy2"), "haccid");
-    is(find_by_haccid<Vectorly>("vy1"), &vy1, "find_by_haccid");
-    is(find_by_id<Vectorly>("vy2"), &vy2, "find_by_id is the same");
+    is(value_from_hacc<Vectorly>(new_hacc({new_hacc(34.0), new_hacc(52.0)})), Vectorly{34.0, 52.0}, "Vectorly accepts Array");
+    is(value_from_hacc<Vectorly>(new_hacc({new_attr("x", 32.0), new_attr("y", 54.0)})), Vectorly{32.0, 54.0}, "Vectorly accepts Object");
+    is(to_hacc(Vectorly{2.0, 4.0})->form(), OBJECT, "Vectorly turns into Object by default");
+    is(to_hacc(Vectorly{2.0, 4.0})->as_object()->attr("y")->as_float()->f, 4.f, "Vectorly Object has atribute 'y'");
+    is(get_id(vy1), String("vy1"), "get_id");
+    is(get_id(vy2), String("vy2"), "get_id");
+    is(find_by_id<Vectorly>("vy1"), &vy1, "find_by_id");
+    is(value_from_hacc<MyUnion>(new_hacc({new_attr("i", 35)})).i.i, 35, "Union with declared variants can be read from hacc");
+    is(value_from_hacc<MyUnion>(new_hacc({new_attr("f", 32.f)})).f.f, 32.f, "Union with declared variants can be read from hacc");
+    is(hacc_from(MyUnion(71))->form(), OBJECT, "Union with declared variants is written as object");
+    is(hacc_from(MyUnion(71))->as_object()->name_at(0), "i", "Union with declared variants can be written to hacc");
+    is(hacc_from(MyUnion(71))->as_object()->value_at(0)->get_integer(), 71, "Union with declared variants can be written to hacc");
+    is(hacc_from(MyUnion(4.f))->as_object()->name_at(0), "f", "Union with declared variants can be written to hacc");
+    is(hacc_from(MyUnion(4.f))->as_object()->value_at(0)->get_float(), 4.f, "Union with declared variants can be written to hacc");
 });
 

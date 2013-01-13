@@ -7,18 +7,19 @@
 void hacc_string_test (hacc::String from, hacc::String to) {
     using namespace hacc;
     using namespace tap;
-    Hacc tree = hacc_from_string(from);
+    const Hacc* tree = hacc_from_string(from);
     const char* name = (escape_string(from) + " -> " + escape_string(to)).c_str();
-    if (tree.form() == ERROR) {
+    if (tree->form() == ERROR) {
         fail(name);
-        printf(" # Parse failed: %s\n", tree.value.e.what());
+        printf(" # Parse failed: %s\n", static_cast<const Hacc::Error*>(tree)->e.what());
     }
     else is(hacc_to_string(tree), to, name);
+    delete(tree);
 }
 
 tap::Tester hacc_strings_tester ("hacc-strings", [](){
     using namespace tap;
-    plan(46);
+    plan(45);
      printf(" # Bools\n");  // 2
     hacc_string_test("true", "true");
     hacc_string_test("false", "false");
@@ -66,15 +67,14 @@ tap::Tester hacc_strings_tester ("hacc-strings", [](){
      printf(" # Arrays and Objects\n");  // 2
     hacc_string_test("[{a: 1, b: []} [4, {c: {d: []}}]]", "[{a: 1, b: []}, [4, {c: {d: []}}]]");
     hacc_string_test("{a: []}", "{a: []}");
-     printf(" # Refs\n");  // 2
-    hacc_string_test("&@an_addr3432", "&@an_addr3432");
-    hacc_string_test("&#a_class@an_addr", "&#a_class@an_addr");
-     printf(" # Prefixes\n");  // 5
-    hacc_string_test("#int32(1)", "#int32(1)");
-    hacc_string_test("#bool(false)", "#bool(false)");
-    hacc_string_test("#\"VArray<int32>\"[1, 2, 3]", "#\"VArray<int32>\"[1, 2, 3]");
-    hacc_string_test("#int32@one(1)", "#int32@one(1)");
-    hacc_string_test("#\"int8*\"@cp(&#int8@c)", "#\"int8*\"@cp(&#int8@c)");
+     printf(" # Refs\n");  // 3
+    hacc_string_test("bareword_3432", "bareword_3432");
+    hacc_string_test("&\"stringish\\nid\"", "&\"stringish\\nid\"");
+    hacc_string_test("&anded_3432", "anded_3432");
+     printf(" # Prefixes\n");  // 3
+    hacc_string_test("one = 1", "one = 1");
+    hacc_string_test("&two=2", "two = 2");
+    hacc_string_test("{ak: ai = \"as\" bk: &\"bi\" = \"bs\"}", "{ak: ai = \"as\", bk: bi = \"bs\"}");
 });
 
 

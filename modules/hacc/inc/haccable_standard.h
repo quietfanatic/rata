@@ -3,53 +3,71 @@
 
 #include "haccable.h"
 
-template <class C> struct Haccable<C*> : hacc::Haccability<C*> {
-    void describe (hacc::Haccer& h, C*& it) {
-        h.as_pointer(it);
-    }
-};
 
-template <class C> struct Haccable<hacc::VArray<C>> : hacc::Haccability<hacc::VArray<C>> {
-    void describe (hacc::Haccer& h, hacc::VArray<C>& it) {
-        using namespace hacc;
-         // This is kind of silly honestly.
-        if (Haccer::Validator* v = h.validator()) {
-            it.assign(v->hacc.get_array().size(), C());
-        }
-        for (uint i = 0; h.writer() ? i < it.size() : h.elems_left(); i++) {
-            h.elem(it[i]);
-        }
-    }
-};
 
-template <class C> struct Haccable<hacc::Map<C>> : hacc::Haccability<hacc::Map<C>> {
-    void describe (hacc::Haccer& h, hacc::Map<C>& it) {
-        using namespace hacc;
-         // Okay this is really silly.
-        if (Haccer::Writer* w = h.writer()) {
-            for (auto iter = it.begin(); iter != it.end(); it++) {
-                h.attr(iter->first, iter->second);
-            }
+HCB_TEMPLATE_BEGIN(<class C>, hacc::VArray<C>)
+    using namespace hacc;
+    to([](const VArray<C>& v){
+        VArray<const Hacc*> a;
+        Bomb b ([&a](){ for (auto& p : a) delete p; });
+        for (const C& e : v) {
+            a.push_back(hacc_from(e));
         }
-        else if (Haccer::Validator* r = h.validator()) {
-            auto& o = r->hacc.get_object();
-            for (auto iter = o.begin(); iter != o.end(); iter++) {
-                h.attr(iter->first, it[iter->first]);
-            }
+        b.defuse();
+        return new_hacc(std::move(a));
+    });
+    update_from([](VArray<C>& v, const Hacc* h){
+        auto ah = h->as_array();
+        v.clear();
+        v.resize(ah->n_elems());
+        for (uint i = 0; i < ah->n_elems(); i++) {
+            update_from_hacc(v[i], ah->elem(i));
         }
-        else if (Haccer::Reader* r = h.reader()) {
-            auto& o = r->hacc.get_object();
-            for (auto iter = o.begin(); iter != o.end(); iter++) {
-                h.attr(iter->first, it[iter->first]);
-            }
+    });
+HCB_TEMPLATE_END(<class C>, hacc::VArray<C>)
+
+HCB_TEMPLATE_BEGIN(<class C>, hacc::Map<C>)
+    using namespace hacc;
+    to([](const Map<C>& v){
+        Map<const Hacc*> o;
+        Bomb b ([&o](){ for (auto& p : o) delete p.second; });
+        for (auto& pair : v) {
+            o.push_back(hacc_attr(pair.first, hacc_from(pair.second)));
         }
-        else if (Haccer::Finisher* r = h.finisher()) {
-            auto& o = r->hacc.get_object();
-            for (auto iter = o.begin(); iter != o.end(); iter++) {
-                h.attr(iter->first, it[iter->first]);
-            }
+        b.defuse();
+        return new_hacc(std::move(o));
+    });
+    update_from([](Map<C>& v, const Hacc* h){
+        auto oh = h->as_object();
+        v.clear();
+        v.resize(oh->n_attrs());
+        for (uint i = 0; i < oh->n_attrs(); i++) {
+            v[i].first = oh->name_at(i);
+            update_from_hacc(v[i].second, oh->value_at(i));
         }
-    }
-};
+    });
+HCB_TEMPLATE_END(<class C>, hacc::Map<C>)
+
+HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
+    using namespace hacc;
+    to([](const std::unordered_map<std::string, C>& v){
+        Map<const Hacc*> o;
+        Bomb b ([&o](){ for (auto& p : o) delete p.second; });
+        for (auto& pair : v) {
+            o.push_back(hacc_attr(pair.first, hacc_from(pair.second)));
+        }
+        b.defuse();
+        return new_hacc(std::move(o));
+    });
+    update_from([](std::unordered_map<std::string, C>& v, const Hacc* h){
+        auto oh = h->as_object();
+        v.clear();
+        v.reserve(oh->n_attrs());
+        for (uint i = 0; i < oh->n_attrs(); i++) {
+            update_from_hacc(v[oh->name_at(i)], oh->value_at(i));
+        }
+    });
+HCB_TEMPLATE_END(<class C>, std::unordered_map<std::string HCB_COMMA C>)
+
 
 #endif
