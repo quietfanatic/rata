@@ -11,17 +11,6 @@ namespace hacc {
         return cpptype_map;
     }
 
-     // These are used to wrangle IDs to/from pointers when processing haccs.
-    struct write_id_info {
-        std::string id;
-        HaccTable* table = null;
-        Hacc* written = null;
-        bool referenced = false;
-    };
-    std::unordered_map<void*, write_id_info> write_history;
-    uint writing = 0;
-
-
     HaccTable* HaccTable::by_cpptype (const std::type_info& t) {
         auto& r = cpptype_map()[&t];
         if (!r) {
@@ -38,9 +27,51 @@ namespace hacc {
 
     HaccTable::HaccTable (const std::type_info& t) : cpptype(t) { }
 
+     // This is used to coordinate IDs when writing
+    struct write_id_info {
+        std::string id;
+        HaccTable* table = null;
+        Hacc* written = null;
+        bool referenced = false;
+    };
+    static std::unordered_map<void*, write_id_info> write_history;
+    static uint writing = 0;
+    struct write_lock {
+        write_lock () { writing++; }
+        ~write_lock () { if (!--writing) write_history.clear(); }
+    };
+     // These are used to make sure pointers are updated after the pointed-to data
+    static std::unordered_map<String, Func<void* ()>> read_ids;
+    static std::vector<Func<void ()>> delayed_updates;
+    static uint reading = 0;
+    struct read_history_lock {
+        read_lock () { reading++; }
+        ~read_lock () {
+             // Iteration over delayed_reads should not happen in destructor
+             //  for exception safety.
+            if (!--reading) {
+                read_ids.clear();
+                delayed_reads.clear();
+            }
+        }
+    };
+     // If the data's been copied, we use the corresponding get method. :)
+    void* find_maybe_copied (String id) {
+        auto iter = read_ids.find(id);
+        if (iter != read_ids.end()) {
+            auto jter = copied_spots.find(iter->second);
+            if (jter == copied_spots.end()) {
+                return iter->second;
+            }
+            else {
+                return jter->second();
+            }
+        }
+        else return null;
+    }
+
     const Hacc* HaccTable::to_hacc (void* p) {
-         // create a temporary id system if one doesn't currently exist.
-        if (!writing++) /* no-op */;
+        write_history_lock wl;
 
         const Hacc* h = to_hacc_inner(p);
          // Save id if this address has been referenced
@@ -51,9 +82,6 @@ namespace hacc {
             hist.written->id = hist.id;
         }
         
-         // write_history takes too much memory to just keep forever.
-        if (!--writing)
-            write_history.clear();
         return const_cast<const Hacc*>(h);
     }
 
@@ -145,6 +173,62 @@ namespace hacc {
     }
 
     void HaccTable::update_from_hacc (void* p, const Hacc* h) {
+        read_history_lock rl;
+        update_from_hacc_inner(p, h);
+        if (reading == 1) {
+             // Must be amenable to expansion during iteration.
+            for (uint i = 0; i < delayed_updates.size(); i++) {
+                delayed_updates[i]();
+            }
+        }
+    }
+
+     // If the set function copies data, thus invalidating the old copy's address,
+     //  we must provide a way to get the address of the new data
+    void HaccTable::update_with_getset (void* p, const Hacc* h, const GetSet0& gs) {
+         // For things with IDs, save the ID temporarily
+        if (!h->id.empty()) {
+            if (gs.copy_on_set) {
+                 // If the get function copies too, all hope is lost.
+                 //  ...how did you manage to make a pointer to this in the first place?
+                if (gs.copy_on_get) {
+                    gs.set(p, [&](void* mp){
+                        read_ids.emplace(mp, null);  // record that this is unavailable
+                        update_from_hacc_inner(mp, h);
+                    });
+                }
+                else {
+                    const GetSet0::Get& get = gs.get;
+                    gs.set(p, [&](void* mp){
+                        read_ids.emplace(mp, [get, p](){
+                            void* newmp;
+                            get(p, [&newp](void* mp2){ newmp = mp2; });
+                            return newmp;
+                        }
+                        update_from_hacc_inner(mp, h);
+                    });
+                }
+            }
+            else {
+                gs.set(p, [&](void* mp){
+                    read_ids.emplace(mp, [mp](){ return mp; });
+                    update_from_hacc_inner(mp, h);
+                });
+            }
+        }
+         // For refs, schedule an operation to find the pointee by ID
+        else if (h->form() == REF) {
+            delayed_updates.emplace_back([this, p, h, &gs](){
+                gs.set(p, [this, h](void* mp){
+                    update_from_hacc_inner(mp, h);
+                });
+            });
+        }
+         // For everything else, just do the thing now.
+        else gs.set(p, [&](void* mp){ update_from_hacc(mp, h); }
+    }
+
+    void HaccTable::update_from_hacc_inner (void* p, const Hacc* h) {
         if (update_from) { update_from(p, h); }
          // Ah, what the heck, let's do pointers first.
         else if (pointer) {
@@ -170,8 +254,28 @@ namespace hacc {
                         return;
                     }
                 }
+                throw Error("A polymorphic type can only be represented by an Object hacc or an Array hacc.");
             }
-            throw Error("A polymorphic type can only be represented by an Object hacc or an Array hacc.");
+            else if (h->form() == REF) {
+                auto rh = h->as_ref();
+                auto iter = read_ids.find(rh->id);
+                if (iter != read_ids.end()) {
+                    if (iter->second) {
+                        void* addr = iter->second();
+                        pointer.set(p, [&addr, this](void* mp){
+                            *(void**)mp = addr;
+                        });
+                    }
+                    else throw Error("The <mangled: " + String(pointee_t->cpptype.name()) + "> with ID '" + rh->id + "' could not be referenced due to too much encapsulation.");
+                }
+                else if (void* addr = pointee_t->find_by_id(rh->id)) {
+                    pointer.set(p, [&addr, this](void* mp){
+                        *(void**)mp = addr;
+                    });
+                }
+                else throw Error("No <mangled: " + String(pointee_t->cpptype.name()) + "> with ID '" + rh->id + "' could be found.");
+            }
+            else throw Error("A non-followed pointer can only be represented by a Ref hacc. (Did you forget the &?)");
         }
          // Like a union next
         else if (variants.size()) {
@@ -183,8 +287,7 @@ namespace hacc {
                 for (auto& pair : variants) {
                     if (pair.first == oh->name_at(0)) {
                         HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                        const Hacc* val = oh->value_at(0);
-                        pair.second.set(p, [val, t](void* mp){ t->update_from_hacc(mp, val); });
+                        t->update_with_getset(p, oh->value_at(0), pair.second);
                         return;
                     }
                 }
@@ -196,8 +299,7 @@ namespace hacc {
             auto oh = h->as_object();
             for (auto& pair : attrs) {
                 HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                const Hacc* attr = oh->attr(pair.first);
-                pair.second.set(p, [attr, t](void* mp){ t->update_from_hacc(mp, attr); });
+                t->update_with_getset(p, oh->attr(pair.first), pair.second);
             }
         }
          // Like an array next
@@ -205,14 +307,13 @@ namespace hacc {
             auto ah = h->as_array();
             for (uint i = 0; i < elems.size(); i++) {
                 HaccTable* t = HaccTable::require_cpptype(*elems[i].mtype);
-                const Hacc* elem = ah->elem(i);
-                elems[i].set(p, [t, elem](void* mp){ t->update_from_hacc(mp, elem); });
+                t->update_with_getset(p, ah->elem(i), elems[i]);
             }
         }
          // Plain delegation last.
         else if (delegate) {
             HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
-            delegate.set(p, [t, h](void* mp){ t->update_from_hacc(mp, h); });
+            t->update_with_getset(p, h, delegate);
         }
         else throw Error("Haccability description for <mangled: " + String(cpptype.name()) + "did not provide any way to update from hacc.");
     }

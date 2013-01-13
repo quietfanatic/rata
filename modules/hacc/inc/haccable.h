@@ -47,6 +47,7 @@ struct HaccTable {
     const Hacc* to_hacc (void*);
     const Hacc* to_hacc_inner (void*);
     void update_from_hacc (void*, const Hacc*);
+    void update_from_hacc_inner (void*, const Hacc*);
     void* new_from_hacc (const Hacc* h);
     String get_id (void*);
     void* find_by_id (String);
