@@ -45,8 +45,6 @@ workflow {
 
     include glob 'modules/*';
 
-    our @libs = qw(-lGL -lglfw -lSOIL lib/libBox2D.a);
-
     phony 'test', sub { targetmatch qr/^modules\/.*\/test/ }, sub { };
 
     phony 'clean', sub { targetmatch qr/^modules\/.*\/clean/ }, sub { };
