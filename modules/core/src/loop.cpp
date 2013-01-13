@@ -3,6 +3,7 @@
 #include "GL/glfw.h"
 
 #include "../inc/loop.h"
+#include "../inc/commands.h"
 #include "../../vis/inc/vis.h"
 
 namespace core {
@@ -22,6 +23,9 @@ namespace core {
             switch (keycode) {
                 case GLFW_KEY_ESC: {
                     quit_game();
+                }
+                case '`': {
+                    command_from_terminal();
                 }
                 default: {
 //                    if (keycode < 400)

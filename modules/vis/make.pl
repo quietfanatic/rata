@@ -17,7 +17,9 @@ workflow {
 
     include '../..';
 
-    cppc_rule('tmp/vis.o', [qw<src/vis.cpp inc/vis.h>]);
+    subdep('src/vis.cpp', 'inc/vis.h');
+
+    cppc_rule('tmp/vis.o', 'src/vis.cpp');
 
     clean_rule(glob 'tmp/*');
 
