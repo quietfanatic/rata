@@ -1,8 +1,9 @@
 
 #include <stdlib.h>
 #include "GL/glfw.h"
-#include "../inc/loop.h"
 
+#include "../inc/loop.h"
+#include "../../vis/inc/vis.h"
 
 namespace core {
 
@@ -47,7 +48,10 @@ namespace core {
         glfwSetWindowCloseCallback(close_cb);
         for (;;) {
             glfwPollEvents();
+            vis::start_draw();
             glfwSleep(1/60.0);
+            vis::finish_draw();
+            glfwSwapBuffers();
         }
     }
 

@@ -1,5 +1,5 @@
-#ifndef HAVE_SYSTEM_STATE_H
-#define HAVE_SYSTEM_STATE_H
+#ifndef HAVE_CORE_STATE_H
+#define HAVE_CORE_STATE_H
 
 struct Stateful;
 

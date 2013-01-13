@@ -1,4 +1,5 @@
-
+#ifndef HAVE_CORE_LOOP_H
+#define HAVE_CORE_LOOP_H
 
 namespace core {
 
@@ -8,4 +9,4 @@ void main_loop ();
 
 }
 
-
+#endif
