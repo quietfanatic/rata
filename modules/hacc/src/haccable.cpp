@@ -228,16 +228,25 @@ namespace hacc {
         else if (pointer) {
             HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
             if (follow_pointer) {
-                String sub;
-                const Hacc* val;
-                hacc::Hacc::Array rest ({});
                 if (h->form() == OBJECT) {
                     auto oh = h->as_object();
                     if (oh->n_attrs() != 1) {
                         throw Error("An object Hacc representing a polymorphic type must contain only one attribute.");
                     }
-                    sub = oh->name_at(0);
-                    val = oh->value_at(0);
+                    String sub = oh->name_at(0);
+                    const Hacc* val = oh->value_at(0);
+                    auto iter = pointee_t->subtypes.find(sub);
+                    if (iter == pointee_t->subtypes.end()) {
+                        throw Error("Unknown subtype '" + sub + "' of <mangled: " + String(pointee_t->cpptype.name()) + ">");
+                    }
+                    else {
+                        auto& caster = iter->second;
+                        HaccTable* t = HaccTable::require_cpptype(caster.subtype);
+                        pointer.set(p, [&caster, val, t](void* basep){
+                            *(void**)basep = caster.up(t->new_from_hacc(val));
+                        });
+                        return;
+                    }
                 }
                 else if (h->form() == ARRAY) {
                     auto ah = h->as_array();
@@ -247,21 +256,20 @@ namespace hacc {
                     if (ah->elem(0)->form() != REF) {
                         throw Error("An array Hacc representing a polymorphic type must have a Ref as it's first element.");
                     }
-                    sub = ah->elem(0)->as_ref()->r.id;
-                    rest.a = Array(ah->a.begin()+1, ah->a.end());
-                    val = &rest;
-                }
-                auto iter = pointee_t->subtypes.find(sub);
-                if (iter == pointee_t->subtypes.end()) {
-                    throw Error("Unknown subtype '" + sub + "' of <mangled: " + String(pointee_t->cpptype.name()) + ">");
-                }
-                else {
-                    auto& caster = iter->second;
-                    HaccTable* t = HaccTable::require_cpptype(caster.subtype);
-                    pointer.set(p, [&caster, val, t](void* basep){
-                        *(void**)basep = caster.up(t->new_from_hacc(val));
-                    });
-                    return;
+                    String sub = ah->elem(0)->as_ref()->r.id;
+                    const Hacc* val = new_hacc(Array(ah->a.begin()+1, ah->a.end()));
+                    auto iter = pointee_t->subtypes.find(sub);
+                    if (iter == pointee_t->subtypes.end()) {
+                        throw Error("Unknown subtype '" + sub + "' of <mangled: " + String(pointee_t->cpptype.name()) + ">");
+                    }
+                    else {
+                        auto& caster = iter->second;
+                        HaccTable* t = HaccTable::require_cpptype(caster.subtype);
+                        pointer.set(p, [&caster, val, t](void* basep){
+                            *(void**)basep = caster.up(t->new_from_hacc(val));
+                        });
+                        return;
+                    }
                 }
                 throw Error("A polymorphic type can only be represented by an Object hacc or an Array hacc.");
             }
