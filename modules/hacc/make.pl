@@ -35,6 +35,7 @@ workflow {
     cppc_rule('tmp/strings.t.o', [qw<test/strings.t.cpp inc/strings.h>]);
     cppc_rule('tmp/files.t.o', [qw<test/files.t.cpp inc/files.h>]);
     cppc_rule('tmp/haccable.t.o', [qw<test/haccable.t.cpp inc/haccable.h>]);
+    cppc_rule('tmp/everything.t.o', [qw<test/everything.t.cpp inc/everything.h>]);
     cppc_rule('tmp/haccable_standard.t.o', [qw<test/haccable_standard.t.cpp inc/haccable_standard.h>]);
     cppc_rule('tmp/haccable_pointers.t.o', [qw<test/haccable_pointers.t.cpp inc/haccable_pointers.h>]);
     cppc_rule('tmp/haccable_integration.t.o', [qw<test/haccable_integration.t.cpp inc/haccable_integration.h>]);

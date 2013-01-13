@@ -1,5 +1,5 @@
-#ifndef HAVE_HACCABLE_POINTERS
-#define HAVE_HACCABLE_POINTERS
+#ifndef HAVE_HACC_HACCABLE_POINTERS
+#define HAVE_HACC_HACCABLE_POINTERS
 
 #include <memory>
 #include "haccable.h"

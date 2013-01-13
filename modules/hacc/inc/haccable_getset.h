@@ -1,5 +1,5 @@
-#ifndef HAVE_HACC_GETSET_H
-#define HAVE_HACC_GETSET_H
+#ifndef HAVE_HACC_HACCABLE_GETSET_H
+#define HAVE_HACC_HACCABLE_GETSET_H
 
  // This file provides three classes for encapsulating OO magic attributes.
  // GetSet2, GetSet1, and GetSet0 progress from less to more type erasure.

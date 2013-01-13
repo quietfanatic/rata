@@ -43,16 +43,16 @@ template <class C> C* string_to_new (String s) {
 }
 
  // Haccs <-> Files
-void hacc_to_file (const Hacc* h, Either_String f) {
+static inline void hacc_to_file (const Hacc* h, Either_String f) {
     string_to_file(hacc_to_string(h), f);
 }
-const Hacc* hacc_from_file (Either_String f) {
+static inline const Hacc* hacc_from_file (Either_String f) {
     return hacc_from_string(string_from_file(f));
 }
-void file_from_hacc (Either_String f, const Hacc* h) {
+static inline void file_from_hacc (Either_String f, const Hacc* h) {
     return file_from_string(f, string_from_hacc(h));
 }
-const Hacc* file_to_hacc (Either_String f) {
+static inline const Hacc* file_to_hacc (Either_String f) {
     return string_to_hacc(file_to_string(f));
 }
 
