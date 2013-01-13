@@ -39,6 +39,16 @@ HCB_BEGIN(SubThing2)
     delegate(supertype<HasAFloat>());
 HCB_END(SubThing2)
 
+struct SubThing3 : SuperThing {
+    int val;
+    float number () { return val; }
+};
+
+HCB_BEGIN(SubThing3)
+    base<SuperThing>("sub3");
+    elem(member(&SubThing3::val));
+HCB_END(SubThing3)
+
 hacc::canonical_ptr<SuperThing> the_p;
 
 struct Reffable {
@@ -81,7 +91,7 @@ Self_Ref yourself { 4, NULL };
 tap::Tester haccable_pointers_tester ("haccable_pointers", [](){
     using namespace hacc;
     using namespace tap;
-    plan(16);
+    plan(18);
     doesnt_throw([](){ update_from_hacc(the_p, new_hacc({new_attr("sub1", 54)})); }, "Can update_from_hacc on polymorphic canonical_ptr...");
     is(the_p->number(), 54.f, "...which works correctly");
     is(to_hacc(the_p)->form(), OBJECT, "polymorphic canonical_pointer produces an object hacc");
@@ -90,6 +100,8 @@ tap::Tester haccable_pointers_tester ("haccable_pointers", [](){
     is(the_p->number(), 20.f, "...which works correctly");
     is(to_hacc(the_p)->form(), OBJECT, "polymorphic canonical_pointer produces an object hacc");
     is(to_hacc(the_p)->as_object()->attr("sub2")->get_float(), 20.f, "to_hacc on polymorphic canonical_pointer works.");
+    doesnt_throw([](){ update_from_hacc(the_p, new_hacc({new_hacc(Ref("sub3")), new_hacc(32)})); }, "polymorphic canonical_ptr can accept array-type union notation...");
+    is(the_p->number(), 32.f, "...which works correctly");
     Reffable* rp = &r1;
     is(to_hacc(rp)->form(), REF, "pointers become REFs");
     is(to_hacc(rp)->as_ref()->r.id, String("r1"), "to_hacc on pointer uses get_id");
