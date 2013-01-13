@@ -91,11 +91,19 @@ namespace hacc {
          // Then like an object
         else if (attrs.size()) {
             hacc::Object o;
-//            hacc::Hacc::Object oh {hacc::Object()};
-            try { for (auto& pair : attrs) {
-                HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                pair.second.get(p, [&pair, &o, t](void* mp){ o.emplace_back(pair.first, t->to_hacc(mp)); });
-            } } catch (hacc::Error& e) { printf(" # Got error: %s\n", e.what()); throw e; }
+             // Okay, for some reason Bombs are segfaulting here.
+            try {
+                for (auto& pair : attrs) {
+                    HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
+                    pair.second.get(p, [&pair, &o, t](void* mp){ o.emplace_back(pair.first, t->to_hacc(mp)); });
+                }
+            } catch (std::exception& e) {
+                for (auto& p : o) delete p.second;
+                throw e;
+            } catch (...) {
+                for (auto& p : o) delete p.second;
+                throw std::bad_exception();
+            }
             return new_hacc(std::move(o));
         }
          // Like an array next
