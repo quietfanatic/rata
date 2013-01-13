@@ -3,23 +3,25 @@
 
 #include <unordered_map>
 
+#include "../../core/inc/resources.h"
+
 namespace vis {
-/*
-    struct Image : Resource<Image> {
-        const char* filename;
+
+    struct Image : Resource {
         GLuint tex = 0;
         uint w;
         uint h;
 
-        void load ();
-        void unload ();
-        void reload ();
+        bool load ();
+        bool unload ();
+        bool reload ();
 
-        Image (const char* filename) : filename(filename) {
-            load();
-        }
+        static ResourceGroup all;
+
+        Image (std::string name) : Resource(name) { }
+        ~Image () { unload(); }
     };
-*/
+
     void start_draw ();
     void finish_draw ();
 }

@@ -3,6 +3,8 @@
 
 #include <unordered_map>
 #include <string>
+#include <math.h>
+
 typedef std::string Str;
 template <class T> using Hash = std::unordered_map<std::string, T>;
 template <class T> using Init_Safe = T& ();
