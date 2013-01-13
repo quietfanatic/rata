@@ -10,6 +10,9 @@ template <class F> using Func = std::function<F>;
 
 namespace hacc {
 
+     // This file is starting to show its age already.
+    template <class C> inline void instantiate_table ();
+
     template <class X, class M>
     struct GetSet2 {
          // In order to minimize copying of temporaries, get and set have to be
@@ -26,7 +29,8 @@ namespace hacc {
         bool copies_on_get;
         bool copies_on_set;
         GetSet2 (Get get, Set set, bool cg = true, bool cs = true) :
-            get(get), set(set), copies_on_get(cg), copies_on_set(cs) { }
+            get(get), set(set), copies_on_get(cg), copies_on_set(cs)
+        { instantiate_table<M>(); }  // Be sure to instantiate M's HCB.
     };
 
     template <class X>

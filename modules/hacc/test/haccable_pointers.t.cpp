@@ -72,7 +72,6 @@ HCB_BEGIN(Self_Ref)
     attr("x", member(&Self_Ref::x));
     attr("self", member(&Self_Ref::self));
 HCB_END(Self_Ref)
-HCB_INSTANCE(Self_Ref*)  // TODO: Make this not necessary
 
 Self_Ref myself { 3, &myself };
 const hacc::Hacc* haccself = NULL;

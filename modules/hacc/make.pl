@@ -20,7 +20,7 @@ workflow {
     subdep('inc/strings.h', 'inc/hacc.h');
     subdep('inc/files.h', 'inc/hacc.h');
     subdep('inc/haccers.h', 'inc/hacc.h');
-    subdep('inc/haccable.h', 'inc/getset.h');
+    subdep('inc/haccable.h', 'inc/haccable_getset.h');
     subdep('inc/haccable_standard.h', 'inc/haccable.h');
     subdep('inc/haccable_pointers.h', 'inc/haccable.h');
     subdep('inc/haccable_integration', [qw<inc/haccable.h inc/strings.h inc/files.h>]);

@@ -3,8 +3,7 @@
 
 #include <unordered_map>
 #include "hacc.h"
-#include "getset.h"
-
+#include "haccable_getset.h"
 
 namespace hacc {
 
@@ -73,7 +72,10 @@ template <class C> struct Haccable {
         return table;
     }
 };
+
 namespace hacc {
+
+    template <class C> inline void instantiate_table () { Haccable<C>::get_table(); }
 
  // This class is essential enough to be included in every Haccable.
  //  It represents the canonical path to a polymorphic object.
