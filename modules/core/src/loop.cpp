@@ -54,10 +54,10 @@ namespace core {
         for (;;) {
             glfwPollEvents();
             vis::start_draw();
-            vis::draw_image(test_image, Vec(4, 4), false, false);
+            vis::draw_image(test_image, Vec(0, 0), false, false);
             vis::finish_draw();
-            glfwSleep(1/60.0);
             glfwSwapBuffers();
+            glfwSleep(1/60.0);
         }
     }
 
