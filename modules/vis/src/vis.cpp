@@ -1,6 +1,7 @@
 
 #include <GL/gl.h>
 #include <SOIL/SOIL.h>
+#include "../../hacc/inc/haccable_standard.h"
 #include "../inc/vis.h"
 
 namespace vis {
@@ -16,7 +17,7 @@ namespace vis {
 
     bool Image::load () {
         int iw; int ih; int ich;
-        uint8* data = SOIL_load_image(name.c_str(), &iw, &ih, &ich, 4);
+        uint8* data = SOIL_load_image(("modules/" + name).c_str(), &iw, &ih, &ich, 4);
         if (!data) {
             fprintf(stderr, "Failed to load image %s: %s\n", name.c_str(), SOIL_last_result());
             return false;
@@ -33,7 +34,7 @@ namespace vis {
             return false;
         }
         unload();
-        tex = newtex; w = iw; h = ih;
+        tex = newtex; size = Vec(iw, ih);
         return true;
     }
     bool Image::reload () { return load(); }
@@ -57,15 +58,44 @@ namespace vis {
         glEnable(GL_TEXTURE_2D);
     }
 
-    void draw_image (Image* img, Vec p, bool fliph, bool flipv) {
-        if (!img) return;
+    void draw_img (Image* img, SubImg* sub, Vec p, bool fliph, bool flipv) {
+        if (!img || !sub) return;
         glBindTexture(GL_TEXTURE_2D, img->tex);
+        float tl, tb, tr, tt, vl, vb, vr, vt;
+        if (fliph) {
+            tl = sub->pos.x + sub->size.x;
+            tr = sub->pos.x;
+            vl = p.x - sub->size.x + sub->center.x;
+            vr = p.x + sub->center.x;
+        }
+        else {
+            tl = sub->pos.x;
+            tr = sub->pos.x + sub->size.x;
+            vl = p.x - sub->center.x;
+            vr = p.x + sub->size.x - sub->center.x;
+        }
+        if (flipv) {
+            tb = sub->pos.y + sub->size.y;
+            tt = sub->pos.y;
+            vb = p.y - sub->size.y + sub->center.y;
+            vt = p.y + sub->center.y;
+        }
+        else {
+            tb = sub->pos.y;
+            tt = sub->pos.y + sub->size.y;
+            vb = p.y - sub->center.y;
+            vt = p.y + sub->size.y - sub->center.y;
+        }
+        tl /= img->size.x;
+        tb /= img->size.y;
+        tr /= img->size.x;
+        tt /= img->size.y;
          // Direct Mode is still the easiest for drawing individual images.
         glBegin(GL_QUADS);
-            glTexCoord2f(!fliph, !flipv); glVertex2f(p.x, p.y);
-            glTexCoord2f(!!fliph, !flipv); glVertex2f(p.x + img->w*PX, p.y);
-            glTexCoord2f(!!fliph, !!flipv); glVertex2f(p.x + img->w*PX, p.y + img->h*PX);
-            glTexCoord2f(!fliph, !!flipv); glVertex2f(p.x, p.y + img->h*PX);
+            glTexCoord2f(tl, 1-tb); glVertex2f(vl, vb);
+            glTexCoord2f(tr, 1-tb); glVertex2f(vr, vb);
+            glTexCoord2f(tr, 1-tt); glVertex2f(vr, vt);
+            glTexCoord2f(tl, 1-tt); glVertex2f(vl, vt);
         glEnd();
     }
 
@@ -92,4 +122,19 @@ HCB_BEGIN(vis::Image)
         return p;
     });
 HCB_END(vis::Image)
+
+HCB_BEGIN(vis::SubImg)
+    using namespace vis;
+    attr("pos", member(&SubImg::pos));
+    elem(member(&SubImg::pos));
+    attr("size", member(&SubImg::size));
+    elem(member(&SubImg::size));
+    attr("center", member(&SubImg::center));
+    elem(member(&SubImg::center));
+HCB_END(vis::SubImg)
+
+HCB_BEGIN(vis::Layout1D)
+    delegate(member(&vis::Layout1D::subs));
+HCB_END(vis::Layout1D)
+HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA vis::SubImg>);
 

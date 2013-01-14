@@ -10,10 +10,10 @@
 
 namespace vis {
 
+     // Only the barebones image file
     struct Image : Resource {
         GLuint tex = 0;
-        uint w = 0;
-        uint h = 0;
+        Vec size;
 
         bool load ();
         bool unload ();
@@ -25,8 +25,21 @@ namespace vis {
         ~Image () { unload(); }
     };
 
+     // Part of another image
+    struct SubImg {
+        Vec pos;
+        Vec size;
+        Vec center;
+        std::vector<Vec> misc;
+    };
+
+     // Basically, this describes a set of subimgs on another image.
+    struct Layout1D {
+        std::unordered_map<std::string, SubImg> subs;
+    };
+
     void start_draw ();
-    void draw_image (Image* img, Vec p, bool fliph, bool flipv);
+    void draw_img (Image* set, SubImg* sub, Vec p, bool fliph, bool flipv);
     void finish_draw ();
 }
 

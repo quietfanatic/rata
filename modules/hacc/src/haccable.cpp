@@ -71,7 +71,9 @@ namespace hacc {
     }
 
     const Hacc* HaccTable::to_hacc_inner (void* p) {
-        if (to) { return to(p); }
+        if (!initialized)
+            throw Error("Unhaccable type <mangled: " + String(cpptype.name()) + ">");
+        else if (to) { return to(p); }
          // Like a union first
         else if (variants.size() && select_variant) {
             String v = select_variant(p);
@@ -226,7 +228,9 @@ namespace hacc {
     }
 
     void HaccTable::update_from_hacc_inner (void* p, const Hacc* h) {
-        if (update_from) { update_from(p, h); }
+        if (!initialized)
+            throw Error("Unhaccable type <mangled: " + String(cpptype.name()) + ">");
+        else if (update_from) { update_from(p, h); }
          // Ah, what the heck, let's do pointers first.
         else if (pointer) {
             HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
@@ -338,7 +342,7 @@ namespace hacc {
             HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
             t->update_with_getset(p, h, delegate);
         }
-        else throw Error("Haccability description for <mangled: " + String(cpptype.name()) + "did not provide any way to update from hacc.");
+        else throw Error("Haccability description for <mangled: " + String(cpptype.name()) + "> did not provide any way to update from hacc.");
     }
     void* HaccTable::new_from_hacc (const Hacc* h) {
         void* r = allocate();

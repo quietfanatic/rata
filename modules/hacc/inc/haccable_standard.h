@@ -49,12 +49,13 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::Map<C>)
 HCB_TEMPLATE_END(<class C>, hacc::Map<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
+    HCB_INSTANCE(C)
     using namespace hacc;
     to([](const std::unordered_map<std::string, C>& v){
         Map<const Hacc*> o;
         Bomb b ([&o](){ for (auto& p : o) delete p.second; });
         for (auto& pair : v) {
-            o.push_back(hacc_attr(pair.first, hacc_from(pair.second)));
+            o.push_back(hacc_attr(pair.first, hacc_from((const C&)pair.second)));
         }
         b.defuse();
         return new_hacc(std::move(o));
