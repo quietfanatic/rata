@@ -52,7 +52,7 @@ namespace vis {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glTranslatef(-1, -1, 0);  // 0,0 starts out in the center
-        glScalef(1/10.0/2, 1/7.5/2, 1);
+        glScalef(1/10.0, 1/7.5, 1);
          // Make coordinates point to pixels, not the corners between pixels
         glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
         glEnable(GL_TEXTURE_2D);
@@ -65,26 +65,26 @@ namespace vis {
         if (fliph) {
             tl = sub->pos.x - sub->box.r;
             tr = sub->pos.x - sub->box.l;
-            vl = p.x - sub->box.r;
-            vr = p.x - sub->box.l;
+            vl = p.x - sub->box.r * PX;
+            vr = p.x - sub->box.l * PX;
         }
         else {
             tl = sub->pos.x + sub->box.l;
             tr = sub->pos.x + sub->box.r;
-            vl = p.x + sub->box.l;
-            vr = p.x + sub->box.r;
+            vl = p.x + sub->box.l * PX;
+            vr = p.x + sub->box.r * PX;
         }
         if (flipv) {
             tb = sub->pos.y - sub->box.t;
             tt = sub->pos.y - sub->box.b;
-            vb = p.y - sub->box.t;
-            vt = p.y - sub->box.b;
+            vb = p.y - sub->box.t * PX;
+            vt = p.y - sub->box.b * PX;
         }
         else {
             tb = sub->pos.y + sub->box.b;
             tt = sub->pos.y + sub->box.t;
-            vb = p.y + sub->box.b;
-            vt = p.y + sub->box.t;
+            vb = p.y + sub->box.b * PX;
+            vt = p.y + sub->box.t * PX;
         }
         tl /= img->size.x;
         tb /= img->size.y;
