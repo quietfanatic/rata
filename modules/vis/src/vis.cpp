@@ -105,11 +105,11 @@ namespace vis {
 
     void test () {
         static vis::Image* test_image = hacc::require_id<vis::Image>("vis/test.png");
-        static vis::Layout1D* test_layout = hacc::new_from_file<vis::Layout1D>("modules/vis/test.hacc");
-        static vis::SubImg* white = &test_layout->get("white");
-        static vis::SubImg* red = &test_layout->get("red");
-        static vis::SubImg* green = &test_layout->get("green");
-        static vis::SubImg* blue = &test_layout->get("blue");
+        static auto layout = hacc::new_from_file<Hash<SubImg>>("modules/vis/test.hacc");
+        static vis::SubImg* white = &layout->at("white");
+        static vis::SubImg* red = &layout->at("red");
+        static vis::SubImg* green = &layout->at("green");
+        static vis::SubImg* blue = &layout->at("blue");
 
         vis::draw_img(test_image, white, Vec(2, 2), false, false);
         vis::draw_img(test_image, red, Vec(18, 2), false, false);
@@ -145,8 +145,5 @@ HCB_BEGIN(vis::SubImg)
     elem(member(&SubImg::box));
 HCB_END(vis::SubImg)
 
-HCB_BEGIN(vis::Layout1D)
-    delegate(member(&vis::Layout1D::subs));
-HCB_END(vis::Layout1D)
 HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA vis::SubImg>);
 

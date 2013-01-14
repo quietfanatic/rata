@@ -33,11 +33,6 @@ namespace vis {
         std::vector<Vec> misc;
     };
 
-     // Basically, this describes a set of subimgs on another image.
-    struct Layout1D {
-        std::unordered_map<std::string, SubImg> subs;
-        SubImg* get (std::string name) { return &subs.at(name); }
-    };
 
     void test ();
 
