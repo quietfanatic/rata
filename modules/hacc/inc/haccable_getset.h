@@ -13,6 +13,24 @@ namespace hacc {
      // This file is starting to show its age already.
     template <class C> inline void instantiate_table ();
 
+    template <class M>
+    struct Defaulter1 {
+        Func<void (M&)> def;
+        Defaulter1 (Null n = null) : def(n) { }
+        Defaulter1 (M m) : def([m](M& mp){ mp = m; }) { }
+        Defaulter1 (M* m) : def([m](M& mp){ mp = *m; }) { }
+        Defaulter1 (const Func<M ()>& f) : def([f](M& mp){ mp = f(); }) { }
+        Defaulter1 (const Func<const M& ()>& f) : def([f](M& mp){ mp = f(); }) { }
+        Defaulter1 (const Func<void (M&)>& f) : def([f](M& mp){ f(mp); }) { }
+    };
+
+    struct Defaulter0 {
+        Func<void (void*)> def;
+        Defaulter0 (Null n = null) : def(n) { }
+        template <class M>
+        Defaulter0 (Defaulter1<M> def1) : def(*(Func<void (void*)>*)&def1.def) { }
+    };
+
     template <class X, class M>
     struct GetSet2 {
          // In order to minimize copying of temporaries, get and set have to be
@@ -28,8 +46,9 @@ namespace hacc {
         Set set;
         bool copies_on_get;
         bool copies_on_set;
-        GetSet2 (Get get, Set set, bool cg = true, bool cs = true) :
-            get(get), set(set), copies_on_get(cg), copies_on_set(cs)
+        Defaulter1<M> def;
+        GetSet2 (Get get, Set set, bool cg = true, bool cs = true, Defaulter1<M> def = null) :
+            get(get), set(set), copies_on_get(cg), copies_on_set(cs), def(def)
         { instantiate_table<M>(); }  // Be sure to instantiate M's HCB.
     };
 
@@ -42,13 +61,15 @@ namespace hacc {
         Set set;
         bool copies_on_get;
         bool copies_on_set;
-        GetSet1 (const std::type_info& mtype, Get get, Set set, bool gs = true, bool cs = true) :
-            mtype(&mtype), get(get), set(set), copies_on_get(gs), copies_on_set(cs)
+        Defaulter0 def;
+        GetSet1 (const std::type_info& mtype, Get get, Set set, bool gs = true, bool cs = true, Defaulter0 def = null) :
+            mtype(&mtype), get(get), set(set), copies_on_get(gs), copies_on_set(cs), def(def)
         { }
         template <class M>
         GetSet1 (const GetSet2<X, M>& gs2) :
             mtype(&typeid(M)), get(*(Get*)&gs2.get), set(*(Set*)&gs2.set),
-            copies_on_get(gs2.copies_on_get), copies_on_set(gs2.copies_on_set)
+            copies_on_get(gs2.copies_on_get), copies_on_set(gs2.copies_on_set),
+            def(gs2.def)
         { }
     };
 
@@ -61,19 +82,20 @@ namespace hacc {
         Set set;
         bool copies_on_get;
         bool copies_on_set;
+        Defaulter0 def;
         GetSet0 () : xtype(null), mtype(null) { }
-        GetSet0 (const std::type_info& xtype, const std::type_info& mtype, Get get, Set set, bool gs = true, bool cs = true) :
-            xtype(&xtype), mtype(&mtype), get(get), set(set), copies_on_get(gs), copies_on_set(cs)
+        GetSet0 (const std::type_info& xtype, const std::type_info& mtype, Get get, Set set, bool gs = true, bool cs = true, Defaulter0 def = null) :
+            xtype(&xtype), mtype(&mtype), get(get), set(set), copies_on_get(gs), copies_on_set(cs), def(def)
         { }
         template <class X>
         GetSet0 (const GetSet1<X>& gs1) :
             xtype(&typeid(X)), mtype(gs1.mtype), get(*(Get*)&gs1.get), set(*(Set*)&gs1.set),
-            copies_on_get(gs1.copies_on_get), copies_on_set(gs1.copies_on_set)
+            copies_on_get(gs1.copies_on_get), copies_on_set(gs1.copies_on_set), def(gs1.def)
         { }
         template <class X, class M>
         GetSet0 (const GetSet2<X, M>& gs2) :
             xtype(&typeid(X)), mtype(&typeid(M)), get(*(Get*)&gs2.get), set(*(Set*)&gs2.set),
-            copies_on_get(gs2.copies_on_get), copies_on_set(gs2.copies_on_set)
+            copies_on_get(gs2.copies_on_get), copies_on_set(gs2.copies_on_set), def(gs2.def)
         { }
         operator bool () { return mtype; }
     };
@@ -81,94 +103,103 @@ namespace hacc {
     template <class C, bool has_members = std::is_class<C>::value || std::is_union<C>::value> struct GetSet_Builders;
     template <class C> struct GetSet_Builders<C, false> {
         template <class M>
-        static GetSet2<C, M> value_functions (const Func<M (const C&)>& g, const Func<void (C&, M)>& s) {
+        static GetSet2<C, M> value_functions (const Func<M (const C&)>& g, const Func<void (C&, M)>& s, const Defaulter1<M>& def = null) {
             return GetSet2<C, M>(
                 [g, s](const C& x, const Func<void (const M&)>& c){ const M& tmp = g(x); c(tmp); },
                 [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); s(tmp); },
                 true,
-                true
+                true,
+                def
             );
         }
         template <class M>
-        static GetSet2<C, M> ref_functions (const Func<const M& (const C&)>& g, const Func<void (C&, const M&)>& s) {
+        static GetSet2<C, M> ref_functions (const Func<const M& (const C&)>& g, const Func<void (C&, const M&)>& s, const Defaulter1<M>& def = null) {
             return GetSet2<C, M>(
                 [g, s](const C& x, const Func<void (const M&)>& c){ c(g(x)); },
                 [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); s(tmp); },
                 false,
-                true
+                true,
+                def
             );
         }
         template <class M>
-        static GetSet2<C, M> ref_function (const Func<M& (C&)>& f) {
+        static GetSet2<C, M> ref_function (const Func<M& (C&)>& f, const Defaulter1<M>& def = null) {
             return GetSet2<C, M>(
                 [f](const C& x, const Func<void (const M&)>& c){ c(f(x)); },
                 [f](C& x, const Func<void (M&)>& c){ c(f(x)); },
                 false,
-                false
+                false,
+                def
             );
         }
         template <class M>
-        static GetSet2<C, M> assignable () {
+        static GetSet2<C, M> assignable (const Defaulter1<M>& def = null) {
             return GetSet2<C, M>(
                 [](const C& x, const Func<void (const M&)>& c){ M tmp = x; c(tmp); },
                 [](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); x = tmp; },
                 true,
-                true
+                true,
+                def
             );
         }
         template <class M>
-        static GetSet2<C, M> supertype () {
+        static GetSet2<C, M> supertype (const Defaulter1<M>& def = null) {
             return GetSet2<C, M>(
                 [](const C& x, const Func<void (const M&)>& c){ c(x); },
                 [](C& x, const Func<void (M&)>& c){ c(x); },
                 false,
-                false
+                false,
+                def
             );
         }
-        template <class M>
-        static GetSet2<C, M> member (const M&) { throw Error("hcb::member is not available for non-class types."); }
-        template <class M, class M2>
-        static GetSet2<C, M> value_methods (const M&, const M2&) { throw Error("hcb::value_methods is not available for non-class types."); }
-        template <class M, class M2>
-        static GetSet2<C, M> ref_methods (const M&, const M2&) { throw Error("hcb::ref_methods is not available for non-class types."); }
-        template <class M>
-        static GetSet2<C, M> ref_method (const M&) { throw Error("hcb::ref_method is not available for non-class types."); }
+        template <class M, class... Args>
+        static GetSet2<C, M> member (Args... args) { throw Error("hcb::member is not available for non-class types."); }
+        template <class M, class... Args>
+        static GetSet2<C, M> value_methods (Args... args) { throw Error("hcb::value_methods is not available for non-class types."); }
+        template <class M, class... Args>
+        static GetSet2<C, M> ref_methods (Args... args) { throw Error("hcb::ref_methods is not available for non-class types."); }
+        template <class M, class... Args>
+        static GetSet2<C, M> ref_method (Args... args) { throw Error("hcb::ref_method is not available for non-class types."); }
     };
     template <class C> struct GetSet_Builders<C, true> : GetSet_Builders<C, false> {
         template <class M>
-        static GetSet2<C, M> member (M C::* mp) {
+        static GetSet2<C, M> member (M C::* mp, const Defaulter1<M>& def = null) {
             return GetSet2<C, M>(
                 [mp](const C& x, const Func<void (const M&)>& c){ c(x.*mp); },
                 [mp](C& x, const Func<void (M&)>& c){ c(x.*mp); },
                 false,
-                false
+                false,
+                def
             );
         }
         template <class M>
-        static GetSet2<C, M> value_methods (M (C::* g )()const, void (C::* s )(M)) {
+        static GetSet2<C, M> value_methods (M (C::* g )()const, void (C::* s )(M), const Defaulter1<M>& def = null) {
             return GetSet2<C, M>(
                 [g, s](const C& x, const Func<void (const M&)>& c){ c((x.*g)()); },
                 [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); (x.*s)(tmp); },
                 true,
-                true
+                true,
+                def
             );
         }
         template <class M>
-        static GetSet2<C, M> ref_methods (const M& (C::* g )()const, void (C::* s )(const M&)) {
+        static GetSet2<C, M> ref_methods (const M& (C::* g )()const, void (C::* s )(const M&), const Defaulter1<M>& def = null) {
             return GetSet2<C, M>(
                 [g, s](const C& x, const Func<void (const M&)>& c){ c((x.*g)()); },
                 [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); (x.*s)(tmp); },
                 false,
-                true
+                true,
+                def
             );
         }
         template <class M>
-        static GetSet2<C, M> ref_method (M& (C::* m )()) {
+        static GetSet2<C, M> ref_method (M& (C::* m )(), const Defaulter1<M>& def = null) {
             return GetSet2<C, M>(
                 [m](const C& x, const Func<void (const M&)>& c){ c((x.*m)()); },
                 [m](C& x, const Func<void (M&)>& c){ c((x.*m)()); },
                 false,
-                false
+                false,
+                def
             );
         }
     };
