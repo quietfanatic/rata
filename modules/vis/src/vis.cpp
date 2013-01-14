@@ -106,10 +106,10 @@ namespace vis {
     void test () {
         static vis::Image* test_image = hacc::require_id<vis::Image>("vis/test.png");
         static vis::Layout1D* test_layout = hacc::new_from_file<vis::Layout1D>("modules/vis/test.hacc");
-        static vis::SubImg* white = &test_layout->subs.at("white");
-        static vis::SubImg* red = &test_layout->subs.at("red");
-        static vis::SubImg* green = &test_layout->subs.at("green");
-        static vis::SubImg* blue = &test_layout->subs.at("blue");
+        static vis::SubImg* white = &test_layout->get("white");
+        static vis::SubImg* red = &test_layout->get("red");
+        static vis::SubImg* green = &test_layout->get("green");
+        static vis::SubImg* blue = &test_layout->get("blue");
 
         vis::draw_img(test_image, white, Vec(2, 2), false, false);
         vis::draw_img(test_image, red, Vec(18, 2), false, false);
