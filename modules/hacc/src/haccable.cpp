@@ -230,12 +230,40 @@ namespace hacc {
     void HaccTable::update_from_hacc_inner (void* p, const Hacc* h) {
         if (!initialized)
             throw Error("Unhaccable type <mangled: " + String(cpptype.name()) + ">");
-        else if (update_from) { update_from(p, h); }
-         // Ah, what the heck, let's do pointers first.
-        else if (pointer) {
-            HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
-            if (follow_pointer) {
-                if (h->form() == OBJECT) {
+        else if (update_from) {
+            update_from(p, h);
+        }
+        else if (delegate) {
+            HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
+            t->update_with_getset(p, h, delegate);
+        }
+        else if (empty) {
+             // .......
+        }
+        else switch (h->form()) {
+            case OBJECT: {
+                if (attrs.size()) {
+                    auto oh = h->as_object();
+                    for (auto& pair : attrs) {
+                        HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
+                        t->update_with_getset(p, oh->attr(pair.first), pair.second);
+                    }
+                }
+                else if (variants.size()) {
+                    auto oh = h->as_object();
+                    if (oh->n_attrs() != 1) {
+                        throw Error("An object Hacc representing a union type must contain only one attribute.");
+                    }
+                    for (auto& pair : variants) {
+                        if (pair.first == oh->name_at(0)) {
+                            HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
+                            t->update_with_getset(p, oh->value_at(0), pair.second);
+                            break;
+                        }
+                    }
+                }
+                else if (pointer) {
+                    HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
                     auto oh = h->as_object();
                     if (oh->n_attrs() != 1) {
                         throw Error("An object Hacc representing a polymorphic type must contain only one attribute.");
@@ -252,10 +280,22 @@ namespace hacc {
                         pointer.set(p, [&caster, val, t](void* basep){
                             *(void**)basep = caster.up(t->new_from_hacc(val));
                         });
-                        return;
+                        break;
                     }
                 }
-                else if (h->form() == ARRAY) {
+                else throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by an object Hacc.");
+                break;
+            }
+            case ARRAY: {
+                if (elems.size()) {
+                    auto ah = h->as_array();
+                    for (uint i = 0; i < elems.size(); i++) {
+                        HaccTable* t = HaccTable::require_cpptype(*elems[i].mtype);
+                        t->update_with_getset(p, ah->elem(i), elems[i]);
+                    }
+                }
+                else if (pointer) {
+                    HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
                     auto ah = h->as_array();
                     if (ah->n_elems() < 1) {
                         throw Error("An array Hacc representing a polymorphic type must contain only one attribute.");
@@ -275,75 +315,52 @@ namespace hacc {
                         pointer.set(p, [&caster, val, t](void* basep){
                             *(void**)basep = caster.up(t->new_from_hacc(val));
                         });
-                        return;
+                        break;
                     }
                 }
-                throw Error("A polymorphic type can only be represented by an Object hacc or an Array hacc.");
+                else throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by an array Hacc.");
+                break;
             }
-            else if (h->form() == REF) {
-                String id = h->as_ref()->r.id;
-                auto iter = read_ids.find(id);
-                if (iter != read_ids.end()) {
-                    if (iter->second) {
-                        void* addr = iter->second();
+            case REF: {
+                if (pointer) {
+                    HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
+                    String id = h->as_ref()->r.id;
+                    auto iter = read_ids.find(id);
+                    if (iter != read_ids.end()) {
+                        if (iter->second) {
+                            void* addr = iter->second();
+                            pointer.set(p, [&addr, this](void* mp){
+                                *(void**)mp = addr;
+                            });
+                        }
+                        else throw Error("The <mangled: " + String(pointee_t->cpptype.name()) + "> with ID '" + id + "' could not be referenced due to too much encapsulation.");
+                    }
+                    else if (void* addr = pointee_t->find_by_id(id)) {
                         pointer.set(p, [&addr, this](void* mp){
                             *(void**)mp = addr;
                         });
                     }
-                    else throw Error("The <mangled: " + String(pointee_t->cpptype.name()) + "> with ID '" + id + "' could not be referenced due to too much encapsulation.");
+                    else throw Error("No <mangled: " + String(pointee_t->cpptype.name()) + "> with ID '" + id + "' could be found.");
                 }
-                else if (void* addr = pointee_t->find_by_id(id)) {
-                    pointer.set(p, [&addr, this](void* mp){
-                        *(void**)mp = addr;
-                    });
+                else throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a reference Hacc.");
+                break;
+            }
+            case STRING: throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a string Hacc.");
+            case DOUBLE: throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a double Hacc.");
+            case FLOAT: throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a float Hacc.");
+            case INTEGER: throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by an integer Hacc.");
+            case BOOL: throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a bool Hacc.");
+            case NULLFORM: {
+                if (pointer) {
+                    pointer.set(p, [](void* mp){ *(void**)mp = NULL; });
                 }
-                else throw Error("No <mangled: " + String(pointee_t->cpptype.name()) + "> with ID '" + id + "' could be found.");
+                else throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a null Hacc.");
+                break;
             }
-            else throw Error("A non-followed pointer can only be represented by a Ref hacc. (Did you forget the &?)");
+            default: throw Error("Oops, a corrupted hacc snuck in somewhere.\n");
         }
-         // Like a union next
-        else if (variants.size()) {
-            if (h->form() == OBJECT) {
-                auto oh = h->as_object();
-                if (oh->n_attrs() != 1) {
-                    throw Error("An object Hacc representing a union type must contain only one attribute.");
-                }
-                for (auto& pair : variants) {
-                    if (pair.first == oh->name_at(0)) {
-                        HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                        t->update_with_getset(p, oh->value_at(0), pair.second);
-                        return;
-                    }
-                }
-            }
-            else throw Error("A union type can only be represented by an Object hacc or an Array hacc.");
-        }
-         // Then like an object
-        else if (h->form() == OBJECT && attrs.size()) {
-            auto oh = h->as_object();
-            for (auto& pair : attrs) {
-                HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                t->update_with_getset(p, oh->attr(pair.first), pair.second);
-            }
-        }
-         // Like an array next
-        else if (h->form() == ARRAY && elems.size()) {
-            auto ah = h->as_array();
-            for (uint i = 0; i < elems.size(); i++) {
-                HaccTable* t = HaccTable::require_cpptype(*elems[i].mtype);
-                t->update_with_getset(p, ah->elem(i), elems[i]);
-            }
-        }
-        else if (empty) {
-             // Shh, don't tell anyone we're not doing anything
-        }
-         // Plain delegation last.
-        else if (delegate) {
-            HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
-            t->update_with_getset(p, h, delegate);
-        }
-        else throw Error("Haccability description for <mangled: " + String(cpptype.name()) + "> did not provide any way to update from hacc.");
     }
+
     void* HaccTable::new_from_hacc (const Hacc* h) {
         void* r = allocate();
         Bomb b ([this, r](){ deallocate(r); });
