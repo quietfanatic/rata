@@ -13,7 +13,7 @@ struct Resource;
 
 struct ResourceGroup {
     Str name;
-    Hash<hacc::canonical_ptr<Resource>> loaded;
+    Hash<Resource*> loaded;
 
     bool unload ();
     bool reload ();

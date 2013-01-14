@@ -46,14 +46,16 @@ namespace core {
     }
 
     void main_loop () {
-        vis::Image* test_image = hacc::require_id<vis::Image>("test.png");
         glfwInit();
         glfwOpenWindow(640, 480, 8, 8, 8, 0, 0, 0, GLFW_WINDOW);
         glfwSetKeyCallback(key_cb);
         glfwSetWindowCloseCallback(close_cb);
+        vis::Image* test_image = hacc::require_id<vis::Image>("test.png");
+        printf("%s\n", test_image->name.c_str());
         for (;;) {
             glfwPollEvents();
             vis::start_draw();
+            printf("%s\n", test_image->name.c_str());
             vis::draw_image(test_image, Vec(0, 0), false, false);
             vis::finish_draw();
             glfwSwapBuffers();

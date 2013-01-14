@@ -12,8 +12,8 @@ namespace vis {
 
     struct Image : Resource {
         GLuint tex = 0;
-        uint w;
-        uint h;
+        uint w = 0;
+        uint h = 0;
 
         bool load ();
         bool unload ();

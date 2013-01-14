@@ -62,10 +62,10 @@ namespace vis {
         glBindTexture(GL_TEXTURE_2D, img->tex);
          // Direct Mode is still the easiest for drawing individual images.
         glBegin(GL_QUADS);
-            glTexCoord2f(!fliph, !!flipv); glVertex2f(p.x, p.y);
-            glTexCoord2f(!!fliph, !!flipv); glVertex2f(p.x + img->w*PX, p.y);
-            glTexCoord2f(!!fliph, !flipv); glVertex2f(p.x + img->w*PX, p.y + img->h*PX);
-            glTexCoord2f(!fliph, !flipv); glVertex2f(p.x, p.y + img->h*PX);
+            glTexCoord2f(!fliph, !flipv); glVertex2f(p.x, p.y);
+            glTexCoord2f(!!fliph, !flipv); glVertex2f(p.x + img->w*PX, p.y);
+            glTexCoord2f(!!fliph, !!flipv); glVertex2f(p.x + img->w*PX, p.y + img->h*PX);
+            glTexCoord2f(!fliph, !!flipv); glVertex2f(p.x, p.y + img->h*PX);
         glEnd();
     }
 
@@ -78,16 +78,16 @@ namespace vis {
 HCB_BEGIN(vis::Image)
     using namespace vis;
     get_id([](const Image& i){ return i.name; });
-    find_by_id([](std::string id){
-        Image* p = (Image*)(Resource*)Image::all.loaded[id];
+    find_by_id([](std::string id) -> Image* {
+        Image*& p = reinterpret_cast<Image*&>(Image::all.loaded[id]);
         if (!p) {
             p = new Image (id);
             if (!p->load()) {
                 fprintf(stderr, "Load of image failed.\n");
-                delete p;
-                return (Image*)NULL;
+                Image::all.loaded.erase(id);
+                return NULL;
             }
-            Image::all.loaded.emplace(id, p);
+            
         }
         return p;
     });
