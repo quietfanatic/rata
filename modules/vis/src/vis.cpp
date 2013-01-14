@@ -1,7 +1,7 @@
 
 #include <GL/gl.h>
 #include <SOIL/SOIL.h>
-#include "../../hacc/inc/haccable_standard.h"
+#include "../../hacc/inc/everything.h"
 #include "../inc/vis.h"
 
 namespace vis {
@@ -101,6 +101,20 @@ namespace vis {
 
     void finish_draw () {
          // Leave flipping to core, so we don't have to include glfw
+    }
+
+    void test () {
+        static vis::Image* test_image = hacc::require_id<vis::Image>("vis/test.png");
+        static vis::Layout1D* test_layout = hacc::new_from_file<vis::Layout1D>("modules/vis/test.hacc");
+        static vis::SubImg* white = &test_layout->subs.at("white");
+        static vis::SubImg* red = &test_layout->subs.at("red");
+        static vis::SubImg* green = &test_layout->subs.at("green");
+        static vis::SubImg* blue = &test_layout->subs.at("blue");
+
+        vis::draw_img(test_image, white, Vec(2, 2), false, false);
+        vis::draw_img(test_image, red, Vec(18, 2), false, false);
+        vis::draw_img(test_image, green, Vec(18, 13), false, false);
+        vis::draw_img(test_image, blue, Vec(2, 13), false, false);
     }
 
 }

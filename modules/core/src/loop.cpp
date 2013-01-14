@@ -51,13 +51,10 @@ namespace core {
         set_video(2);
         glfwSetKeyCallback(key_cb);
         glfwSetWindowCloseCallback(close_cb);
-        vis::Image* test_image = hacc::require_id<vis::Image>("vis/test.png");
-        vis::Layout1D* test_layout = hacc::new_from_file<vis::Layout1D>("modules/vis/test.hacc");
-        vis::SubImg* test_sub = &test_layout->subs.at("base");
         for (;;) {
             glfwPollEvents();
             vis::start_draw();
-            vis::draw_img(test_image, test_sub, Vec(0, 0), false, false);
+            vis::test();
             vis::finish_draw();
             glfwSwapBuffers();
             glfwSleep(1/60.0);

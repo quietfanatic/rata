@@ -38,6 +38,8 @@ namespace vis {
         std::unordered_map<std::string, SubImg> subs;
     };
 
+    void test ();
+
     void start_draw ();
     void draw_img (Image* set, SubImg* sub, Vec p, bool fliph, bool flipv);
     void finish_draw ();

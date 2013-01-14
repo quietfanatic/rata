@@ -18,7 +18,7 @@ workflow {
     include '../..';
 
     subdep('inc/vis.h', [qw<../core/inc/resources.h ../util/inc/Vec.h ../util/inc/Rect.h>]);
-    subdep('src/vis.cpp', 'inc/vis.h');
+    subdep('src/vis.cpp', [qw<inc/vis.h ../hacc/inc/everything.h>]);
 
     cppc_rule('tmp/vis.o', 'src/vis.cpp');
 
