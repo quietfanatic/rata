@@ -213,7 +213,7 @@ template <class C> C* require_id (String id) {
 #define HCB_COMMA ,  // because literal commas confuse function-like macros.
 #define HCB_UNQ2(a, b) a##b
 #define HCB_UNQ1(a, b) HCB_UNQ2(a, b)
-#define HCB_INSTANCE(type) static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::get_table();
+#define HCB_INSTANCE(type) static inline void HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) () { Haccable<type>::get_table(); }
 #define HCB_BEGIN(type) template <> struct Haccable<type> : hacc::Haccability<type> { static void describe () {
 #define HCB_END(type) } }; static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::get_table();
 #define HCB_PARAMS(...) __VA_ARGS__
