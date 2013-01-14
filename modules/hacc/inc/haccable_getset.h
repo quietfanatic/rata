@@ -106,7 +106,7 @@ namespace hacc {
         static GetSet2<C, M> value_functions (const Func<M (const C&)>& g, const Func<void (C&, M)>& s, const Defaulter1<M>& def = null) {
             return GetSet2<C, M>(
                 [g, s](const C& x, const Func<void (const M&)>& c){ const M& tmp = g(x); c(tmp); },
-                [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); s(tmp); },
+                [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); s(x, tmp); },
                 true,
                 true,
                 def
@@ -116,7 +116,7 @@ namespace hacc {
         static GetSet2<C, M> ref_functions (const Func<const M& (const C&)>& g, const Func<void (C&, const M&)>& s, const Defaulter1<M>& def = null) {
             return GetSet2<C, M>(
                 [g, s](const C& x, const Func<void (const M&)>& c){ c(g(x)); },
-                [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); s(tmp); },
+                [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); s(x, tmp); },
                 false,
                 true,
                 def
