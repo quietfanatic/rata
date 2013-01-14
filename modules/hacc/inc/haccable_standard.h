@@ -49,7 +49,6 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::Map<C>)
 HCB_TEMPLATE_END(<class C>, hacc::Map<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
-    HCB_INSTANCE(C)
     using namespace hacc;
     to([](const std::unordered_map<std::string, C>& v){
         Map<const Hacc*> o;
