@@ -135,8 +135,13 @@ namespace hacc {
                     hist.written->id = hist.id;
                 else hist.table = pointee_t;
             }
-             // Follow pointer only once.
-            if (follow_pointer && !hist.written) {
+            bool should_follow;
+            switch (get_pointer_policy()) {
+                case ALWAYS_FOLLOW: should_follow = true; break;
+                case FOLLOW: should_follow = !hist.written; break;
+                default: should_follow = false; break;
+            }
+            if (should_follow) {
                 if (pointee_t->subtypes.empty()) { // Non-polymorphic
                     return pointee_t->to_hacc(pp);
                 }
@@ -384,6 +389,12 @@ namespace hacc {
         void* r = find_by_id(s);
         if (!r) throw Error("No <mangled: " + String(cpptype.name()) + "> was found with id '" + s + "'.");
         return r;
+    }
+
+    uint8 HaccTable::get_pointer_policy () {
+        if (pointee_type && pointer_policy == ASK_POINTEE)
+            return by_cpptype(*pointee_type)->pointee_policy;
+        else return pointer_policy;
     }
 
 }

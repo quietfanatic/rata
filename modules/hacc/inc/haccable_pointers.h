@@ -41,11 +41,13 @@ namespace hacc {
 
 HCB_TEMPLATE_BEGIN(<class C>, hacc::follow_ptr<C>)
      // BLERGH!  What the heck, C++, making me stick 'template' in the middle of this
-    follow_pointer(hacc::Haccability<hacc::follow_ptr<C>>::template assignable<C*>());
+    pointer(hacc::Haccability<hacc::follow_ptr<C>>::template assignable<C*>());
+    pointer_policy(hacc::FOLLOW);
 HCB_TEMPLATE_END(<class C>, hacc::follow_ptr<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, hacc::canonical_ptr<C>)
-    follow_pointer(hacc::Haccability<hacc::canonical_ptr<C>>::template assignable<C*>());
+    pointer(hacc::Haccability<hacc::canonical_ptr<C>>::template assignable<C*>());
+    pointer_policy(hacc::FOLLOW);
 HCB_TEMPLATE_END(<class C>, hacc::canonical_ptr<C>)
 
 // TODO: Add shared_ptr and unique_ptr, similar to the above
@@ -59,7 +61,8 @@ HCB_TEMPLATE_END(<class C>, hacc::canonical_ptr<C>)
  //  then the resulting HACC will not be able to be read back in.
 
 HCB_TEMPLATE_BEGIN(<class C>, C*)
-    reference_pointer(hacc::Haccability<C*>::template supertype<C*>());
+    pointer(hacc::Haccability<C*>::template supertype<C*>());
+    pointer_policy(hacc::REFERENCE);
 HCB_TEMPLATE_END(<class C>, C*)
 
 #endif

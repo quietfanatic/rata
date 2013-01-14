@@ -7,6 +7,13 @@
 
 namespace hacc {
 
+enum Pointer_Policy {
+    ASK_POINTEE,
+    REFERENCE,
+    FOLLOW,
+    ALWAYS_FOLLOW
+};
+
 
  // This stores all the info for one type.
 struct HaccTable {
@@ -38,7 +45,8 @@ struct HaccTable {
     std::unordered_map<String, Caster0> subtypes;
      // Allows this to be treated as a pointer.
     GetSet0 pointer;
-    bool follow_pointer;
+    uint8 pointer_policy = ASK_POINTEE;
+    uint8 pointee_policy = REFERENCE;  // This can be set on the pointee's hacctable.
      // These will be automatically set with pointer
     const std::type_info* pointee_type = null;
     const std::type_info* (* pointee_realtype ) (void*) = null;
@@ -55,6 +63,7 @@ struct HaccTable {
     const Hacc* to_hacc_inner (void*);
     void update_from_hacc_inner (void*, const Hacc*);
     void update_with_getset (void*, const Hacc*, const GetSet0&);
+    uint8 get_pointer_policy ();
 
      // This throws an error when not found
     static HaccTable* require_cpptype (const std::type_info&);
@@ -142,16 +151,16 @@ template <class C> struct Haccability : GetSet_Builders<C> {
         Haccable<B>::get_table()->subtypes.emplace(name, Caster2<B, C>());
     }
     template <class P>
-    static void follow_pointer (const GetSet2<C, P*>& gs) {
+    static void pointer (const GetSet2<C, P*>& gs) {
         get_table()->pointer = gs;
-        get_table()->follow_pointer = true;
         get_table()->pointee_type = &typeid(P);
         get_table()->pointee_realtype = [](void* p) { return &typeid(*(P*)p); };
     }
-    template <class P>
-    static void reference_pointer (const GetSet2<C, P*>& gs) {
-        get_table()->pointer = gs;
-        get_table()->pointee_type = &typeid(P);
+    static void pointer_policy (uint8 policy) {
+        get_table()->pointer_policy = policy;
+    }
+    static void pointee_policy (uint8 policy) {
+        get_table()->pointee_policy = policy;
     }
 };
 
@@ -240,8 +249,9 @@ template <class C> C* require_id (String id) {
     using hcb::value_methods; \
     using hcb::ref_methods; \
     using hcb::ref_method; \
-    using hcb::follow_pointer; \
-    using hcb::reference_pointer; \
+    using hcb::pointer; \
+    using hcb::pointer_policy; \
+    using hcb::pointee_policy; \
     static void describe () {
 #define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
 
