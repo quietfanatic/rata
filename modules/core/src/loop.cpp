@@ -41,21 +41,19 @@ namespace core {
         }
     }
 
-    void set_video () {
-
+    void set_video (uint scale) {
+        glfwOpenWindow(320*scale, 240*scale, 8, 8, 8, 0, 0, 0, GLFW_WINDOW);
     }
 
     void main_loop () {
         glfwInit();
-        glfwOpenWindow(640, 480, 8, 8, 8, 0, 0, 0, GLFW_WINDOW);
+        set_video(2);
         glfwSetKeyCallback(key_cb);
         glfwSetWindowCloseCallback(close_cb);
-        vis::Image* test_image = hacc::require_id<vis::Image>("test.png");
-        printf("%s\n", test_image->name.c_str());
+        vis::Image* test_image = hacc::require_id<vis::Image>("vis/test.png");
         for (;;) {
             glfwPollEvents();
             vis::start_draw();
-            printf("%s\n", test_image->name.c_str());
             vis::draw_image(test_image, Vec(0, 0), false, false);
             vis::finish_draw();
             glfwSwapBuffers();
