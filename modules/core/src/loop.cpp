@@ -46,6 +46,7 @@ namespace core {
     }
 
     void main_loop () {
+        vis::Image* test_image = hacc::require_id<vis::Image>("test.png");
         glfwInit();
         glfwOpenWindow(640, 480, 8, 8, 8, 0, 0, 0, GLFW_WINDOW);
         glfwSetKeyCallback(key_cb);
@@ -53,8 +54,9 @@ namespace core {
         for (;;) {
             glfwPollEvents();
             vis::start_draw();
-            glfwSleep(1/60.0);
+            vis::draw_image(test_image, Vec(4, 4), false, false);
             vis::finish_draw();
+            glfwSleep(1/60.0);
             glfwSwapBuffers();
         }
     }

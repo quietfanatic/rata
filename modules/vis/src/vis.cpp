@@ -1,32 +1,47 @@
 
 #include <GL/gl.h>
 #include <SOIL/SOIL.h>
-#include "../../util/inc/Vec.h"
 #include "../inc/vis.h"
 
 namespace vis {
 
+    GLenum diagnose_opengl () {
+        GLenum err = glGetError();
+        if (err)
+            fprintf(stderr, "OpenGL error: %04x\n", err);
+        return err;
+    }
+
     ResourceGroup Image::all ("images");
 
     bool Image::load () {
-        int w; int h; int ch;
-        uint8* data = SOIL_load_image(name.c_str(), &w, &h, &ch, 4);
-        if (!data) return false;
-        GLuint newtex = SOIL_load_OGL_texture_from_memory(
-            data, w*h*ch, 4, SOIL_CREATE_NEW_ID, 0
-        );
-        if (!newtex) return false;
+        int iw; int ih; int ich;
+        uint8* data = SOIL_load_image(name.c_str(), &iw, &ih, &ich, 4);
+        if (!data) {
+            fprintf(stderr, "Failed to load image %s: %s\n", name.c_str(), SOIL_last_result());
+            return false;
+        }
+        GLuint newtex;
+        glGenTextures(1, &newtex);
         glBindTexture(GL_TEXTURE_2D, newtex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iw, ih, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        free(data);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        if (diagnose_opengl()) {
+            fprintf(stderr, "Aborting load of %s\n", name.c_str());
+            return false;
+        }
         unload();
-        tex = newtex;
+        tex = newtex; w = iw; h = ih;
         return true;
     }
     bool Image::reload () { return load(); }
     bool Image::unload () {
-        glDeleteTextures(1, &tex);
-        tex = 0;
+        if (tex) {
+            glDeleteTextures(1, &tex);
+            tex = 0;
+        }
         return true;
     }
 
@@ -68,6 +83,7 @@ HCB_BEGIN(vis::Image)
         if (!p) {
             p = new Image (id);
             if (!p->load()) {
+                fprintf(stderr, "Load of image failed.\n");
                 delete p;
                 return (Image*)NULL;
             }

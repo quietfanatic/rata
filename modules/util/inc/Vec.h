@@ -27,22 +27,22 @@ struct Vec {
     CE Vec norm () const;  
 };
 
-CE Vec operator - (Vec a) { return Vec(-a.x, -a.y); }
-CE Vec operator + (Vec a, Vec b) { return Vec(a.x+b.x, a.y+b.y); }
-CE Vec operator - (Vec a, Vec b) { return Vec(a.x-b.x, a.y-b.y); }
-CE Vec operator * (Vec a, float b) { return Vec(a.x*b, a.y*b); }
-CE Vec operator * (float a, Vec b) { return Vec(a*b.x, a*b.y); }
-CE Vec operator / (Vec a,  float b) { return Vec(a.x/b, a.y/b); }
-Vec operator += (Vec& a, Vec b) { return a = a + b; }
-Vec operator -= (Vec& a, Vec b) { return a = a - b; }
-Vec operator *= (Vec& a, float b) { return a = a * b; }
-Vec operator /= (Vec& a, float b) { return a = a / b; }
-CE bool operator == (Vec a, Vec b) { return a.x==b.x && a.y==b.y; }
-CE bool operator != (Vec a, Vec b) { return a.x!=b.x || a.y!=b.y; }
-CE float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
+CE inline Vec operator - (Vec a) { return Vec(-a.x, -a.y); }
+CE inline Vec operator + (Vec a, Vec b) { return Vec(a.x+b.x, a.y+b.y); }
+CE inline Vec operator - (Vec a, Vec b) { return Vec(a.x-b.x, a.y-b.y); }
+CE inline Vec operator * (Vec a, float b) { return Vec(a.x*b, a.y*b); }
+CE inline Vec operator * (float a, Vec b) { return Vec(a*b.x, a*b.y); }
+CE inline Vec operator / (Vec a,  float b) { return Vec(a.x/b, a.y/b); }
+static inline Vec operator += (Vec& a, Vec b) { return a = a + b; }
+static inline Vec operator -= (Vec& a, Vec b) { return a = a - b; }
+static inline Vec operator *= (Vec& a, float b) { return a = a * b; }
+static inline Vec operator /= (Vec& a, float b) { return a = a / b; }
+CE inline bool operator == (Vec a, Vec b) { return a.x==b.x && a.y==b.y; }
+CE inline bool operator != (Vec a, Vec b) { return a.x!=b.x || a.y!=b.y; }
+CE inline float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
 
-CE Vec Vec::norm () const { return *this / mag(); }
-CE Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
+CE inline Vec Vec::norm () const { return *this / mag(); }
+CE inline Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
 
  // Let's just have vecs be array-like, I think.
 HCB_BEGIN(Vec)

@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 
+#include "../../util/inc/Vec.h"
 #include "../../core/inc/resources.h"
 
 #define PX (1/16.0)
