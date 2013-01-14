@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include "../../util/inc/Vec.h"
+#include "../../util/inc/Rect.h"
 #include "../../core/inc/resources.h"
 
 #define PX (1/16.0)
@@ -28,8 +29,7 @@ namespace vis {
      // Part of another image
     struct SubImg {
         Vec pos;
-        Vec size;
-        Vec center;
+        Rect box;
         std::vector<Vec> misc;
     };
 

@@ -63,28 +63,28 @@ namespace vis {
         glBindTexture(GL_TEXTURE_2D, img->tex);
         float tl, tb, tr, tt, vl, vb, vr, vt;
         if (fliph) {
-            tl = sub->pos.x + sub->size.x;
-            tr = sub->pos.x;
-            vl = p.x - sub->size.x + sub->center.x;
-            vr = p.x + sub->center.x;
+            tl = sub->pos.x - sub->box.r;
+            tr = sub->pos.x - sub->box.l;
+            vl = p.x - sub->box.r;
+            vr = p.x - sub->box.l;
         }
         else {
-            tl = sub->pos.x;
-            tr = sub->pos.x + sub->size.x;
-            vl = p.x - sub->center.x;
-            vr = p.x + sub->size.x - sub->center.x;
+            tl = sub->pos.x + sub->box.l;
+            tr = sub->pos.x + sub->box.r;
+            vl = p.x + sub->box.l;
+            vr = p.x + sub->box.r;
         }
         if (flipv) {
-            tb = sub->pos.y + sub->size.y;
-            tt = sub->pos.y;
-            vb = p.y - sub->size.y + sub->center.y;
-            vt = p.y + sub->center.y;
+            tb = sub->pos.y - sub->box.t;
+            tt = sub->pos.y - sub->box.b;
+            vb = p.y - sub->box.t;
+            vt = p.y - sub->box.b;
         }
         else {
-            tb = sub->pos.y;
-            tt = sub->pos.y + sub->size.y;
-            vb = p.y - sub->center.y;
-            vt = p.y + sub->size.y - sub->center.y;
+            tb = sub->pos.y + sub->box.b;
+            tt = sub->pos.y + sub->box.t;
+            vb = p.y + sub->box.b;
+            vt = p.y + sub->box.t;
         }
         tl /= img->size.x;
         tb /= img->size.y;
@@ -127,10 +127,8 @@ HCB_BEGIN(vis::SubImg)
     using namespace vis;
     attr("pos", member(&SubImg::pos));
     elem(member(&SubImg::pos));
-    attr("size", member(&SubImg::size));
-    elem(member(&SubImg::size));
-    attr("center", member(&SubImg::center));
-    elem(member(&SubImg::center));
+    attr("box", member(&SubImg::box));
+    elem(member(&SubImg::box));
 HCB_END(vis::SubImg)
 
 HCB_BEGIN(vis::Layout1D)
