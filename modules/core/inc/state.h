@@ -3,6 +3,8 @@
 
 #include "../../util/inc/organization.h"
 
+namespace core {
+
 struct Stateful;
 
 struct Game_State {
@@ -13,10 +15,14 @@ extern Game_State* current_state;
 
 struct Stateful : Linkable<Stateful> {
     Stateful (Game_State* s = current_state) { if (s) link(s->things); }
-    virtual ~Stateful (); // Gotta be polymorphic.
+
+     // These should do things like register themselves in a phase or layer.
+    virtual void freeze () { }
+    virtual void thaw () { }
+    virtual ~Stateful () { }
 };
 
-
+}
 
 
 #endif

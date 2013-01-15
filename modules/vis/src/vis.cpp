@@ -3,6 +3,7 @@
 #include <SOIL/SOIL.h>
 #include "../../hacc/inc/everything.h"
 #include "../inc/vis.h"
+#include "../../core/inc/loop.h"
 
 namespace vis {
 
@@ -103,19 +104,24 @@ namespace vis {
          // Leave flipping to core, so we don't have to include glfw
     }
 
-    void test () {
-        static vis::Image* test_image = hacc::require_id<vis::Image>("vis/test.png");
-        static auto layout = hacc::new_from_file<Hash<SubImg>>("modules/vis/test.hacc");
-        static vis::SubImg* white = &layout->at("white");
-        static vis::SubImg* red = &layout->at("red");
-        static vis::SubImg* green = &layout->at("green");
-        static vis::SubImg* blue = &layout->at("blue");
+    struct Test_Layer : core::Phase {
+        Test_Layer () : core::Phase(core::draw_phases(), "asdf") { }
+        void run () {
+            static vis::Image* test_image = hacc::require_id<vis::Image>("vis/test.png");
+            static auto layout = hacc::new_from_file<Hash<SubImg>>("modules/vis/test.hacc");
+            static vis::SubImg* white = &layout->at("white");
+            static vis::SubImg* red = &layout->at("red");
+            static vis::SubImg* green = &layout->at("green");
+            static vis::SubImg* blue = &layout->at("blue");
 
-        vis::draw_img(test_image, white, Vec(2, 2), false, false);
-        vis::draw_img(test_image, red, Vec(18, 2), false, false);
-        vis::draw_img(test_image, green, Vec(18, 13), false, false);
-        vis::draw_img(test_image, blue, Vec(2, 13), false, false);
-    }
+            vis::start_draw();
+            vis::draw_img(test_image, white, Vec(2, 2), false, false);
+            vis::draw_img(test_image, red, Vec(18, 2), false, false);
+            vis::draw_img(test_image, green, Vec(18, 13), false, false);
+            vis::draw_img(test_image, blue, Vec(2, 13), false, false);
+            vis::finish_draw();
+        }
+    } test_layer;
 
 }
 

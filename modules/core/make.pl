@@ -17,7 +17,7 @@ workflow {
 
     include '../..';
 
-    subdep('src/loop.cpp', [qw<inc/loop.h ../vis/inc/vis.h>]);
+    subdep('src/loop.cpp', [qw<inc/loop.h>]);
     subdep('src/commands.cpp', [qw<inc/commands.h ../hacc/inc/everything.h>]);
     subdep('inc/resources.h', '../util/inc/honestly.h');
     subdep('src/resources.cpp', 'inc/resources.h');

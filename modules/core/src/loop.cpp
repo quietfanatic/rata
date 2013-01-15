@@ -4,7 +4,6 @@
 
 #include "../inc/loop.h"
 #include "../inc/commands.h"
-#include "../../vis/inc/vis.h"
 #include "../../hacc/inc/everything.h"
 
 namespace core {
@@ -53,13 +52,27 @@ namespace core {
         glfwSetWindowCloseCallback(close_cb);
         for (;;) {
             glfwPollEvents();
-            vis::start_draw();
-            vis::test();
-            vis::finish_draw();
+            for (Phase* p : game_phases())
+                p->run();
+            for (Phase* p : draw_phases())
+                p->run();
             glfwSwapBuffers();
             glfwSleep(1/60.0);
         }
     }
+
+    Phase::Phase (std::vector<Phase*>& type, std::string order) : order(order) {
+        for (auto i = type.begin(); i != type.end(); i++) {
+            if (order < (*i)->order) {
+                type.insert(i, this);
+                return;
+            }
+        }
+        type.push_back(this);
+    }
+
+    std::vector<Phase*>& game_phases () { static std::vector<Phase*> r; return r; }
+    std::vector<Phase*>& draw_phases () { static std::vector<Phase*> r; return r; }
 
 }
 
