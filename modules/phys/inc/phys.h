@@ -25,6 +25,7 @@ namespace phys {
     struct Physical {
         b2Body* body = NULL;
         BodyDef* body_def;
+
         Physical (BodyDef* body_def) : body_def(body_def) { }
         void exist ();  // Registers with the sim.
     };

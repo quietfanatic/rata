@@ -28,6 +28,11 @@ namespace core {
             fprintf(stderr, "Error: cannot play game because a game state was not loaded.\n");
             return;
         }
+        for (Phase* p : game_phases())
+            p->init();
+        for (Phase* p : draw_phases())
+            p->init();
+        current_state->exist();
         for (;;) {
             read_input();
             for (Phase* p : game_phases())

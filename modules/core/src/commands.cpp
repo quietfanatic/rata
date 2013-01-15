@@ -19,10 +19,10 @@ namespace core {
             std::getline(std::cin, cmdline);
             hacc::update_from_string(cmd, "[" + cmdline + "]");
         } catch (hacc::Error& e) {
-            printf("Error: Command was not run due to hacc error: %s\n", e.what());
+            printf("Error parsing command: %s\n", e.what());
             return;
         } catch (std::exception& e) {
-            printf("Error: Command was not run due to an exception: %s\n", e.what());
+            printf("Error generating command: %s\n", e.what());
             return;
         }
         try {

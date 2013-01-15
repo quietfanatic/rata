@@ -1,4 +1,5 @@
 
+#include <stdexcept>
 #include "../../hacc/inc/everything.h"
 #include "../inc/state.h"
 #include "../inc/commands.h"
@@ -18,6 +19,10 @@ namespace core {
     Game_State* current_state = NULL;
 
     void Game_State::exist () {
+        if (existing) {
+            throw std::logic_error("Error: something tried to activate the game state a second time.");
+        }
+        existing = true;
         for (auto p = things.first(); p; p = p->next()) {
             p->exist();
         }
@@ -29,7 +34,6 @@ namespace core {
             if (state) {
                 delete current_state;
                 current_state = state;
-                current_state->exist();
             }
         } catch (hacc::Error& e) {
             printf("Failed to load state due to hacc error: %s\n", e.what());

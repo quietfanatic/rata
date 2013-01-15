@@ -9,6 +9,8 @@ struct Stateful;
 
 struct Game_State {
     Links<Stateful> things;
+    bool existing = false;
+
     void exist ();
     ~Game_State () { things.destroy_all(); }
 };

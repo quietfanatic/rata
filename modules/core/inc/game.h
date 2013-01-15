@@ -16,6 +16,7 @@ void save (std::string filename);
 struct Phase {
     std::string order;
     Phase (std::vector<Phase*>& type, std::string order);
+    virtual void init () { }
     virtual void run () = 0;
 };
 

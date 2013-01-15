@@ -67,14 +67,13 @@ HCB_END(phys::BodyDef)
 namespace phys {
     b2World* sim;
 
-    void init () {
-        sim = new b2World(
-            b2Vec2(-10, 0)
-        );
-    }
-
     struct Sim_Phase : core::Phase {
         Sim_Phase () : core::Phase(core::game_phases(), "B.M") { }
+        void init () {
+            sim = new b2World(
+                b2Vec2(-10, 0)
+            );
+        }
         void run () {
             sim->step(1/60.0, 10, 10);
         }
@@ -92,6 +91,10 @@ namespace phys {
             fix->manifest(b2b);
         }
     }
+
+    void Physical::exist () {
+        if (!sim) init();
+        sim->
 
 }
 
