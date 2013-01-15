@@ -65,17 +65,21 @@ HCB_BEGIN(phys::BodyDef)
 HCB_END(phys::BodyDef)
 
 namespace phys {
-    b2World* world;
+    b2World* sim;
 
     void init () {
-        world = new b2World(
+        sim = new b2World(
             b2Vec2(-10, 0)
         );
     }
 
-    void step () {
-        world->step(1/60.0, 10, 10);
-    }
+    struct Sim_Phase : core::Phase {
+        Sim_Phase () : core::Phase(core::game_phases(), "B.M") { }
+        void run () {
+            sim->step(1/60.0, 10, 10);
+        }
+    } sim_phase;
+
 
     b2Fixture* FixtureDef::manifest (b2Body* b2b) {
         b2Fixture* b2f = b2b->createFixture(b2);

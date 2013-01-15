@@ -12,12 +12,24 @@ using namespace hacc;
 namespace core {
 
     void command_from_terminal () {
-        printf("Command: ");
-        std::string cmdline;
-        std::getline(std::cin, cmdline);
         canonical_ptr<Command> cmd;
-        hacc::update_from_string(cmd, "[" + cmdline + "]");
-        (*cmd)();
+        try {
+            printf("Command: ");
+            std::string cmdline;
+            std::getline(std::cin, cmdline);
+            hacc::update_from_string(cmd, "[" + cmdline + "]");
+        } catch (hacc::Error& e) {
+            printf("Error: Command was not run due to hacc error: %s\n", e.what());
+            return;
+        } catch (std::exception& e) {
+            printf("Error: Command was not run due to an exception: %s\n", e.what());
+            return;
+        }
+        try {
+            (*cmd)();
+        } catch (std::exception& e) {
+            printf("Error: The command threw an exception: %s\n", e.what());
+        }
     }
 
 }
