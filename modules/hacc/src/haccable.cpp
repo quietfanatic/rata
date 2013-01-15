@@ -5,14 +5,14 @@
 namespace hacc {
 
      // The global list of all hacctables.
-    typedef std::unordered_map<const std::type_info*, HaccTable*> Type_Map;
+    typedef std::unordered_map<size_t, HaccTable*> Type_Map;
     static Type_Map& cpptype_map () {
         static Type_Map cpptype_map;
         return cpptype_map;
     }
 
     HaccTable* HaccTable::by_cpptype (const std::type_info& t) {
-        auto& r = cpptype_map()[&t];
+        auto& r = cpptype_map()[t.hash_code()];
         if (!r) {
             //fprintf(stderr, " # Creating HaccTable for <mangled: %s>, &typeid: %lx\n", t.name(), (unsigned long)&t);
             r = new HaccTable(t);
@@ -20,7 +20,7 @@ namespace hacc {
         return r;
     }
     HaccTable* HaccTable::require_cpptype (const std::type_info& t) {
-        auto iter = cpptype_map().find(&t);
+        auto iter = cpptype_map().find(t.hash_code());
         if (iter == cpptype_map().end()) throw Error("Unhaccable type <mangled: " + String(t.name()) + ">");
         return iter->second;
     }

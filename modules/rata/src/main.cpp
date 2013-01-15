@@ -7,8 +7,6 @@
 using vis::Image;
 using vis::SubImg;
 
-HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA vis::SubImg>);
-
 struct Test_Actor : core::Stateful, vis::Single_Image {
     void exist () { appear(); }
     Image* img_image () { static Image* r = hacc::require_id<Image>("vis/test.png"); return r; }
