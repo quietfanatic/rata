@@ -22,7 +22,7 @@ workflow {
     subdep('inc/resources.h', '../util/inc/honestly.h');
     subdep('src/resources.cpp', 'inc/resources.h');
     subdep('inc/state.h', '../util/inc/organization.h');
-    subdep('src/state.cpp', [qw<inc/state.h ../hacc/inc/haccable_pointers.h>]);
+    subdep('src/state.cpp', [qw<inc/state.h ../hacc/inc/everything.h>]);
 
     cppc_rule('tmp/game.o', 'src/game.cpp');
     cppc_rule('tmp/commands.o', 'src/commands.cpp');

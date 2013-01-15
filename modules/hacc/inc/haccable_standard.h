@@ -5,10 +5,11 @@
 
 
 
-HCB_TEMPLATE_BEGIN(<class C>, hacc::VArray<C>)
+HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
     using namespace hacc;
-    to([](const VArray<C>& v){
-        VArray<const Hacc*> a;
+    type_name("std::vector<" + get_type_name<C>() + ">");
+    to([](const std::vector<C>& v){
+        std::vector<const Hacc*> a;
         Bomb b ([&a](){ for (auto& p : a) delete p; });
         for (const C& e : v) {
             a.push_back(hacc_from(e));
@@ -16,7 +17,7 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::VArray<C>)
         b.defuse();
         return new_hacc(std::move(a));
     });
-    update_from([](VArray<C>& v, const Hacc* h){
+    update_from([](std::vector<C>& v, const Hacc* h){
         auto ah = h->as_array();
         v.clear();
         v.resize(ah->n_elems());
@@ -24,10 +25,11 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::VArray<C>)
             update_from_hacc(v[i], ah->elem(i));
         }
     });
-HCB_TEMPLATE_END(<class C>, hacc::VArray<C>)
+HCB_TEMPLATE_END(<class C>, hacc::std::vector<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, hacc::Map<C>)
     using namespace hacc;
+    type_name("hacc::Map<" + get_type_name<C>() + ">");
     to([](const Map<C>& v){
         Map<const Hacc*> o;
         Bomb b ([&o](){ for (auto& p : o) delete p.second; });
@@ -50,6 +52,7 @@ HCB_TEMPLATE_END(<class C>, hacc::Map<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
     using namespace hacc;
+    type_name("std::unordered_map<std::string, " + get_type_name<C>() + ">");
     to([](const std::unordered_map<std::string, C>& v){
         Map<const Hacc*> o;
         Bomb b ([&o](){ for (auto& p : o) delete p.second; });

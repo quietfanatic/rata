@@ -19,7 +19,7 @@ void hacc_string_test (hacc::String from, hacc::String to) {
 
 tap::Tester hacc_strings_tester ("hacc-strings", [](){
     using namespace tap;
-    plan(45);
+    plan(46);
      printf(" # Bools\n");  // 2
     hacc_string_test("true", "true");
     hacc_string_test("false", "false");
@@ -75,6 +75,9 @@ tap::Tester hacc_strings_tester ("hacc-strings", [](){
     hacc_string_test("one = 1", "one = 1");
     hacc_string_test("&two=2", "two = 2");
     hacc_string_test("{ak: ai = \"as\" bk: &\"bi\" = \"bs\"}", "{ak: ai = \"as\", bk: bi = \"bs\"}");
+     printf(" # Misc\n");  // 1
+    hacc_string_test("{ things: [ {test_actor: {}} ] }", "{things: [{test_actor: {}}]}");
+    
 });
 
 

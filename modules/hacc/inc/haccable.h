@@ -20,6 +20,8 @@ struct HaccTable {
     const std::type_info& cpptype;
     bool initialized = false;
 
+     // Mostly makes error reporting much nicer.
+    String type_name;
      // How to allocate this type.  Generally set to "new X ()"
     Func<void* ()> allocate;
      // Pretty much no reason to override this.  It calls delete by default.
@@ -51,7 +53,7 @@ struct HaccTable {
     const std::type_info* pointee_type = null;
     const std::type_info* (* pointee_realtype ) (void*) = null;
      // This allows the type to accept and empty array or hash
-    bool empty;
+    bool empty = false;
     
     const Hacc* to_hacc (void*);
     void update_from_hacc (void*, const Hacc*);
@@ -61,9 +63,10 @@ struct HaccTable {
     void* require_id (String);
      // Helpers that I'd like to not have to declare here but C++.
     const Hacc* to_hacc_inner (void*);
-    void update_from_hacc_inner (void*, const Hacc*);
-    void update_with_getset (void*, const Hacc*, const GetSet0&);
+    void update_from_hacc_inner (void*, const Hacc*, std::vector<Func<void()>>&);
+    void update_with_getset (void*, const Hacc*, const GetSet0&, std::vector<Func<void()>>&);
     uint8 get_pointer_policy ();
+    String get_type_name ();
 
      // This throws an error when not found
     static HaccTable* require_cpptype (const std::type_info&);
@@ -82,6 +85,7 @@ template <class C> struct Haccable {
         static hacc::HaccTable* table = hacc::HaccTable::by_cpptype(typeid(C));
         return table;
     }
+    static constexpr bool defined_here = false;
 };
 
 namespace hacc {
@@ -112,12 +116,13 @@ template <class C> struct PolyP {
 template <class C, bool has_nc = std::is_constructible<C>::value> struct per_nc;
 template <class C> struct per_nc<C, true> { static void* allocate () { return new C; } };
 template <class C> struct per_nc<C, false> { static void* allocate () { 
-    throw Error("Cannot allocate <mangled: " + String(typeid(C).name()) + "> because it has no nullary constructor.");
+    throw Error("Cannot allocate <mangled: " + Haccable<C>::get_table()->get_type_name() + "> because it has no nullary constructor.");
 } };
 
  // This class provides the DSL for creating HaccTables.
  //  Every specialization of Haccable must inherit from this.
 template <class C> struct Haccability : GetSet_Builders<C> {
+    static constexpr bool defined_here = true;
     
      // If a table was already allocated (possibly in another compilation unit),
      //  this returns that.  Otherwise, it builds one from C's HCB.
@@ -134,6 +139,7 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     }
 
      // Alright, here's the DSL for when you're defining haccabilities.
+    static void type_name (String name) { get_table()->type_name = name; }
     static void allocate (const Func<C* ()>& f) { get_table()->allocate = *(Func<void* ()>*)&f; }
     static void deallocate (const Func<void (C*)>& f) { get_table()->deallocate = *(Func<void* ()>*)&f; }
     static void get_id (const Func<String (const C&)>& f) { get_table()->get_id_p = *(Func<String (void*)>*)&f; }
@@ -213,6 +219,9 @@ template <class C> C* find_by_id (String id) {
 template <class C> C* require_id (String id) {
     return (C*)require_hacctable<C>()->require_id(id);
 }
+template <class C> String get_type_name () {
+    return Haccable<C>::get_table()->get_type_name();
+}
 
 }
 
@@ -222,12 +231,13 @@ template <class C> C* require_id (String id) {
 #define HCB_COMMA ,  // because literal commas confuse function-like macros.
 #define HCB_UNQ2(a, b) a##b
 #define HCB_UNQ1(a, b) HCB_UNQ2(a, b)
-#define HCB_INSTANCE(type) static inline void HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) () { Haccable<type>::get_table(); }
+#define HCB_INSTANCE(type) static inline void HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) () { static_assert(Haccable<type>::defined_here, "The Haccability requested by HCB_INSTANCE was not defined in this compilation unit."); }
 #define HCB_BEGIN(type) template <> struct Haccable<type> : hacc::Haccability<type> { static void describe () {
 #define HCB_END(type) } }; static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::get_table();
 #define HCB_PARAMS(...) __VA_ARGS__
 #define HCB_TEMPLATE_BEGIN(params, type) template params struct Haccable<type> : hacc::Haccability<type> { \
     using hcb = hacc::Haccability<type>; \
+    using hcb::type_name; \
     using hcb::allocate; \
     using hcb::get_id; \
     using hcb::find_by_id; \

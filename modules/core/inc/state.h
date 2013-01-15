@@ -9,18 +9,21 @@ struct Stateful;
 
 struct Game_State {
     Links<Stateful> things;
+    void exist ();
+    ~Game_State () { things.clear(); }
 };
 
 extern Game_State* current_state;
 
 struct Stateful : Linkable<Stateful> {
-    Stateful (Game_State* s = current_state) { if (s) link(s->things); }
+    Stateful () { }
 
-     // These should do things like register themselves in a phase or layer.
-    virtual void freeze () { }
-    virtual void thaw () { }
+     // Don't register with layers and physics and such until exist() is called.
+    virtual void exist () { }
     virtual ~Stateful () { }
 };
+
+void load_state (std::string filename);
 
 }
 

@@ -1,7 +1,7 @@
 #ifndef HAVE_UTIL_ORGANIZATION_H
 #define HAVE_UTIL_ORGANIZATION_H
 
-
+#include "../../hacc/inc/haccable.h"
 #include "honestly.h"
 
 
@@ -16,14 +16,18 @@ struct Linkable_Link {
      // if next is null!  Only the next next will be null.
      // Use is_first and is_last on the linked item instead.  Following
      // the C* next of the last item can lead to memory corruption.
-    Linkable_Link<C, which>* _next = NULL;
-    Linkable_Link<C, which>* _prev = NULL;
+    Linkable_Link<C, which>* _next;
+    Linkable_Link<C, which>* _prev;
+    Linkable_Link (Linkable_Link<C, which>* n = NULL, Linkable_Link<C, which>* p = NULL) :
+        _next(n), _prev(p)
+    { }
 };
 
 template <class C, uint which = 0>
 struct Links {
     Linkable_Link<C, which> first_pseudo;
     Linkable_Link<C, which> last_pseudo;
+    Links () : first_pseudo(&last_pseudo, NULL), last_pseudo(NULL, &first_pseudo) { }
     C* first () const { return empty() ? NULL : static_cast<C*>(first_pseudo._next); }
     C* last () const { return empty() ? NULL : static_cast<C*>(last_pseudo._prev); }
     bool empty () const {
@@ -31,23 +35,22 @@ struct Links {
     }
     operator bool () const { return !empty(); }
     void clear () {
-        C* nextp;
         for (C* p = first(); p; p = p->next()) {
             delete p;
         }
     }
 };
 // for (C* x = list.first(); x; x = x->next()) ...
-/*
+
 HCB_TEMPLATE_BEGIN(<class C>, Links<C>)
     using namespace hacc;
     to([](const Links<C>& v){
         VArray<const Hacc*> a;
-        Bomb b ([&a](){ for (auto& p : a) delete p; });
+//        Bomb b ([&a](){ for (auto& p : a) delete p; });
         for (C* p = v.first(); p; p = p->next()) {
             a.push_back(hacc_from(p));
         }
-        b.defuse();
+//        b.defuse();
         return new_hacc(std::move(a));
     });
     update_from([](Links<C>& v, const Hacc* h){
@@ -55,11 +58,12 @@ HCB_TEMPLATE_BEGIN(<class C>, Links<C>)
         v.clear();
         for (uint i = 0; i < ah->n_elems(); i++) {
             C* n = value_from_hacc<C*>(ah->elem(i));
+            if (!n) printf("BLARGH!\n");
             n->link(v);
         }
     });
 HCB_TEMPLATE_END(<class C>, Links<C>)
-*/
+
 template <class C, uint which = 0>
 struct Linkable : Linkable_Link<C, which> {
     using Linkable_Link<C, which>::_next;
@@ -94,8 +98,8 @@ struct Linkable : Linkable_Link<C, which> {
         if (_next) { _next->_prev = _prev; _next = NULL; }
         if (_prev) { _prev->_next = _next; _prev = NULL; }
     }
-    Linkable () { }
-    ~Linkable () { unlink(); }
+    Linkable () : Linkable_Link<C, which>(NULL, NULL) { }
+    ~Linkable () { printf("Destroy\n"); unlink(); }
     Linkable (Links<C, which>& l) { link(l); }
 };
 

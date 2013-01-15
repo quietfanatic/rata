@@ -120,9 +120,11 @@ namespace vis {
         }
     } test_layer;
 
-    void Image_Drawer::set_visible (bool b) {
-        if (b) link(image_drawers);
-        else unlink();
+    void Image_Drawer::appear () {
+        link(image_drawers);
+    }
+    void Image_Drawer::disappear () {
+        unlink();
     }
 
     Links<Image_Drawer> image_drawers;
@@ -135,17 +137,6 @@ namespace vis {
             }
         }
     } idl;
-
-    struct Test_Drawer : Single_Image {
-        Image* img_image () { static Image* r = hacc::require_id<Image>("vis/test.png"); return r; }
-        SubImg* img_sub () {
-            static SubImg r = hacc::value_from_file<std::unordered_map<std::string, SubImg>>(
-                "modules/vis/test.hacc"
-            ).at("green");
-            return &r;
-        }
-        Vec img_pos () { return Vec(10, 7.5); }
-    };
 
 }
 

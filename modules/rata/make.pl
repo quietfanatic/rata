@@ -25,7 +25,7 @@ workflow {
 
     include '../..';
 
-    subdep('src/main.cpp', '../core/inc/game.h');
+    subdep('src/main.cpp', [qw<../core/inc/game.h ../core/inc/state.h ../vis/inc/vis.h ../hacc/inc/everything.h>]);
 
     cppc_rule('tmp/main.o', 'src/main.cpp');
 

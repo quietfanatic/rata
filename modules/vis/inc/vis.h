@@ -14,7 +14,7 @@ namespace vis {
 
      // Only the barebones image file
     struct Image : Resource {
-        GLuint tex = 0;
+        uint tex = 0;
         Vec size;
 
         bool load ();
@@ -40,8 +40,8 @@ namespace vis {
     struct Image_Drawer : Linkable<Image_Drawer> {
         virtual void draw () = 0;
         bool is_visible () { return is_linked(); }
-        void set_visible (bool b);
-        Image_Drawer (bool b = false) { set_visible(b); }
+        void appear ();
+        void disappear ();
     };
     extern Links<Image_Drawer> image_drawers;
     struct Single_Image : Image_Drawer {

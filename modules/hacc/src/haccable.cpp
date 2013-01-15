@@ -35,6 +35,7 @@ namespace hacc {
         bool referenced = false;
     };
     static std::unordered_map<void*, write_id_info> write_history;
+    typedef std::vector<Func<void ()>> DU;
     static uint writing = 0;
     struct write_lock {
         write_lock () { writing++; }
@@ -42,16 +43,12 @@ namespace hacc {
     };
      // These are used to make sure pointers are updated after the pointed-to data
     static std::unordered_map<String, Func<void* ()>> read_ids;
-    static std::vector<Func<void ()>> delayed_updates;
     static uint reading = 0;
     struct read_lock {
         read_lock () { reading++; }
         ~read_lock () {
-             // Iteration over delayed_reads should not happen in destructor
-             //  for exception safety.
             if (!--reading) {
                 read_ids.clear();
-                delayed_updates.clear();
             }
         }
     };
@@ -72,14 +69,14 @@ namespace hacc {
 
     const Hacc* HaccTable::to_hacc_inner (void* p) {
         if (!initialized)
-            throw Error("Unhaccable type <mangled: " + String(cpptype.name()) + ">");
+            throw Error("Unhaccable type " + get_type_name());
         else if (to) { return to(p); }
          // Like a union first
         else if (variants.size() && select_variant) {
             String v = select_variant(p);
             auto iter = variants.find(v);
             if (iter == variants.end()) {
-                throw Error("Selected variant '" + v + "' was not listed in variants.");
+                throw Error("Selected variant '" + v + "' was not listed in variants of " + get_type_name() + ".");
             }
             else {
                 auto& gs = iter->second;
@@ -110,12 +107,12 @@ namespace hacc {
          // Like an array next
         else if (elems.size()) {
             hacc::Array a;
-            Bomb b ([&a](){ for (auto& p : a) delete p; });
+//            Bomb b ([&a](){ for (auto& p : a) delete p; });
             for (auto& gs : elems) {
                 HaccTable* t = HaccTable::require_cpptype(*gs.mtype);
                 gs.get(p, [&a, t](void* mp){ a.push_back(t->to_hacc(mp)); });
             }
-            b.defuse();
+//            b.defuse();
             return new_hacc(std::move(a));
         }
          // Following a pointer happens somewhere in here.
@@ -155,7 +152,7 @@ namespace hacc {
                             return new_hacc({hacc_attr(pair.first, val)});
                         }
                     }
-                    throw Error("Unrecognized subtype <mangled: " + String(realtype->name()) + "> of <mangled: " + String(cpptype.name()) + ">");
+                    throw Error("Unrecognized subtype " + HaccTable::by_cpptype(*realtype)->get_type_name() + " of " + get_type_name());
                 }
             }
             else {
@@ -172,24 +169,25 @@ namespace hacc {
             delegate.get(p, [t, &r](void* mp){ r = t->to_hacc(mp); });
             return r;
         }
-        else throw Error("Haccability description for <mangled: " + String(cpptype.name()) + "> did not provide any way to turn into a hacc.");
+        else throw Error("Haccability description for " + get_type_name() + " did not provide any way to turn into a hacc.");
     }
 
     void HaccTable::update_from_hacc (void* p, const Hacc* h) {
         if (!h) throw Error("update_from_hacc called with NULL pointer for hacc.");
         read_lock rl;
-        update_from_hacc_inner(p, h);
-        if (reading == 1) {
-             // Must be amenable to expansion during iteration.
-            for (uint i = 0; i < delayed_updates.size(); i++) {
-                delayed_updates[i]();
-            }
+        DU delayed_updates;
+
+        update_from_hacc_inner(p, h, delayed_updates);
+
+         // Must be amenable to expansion during iteration.
+        for (uint i = 0; i < delayed_updates.size(); i++) {
+            delayed_updates[i]();
         }
     }
 
      // If the set function copies data, thus invalidating the old copy's address,
      //  we must provide a way to get the address of the new data
-    void HaccTable::update_with_getset (void* p, const Hacc* h, const GetSet0& gs) {
+    void HaccTable::update_with_getset (void* p, const Hacc* h, const GetSet0& gs, DU& du) {
          // For things with IDs, save the ID temporarily
         if (!h->id.empty()) {
             if (gs.copies_on_set) {
@@ -198,7 +196,7 @@ namespace hacc {
                 if (gs.copies_on_get) {
                     read_ids.emplace(h->id, null);  // record that this is unavailable
                     gs.set(p, [&](void* mp){
-                        update_from_hacc_inner(mp, h);
+                        update_from_hacc_inner(mp, h, du);
                     });
                 }
                 else {
@@ -209,38 +207,38 @@ namespace hacc {
                         return newmp;
                     });
                     gs.set(p, [&](void* mp){
-                        update_from_hacc_inner(mp, h);
+                        update_from_hacc_inner(mp, h, du);
                     });
                 }
             }
             else {
                 gs.set(p, [&](void* mp){
                     read_ids.emplace(h->id, [mp](){ return mp; });
-                    update_from_hacc_inner(mp, h);
+                    update_from_hacc_inner(mp, h, du);
                 });
             }
         }
          // For refs, schedule an operation to find the pointee by ID
         else if (h->form() == REF) {
-            delayed_updates.emplace_back([this, p, h, &gs](){
-                gs.set(p, [this, h](void* mp){
-                    update_from_hacc_inner(mp, h);
+            du.emplace_back([this, p, h, &gs, &du](){
+                gs.set(p, [this, h, &du](void* mp){
+                    update_from_hacc_inner(mp, h, du);
                 });
             });
         }
          // For everything else, just do the thing now.
-        else gs.set(p, [&](void* mp){ update_from_hacc(mp, h); });
+        else gs.set(p, [&](void* mp){ update_from_hacc_inner(mp, h, du); });
     }
 
-    void HaccTable::update_from_hacc_inner (void* p, const Hacc* h) {
+    void HaccTable::update_from_hacc_inner (void* p, const Hacc* h, DU& du) {
         if (!initialized)
-            throw Error("Unhaccable type <mangled: " + String(cpptype.name()) + ">");
+            throw Error("Unhaccable type " + get_type_name());
         else if (update_from) {
             update_from(p, h);
         }
         else if (delegate) {
             HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
-            t->update_with_getset(p, h, delegate);
+            t->update_with_getset(p, h, delegate, du);
         }
         else if (empty) {
              // .......
@@ -251,7 +249,7 @@ namespace hacc {
                     auto oh = h->as_object();
                     for (auto& pair : attrs) {
                         HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                        t->update_with_getset(p, oh->attr(pair.first), pair.second);
+                        t->update_with_getset(p, oh->attr(pair.first), pair.second, du);
                     }
                 }
                 else if (variants.size()) {
@@ -262,7 +260,7 @@ namespace hacc {
                     for (auto& pair : variants) {
                         if (pair.first == oh->name_at(0)) {
                             HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                            t->update_with_getset(p, oh->value_at(0), pair.second);
+                            t->update_with_getset(p, oh->value_at(0), pair.second, du);
                             break;
                         }
                     }
@@ -277,7 +275,7 @@ namespace hacc {
                     const Hacc* val = oh->value_at(0);
                     auto iter = pointee_t->subtypes.find(sub);
                     if (iter == pointee_t->subtypes.end()) {
-                        throw Error("Unknown subtype '" + sub + "' of <mangled: " + String(pointee_t->cpptype.name()) + ">");
+                        throw Error("Unknown subtype '" + sub + "' of " + pointee_t->get_type_name());
                     }
                     else {
                         auto& caster = iter->second;
@@ -288,7 +286,7 @@ namespace hacc {
                         break;
                     }
                 }
-                else throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by an object Hacc.");
+                else throw Error("Type " + get_type_name() + " cannot be represented by an object Hacc.");
                 break;
             }
             case ARRAY: {
@@ -296,7 +294,7 @@ namespace hacc {
                     auto ah = h->as_array();
                     for (uint i = 0; i < elems.size(); i++) {
                         HaccTable* t = HaccTable::require_cpptype(*elems[i].mtype);
-                        t->update_with_getset(p, ah->elem(i), elems[i]);
+                        t->update_with_getset(p, ah->elem(i), elems[i], du);
                     }
                 }
                 else if (pointer) {
@@ -312,18 +310,20 @@ namespace hacc {
                     const Hacc* val = new_hacc(Array(ah->a.begin()+1, ah->a.end()));
                     auto iter = pointee_t->subtypes.find(sub);
                     if (iter == pointee_t->subtypes.end()) {
-                        throw Error("Unknown subtype '" + sub + "' of <mangled: " + String(pointee_t->cpptype.name()) + ">");
+                        throw Error("Unknown subtype '" + sub + "' of " + pointee_t->get_type_name());
                     }
                     else {
                         auto& caster = iter->second;
                         HaccTable* t = HaccTable::require_cpptype(caster.subtype);
-                        pointer.set(p, [&caster, val, t](void* basep){
-                            *(void**)basep = caster.up(t->new_from_hacc(val));
+                        pointer.set(p, [&caster, val, t, &du](void* basep){
+                            void* newp = t->allocate();
+                            t->update_from_hacc_inner(newp, val, du);
+                            *(void**)basep = caster.up(newp);
                         });
                         break;
                     }
                 }
-                else throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by an array Hacc.");
+                else throw Error("Type " + get_type_name() + " cannot be represented by an array Hacc.");
                 break;
             }
             case REF: {
@@ -338,28 +338,28 @@ namespace hacc {
                                 *(void**)mp = addr;
                             });
                         }
-                        else throw Error("The <mangled: " + String(pointee_t->cpptype.name()) + "> with ID '" + id + "' could not be referenced due to too much encapsulation.");
+                        else throw Error("The " + pointee_t->get_type_name() + " with ID '" + id + "' could not be referenced due to too much encapsulation.");
                     }
                     else if (void* addr = pointee_t->find_by_id(id)) {
                         pointer.set(p, [&addr, this](void* mp){
                             *(void**)mp = addr;
                         });
                     }
-                    else throw Error("No <mangled: " + String(pointee_t->cpptype.name()) + "> with ID '" + id + "' could be found.");
+                    else throw Error("No " + pointee_t->get_type_name() + " with ID '" + id + "' could be found.");
                 }
-                else throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a reference Hacc.");
+                else throw Error("Type " + get_type_name() + " cannot be represented by a reference Hacc.");
                 break;
             }
-            case STRING: throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a string Hacc.");
-            case DOUBLE: throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a double Hacc.");
-            case FLOAT: throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a float Hacc.");
-            case INTEGER: throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by an integer Hacc.");
-            case BOOL: throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a bool Hacc.");
+            case STRING: throw Error("Type " + get_type_name() + " cannot be represented by a string Hacc.");
+            case DOUBLE: throw Error("Type " + get_type_name() + " cannot be represented by a double Hacc.");
+            case FLOAT: throw Error("Type " + get_type_name() + " cannot be represented by a float Hacc.");
+            case INTEGER: throw Error("Type " + get_type_name() + " cannot be represented by an integer Hacc.");
+            case BOOL: throw Error("Type " + get_type_name() + " cannot be represented by a bool Hacc.");
             case NULLFORM: {
                 if (pointer) {
                     pointer.set(p, [](void* mp){ *(void**)mp = NULL; });
                 }
-                else throw Error("Type <mangled: " + String(cpptype.name()) + "> cannot be represented by a null Hacc.");
+                else throw Error("Type " + get_type_name() + " cannot be represented by a null Hacc.");
                 break;
             }
             default: throw Error("Oops, a corrupted hacc snuck in somewhere.\n");
@@ -367,10 +367,11 @@ namespace hacc {
     }
 
     void* HaccTable::new_from_hacc (const Hacc* h) {
+        if (!allocate) throw Error("No known way to allocate a " + get_type_name() + "");
         void* r = allocate();
-        Bomb b ([this, r](){ deallocate(r); });
+//        Bomb b ([this, r](){ deallocate(r); });
         update_from_hacc(r, h);
-        b.defuse();
+//        b.defuse();
         return r;
     }
 
@@ -387,7 +388,7 @@ namespace hacc {
     }
     void* HaccTable::require_id (String s) {
         void* r = find_by_id(s);
-        if (!r) throw Error("No <mangled: " + String(cpptype.name()) + "> was found with id '" + s + "'.");
+        if (!r) throw Error("No " + get_type_name() + " was found with id '" + s + "'.");
         return r;
     }
 
@@ -395,6 +396,11 @@ namespace hacc {
         if (pointee_type && pointer_policy == ASK_POINTEE)
             return by_cpptype(*pointee_type)->pointee_policy;
         else return pointer_policy;
+    }
+
+    String HaccTable::get_type_name () {
+        if (type_name.empty()) return "{" + String(cpptype.name()) + "}";
+        else return type_name;
     }
 
 }

@@ -140,7 +140,7 @@ HACC_VARIANT(Array, ARRAY,
     Array (std::initializer_list<const Hacc*> l, hacc::String id = "") : Hacc(id), a(l) { }
     size_t n_elems () const { return a.size(); }
     const Hacc* elem (uint i) const { return a.at(i); }
-    ~Array () { for (auto p : a) delete p; }
+    ~Array () { /*for (auto p : a) delete p;*/ }
 )
 HACC_VARIANT(Object, OBJECT,
     hacc::Object o;
@@ -153,7 +153,7 @@ HACC_VARIANT(Object, OBJECT,
     const Hacc* value_at (uint i) const { return o.at(i).second; }
     bool has_attr (hacc::String s) const;
     const Hacc* attr (hacc::String s) const;
-    ~Object () { for (auto& pair : o) delete pair.second; }
+    ~Object () { /*for (auto& pair : o) delete pair.second;*/ }
 )
 HACC_VARIANT_S(Error, ERROR, Error, e)
 
