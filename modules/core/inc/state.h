@@ -10,7 +10,7 @@ struct Stateful;
 struct Game_State {
     Links<Stateful> things;
     void exist ();
-    ~Game_State () { things.clear(); }
+    ~Game_State () { things.destroy_all(); }
 };
 
 extern Game_State* current_state;
@@ -24,6 +24,7 @@ struct Stateful : Linkable<Stateful> {
 };
 
 void load_state (std::string filename);
+void save_state (std::string filename);
 
 }
 

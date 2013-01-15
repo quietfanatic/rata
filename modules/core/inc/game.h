@@ -11,6 +11,7 @@ void quit_game ();
 void set_video ();
 void play ();
 void load (std::string filename);
+void save (std::string filename);
 
 struct Phase {
     std::string order;

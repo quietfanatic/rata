@@ -42,6 +42,9 @@ namespace core {
     void load (std::string filename) {
         load_state(filename);
     }
+    void save (std::string filename) {
+        save_state(filename);
+    }
 
     Phase::Phase (std::vector<Phase*>& type, std::string order) : order(order) {
         for (auto i = type.begin(); i != type.end(); i++) {

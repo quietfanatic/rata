@@ -34,7 +34,7 @@ struct Links {
         return first_pseudo._next == &last_pseudo;
     }
     operator bool () const { return !empty(); }
-    void clear () {
+    void destroy_all () {
         for (C* p = first(); p; p = p->next()) {
             delete p;
         }
@@ -55,7 +55,7 @@ HCB_TEMPLATE_BEGIN(<class C>, Links<C>)
     });
     update_from([](Links<C>& v, const Hacc* h){
         auto ah = h->as_array();
-        v.clear();
+        v.destroy_all();
         for (uint i = 0; i < ah->n_elems(); i++) {
             C* n = value_from_hacc<C*>(ah->elem(i));
             if (!n) printf("BLARGH!\n");

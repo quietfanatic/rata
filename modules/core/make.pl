@@ -22,7 +22,7 @@ workflow {
     subdep('inc/resources.h', '../util/inc/honestly.h');
     subdep('src/resources.cpp', 'inc/resources.h');
     subdep('inc/state.h', '../util/inc/organization.h');
-    subdep('src/state.cpp', [qw<inc/state.h ../hacc/inc/everything.h>]);
+    subdep('src/state.cpp', [qw<inc/state.h ../hacc/inc/everything.h inc/commands.h>]);
     subdep('src/input.h', '../util/inc/honestly.h');
     subdep('src/input.cpp', [qw<inc/input.h inc/game.h inc/commands.h>]);
 
