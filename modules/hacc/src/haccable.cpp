@@ -360,6 +360,7 @@ namespace hacc {
                 else throw Error("Type " + get_type_name() + " cannot be represented by a null Hacc.");
                 break;
             }
+            case ERROR: throw h->as_error()->e;
             default: throw Error("Oops, a corrupted hacc snuck in somewhere.\n");
         }
     }
