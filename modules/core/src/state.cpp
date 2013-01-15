@@ -10,7 +10,7 @@ HCB_BEGIN(Game_State)
 HCB_END(Game_State)
 
 HCB_BEGIN(Stateful)
-    pointee_policy(hacc::FOLLOW);
+    pointee_policy(hacc::ALWAYS_FOLLOW);
 HCB_END(Stateful)
 
 namespace core {

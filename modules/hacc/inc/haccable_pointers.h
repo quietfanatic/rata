@@ -65,7 +65,7 @@ HCB_TEMPLATE_END(<class C>, hacc::canonical_ptr<C>)
 HCB_TEMPLATE_BEGIN(<class C>, C*)
     type_name(hacc::get_type_name<C>() + "*");
     pointer(hacc::Haccability<C*>::template supertype<C*>());
-    pointer_policy(hacc::REFERENCE);
+    pointer_policy(hacc::ASK_POINTEE);
 HCB_TEMPLATE_END(<class C>, C*)
 
 #endif

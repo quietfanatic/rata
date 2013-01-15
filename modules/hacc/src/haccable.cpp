@@ -131,6 +131,9 @@ namespace hacc {
                 case FOLLOW: should_follow = !hist.written; break;
                 default: should_follow = false; break;
             }
+            printf("Type: %s, should follow: %d, pointer policy: %d\n",
+                get_type_name().c_str(), should_follow, get_pointer_policy()
+            );
             if (should_follow) {
                 if (pointee_t->subtypes.empty()) { // Non-polymorphic
                     return pointee_t->to_hacc(pp);
