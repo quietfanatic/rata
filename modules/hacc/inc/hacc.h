@@ -90,6 +90,7 @@ template <class T> using Func = std::function<T>;
 struct Hacc {
     hacc::String id;
     virtual Form form () const = 0;
+    virtual void destroy () const { }
     virtual ~Hacc () { }
     struct Null;
     struct Bool;
@@ -140,7 +141,12 @@ HACC_VARIANT(Array, ARRAY,
     Array (std::initializer_list<const Hacc*> l, hacc::String id = "") : Hacc(id), a(l) { }
     size_t n_elems () const { return a.size(); }
     const Hacc* elem (uint i) const { return a.at(i); }
-    ~Array () { /*for (auto p : a) delete p;*/ }
+    void destroy () const {
+        for (auto p : a) {
+            p->destroy();
+            delete p;
+        }
+    }
 )
 HACC_VARIANT(Object, OBJECT,
     hacc::Object o;
@@ -153,7 +159,12 @@ HACC_VARIANT(Object, OBJECT,
     const Hacc* value_at (uint i) const { return o.at(i).second; }
     bool has_attr (hacc::String s) const;
     const Hacc* attr (hacc::String s) const;
-    ~Object () { /*for (auto& pair : o) delete pair.second;*/ }
+    void destroy () const {
+        for (auto& pair : o) {
+            pair.second->destroy();
+            delete pair.second;
+        }
+    }
 )
 HACC_VARIANT_S(Error, ERROR, Error, e)
 

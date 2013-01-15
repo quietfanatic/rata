@@ -89,30 +89,23 @@ namespace hacc {
          // Then like an object
         else if (attrs.size()) {
             hacc::Object o;
-             // Okay, for some reason Bombs are segfaulting here.
-            try {
-                for (auto& pair : attrs) {
-                    HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                    pair.second.get(p, [&pair, &o, t](void* mp){ o.emplace_back(pair.first, t->to_hacc(mp)); });
-                }
-            } catch (std::exception& e) {
-                for (auto& p : o) delete p.second;
-                throw e;
-            } catch (...) {
-                for (auto& p : o) delete p.second;
-                throw std::bad_exception();
+            Bomb b ([&o](){ for (auto& p : o) { p.second->destroy(); delete p.second; } });
+            for (auto& pair : attrs) {
+                HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
+                pair.second.get(p, [&pair, &o, t](void* mp){ o.emplace_back(pair.first, t->to_hacc(mp)); });
             }
+            b.defuse();
             return new_hacc(std::move(o));
         }
          // Like an array next
         else if (elems.size()) {
             hacc::Array a;
-//            Bomb b ([&a](){ for (auto& p : a) delete p; });
+            Bomb b ([&a](){ for (auto& p : a) { p->destroy(); delete p; } });
             for (auto& gs : elems) {
                 HaccTable* t = HaccTable::require_cpptype(*gs.mtype);
                 gs.get(p, [&a, t](void* mp){ a.push_back(t->to_hacc(mp)); });
             }
-//            b.defuse();
+            b.defuse();
             return new_hacc(std::move(a));
         }
          // Following a pointer happens somewhere in here.
@@ -317,8 +310,10 @@ namespace hacc {
                         HaccTable* t = HaccTable::require_cpptype(caster.subtype);
                         pointer.set(p, [&caster, val, t, &du](void* basep){
                             void* newp = t->allocate();
+                            Bomb b ([newp, t](){ t->deallocate(newp); });
                             t->update_from_hacc_inner(newp, val, du);
                             *(void**)basep = caster.up(newp);
+                            b.defuse();
                         });
                         break;
                     }
@@ -369,9 +364,9 @@ namespace hacc {
     void* HaccTable::new_from_hacc (const Hacc* h) {
         if (!allocate) throw Error("No known way to allocate a " + get_type_name() + "");
         void* r = allocate();
-//        Bomb b ([this, r](){ deallocate(r); });
+        Bomb b ([this, r](){ deallocate(r); });
         update_from_hacc(r, h);
-//        b.defuse();
+        b.defuse();
         return r;
     }
 
