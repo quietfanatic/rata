@@ -1,5 +1,5 @@
-#ifndef HAVE_CORE_CONSOLE_H
-#define HAVE_CORE_CONSOLE_H
+#ifndef HAVE_CORE_COMMANDS_H
+#define HAVE_CORE_COMMANDS_H
 
 struct Command {
     virtual void operator() () = 0;

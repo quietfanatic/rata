@@ -3,7 +3,7 @@
 #include <SOIL/SOIL.h>
 #include "../../hacc/inc/everything.h"
 #include "../inc/vis.h"
-#include "../../core/inc/loop.h"
+#include "../../core/inc/game.h"
 
 namespace vis {
 

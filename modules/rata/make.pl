@@ -16,7 +16,7 @@ use File::Path qw<remove_tree>;
 workflow {
 
     our @objects = qw<
-        tmp/main.o ../core/tmp/loop.o ../vis/tmp/vis.o
+        tmp/main.o ../core/tmp/game.o ../vis/tmp/vis.o
         ../core/tmp/commands.o ../hacc/tmp/hacc.o ../hacc/tmp/haccable.o
         ../hacc/tmp/haccable_standard.o ../hacc/tmp/strings.o ../hacc/tmp/files.o
         ../core/tmp/resources.o ../core/tmp/state.o
@@ -25,7 +25,7 @@ workflow {
 
     include '../..';
 
-    subdep('src/main.cpp', '../core/inc/loop.h');
+    subdep('src/main.cpp', '../core/inc/game.h');
 
     cppc_rule('tmp/main.o', 'src/main.cpp');
 

@@ -5,7 +5,7 @@
 
 #include "../../hacc/inc/everything.h"
 #include "../inc/commands.h"
-#include "../inc/loop.h"
+#include "../inc/game.h"
 
 using namespace hacc;
 

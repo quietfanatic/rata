@@ -1,5 +1,5 @@
 
-#include "../../core/inc/loop.h"
+#include "../../core/inc/game.h"
 
 
 int main () {
