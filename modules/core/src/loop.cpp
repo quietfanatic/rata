@@ -45,11 +45,14 @@ namespace core {
         glfwOpenWindow(320*scale, 240*scale, 8, 8, 8, 0, 0, 0, GLFW_WINDOW);
     }
 
-    void main_loop () {
+    void init () {
         glfwInit();
         set_video(2);
         glfwSetKeyCallback(key_cb);
         glfwSetWindowCloseCallback(close_cb);
+    }
+
+    void main_loop () {
         for (;;) {
             glfwPollEvents();
             for (Phase* p : game_phases())

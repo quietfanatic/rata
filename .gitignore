@@ -1,10 +1,10 @@
 # binaries
-rata
+./rata
 
 # resource dirs
-lib
-res
-img
+./lib
+./res
+./img
 
 # intermediates
 tmp
@@ -14,5 +14,3 @@ gmon.out
 
 # vim
 .*.swp
-*/.*.swp
-*/*/.*.swp
