@@ -20,7 +20,6 @@ namespace core {
     void init () {
         glfwInit();
         set_video(2);
-        init_input();
     }
 
     void play () {
@@ -34,7 +33,6 @@ namespace core {
             p->init();
         current_state->exist();
         for (;;) {
-            read_input();
             for (Phase* p : game_phases())
                 p->run();
             for (Phase* p : draw_phases())

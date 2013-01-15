@@ -45,22 +45,22 @@ namespace core {
         }
     }
 
-    void init_input () {
-        for (uint i = 0; i < NUM_KEYS; i++)
-            keys[i] = 0;
-        glfwSetKeyCallback(key_cb);
-        glfwSetWindowCloseCallback(close_cb);
-        glfwDisable(GLFW_AUTO_POLL_EVENTS);
-    }
-
-    void read_input () {
-        for (uint i = 0; i < NUM_KEYS; i++)
-            if (keys[i] && keys[i] != 255)
-                keys[i]++;
-        glfwPollEvents();
-    }
-
-
+    struct Input_Phase : core::Phase {
+        Input_Phase () : core::Phase(core::game_phases(), "A.M") { }
+        void init () {
+            for (uint i = 0; i < NUM_KEYS; i++)
+                keys[i] = 0;
+            glfwSetKeyCallback(key_cb);
+            glfwSetWindowCloseCallback(close_cb);
+            glfwDisable(GLFW_AUTO_POLL_EVENTS);
+        }
+        void run () {
+            for (uint i = 0; i < NUM_KEYS; i++)
+                if (keys[i] && keys[i] != 255)
+                    keys[i]++;
+            glfwPollEvents();
+        }
+    } input_phase;
 
 }
 
