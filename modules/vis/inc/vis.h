@@ -34,9 +34,7 @@ namespace vis {
     };
 
 
-    void start_draw ();
     void draw_img (Image* set, SubImg* sub, Vec p, bool fliph, bool flipv);
-    void finish_draw ();
 }
 
 #endif

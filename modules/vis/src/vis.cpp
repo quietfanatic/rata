@@ -47,18 +47,6 @@ namespace vis {
         return true;
     }
 
-    void start_draw () {
-        glClearColor(0.5, 0.5, 0.5, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glTranslatef(-1, -1, 0);  // 0,0 starts out in the center
-        glScalef(1/10.0, 1/7.5, 1);
-         // Make coordinates point to pixels, not the corners between pixels
-        glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
-        glEnable(GL_TEXTURE_2D);
-    }
-
     void draw_img (Image* img, SubImg* sub, Vec p, bool fliph, bool flipv) {
         if (!img || !sub) return;
         glBindTexture(GL_TEXTURE_2D, img->tex);
@@ -100,12 +88,23 @@ namespace vis {
         glEnd();
     }
 
-    void finish_draw () {
-         // Leave flipping to core, so we don't have to include glfw
-    }
+    struct Camera_Setup_Layer : core::Phase {
+        Camera_Setup_Layer () : core::Phase(core::draw_phases(), "B.M") { }
+        void run () {
+            glClearColor(0.5, 0.5, 0.5, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glTranslatef(-1, -1, 0);  // 0,0 starts out in the center
+            glScalef(1/10.0, 1/7.5, 1);
+             // Make coordinates point to pixels, not the corners between pixels
+            glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
+            glEnable(GL_TEXTURE_2D);
+        }
+    } csl;
 
     struct Test_Layer : core::Phase {
-        Test_Layer () : core::Phase(core::draw_phases(), "asdf") { }
+        Test_Layer () : core::Phase(core::draw_phases(), "C.M") { }
         void run () {
             static vis::Image* test_image = hacc::require_id<vis::Image>("vis/test.png");
             static auto layout = hacc::new_from_file<Hash<SubImg>>("modules/vis/test.hacc");
@@ -114,12 +113,10 @@ namespace vis {
             static vis::SubImg* green = &layout->at("green");
             static vis::SubImg* blue = &layout->at("blue");
 
-            vis::start_draw();
             vis::draw_img(test_image, white, Vec(2, 2), false, false);
             vis::draw_img(test_image, red, Vec(18, 2), false, false);
             vis::draw_img(test_image, green, Vec(18, 13), false, false);
             vis::draw_img(test_image, blue, Vec(2, 13), false, false);
-            vis::finish_draw();
         }
     } test_layer;
 
