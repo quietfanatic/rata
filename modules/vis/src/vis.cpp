@@ -120,6 +120,33 @@ namespace vis {
         }
     } test_layer;
 
+    void Image_Drawer::set_visible (bool b) {
+        if (b) link(image_drawers);
+        else unlink();
+    }
+
+    Links<Image_Drawer> image_drawers;
+
+    struct Image_Drawer_Layer : core::Phase {
+        Image_Drawer_Layer () : core::Phase(core::draw_phases(), "D.M") { }
+        void run () {
+            for (Image_Drawer* p = image_drawers.first(); p; p = p->next()) {
+                p->draw();
+            }
+        }
+    } idl;
+
+    struct Test_Drawer : Single_Image {
+        Image* img_image () { static Image* r = hacc::require_id<Image>("vis/test.png"); return r; }
+        SubImg* img_sub () {
+            static SubImg r = hacc::value_from_file<std::unordered_map<std::string, SubImg>>(
+                "modules/vis/test.hacc"
+            ).at("green");
+            return &r;
+        }
+        Vec img_pos () { return Vec(10, 7.5); }
+    };
+
 }
 
 HCB_BEGIN(vis::Image)

@@ -24,8 +24,8 @@ template <class C, uint which = 0>
 struct Links {
     Linkable_Link<C, which> first_pseudo;
     Linkable_Link<C, which> last_pseudo;
-    C* first () const { return empty() ? NULL : first_pseudo._next; }
-    C* last () const { return empty() ? NULL : last_pseudo._prev; }
+    C* first () const { return empty() ? NULL : static_cast<C*>(first_pseudo._next); }
+    C* last () const { return empty() ? NULL : static_cast<C*>(last_pseudo._prev); }
     bool empty () const {
         return first_pseudo._next == &last_pseudo;
     }
