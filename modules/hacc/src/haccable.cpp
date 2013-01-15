@@ -363,11 +363,18 @@ namespace hacc {
             default: throw Error("Oops, a corrupted hacc snuck in somewhere.\n");
         }
     }
+    struct daBomb {
+        HaccTable* t;
+        void* p;
+        ~daBomb () { if (p) t->deallocate(p); }
+        void defuse () { p = null; }
+    };
 
     void* HaccTable::new_from_hacc (const Hacc* h) {
         if (!allocate) throw Error("No known way to allocate a " + get_type_name() + "");
         void* r = allocate();
-        Bomb b ([this, r](){ deallocate(r); });
+         // Bombs are segfaulting again.  *sigh*
+        daBomb b {this, r};
         update_from_hacc(r, h);
         b.defuse();
         return r;
