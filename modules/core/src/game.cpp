@@ -3,8 +3,8 @@
 #include "GL/glfw.h"
 
 #include "../inc/game.h"
+#include "../inc/input.h"
 #include "../inc/state.h"
-#include "../inc/commands.h"
 #include "../../hacc/inc/everything.h"
 
 namespace core {
@@ -13,35 +13,6 @@ namespace core {
         glfwTerminate();
         exit(0);
     }
-
-    int GLFWCALL close_cb () {
-        quit_game();
-        return true;  // not gonna happen
-    }
-
-    void GLFWCALL key_cb (int keycode, int action) {
-        if (action == GLFW_PRESS) {
-            switch (keycode) {
-                case GLFW_KEY_ESC: {
-                    quit_game();
-                }
-                case '`': {
-                    command_from_terminal();
-                }
-                default: {
-//                    if (keycode < 400)
-  //                      key[keycode] = 1;
-    //                    return;
-                }
-            }
-        }
-        else { // action == GLFW_RELEASE
-      //      if (keycode < 400)
-        //        key[keycode] = 0;
-          //      return;
-        }
-    }
-
     void set_video (uint scale) {
         glfwOpenWindow(320*scale, 240*scale, 8, 8, 8, 0, 0, 0, GLFW_WINDOW);
     }
@@ -49,8 +20,7 @@ namespace core {
     void init () {
         glfwInit();
         set_video(2);
-        glfwSetKeyCallback(key_cb);
-        glfwSetWindowCloseCallback(close_cb);
+        init_input();
     }
 
     void play () {
@@ -59,7 +29,7 @@ namespace core {
             return;
         }
         for (;;) {
-            glfwPollEvents();
+            read_input();
             for (Phase* p : game_phases())
                 p->run();
             for (Phase* p : draw_phases())

@@ -16,10 +16,18 @@ use File::Path qw<remove_tree>;
 workflow {
 
     our @objects = qw<
-        tmp/main.o ../core/tmp/game.o ../vis/tmp/vis.o
-        ../core/tmp/commands.o ../hacc/tmp/hacc.o ../hacc/tmp/haccable.o
-        ../hacc/tmp/haccable_standard.o ../hacc/tmp/strings.o ../hacc/tmp/files.o
-        ../core/tmp/resources.o ../core/tmp/state.o
+        tmp/main.o
+        ../core/tmp/game.o
+        ../core/tmp/commands.o
+        ../core/tmp/resources.o 
+        ../core/tmp/state.o
+        ../core/tmp/input.o
+        ../hacc/tmp/haccable_standard.o
+        ../hacc/tmp/strings.o
+        ../hacc/tmp/files.o
+        ../hacc/tmp/hacc.o
+        ../hacc/tmp/haccable.o
+        ../vis/tmp/vis.o
     >;
     our @libs = qw(-lGL -lglfw -lSOIL ../../lib/libBox2D.a);
 

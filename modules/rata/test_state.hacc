@@ -1,6 +1,6 @@
 {
     things: [
-        {test_actor: {}}
+        {test_actor: {pos: [10, 7.5]}}
     ]
 }
 
