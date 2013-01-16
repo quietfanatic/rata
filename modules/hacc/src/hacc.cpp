@@ -57,6 +57,7 @@ const Hacc* Hacc::Object::attr (hacc::String name) const {
             return it->second;
         }
     }
+    fprintf(stderr, "No atttribute '%s' found.\n", name.c_str());
     throw Error("No atttribute '" + name + "'");
 }
 

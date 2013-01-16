@@ -1,3 +1,6 @@
+#ifndef HAVE_UTIL_VEC_H
+#define HAVE_UTIL_VEC_H
+
 
 #include <Box2D/Box2D.h>
 #include "honestly.h"
@@ -50,3 +53,4 @@ HCB_BEGIN(Vec)
     elem(member(&Vec::y));
 HCB_END(Vec)
 
+#endif

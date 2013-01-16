@@ -131,9 +131,6 @@ namespace hacc {
                 case FOLLOW: should_follow = !hist.written; break;
                 default: should_follow = false; break;
             }
-            printf("Type: %s, should follow: %d, pointer policy: %d\n",
-                get_type_name().c_str(), should_follow, get_pointer_policy()
-            );
             if (should_follow) {
                 if (pointee_t->subtypes.empty()) { // Non-polymorphic
                     return pointee_t->to_hacc(pp);
@@ -245,7 +242,11 @@ namespace hacc {
                     auto oh = h->as_object();
                     for (auto& pair : attrs) {
                         HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                        t->update_with_getset(p, oh->attr(pair.first), pair.second, du);
+                        if (oh->has_attr(pair.first))
+                            t->update_with_getset(p, oh->attr(pair.first), pair.second, du);
+                        else if (pair.second.def.def)
+                            pair.second.set(p, [&](void* mp){ pair.second.def.def(mp); });
+                        else throw Error("Missing required attribute " + pair.first + " of " + get_type_name());
                     }
                 }
                 else if (variants.size()) {
@@ -290,7 +291,11 @@ namespace hacc {
                     auto ah = h->as_array();
                     for (uint i = 0; i < elems.size(); i++) {
                         HaccTable* t = HaccTable::require_cpptype(*elems[i].mtype);
-                        t->update_with_getset(p, ah->elem(i), elems[i], du);
+                        if (i < ah->n_elems())
+                            t->update_with_getset(p, ah->elem(i), elems[i], du);
+                        else if (elems[i].def.def)
+                            elems[i].set(p, [&](void* mp){ elems[i].def.def(mp); });
+                        else throw Error("Not enough elements to respresent a " + get_type_name());
                     }
                 }
                 else if (pointer) {
