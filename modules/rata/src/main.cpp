@@ -48,6 +48,7 @@ HCB_END(Test_Actor)
 
  // ONE LINE, that's right, ONE LINE!
 int main () {
+    Test_Actor x ();
     core::load("modules/rata/test_state.hacc");
 }
 

@@ -116,7 +116,7 @@ template <class C> struct PolyP {
 template <class C, bool has_nc = std::is_constructible<C>::value> struct per_nc;
 template <class C> struct per_nc<C, true> { static void* allocate () { return new C; } };
 template <class C> struct per_nc<C, false> { static void* allocate () { 
-    throw Error("Cannot allocate <mangled: " + Haccable<C>::get_table()->get_type_name() + "> because it has no nullary constructor.");
+    throw Error("Cannot allocate " + Haccable<C>::get_table()->get_type_name() + " because it has no nullary constructor.");
 } };
 
  // This class provides the DSL for creating HaccTables.

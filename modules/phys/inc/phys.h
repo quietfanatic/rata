@@ -25,8 +25,8 @@ namespace phys {
     };
 
     struct Actor : Linkable<Actor> {
-        virtual void pos () = 0;
-//        virtual void room ();
+        virtual Vec pos () const = 0;
+//        virtual Room* room ();
         virtual void activate () { }
         virtual void deactivate () { }
         virtual void act () { }
