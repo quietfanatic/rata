@@ -11,9 +11,9 @@ using vis::Image;
 using vis::SubImg;
 using phys::Physical;
 
-struct Test_Actor : core::Stateful, vis::Single_Image, Physical {
+struct Test_Actor : core::Stateful, Physical, vis::Single_Image {
     Vec img_pos () { return pos(); }
-    void start () { appear(); activate(); printf("Started.\n"); }
+    void start () { Physical::start(); appear(); printf("Started.\n"); }
     Image* img_image () { static Image* r = hacc::require_id<Image>("vis/test.png"); return r; }
     SubImg* img_sub () {
         static SubImg r = hacc::value_from_file<std::unordered_map<std::string, SubImg>>(
