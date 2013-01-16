@@ -49,8 +49,8 @@ namespace phys {
         void set_vel (Vec v) { body->SetLinearVelocity(b2Vec2(v.x, v.y)); }
 
         Physical (BodyDef* body_def) { body = body_def->manifest(sim); }
-        void activate () { body->SetActive(true); printf("Activated\n"); }
-        void deactivate () { body->SetActive(false); printf("Deactivated\n"); }
+        void activate ();
+        void deactivate ();
         void start () { Actor::start(); activate(); }
     };
 

@@ -17,7 +17,8 @@ workflow {
 
     include '../..';
 
-    subdep('inc/Vec.h', '../hacc/inc/haccable.h');
+    subdep('inc/Vec.h', [qw<../hacc/inc/haccable.h inc/honestly.h>]);
+    subdep('src/organization.h', [qw<../hacc/inc/haccable.h inc/honestly.h>]);
     subdep('src/debug.cpp', 'inc/debug.h');
 
     cppc_rule('tmp/debug.o', 'src/debug.cpp');

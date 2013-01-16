@@ -3,6 +3,7 @@
 #include "../../core/inc/game.h"
 #include "../../hacc/inc/haccable_standard.h"
 #include "../../hacc/inc/haccable_pointers.h"
+#include "../../util/inc/debug.h"
 
  // This is so satisfying
 
@@ -90,9 +91,12 @@ namespace phys {
         }
     } act_phase;
 
+    Logger phys_logger ("phys");
+
     struct Sim_Phase : core::Phase {
         Sim_Phase () : core::Phase(core::game_phases(), "D.M") { }
         void init () {
+            phys_logger.log("Creating the main sim.");
             sim = new b2World(
                 b2Vec2(0, -20)
             );
@@ -119,21 +123,22 @@ namespace phys {
 
 
     b2Fixture* FixtureDef::manifest (b2Body* b2b) {
-        printf("Manifesting fixture\n");
         b2Fixture* b2f = b2b->CreateFixture(&b2);
         b2f->SetUserData(this);
         return b2f;
     }
 
     b2Body* BodyDef::manifest (b2World* sim, Vec pos, Vec vel) {
-        printf("Manifesting body\n");
         b2Body* b2b = sim->CreateBody(&b2);
-        printf("Sim now has %d bodies.\n", sim->GetBodyCount());
+        phys_logger.log("Sim now has %d bodies.\n", sim->GetBodyCount());
         for (FixtureDef& fix : fixtures) {
             fix.manifest(b2b);
         }
         return b2b;
     }
+
+    void Physical::activate () { body->SetActive(true); }
+    void Physical::deactivate () { body->SetActive(false); }
 
 }
 

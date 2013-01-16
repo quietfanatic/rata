@@ -1,5 +1,10 @@
 
-#include "debug.h"
+#include "../inc/debug.h"
 
-uint debug_frame = -1;
-hacc::Map<Debugger> debuggers;
+int logging_frame = -1;
+
+
+std::unordered_map<std::string, Logger*>& Logger::all () {
+    static std::unordered_map<std::string, Logger*> all;
+    return all;
+}

@@ -1,35 +1,38 @@
+#ifndef HAVE_UTIL_DEBUG_H
+#define HAVE_UTIL_DEBUG_H
 
-#include "registrators.h"
+#include <stdio.h>
+#include <string>
+#include <unordered_map>
 
-extern uint debug_frame;
+extern int logging_frame;
 
-struct Debugger : Named<Debugger> {
+struct Logger {
     std::string name = "";
     bool on = false;
+
+    static std::unordered_map<std::string, Logger*>& all ();
+
+    void stamp () {
+        fprintf(stderr, "[%s %d] ", name.c_str(), logging_frame);
+    }
     template <class... Args>
-    void dbg (const char* fmt, Args... args) {
+    void log (const char* fmt, Args... args) {
         if (on) {
-            printf(
-            printf(fmt, args...);
+            stamp();
+            fprintf(stderr, fmt, args...);
+            fputc('\n', stderr);
         }
     }
-    Debugger(const Debugger&) = delete;
+    void log (std::string s) {
+        if (on) {
+            stamp();
+            fputs(s.c_str(), stderr);
+            fputc('\n', stderr);
+        }
+    }
+    Logger (std::string name, bool on = true) : name(name), on(on) { all().emplace(name, this); }
+    Logger (const Logger&) = delete;
 };
 
-extern hacc::Map<Debugger> debuggers;
-
-HCB_BEGIN(Debugger) {
-    void describe (hacc::Haccer& h, Debugger& it) {
-        h.attr("on", it.on);
-    }
-    Debugger* find_by_haccid (String id) {
-        return &debuggers[id];  // Autovivification
-    }
-    std::string haccid (const Debugger& d) {
-         // So dirty!
-         // We're assuming that every debugger is a member of a pair, and is preceded by a string in memory.
-        typedef std::pair<std::string, Debugger> apair;
-        unsigned long offset = (unsigned long)&((apair*)0)->second;
-        return ((apair*)((unsigned long)&d - offset))->first;
-    }
-} HCB_END(Debugger)
+#endif

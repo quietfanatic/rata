@@ -29,6 +29,7 @@ workflow {
         ../hacc/tmp/haccable.o
         ../phys/tmp/phys.o
         ../vis/tmp/vis.o
+        ../util/tmp/debug.o
     >;
     our @libs = qw(-lGL -lglfw -lSOIL ../../lib/libBox2D.a);
 
