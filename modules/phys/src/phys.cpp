@@ -2,6 +2,7 @@
 #include "../inc/phys.h"
 #include "../../core/inc/game.h"
 #include "../../hacc/inc/haccable_standard.h"
+#include "../../hacc/inc/haccable_pointers.h"
 
  // This is so satisfying
 
