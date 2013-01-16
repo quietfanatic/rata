@@ -28,6 +28,7 @@ namespace core {
 
     void init () {
         if (initialized) return;
+        initialized = true;
         glfwInit();
         set_video(2);
         all_phases<&Phase::init>();
