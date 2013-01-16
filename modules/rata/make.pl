@@ -27,13 +27,14 @@ workflow {
         ../hacc/tmp/files.o
         ../hacc/tmp/hacc.o
         ../hacc/tmp/haccable.o
+        ../phys/tmp/phys.o
         ../vis/tmp/vis.o
     >;
     our @libs = qw(-lGL -lglfw -lSOIL ../../lib/libBox2D.a);
 
     include '../..';
 
-    subdep('src/main.cpp', [qw<../core/inc/game.h ../core/inc/state.h ../vis/inc/vis.h ../hacc/inc/everything.h>]);
+    subdep('src/main.cpp', [qw<../core/inc/game.h ../core/inc/state.h ../vis/inc/vis.h ../hacc/inc/everything.h ../phys/inc/phys.h>]);
 
     cppc_rule('tmp/main.o', 'src/main.cpp');
 
