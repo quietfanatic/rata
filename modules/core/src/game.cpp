@@ -8,8 +8,7 @@
 
 namespace core {
 
-    template <void (Phase::* method )()>
-    void all_phases () {
+    void all_phases (void (Phase::* method )()) {
         for (Phase* p : game_phases())
             (p->*method)();
         for (Phase* p : draw_phases())
@@ -31,13 +30,13 @@ namespace core {
         initialized = true;
         glfwInit();
         set_video(2);
-        all_phases<&Phase::init>();
+        all_phases(&Phase::init);
     }
 
     void start () {
         try {
             init();
-            all_phases<&Phase::start>();
+            all_phases(&Phase::start);
             for (;;) {
                 for (Phase* p : game_phases())
                     p->run();
@@ -52,7 +51,7 @@ namespace core {
     }
 
     void stop () {
-        all_phases<&Phase::stop>();
+        all_phases(&Phase::stop);
     }
 
     Phase::Phase (std::vector<Phase*>& type, std::string order) : order(order) {
