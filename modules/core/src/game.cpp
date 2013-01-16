@@ -34,15 +34,19 @@ namespace core {
     }
 
     void start () {
-        init();
-        all_phases<&Phase::start>();
-        for (;;) {
-            for (Phase* p : game_phases())
-                p->run();
-            for (Phase* p : draw_phases())
-                p->run();
-            glfwSwapBuffers();
-            glfwSleep(1/60.0);
+        try {
+            init();
+            all_phases<&Phase::start>();
+            for (;;) {
+                for (Phase* p : game_phases())
+                    p->run();
+                for (Phase* p : draw_phases())
+                    p->run();
+                glfwSwapBuffers();
+                glfwSleep(1/60.0);
+            }
+        } catch (std::exception& e) {
+            fprintf(stderr, "Game was aborted due to an exception: %s\n", e.what());
         }
     }
 
