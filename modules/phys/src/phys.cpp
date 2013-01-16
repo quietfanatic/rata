@@ -80,7 +80,7 @@ namespace phys {
         Sim_Phase () : core::Phase(core::game_phases(), "B.M") { }
         void init () {
             sim = new b2World(
-                b2Vec2(-10, 0)
+                b2Vec2(0, -20)
             );
         }
         void start () {
