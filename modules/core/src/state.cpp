@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include "../../hacc/inc/everything.h"
 #include "../inc/state.h"
+#include "../inc/game.h"
 #include "../inc/commands.h"
 
 using namespace core;
@@ -18,31 +19,31 @@ namespace core {
 
     Game_State* current_state = NULL;
 
-    void Game_State::exist () {
-        if (existing) {
-            throw std::logic_error("Error: something tried to activate the game state a second time.");
+    void Game_State::start () {
+        if (started) {
+            throw std::logic_error("Error: something tried to start the game state a second time.");
         }
-        existing = true;
+        started = true;
         for (auto p = things.first(); p; p = p->next()) {
-            p->exist();
+            p->start();
         }
     }
 
-    void load_state (std::string filename) {
+    void load (std::string filename) {
+        init();
+        stop();
         try {
-            Game_State* state = hacc::new_from_file<Game_State>(filename);
-            if (state) {
-                delete current_state;
-                current_state = state;
-            }
+            if (current_state) delete current_state;
+            current_state = hacc::new_from_file<Game_State>(filename);
         } catch (hacc::Error& e) {
             printf("Failed to load state due to hacc error: %s\n", e.what());
         } catch (std::exception& e) {
             printf("Failed to load state due to an exception: %s\n", e.what());
         }
+        start();
     }
 
-    void save_state (std::string filename) {
+    void save (std::string filename) {
         try {
             hacc::file_from(filename, *current_state);
         } catch (hacc::Error& e) {
@@ -55,14 +56,14 @@ namespace core {
     struct Load_Command : Command {
         std::string filename;
         void operator() () {
-            load_state(filename);
+            load(filename);
         }
     };
 
     struct Save_Command : Command {
         std::string filename;
         void operator() () {
-            save_state(filename);
+            save(filename);
         }
     };
 

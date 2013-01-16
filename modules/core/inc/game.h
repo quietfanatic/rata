@@ -7,17 +7,20 @@
 namespace core {
 
 void init ();
+void start ();
+void stop ();
+
 void quit_game ();
 void set_video ();
-void play ();
-void load (std::string filename);
-void save (std::string filename);
 
 struct Phase {
     std::string order;
     Phase (std::vector<Phase*>& type, std::string order);
     virtual void init () { }
-    virtual void run () = 0;
+    virtual void start () { }
+    virtual void run () { }
+    virtual void stop () { }
+    virtual void quit () { }
 };
 
 std::vector<Phase*>& game_phases ();

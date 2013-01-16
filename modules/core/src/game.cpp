@@ -4,10 +4,17 @@
 
 #include "../inc/game.h"
 #include "../inc/input.h"
-#include "../inc/state.h"
 #include "../../hacc/inc/everything.h"
 
 namespace core {
+
+    template <void (Phase::* method )()>
+    void all_phases () {
+        for (Phase* p : game_phases())
+            (p->*method)();
+        for (Phase* p : draw_phases())
+            (p->*method)();
+    }
 
     void quit_game () {
         glfwTerminate();
@@ -16,22 +23,19 @@ namespace core {
     void set_video (uint scale) {
         glfwOpenWindow(320*scale, 240*scale, 8, 8, 8, 0, 0, 0, GLFW_WINDOW);
     }
+    
+    static bool initialized = false;
 
     void init () {
+        if (initialized) return;
         glfwInit();
         set_video(2);
+        all_phases<&Phase::init>();
     }
 
-    void play () {
-        if (!current_state) {
-            fprintf(stderr, "Error: cannot play game because a game state was not loaded.\n");
-            return;
-        }
-        for (Phase* p : game_phases())
-            p->init();
-        for (Phase* p : draw_phases())
-            p->init();
-        current_state->exist();
+    void start () {
+        init();
+        all_phases<&Phase::start>();
         for (;;) {
             for (Phase* p : game_phases())
                 p->run();
@@ -42,11 +46,8 @@ namespace core {
         }
     }
 
-    void load (std::string filename) {
-        load_state(filename);
-    }
-    void save (std::string filename) {
-        save_state(filename);
+    void stop () {
+        all_phases<&Phase::stop>();
     }
 
     Phase::Phase (std::vector<Phase*>& type, std::string order) : order(order) {

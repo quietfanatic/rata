@@ -99,7 +99,7 @@ struct Linkable : Linkable_Link<C, which> {
         if (_prev) { _prev->_next = _next; _prev = NULL; }
     }
     Linkable () : Linkable_Link<C, which>(NULL, NULL) { }
-    ~Linkable () { printf("Destroy\n"); unlink(); }
+    ~Linkable () { unlink(); }
     Linkable (Links<C, which>& l) { link(l); }
 };
 

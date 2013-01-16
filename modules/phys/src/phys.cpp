@@ -52,7 +52,7 @@ HCB_BEGIN(b2BodyDef)
 //    attr("pos", member(&b2BodyDef::position));  This shouldn't be set through this.
 //    attr("vel", member(&b2BodyDef::linearVelocity));  Nor this
     attr("damping", member(&b2BodyDef::linearDamping), 0.f);
-    attr("gravity", member(&b2BodyDef::gravityScale), 0.f);
+    attr("gravity", member(&b2BodyDef::gravityScale), 1.f);
     attr("unrotatable", member(&b2BodyDef::fixed_rotation), true);
 //    attr("ang", member(&b2BodyDef::angle), 0.f);
 //    attr("ang_vel", member(&b2BodyDef::angularVelocity), 0.f);
@@ -65,6 +65,7 @@ HCB_BEGIN(phys::BodyDef)
 HCB_END(phys::BodyDef)
 
 namespace phys {
+
     b2World* sim;
 
     struct Sim_Phase : core::Phase {
@@ -79,7 +80,6 @@ namespace phys {
         }
     } sim_phase;
 
-
     b2Fixture* FixtureDef::manifest (b2Body* b2b) {
         b2Fixture* b2f = b2b->createFixture(b2);
         b2f->setUserData(this);
@@ -93,8 +93,8 @@ namespace phys {
     }
 
     void Physical::exist () {
-        if (!sim) init();
-        sim->
+        body_def->manifest(sim);
+    }
 
 }
 

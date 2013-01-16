@@ -9,9 +9,9 @@ struct Stateful;
 
 struct Game_State {
     Links<Stateful> things;
-    bool existing = false;
+    bool started = false;
 
-    void exist ();
+    void start ();
     ~Game_State () { things.destroy_all(); }
 };
 
@@ -21,12 +21,12 @@ struct Stateful : Linkable<Stateful> {
     Stateful () { }
 
      // Don't register with layers and physics and such until exist() is called.
-    virtual void exist () { }
+    virtual void start () { }
     virtual ~Stateful () { }
 };
 
-void load_state (std::string filename);
-void save_state (std::string filename);
+void load (std::string filename);
+void save (std::string filename);
 
 }
 
