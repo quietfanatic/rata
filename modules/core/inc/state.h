@@ -21,7 +21,7 @@ struct Stateful : Linkable<Stateful> {
     Stateful () { }
 
      // Don't register with layers and physics and such until exist() is called.
-    virtual void start () { }
+    virtual void start () = 0;
     virtual ~Stateful () { }
 };
 

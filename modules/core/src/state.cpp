@@ -35,6 +35,7 @@ namespace core {
         try {
             if (current_state) delete current_state;
             current_state = hacc::new_from_file<Game_State>(filename);
+            current_state->start();
         } catch (hacc::Error& e) {
             printf("Failed to load state due to hacc error: %s\n", e.what());
         } catch (std::exception& e) {
@@ -55,14 +56,14 @@ namespace core {
 
     struct Load_Command : Command {
         std::string filename;
-        void operator() () {
+        void operator () () {
             load(filename);
         }
     };
 
     struct Save_Command : Command {
         std::string filename;
-        void operator() () {
+        void operator () () {
             save(filename);
         }
     };
