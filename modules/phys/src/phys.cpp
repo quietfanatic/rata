@@ -76,8 +76,22 @@ namespace phys {
 
     b2World* sim = NULL;
 
+    Links<Actor> all_actors;
+    void Actor::start () {
+        link(all_actors);
+    }
+
+
+    struct Act_Phase : core::Phase {
+        Act_Phase () : core::Phase(core::game_phases(), "C.M") { }
+        void run () { // These actions should be parallelizable.
+            for (Actor* p = all_actors.first(); p; p = p->next())
+                p->act();
+        }
+    } act_phase;
+
     struct Sim_Phase : core::Phase {
-        Sim_Phase () : core::Phase(core::game_phases(), "B.M") { }
+        Sim_Phase () : core::Phase(core::game_phases(), "D.M") { }
         void init () {
             sim = new b2World(
                 b2Vec2(0, -20)
@@ -93,6 +107,16 @@ namespace phys {
             init();
         }
     } sim_phase;
+
+    struct React_Phase : core::Phase {
+        React_Phase () : core::Phase(core::game_phases(), "E.M") { }
+        void run () { // These actions should be parallelizable.
+            for (Actor* p = all_actors.first(); p; p = p->next())
+                p->react();
+        }
+
+    } react_phase;
+
 
     b2Fixture* FixtureDef::manifest (b2Body* b2b) {
         printf("Manifesting fixture\n");

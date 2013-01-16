@@ -3,6 +3,7 @@
 
 #include <Box2D/Box2D.h>
 #include "../../util/inc/Vec.h"
+#include "../../util/inc/organization.h"
 
 namespace phys {
 
@@ -23,7 +24,23 @@ namespace phys {
         b2Body* manifest (b2World* sim, Vec pos = Vec(0, 0), Vec vel = Vec(0, 0));
     };
 
-    struct Physical {
+    struct Actor : Linkable<Actor> {
+        virtual void pos () = 0;
+//        virtual void room ();
+        virtual void activate () { }
+        virtual void deactivate () { }
+        virtual void act () { }
+        virtual void react () { }
+        virtual void away () { }
+        virtual ~Actor () { }
+
+        void start ();
+    };
+
+     // This will be replaced by per-room lists.
+    extern Links<Actor> all_actors;
+
+    struct Physical : Actor {
         b2Body* body = NULL;
 
         Vec pos () const { return reinterpret_cast<const Vec&>(body->GetPosition()); }
@@ -33,7 +50,7 @@ namespace phys {
 
         Physical (BodyDef* body_def) { body = body_def->manifest(sim); }
         void activate () { body->SetActive(true); printf("Activated\n"); }
-        void deactivate () { body->SetActive(false); }
+        void deactivate () { body->SetActive(false); printf("Deactivated\n"); }
     };
 
 }

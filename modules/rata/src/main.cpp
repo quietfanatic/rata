@@ -28,6 +28,11 @@ struct Test_Actor : core::Stateful, vis::Single_Image, Physical {
     }
     Test_Actor () : Physical(bd()) { the = this; }
     ~Test_Actor () { the = NULL; }
+
+     // Actor interface
+    void act () { printf("Acting\n"); }
+    void react () { printf("Reacting\n"); }
+
 };
 Test_Actor* Test_Actor::the;
 

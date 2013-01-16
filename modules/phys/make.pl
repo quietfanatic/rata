@@ -17,7 +17,7 @@ workflow {
 
     include '../..';
 
-    subdep('inc/phys.h', '../util/inc/Vec.h');
+    subdep('inc/phys.h', [qw<../util/inc/Vec.h ../util/inc/organization.h>]);
     subdep('src/phys.cpp', [qw<inc/phys.h ../core/inc/game.h ../hacc/inc/haccable_standard.h ../hacc/inc/haccable_pointers.h>]);
     cppc_rule('tmp/phys.o', 'src/phys.cpp');
 
