@@ -302,7 +302,7 @@ namespace hacc {
                     HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
                     auto ah = h->as_array();
                     if (ah->n_elems() < 1) {
-                        throw Error("An array Hacc representing a polymorphic type must contain only one attribute.");
+                        throw Error("An array Hacc representing a polymorphic type must not be empty.");
                     }
                     if (ah->elem(0)->form() != REF) {
                         throw Error("An array Hacc representing a polymorphic type must have a Ref as it's first element.");
