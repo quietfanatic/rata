@@ -33,6 +33,8 @@ HCB_END(b2PolygonShape)
 
 HCB_BEGIN(b2EdgeShape)
     base<b2Shape>("edge");
+    attr("v1", member((b2Vec2 b2EdgeShape::*)&b2EdgeShape::m_vertex1));
+    attr("v2", member((b2Vec2 b2EdgeShape::*)&b2EdgeShape::m_vertex2));
     elem(member((b2Vec2 b2EdgeShape::*)&b2EdgeShape::m_vertex1));
     elem(member((b2Vec2 b2EdgeShape::*)&b2EdgeShape::m_vertex2));
 HCB_END(b2EdgeShape)
@@ -52,7 +54,17 @@ HCB_BEGIN(phys::FixtureDef)
 HCB_END(phys::FixtureDef)
 
 HCB_BEGIN(b2BodyType)
-    delegate(assignable<int>());
+    value_name([](const b2BodyType& bt) -> std::string {
+        switch (bt) {
+            case b2_staticBody: return "static";
+            case b2_dynamicBody: return "dynamic";
+            case b2_kinematicBody: return "kinematic";
+            default: return "";
+        }
+    });
+    value("static", b2_staticBody);
+    value("dynamic", b2_dynamicBody);
+    value("kinematic", b2_kinematicBody);
 HCB_END(b2BodyType)
 
 HCB_BEGIN(b2BodyDef)
