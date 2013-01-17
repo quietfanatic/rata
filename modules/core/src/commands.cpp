@@ -17,6 +17,7 @@ namespace core {
             printf("Command: ");
             std::string cmdline;
             std::getline(std::cin, cmdline);
+            if (cmdline.empty()) return;
             hacc::update_from_string(cmd, "[" + cmdline + "]");
         } catch (hacc::Error& e) {
             printf("Error parsing command: %s\n", e.what());
