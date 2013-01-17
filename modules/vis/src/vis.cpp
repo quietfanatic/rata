@@ -18,7 +18,7 @@ namespace vis {
 
     bool Image::load () {
         int iw; int ih; int ich;
-        uint8* data = SOIL_load_image(("modules/" + name).c_str(), &iw, &ih, &ich, 4);
+        uint8* data = SOIL_load_image((name).c_str(), &iw, &ih, &ich, 4);
         if (!data) {
             fprintf(stderr, "Failed to load image %s: %s\n", name.c_str(), SOIL_last_result());
             return false;
@@ -106,7 +106,7 @@ namespace vis {
     struct Test_Layer : core::Phase {
         Test_Layer () : core::Phase(core::draw_phases(), "C.M") { }
         void run () {
-            static vis::Image* test_image = hacc::require_id<vis::Image>("vis/test.png");
+            static vis::Image* test_image = hacc::require_id<vis::Image>("modules/vis/test.png");
             static auto layout = hacc::new_from_file<Hash<SubImg>>("modules/vis/test.hacc");
             static vis::SubImg* white = &layout->at("white");
             static vis::SubImg* red = &layout->at("red");

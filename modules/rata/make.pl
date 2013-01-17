@@ -30,12 +30,13 @@ workflow {
         ../phys/tmp/phys.o
         ../vis/tmp/vis.o
         ../util/tmp/debug.o
+        ../ent/tmp/various.o
     >;
     our @libs = qw(-lGL -lglfw -lSOIL ../../lib/libBox2D.a);
 
     include '../..';
 
-    subdep('src/main.cpp', [qw<../core/inc/game.h ../core/inc/state.h ../vis/inc/vis.h ../hacc/inc/everything.h ../phys/inc/phys.h>]);
+    subdep('src/main.cpp', [qw<../core/inc/state.h>]);
 
     cppc_rule('tmp/main.o', 'src/main.cpp');
 
