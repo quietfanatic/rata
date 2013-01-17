@@ -318,7 +318,23 @@ struct Parser {
         return r;
     }
     const Hacc* parse_id_or_ref (String id) {
-        String gotid = look() == '&' ? parse_id() : parse_ident("An ID of some sort (this shouldn't happen)");
+        String gotid;
+        if (look() == '&') {
+            gotid = parse_id();
+        }
+        else {
+            gotid = parse_ident("An ID of some sort (this shouldn't happen)");
+            if (gotid == "null")
+                return new_hacc(null, id);
+            else if (gotid == "false")
+                return new_hacc(false, id);
+            else if (gotid == "true")
+                return new_hacc(true, id);
+            else if (gotid == "nan" || gotid == "inf") {
+                p -= 3;
+                return parse_floating(id);
+            }
+        }
         parse_ws();
         if (look() == '=') {
             p++;
@@ -349,36 +365,11 @@ struct Parser {
             case '[': return parse_array(id);
             case '{': return parse_object(id);
             case '(': return parse_parens(id);
-            case 'n': {
-                if (end - p >= 4 && 0==strncmp(p, "null", 4)) {
-                    p += 4;
-                    return new_hacc(null, id);
-                }
-                else return parse_id_or_ref(id);
-            }
-            case 't': {
-                if (end - p >= 4 && 0==strncmp(p, "true", 4)) {
-                    p += 4;
-                    return new_hacc(true, id);
-                }
-                else return parse_id_or_ref(id);
-            }
-            case 'f': {
-                if (end - p >= 5 && 0==strncmp(p, "false", 5)) {
-                    p += 5;
-                    return new_hacc(false, id);
-                }
-                else return parse_id_or_ref(id);
-            }
-             // Yeah, yeah, I know, I'm weird.
-            case '&': case '_': case 'a': case 'b': case 'c': case 'd': case 'e': case 'g':
-            case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'o': case 'p':
-            case 'q': case 'r': case 's': case 'u': case 'v': case 'w': case 'x': case 'y':
-            case 'z': case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G':
-            case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'O':
-            case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W':
-            case 'X': case 'Y': case 'Z': return parse_id_or_ref(id);
-            default: throw Error("Unrecognized character " + String(1, next));
+            case '&': case '_': return parse_id_or_ref(id);
+            default:
+                if (isalnum(next))
+                    return parse_id_or_ref(id);
+                else throw Error("Unrecognized character " + String(1, next));
         }
     }
     const Hacc* parse_all () {
