@@ -54,6 +54,9 @@ struct HaccTable {
     const std::type_info* (* pointee_realtype ) (void*) = null;
      // This allows the type to accept and empty array or hash
     bool empty = false;
+     // These allow the type to be treated kinda like an enum
+    std::unordered_map<String, Defaulter0> values;
+    Func<String (void*)> value_name;
     
     const Hacc* to_hacc (void*);
     void update_from_hacc (void*, const Hacc*);
@@ -151,6 +154,8 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     static void elem (const GetSet1<C>& gs) { get_table()->elems.push_back(gs); }
     static void variant (String name, const GetSet1<C>& gs) { get_table()->variants.emplace(name, gs); }
     static void select_variant (const Func<String (const C&)>& f) { get_table()->select_variant = *(Func<String (void*)>*)&f; }
+    static void value (String name, const Defaulter1<C>& val) { get_table()->values.emplace(name, val); }
+    static void value_name (const Func<String (const C&)>& f) { get_table()->value_name = *(Func<String (void*)>*)&f; }
     static void empty () { get_table()->empty = true; }
     template <class B>
     static void base (String name) {
@@ -248,6 +253,8 @@ template <class C> String get_type_name () {
     using hcb::elem; \
     using hcb::variant; \
     using hcb::select_variant; \
+    using hcb::value; \
+    using hcb::value_name; \
     using hcb::empty; \
     using hcb::base; \
     using hcb::value_functions; \

@@ -152,6 +152,9 @@ namespace hacc {
                 return new_hacc(hacc::Ref(hist.id, pp));
             }
         }
+        else if (value_name) {
+            return new_hacc(Ref(value_name(p)));
+        }
         else if (empty) {
             return new_hacc(Array());
         }
@@ -349,6 +352,12 @@ namespace hacc {
                         });
                     }
                     else throw Error("No " + pointee_t->get_type_name() + " with ID '" + id + "' could be found.");
+                }
+                else if (values.size()) {
+                    auto iter = values.find(h->as_ref()->r.id);
+                    if (iter != values.end())
+                        iter->second.def(p);
+                    else throw Error("Type " + get_type_name() + " has no value '" + h->as_ref()->r.id);
                 }
                 else throw Error("Type " + get_type_name() + " cannot be represented by a reference Hacc.");
                 break;
