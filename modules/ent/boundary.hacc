@@ -1,0 +1,9 @@
+{
+    b2: { type: static }
+    fixtures: [
+        {b2: {shape: {edge: {v1: [20  0], v2: [ 0  0]}}}}
+        {b2: {shape: {edge: {v1: [20 15], v2: [20  0]}}}}
+        {b2: {shape: {edge: {v1: [ 0 15], v2: [20 15]}}}}
+        {b2: {shape: {edge: {v1: [ 0  0], v2: [ 0 15]}}}}
+    ]
+}

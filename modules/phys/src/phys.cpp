@@ -51,6 +51,10 @@ HCB_BEGIN(phys::FixtureDef)
     attr("b2", member(&FixtureDef::b2));
 HCB_END(phys::FixtureDef)
 
+HCB_BEGIN(b2BodyType)
+    delegate(assignable<int>());
+HCB_END(b2BodyType)
+
 HCB_BEGIN(b2BodyDef)
     attr("type", member<b2BodyType>(&b2BodyDef::type, b2_dynamicBody));
 //    attr("pos", member(&b2BodyDef::position));  This shouldn't be set through this.

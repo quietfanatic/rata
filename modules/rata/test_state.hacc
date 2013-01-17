@@ -5,6 +5,9 @@
             image: &"modules/vis/test.png"
             sub: {pos: [16, 16] box: [-16 -16 16 16]}
         }}
+        {Boundary: {
+            physical: {pos: [0 0]}
+        }}
     ]
 }
 
