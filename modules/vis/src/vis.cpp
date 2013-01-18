@@ -47,7 +47,7 @@ namespace vis {
 
     void draw_img (Image* img, SubImg* sub, Vec p, bool fliph, bool flipv) {
         if (draw_img_logger.on) {
-            draw_img_logger.log("img: %s sub: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u\n",
+            draw_img_logger.log("img: %s sub: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u",
                 img ? img->name.c_str() : "NULL", sub ? sub->pos.x : 0/0.0, sub ? sub->pos.y : 0/0.0,
                 sub ? sub->box.l : 0/0.0, sub ? sub->box.b : 0/0.0, sub ? sub->box.r : 0/0.0, sub ? sub->box.t : 0/0.0,
                 p.x, p.y, fliph, flipv
@@ -84,6 +84,11 @@ namespace vis {
         tb /= img->size.y;
         tr /= img->size.x;
         tt /= img->size.y;
+        if (draw_img_logger.on) {
+            draw_img_logger.log("tex: [%g %g %g %g] vert [%g %g %g %g]",
+                tl, tb, tr, tt, vl, vb, vr, vt
+            );
+        }
          // Direct Mode is still the easiest for drawing individual images.
         glBegin(GL_QUADS);
             glTexCoord2f(tl, 1-tb); glVertex2f(vl, vb);
@@ -105,6 +110,9 @@ namespace vis {
              // Make coordinates point to pixels, not the corners between pixels
             glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
             glEnable(GL_TEXTURE_2D);
+             // Blending in lieu of real shaders
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
     } csl;
 

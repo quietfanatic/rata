@@ -89,7 +89,7 @@ namespace vis {
         void reposition_segment (Segment*, Vec);
         void reposition () {
             if (!skeleton) return;
-            reposition_segment(skeleton->root, skeleton->root_pos);
+            reposition_segment(skeleton->root, skeleton->root_pos*PX);
         }
         Vec position_of (Segment* segment) {
             if (!skeleton) return Vec();

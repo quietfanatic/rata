@@ -23,14 +23,14 @@
             head_laybk    = {name: "laybk"    subimg: {pos: [ 62 73] box: [-16 -11 12  9]}}
         ]
         body_poses = [
-            body_stand  = {name: "stand"  subimg: {pos: [11  3] box: [-10 -3 10 17]} joints: [[ 0 16]]}
-            body_walk   = {name: "walk"   subimg: {pos: [32  3] box: [-10 -3 10 17]} joints: [[ 0 15]]}
-            body_kneel  = {name: "kneel"  subimg: {pos: [53  3] box: [-10 -3 10 17]} joints: [[ 0 10]]}
-            body_sit    = {name: "sit"    subimg: {pos: [74  3] box: [-10 -3 10 17]} joints: [[-2  9]]}
-            body_crawl1 = {name: "crawl1" subimg: {pos: [11 24] box: [-10 -3 10 17]} joints: [[ 6  5]]}
-            body_crawl2 = {name: "crawl2" subimg: {pos: [32 24] box: [-10 -3 10 17]} joints: [[ 6  4]]}
-            body_hurtbk = {name: "hurtbk" subimg: {pos: [53 24] box: [-10 -3 10 17]} joints: [[ 0 15]]}
-            body_laybk  = {name: "laybk"  subimg: {pos: [74 24] box: [-10 -3 10 17]} joints: [[-8  2]]}
+            body_stand  = {name: "stand"  subimg: {pos: [11  3] box: [-10 -2 10 18]} joints: [[ 0 16]]}
+            body_walk   = {name: "walk"   subimg: {pos: [32  3] box: [-10 -2 10 18]} joints: [[ 0 15]]}
+            body_kneel  = {name: "kneel"  subimg: {pos: [53  3] box: [-10 -2 10 18]} joints: [[ 0 10]]}
+            body_sit    = {name: "sit"    subimg: {pos: [74  3] box: [-10 -2 10 18]} joints: [[-2  9]]}
+            body_crawl1 = {name: "crawl1" subimg: {pos: [11 24] box: [-10 -2 10 18]} joints: [[ 6  5]]}
+            body_crawl2 = {name: "crawl2" subimg: {pos: [32 24] box: [-10 -2 10 18]} joints: [[ 6  4]]}
+            body_hurtbk = {name: "hurtbk" subimg: {pos: [53 24] box: [-10 -2 10 18]} joints: [[ 0 15]]}
+            body_laybk  = {name: "laybk"  subimg: {pos: [74 24] box: [-10 -2 10 18]} joints: [[-8  2]]}
         ]
     ]
     presets: [

@@ -131,13 +131,14 @@ namespace vis {
         ms.pos = pos;
         if (!ms.pose) return;
         for (uint i = 0; i < segment->subs.size(); i++) {
-            reposition_segment(segment->subs[i], pos + ms.pose->joints[i]);
+            reposition_segment(segment->subs[i], pos + ms.pose->joints[i]*PX);
         }
     }
     void Model::apply_pose (Segment* segment, Pose* pose) {
         if (!skeleton) return;
-        model_segments.at(skeleton->offset_of_segment(segment)).pose = pose;
-        reposition_segment(segment, Vec(0, 0));
+        ModelSegment& ms = model_segments.at(skeleton->offset_of_segment(segment));
+        ms.pose = pose;
+        reposition_segment(segment, ms.pos);
     }
     void Model::apply_preset (Preset* preset) {
         if (!skeleton) return;
