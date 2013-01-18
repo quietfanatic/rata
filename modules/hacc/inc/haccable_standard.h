@@ -72,5 +72,11 @@ HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
     });
 HCB_TEMPLATE_END(<class C>, std::unordered_map<std::string HCB_COMMA C>)
 
+HCB_TEMPLATE_BEGIN(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
+    using namespace hacc;
+    type_name("std::pair<" + get_type_name<A>() + ", " + get_type_name<B>() + ">");
+    elem(member(&std::pair<A, B>::first));
+    elem(member(&std::pair<A, B>::second));
+HCB_TEMPLATE_END(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
 
 #endif

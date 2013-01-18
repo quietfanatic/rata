@@ -24,7 +24,7 @@ HCB_BEGIN(Preset)
     attr("segment_poses", member(&Preset::segment_poses));
 HCB_END(Preset)
 
-static ResourceGroup skeletons;
+static ResourceGroup skeletons ("skeletons");
 HCB_BEGIN(Skeleton)
     type_name("vis::Skeleton");
     attr("segments", member(&Skeleton::segments));
@@ -43,8 +43,12 @@ HCB_BEGIN(SkinSegment)
 HCB_END(SkinSegment)
 
 namespace vis {
+    Skeleton::Skeleton () { }
     Skeleton::Skeleton (std::string name) : Resource(name) { hacc::update_from_file(*this, name); }
     Skeleton::~Skeleton () {
+         // If we don't have a name, we're not canonical.
+        if (name.empty()) return;
+        if (segments.empty()) return;
          // There may be duplicate pose lists.
         void* freed [segments.size()];
         uint freedi = 0;
@@ -56,8 +60,11 @@ namespace vis {
             next_seg: { }
         }
     }
-    bool Skeleton::reload () {
-        hacc::update_from_file(*this, name);
-        return true;
+    void Skeleton::reload () {
+        Skeleton&& tmp = hacc::value_from_file<Skeleton>(name);
+        segments = std::move(tmp.segments);
+        root = std::move(tmp.root);
+        root_pos = std::move(tmp.root_pos);
+        presets = std::move(tmp.presets);
     }
 }

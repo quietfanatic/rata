@@ -29,6 +29,7 @@ workflow {
         ../hacc/tmp/haccable.o
         ../phys/tmp/phys.o
         ../vis/tmp/vis.o
+        ../vis/tmp/models.o
         ../util/tmp/debug.o
         ../ent/tmp/various.o
     >;

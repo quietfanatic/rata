@@ -30,6 +30,7 @@ struct Resource {
     virtual void reload () = 0;
     virtual ~Resource () { }
 
+    Resource () { }
     Resource (Str name) : name(name) { }
 };
 

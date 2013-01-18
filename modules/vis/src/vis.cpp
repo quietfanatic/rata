@@ -15,8 +15,6 @@ namespace vis {
         return err;
     }
 
-    ResourceGroup Image::all ("images");
-
     void Image::reload () {
         int iw; int ih; int ich;
         uint8* data = SOIL_load_image((name).c_str(), &iw, &ih, &ich, 4);
@@ -140,10 +138,11 @@ namespace vis {
 
 using namespace vis;
 
+static ResourceGroup images ("images");
 HCB_BEGIN(Image)
     using namespace vis;
     type_name("vis::Image");
-    resource_haccability<Image, &Image::all>();
+    resource_haccability<Image, &images>();
 HCB_END(vis::Image)
 
 HCB_BEGIN(SubImg)

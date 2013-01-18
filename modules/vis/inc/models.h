@@ -63,8 +63,8 @@ namespace vis {
             }
         }
          // Resource
-        bool reload ();
-        static ResourceGroup all;
+        void reload ();
+        Skeleton ();
         Skeleton (std::string name);
         ~Skeleton ();
     };

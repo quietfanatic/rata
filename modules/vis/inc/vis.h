@@ -20,8 +20,6 @@ namespace vis {
         void unload ();
         void reload ();
 
-        static ResourceGroup all;
-
         Image (std::string name);
         ~Image () { unload(); }
     };
