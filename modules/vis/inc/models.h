@@ -29,7 +29,7 @@ namespace vis {
     struct Segment {
         std::string name;
         std::vector<Segment*> subs;
-        hacc::follow_ptr<std::vector<Pose>> poses;
+        std::vector<Pose>* poses;
 
         Pose* pose_named (std::string name);
     };
@@ -43,6 +43,7 @@ namespace vis {
         std::vector<Segment> segments;
         Segment* root;
         Vec root_pos;
+        std::vector<std::vector<Pose>> pose_lists;
         std::vector<Preset> presets;
 
         Segment* segment_named (std::string name);

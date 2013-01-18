@@ -312,10 +312,10 @@ namespace hacc {
                     HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
                     auto ah = h->as_array();
                     if (ah->n_elems() < 1) {
-                        throw Error("An array Hacc representing a polymorphic type must not be empty.");
+                        throw Error("An array Hacc representing a polymorphic type (" + get_type_name() + ") must not be empty.");
                     }
                     if (ah->elem(0)->form() != REF) {
-                        throw Error("An array Hacc representing a polymorphic type must have a Ref as it's first element.");
+                        throw Error("An array Hacc representing a polymorphic type (" + get_type_name() + ") must have a Ref as it's first element.");
                     }
                     String sub = ah->elem(0)->as_ref()->r.id;
                     const Hacc* val = new_hacc(Array(ah->a.begin()+1, ah->a.end()));

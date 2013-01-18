@@ -32,6 +32,7 @@ HCB_BEGIN(Skeleton)
     attr("segments", member(&Skeleton::segments));
     attr("root", member(&Skeleton::root));
     attr("root_pos", member(&Skeleton::root_pos));
+    attr("pose_lists", member(&Skeleton::pose_lists));
     attr("presets", member(&Skeleton::presets));
     resource_haccability<Skeleton, &skeletons>();
 HCB_END(Skeleton)
@@ -54,27 +55,14 @@ HCB_END(Skin)
 namespace vis {
     Skeleton::Skeleton () { }
     Skeleton::Skeleton (std::string name) : Resource(name) { hacc::update_from_file(*this, name); }
-    Skeleton::~Skeleton () {
-         // If we don't have a name, we're not canonical.
-        if (name.empty()) return;
-        if (segments.empty()) return;
-         // There may be duplicate pose lists.
-        void* freed [segments.size()];
-        uint freedi = 0;
-        for (Segment& seg : segments) {
-            for (uint i = 0; i < freedi; i++)
-                if (freed[i] == (void*)seg.poses.p) goto next_seg;
-            freed[freedi++] = (void*)seg.poses.p;
-            delete seg.poses;
-            next_seg: { }
-        }
-    }
+    Skeleton::~Skeleton () { /* Don't have pointer funkiness any more due to the pose_lists attr */ }
     void Skeleton::reload () {
         Skeleton&& tmp = hacc::value_from_file<Skeleton>(name);
         segments = std::move(tmp.segments);
         root = std::move(tmp.root);
         root_pos = std::move(tmp.root_pos);
         presets = std::move(tmp.presets);
+        pose_lists = std::move(tmp.pose_lists);
     }
 
     Pose* Segment::pose_named (std::string name) {
@@ -159,7 +147,7 @@ namespace vis {
             model.draw(Vec(10, 4));
         }
         void init () {
-//            model = Model(require_id<Skeleton>("modules/rata/res/rata-skeleton.hacc"));
+            model = Model(hacc::require_id<Skeleton>("modules/rata/res/rata-skeleton.hacc"));
         }
     } model_tester;
 
