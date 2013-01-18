@@ -266,7 +266,7 @@ struct Parser {
                     ab.defuse();
                     return new_hacc(std::move(a), id);
                 }
-                default: a.push_back(parse_thing(id)); break;
+                default: a.push_back(parse_thing()); break;
             }
         }
     }
@@ -302,7 +302,7 @@ struct Parser {
                 case ':': throw error("Extra : in object");
                 case ',': throw error("Misplaced comma after : in object");
                 case '}': throw error("Missing value after : in object");
-                default: o.push_back(hacc_attr(key, parse_thing(id))); break;
+                default: o.push_back(hacc_attr(key, parse_thing())); break;
             }
         }
     }
@@ -345,7 +345,7 @@ struct Parser {
         else return new_hacc(Ref(gotid), id);
     }
 
-    const Hacc* parse_thing (String id) {
+    const Hacc* parse_thing (String id = "") {
         parse_ws();
         for (;;) switch (char next = look()) {
             case '+':
@@ -373,7 +373,7 @@ struct Parser {
         }
     }
     const Hacc* parse_all () {
-        const Hacc* r = parse_thing("");
+        const Hacc* r = parse_thing();
         parse_ws();
         if (look() == EOF) return r;
         else {
