@@ -21,6 +21,7 @@ struct ResourceGroup {
     static Hash<ResourceGroup*>& all_groups () {
         static Hash<ResourceGroup*> r; return r;
     }
+    ResourceGroup () { }
     ResourceGroup (Str name) : name(name) { all_groups().emplace(name, this); }
 };
 

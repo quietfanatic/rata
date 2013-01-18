@@ -3,6 +3,7 @@
  // This defines haccabilities for most builtin types.
 #define HCB_LIT(cpptype, form) \
 HCB_BEGIN(cpptype) \
+    type_name(#cpptype); \
     to([](const cpptype& x){ return new_hacc(x); }); \
     update_from([](cpptype& x, const Hacc* h){ x = h->get_##form(); }); \
 HCB_END(cpptype)
@@ -23,5 +24,5 @@ HCB_LIT(int64, integer)
 HCB_LIT(uint64, integer)
 HCB_LIT(float, float)
 HCB_LIT(double, double)
-HCB_LIT(hacc::String, string)
+HCB_LIT(std::string, string)
 
