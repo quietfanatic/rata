@@ -23,7 +23,7 @@ std::vector<IPp> v2;
 tap::Tester haccable_standard_tester ("haccable_standard", [](){
     using namespace hacc;
     using namespace tap;
-    plan(30);
+    plan(31);
 #define TEST_STD(type, value, form) \
     is((type(*)())([](){return (type)hacc_from<type>((type)value)->get_##form();}), (type)value, "standard hacc_from on " #type); \
     is((type(*)())([](){return (type)hacc_to_value<type>(new_hacc((type)value));}), (type)value, "standard hacc_to on " #type);

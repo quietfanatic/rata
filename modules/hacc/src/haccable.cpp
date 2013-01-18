@@ -168,10 +168,11 @@ namespace hacc {
         else throw Error("Haccability description for " + get_type_name() + " did not provide any way to turn into a hacc.");
     }
 
-    void HaccTable::update_from_hacc (void* p, const Hacc* h) {
+    void HaccTable::update_from_hacc (void* p, const Hacc* h, bool save_id) {
         if (!h) throw Error("update_from_hacc called with NULL pointer for hacc.");
         read_lock rl;
 
+        if (save_id) read_ids.emplace(h->id, [p](){ return p; });
         update_from_hacc_inner(p, h);
 
         if (reading == 1) {

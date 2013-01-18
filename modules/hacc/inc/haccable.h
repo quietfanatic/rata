@@ -59,7 +59,7 @@ struct HaccTable {
     Func<String (void*)> value_name;
     
     const Hacc* to_hacc (void*);
-    void update_from_hacc (void*, const Hacc*);
+    void update_from_hacc (void*, const Hacc*, bool save_id = true);
     void* new_from_hacc (const Hacc* h);
     String get_id (void*);
     void* find_by_id (String);
@@ -200,12 +200,12 @@ void update_from_hacc (C& v, const Hacc* h) {
 }
 template <class C> C value_from_hacc (const Hacc* h) {
     C r;
-    update_from_hacc(r, h);
+    require_hacctable<C>()->update_from_hacc((void*)&r, h, false);
     return r;
 }
 template <class C> C hacc_to_value (const Hacc* h) {
     C r;
-    update_from_hacc(r, h);
+    require_hacctable<C>()->update_from_hacc((void*)&r, h, false);
     return r;
 }
 template <class C> C* new_from_hacc (const Hacc* h) {
