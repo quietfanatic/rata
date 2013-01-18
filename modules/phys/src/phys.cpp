@@ -20,7 +20,7 @@ HCB_END(b2CircleShape)
 
 HCB_BEGIN(b2PolygonShape)
     base<b2Shape>("polygon");
-    attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius, hacc::Defaulter1<float>(b2_polygonRadius)));
+    attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius, def(b2_polygonRadius)));
     attr("verts", value_functions<std::vector<b2Vec2>>(
         [](const b2PolygonShape& ps){
             return std::vector<b2Vec2>(ps.m_vertices, ps.m_vertices + ps.m_vertexCount);
@@ -41,10 +41,10 @@ HCB_END(b2EdgeShape)
 
 HCB_BEGIN(b2FixtureDef)
     attr("shape", member(&b2FixtureDef::shape));
-    attr("friction", member<float>(&b2FixtureDef::friction, 0.f));
-    attr("restitution", member<float>(&b2FixtureDef::restitution, 0.f));
-    attr("density", member<float>(&b2FixtureDef::density, 0.f));
-    attr("is_sensor", member<bool>(&b2FixtureDef::isSensor, false));
+    attr("friction", member(&b2FixtureDef::friction, def(0.f)));
+    attr("restitution", member(&b2FixtureDef::restitution, def(0.f)));
+    attr("density", member(&b2FixtureDef::density, def(0.f)));
+    attr("is_sensor", member(&b2FixtureDef::isSensor, def(false)));
 //    attr("filter", member(&b2FixtureDef::filter))
 HCB_END(b2FixtureDef)
 
@@ -68,11 +68,11 @@ HCB_BEGIN(b2BodyType)
 HCB_END(b2BodyType)
 
 HCB_BEGIN(b2BodyDef)
-    attr("type", member<b2BodyType>(&b2BodyDef::type, b2_dynamicBody));
+    attr("type", member(&b2BodyDef::type, def(b2_dynamicBody)));
 //    attr("pos", member(&b2BodyDef::position));  This shouldn't be set through this.
 //    attr("vel", member(&b2BodyDef::linearVelocity));  Nor this
-    attr("damping", member<float>(&b2BodyDef::linearDamping, 0.f));
-    attr("gravity", member<float>(&b2BodyDef::gravityScale, 1.f));
+    attr("damping", member(&b2BodyDef::linearDamping, def(0.f)));
+    attr("gravity", member(&b2BodyDef::gravityScale, def(1.f)));
 //    attr("unrotatable", member(&b2BodyDef::fixed_rotation), true);
 //    attr("ang", member(&b2BodyDef::angle), 0.f);
 //    attr("ang_vel", member(&b2BodyDef::angularVelocity), 0.f);
@@ -86,8 +86,8 @@ HCB_END(phys::BodyDef)
 
 HCB_BEGIN(phys::Physical)
     using namespace phys;
-    attr("pos", value_methods<Vec>(&Physical::pos, &Physical::set_pos));
-    attr("vel", value_methods<Vec>(&Physical::vel, &Physical::set_vel, Vec(0, 0)));
+    attr("pos", value_methods(&Physical::pos, &Physical::set_pos));
+    attr("vel", value_methods(&Physical::vel, &Physical::set_vel, def(Vec(0, 0))));
 HCB_END(phys::Physical)
 namespace phys {
 

@@ -13,15 +13,14 @@ namespace hacc {
      // This file is starting to show its age already.
     template <class C> inline void instantiate_table ();
 
+    struct Optional { };
+
     template <class M>
     struct Defaulter1 {
         Func<void (M&)> def;
-        Defaulter1 (Null n = null) : def(n) { }
-        Defaulter1 (M m) : def([m](M& mp){ mp = m; }) { }
-        Defaulter1 (M* m) : def([m](M& mp){ mp = *m; }) { }
-        Defaulter1 (const Func<M ()>& f) : def([f](M& mp){ mp = f(); }) { }
-        Defaulter1 (const Func<const M& ()>& f) : def([f](M& mp){ mp = f(); }) { }
-        Defaulter1 (const Func<void (M&)>& f) : def([f](M& mp){ f(mp); }) { }
+        Defaulter1 (const Func<void (M&)>& def) : def(def) { }
+        Defaulter1 (Null) { }
+        Defaulter1 (Optional) : def([](M&){}) { }
     };
 
     struct Defaulter0 {
@@ -102,8 +101,16 @@ namespace hacc {
 
     template <class C, bool has_members = std::is_class<C>::value || std::is_union<C>::value> struct GetSet_Builders;
     template <class C> struct GetSet_Builders<C, false> {
+        
         template <class M>
-        static GetSet2<C, M> value_functions (const Func<M (const C&)>& g, const Func<void (C&, M)>& s, const Defaulter1<M>& def = null) {
+        static Defaulter1<M> def (const M& def) {
+            return Defaulter1<M>([def](M& m){ m = def; });
+        }
+        static constexpr Null required = null;
+        static constexpr Optional optional = Optional();
+
+        template <class M>
+        static GetSet2<C, M> value_functions (const Func<M (const C&)>& g, const Func<void (C&, M)>& s, const Defaulter0& def = required) {
             return GetSet2<C, M>(
                 [g, s](const C& x, const Func<void (const M&)>& c){ const M& tmp = g(x); c(tmp); },
                 [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); s(x, tmp); },
@@ -113,7 +120,7 @@ namespace hacc {
             );
         }
         template <class M>
-        static GetSet2<C, M> ref_functions (const Func<const M& (const C&)>& g, const Func<void (C&, const M&)>& s, const Defaulter1<M>& def = null) {
+        static GetSet2<C, M> ref_functions (const Func<const M& (const C&)>& g, const Func<void (C&, const M&)>& s, const Defaulter1<M>& def = required) {
             return GetSet2<C, M>(
                 [g, s](const C& x, const Func<void (const M&)>& c){ c(g(x)); },
                 [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); s(x, tmp); },
@@ -123,7 +130,7 @@ namespace hacc {
             );
         }
         template <class M>
-        static GetSet2<C, M> ref_function (const Func<M& (C&)>& f, const Defaulter1<M>& def = null) {
+        static GetSet2<C, M> ref_function (const Func<M& (C&)>& f, const Defaulter1<M>& def = required) {
             return GetSet2<C, M>(
                 [f](const C& x, const Func<void (const M&)>& c){ c(f(x)); },
                 [f](C& x, const Func<void (M&)>& c){ c(f(x)); },
@@ -133,7 +140,7 @@ namespace hacc {
             );
         }
         template <class M>
-        static GetSet2<C, M> assignable (const Defaulter1<M>& def = null) {
+        static GetSet2<C, M> assignable (const Defaulter1<M>& def = required) {
             return GetSet2<C, M>(
                 [](const C& x, const Func<void (const M&)>& c){ M tmp = x; c(tmp); },
                 [](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); x = tmp; },
@@ -143,7 +150,7 @@ namespace hacc {
             );
         }
         template <class M>
-        static GetSet2<C, M> supertype (const Defaulter1<M>& def = null) {
+        static GetSet2<C, M> supertype (const Defaulter1<M>& def = required) {
             return GetSet2<C, M>(
                 [](const C& x, const Func<void (const M&)>& c){ c(x); },
                 [](C& x, const Func<void (M&)>& c){ c(x); },
@@ -162,8 +169,9 @@ namespace hacc {
         static GetSet2<C, M> ref_method (Args... args) { throw Error("hcb::ref_method is not available for non-class types."); }
     };
     template <class C> struct GetSet_Builders<C, true> : GetSet_Builders<C, false> {
+        static constexpr Null required = null;
         template <class M>
-        static GetSet2<C, M> member (M C::* mp, const Defaulter1<M>& def = null) {
+        static GetSet2<C, M> member (M C::* mp, const Defaulter1<M>& def = required) {
             return GetSet2<C, M>(
                 [mp](const C& x, const Func<void (const M&)>& c){ c(x.*mp); },
                 [mp](C& x, const Func<void (M&)>& c){ c(x.*mp); },
@@ -173,7 +181,7 @@ namespace hacc {
             );
         }
         template <class M>
-        static GetSet2<C, M> value_methods (M (C::* g )()const, void (C::* s )(M), const Defaulter1<M>& def = null) {
+        static GetSet2<C, M> value_methods (M (C::* g )()const, void (C::* s )(M), const Defaulter1<M>& def = required) {
             return GetSet2<C, M>(
                 [g, s](const C& x, const Func<void (const M&)>& c){ c((x.*g)()); },
                 [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); (x.*s)(tmp); },
@@ -183,7 +191,7 @@ namespace hacc {
             );
         }
         template <class M>
-        static GetSet2<C, M> ref_methods (const M& (C::* g )()const, void (C::* s )(const M&), const Defaulter1<M>& def = null) {
+        static GetSet2<C, M> ref_methods (const M& (C::* g )()const, void (C::* s )(const M&), const Defaulter1<M>& def = required) {
             return GetSet2<C, M>(
                 [g, s](const C& x, const Func<void (const M&)>& c){ c((x.*g)()); },
                 [g, s](C& x, const Func<void (M&)>& c){ M tmp; c(tmp); (x.*s)(tmp); },
@@ -193,7 +201,7 @@ namespace hacc {
             );
         }
         template <class M>
-        static GetSet2<C, M> ref_method (M& (C::* m )(), const Defaulter1<M>& def = null) {
+        static GetSet2<C, M> ref_method (M& (C::* m )(), const Defaulter1<M>& def = required) {
             return GetSet2<C, M>(
                 [m](const C& x, const Func<void (const M&)>& c){ c((x.*m)()); },
                 [m](C& x, const Func<void (M&)>& c){ c((x.*m)()); },

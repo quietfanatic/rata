@@ -92,7 +92,7 @@ HCB_BEGIN(Command_Type)
 HCB_END(Command_Type)
 
 struct HelpCommand : Command {
-    Command_Type* ct;
+    Command_Type* ct = NULL;
     void operator() () {
         if (ct == NULL) {
             printf("This is the in-game console.  List of available commands are:\n\n");
@@ -119,7 +119,7 @@ struct HelpCommand : Command {
 HCB_BEGIN(HelpCommand)
     base<Command>("help");
     command_description<HelpCommand>("Show information about the in-game console or about a command");
-    elem(member<Command_Type*>(&HelpCommand::ct, (Command_Type*)NULL));
+    elem(member(&HelpCommand::ct, optional);
 HCB_END(HelpCommand)
 
 
