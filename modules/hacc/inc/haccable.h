@@ -154,7 +154,7 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     static void elem (const GetSet1<C>& gs) { get_table()->elems.push_back(gs); }
     static void variant (String name, const GetSet1<C>& gs) { get_table()->variants.emplace(name, gs); }
     static void select_variant (const Func<String (const C&)>& f) { get_table()->select_variant = *(Func<String (void*)>*)&f; }
-    static void value (String name, const Defaulter1<C>& val) { get_table()->values.emplace(name, val); }
+    static void value (String name, const C& val) { get_table()->values.emplace(name, GetSet_Builders<C>::def(val)); }
     static void value_name (const Func<String (const C&)>& f) { get_table()->value_name = *(Func<String (void*)>*)&f; }
     static void empty () { get_table()->empty = true; }
     template <class B>

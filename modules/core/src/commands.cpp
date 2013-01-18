@@ -119,7 +119,7 @@ struct HelpCommand : Command {
 HCB_BEGIN(HelpCommand)
     base<Command>("help");
     command_description<HelpCommand>("Show information about the in-game console or about a command");
-    elem(member(&HelpCommand::ct, optional);
+    elem(member(&HelpCommand::ct, optional<Command_Type*>()));
 HCB_END(HelpCommand)
 
 

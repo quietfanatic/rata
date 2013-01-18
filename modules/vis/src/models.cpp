@@ -39,9 +39,9 @@ HCB_END(Skeleton)
 HCB_BEGIN(SkinSegment)
     type_name("vis::SkinSegment");
     attr("image", member(&SkinSegment::image));
-    attr("subimg_offset", member<Vec>(&SkinSegment::subimg_offset, Vec(0, 0)));
-    attr("z_shift", member<float>(&SkinSegment::z_shift, 0.0));
-    attr("covers", member<SkinSegment*>(&SkinSegment::covers, (SkinSegment*)NULL));
+    attr("subimg_offset", member(&SkinSegment::subimg_offset, def(Vec(0, 0))));
+    attr("z_shift", member(&SkinSegment::z_shift, def(0.f)));
+    attr("covers", member(&SkinSegment::covers, def((SkinSegment*)NULL)));
 HCB_END(SkinSegment)
 
 namespace vis {

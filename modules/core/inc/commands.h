@@ -1,6 +1,8 @@
 #ifndef HAVE_CORE_COMMANDS_H
 #define HAVE_CORE_COMMANDS_H
 
+#include <typeinfo>
+
 struct Command {
     virtual void operator() () = 0;
     virtual ~Command () { }
