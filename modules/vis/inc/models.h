@@ -20,6 +20,8 @@ namespace vis {
     struct Pose {
         std::string name;
         SubImg subimg;
+        bool fliph;
+        bool flipv;
         std::vector<Vec> joints;
     };
 
@@ -28,11 +30,7 @@ namespace vis {
         std::vector<Segment*> subs;
         hacc::follow_ptr<std::vector<Pose>> poses;
 
-        Pose* pose_named (std::string name) {
-            for (auto& pose : *poses)
-                if (pose.name == name) return &pose;
-            throw std::logic_error("Segment Pose not found.");
-        }
+        Pose* pose_named (std::string name);
     };
 
     struct Preset {
@@ -46,22 +44,9 @@ namespace vis {
         Vec root_pos;
         std::vector<Preset> presets;
 
-        Segment* segment_named (std::string name) {
-            for (auto& p : segments)
-                if (p.name == name) return &p;
-            throw std::logic_error("Skeleton Segment not found.");
-        }
-        Preset* preset_named (std::string name) {
-            for (auto& p : presets)
-                if (p.name == name) return &p;
-            throw std::logic_error("Skeleton Segment not found.");
-        }
-        uint offset_of_segment (Segment* p) {
-            uint r = p - segments.data();
-            if (r < 0 || r >= segments.size()) {
-                throw std::logic_error("A Segment was used with a Skeleton it doesn't belong to.");
-            }
-        }
+        Segment* segment_named (std::string name);
+        Preset* preset_named (std::string name);
+        uint offset_of_segment (Segment* p);
          // Resource
         void reload ();
         Skeleton ();
@@ -73,45 +58,35 @@ namespace vis {
         Image* image;
         Vec subimg_offset;
         float z_shift;
-        SkinSegment* with;
+        SkinSegment* covers;
     };
 
     struct ModelSegment {
         SkinSegment* skin;
         Pose* pose;
         Vec pos;
+
+        void draw (Vec mpos, bool fliph, bool flipv);
     };
 
     struct Model {
         Skeleton* skeleton;
         std::vector<ModelSegment> model_segments;
 
-        void reposition_segment (Segment* segment, Vec pos) {
-            ModelSegment& ms = model_segments.at(skeleton->offset_of_segment(segment));
-            ms.pos = pos;
-            if (!ms.pose) return;
-            for (uint i = 0; i < segment->subs.size(); i++) {
-                reposition_segment(segment->subs[i], pos + ms.pose->joints[i]);
-            }
-        }
+        void reposition_segment (Segment* segment, Vec pos);
         
         void reposition () {
             reposition_segment(skeleton->root, skeleton->root_pos);
         }
 
-        void apply_pose (Segment* segment, Pose* pose) {
-            model_segments.at(skeleton->offset_of_segment(segment)).pose = pose;
-            reposition_segment(segment, Vec(0, 0));
-        }
-        void apply_preset (Preset* preset, Pose* pose) {
-            for (auto& s_p : preset->segment_poses)
-                model_segments.at(skeleton->offset_of_segment(s_p.first)).pose = s_p.second;
-            reposition();
-        }
+        void apply_pose (Segment* segment, Pose* pose);
+        void apply_preset (Preset* preset, Pose* pose);
 
         Vec position_of (Segment* segment) {
             return model_segments.at(skeleton->offset_of_segment(segment)).pos;
         }
+
+        void draw (Vec pos, bool fliph = false, bool flipv = false);
     };
 
 

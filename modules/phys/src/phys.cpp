@@ -100,7 +100,7 @@ namespace phys {
 
 
     struct Act_Phase : core::Phase {
-        Act_Phase () : core::Phase(core::game_phases(), "C.M") { }
+        Act_Phase () : core::Phase("C.M", "act") { }
         void run () { // These actions should be parallelizable.
             for (Actor* p = all_actors.first(); p; p = p->next())
                 p->act();
@@ -110,7 +110,7 @@ namespace phys {
     Logger phys_logger ("phys");
 
     struct Sim_Phase : core::Phase {
-        Sim_Phase () : core::Phase(core::game_phases(), "D.M") { }
+        Sim_Phase () : core::Phase("D.M", "sim") { }
         void init () {
             phys_logger.log("Creating the main sim.");
             sim = new b2World(
@@ -129,7 +129,7 @@ namespace phys {
     } sim_phase;
 
     struct React_Phase : core::Phase {
-        React_Phase () : core::Phase(core::game_phases(), "E.M") { }
+        React_Phase () : core::Phase("E.M", "react") { }
         void run () { // These actions should be parallelizable.
             for (Actor* p = all_actors.first(); p; p = p->next())
                 p->react();

@@ -1,6 +1,8 @@
 
 #include "../inc/models.h"
 #include "../../hacc/inc/everything.h"
+#include "../inc/vis.h"
+#include "../../core/inc/game.h"
 
 using namespace vis;
 
@@ -39,7 +41,7 @@ HCB_BEGIN(SkinSegment)
     attr("image", member(&SkinSegment::image));
     attr("subimg_offset", member<Vec>(&SkinSegment::subimg_offset, Vec(0, 0)));
     attr("z_shift", member<float>(&SkinSegment::z_shift, 0.0));
-    attr("with", member<SkinSegment*>(&SkinSegment::with, (SkinSegment*)NULL));
+    attr("covers", member<SkinSegment*>(&SkinSegment::covers, (SkinSegment*)NULL));
 HCB_END(SkinSegment)
 
 namespace vis {
@@ -67,4 +69,69 @@ namespace vis {
         root_pos = std::move(tmp.root_pos);
         presets = std::move(tmp.presets);
     }
+
+    Pose* Segment::pose_named (std::string name) {
+        for (auto& pose : *poses)
+            if (pose.name == name) return &pose;
+        throw std::logic_error("Segment Pose not found.");
+    }
+
+    Segment* Skeleton::segment_named (std::string name) {
+        for (auto& p : segments)
+            if (p.name == name) return &p;
+        throw std::logic_error("Skeleton Segment not found.");
+    }
+    Preset* Skeleton::preset_named (std::string name) {
+        for (auto& p : presets)
+            if (p.name == name) return &p;
+        throw std::logic_error("Skeleton Segment not found.");
+    }
+    uint Skeleton::offset_of_segment (Segment* p) {
+        uint r = p - segments.data();
+        if (r < 0 || r >= segments.size()) {
+            throw std::logic_error("A Segment was used with a Skeleton it doesn't belong to.");
+        }
+        return r;
+    }
+
+    void ModelSegment::draw (Vec mpos, bool fliph, bool flipv) {
+        if (!skin) return;
+        if (!pose) return;
+        SubImg subimg = pose->subimg;
+        Vec posesubpos;
+        for (SkinSegment* ss = skin; ss; ss = ss->covers) {
+            subimg.pos = posesubpos + ss->subimg_offset;
+            draw_img(ss->image, &subimg, mpos + pos, pose->fliph?!fliph:fliph, pose->flipv?!flipv:flipv);
+        }
+    }
+    void Model::reposition_segment (Segment* segment, Vec pos) {
+        ModelSegment& ms = model_segments.at(skeleton->offset_of_segment(segment));
+        ms.pos = pos;
+        if (!ms.pose) return;
+        for (uint i = 0; i < segment->subs.size(); i++) {
+            reposition_segment(segment->subs[i], pos + ms.pose->joints[i]);
+        }
+    }
+    void Model::apply_pose (Segment* segment, Pose* pose) {
+        model_segments.at(skeleton->offset_of_segment(segment)).pose = pose;
+        reposition_segment(segment, Vec(0, 0));
+    }
+    void Model::apply_preset (Preset* preset, Pose* pose) {
+        for (auto& s_p : preset->segment_poses)
+            model_segments.at(skeleton->offset_of_segment(s_p.first)).pose = s_p.second;
+        reposition();
+    }
+    void Model::draw (Vec pos, bool fliph, bool flipv) {
+        for (ModelSegment& ms : model_segments)
+            ms.draw(pos, fliph, flipv);
+    }
+
+
+
+    struct Model_Tester : core::Layer {
+        Model_Tester () : core::Layer("E.M", "model_tester", false) { }
+        void run () { }
+    } model_tester;
+
+
 }

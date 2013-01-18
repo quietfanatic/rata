@@ -278,7 +278,11 @@ namespace hacc {
                     const Hacc* val = oh->value_at(0);
                     auto iter = pointee_t->subtypes.find(sub);
                     if (iter == pointee_t->subtypes.end()) {
-                        throw Error("Unknown subtype '" + sub + "' of " + pointee_t->get_type_name());
+                        String r = "Unknown subtype '" + sub + "' of " + pointee_t->get_type_name() + "(Available:";
+                        for (auto& p : pointee_t->subtypes) {
+                            r += " " + p.first;
+                        }
+                        throw Error(r);
                     }
                     else {
                         auto& caster = iter->second;
@@ -317,7 +321,12 @@ namespace hacc {
                     const Hacc* val = new_hacc(Array(ah->a.begin()+1, ah->a.end()));
                     auto iter = pointee_t->subtypes.find(sub);
                     if (iter == pointee_t->subtypes.end()) {
-                        throw Error("Unknown subtype '" + sub + "' of " + pointee_t->get_type_name());
+                        String r = "Unknown subtype '" + sub + "' of " + pointee_t->get_type_name() + " (Available:";
+                        for (auto& p : pointee_t->subtypes) {
+                            r += " " + p.first;
+                        }
+                        r += ")";
+                        throw Error(r);
                     }
                     else {
                         auto& caster = iter->second;

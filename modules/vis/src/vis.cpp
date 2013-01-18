@@ -84,8 +84,8 @@ namespace vis {
         glEnd();
     }
 
-    struct Camera_Setup_Layer : core::Phase {
-        Camera_Setup_Layer () : core::Phase(core::draw_phases(), "B.M") { }
+    struct Camera_Setup_Layer : core::Layer {
+        Camera_Setup_Layer () : core::Layer("B.M", "camera_setup") { }
         void run () {
             glClearColor(0.5, 0.5, 0.5, 0);
             glClear(GL_COLOR_BUFFER_BIT);
@@ -99,8 +99,8 @@ namespace vis {
         }
     } csl;
 
-    struct Test_Layer : core::Phase {
-        Test_Layer () : core::Phase(core::draw_phases(), "C.M") { }
+    struct Test_Layer : core::Layer {
+        Test_Layer () : core::Layer("C.M", "test") { }
         void run () {
             static vis::Image* test_image = hacc::require_id<vis::Image>("modules/vis/test.png");
             static auto layout = hacc::new_from_file<Hash<SubImg>>("modules/vis/test.hacc");
@@ -125,8 +125,8 @@ namespace vis {
 
     Links<Image_Drawer> image_drawers;
 
-    struct Image_Drawer_Layer : core::Phase {
-        Image_Drawer_Layer () : core::Phase(core::draw_phases(), "D.M") { }
+    struct Image_Drawer_Layer : core::Layer {
+        Image_Drawer_Layer () : core::Layer("D.M", "image_drawing") { }
         void run () {
             for (Image_Drawer* p = image_drawers.first(); p; p = p->next()) {
                 p->draw();

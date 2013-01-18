@@ -35,7 +35,12 @@ namespace core {
 
 }
 
+HCB_BEGIN(Command)
+    type_name("Command");
+HCB_END(Command)
+
  // Some trivial builtin commands
+
 
 struct EchoCommand : Command {
     std::string s;

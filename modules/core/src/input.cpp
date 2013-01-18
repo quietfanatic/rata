@@ -46,7 +46,8 @@ namespace core {
     }
 
     struct Input_Phase : core::Phase {
-        Input_Phase () : core::Phase(core::game_phases(), "A.M") { }
+         // Input phase doesn't have a name to keep you from locking out your controls.
+        Input_Phase () : core::Phase("A.M") { }
         void init () {
             for (uint i = 0; i < NUM_KEYS; i++)
                 keys[i] = 0;
