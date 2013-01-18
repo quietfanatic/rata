@@ -119,7 +119,7 @@ namespace vis {
         if (!skin) return;
         if (!pose) return;
         SubImg subimg = pose->subimg;
-        Vec posesubpos;
+        Vec posesubpos = subimg.pos;
         for (SkinSegment* ss = skin; ss; ss = ss->covers) {
             subimg.pos = posesubpos + ss->subimg_offset;
             draw_img(ss->image, &subimg, mpos + pos, pose->fliph?!fliph:fliph, pose->flipv?!flipv:flipv);
