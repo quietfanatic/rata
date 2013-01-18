@@ -171,13 +171,16 @@ namespace hacc {
     void HaccTable::update_from_hacc (void* p, const Hacc* h) {
         if (!h) throw Error("update_from_hacc called with NULL pointer for hacc.");
         read_lock rl;
-        DU delayed_updates;
+        static DU delayed_updates;
 
         update_from_hacc_inner(p, h, delayed_updates);
 
-         // Must be amenable to expansion during iteration.
-        for (uint i = 0; i < delayed_updates.size(); i++) {
-            delayed_updates[i]();
+        if (reading == 1) {
+             // Must be amenable to expansion during iteration.
+            for (uint i = 0; i < delayed_updates.size(); i++) {
+                delayed_updates[i]();
+            }
+            delayed_updates.clear();
         }
     }
 

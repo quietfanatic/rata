@@ -19,7 +19,6 @@ HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
     });
     update_from([](std::vector<C>& v, const Hacc* h){
         auto ah = h->as_array();
-        v.clear();
         v.resize(ah->n_elems());
         for (uint i = 0; i < ah->n_elems(); i++) {
             update_from_hacc(v[i], ah->elem(i));
