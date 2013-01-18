@@ -3,7 +3,7 @@
 
 # resource dirs
 lib
-res
+/res
 img
 
 # intermediates
