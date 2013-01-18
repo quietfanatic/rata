@@ -13,6 +13,7 @@ namespace vis {
     struct Preset;
     struct Skeleton;
     struct SkinSegment;
+    struct Skin;
      // Dynamic things
     struct Model;
     struct ModelSegment;
@@ -61,28 +62,42 @@ namespace vis {
         SkinSegment* covers;
     };
 
+    struct Skin : Resource {
+        std::vector<std::pair<Segment*, SkinSegment*>> segments;
+         // Resource
+        void reload ();
+        Skin ();
+        Skin (std::string name);
+    };
+
     struct ModelSegment {
-        SkinSegment* skin;
-        Pose* pose;
+        SkinSegment* skin = NULL;
+        Pose* pose = NULL;
         Vec pos;
 
         void draw (Vec mpos, bool fliph, bool flipv);
     };
 
     struct Model {
-        Skeleton* skeleton;
+        Model ();
+        Model (Skeleton*);
+        Skeleton* skeleton = NULL;
         std::vector<ModelSegment> model_segments;
 
         void reposition_segment (Segment* segment, Vec pos);
         
         void reposition () {
+            if (!skeleton) return;
             reposition_segment(skeleton->root, skeleton->root_pos);
         }
 
         void apply_pose (Segment* segment, Pose* pose);
         void apply_preset (Preset* preset, Pose* pose);
+        void apply_segment_skin (Segment*, SkinSegment*);
+        void apply_skin (Skin*);
 
         Vec position_of (Segment* segment) {
+            if (!skeleton) return Vec();
             return model_segments.at(skeleton->offset_of_segment(segment)).pos;
         }
 

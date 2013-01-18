@@ -44,6 +44,13 @@ HCB_BEGIN(SkinSegment)
     attr("covers", member(&SkinSegment::covers, def((SkinSegment*)NULL)));
 HCB_END(SkinSegment)
 
+static ResourceGroup skins ("skins");
+HCB_BEGIN(Skin)
+    type_name("vis::Skin");
+    resource_haccability<Skin, &skins>();
+    attr("segments", (member(&Skin::segments)));
+HCB_END(Skin)
+
 namespace vis {
     Skeleton::Skeleton () { }
     Skeleton::Skeleton (std::string name) : Resource(name) { hacc::update_from_file(*this, name); }
@@ -105,6 +112,7 @@ namespace vis {
         }
     }
     void Model::reposition_segment (Segment* segment, Vec pos) {
+        if (!skeleton) return;
         ModelSegment& ms = model_segments.at(skeleton->offset_of_segment(segment));
         ms.pos = pos;
         if (!ms.pose) return;
@@ -113,25 +121,73 @@ namespace vis {
         }
     }
     void Model::apply_pose (Segment* segment, Pose* pose) {
+        if (!skeleton) return;
         model_segments.at(skeleton->offset_of_segment(segment)).pose = pose;
         reposition_segment(segment, Vec(0, 0));
     }
     void Model::apply_preset (Preset* preset, Pose* pose) {
+        if (!skeleton) return;
         for (auto& s_p : preset->segment_poses)
             model_segments.at(skeleton->offset_of_segment(s_p.first)).pose = s_p.second;
         reposition();
+    }
+    void Model::apply_segment_skin (Segment* segment, SkinSegment* ss) {
+        if (!skeleton) return;
+        model_segments.at(skeleton->offset_of_segment(segment)).skin = ss;
+    }
+    void Model::apply_skin (Skin* skin) {
+        if (!skeleton) return;
+        for (auto& s_ss : skin->segments)
+            model_segments.at(skeleton->offset_of_segment(s_ss.first)).skin = s_ss.second;
     }
     void Model::draw (Vec pos, bool fliph, bool flipv) {
         for (ModelSegment& ms : model_segments)
             ms.draw(pos, fliph, flipv);
     }
 
+    Model::Model () : skeleton(NULL), model_segments() { }
+    Model::Model (Skeleton* skel) : skeleton(skel), model_segments(skel ? skel->segments.size() : 0) { }
 
+    void Skin::reload () { segments = hacc::value_from_file<Skin>(name).segments; }
+    Skin::Skin () { }
+    Skin::Skin (std::string name) : Resource(name) { hacc::update_from_file(*this, name); }
 
     struct Model_Tester : core::Layer {
         Model_Tester () : core::Layer("E.M", "model_tester", false) { }
-        void run () { }
+        Model model;
+        void run () {
+            model.draw(Vec(10, 4));
+        }
+        void init () {
+//            model = Model(require_id<Skeleton>("modules/rata/res/rata-skeleton.hacc"));
+        }
     } model_tester;
 
-
 }
+
+struct MT_Load_Command : Command {
+    Skeleton* skel;
+    void operator() () {
+        model_tester.model = Model(skel);
+    }
+};
+
+HCB_BEGIN(MT_Load_Command)
+    base<Command>("mt_load");
+    command_description<MT_Load_Command>("Load a skeleton into the model_tester layer.\nUnload with 'mt_load null'");
+    elem(member(&MT_Load_Command::skel));
+HCB_END(MT_Load_Command)
+
+struct MT_Skin_Command : Command {
+    Skin* skin;
+    void operator() () {
+        model_tester.model.apply_skin(skin);
+    }
+};
+
+HCB_BEGIN(MT_Skin_Command)
+    base<Command>("mt_skin");
+    command_description<MT_Skin_Command>("Load a skin into the model_tester layer");
+    elem(member(&MT_Skin_Command::skin));
+HCB_END(MT_Skin_Command)
+
