@@ -64,7 +64,7 @@ namespace vis {
     };
 
     struct Skin : Resource {
-        std::vector<std::pair<Segment*, SkinSegment*>> segments;
+        std::vector<std::pair<Segment*, SkinSegment>> segments;
          // Resource
         void reload ();
         Skin ();

@@ -18,6 +18,20 @@ HCB_BEGIN(Segment)
     attr("name", member(&Segment::name));
     attr("subs", member(&Segment::subs));
     attr("poses", member(&Segment::poses));
+     // Find a segment by skeleton:segment
+     //  e.g. &"modules/rata/res/rata-skeleton.hacc:head"
+    find_by_id([](std::string id){
+        size_t colonpos = id.find(':');
+        if (colonpos == std::string::npos)
+            return (Segment*)NULL;
+        Skeleton* skel = hacc::find_by_id<Skeleton>(id.substr(0, colonpos));
+        if (!skel) return (Segment*)NULL;
+        try {
+            return skel->segment_named(id.substr(colonpos + 1));
+        } catch (std::logic_error& e) {
+            return (Segment*)NULL;
+        }
+    });
 HCB_END(Segment)
 
 HCB_BEGIN(Preset)
@@ -79,7 +93,7 @@ namespace vis {
     Preset* Skeleton::preset_named (std::string name) {
         for (auto& p : presets)
             if (p.name == name) return &p;
-        throw std::logic_error("Skeleton Segment not found.");
+        throw std::logic_error("Skeleton Preset not found.");
     }
     uint Skeleton::offset_of_segment (Segment* p) {
         uint r = p - segments.data();
@@ -126,7 +140,7 @@ namespace vis {
     void Model::apply_skin (Skin* skin) {
         if (!skeleton) return;
         for (auto& s_ss : skin->segments)
-            model_segments.at(skeleton->offset_of_segment(s_ss.first)).skin = s_ss.second;
+            model_segments.at(skeleton->offset_of_segment(s_ss.first)).skin = &s_ss.second;
     }
     void Model::draw (Vec pos, bool fliph, bool flipv) {
         for (ModelSegment& ms : model_segments)
@@ -140,14 +154,15 @@ namespace vis {
     Skin::Skin () { }
     Skin::Skin (std::string name) : Resource(name) { hacc::update_from_file(*this, name); }
 
-    struct Model_Tester : core::Layer {
-        Model_Tester () : core::Layer("E.M", "model_tester", false) { }
+    struct Model_Test : core::Layer {
+        Model_Test () : core::Layer("E.M", "model_test", false) { }
         Model model;
         void run () {
             model.draw(Vec(10, 4));
         }
         void init () {
             model = Model(hacc::require_id<Skeleton>("modules/rata/res/rata-skeleton.hacc"));
+            model.apply_skin(hacc::require_id<Skin>("modules/rata/res/rata-skin.hacc"));
         }
     } model_tester;
 
@@ -162,7 +177,7 @@ struct MT_Load_Command : Command {
 
 HCB_BEGIN(MT_Load_Command)
     base<Command>("mt_load");
-    command_description<MT_Load_Command>("Load a skeleton into the model_tester layer.\nUnload with 'mt_load null'");
+    command_description<MT_Load_Command>("Load a skeleton into the model_test layer.\nUnload with 'mt_load null'");
     elem(member(&MT_Load_Command::skel));
 HCB_END(MT_Load_Command)
 
@@ -175,7 +190,7 @@ struct MT_Skin_Command : Command {
 
 HCB_BEGIN(MT_Skin_Command)
     base<Command>("mt_skin");
-    command_description<MT_Skin_Command>("Load a skin into the model_tester layer");
+    command_description<MT_Skin_Command>("Load a skin into the model_test layer");
     elem(member(&MT_Skin_Command::skin));
 HCB_END(MT_Skin_Command)
 

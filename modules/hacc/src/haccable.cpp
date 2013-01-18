@@ -258,7 +258,7 @@ namespace hacc {
                 else if (variants.size()) {
                     auto oh = h->as_object();
                     if (oh->n_attrs() != 1) {
-                        throw Error("An object Hacc representing a union type must contain only one attribute.");
+                        throw Error("An object Hacc representing a union type (" + get_type_name() + ") must contain only one attribute.");
                     }
                     for (auto& pair : variants) {
                         if (pair.first == oh->name_at(0)) {
@@ -272,7 +272,7 @@ namespace hacc {
                     HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
                     auto oh = h->as_object();
                     if (oh->n_attrs() != 1) {
-                        throw Error("An object Hacc representing a polymorphic type must contain only one attribute.");
+                        throw Error("An object Hacc representing a polymorphic type (" + get_type_name() + ") must contain only one attribute.");
                     }
                     String sub = oh->name_at(0);
                     const Hacc* val = oh->value_at(0);
