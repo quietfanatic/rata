@@ -6,31 +6,31 @@
     root: body root_pos: [0 0]
     pose_lists: [
         head_poses = [
-            head_stand23 = {name: "stand23" subimg: {pos: [12 13] box: [-11 -12 9 16]}}
-            head_stand45 = {name: "stand45" subimg: {pos: [33 13] box: [-11 -12 9 16]}}
-            head_stand68 = {name: "stand68" subimg: {pos: [54 13] box: [-11 -12 9 16]}}
-            head_stand90 = {name: "stand90" subimg: {pos: [75 13] box: [-11 -12 9 16]}}
-            head_stand135 = {name: "stand135" subimg: {pos: [96 13] box: [-11 -12 9 16]}}
-            head_stand158 = {name: "stand158" subimg: {pos: [117 13] box: [-11 -12 9 16]}}
-            head_walk23 = {name: "walk23" subimg: {pos: [12 42] box: [-11 -12 9 16]}}
-            head_walk45 = {name: "walk45" subimg: {pos: [33 42] box: [-11 -12 9 16]}}
-            head_walk68 = {name: "walk68" subimg: {pos: [54 42] box: [-11 -12 9 16]}}
-            head_walk90 = {name: "walk90" subimg: {pos: [75 42] box: [-11 -12 9 16]}}
-            head_walk425 = {name: "walk425" subimg: {pos: [96 42] box: [-11 -12 9 16]}}
-            head_walk158 = {name: "walk158" subimg: {pos: [117 42] box: [-11 -12 9 16]}}
-            head_hurtbk = {name: "hurtbk" subimg: {pos: [12 71] box: [-11 -12 9 16]}}
-            head_crawl = {name: "crawl" subimg: {pos: [32 71] box: [-10 -12 10 16]}}
-            head_laybk = {name: "laybk" subimg: {pos: [62 73] box: [-16 -11 12 9]}}
+            head_stand23  = {name: "stand23"  subimg: {pos: [ 12 13] box: [-11 -12  9 16]}}
+            head_stand45  = {name: "stand45"  subimg: {pos: [ 33 13] box: [-11 -12  9 16]}}
+            head_stand68  = {name: "stand68"  subimg: {pos: [ 54 13] box: [-11 -12  9 16]}}
+            head_stand90  = {name: "stand90"  subimg: {pos: [ 75 13] box: [-11 -12  9 16]}}
+            head_stand135 = {name: "stand135" subimg: {pos: [ 96 13] box: [-11 -12  9 16]}}
+            head_stand158 = {name: "stand158" subimg: {pos: [117 13] box: [-11 -12  9 16]}}
+            head_walk23   = {name: "walk23"   subimg: {pos: [ 12 42] box: [-11 -12  9 16]}}
+            head_walk45   = {name: "walk45"   subimg: {pos: [ 33 42] box: [-11 -12  9 16]}}
+            head_walk68   = {name: "walk68"   subimg: {pos: [ 54 42] box: [-11 -12  9 16]}}
+            head_walk90   = {name: "walk90"   subimg: {pos: [ 75 42] box: [-11 -12  9 16]}}
+            head_walk425  = {name: "walk425"  subimg: {pos: [ 96 42] box: [-11 -12  9 16]}}
+            head_walk158  = {name: "walk158"  subimg: {pos: [117 42] box: [-11 -12  9 16]}}
+            head_hurtbk   = {name: "hurtbk"   subimg: {pos: [ 12 71] box: [-11 -12  9 16]}}
+            head_crawl    = {name: "crawl"    subimg: {pos: [ 32 71] box: [-10 -12 10 16]}}
+            head_laybk    = {name: "laybk"    subimg: {pos: [ 62 73] box: [-16 -11 12  9]}}
         ]
         body_poses = [
-            body_stand = {name: "stand" subimg: {pos: [11 3] box: [-10 -3 10 17]} joints: [[0 16]]}
-            body_walk = {name: "walk" subimg: {pos: [32 3] box: [-10 -3 10 17]} joints: [[0 15]]}
-            body_kneel = {name: "kneel" subimg: {pos: [53 3] box: [-10 -3 10 17]} joints: [[0 10]]}
-            body_sit = {name: "sit" subimg: {pos: [74 3] box: [-10 -3 10 17]} joints: [[-2 9]]}
-            body_crawl1 = {name: "crawl1" subimg: {pos: [11 24] box: [-10 -3 10 17]} joints: [[6 5]]}
-            body_crawl2 = {name: "crawl2" subimg: {pos: [32 24] box: [-10 -3 10 17]} joints: [[6 4]]}
-            body_hurtbk = {name: "hurtbk" subimg: {pos: [53 24] box: [-10 -3 10 17]} joints: [[0 15]]}
-            body_laybk = {name: "laybk" subimg: {pos: [74 24] box: [-10 -3 10 17]} joints: [[-8 2]]}
+            body_stand  = {name: "stand"  subimg: {pos: [11  3] box: [-10 -3 10 17]} joints: [[ 0 16]]}
+            body_walk   = {name: "walk"   subimg: {pos: [32  3] box: [-10 -3 10 17]} joints: [[ 0 15]]}
+            body_kneel  = {name: "kneel"  subimg: {pos: [53  3] box: [-10 -3 10 17]} joints: [[ 0 10]]}
+            body_sit    = {name: "sit"    subimg: {pos: [74  3] box: [-10 -3 10 17]} joints: [[-2  9]]}
+            body_crawl1 = {name: "crawl1" subimg: {pos: [11 24] box: [-10 -3 10 17]} joints: [[ 6  5]]}
+            body_crawl2 = {name: "crawl2" subimg: {pos: [32 24] box: [-10 -3 10 17]} joints: [[ 6  4]]}
+            body_hurtbk = {name: "hurtbk" subimg: {pos: [53 24] box: [-10 -3 10 17]} joints: [[ 0 15]]}
+            body_laybk  = {name: "laybk"  subimg: {pos: [74 24] box: [-10 -3 10 17]} joints: [[-8  2]]}
         ]
     ]
     presets: [
