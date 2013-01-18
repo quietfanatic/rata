@@ -66,8 +66,8 @@ struct HaccTable {
     void* require_id (String);
      // Helpers that I'd like to not have to declare here but C++.
     const Hacc* to_hacc_inner (void*);
-    void update_from_hacc_inner (void*, const Hacc*, std::vector<Func<void()>>&);
-    void update_with_getset (void*, const Hacc*, const GetSet0&, std::vector<Func<void()>>&);
+    void update_from_hacc_inner (void*, const Hacc*);
+    void update_with_getset (void*, const Hacc*, const GetSet0&);
     uint8 get_pointer_policy ();
     String get_type_name ();
 

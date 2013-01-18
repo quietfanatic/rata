@@ -35,7 +35,7 @@ namespace hacc {
         bool referenced = false;
     };
     static std::unordered_map<void*, write_id_info> write_history;
-    typedef std::vector<Func<void ()>> DU;
+    static std::vector<Func<void ()>> delayed_updates;
     static uint writing = 0;
     struct write_lock {
         write_lock () { writing++; }
@@ -171,9 +171,8 @@ namespace hacc {
     void HaccTable::update_from_hacc (void* p, const Hacc* h) {
         if (!h) throw Error("update_from_hacc called with NULL pointer for hacc.");
         read_lock rl;
-        static DU delayed_updates;
 
-        update_from_hacc_inner(p, h, delayed_updates);
+        update_from_hacc_inner(p, h);
 
         if (reading == 1) {
              // Must be amenable to expansion during iteration.
@@ -186,7 +185,7 @@ namespace hacc {
 
      // If the set function copies data, thus invalidating the old copy's address,
      //  we must provide a way to get the address of the new data
-    void HaccTable::update_with_getset (void* p, const Hacc* h, const GetSet0& gs, DU& du) {
+    void HaccTable::update_with_getset (void* p, const Hacc* h, const GetSet0& gs) {
          // For things with IDs, save the ID temporarily
         if (!h->id.empty()) {
             if (gs.copies_on_set) {
@@ -195,7 +194,7 @@ namespace hacc {
                 if (gs.copies_on_get) {
                     read_ids.emplace(h->id, null);  // record that this is unavailable
                     gs.set(p, [&](void* mp){
-                        update_from_hacc_inner(mp, h, du);
+                        update_from_hacc_inner(mp, h);
                     });
                 }
                 else {
@@ -206,30 +205,30 @@ namespace hacc {
                         return newmp;
                     });
                     gs.set(p, [&](void* mp){
-                        update_from_hacc_inner(mp, h, du);
+                        update_from_hacc_inner(mp, h);
                     });
                 }
             }
             else {
                 gs.set(p, [&](void* mp){
                     read_ids.emplace(h->id, [mp](){ return mp; });
-                    update_from_hacc_inner(mp, h, du);
+                    update_from_hacc_inner(mp, h);
                 });
             }
         }
          // For refs, schedule an operation to find the pointee by ID
         else if (h->form() == REF) {
-            du.emplace_back([this, p, h, &gs, &du](){
-                gs.set(p, [this, h, &du](void* mp){
-                    update_from_hacc_inner(mp, h, du);
+            delayed_updates.emplace_back([this, p, h, &gs](){
+                gs.set(p, [this, h](void* mp){
+                    update_from_hacc_inner(mp, h);
                 });
             });
         }
          // For everything else, just do the thing now.
-        else gs.set(p, [&](void* mp){ update_from_hacc_inner(mp, h, du); });
+        else gs.set(p, [&](void* mp){ update_from_hacc_inner(mp, h); });
     }
 
-    void HaccTable::update_from_hacc_inner (void* p, const Hacc* h, DU& du) {
+    void HaccTable::update_from_hacc_inner (void* p, const Hacc* h) {
         if (!initialized)
             throw Error("Unhaccable type " + get_type_name());
         else if (update_from) {
@@ -237,7 +236,7 @@ namespace hacc {
         }
         else if (delegate) {
             HaccTable* t = HaccTable::require_cpptype(*delegate.mtype);
-            t->update_with_getset(p, h, delegate, du);
+            t->update_with_getset(p, h, delegate);
         }
         else if (empty) {
              // .......
@@ -249,7 +248,7 @@ namespace hacc {
                     for (auto& pair : attrs) {
                         HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
                         if (oh->has_attr(pair.first))
-                            t->update_with_getset(p, oh->attr(pair.first), pair.second, du);
+                            t->update_with_getset(p, oh->attr(pair.first), pair.second);
                         else if (pair.second.def.def)
                             pair.second.set(p, [&](void* mp){ pair.second.def.def(mp); });
                         else throw Error("Missing required attribute " + pair.first + " of " + get_type_name());
@@ -263,7 +262,7 @@ namespace hacc {
                     for (auto& pair : variants) {
                         if (pair.first == oh->name_at(0)) {
                             HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
-                            t->update_with_getset(p, oh->value_at(0), pair.second, du);
+                            t->update_with_getset(p, oh->value_at(0), pair.second);
                             break;
                         }
                     }
@@ -302,7 +301,7 @@ namespace hacc {
                     for (uint i = 0; i < elems.size(); i++) {
                         HaccTable* t = HaccTable::require_cpptype(*elems[i].mtype);
                         if (i < ah->n_elems())
-                            t->update_with_getset(p, ah->elem(i), elems[i], du);
+                            t->update_with_getset(p, ah->elem(i), elems[i]);
                         else if (elems[i].def.def)
                             elems[i].set(p, [&](void* mp){ elems[i].def.def(mp); });
                         else throw Error("Not enough elements to respresent a " + get_type_name());
@@ -331,10 +330,10 @@ namespace hacc {
                     else {
                         auto& caster = iter->second;
                         HaccTable* t = HaccTable::require_cpptype(caster.subtype);
-                        pointer.set(p, [&caster, val, t, &du](void* basep){
+                        pointer.set(p, [&caster, val, t](void* basep){
                             void* newp = t->allocate();
                             Bomb b ([newp, t](){ t->deallocate(newp); });
-                            t->update_from_hacc_inner(newp, val, du);
+                            t->update_from_hacc_inner(newp, val);
                             *(void**)basep = caster.up(newp);
                             b.defuse();
                         });
