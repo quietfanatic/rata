@@ -32,7 +32,6 @@ struct Logger {
         }
     }
     Logger (std::string name, bool on = true) : name(name), on(on) { all().emplace(name, this); }
-    Logger (const Logger&) = delete;
 };
 
 #endif

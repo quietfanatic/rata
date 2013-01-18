@@ -19,7 +19,7 @@ workflow {
 
     subdep('inc/Vec.h', [qw<../hacc/inc/haccable.h inc/honestly.h>]);
     subdep('src/organization.h', [qw<../hacc/inc/haccable.h inc/honestly.h>]);
-    subdep('src/debug.cpp', [qw<inc/debug.h ../hacc/inc/haccable.h ../core/inc/commands.h>]);
+    subdep('src/debug.cpp', [qw<inc/debug.h ../hacc/inc/haccable.h ../core/inc/commands.h ../hacc/inc/haccable_pointers.h>]);
 
     cppc_rule('tmp/debug.o', 'src/debug.cpp');
 

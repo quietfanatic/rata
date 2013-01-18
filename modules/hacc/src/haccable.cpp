@@ -21,7 +21,7 @@ namespace hacc {
     }
     HaccTable* HaccTable::require_cpptype (const std::type_info& t) {
         auto iter = cpptype_map().find(t.hash_code());
-        if (iter == cpptype_map().end()) throw Error("Unhaccable type <mangled: " + String(t.name()) + ">");
+        if (iter == cpptype_map().end()) throw Error("No HaccTable exists for type <mangled: " + String(t.name()) + ">");
         return iter->second;
     }
 
