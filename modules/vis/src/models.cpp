@@ -10,7 +10,7 @@ HCB_BEGIN(Pose)
     type_name("vis::Pose");
     attr("name", member(&Pose::name));
     attr("subimg", member(&Pose::subimg));
-    attr("joints", member(&Pose::joints));
+    attr("joints", member(&Pose::joints, optional<decltype(((Pose*)NULL)->joints)>()));
 HCB_END(Pose)
 
 HCB_BEGIN(Segment)
