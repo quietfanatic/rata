@@ -340,7 +340,7 @@ struct Parser {
             p++;
             return id.empty()
                 ? parse_thing(gotid)
-                : throw error("Too many IDs were assigned");
+                : throw error("Too many IDs were assigned (" + id + " and " + gotid + ")");
         }
         else return new_hacc(Ref(gotid), id);
     }

@@ -4,6 +4,7 @@
 using namespace hacc;
 
 HCB_BEGIN(int)
+    type_name("int");
     to([](const int& x){ return new_hacc(x); });
     update_from([](int& x, const Hacc* h){ x = h->get_integer(); });
 HCB_END(int)

@@ -238,7 +238,7 @@ template <class C> String get_type_name () {
 #define HCB_UNQ1(a, b) HCB_UNQ2(a, b)
 #define HCB_INSTANCE(type) static inline void HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) () { static_assert(Haccable<type>::defined_here, "The Haccability requested by HCB_INSTANCE was not defined in this compilation unit."); }
 #define HCB_BEGIN(type) template <> struct Haccable<type> : hacc::Haccability<type> { static void describe () {
-#define HCB_END(type) } }; HCB_INSTANCE(type)
+#define HCB_END(type) } }; static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) = Haccable<type>::get_table();
 #define HCB_PARAMS(...) __VA_ARGS__
 #define HCB_TEMPLATE_BEGIN(params, type) template params struct Haccable<type> : hacc::Haccability<type> { \
     using hcb = hacc::Haccability<type>; \
