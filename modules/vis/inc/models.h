@@ -80,27 +80,26 @@ namespace vis {
     };
 
     struct Model {
-        Model ();
-        Model (Skeleton*);
         Skeleton* skeleton = NULL;
         std::vector<ModelSegment> model_segments;
 
-        void reposition_segment (Segment* segment, Vec pos);
-        
+        Model ();
+        Model (Skeleton*);
+
+        void reposition_segment (Segment*, Vec);
         void reposition () {
             if (!skeleton) return;
             reposition_segment(skeleton->root, skeleton->root_pos);
         }
-
-        void apply_pose (Segment* segment, Pose* pose);
-        void apply_preset (Preset* preset, Pose* pose);
-        void apply_segment_skin (Segment*, SkinSegment*);
-        void apply_skin (Skin*);
-
         Vec position_of (Segment* segment) {
             if (!skeleton) return Vec();
             return model_segments.at(skeleton->offset_of_segment(segment)).pos;
         }
+
+        void apply_pose (Segment*, Pose*);
+        void apply_preset (Preset*);
+        void apply_segment_skin (Segment*, SkinSegment*);
+        void apply_skin (Skin*);
 
         void draw (Vec pos, bool fliph = false, bool flipv = false);
     };

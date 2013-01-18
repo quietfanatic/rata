@@ -38,6 +38,18 @@ HCB_BEGIN(Preset)
     type_name("vis::Preset");
     attr("name", member(&Preset::name));
     attr("segment_poses", member(&Preset::segment_poses));
+    find_by_id([](std::string id){
+        size_t colonpos = id.find(':');
+        if (colonpos == std::string::npos)
+            return (Preset*)NULL;
+        Skeleton* skel = hacc::find_by_id<Skeleton>(id.substr(0, colonpos));
+        if (!skel) return (Preset*)NULL;
+        try {
+            return skel->preset_named(id.substr(colonpos + 1));
+        } catch (std::logic_error& e) {
+            return (Preset*)NULL;
+        }
+    });
 HCB_END(Preset)
 
 static ResourceGroup skeletons ("skeletons");
@@ -127,7 +139,7 @@ namespace vis {
         model_segments.at(skeleton->offset_of_segment(segment)).pose = pose;
         reposition_segment(segment, Vec(0, 0));
     }
-    void Model::apply_preset (Preset* preset, Pose* pose) {
+    void Model::apply_preset (Preset* preset) {
         if (!skeleton) return;
         for (auto& s_p : preset->segment_poses)
             model_segments.at(skeleton->offset_of_segment(s_p.first)).pose = s_p.second;
@@ -163,6 +175,7 @@ namespace vis {
         void init () {
             model = Model(hacc::require_id<Skeleton>("modules/rata/res/rata-skeleton.hacc"));
             model.apply_skin(hacc::require_id<Skin>("modules/rata/res/rata-skin.hacc"));
+            model.apply_preset(model.skeleton->preset_named("idle"));
         }
     } model_tester;
 
@@ -193,4 +206,29 @@ HCB_BEGIN(MT_Skin_Command)
     command_description<MT_Skin_Command>("Load a skin into the model_test layer");
     elem(member(&MT_Skin_Command::skin));
 HCB_END(MT_Skin_Command)
+
+struct MT_Preset_Command : Command {
+    Preset* preset;
+    void operator() () {
+        model_tester.model.apply_preset(preset);
+    }
+};
+
+HCB_BEGIN(MT_Preset_Command)
+    base<Command>("mt_preset");
+    command_description<MT_Preset_Command>("Load a pose preset into the model_test layer");
+    elem(member(&MT_Preset_Command::preset));
+HCB_END(MT_Preset_Command)
+
+struct MT_Dump_Command : Command {
+    void operator() () {
+        if (!model_tester.model.skeleton) return;
+        fputs(hacc::string_from(*model_tester.model.skeleton).c_str(), stdout);
+    }
+};
+
+HCB_BEGIN(MT_Dump_Command)
+    base<Command>("mt_dump");
+    empty();
+HCB_END(MT_Dump_Command)
 

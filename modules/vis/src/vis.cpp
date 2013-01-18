@@ -5,6 +5,7 @@
 #include "../../hacc/inc/everything.h"
 #include "../inc/vis.h"
 #include "../../core/inc/game.h"
+#include "../../util/inc/debug.h"
 
 namespace vis {
 
@@ -42,8 +43,16 @@ namespace vis {
     }
     Image::Image (std::string name) : Resource(name) { reload(); }
 
+    static Logger draw_img_logger ("draw_img", false);
 
     void draw_img (Image* img, SubImg* sub, Vec p, bool fliph, bool flipv) {
+        if (draw_img_logger.on) {
+            draw_img_logger.log("img: %s sub: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u\n",
+                img ? img->name.c_str() : "NULL", sub ? sub->pos.x : 0/0.0, sub ? sub->pos.y : 0/0.0,
+                sub ? sub->box.l : 0/0.0, sub ? sub->box.b : 0/0.0, sub ? sub->box.r : 0/0.0, sub ? sub->box.t : 0/0.0,
+                p.x, p.y, fliph, flipv
+            );
+        }
         if (!img || !sub) return;
         glBindTexture(GL_TEXTURE_2D, img->tex);
         float tl, tb, tr, tt, vl, vb, vr, vt;

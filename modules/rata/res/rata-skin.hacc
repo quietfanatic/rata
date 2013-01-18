@@ -4,7 +4,7 @@
             image: &"modules/rata/res/rata-base.png"
             subimg_offset: [0 0]
         }]
-        [&"modules/rata/res/rata-skeleton.hacc:body" {
+        [&"modules/rata/res/rata-skeleton.hacc:head" {
             image: &"modules/rata/res/rata-base.png"
             subimg_offset: [86 0]
         }]
