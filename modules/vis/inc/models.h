@@ -24,12 +24,14 @@ namespace vis {
         bool fliph;
         bool flipv;
         std::vector<Vec> joints;
+        float z_offset;
     };
 
     struct Segment {
         std::string name;
         std::vector<Segment*> subs;
         std::vector<Pose>* poses;
+        float z_offset;
 
         Pose* pose_named (std::string name);
     };
@@ -59,7 +61,7 @@ namespace vis {
     struct SkinSegment {
         Image* image;
         Vec subimg_offset;
-        float z_shift;
+        float z_offset;
         SkinSegment* covers;
     };
 

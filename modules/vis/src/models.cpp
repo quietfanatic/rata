@@ -11,6 +11,7 @@ HCB_BEGIN(Pose)
     attr("name", member(&Pose::name));
     attr("subimg", member(&Pose::subimg));
     attr("joints", member(&Pose::joints, optional<decltype(((Pose*)NULL)->joints)>()));
+    attr("z_offset", member(&Pose::z_offset, def(0.f)));
 HCB_END(Pose)
 
 HCB_BEGIN(Segment)
@@ -18,6 +19,7 @@ HCB_BEGIN(Segment)
     attr("name", member(&Segment::name));
     attr("subs", member(&Segment::subs));
     attr("poses", member(&Segment::poses));
+    attr("z_offset", member(&Segment::z_offset, def(0.f)));
      // Find a segment by skeleton:segment
      //  e.g. &"modules/rata/res/rata-skeleton.hacc:head"
     find_by_id([](std::string id){
@@ -67,7 +69,7 @@ HCB_BEGIN(SkinSegment)
     type_name("vis::SkinSegment");
     attr("image", member(&SkinSegment::image));
     attr("subimg_offset", member(&SkinSegment::subimg_offset, def(Vec(0, 0))));
-    attr("z_shift", member(&SkinSegment::z_shift, def(0.f)));
+    attr("z_offset", member(&SkinSegment::z_offset, def(0.f)));
     attr("covers", member(&SkinSegment::covers, def((SkinSegment*)NULL)));
 HCB_END(SkinSegment)
 
