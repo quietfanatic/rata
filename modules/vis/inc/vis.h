@@ -17,13 +17,12 @@ namespace vis {
         uint tex = 0;
         Vec size;
 
-        bool load ();
-        bool unload ();
-        bool reload ();
+        void unload ();
+        void reload ();
 
         static ResourceGroup all;
 
-        Image (std::string name) : Resource(name) { }
+        Image (std::string name);
         ~Image () { unload(); }
     };
 

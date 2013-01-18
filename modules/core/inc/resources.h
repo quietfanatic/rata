@@ -15,8 +15,8 @@ struct ResourceGroup {
     Str name;
     Hash<Resource*> loaded;
 
-    bool unload ();
-    bool reload ();
+    void unload_all ();
+    void reload_all ();
 
     static Hash<ResourceGroup*>& all_groups () {
         static Hash<ResourceGroup*> r; return r;
@@ -27,11 +27,30 @@ struct ResourceGroup {
 struct Resource {
     Str name;
 
-    virtual bool unload () { return false; }
-    virtual bool reload () { return false; }
+    virtual void reload () = 0;
     virtual ~Resource () { }
 
     Resource (Str name) : name(name) { }
 };
+
+template <class Res, ResourceGroup* grp>
+void resource_haccability () {
+    hacc::Haccability<Res>::get_id([](const Res& res){ return res.name; });
+    hacc::Haccability<Res>::find_by_id([](std::string id) -> Res* {
+        Resource*& p = grp->loaded[id];
+        if (!p) {
+            try {
+                p = new Res (id);
+            } catch (std::exception& e) {
+                fprintf(stderr, "Failed to load %s with id \"%s\": %s\n",
+                    hacc::get_type_name<Res>().c_str(), id.c_str(), e.what()
+                );
+                grp->loaded.erase(id);
+                return NULL;
+            }
+        }
+        return static_cast<Res*>(p);
+   });
+}
 
 #endif

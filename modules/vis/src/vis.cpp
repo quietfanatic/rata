@@ -1,4 +1,5 @@
 
+#include <stdexcept>
 #include <GL/gl.h>
 #include <SOIL/SOIL.h>
 #include "../../hacc/inc/everything.h"
@@ -16,12 +17,11 @@ namespace vis {
 
     ResourceGroup Image::all ("images");
 
-    bool Image::load () {
+    void Image::reload () {
         int iw; int ih; int ich;
         uint8* data = SOIL_load_image((name).c_str(), &iw, &ih, &ich, 4);
         if (!data) {
-            fprintf(stderr, "Failed to load image %s: %s\n", name.c_str(), SOIL_last_result());
-            return false;
+            throw std::logic_error(SOIL_last_result());
         }
         GLuint newtex;
         glGenTextures(1, &newtex);
@@ -31,21 +31,19 @@ namespace vis {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         if (diagnose_opengl()) {
-            fprintf(stderr, "Aborting load of %s\n", name.c_str());
-            return false;
+            throw std::logic_error("Please look up the above OpenGL error code.");
         }
         unload();
         tex = newtex; size = Vec(iw, ih);
-        return true;
     }
-    bool Image::reload () { return load(); }
-    bool Image::unload () {
+    void Image::unload () {
         if (tex) {
             glDeleteTextures(1, &tex);
             tex = 0;
         }
-        return true;
     }
+    Image::Image (std::string name) : Resource(name) { reload(); }
+
 
     void draw_img (Image* img, SubImg* sub, Vec p, bool fliph, bool flipv) {
         if (!img || !sub) return;
@@ -140,26 +138,17 @@ namespace vis {
 
 }
 
-HCB_BEGIN(vis::Image)
+using namespace vis;
+
+HCB_BEGIN(Image)
     using namespace vis;
-    get_id([](const Image& i){ return i.name; });
-    find_by_id([](std::string id) -> Image* {
-        Image*& p = reinterpret_cast<Image*&>(Image::all.loaded[id]);
-        if (!p) {
-            p = new Image (id);
-            if (!p->load()) {
-                fprintf(stderr, "Load of image failed.\n");
-                Image::all.loaded.erase(id);
-                return NULL;
-            }
-            
-        }
-        return p;
-    });
+    type_name("vis::Image");
+    resource_haccability<Image, &Image::all>();
 HCB_END(vis::Image)
 
-HCB_BEGIN(vis::SubImg)
+HCB_BEGIN(SubImg)
     using namespace vis;
+    type_name("vis::SubImg");
     attr("pos", member(&SubImg::pos));
     elem(member(&SubImg::pos));
     attr("box", member(&SubImg::box));

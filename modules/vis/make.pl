@@ -18,9 +18,12 @@ workflow {
     include '../..';
 
     subdep('inc/vis.h', [qw<../core/inc/resources.h ../util/inc/Vec.h ../util/inc/Rect.h ../util/inc/organization.h>]);
+    subdep('inc/models.h', [qw<inc/vis.h ../util/inc/Vec.h ../hacc/inc/haccable_pointers.h>]);
     subdep('src/vis.cpp', [qw<inc/vis.h ../hacc/inc/everything.h ../core/inc/game.h>]);
+    subdep('src/modules.cpp', [qw<inc/models.h ../hacc/inc/everything.h>]);
 
     cppc_rule('tmp/vis.o', 'src/vis.cpp');
+    cppc_rule('tmp/models.o', 'src/models.cpp');
 
     clean_rule(glob 'tmp/*');
 

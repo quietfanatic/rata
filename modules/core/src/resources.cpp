@@ -1,17 +1,23 @@
 #include "../inc/resources.h"
 
-bool ResourceGroup::unload () {
-    bool success = true;
-    for (auto& p : loaded)
-        success *= p.second->unload();
-    if (success) loaded.clear();
-    return success;
+void ResourceGroup::unload_all () {
+    for (auto& p : loaded) {
+        try {
+            delete p.second;
+        } catch (std::exception& e) {
+            fprintf(stderr, "Problem unloading \"%s\": %s\n", p.first.c_str(), e.what());
+        }
+    }
+    loaded.clear();
 }
-bool ResourceGroup::reload () {
-    bool success = true;
-    for (auto& p : loaded)
-        success *= p.second->reload();
-    return success;
+void ResourceGroup::reload_all () {
+    for (auto& p : loaded) {
+        try {
+            p.second->reload();
+        } catch (std::exception& e) {
+            fprintf(stderr, "Failed to reload \"%s\": %s\n", p.first.c_str(), e.what());
+        }
+    }
 }
 
 HCB_BEGIN(ResourceGroup)
@@ -26,7 +32,7 @@ HCB_END(ResourceGroup)
 
 struct ReloadAllCommand : Command {
     ResourceGroup* grp;
-    void operator() () { if (grp) grp->reload(); }
+    void operator() () { if (grp) grp->reload_all(); }
 };
 HCB_BEGIN(ReloadAllCommand)
     base<Command>("reload_all");
