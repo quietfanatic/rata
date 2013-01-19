@@ -21,8 +21,8 @@ workflow {
     subdep('inc/models.h', [qw<inc/vis.h ../core/inc/resources.h ../util/inc/Vec.h ../hacc/inc/haccable_pointers.h>]);
     subdep('inc/shaders.h', [qw<../core/inc/resources.h>]);
     subdep('src/vis.cpp', [qw<inc/vis.h ../hacc/inc/everything.h ../core/inc/game.h ../util/inc/debug.h inc/shaders.h>]);
-    subdep('src/models.cpp', [qw<inc/models.h ../hacc/inc/everything.h ../inc/vis.h>]);
-    subdep('src/shaders.cpp', [qw<../../hacc/inc/everything.h inc/shaders.h inc/vis.h>]);
+    subdep('src/models.cpp', [qw<inc/models.h ../hacc/inc/everything.h inc/vis.h>]);
+    subdep('src/shaders.cpp', [qw<../hacc/inc/everything.h inc/shaders.h inc/vis.h>]);
 
     cppc_rule('tmp/vis.o', 'src/vis.cpp');
     cppc_rule('tmp/models.o', 'src/models.cpp');

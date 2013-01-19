@@ -118,7 +118,8 @@ sub subdep ($$) {
         from => lazify($from),
     };
     for my $to (@{$subdep->{to}}) {
-        push @{$workflow{subdeps}{realpath($to)}}, $subdep;
+        my $rp = realpath($to);
+        push @{$workflow{subdeps}{$rp}}, $subdep;
     }
 }
 sub arrayify {
@@ -168,6 +169,9 @@ sub include {
             push @{$this_workflow->{targets}{$_}}, @{$workflow{targets}{$_}};
         }
         $this_workflow->{phonies} = {%{$this_workflow->{phonies}}, %{$workflow{phonies}}};
+        for (keys %{$workflow{subdeps}}) {
+            push @{$this_workflow->{subdeps}{$_}}, @{$workflow{subdeps}{$_}};
+        }
     }
 }
 
