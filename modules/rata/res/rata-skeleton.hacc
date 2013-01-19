@@ -1,7 +1,9 @@
 {  // Skeleton for the main character.  Arms will come later.
     segments: [
-        head = {name: "head" subs: [] poses: head_poses}
-        body = {name: "body" subs: [head] poses: body_poses}
+        head = {name: "head" subs: [] poses: head_poses z_offset: -2}
+        forearm = {name: "forearm" subs: [] poses: forearm_poses z_offset: -6}
+        arm = {name: "arm" subs: [forearm] poses: arm_poses z_offset: -4}
+        body = {name: "body" subs: [head arm] poses: body_poses}
     ]
     root: body root_pos: [0 0]
     pose_lists: [
@@ -22,6 +24,28 @@
             head_crawl    = {name: "crawl"    subimg: {pos: [ 32 71] box: [-10 -12 10 16]}}
             head_laybk    = {name: "laybk"    subimg: {pos: [ 62 73] box: [-16 -11 12  9]}}
         ]
+        forearm_poses = [
+            forearm_a0   = {name: "a0"   subimg: {pos: [ 5 8] box: [-4 -6 6 8]}}
+            forearm_a23  = {name: "a23"  subimg: {pos: [16 8] box: [-4 -6 6 8]}}
+            forearm_a45  = {name: "a45"  subimg: {pos: [27 8] box: [-4 -6 6 8]}}
+            forearm_a68  = {name: "a68"  subimg: {pos: [38 8] box: [-4 -6 6 8]}}
+            forearm_a90  = {name: "a90"  subimg: {pos: [49 8] box: [-4 -6 6 8]}}
+            forearm_a113 = {name: "a113" subimg: {pos: [60 8] box: [-4 -6 6 8]}}
+            forearm_a135 = {name: "a135" subimg: {pos: [71 8] box: [-4 -6 6 8]}}
+            forearm_a158 = {name: "a158" subimg: {pos: [82 8] box: [-4 -6 6 8]}}
+            forearm_a180 = {name: "a180" subimg: {pos: [93 8] box: [-4 -6 6 8]}}
+        ]
+        arm_poses = [
+            arm_a0   = {name: "a0"   subimg: {pos: [ 5 8] box: [-4 -7 6 7]}}
+            arm_a23  = {name: "a23"  subimg: {pos: [16 8] box: [-4 -7 6 7]}}
+            arm_a45  = {name: "a45"  subimg: {pos: [27 8] box: [-4 -7 6 7]}}
+            arm_a68  = {name: "a68"  subimg: {pos: [38 8] box: [-4 -7 6 7]}}
+            arm_a90  = {name: "a90"  subimg: {pos: [49 8] box: [-4 -7 6 7]}}
+            arm_a113 = {name: "a113" subimg: {pos: [60 8] box: [-4 -7 6 7]}}
+            arm_a135 = {name: "a135" subimg: {pos: [71 8] box: [-4 -7 6 7]}}
+            arm_a158 = {name: "a158" subimg: {pos: [82 8] box: [-4 -7 6 7]}}
+            arm_a180 = {name: "a180" subimg: {pos: [93 8] box: [-4 -7 6 7]}}
+        ]
         body_poses = [
             body_stand  = {name: "stand"  subimg: {pos: [11  3] box: [-10 -2 10 18]} joints: [[ 0 16]]}
             body_walk   = {name: "walk"   subimg: {pos: [32  3] box: [-10 -2 10 18]} joints: [[ 0 15]]}
@@ -35,28 +59,52 @@
     ]
     presets: [
         {name: "idle" segment_poses: [
-            [head head_stand90]
             [body body_stand]
+            [head head_stand90]
+            [arm arm_a0]
+            [forearm forearm_a0]
         ]}
-        {name: "walk" segment_poses: [
-            [head head_walk90]
+        {name: "walk1" segment_poses: [
             [body body_walk]
+            [head head_walk90]
+            [arm arm_a23]
+            [forearm forearm_a23]
+        ]}
+        {name: "walk2" segment_poses: [
+            [body body_walk]
+            [head head_walk90]
+            [arm arm_a0]
+            [forearm forearm_a0]
         ]}
         {name: "crawl1" segment_poses: [
-            [head head_crawl]
             [body body_crawl1]
+            [head head_crawl]
+            [arm arm_a0]
+            [forearm forearm_a90]
         ]}
-        {name: "crawl2" segment_poses: [
+        {name: "crawl2_1" segment_poses: [
             [head head_crawl]
             [body body_crawl2]
+            [arm arm_a45]
+            [forearm forearm_a90]
+        ]}
+        {name: "crawl2_2" segment_poses: [
+            [head head_crawl]
+            [body body_crawl2]
+            [arm arm_a45]
+            [forearm forearm_a90]
         ]}
         {name: "hurtbk" segment_poses: [
             [head head_hurtbk]
             [body body_hurtbk]
+            [arm arm_a23]
+            [forearm forearm_a68]
         ]}
         {name: "laybk" segment_poses: [
             [head head_laybk]
             [body body_laybk]
+            [arm arm_a0]
+            [forearm forearm_a0]
         ]}
     ]
 }
