@@ -90,6 +90,7 @@ namespace vis {
 
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
+            glDepthRange(-128, 127);  // Just be honest about our depth buffer precision
         }
     } csl;
 
