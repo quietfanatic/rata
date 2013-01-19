@@ -83,15 +83,28 @@ HCB_END(Skin)
 
 namespace vis {
     Skeleton::Skeleton () { }
-    Skeleton::Skeleton (std::string name) : Resource(name) { hacc::update_from_file(*this, name); }
+    Skeleton::Skeleton (std::string name) : Resource(name) { hacc::update_from_file(*this, name); verify(); }
     Skeleton::~Skeleton () { /* Don't have pointer funkiness any more due to the pose_lists attr */ }
     void Skeleton::reload () {
         Skeleton&& tmp = hacc::value_from_file<Skeleton>(name);
+        tmp.verify();
         segments = std::move(tmp.segments);
         root = std::move(tmp.root);
         root_pos = std::move(tmp.root_pos);
         presets = std::move(tmp.presets);
         pose_lists = std::move(tmp.pose_lists);
+    }
+
+    void Skeleton::verify () {
+        for (auto& seg : segments) {
+            auto n_subs = seg.subs.size();
+            for (auto& pose : *seg.poses) {
+                if (pose.joints.size() < n_subs) {
+                    fprintf(stderr, "Skeleton error: Pose %s on %s doesn't have enough joints.\n", seg.name.c_str(), pose.name.c_str());
+                    throw std::logic_error("Skeleton contained errors.");
+                }
+            }
+        }
     }
 
     Pose* Segment::pose_named (std::string name) {

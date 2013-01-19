@@ -51,6 +51,8 @@ namespace vis {
         Segment* segment_named (std::string name);
         Preset* preset_named (std::string name);
         uint offset_of_segment (Segment* p);
+
+        void verify ();
          // Resource
         void reload ();
         Skeleton ();
