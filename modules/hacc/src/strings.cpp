@@ -62,6 +62,20 @@ String hacc_value_to_string (const Hacc* h) {
         }
         case STRING: return "\"" + escape_string(static_cast<const Hacc::String*>(h)->s) + "\"";
         case REF: return escape_id(static_cast<const Hacc::Ref*>(h)->r.id);
+        case ATTRREF: {
+            auto arh = static_cast<const Hacc::AttrRef*>(h);
+            return hacc_to_string(arh->ar.subject) + "." + escape_ident(arh->ar.name);
+        }
+        case ELEMREF: {
+            auto erh = static_cast<const Hacc::ElemRef*>(h);
+            char is[32];
+            sprintf(is, "%ld", erh->er.index);
+            return hacc_to_string(erh->er.subject) + "." + is;
+        }
+        case MACROCALL: {
+            auto mch = static_cast<const Hacc::MacroCall*>(h);
+            return mch->mc.name + "(" + hacc_to_string(mch->mc.arg) + ")";
+        }
         case ARRAY: {
             String r = "[";
             auto& a = static_cast<const Hacc::Array*>(h)->a;
@@ -203,34 +217,34 @@ struct Parser {
 
      // Parsing of specific valtypes.
      // This one could return an int, float, or double.
-    const Hacc* parse_numeric (String id) {
+    const Hacc* parse_numeric () {
         int64 val;
         uint len;
         if (!sscanf(safebuf(), "%" SCNi64 "%n", &val, &len))
             throw error("Weird number");
         p += len;
         switch (look()) {
-            case '~': return parse_bitrep(id);
+            case '~': return parse_bitrep();
             case '.':
             case 'e':
             case 'E':
             case 'p':  // backtrack!
-            case 'P': p -= len; return parse_floating(id);
-            default: return new_hacc(val, id);
+            case 'P': p -= len; return parse_floating();
+            default: return new_hacc(val);
         }
     }
-    const Hacc* parse_floating (String id) {
+    const Hacc* parse_floating () {
         double val;
         uint len;
         if (!sscanf(safebuf(), "%lg%n", &val, &len))
             throw error("Weird number");
         p += len;
         switch (look()) {
-            case '~': return parse_bitrep(id);
-            default: return new_hacc(val, id);
+            case '~': return parse_bitrep();
+            default: return new_hacc(val);
         }
     }
-    const Hacc* parse_bitrep (String id) {
+    const Hacc* parse_bitrep () {
         p++;  // for the ~
         uint64 rep;
         uint len;
@@ -238,13 +252,13 @@ struct Parser {
             throw error("Missing precise bitrep after ~");
         p += len;
         switch (len) {
-            case  8: return new_hacc(*(float*)&rep, id);
-            case 16: return new_hacc(*(double*)&rep, id);
+            case  8: return new_hacc(*(float*)&rep);
+            case 16: return new_hacc(*(double*)&rep);
             default: throw error("Precise bitrep doesn't have 8 or 16 digits");
         }
     }
-    const Hacc* parse_string (String id) {
-        return new_hacc(parse_stringly(), id);
+    const Hacc* parse_string () {
+        return new_hacc(parse_stringly());
     }
     struct ArrayBomb {
         Array* a;
@@ -252,7 +266,7 @@ struct Parser {
         void defuse () { a = null; }
         ~ArrayBomb () { if (a) for (auto p : *a) delete p; }
     };
-    const Hacc* parse_array (String id) {
+    const Hacc* parse_array () {
         Array a;
         ArrayBomb ab (&a);
         p++;  // for the [
@@ -264,7 +278,7 @@ struct Parser {
                 case ',': p++; break;
                 case ']': p++; {
                     ab.defuse();
-                    return new_hacc(std::move(a), id);
+                    return new_hacc(std::move(a));
                 }
                 default: a.push_back(parse_thing()); break;
             }
@@ -276,7 +290,7 @@ struct Parser {
         void defuse () { o = null; }
         ~ObjectBomb () { if (o) for (auto& p : *o) delete p.second; }
     };
-    const Hacc* parse_object (String id) {
+    const Hacc* parse_object () {
         Object o;
         ObjectBomb ob (&o);
         p++;  // for the left brace
@@ -289,7 +303,7 @@ struct Parser {
                 case ',': p++; continue;
                 case '}': p++; {
                     ob.defuse();
-                    return new_hacc(std::move(o), id);
+                    return new_hacc(std::move(o));
                 }
                 default: key = parse_ident("an attribute name or the end of the object"); break;
             }
@@ -306,9 +320,9 @@ struct Parser {
             }
         }
     }
-    const Hacc* parse_parens (String id) {
+    const Hacc* parse_parens () {
         p++;  // for the (
-        const Hacc* r = parse_thing(id);
+        const Hacc* r = parse_thing();
         parse_ws();
         if (look() == ')') p++;
         else {
@@ -317,7 +331,7 @@ struct Parser {
         }
         return r;
     }
-    const Hacc* parse_id_or_ref (String id) {
+    const Hacc* parse_id_or_ref (String type) {
         String gotid;
         if (look() == '&') {
             gotid = parse_id();
@@ -325,27 +339,64 @@ struct Parser {
         else {
             gotid = parse_ident("An ID of some sort (this shouldn't happen)");
             if (gotid == "null")
-                return new_hacc(null, id);
+                return new_hacc(null);
             else if (gotid == "false")
-                return new_hacc(false, id);
+                return new_hacc(false);
             else if (gotid == "true")
-                return new_hacc(true, id);
+                return new_hacc(true);
             else if (gotid == "nan" || gotid == "inf") {
                 p -= 3;
-                return parse_floating(id);
+                return parse_floating();
+            }
+            else if (look() == '(') {
+                return new_hacc(hacc::MacroCall(gotid, parse_parens()));
             }
         }
         parse_ws();
         if (look() == '=') {
             p++;
-            return id.empty()
-                ? parse_thing(gotid)
-                : throw error("Too many IDs were assigned (" + id + " and " + gotid + ")");
+            return parse_thing(type, gotid);
         }
-        else return new_hacc(Ref(gotid), id);
+        else return new_hacc(Ref(gotid));
+    }
+    const Hacc* parse_derefs (const Hacc* subject, String type, String id) {
+        if (look() == '.') {
+            p++;
+            if (isdigit(look())) {
+                uint64 index;
+                uint len;
+                if (!sscanf(safebuf(), "%" SCNu64 "%n", &index, &len))
+                    throw error("Weird number in element dereference");
+                p += len;
+                return parse_derefs(new_hacc(hacc::ElemRef(subject, index)), type, id);
+            }
+            else if (isalpha(look()) || look() == '_' || look() == '"') {
+                String name = parse_ident("attribute name");
+                return parse_derefs(new_hacc(hacc::AttrRef(subject, name)), type, id);
+            }
+            else throw error("dot not followed by an ident or number");
+        }
+        else {
+            if (!type.empty()) {
+                const_cast<Hacc*>(subject)->type = type;
+            }
+            if (!id.empty()) {
+                if (!subject->id.empty())
+                    throw error("Too many IDs given");
+                const_cast<Hacc*>(subject)->id = id;
+            }
+            return subject;
+        }
     }
 
-    const Hacc* parse_thing (String id = "") {
+    const Hacc* parse_typed_thing (String type, String id) {
+        if (!type.empty())
+            throw error("Too many #types given");
+        p++;  // for the #
+        return parse_thing(parse_ident("type after '#'"), id);
+    }
+
+    const Hacc* parse_thing (String type = "", String id = "") {
         parse_ws();
         for (;;) switch (char next = look()) {
             case '+':
@@ -359,16 +410,17 @@ struct Parser {
             case '6':
             case '7':
             case '8':
-            case '9': return parse_numeric(id);
-            case '~': return parse_bitrep(id);
-            case '"': return parse_string(id);
-            case '[': return parse_array(id);
-            case '{': return parse_object(id);
-            case '(': return parse_parens(id);
-            case '&': case '_': return parse_id_or_ref(id);
+            case '9': return parse_derefs(parse_numeric(), type, id);
+            case '#': return parse_typed_thing(type, id);
+            case '~': return parse_derefs(parse_bitrep(), type, id);
+            case '"': return parse_derefs(parse_string(), type, id);
+            case '[': return parse_derefs(parse_array(), type, id);
+            case '{': return parse_derefs(parse_object(), type, id);
+            case '(': return parse_derefs(parse_parens(), type, id);
+            case '&': case '_': return parse_derefs(parse_id_or_ref(type), type, id);
             default:
                 if (isalnum(next))
-                    return parse_id_or_ref(id);
+                    return parse_derefs(parse_id_or_ref(type), type, id);
                 else throw Error("Unrecognized character " + String(1, next));
         }
     }

@@ -42,6 +42,9 @@ enum Form {
     DOUBLE,
     STRING,
     REF,
+    ATTRREF,
+    ELEMREF,
+    MACROCALL,
     ARRAY,
     OBJECT,
     ERROR
@@ -79,6 +82,21 @@ struct Ref {
     template <class C>
     Ref (C* addr) : id(""), addr((void*)addr) { }
 };
+struct AttrRef {
+    const Hacc* subject;
+    String name;
+    AttrRef (const Hacc* s, String n) : subject(s), name(n) { }
+};
+struct ElemRef {
+    const Hacc* subject;
+    size_t index;
+    ElemRef (const Hacc* s, size_t i) : subject(s), index(i) { }
+};
+struct MacroCall {
+    String name;
+    const Hacc* arg;
+    MacroCall (String name, const Hacc* arg) : name(name), arg(arg) { }
+};
 template <class T> using VArray = std::vector<T>;
 typedef VArray<const Hacc*> Array;
 template <class T> using Map = std::vector<std::pair<String, T>>;
@@ -88,6 +106,7 @@ template <class T> using Func = std::function<T>;
 
 
 struct Hacc {
+    hacc::String type;
     hacc::String id;
     virtual Form form () const = 0;
     virtual void destroy () const { }
@@ -99,6 +118,9 @@ struct Hacc {
     struct Double;
     struct String;
     struct Ref;
+    struct AttrRef;
+    struct ElemRef;
+    struct MacroCall;
     struct Array;
     struct Object;
     struct Error;
@@ -114,6 +136,9 @@ struct Hacc {
     HACC_GETTER_R_DECL(Double, double, d)
     HACC_GETTER_DECL(String, string, s)
     HACC_GETTER_DECL(Ref, ref, r)
+    HACC_GETTER_DECL(AttrRef, attrref, ar)
+    HACC_GETTER_DECL(ElemRef, elemref, er)
+    HACC_GETTER_DECL(MacroCall, macrocall, mc)
     HACC_GETTER_DECL(Array, array, a)
     HACC_GETTER_DECL(Object, object, o)
     HACC_GETTER_DECL(Error, error, e)
@@ -133,6 +158,33 @@ HACC_VARIANT_S(Float, FLOAT, Float, f)
 HACC_VARIANT_S(Double, DOUBLE, Double, d)
 HACC_VARIANT_S(String, STRING, String, s)
 HACC_VARIANT_S(Ref, REF, Ref, r)
+HACC_VARIANT(AttrRef, ATTRREF,
+    hacc::AttrRef ar;
+    operator const hacc::AttrRef& () const { return ar; }
+    AttrRef (const hacc::AttrRef& ar, hacc::String id = "") : Hacc(id), ar(ar) { }
+    void destroy () const {
+        ar.subject->destroy();
+        delete ar.subject;
+    }
+)
+HACC_VARIANT(ElemRef, ELEMREF,
+    hacc::ElemRef er;
+    operator const hacc::ElemRef& () const { return er; }
+    ElemRef (const hacc::ElemRef& er, hacc::String id = "") : Hacc(id), er(er) { }
+    void destroy () const {
+        er.subject->destroy();
+        delete er.subject;
+    }
+)
+HACC_VARIANT(MacroCall, MACROCALL,
+    hacc::MacroCall mc;
+    operator const hacc::MacroCall& () const { return mc; }
+    MacroCall (const hacc::MacroCall& er, hacc::String id = "") : Hacc(id), mc(mc) { }
+    void destroy () const {
+        mc.arg->destroy();
+        delete mc.arg;
+    }
+)
 HACC_VARIANT(Array, ARRAY,
     hacc::Array a;
     operator const hacc::Array& () const { return a; }
@@ -188,6 +240,9 @@ HACC_NEW_DECL(Float, f, Float)
 HACC_NEW_DECL(Double, d, Double)
 HACC_NEW_DECL(String, s, String)
 HACC_NEW_DECL(Ref, r, Ref)
+HACC_NEW_DECL(AttrRef, ar, AttrRef)
+HACC_NEW_DECL(ElemRef, er, ElemRef)
+HACC_NEW_DECL(MacroCall, mc, MacroCall)
 HACC_NEW_DECL_COPY(Array, a, Array)
 HACC_NEW_DECL_MOVE(Array, a, Array)
 HACC_NEW_DECL_COPY(Object, o, Object)

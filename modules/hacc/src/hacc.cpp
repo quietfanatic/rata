@@ -29,6 +29,9 @@ const char* form_name (Form form) {
         case DOUBLE: return "double";
         case STRING: return "string";
         case REF: return "ref";
+        case ATTRREF: return "attrref";
+        case ELEMREF: return "elemref";
+        case MACROCALL: return "macrocall";
         case ARRAY: return "array";
         case OBJECT: return "object";
         case ERROR: return "error";
@@ -71,6 +74,9 @@ HACC_AS_IMPL(Float, float, FLOAT)
 HACC_AS_IMPL(Double, double, DOUBLE)
 HACC_AS_IMPL(String, string, STRING)
 HACC_AS_IMPL(Ref, ref, REF)
+HACC_AS_IMPL(AttrRef, attrref, ATTRREF)
+HACC_AS_IMPL(ElemRef, elemref, ELEMREF)
+HACC_AS_IMPL(MacroCall, macrocall, MACROCALL)
 HACC_AS_IMPL(Array, array, ARRAY)
 HACC_AS_IMPL(Object, object, OBJECT)
 HACC_AS_IMPL(Error, error, ERROR)
@@ -79,6 +85,9 @@ HACC_GETTER_R_IMPL(Bool, bool, b)
 HACC_GETTER_R_IMPL(Integer, integer, i)
 HACC_GETTER_IMPL(String, string, s)
 HACC_GETTER_IMPL(Ref, ref, r)
+HACC_GETTER_IMPL(AttrRef, attrref, ar)
+HACC_GETTER_IMPL(ElemRef, elemref, er)
+HACC_GETTER_IMPL(MacroCall, macrocall, mc)
 HACC_GETTER_IMPL(Array, array, a)
 HACC_GETTER_IMPL(Object, object, o)
 HACC_GETTER_IMPL(Error, error, e)

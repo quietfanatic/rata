@@ -386,6 +386,9 @@ namespace hacc {
                 else throw Error("Type " + get_type_name() + " cannot be represented by a null Hacc.");
                 break;
             }
+            case ATTRREF: throw Error("unhaccing ATTRREF is NYI");
+            case ELEMREF: throw Error("unhaccing ELEMREF is NYI");
+            case MACROCALL: throw Error("unhaccing MACROCALL is NYI");
             case ERROR: throw h->as_error()->e;
             default: throw Error("Oops, a corrupted hacc snuck in somewhere.\n");
         }
