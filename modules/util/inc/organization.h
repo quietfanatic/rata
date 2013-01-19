@@ -35,9 +35,13 @@ struct Links {
     }
     operator bool () const { return !empty(); }
     void destroy_all () {
-        for (C* p = first(); p; p = p->next()) {
+        C* nextp = NULL;
+        for (C* p = first(); p; p = nextp) {
+            nextp = p->next();
+            p->unlink();
             delete p;
         }
+
     }
 };
 // for (C* x = list.first(); x; x = x->next()) ...
