@@ -1,0 +1,6 @@
+{
+    shaders: [
+        &"modules/vis/res/default.vert"
+        &"modules/vis/res/test-red.frag"
+    ]
+}

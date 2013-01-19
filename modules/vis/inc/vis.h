@@ -2,6 +2,7 @@
 #define HAVE_VIS_VIS_H
 
 #include <unordered_map>
+#include <stdexcept>
 
 #include "../../util/inc/Vec.h"
 #include "../../util/inc/Rect.h"
@@ -11,6 +12,15 @@
 #define PX (1/16.0)
 
 namespace vis {
+
+    template <class F> F* glproc (const char* name) {
+        F* r = (F*)glfwGetProcAddress(name);
+        if (!r) {
+            fprintf(stderr, "No GL proc was found named %s\n", name);
+            throw std::logic_error("Missing GL procedure.");
+        }
+        return r;
+    }
 
      // Only the barebones image file
     struct Image : Resource {
@@ -50,6 +60,11 @@ namespace vis {
         void draw () {
             draw_img(img_image(), img_sub(), img_pos(), img_fliph(), img_flipv());
         }
+    };
+
+    struct GL_Proc : Resource {
+        void reload () { }
+        GL_Proc (std::string name);
     };
 
 }

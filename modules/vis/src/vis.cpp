@@ -1,11 +1,12 @@
-
 #include <stdexcept>
 #include <GL/gl.h>
+#include <GL/glfw.h>
 #include <SOIL/SOIL.h>
 #include "../../hacc/inc/everything.h"
 #include "../inc/vis.h"
 #include "../../core/inc/game.h"
 #include "../../util/inc/debug.h"
+#include "../inc/shaders.h"
 
 namespace vis {
 
@@ -54,7 +55,6 @@ namespace vis {
             );
         }
         if (!img || !sub) return;
-        glBindTexture(GL_TEXTURE_2D, img->tex);
         float tl, tb, tr, tt, vl, vb, vr, vt;
         if (fliph) {
             tl = sub->pos.x - sub->box.r;
@@ -89,6 +89,8 @@ namespace vis {
                 tl, tb, tr, tt, vl, vb, vr, vt
             );
         }
+        hacc::require_id<Program>("modules/vis/res/test-red.prog")->use();
+        glBindTexture(GL_TEXTURE_2D, img->tex);
          // Direct Mode is still the easiest for drawing individual images.
         glBegin(GL_QUADS);
             glTexCoord2f(tl, 1-tb); glVertex2f(vl, vb);
