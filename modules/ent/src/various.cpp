@@ -2,16 +2,16 @@
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/state.h"
 #include "../../phys/inc/phys.h"
-#include "../../vis/inc/vis.h"
+#include "../../vis/inc/sprites.h"
 
 const char* test_bdf = "modules/ent/test_actor_def.hacc";
-struct Test_Actor : core::Stateful, phys::Physical_With<&test_bdf>, vis::Single_Image {
+struct Test_Actor : core::Stateful, phys::Physical_With<&test_bdf>, vis::Sprite {
     vis::Image* image;
     vis::SubImg sub;
     Vec img_pos () { return pos(); }
     vis::Image* img_image () { return image; }
     vis::SubImg* img_sub () { return &sub; }
-    void start () { phys::Physical::start(); vis::Single_Image::appear(); }
+    void start () { phys::Physical::start(); vis::Sprite::appear(); }
 };
 
 HCB_BEGIN(Test_Actor)

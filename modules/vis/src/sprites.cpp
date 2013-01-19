@@ -3,53 +3,26 @@
 #include <GL/glfw.h>
 #include <SOIL/SOIL.h>
 #include "../../hacc/inc/everything.h"
-#include "../inc/vis.h"
+#include "../inc/sprites.h"
 #include "../../core/inc/game.h"
 #include "../../util/inc/debug.h"
 #include "../inc/shaders.h"
 
 namespace vis {
 
-    GLenum diagnose_opengl (const char* when = "") {
+    static GLenum diagnose_opengl (const char* when = "") {
         GLenum err = glGetError();
         if (err)
             fprintf(stderr, "OpenGL error: %04x %s\n", err, when);
         return err;
     }
 
-    void Image::reload () {
-        int iw; int ih; int ich;
-        uint8* data = SOIL_load_image((name).c_str(), &iw, &ih, &ich, 4);
-        if (!data) {
-            throw std::logic_error(SOIL_last_result());
-        }
-        GLuint newtex;
-        glGenTextures(1, &newtex);
-        glBindTexture(GL_TEXTURE_2D, newtex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iw, ih, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        free(data);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        if (diagnose_opengl()) {
-            throw std::logic_error("Please look up the above OpenGL error code.");
-        }
-        unload();
-        tex = newtex; size = Vec(iw, ih);
-    }
-    void Image::unload () {
-        if (tex) {
-            glDeleteTextures(1, &tex);
-            tex = 0;
-        }
-    }
-    Image::Image (std::string name) : Resource(name) { reload(); }
+    static Logger draw_sprite_logger ("draw_sprite", false);
+    static Program* sprite_program = NULL;
 
-    static Logger draw_img_logger ("draw_img", false);
-    static Program* draw_img_program = NULL;
-
-    void draw_img (Image* img, SubImg* sub, Vec p, bool fliph, bool flipv) {
-        if (draw_img_logger.on) {
-            draw_img_logger.log("img: %s sub: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u",
+    void draw_sprite (Image* img, SubImg* sub, Vec p, bool fliph, bool flipv) {
+        if (draw_sprite_logger.on) {
+            draw_sprite_logger.log("img: %s sub: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u",
                 img ? img->name.c_str() : "NULL", sub ? sub->pos.x : 0/0.0, sub ? sub->pos.y : 0/0.0,
                 sub ? sub->box.l : 0/0.0, sub ? sub->box.b : 0/0.0, sub ? sub->box.r : 0/0.0, sub ? sub->box.t : 0/0.0,
                 p.x, p.y, fliph, flipv
@@ -85,12 +58,12 @@ namespace vis {
         tb /= img->size.y;
         tr /= img->size.x;
         tt /= img->size.y;
-        if (draw_img_logger.on) {
-            draw_img_logger.log("tex: [%g %g %g %g] vert [%g %g %g %g]",
+        if (draw_sprite_logger.on) {
+            draw_sprite_logger.log("tex: [%g %g %g %g] vert [%g %g %g %g]",
                 tl, tb, tr, tt, vl, vb, vr, vt
             );
         }
-        draw_img_program->use();
+        sprite_program->use();
         glBindTexture(GL_TEXTURE_2D, img->tex);
          // Direct Mode is still the easiest for drawing individual images.
         glBegin(GL_QUADS);
@@ -129,60 +102,43 @@ namespace vis {
             static vis::SubImg* green = &layout->at("green");
             static vis::SubImg* blue = &layout->at("blue");
 
-            vis::draw_img(test_image, white, Vec(2, 2), false, false);
-            vis::draw_img(test_image, red, Vec(18, 2), false, false);
-            vis::draw_img(test_image, green, Vec(18, 13), false, false);
-            vis::draw_img(test_image, blue, Vec(2, 13), false, false);
+            vis::draw_sprite(test_image, white, Vec(2, 2), false, false);
+            vis::draw_sprite(test_image, red, Vec(18, 2), false, false);
+            vis::draw_sprite(test_image, green, Vec(18, 13), false, false);
+            vis::draw_sprite(test_image, blue, Vec(2, 13), false, false);
         }
     } test_layer;
 
-    void Image_Drawer::appear () {
-        link(image_drawers);
+    static Links<Draws_Sprites> sprite_drawers;
+
+    void Draws_Sprites::appear () {
+        link(sprite_drawers);
     }
-    void Image_Drawer::disappear () {
+    void Draws_Sprites::disappear () {
         unlink();
     }
 
-    Links<Image_Drawer> image_drawers;
 
-    struct Image_Drawer_Layer : core::Layer {
-        Image_Drawer_Layer () : core::Layer("D.M", "image_drawing") { }
+    struct Sprite_Layer : core::Layer {
+        Sprite_Layer () : core::Layer("D.M", "sprites") { }
         void run () {
-            for (Image_Drawer* p = image_drawers.first(); p; p = p->next()) {
+            for (Draws_Sprites* p = sprite_drawers.first(); p; p = p->next()) {
                 p->draw();
             }
         }
         void init () {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
-            draw_img_program = hacc::require_id<Program>("modules/vis/res/sprite.prog");
-            draw_img_program->use();
-            int tex_uni = draw_img_program->require_uniform("tex");
+            sprite_program = hacc::require_id<Program>("modules/vis/res/sprite.prog");
+            sprite_program->use();
+            int tex_uni = sprite_program->require_uniform("tex");
             glUniform1i(tex_uni, 0);  // Texture unit 0
             if (diagnose_opengl("after setting uniform")) {
                 throw std::logic_error("image_drawing init failed due to GL error");
             }
         }
-    } idl;
+    } sprite_layer;
 
 }
 
 using namespace vis;
-
-static ResourceGroup images ("images");
-HCB_BEGIN(Image)
-    using namespace vis;
-    type_name("vis::Image");
-    resource_haccability<Image, &images>();
-HCB_END(vis::Image)
-
-HCB_BEGIN(SubImg)
-    using namespace vis;
-    type_name("vis::SubImg");
-    attr("pos", member(&SubImg::pos));
-    elem(member(&SubImg::pos));
-    attr("box", member(&SubImg::box));
-    elem(member(&SubImg::box));
-HCB_END(vis::SubImg)
-
-HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA vis::SubImg>);
 

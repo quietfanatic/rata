@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include "../../util/inc/Vec.h"
 #include "../../hacc/inc/haccable_pointers.h"
-#include "../inc/vis.h"
+#include "images.h"
 
 namespace vis {
      // Static things

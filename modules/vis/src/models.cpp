@@ -1,8 +1,9 @@
 
 #include "../inc/models.h"
+#include "../inc/sprites.h"
 #include "../../hacc/inc/everything.h"
-#include "../inc/vis.h"
 #include "../../core/inc/game.h"
+#include "../../core/inc/commands.h"
 
 using namespace vis;
 
@@ -124,7 +125,7 @@ namespace vis {
         Vec posesubpos = subimg.pos;
         for (SkinSegment* ss = skin; ss; ss = ss->covers) {
             subimg.pos = posesubpos + ss->subimg_offset;
-            draw_img(ss->image, &subimg, mpos + pos, pose->fliph?!fliph:fliph, pose->flipv?!flipv:flipv);
+            draw_sprite(ss->image, &subimg, mpos + pos, pose->fliph?!fliph:fliph, pose->flipv?!flipv:flipv);
         }
     }
     void Model::reposition_segment (Segment* segment, Vec pos) {

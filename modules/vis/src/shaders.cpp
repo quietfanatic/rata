@@ -2,11 +2,10 @@
 #include "GL/glfw.h"
 #include "../../hacc/inc/everything.h"
 #include "../inc/shaders.h"
-#include "../inc/vis.h"
 
 namespace vis {
 
-    GLenum diagnose_opengl (std::string s = "") {
+    static GLenum diagnose_opengl (std::string s = "") {
         GLenum err = glGetError();
         if (err)
             fprintf(stderr, "OpenGL error %04x %s\n", err, s.c_str());
