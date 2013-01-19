@@ -27,7 +27,12 @@ namespace core {
         exit(0);
     }
     void set_video (uint scale) {
-        glfwOpenWindow(320*scale, 240*scale, 8, 8, 8, 0, 0, 0, GLFW_WINDOW);
+        glfwOpenWindow(
+            320*scale, 240*scale,
+            8, 8, 8, 0,  // r g b a
+            8, 0,  // depth stencil
+            GLFW_WINDOW
+        );
     }
     
     static bool initialized = false;

@@ -78,7 +78,7 @@ namespace vis {
         Camera_Setup_Layer () : core::Layer("B.M", "camera_setup") { }
         void run () {
             glClearColor(0.5, 0.5, 0.5, 0);
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
             glTranslatef(-1, -1, 0);  // 0,0 starts out in the center
@@ -86,9 +86,9 @@ namespace vis {
              // Make coordinates point to pixels, not the corners between pixels
             glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
             glEnable(GL_TEXTURE_2D);
-             // Blending in lieu of real shaders
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+             // Depth buffer is awesome
+            glEnable(GL_DEPTH_TEST);
         }
     } csl;
 
