@@ -41,7 +41,7 @@ namespace core {
         if (initialized) return;
         initialized = true;
         glfwInit();
-        set_video(2);
+        set_video(3);
         all_phaselayers(&PhaseLayer::init);
     }
 

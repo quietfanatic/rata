@@ -79,16 +79,17 @@ namespace vis {
         void run () {
             glClearColor(0.5, 0.5, 0.5, 0);
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
             glTranslatef(-1, -1, 0);  // 0,0 starts out in the center
-            glScalef(1/10.0, 1/7.5, 1);
+            glScalef(1/10.0, 1/7.5, 1);  // This is independent of window scale
+
              // Make coordinates point to pixels, not the corners between pixels
             glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
-            glEnable(GL_TEXTURE_2D);
 
-             // Depth buffer is awesome
-            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_TEXTURE_2D);
+            glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
         }
     } csl;
 
