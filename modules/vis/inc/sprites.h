@@ -15,7 +15,7 @@ namespace vis {
         void disappear ();
     };
 
-    void draw_sprite (Image*, SubImg*, Vec, bool, bool);
+    void draw_sprite (Image*, SubImg*, Vec, bool, bool, float);
 
     struct Sprite : Draws_Sprites {
         virtual Image* img_image () = 0;
@@ -23,11 +23,11 @@ namespace vis {
         virtual Vec img_pos () = 0;
         virtual bool img_fliph () { return false; }
         virtual bool img_flipv () { return false; }
+        virtual float img_z () { return 0; }
         void draw () {
-            draw_sprite(img_image(), img_sub(), img_pos(), img_fliph(), img_flipv());
+            draw_sprite(img_image(), img_sub(), img_pos(), img_fliph(), img_flipv(), img_z());
         }
     };
-
 }
 
 #endif

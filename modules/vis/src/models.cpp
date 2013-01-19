@@ -118,14 +118,18 @@ namespace vis {
         return r;
     }
 
-    void ModelSegment::draw (Vec mpos, bool fliph, bool flipv) {
+    void ModelSegment::draw (Segment* seg, Vec mpos, bool fliph, bool flipv, float z) {
         if (!skin) return;
         if (!pose) return;
         SubImg subimg = pose->subimg;
         Vec posesubpos = subimg.pos;
         for (SkinSegment* ss = skin; ss; ss = ss->covers) {
             subimg.pos = posesubpos + ss->subimg_offset;
-            draw_sprite(ss->image, &subimg, mpos + pos, pose->fliph?!fliph:fliph, pose->flipv?!flipv:flipv);
+            draw_sprite(
+                ss->image, &subimg, mpos + pos,
+                pose->fliph?!fliph:fliph, pose->flipv?!flipv:flipv,
+                z + seg->z_offset + pose->z_offset + ss->z_offset
+            );
         }
     }
     void Model::reposition_segment (Segment* segment, Vec pos) {
@@ -158,9 +162,11 @@ namespace vis {
         for (auto& s_ss : skin->segments)
             model_segments.at(skeleton->offset_of_segment(s_ss.first)).skin = &s_ss.second;
     }
-    void Model::draw (Vec pos, bool fliph, bool flipv) {
-        for (ModelSegment& ms : model_segments)
-            ms.draw(pos, fliph, flipv);
+    void Model::draw (Vec pos, bool fliph, bool flipv, float z) {
+        if (!skeleton) return;
+        uint nsegs = skeleton->segments.size();
+        for (uint i = 0; i < nsegs; i++)
+            model_segments[i].draw(&skeleton->segments[i], pos, fliph, flipv, z);
     }
 
     Model::Model () : skeleton(NULL), model_segments() { }

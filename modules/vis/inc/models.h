@@ -78,7 +78,7 @@ namespace vis {
         Pose* pose = NULL;
         Vec pos;
 
-        void draw (Vec mpos, bool fliph, bool flipv);
+        void draw (Segment* seg, Vec mpos, bool fliph, bool flipv, float z);
     };
 
     struct Model {
@@ -103,7 +103,7 @@ namespace vis {
         void apply_segment_skin (Segment*, SkinSegment*);
         void apply_skin (Skin*);
 
-        void draw (Vec pos, bool fliph = false, bool flipv = false);
+        void draw (Vec pos, bool fliph = false, bool flipv = false, float z = 0);
     };
 
 

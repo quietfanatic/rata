@@ -20,12 +20,12 @@ namespace vis {
     static Logger draw_sprite_logger ("draw_sprite", false);
     static Program* sprite_program = NULL;
 
-    void draw_sprite (Image* img, SubImg* sub, Vec p, bool fliph, bool flipv) {
+    void draw_sprite (Image* img, SubImg* sub, Vec p, bool fliph, bool flipv, float z) {
         if (draw_sprite_logger.on) {
-            draw_sprite_logger.log("img: %s sub: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u",
+            draw_sprite_logger.log("img: %s sub: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
                 img ? img->name.c_str() : "NULL", sub ? sub->pos.x : 0/0.0, sub ? sub->pos.y : 0/0.0,
                 sub ? sub->box.l : 0/0.0, sub ? sub->box.b : 0/0.0, sub ? sub->box.r : 0/0.0, sub ? sub->box.t : 0/0.0,
-                p.x, p.y, fliph, flipv
+                p.x, p.y, fliph, flipv, z
             );
         }
         if (!img || !sub) return;
@@ -67,10 +67,10 @@ namespace vis {
         glBindTexture(GL_TEXTURE_2D, img->tex);
          // Direct Mode is still the easiest for drawing individual images.
         glBegin(GL_QUADS);
-            glTexCoord2f(tl, 1-tb); glVertex2f(vl, vb);
-            glTexCoord2f(tr, 1-tb); glVertex2f(vr, vb);
-            glTexCoord2f(tr, 1-tt); glVertex2f(vr, vt);
-            glTexCoord2f(tl, 1-tt); glVertex2f(vl, vt);
+            glTexCoord2f(tl, 1-tb); glVertex3f(vl, vb, z);
+            glTexCoord2f(tr, 1-tb); glVertex3f(vr, vb, z);
+            glTexCoord2f(tr, 1-tt); glVertex3f(vr, vt, z);
+            glTexCoord2f(tl, 1-tt); glVertex3f(vl, vt, z);
         glEnd();
     }
 
@@ -102,10 +102,10 @@ namespace vis {
             static vis::SubImg* green = &layout->at("green");
             static vis::SubImg* blue = &layout->at("blue");
 
-            vis::draw_sprite(test_image, white, Vec(2, 2), false, false);
-            vis::draw_sprite(test_image, red, Vec(18, 2), false, false);
-            vis::draw_sprite(test_image, green, Vec(18, 13), false, false);
-            vis::draw_sprite(test_image, blue, Vec(2, 13), false, false);
+            vis::draw_sprite(test_image, white, Vec(2, 2), false, false, 0);
+            vis::draw_sprite(test_image, red, Vec(18, 2), false, false, 0);
+            vis::draw_sprite(test_image, green, Vec(18, 13), false, false, 0);
+            vis::draw_sprite(test_image, blue, Vec(2, 13), false, false, 0);
         }
     } test_layer;
 
