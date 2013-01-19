@@ -10,10 +10,10 @@
 
 namespace vis {
 
-    GLenum diagnose_opengl () {
+    GLenum diagnose_opengl (const char* when = "") {
         GLenum err = glGetError();
         if (err)
-            fprintf(stderr, "OpenGL error: %04x\n", err);
+            fprintf(stderr, "OpenGL error: %04x %s\n", err, when);
         return err;
     }
 
@@ -45,6 +45,7 @@ namespace vis {
     Image::Image (std::string name) : Resource(name) { reload(); }
 
     static Logger draw_img_logger ("draw_img", false);
+    static Program* draw_img_program = NULL;
 
     void draw_img (Image* img, SubImg* sub, Vec p, bool fliph, bool flipv) {
         if (draw_img_logger.on) {
@@ -89,7 +90,7 @@ namespace vis {
                 tl, tb, tr, tt, vl, vb, vr, vt
             );
         }
-        hacc::require_id<Program>("modules/vis/res/test-red.prog")->use();
+        draw_img_program->use();
         glBindTexture(GL_TEXTURE_2D, img->tex);
          // Direct Mode is still the easiest for drawing individual images.
         glBegin(GL_QUADS);
@@ -149,6 +150,16 @@ namespace vis {
         void run () {
             for (Image_Drawer* p = image_drawers.first(); p; p = p->next()) {
                 p->draw();
+            }
+        }
+        void init () {
+            static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
+            draw_img_program = hacc::require_id<Program>("modules/vis/res/sprite.prog");
+            draw_img_program->use();
+            int tex_uni = draw_img_program->require_uniform("tex");
+            glUniform1i(tex_uni, 0);  // Texture unit 0
+            if (diagnose_opengl("after setting uniform")) {
+                throw std::logic_error("image_drawing init failed due to GL error");
             }
         }
     } idl;

@@ -130,6 +130,16 @@ namespace vis {
         if (glid) glDeleteProgram(glid);
     }
 
+    int Program::require_uniform (const char* uni) {
+        static auto glGetUniformLocation = glproc<GLint (GLuint, const GLchar*)>("glGetUniformLocation");
+        int r = glGetUniformLocation(glid, uni);
+        if (r == -1) {
+            fprintf(stderr, "Program %s has no uniform named %s\n", name.c_str(), uni);
+            throw std::logic_error("Uniform not found.");
+        }
+        return r;
+    }
+
 }
 
 using namespace vis;

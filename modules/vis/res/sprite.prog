@@ -1,0 +1,6 @@
+{
+    shaders: [
+        &"modules/vis/res/sprite.vert"
+        &"modules/vis/res/sprite.frag"
+    ]
+}
