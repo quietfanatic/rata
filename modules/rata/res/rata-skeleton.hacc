@@ -1,8 +1,8 @@
 {  // Skeleton for the main character.  Arms will come later.
     segments: [
-        head = {name: "head" subs: [] poses: head_poses z_offset: 0}
-        forearm = {name: "forearm" subs: [] poses: forearm_poses z_offset: 0}
-        arm = {name: "arm" subs: [forearm] poses: arm_poses z_offset: 0}
+        head = {name: "head" subs: [] poses: head_poses z_offset: -0.02}
+        forearm = {name: "forearm" subs: [] poses: forearm_poses z_offset: -0.06}
+        arm = {name: "arm" subs: [forearm] poses: arm_poses z_offset: -0.04}
         body = {name: "body" subs: [head arm] poses: body_poses}
     ]
     root: body root_pos: [0 0]
