@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <stdexcept>
+#include <GL/glfw.h>
 
 #include "../../util/inc/Vec.h"
 #include "../../util/inc/Rect.h"
