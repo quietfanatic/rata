@@ -2,7 +2,7 @@
     things: [
         {Test_Actor: {
             physical: {pos: [10, 7.5]}
-            image: &"modules/vis/test.png"
+            image: &"modules/vis/res/test.png"
             sub: {pos: [16, 16] box: [-16 -16 16 16]}
         }}
         {Boundary: {

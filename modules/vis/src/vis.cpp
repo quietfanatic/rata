@@ -121,8 +121,8 @@ namespace vis {
     struct Test_Layer : core::Layer {
         Test_Layer () : core::Layer("C.M", "test") { }
         void run () {
-            static vis::Image* test_image = hacc::require_id<vis::Image>("modules/vis/test.png");
-            static auto layout = hacc::new_from_file<Hash<SubImg>>("modules/vis/test.hacc");
+            static vis::Image* test_image = hacc::require_id<vis::Image>("modules/vis/res/test.png");
+            static auto layout = hacc::new_from_file<Hash<SubImg>>("modules/vis/res/test.hacc");
             static vis::SubImg* white = &layout->at("white");
             static vis::SubImg* red = &layout->at("red");
             static vis::SubImg* green = &layout->at("green");
