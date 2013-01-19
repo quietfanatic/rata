@@ -100,7 +100,9 @@ namespace vis {
             auto n_subs = seg.subs.size();
             for (auto& pose : *seg.poses) {
                 if (pose.joints.size() < n_subs) {
-                    fprintf(stderr, "Skeleton error: Pose %s on %s doesn't have enough joints.\n", seg.name.c_str(), pose.name.c_str());
+                    fprintf(stderr, "Skeleton error: Pose %s of %s doesn't have enough joints (%lu < %lu).\n",
+                        pose.name.c_str(), seg.name.c_str(), pose.joints.size(), n_subs
+                    );
                     throw std::logic_error("Skeleton contained errors.");
                 }
             }

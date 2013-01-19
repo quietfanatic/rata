@@ -1,8 +1,8 @@
 {  // Skeleton for the main character.  Arms will come later.
     segments: [
-        head = {name: "head" subs: [] poses: head_poses z_offset: -2}
-        forearm = {name: "forearm" subs: [] poses: forearm_poses z_offset: -6}
-        arm = {name: "arm" subs: [forearm] poses: arm_poses z_offset: -4}
+        head = {name: "head" subs: [] poses: head_poses z_offset: 0}
+        forearm = {name: "forearm" subs: [] poses: forearm_poses z_offset: 0}
+        arm = {name: "arm" subs: [forearm] poses: arm_poses z_offset: 0}
         body = {name: "body" subs: [head arm] poses: body_poses}
     ]
     root: body root_pos: [0 0]
@@ -25,36 +25,36 @@
             head_laybk    = {name: "laybk"    subimg: {pos: [ 62 73] box: [-16 -11 12  9]}}
         ]
         forearm_poses = [
-            forearm_a0   = {name: "a0"   subimg: {pos: [ 5 8] box: [-4 -6 6 8]}}
-            forearm_a23  = {name: "a23"  subimg: {pos: [16 8] box: [-4 -6 6 8]}}
-            forearm_a45  = {name: "a45"  subimg: {pos: [27 8] box: [-4 -6 6 8]}}
-            forearm_a68  = {name: "a68"  subimg: {pos: [38 8] box: [-4 -6 6 8]}}
-            forearm_a90  = {name: "a90"  subimg: {pos: [49 8] box: [-4 -6 6 8]}}
-            forearm_a113 = {name: "a113" subimg: {pos: [60 8] box: [-4 -6 6 8]}}
-            forearm_a135 = {name: "a135" subimg: {pos: [71 8] box: [-4 -6 6 8]}}
-            forearm_a158 = {name: "a158" subimg: {pos: [82 8] box: [-4 -6 6 8]}}
-            forearm_a180 = {name: "a180" subimg: {pos: [93 8] box: [-4 -6 6 8]}}
+            forearm_a0   = {name: "a0"   subimg: {pos: [ 4 8] box: [-3 -7 7 7]}}
+            forearm_a23  = {name: "a23"  subimg: {pos: [15 8] box: [-3 -7 7 7]}}
+            forearm_a45  = {name: "a45"  subimg: {pos: [26 8] box: [-3 -7 7 7]}}
+            forearm_a68  = {name: "a68"  subimg: {pos: [37 8] box: [-3 -7 7 7]}}
+            forearm_a90  = {name: "a90"  subimg: {pos: [48 8] box: [-3 -7 7 7]}}
+            forearm_a113 = {name: "a113" subimg: {pos: [59 8] box: [-3 -7 7 7]}}
+            forearm_a135 = {name: "a135" subimg: {pos: [70 8] box: [-3 -7 7 7]}}
+            forearm_a158 = {name: "a158" subimg: {pos: [81 8] box: [-3 -7 7 7]}}
+            forearm_a180 = {name: "a180" subimg: {pos: [92 8] box: [-3 -7 7 7]}}
         ]
         arm_poses = [
-            arm_a0   = {name: "a0"   subimg: {pos: [ 5 8] box: [-4 -7 6 7]}}
-            arm_a23  = {name: "a23"  subimg: {pos: [16 8] box: [-4 -7 6 7]}}
-            arm_a45  = {name: "a45"  subimg: {pos: [27 8] box: [-4 -7 6 7]}}
-            arm_a68  = {name: "a68"  subimg: {pos: [38 8] box: [-4 -7 6 7]}}
-            arm_a90  = {name: "a90"  subimg: {pos: [49 8] box: [-4 -7 6 7]}}
-            arm_a113 = {name: "a113" subimg: {pos: [60 8] box: [-4 -7 6 7]}}
-            arm_a135 = {name: "a135" subimg: {pos: [71 8] box: [-4 -7 6 7]}}
-            arm_a158 = {name: "a158" subimg: {pos: [82 8] box: [-4 -7 6 7]}}
-            arm_a180 = {name: "a180" subimg: {pos: [93 8] box: [-4 -7 6 7]}}
+            arm_a0   = {name: "a0"   subimg: {pos: [ 5 8] box: [-4 -7 6 7]} joints: [[0 -3]]}
+            arm_a23  = {name: "a23"  subimg: {pos: [16 8] box: [-4 -7 6 7]} joints: [[1 -3]]}
+            arm_a45  = {name: "a45"  subimg: {pos: [27 8] box: [-4 -7 6 7]} joints: [[2 -2]]}
+            arm_a68  = {name: "a68"  subimg: {pos: [38 8] box: [-4 -7 6 7]} joints: [[3 -1]]}
+            arm_a90  = {name: "a90"  subimg: {pos: [49 8] box: [-4 -7 6 7]} joints: [[3  0]]}
+            arm_a113 = {name: "a113" subimg: {pos: [60 8] box: [-4 -7 6 7]} joints: [[3  1]]}
+            arm_a135 = {name: "a135" subimg: {pos: [71 8] box: [-4 -7 6 7]} joints: [[2  2]]}
+            arm_a158 = {name: "a158" subimg: {pos: [82 8] box: [-4 -7 6 7]} joints: [[1  3]]}
+            arm_a180 = {name: "a180" subimg: {pos: [93 8] box: [-4 -7 6 7]} joints: [[0  3]]}
         ]
         body_poses = [
-            body_stand  = {name: "stand"  subimg: {pos: [11  3] box: [-10 -2 10 18]} joints: [[ 0 16]]}
-            body_walk   = {name: "walk"   subimg: {pos: [32  3] box: [-10 -2 10 18]} joints: [[ 0 15]]}
-            body_kneel  = {name: "kneel"  subimg: {pos: [53  3] box: [-10 -2 10 18]} joints: [[ 0 10]]}
-            body_sit    = {name: "sit"    subimg: {pos: [74  3] box: [-10 -2 10 18]} joints: [[-2  9]]}
-            body_crawl1 = {name: "crawl1" subimg: {pos: [11 24] box: [-10 -2 10 18]} joints: [[ 6  5]]}
-            body_crawl2 = {name: "crawl2" subimg: {pos: [32 24] box: [-10 -2 10 18]} joints: [[ 6  4]]}
-            body_hurtbk = {name: "hurtbk" subimg: {pos: [53 24] box: [-10 -2 10 18]} joints: [[ 0 15]]}
-            body_laybk  = {name: "laybk"  subimg: {pos: [74 24] box: [-10 -2 10 18]} joints: [[-8  2]]}
+            body_stand  = {name: "stand"  subimg: {pos: [11  3] box: [-10 -2 10 18]} joints: [[ 0 16] [-1 15]]}
+            body_walk   = {name: "walk"   subimg: {pos: [32  3] box: [-10 -2 10 18]} joints: [[ 0 15] [-1 14]]}
+            body_kneel  = {name: "kneel"  subimg: {pos: [53  3] box: [-10 -2 10 18]} joints: [[ 0 10] [-1  9]]}
+            body_sit    = {name: "sit"    subimg: {pos: [74  3] box: [-10 -2 10 18]} joints: [[-2  9] [-3  8]]}
+            body_crawl1 = {name: "crawl1" subimg: {pos: [11 24] box: [-10 -2 10 18]} joints: [[ 6  5] [ 5  4]]}
+            body_crawl2 = {name: "crawl2" subimg: {pos: [32 24] box: [-10 -2 10 18]} joints: [[ 6  4] [ 5  3]]}
+            body_hurtbk = {name: "hurtbk" subimg: {pos: [53 24] box: [-10 -2 10 18]} joints: [[ 0 15] [-1 14]]}
+            body_laybk  = {name: "laybk"  subimg: {pos: [74 24] box: [-10 -2 10 18]} joints: [[-8  2] [-7  1]]}
         ]
     ]
     presets: [
