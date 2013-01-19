@@ -11,7 +11,6 @@
 
 namespace vis {
 
-     // Only the barebones image file
     struct Image : Resource {
         uint tex = 0;
         Vec size;
@@ -20,14 +19,26 @@ namespace vis {
         void reload ();
 
         Image (std::string name);
-        ~Image () { unload(); }
+        ~Image ();
     };
 
      // Part of another image
     struct SubImg {
+        std::string name;
         Vec pos;
         Rect box;
-        std::vector<Vec> misc;
+        std::vector<Vec> points;
+    };
+
+     // A set of subimgs.  Worthy of requiring a file.
+    struct Layout : Resource {
+        std::vector<SubImg> subimgs;
+
+        SubImg* sub_named (std::string);
+
+        void reload ();
+        Layout (std::string name);
+        Layout ();
     };
 
 }

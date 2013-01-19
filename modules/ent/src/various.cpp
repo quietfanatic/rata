@@ -7,10 +7,10 @@
 const char* test_bdf = "modules/ent/test_actor_def.hacc";
 struct Test_Actor : core::Stateful, phys::Physical_With<&test_bdf>, vis::Sprite {
     vis::Image* image;
-    vis::SubImg sub;
+    vis::SubImg* sub;
     Vec img_pos () { return pos(); }
     vis::Image* img_image () { return image; }
-    vis::SubImg* img_sub () { return &sub; }
+    vis::SubImg* img_sub () { return sub; }
     void start () { phys::Physical::start(); vis::Sprite::appear(); }
 };
 

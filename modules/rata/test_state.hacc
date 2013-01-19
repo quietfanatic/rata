@@ -3,7 +3,7 @@
         {Test_Actor: {
             physical: {pos: [10, 7.5]}
             image: &"modules/vis/res/test.png"
-            sub: {pos: [16, 16] box: [-16 -16 16 16]}
+            sub: &"modules/vis/res/test.layout:green"
         }}
         {Boundary: {
             physical: {pos: [0 0]}

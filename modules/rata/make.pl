@@ -30,7 +30,6 @@ workflow {
         ../phys/tmp/phys.o
         ../vis/tmp/images.o
         ../vis/tmp/sprites.o
-        ../vis/tmp/models.o
         ../vis/tmp/shaders.o
         ../util/tmp/debug.o
         ../ent/tmp/various.o

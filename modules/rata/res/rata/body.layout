@@ -1,0 +1,13 @@
+{
+    subimgs: [
+        {name: "stand"  pos: [11  3] box: [-10 -2 10 18] points: [[ 0 16] [-1 15]]}
+        {name: "walk"   pos: [32  3] box: [-10 -2 10 18] points: [[ 0 15] [-1 14]]}
+        {name: "kneel"  pos: [53  3] box: [-10 -2 10 18] points: [[ 0 10] [-1  9]]}
+        {name: "sit"    pos: [74  3] box: [-10 -2 10 18] points: [[-2  9] [-3  8]]}
+        {name: "crawl1" pos: [11 24] box: [-10 -2 10 18] points: [[ 6  5] [ 5  4]]}
+        {name: "crawl2" pos: [32 24] box: [-10 -2 10 18] points: [[ 6  4] [ 5  3]]}
+        {name: "hurtbk" pos: [53 24] box: [-10 -2 10 18] points: [[ 0 15] [-1 14]]}
+        {name: "laybk"  pos: [74 24] box: [-10 -2 10 18] points: [[-8  2] [-7  1]]}
+    ]
+}
+

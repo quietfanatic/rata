@@ -97,17 +97,17 @@ namespace vis {
     struct Test_Layer : core::Layer {
         Test_Layer () : core::Layer("C.M", "test") { }
         void run () {
-            static vis::Image* test_image = hacc::require_id<vis::Image>("modules/vis/res/test.png");
-            static auto layout = hacc::new_from_file<Hash<SubImg>>("modules/vis/res/test.hacc");
-            static vis::SubImg* white = &layout->at("white");
-            static vis::SubImg* red = &layout->at("red");
-            static vis::SubImg* green = &layout->at("green");
-            static vis::SubImg* blue = &layout->at("blue");
+            static vis::Image* image = hacc::require_id<vis::Image>("modules/vis/res/test.png");
+            static vis::Layout* layout = hacc::require_id<vis::Layout>("modules/vis/res/test.layout");
+            static vis::SubImg* white = layout->sub_named("white");
+            static vis::SubImg* red = layout->sub_named("red");
+            static vis::SubImg* green = layout->sub_named("green");
+            static vis::SubImg* blue = layout->sub_named("blue");
 
-            vis::draw_sprite(test_image, white, Vec(2, 2), false, false, 0);
-            vis::draw_sprite(test_image, red, Vec(18, 2), false, false, 0);
-            vis::draw_sprite(test_image, green, Vec(18, 13), false, false, 0);
-            vis::draw_sprite(test_image, blue, Vec(2, 13), false, false, 0);
+            vis::draw_sprite(image, white, Vec(2, 2), false, false, 0);
+            vis::draw_sprite(image, red, Vec(18, 2), false, false, 0);
+            vis::draw_sprite(image, green, Vec(18, 13), false, false, 0);
+            vis::draw_sprite(image, blue, Vec(2, 13), false, false, 0);
         }
     } test_layer;
 

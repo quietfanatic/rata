@@ -37,10 +37,18 @@ HCB_BEGIN(Segment)
     });
 HCB_END(Segment)
 
+HCB_BEGIN(Preset_Piece)
+    type_name("vis::Preset_Piece");
+    elem(member(&Preset_Piece::segment));
+    elem(member(&Preset_Piece::pose));
+    elem(member(&Preset_Piece::fliph, def(false)));
+    elem(member(&Preset_Piece::flipv, def(false)));
+HCB_END(Preset_Piece)
+
 HCB_BEGIN(Preset)
     type_name("vis::Preset");
     attr("name", member(&Preset::name));
-    attr("segment_poses", member(&Preset::segment_poses));
+    attr("pieces", member(&Preset::pieces));
     find_by_id([](std::string id){
         size_t colonpos = id.find(':');
         if (colonpos == std::string::npos)
@@ -133,7 +141,7 @@ namespace vis {
         return r;
     }
 
-    void ModelSegment::draw (Segment* seg, Vec mpos, bool fliph, bool flipv, float z) {
+    void ModelSegment::draw (Segment* seg, Vec mpos, bool fh, bool fv, float z) {
         if (!skin) return;
         if (!pose) return;
         SubImg subimg = pose->subimg;
@@ -142,7 +150,7 @@ namespace vis {
             subimg.pos = posesubpos + ss->subimg_offset;
             draw_sprite(
                 ss->image, &subimg, mpos + pos,
-                pose->fliph?!fliph:fliph, pose->flipv?!flipv:flipv,
+                fliph?!fh:fh, flipv?!fv:fv,
                 z + seg->z_offset + pose->z_offset + ss->z_offset
             );
         }
@@ -153,7 +161,10 @@ namespace vis {
         ms.pos = pos;
         if (!ms.pose) return;
         for (uint i = 0; i < segment->subs.size(); i++) {
-            reposition_segment(segment->subs[i], pos + ms.pose->joints[i]*PX);
+            reposition_segment(
+                segment->subs[i],
+                pos + ms.pose->joints[i].scale(Vec(ms.fliph?-1:1, ms.flipv?-1:1))*PX
+            );
         }
     }
     void Model::apply_pose (Segment* segment, Pose* pose) {
@@ -164,8 +175,12 @@ namespace vis {
     }
     void Model::apply_preset (Preset* preset) {
         if (!skeleton) return;
-        for (auto& s_p : preset->segment_poses)
-            model_segments.at(skeleton->offset_of_segment(s_p.first)).pose = s_p.second;
+        for (auto& pp : preset->pieces) {
+            auto& ms = model_segments.at(skeleton->offset_of_segment(pp.segment));
+            ms.pose = pp.pose;
+            ms.fliph = pp.pose;
+            ms.flipv = pp.pose;
+        }
         reposition();
     }
     void Model::apply_segment_skin (Segment* segment, SkinSegment* ss) {

@@ -1,0 +1,8 @@
+{
+    subimgs:[
+        {name:"white" pos:[16 48] box:[-16 -16 16 16]}
+        {name:"red"   pos:[48 48] box:[-16 -16 16 16]}
+        {name:"green" pos:[48 16] box:[-16 -16 16 16]}
+        {name:"blue"  pos:[16 16] box:[-16 -16 16 16]}
+    ]
+}

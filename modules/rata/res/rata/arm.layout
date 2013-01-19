@@ -1,0 +1,13 @@
+{
+    subimgs: [
+        {name: "a0"   pos: [ 5 8] box: [-4 -7 6 7] points: [[0 -3]]}
+        {name: "a23"  pos: [16 8] box: [-4 -7 6 7] points: [[1 -3]]}
+        {name: "a45"  pos: [27 8] box: [-4 -7 6 7] points: [[2 -2]]}
+        {name: "a68"  pos: [38 8] box: [-4 -7 6 7] points: [[3 -1]]}
+        {name: "a90"  pos: [49 8] box: [-4 -7 6 7] points: [[3  0]]}
+        {name: "a113" pos: [60 8] box: [-4 -7 6 7] points: [[3  1]]}
+        {name: "a135" pos: [71 8] box: [-4 -7 6 7] points: [[2  2]]}
+        {name: "a158" pos: [82 8] box: [-4 -7 6 7] points: [[1  3]]}
+        {name: "a180" pos: [93 8] box: [-4 -7 6 7] points: [[0  3]]}
+    ]
+}

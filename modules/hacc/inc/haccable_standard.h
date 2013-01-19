@@ -78,4 +78,26 @@ HCB_TEMPLATE_BEGIN(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
     elem(member(&std::pair<A, B>::second));
 HCB_TEMPLATE_END(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
 
+ // Here's a nice thing to put in find_by_id.
+template <class C, class Parent>
+void chain_find_by_id (const Func<C* (Parent*, std::string)>& f, std::string sep = ":") {
+    hacc::Haccability<C>::find_by_id([f, sep](std::string id){
+        size_t seppos = id.find(sep);
+        if (seppos == std::string::npos) {
+            fprintf(stderr, "(Chained ID did not contain %s)\n", sep.c_str());
+            return (C*)NULL;
+        }
+        std::string pid = id.substr(0, seppos);
+        Parent* parent = hacc::find_by_id<Parent>(pid);
+        if (!parent) {
+            fprintf(stderr, "(Could not find %s with id %s)\n",
+                hacc::get_type_name<Parent>().c_str(), pid.c_str()
+            );
+            return (C*)NULL;
+        }
+        return f(parent, id.substr(seppos + sep.size()));
+    });
+}
+
+
 #endif

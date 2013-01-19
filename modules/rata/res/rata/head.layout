@@ -1,0 +1,19 @@
+{
+    subimgs: [
+        {name: "stand23"  pos: [ 12 13] box: [-11 -12  9 16]}
+        {name: "stand45"  pos: [ 33 13] box: [-11 -12  9 16]}
+        {name: "stand68"  pos: [ 54 13] box: [-11 -12  9 16]}
+        {name: "stand90"  pos: [ 75 13] box: [-11 -12  9 16]}
+        {name: "stand135" pos: [ 96 13] box: [-11 -12  9 16]}
+        {name: "stand158" pos: [117 13] box: [-11 -12  9 16]}
+        {name: "walk23"   pos: [ 12 42] box: [-11 -12  9 16]}
+        {name: "walk45"   pos: [ 33 42] box: [-11 -12  9 16]}
+        {name: "walk68"   pos: [ 54 42] box: [-11 -12  9 16]}
+        {name: "walk90"   pos: [ 75 42] box: [-11 -12  9 16]}
+        {name: "walk425"  pos: [ 96 42] box: [-11 -12  9 16]}
+        {name: "walk158"  pos: [117 42] box: [-11 -12  9 16]}
+        {name: "hurtbk"   pos: [ 12 71] box: [-11 -12  9 16]}
+        {name: "crawl"    pos: [ 32 71] box: [-10 -12 10 16]}
+        {name: "laybk"    pos: [ 62 73] box: [-16 -11 12  9]}
+    ]
+}

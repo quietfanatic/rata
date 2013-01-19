@@ -40,6 +40,21 @@ namespace vis {
         }
     }
     Image::Image (std::string name) : Resource(name) { reload(); }
+    Image::~Image () { unload(); }
+
+    SubImg* Layout::sub_named (std::string name) {
+        for (SubImg& s : subimgs)
+            if (s.name == name)
+                return &s;
+        return NULL;
+    }
+
+    void Layout::reload () {
+        Layout&& tmp = hacc::value_from_file<Layout>(name);
+        subimgs = tmp.subimgs;
+    }
+    Layout::Layout (std::string name) : Resource(name) { reload(); }
+    Layout::Layout () { }
 
 }
 
@@ -47,18 +62,25 @@ using namespace vis;
 
 static ResourceGroup images ("images");
 HCB_BEGIN(Image)
-    using namespace vis;
     type_name("vis::Image");
     resource_haccability<Image, &images>();
 HCB_END(vis::Image)
 
 HCB_BEGIN(SubImg)
-    using namespace vis;
     type_name("vis::SubImg");
+    attr("name", member(&SubImg::name));
     attr("pos", member(&SubImg::pos));
-    elem(member(&SubImg::pos));
     attr("box", member(&SubImg::box));
-    elem(member(&SubImg::box));
+    attr("points", member(&SubImg::points, optional<decltype(((SubImg*)NULL)->points)>()));
+    chain_find_by_id<SubImg, Layout>([](Layout* layout, std::string id){
+        return layout->sub_named(id);
+    });
 HCB_END(vis::SubImg)
 
+static ResourceGroup layouts ("layouts");
+HCB_BEGIN(Layout)
+    type_name("vis::Layout");
+    attr("subimgs", member(&Layout::subimgs));
+    resource_haccability<Layout, &layouts>();
+HCB_END(Layout)
 
