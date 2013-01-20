@@ -15,17 +15,17 @@ namespace vis {
         void disappear ();
     };
 
-    void draw_sprite (Image*, SubImg*, Vec, bool, bool, float);
+    void draw_sprite (Frame*, Texture*, Vec, bool, bool, float);
 
     struct Sprite : Draws_Sprites {
-        virtual Image* img_image () = 0;
-        virtual SubImg* img_sub () = 0;
-        virtual Vec img_pos () = 0;
-        virtual bool img_fliph () { return false; }
-        virtual bool img_flipv () { return false; }
-        virtual float img_z () { return 0; }
+        virtual Texture* sprite_texture () = 0;
+        virtual Frame* sprite_frame () = 0;
+        virtual Vec sprite_pos () = 0;
+        virtual bool sprite_fliph () { return false; }
+        virtual bool sprite_flipv () { return false; }
+        virtual float sprite_z () { return 0; }
         void draw () {
-            draw_sprite(img_image(), img_sub(), img_pos(), img_fliph(), img_flipv(), img_z());
+            draw_sprite(sprite_frame(), sprite_texture(), sprite_pos(), sprite_fliph(), sprite_flipv(), sprite_z());
         }
     };
 }

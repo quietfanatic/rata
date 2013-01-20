@@ -2,8 +2,8 @@
     things: [
         {Test_Actor: {
             physical: {pos: [10, 7.5]}
-            image: &"modules/vis/res/test.png"
-            sub: file("modules/vis/res/test.layout").green
+            texture: file("modules/vis/res/test.image").ALL
+            frame: file("modules/vis/res/test.layout").green
         }}
         {Boundary: {
             physical: {pos: [0 0]}

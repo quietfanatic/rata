@@ -20,51 +20,51 @@ namespace vis {
     static Logger draw_sprite_logger ("draw_sprite", false);
     static Program* sprite_program = NULL;
 
-    void draw_sprite (Image* img, SubImg* sub, Vec p, bool fliph, bool flipv, float z) {
+    void draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         if (draw_sprite_logger.on) {
-            draw_sprite_logger.log("img: %s sub: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
-                img ? img->name.c_str() : "NULL", sub ? sub->pos.x : 0/0.0, sub ? sub->pos.y : 0/0.0,
-                sub ? sub->box.l : 0/0.0, sub ? sub->box.b : 0/0.0, sub ? sub->box.r : 0/0.0, sub ? sub->box.t : 0/0.0,
+            draw_sprite_logger.log("img: %s frame: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
+                tex ? tex->name.c_str() : "NULL", frame ? frame->offset.x : 0/0.0, frame ? frame->offset.y : 0/0.0,
+                frame ? frame->box.l : 0/0.0, frame ? frame->box.b : 0/0.0, frame ? frame->box.r : 0/0.0, frame ? frame->box.t : 0/0.0,
                 p.x, p.y, fliph, flipv, z
             );
         }
-        if (!img || !sub) return;
+        if (!tex || !frame) return;
         float tl, tb, tr, tt, vl, vb, vr, vt;
         if (fliph) {
-            tl = sub->pos.x - sub->box.r;
-            tr = sub->pos.x - sub->box.l;
-            vl = p.x - sub->box.r * PX;
-            vr = p.x - sub->box.l * PX;
+            tl = frame->offset.x - frame->box.r;
+            tr = frame->offset.x - frame->box.l;
+            vl = p.x - frame->box.r * PX;
+            vr = p.x - frame->box.l * PX;
         }
         else {
-            tl = sub->pos.x + sub->box.l;
-            tr = sub->pos.x + sub->box.r;
-            vl = p.x + sub->box.l * PX;
-            vr = p.x + sub->box.r * PX;
+            tl = frame->offset.x + frame->box.l;
+            tr = frame->offset.x + frame->box.r;
+            vl = p.x + frame->box.l * PX;
+            vr = p.x + frame->box.r * PX;
         }
         if (flipv) {
-            tb = sub->pos.y - sub->box.t;
-            tt = sub->pos.y - sub->box.b;
-            vb = p.y - sub->box.t * PX;
-            vt = p.y - sub->box.b * PX;
+            tb = frame->offset.y - frame->box.t;
+            tt = frame->offset.y - frame->box.b;
+            vb = p.y - frame->box.t * PX;
+            vt = p.y - frame->box.b * PX;
         }
         else {
-            tb = sub->pos.y + sub->box.b;
-            tt = sub->pos.y + sub->box.t;
-            vb = p.y + sub->box.b * PX;
-            vt = p.y + sub->box.t * PX;
+            tb = frame->offset.y + frame->box.b;
+            tt = frame->offset.y + frame->box.t;
+            vb = p.y + frame->box.b * PX;
+            vt = p.y + frame->box.t * PX;
         }
-        tl /= img->size.x;
-        tb /= img->size.y;
-        tr /= img->size.x;
-        tt /= img->size.y;
+        tl /= tex->size.x;
+        tb /= tex->size.y;
+        tr /= tex->size.x;
+        tt /= tex->size.y;
         if (draw_sprite_logger.on) {
             draw_sprite_logger.log("tex: [%g %g %g %g] vert [%g %g %g %g]",
                 tl, tb, tr, tt, vl, vb, vr, vt
             );
         }
         sprite_program->use();
-        glBindTexture(GL_TEXTURE_2D, img->tex);
+        glBindTexture(GL_TEXTURE_2D, tex->tex);
          // Direct Mode is still the easiest for drawing individual images.
         glBegin(GL_QUADS);
             glTexCoord2f(tl, 1-tb); glVertex3f(vl, vb, z);
@@ -97,17 +97,18 @@ namespace vis {
     struct Test_Layer : core::Layer {
         Test_Layer () : core::Layer("C.M", "test") { }
         void run () {
-            static vis::Image* image = hacc::require_id<vis::Image>("modules/vis/res/test.png");
-            static vis::Layout* layout = hacc::reference_file<vis::Layout>("modules/vis/res/test.layout");
-            static vis::SubImg* white = layout->sub_named("white");
-            static vis::SubImg* red = layout->sub_named("red");
-            static vis::SubImg* green = layout->sub_named("green");
-            static vis::SubImg* blue = layout->sub_named("blue");
+            static Image* image = hacc::reference_file<Image>("modules/vis/res/test.image");
+            static Texture* texture = image->texture_named("ALL");
+            static Layout* layout = hacc::reference_file<Layout>("modules/vis/res/test.layout");
+            static Frame* white = layout->frame_named("white");
+            static Frame* red = layout->frame_named("red");
+            static Frame* green = layout->frame_named("green");
+            static Frame* blue = layout->frame_named("blue");
 
-            vis::draw_sprite(image, white, Vec(2, 2), false, false, 0);
-            vis::draw_sprite(image, red, Vec(18, 2), false, false, 0);
-            vis::draw_sprite(image, green, Vec(18, 13), false, false, 0);
-            vis::draw_sprite(image, blue, Vec(2, 13), false, false, 0);
+            draw_sprite(white, texture, Vec(2, 2), false, false, 0);
+            draw_sprite(red, texture, Vec(18, 2), false, false, 0);
+            draw_sprite(green, texture, Vec(18, 13), false, false, 0);
+            draw_sprite(blue, texture, Vec(2, 13), false, false, 0);
         }
     } test_layer;
 

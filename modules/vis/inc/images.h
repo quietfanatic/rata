@@ -11,30 +11,51 @@
 
 namespace vis {
 
-    struct Image : Resource {
-        uint tex = 0;
+     // All positions of these structures are in PX
+    struct Texture;
+    struct Image;
+    struct Frame;
+    struct Layout;
+
+    struct Texture {
+        std::string name;
+        Vec offset;
         Vec size;
+        Layout* layout = NULL;  // Not required
+        bool smooth = false;
 
+        uint tex = 0;
+
+        void load (Image*);
         void unload ();
-        void reload ();
-
-        Image (std::string name);
-        ~Image ();
+        ~Texture ();
     };
 
-     // Part of another image
-    struct SubImg {
+    struct Image {
+        std::string filename;
+        std::vector<Texture> textures;
+
+        Vec size;  // Set on load
+        uint8* data;  // NULL when data is not in memory
+
+        void load ();
+        void unload ();
+        Texture* texture_named (std::string);
+    };
+
+    struct Frame {
         std::string name;
-        Vec pos;
+        Vec offset;
         Rect box;
         std::vector<Vec> points;
     };
 
-     // A set of subimgs.  Worthy of requiring a file.
+     // This may store a VBO in the future.
     struct Layout {
-        std::vector<SubImg> subimgs;
+        Vec size;
+        std::vector<Frame> frames;
 
-        SubImg* sub_named (std::string);
+        Frame* frame_named (std::string);
     };
 
 }

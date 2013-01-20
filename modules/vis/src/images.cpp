@@ -14,36 +14,67 @@ namespace vis {
         return err;
     }
 
-    void Image::reload () {
-        int iw; int ih; int ich;
-        uint8* data = SOIL_load_image((name).c_str(), &iw, &ih, &ich, 4);
-        if (!data) {
-            throw std::logic_error(SOIL_last_result());
-        }
+    void Texture::load (Image* image) {
         GLuint newtex;
         glGenTextures(1, &newtex);
         glBindTexture(GL_TEXTURE_2D, newtex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iw, ih, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        free(data);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        if (diagnose_opengl()) {
-            throw std::logic_error("Please look up the above OpenGL error code.");
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, image->size.x);
+        glPixelStorei(GL_UNPACK_SKIP_PIXELS, offset.x);
+         // We're storing textures upside-down
+        glPixelStorei(GL_UNPACK_SKIP_ROWS, size.y - offset.y);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->data);
+        if (!smooth) {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         }
-        unload();
-        tex = newtex; size = Vec(iw, ih);
+        if (newtex) tex = newtex;
+        else {
+            diagnose_opengl("After loading a texture");
+            throw std::logic_error("OpenGL error");
+        }
     }
-    void Image::unload () {
+    void Texture::unload () {
         if (tex) {
             glDeleteTextures(1, &tex);
             tex = 0;
         }
     }
-    Image::Image (std::string name) : Resource(name) { reload(); }
-    Image::~Image () { unload(); }
+    Texture::~Texture () { unload(); }
 
-    SubImg* Layout::sub_named (std::string name) {
-        for (SubImg& s : subimgs)
+    void Image::load () {
+        int iw; int ih; int ich;
+        uint8* data = SOIL_load_image(filename.c_str(), &iw, &ih, &ich, 4);
+        if (!data) {
+            throw std::logic_error(SOIL_last_result());
+        }
+        size = Vec(iw, ih);
+        for (Texture& t : textures) {
+            if (t.offset.x < 0 || t.offset.y < 0
+             || t.offset.x + t.size.x > size.x
+             || t.offset.y + t.size.y > size.y)
+                throw std::logic_error("Texture specified outside of image");
+        }
+        for (Texture& t : textures) {
+            t.load(this);
+        }
+        free(data);
+    }
+
+    void Image::unload () {
+        for (Texture& t : textures) {
+            t.unload();
+        }
+    }
+
+    Texture* Image::texture_named (std::string name) {
+        for (Texture& t : textures)
+            if (t.name == name)
+                return &t;
+        return NULL;
+    }
+
+    Frame* Layout::frame_named (std::string name) {
+        for (Frame& s : frames)
             if (s.name == name)
                 return &s;
         return NULL;
@@ -53,28 +84,37 @@ namespace vis {
 
 using namespace vis;
 
-static ResourceGroup images ("images");
+HCB_BEGIN(Texture)
+    type_name("vis::Texture");
+    attr("name", member(&Texture::name, def(std::string("ALL"))));
+    attr("offset", member(&Texture::offset, def(Vec(0, 0))));
+    attr("size", member(&Texture::size, def(Vec())));
+    attr("layout", member(&Texture::layout, def((Layout*)NULL)));
+HCB_END(Texture)
+
 HCB_BEGIN(Image)
     type_name("vis::Image");
-    resource_haccability<Image, &images>();
+    attr("filename", member(&Image::filename));
+    attr("textures", member(&Image::textures, def(std::vector<Texture>(1, Texture()))));
+    get_attr([](Image& image, std::string name){
+        return image.texture_named(name);
+    });
 HCB_END(vis::Image)
 
-HCB_BEGIN(SubImg)
-    type_name("vis::SubImg");
-    attr("name", member(&SubImg::name));
-    attr("pos", member(&SubImg::pos));
-    attr("box", member(&SubImg::box));
-    attr("points", member(&SubImg::points, optional<decltype(((SubImg*)NULL)->points)>()));
-    chain_find_by_id<SubImg, Layout>([](Layout* layout, std::string id){
-        return layout->sub_named(id);
-    });
-HCB_END(vis::SubImg)
+HCB_BEGIN(Frame)
+    type_name("vis::Frame");
+    attr("name", member(&Frame::name));
+    attr("offset", member(&Frame::offset));
+    attr("box", member(&Frame::box));
+    attr("points", member(&Frame::points, optional<decltype(((Frame*)NULL)->points)>()));
+HCB_END(vis::Frame)
 
 HCB_BEGIN(Layout)
     type_name("vis::Layout");
-    attr("subimgs", member(&Layout::subimgs));
-    get_attr([](Layout& l, std::string name){
-        return hacc::Generic(l.sub_named(name));
+    attr("size", member(&Layout::size));
+    attr("frames", member(&Layout::frames));
+    get_attr([](Layout& layout, std::string name){
+        return layout.frame_named(name);
     });
 HCB_END(Layout)
 
