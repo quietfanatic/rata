@@ -124,4 +124,7 @@ HCB_BEGIN(Layout)
         return layout.frame_named(name);
     });
 HCB_END(Layout)
+ // For convenience
+HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA Layout>)
+
 

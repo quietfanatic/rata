@@ -355,7 +355,6 @@ namespace hacc {
                         pointer.set(p, [&caster, val, t](void* basep){
                             *(void**)basep = caster.up(t->new_from_hacc(val));
                         });
-                        break;
                     }
                 }
                 else throw Error("Type " + get_type_name() + " cannot be represented by an array Hacc.");

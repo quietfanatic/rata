@@ -9,6 +9,7 @@ namespace hacc {
         Generic& r = files[name];
         if (r.p) return r;
         Hacc* h = hacc_from_file(name);
+        if (h->form() == ERROR) throw h->get_error();
         if (h->type.empty()) throw Error("Contents of file \"" + name + "\" did not give a type annotation.");
         HaccTable* table = HaccTable::require_type_name(h->type);
         void* p = table->new_from_hacc(h);

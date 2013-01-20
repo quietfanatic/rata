@@ -32,6 +32,7 @@ workflow {
         ../vis/tmp/images.o
         ../vis/tmp/sprites.o
         ../vis/tmp/shaders.o
+        ../vis/tmp/models.o
         ../util/tmp/debug.o
         ../ent/tmp/various.o
     >;

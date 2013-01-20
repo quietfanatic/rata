@@ -3,7 +3,17 @@
 
 #include "haccable.h"
 
-
+namespace hacc {
+    template <class C>
+    struct named_vector : std::vector<C> {
+        C* named (std::string name) {
+            for (auto& e : *this)
+                if (e.name == name)
+                    return &e;
+            return NULL;
+        }
+    };
+}
 
 HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
     using namespace hacc;
@@ -16,13 +26,23 @@ HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
         return new_hacc(std::move(a));
     });
     update_from([](std::vector<C>& v, Hacc* h){
+        if (h->form() != ARRAY) throw hacc::Error("A std::vector<" + get_type_name<C>() + "> cannot be represented by a " + form_name(h->form()) + " hacc.");
         auto ah = h->as_array();
         v.resize(ah->n_elems());
         for (uint i = 0; i < ah->n_elems(); i++) {
             update_from_hacc(v[i], ah->elem(i));
         }
     });
-HCB_TEMPLATE_END(<class C>, hacc::std::vector<C>)
+    get_elem([](std::vector<C>& v, size_t index){ return Generic(&v[index]); });
+HCB_TEMPLATE_END(<class C>, std::vector<C>)
+
+HCB_TEMPLATE_BEGIN(<class C>, hacc::named_vector<C>)
+    using namespace hacc;
+    type_name("hacc::named_vector<" + get_type_name<C>() + ">");
+    delegate(hcb::template supertype<std::vector<C>>());
+    get_elem([](named_vector<C>& v, size_t index){ return Generic(&v[index]); });
+    get_attr([](named_vector<C>& v, std::string name){ return Generic(v.named(name)); });
+HCB_TEMPLATE_END(<class C>, hacc::named_vector<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, hacc::Map<C>)
     using namespace hacc;

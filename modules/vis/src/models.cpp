@@ -10,10 +10,10 @@ using namespace vis;
 HCB_BEGIN(Skel)
     type_name("vis::Skel");
     attr("segs", member(&Skel::segs));
-    attr("root", member(&Skel::segs));
-    attr("root_offset", member(&Skel::segs));
+    attr("root", member(&Skel::root));
+    attr("root_offset", member(&Skel::root_offset));
     attr("poses", member(&Skel::poses));
-    finish([](Skel& skel) { skel.finish(); }
+    finish([](Skel& skel) { skel.finish(); });
 HCB_END(Skel)
 
 HCB_BEGIN(Skel::Seg)
@@ -47,41 +47,29 @@ HCB_BEGIN(Skin::App)
     type_name("vis::Skin::App");
     elem(member(&Skin::App::target));
     elem(member(&Skin::App::textures));
-HCB_END(Skin::app)
+HCB_END(Skin::App)
 
 namespace vis {
 
     void Skel::finish () {
         for (auto& seg : segs) {
             auto n_branches = seg.branches.size();
-            for (auto& frame : *seg.layout->frames) {
-                if (frame.points.size() < n_subs) {
+            for (auto& frame : seg.layout->frames) {
+                if (frame.points.size() < n_branches) {
                     fprintf(stderr, "Skeleton error: Frame %s of Seg %s doesn't have enough points (%lu < %lu).\n",
                         frame.name.c_str(), seg.name.c_str(), frame.points.size(), n_branches
                     );
                     throw std::logic_error("Skeleton contained errors.");
                 }
             }
-            for (Skel::Seg* branch : branches) {
+            for (Skel::Seg* branch : seg.branches) {
                 if (branch->parent) {
-                    fprintf(stderr, "Skeleton error: Seg %s was claimed by multiple parents.\n", branch->name.c_str())
+                    fprintf(stderr, "Skeleton error: Seg %s was claimed by multiple parents.\n", branch->name.c_str());
                     throw std::logic_error("Skeleton contained errors.");
                 }
                 branch->parent = branch;
             }
         }
-    }
-
-    Skel::Seg* Skel::seg_named (std::string name) {
-        for (auto& p : segs)
-            if (p.name == name) return &p;
-        throw std::logic_error("Skel Segment not found.");
-    }
-
-    Pose* Skel::pose_named (std::string name) {
-        for (auto& pose : *poses)
-            if (pose.name == name) return &pose;
-        throw std::logic_error("Skel Pose not found.");
     }
 
     uint Skel::seg_index (Seg* p) {
@@ -92,26 +80,45 @@ namespace vis {
         return r;
     }
 
-    void Model::Seg::draw (Skel::Seg* seg, Vec mpos, bool fh, bool fv, float z) {
-        if (!skin) return;
-        if (!pose) return;
-        for (Texture* tex : skin->textures) {
+    void Model::draw_seg (Model::Seg* ms, Skel::Seg* ss, Vec pos, bool fh, bool fv, float z) {
+        if (!ms->skin) return;
+        if (!ms->pose) return;
+        for (Texture* tex : ms->skin->textures) {
             draw_sprite(
-                pose->frame, tex, mpos + pos,
-                pose->fliph?!fh:fh, pose->flipv?!fv:fv,
-                z + seg->z_offset + pose->z_offset
+                ms->pose->frame, tex, pos,
+                ms->pose->fliph?!fh:fh, ms->pose->flipv?!fv:fv,
+                z + ss->z_offset
             );
+        }
+        for (Skel::Seg*& branch : ss->branches) {
+            Vec pt = ms->pose->frame->points[&branch - ss->branches.data()];
+            draw_seg(&segs[skel->seg_index(branch)], branch, pos + pt, fh, fv, z);
         }
     }
     void Model::draw (Vec pos, bool fliph, bool flipv, float z) {
         if (!skel) return;
-        uint nsegs = segs.size();
-        for (uint i = 0; i < nsegs; i++)
-            segss[i].draw(&skel->segs[i], pos, fliph, flipv, z);
+        draw_seg(
+            &segs[skel->seg_index(skel->root)], skel->root,
+            pos + skel->root_offset, fliph, flipv, z
+        );
     }
 
-    Model::Model () : skeleton(NULL), model_segments() { }
-    Model::Model (Skeleton* skel) : skeleton(skel), model_segments(skel ? skel->segments.size() : 0) { }
+    void Model::apply_pose (Pose* pose) {
+        for (auto& app : pose->apps) {
+            segs[skel->seg_index(app.target)].pose = &app;
+        }
+    }
+    void Model::apply_skin (Skin* skin) {
+        for (auto& app : skin->apps) {
+            segs[skel->seg_index(app.target)].skin = &app;
+        }
+    }
+
+    Model::Model () : skel(NULL), segs() { }
+    Model::Model (Skel* skel) : skel(skel), segs(skel ? skel->segs.size() : 0) { }
+
+
+
 
     struct Model_Test : core::Layer {
         Model_Test () : core::Layer("E.M", "model_test", false) { }
@@ -121,8 +128,8 @@ namespace vis {
         }
         void init () {
             model = Model(hacc::reference_file<Skel>("modules/rata/res/rata.skel"));
-            model.apply_skin(hacc::reference_file<Skin>("modules/rata/res/rata.skin"));
-            model.apply_pose(model.skel->pose_named("stand"));
+            model.apply_skin(hacc::reference_file<Skin>("modules/rata/res/rata-base.skin"));
+            model.apply_pose(model.skel->poses.named("stand"));
         }
     } model_tester;
 
@@ -155,13 +162,13 @@ HCB_END(MT_Skin_Command)
 struct MT_Pose_Command : Command {
     std::string name;
     void operator() () {
-        model_tester.model.apply_pose(model_tester.model.skel->pose_named(name));
+        model_tester.model.apply_pose(model_tester.model.skel->poses.named(name));
     }
 };
 
 HCB_BEGIN(MT_Pose_Command)
     base<Command>("mt_pose");
-    command_description<MT_Preset_Command>("Apply a pose to the model_test layer by name");
-    elem(member(&MT_Preset_Command::name));
-HCB_END(MT_Preset_Command)
+    command_description<MT_Pose_Command>("Apply a pose to the model_test layer by name");
+    elem(member(&MT_Pose_Command::name));
+HCB_END(MT_Pose_Command)
 

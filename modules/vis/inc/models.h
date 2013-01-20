@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include "../../util/inc/Vec.h"
 #include "../../hacc/inc/haccable_pointers.h"
+#include "../../hacc/inc/haccable_standard.h"
 #include "images.h"
 
 namespace vis {
@@ -23,16 +24,14 @@ namespace vis {
             float z_offset;
         };
 
-        std::vector<Skel::Seg> segs;
+        hacc::named_vector<Skel::Seg> segs;
         Skel::Seg* root;
         Vec root_offset;
-        std::vector<Pose> poses;
+        hacc::named_vector<Pose> poses;
 
-        Skel::Seg* seg_named (std::string name);
-        Pose* pose_named (std::string name);
         uint seg_index (Skel::Seg* p);
 
-        void verify ();
+        void finish ();
     };
 
     struct Pose {
@@ -57,23 +56,23 @@ namespace vis {
     };
 
     struct Model {
-        struct Model::Seg {
+        struct Seg {
             Skin::App* skin = NULL;
             Pose::App* pose = NULL;
 
-            void draw (Skel::Seg* seg, Vec mpos, bool fh, bool fv, float z);
         };
 
         Skel* skel = NULL;
         std::vector<Model::Seg> segs;
 
         Model ();
-        Model (Skeleton*);
+        Model (Skel*);
 
         Vec offset_of (Skel::Seg* seg);
         void apply_pose (Pose*);
         void apply_skin (Skin*);
 
+        void draw_seg (Model::Seg* ms, Skel::Seg* ss, Vec pos, bool fh, bool fv, float z);
         void draw (Vec pos, bool fliph = false, bool flipv = false, float z = 0);
     };
 
