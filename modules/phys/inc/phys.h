@@ -55,15 +55,6 @@ namespace phys {
         void start () { Actor::start(); activate(); }
     };
     
-    template <const char** bd_filename>
-    struct Physical_With : Physical {
-        static BodyDef body_def;
-        Physical_With () : Physical(&body_def) { }
-    };
-    template <const char** bd_filename>
-    BodyDef Physical_With<bd_filename>::body_def
-        = hacc::value_from_file<BodyDef>(*bd_filename);
-
 }
 
 #endif

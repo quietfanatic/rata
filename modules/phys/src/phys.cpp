@@ -8,17 +8,20 @@
  // This is so satisfying
 
 HCB_BEGIN(b2Vec2)
+    type_name("b2Vec2");
     elem(member(&b2Vec2::x));
     elem(member(&b2Vec2::y));
 HCB_END(b2Vec2)
 
 HCB_BEGIN(b2CircleShape)
+    type_name("b2CircleShape");
     base<b2Shape>("circle");
     attr("c", member(&b2CircleShape::m_p));
     attr("r", member((float b2CircleShape::*)&b2CircleShape::m_radius));
 HCB_END(b2CircleShape)
 
 HCB_BEGIN(b2PolygonShape)
+    type_name("b2PolygonShape");
     base<b2Shape>("polygon");
     attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius, def(b2_polygonRadius)));
     attr("verts", value_functions<std::vector<b2Vec2>>(
@@ -32,6 +35,7 @@ HCB_BEGIN(b2PolygonShape)
 HCB_END(b2PolygonShape)
 
 HCB_BEGIN(b2EdgeShape)
+    type_name("b2EdgeShape");
     base<b2Shape>("edge");
     attr("v1", member((b2Vec2 b2EdgeShape::*)&b2EdgeShape::m_vertex1));
     attr("v2", member((b2Vec2 b2EdgeShape::*)&b2EdgeShape::m_vertex2));
@@ -40,6 +44,7 @@ HCB_BEGIN(b2EdgeShape)
 HCB_END(b2EdgeShape)
 
 HCB_BEGIN(b2FixtureDef)
+    type_name("b2FixtureDef");
     attr("shape", member(&b2FixtureDef::shape));
     attr("friction", member(&b2FixtureDef::friction, def(0.f)));
     attr("restitution", member(&b2FixtureDef::restitution, def(0.f)));
@@ -54,6 +59,7 @@ HCB_BEGIN(phys::FixtureDef)
 HCB_END(phys::FixtureDef)
 
 HCB_BEGIN(b2BodyType)
+    type_name("b2BodyType");
     value_name([](const b2BodyType& bt) -> std::string {
         switch (bt) {
             case b2_staticBody: return "static";
@@ -68,6 +74,7 @@ HCB_BEGIN(b2BodyType)
 HCB_END(b2BodyType)
 
 HCB_BEGIN(b2BodyDef)
+    type_name("b2BodyDef");
     attr("type", member(&b2BodyDef::type, def(b2_dynamicBody)));
 //    attr("pos", member(&b2BodyDef::position));  This shouldn't be set through this.
 //    attr("vel", member(&b2BodyDef::linearVelocity));  Nor this
@@ -80,12 +87,14 @@ HCB_END(b2BodyDef)
 
 HCB_BEGIN(phys::BodyDef)
     using namespace phys;
+    type_name("phys::BodyDef");
     attr("b2", member(&BodyDef::b2));
     attr("fixtures", member(&BodyDef::fixtures));
 HCB_END(phys::BodyDef)
 
 HCB_BEGIN(phys::Physical)
     using namespace phys;
+    type_name("phys::Physical");
     attr("pos", value_methods(&Physical::pos, &Physical::set_pos));
     attr("vel", value_methods(&Physical::vel, &Physical::set_vel, def(Vec(0, 0))));
 HCB_END(phys::Physical)
