@@ -122,9 +122,10 @@ namespace vis {
 
     struct Model_Test : core::Layer {
         Model_Test () : core::Layer("E.M", "model_test", false) { }
+        bool flip = false;
         Model model;
         void run () {
-            model.draw(Vec(10, 4), false, false, 0.5);
+            model.draw(Vec(10, 4), flip, false, 0.5);
         }
         void init () {
             model = Model(hacc::reference_file<Skel>("modules/rata/res/rata.skel"));
@@ -172,3 +173,13 @@ HCB_BEGIN(MT_Pose_Command)
     elem(member(&MT_Pose_Command::name));
 HCB_END(MT_Pose_Command)
 
+struct MT_Flip_Command : Command {
+    void operator() () {
+        model_tester.flip = !model_tester.flip;
+    }
+};
+HCB_BEGIN(MT_Flip_Command)
+    base<Command>("mt_flip");
+    command_description<MT_Pose_Command>("Flip the model tester horizontally");
+    empty();
+HCB_END(MT_Flip_Command)

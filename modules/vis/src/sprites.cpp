@@ -21,6 +21,11 @@ namespace vis {
     static Program* sprite_program = NULL;
 
     void draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
+         // manipulate MODELVIEW matrix
+        glLoadIdentity();
+        glTranslatef(p.x, p.y, z);
+        glScalef(fliph ? -PX : PX, flipv ? -PX : PX, 1);
+
         if (draw_sprite_logger.on) {
             draw_sprite_logger.log("img: %s frame: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
                 tex ? tex->name.c_str() : "NULL", frame ? frame->offset.x : 0/0.0, frame ? frame->offset.y : 0/0.0,
@@ -28,49 +33,20 @@ namespace vis {
                 p.x, p.y, fliph, flipv, z
             );
         }
-        if (!tex || !frame) return;
-        float tl, tb, tr, tt, vl, vb, vr, vt;
-        if (fliph) {
-            tl = frame->offset.x - frame->box.r;
-            tr = frame->offset.x - frame->box.l;
-            vl = p.x - frame->box.r * PX;
-            vr = p.x - frame->box.l * PX;
-        }
-        else {
-            tl = frame->offset.x + frame->box.l;
-            tr = frame->offset.x + frame->box.r;
-            vl = p.x + frame->box.l * PX;
-            vr = p.x + frame->box.r * PX;
-        }
-        if (flipv) {
-            tb = frame->offset.y - frame->box.t;
-            tt = frame->offset.y - frame->box.b;
-            vb = p.y - frame->box.t * PX;
-            vt = p.y - frame->box.b * PX;
-        }
-        else {
-            tb = frame->offset.y + frame->box.b;
-            tt = frame->offset.y + frame->box.t;
-            vb = p.y + frame->box.b * PX;
-            vt = p.y + frame->box.t * PX;
-        }
-        tl /= tex->size.x;
-        tb /= tex->size.y;
-        tr /= tex->size.x;
-        tt /= tex->size.y;
-        if (draw_sprite_logger.on) {
-            draw_sprite_logger.log("tex: [%g %g %g %g] vert [%g %g %g %g]",
-                tl, tb, tr, tt, vl, vb, vr, vt
-            );
-        }
+         // TODO: do this when loading the layout.
+        float tl = (frame->offset.x + frame->box.l) / tex->size.x;
+        float tb = (frame->offset.y + frame->box.b) / tex->size.y;
+        float tr = (frame->offset.x + frame->box.r) / tex->size.x;
+        float tt = (frame->offset.y + frame->box.t) / tex->size.y;
+
         sprite_program->use();
         glBindTexture(GL_TEXTURE_2D, tex->tex);
          // Direct Mode is still the easiest for drawing individual images.
         glBegin(GL_QUADS);
-            glTexCoord2f(tl, 1-tb); glVertex3f(vl, vb, z);
-            glTexCoord2f(tr, 1-tb); glVertex3f(vr, vb, z);
-            glTexCoord2f(tr, 1-tt); glVertex3f(vr, vt, z);
-            glTexCoord2f(tl, 1-tt); glVertex3f(vl, vt, z);
+            glTexCoord2f(tl, 1-tb); glVertex2f(frame->box.l, frame->box.b);
+            glTexCoord2f(tr, 1-tb); glVertex2f(frame->box.r, frame->box.b);
+            glTexCoord2f(tr, 1-tt); glVertex2f(frame->box.r, frame->box.t);
+            glTexCoord2f(tl, 1-tt); glVertex2f(frame->box.l, frame->box.t);
         glEnd();
     }
 
@@ -90,6 +66,8 @@ namespace vis {
 
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
+
+            glMatrixMode(GL_MODELVIEW);
         }
     } csl;
 
