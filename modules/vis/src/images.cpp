@@ -15,6 +15,7 @@ namespace vis {
     }
 
     void Texture::load (Image* image) {
+        if (!size.is_defined()) size = image->size;
         GLuint newtex;
         glGenTextures(1, &newtex);
         glBindTexture(GL_TEXTURE_2D, newtex);
