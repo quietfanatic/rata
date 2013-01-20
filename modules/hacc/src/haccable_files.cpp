@@ -1,0 +1,21 @@
+#include <unordered_map>
+#include "../inc/haccable_files.h"
+
+namespace hacc {
+
+    std::unordered_map<String, Generic> files;
+    Generic generic_from_file (String name) {
+        Generic& r = files[name];
+        if (r.p) return r;
+        Hacc* h = hacc_from_file(name);
+        Bomb b ([h](){ h->destroy(); delete h; });
+        if (h->type.empty()) throw Error("Contents of file \"" + name + "\" did not give a type annotation.");
+        HaccTable* table = HaccTable::require_type_name(h->type);
+        void* p = table->new_from_hacc(h);
+        r.cpptype = &table->cpptype;
+        r.p = p;
+        return r;
+    }
+
+}
+

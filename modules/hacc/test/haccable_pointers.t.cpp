@@ -84,7 +84,7 @@ HCB_BEGIN(Self_Ref)
 HCB_END(Self_Ref)
 
 Self_Ref myself { 3, &myself };
-const hacc::Hacc* haccself = NULL;
+hacc::Hacc* haccself = NULL;
 Self_Ref yourself { 4, NULL };
 
 #include "../../tap/inc/tap.h"

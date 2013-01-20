@@ -9,7 +9,7 @@ HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
     using namespace hacc;
     type_name("std::vector<" + get_type_name<C>() + ">");
     to([](const std::vector<C>& v){
-        std::vector<const Hacc*> a;
+        std::vector<Hacc*> a;
         Bomb b ([&a](){ for (auto& p : a) { p->destroy(); delete p; } });
         for (const C& e : v) {
             a.push_back(hacc_from(e));
@@ -17,7 +17,7 @@ HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
         b.defuse();
         return new_hacc(std::move(a));
     });
-    update_from([](std::vector<C>& v, const Hacc* h){
+    update_from([](std::vector<C>& v, Hacc* h){
         auto ah = h->as_array();
         v.resize(ah->n_elems());
         for (uint i = 0; i < ah->n_elems(); i++) {
@@ -30,7 +30,7 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::Map<C>)
     using namespace hacc;
     type_name("hacc::Map<" + get_type_name<C>() + ">");
     to([](const Map<C>& v){
-        Map<const Hacc*> o;
+        Map<Hacc*> o;
         Bomb b ([&o](){ for (auto& p : o) { p.second->destroy(); delete p.second; } });
         for (auto& pair : v) {
             o.push_back(hacc_attr(pair.first, hacc_from(pair.second)));
@@ -38,7 +38,7 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::Map<C>)
         b.defuse();
         return new_hacc(std::move(o));
     });
-    update_from([](Map<C>& v, const Hacc* h){
+    update_from([](Map<C>& v, Hacc* h){
         auto oh = h->as_object();
         v.clear();
         v.resize(oh->n_attrs());
@@ -53,7 +53,7 @@ HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
     using namespace hacc;
     type_name("std::unordered_map<std::string, " + get_type_name<C>() + ">");
     to([](const std::unordered_map<std::string, C>& v){
-        Map<const Hacc*> o;
+        Map<Hacc*> o;
         Bomb b ([&o](){ for (auto& p : o) { p.second->destroy(); delete p.second; } });
         for (auto& pair : v) {
             o.push_back(hacc_attr(pair.first, hacc_from((const C&)pair.second)));
@@ -61,7 +61,7 @@ HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
         b.defuse();
         return new_hacc(std::move(o));
     });
-    update_from([](std::unordered_map<std::string, C>& v, const Hacc* h){
+    update_from([](std::unordered_map<std::string, C>& v, Hacc* h){
         auto oh = h->as_object();
         v.clear();
         v.reserve(oh->n_attrs());

@@ -42,6 +42,7 @@ enum Form {
     DOUBLE,
     STRING,
     REF,
+    GENERIC,
     ATTRREF,
     ELEMREF,
     MACROCALL,
@@ -73,34 +74,36 @@ struct Error : std::exception {
 };
 struct Ref {
     String id;
-    void* addr;
-    bool operator== (Ref o) const { return addr == o.addr || id == o.id; }
-    template <class C>
-    Ref (String id, C* addr) : id(id), addr((void*)addr) { }
-    Ref (String id) : id(id), addr(null) { }
-    Ref (const char* id) : id(id), addr(null) { }
-    template <class C>
-    Ref (C* addr) : id(""), addr((void*)addr) { }
+    bool operator== (Ref o) const { return id == o.id; }
+    Ref (String id) : id(id) { }
+    Ref (const char* id) : id(id) { }
+};
+struct Generic {
+    const std::type_info* cpptype;
+    void* p;
+    Generic () : cpptype(NULL), p(NULL) { }
+    Generic (const std::type_info& cpptype, void* p) : cpptype(&cpptype), p(p) { }
+    template <class C> Generic (C* p) : cpptype(&typeid(C)), p(p) { }
 };
 struct AttrRef {
-    const Hacc* subject;
+    Hacc* subject;
     String name;
-    AttrRef (const Hacc* s, String n) : subject(s), name(n) { }
+    AttrRef (Hacc* s, String n) : subject(s), name(n) { }
 };
 struct ElemRef {
-    const Hacc* subject;
+    Hacc* subject;
     size_t index;
-    ElemRef (const Hacc* s, size_t i) : subject(s), index(i) { }
+    ElemRef (Hacc* s, size_t i) : subject(s), index(i) { }
 };
 struct MacroCall {
     String name;
-    const Hacc* arg;
-    MacroCall (String name, const Hacc* arg) : name(name), arg(arg) { }
+    Hacc* arg;
+    MacroCall (String name, Hacc* arg) : name(name), arg(arg) { }
 };
 template <class T> using VArray = std::vector<T>;
-typedef VArray<const Hacc*> Array;
+typedef VArray<Hacc*> Array;
 template <class T> using Map = std::vector<std::pair<String, T>>;
-typedef Map<const Hacc*> Object;
+typedef Map<Hacc*> Object;
 
 template <class T> using Func = std::function<T>;
 
@@ -118,6 +121,7 @@ struct Hacc {
     struct Double;
     struct String;
     struct Ref;
+    struct Generic;
     struct AttrRef;
     struct ElemRef;
     struct MacroCall;
@@ -126,9 +130,9 @@ struct Hacc {
     struct Error;
     struct Undefined;
     Hacc (hacc::String id) : id(id) { }
-    hacc::Error form_error (hacc::String expected) const;
-#define HACC_GETTER_DECL(type, name, letter) const type* as_##name () const; const hacc::type& get_##name () const;
-#define HACC_GETTER_R_DECL(type, name, letter) const type* as_##name () const; hacc::type get_##name () const;
+    hacc::Error form_error (hacc::String expected);
+#define HACC_GETTER_DECL(type, name, letter) type* as_##name (); hacc::type& get_##name ();
+#define HACC_GETTER_R_DECL(type, name, letter) type* as_##name (); hacc::type get_##name ();
     HACC_GETTER_R_DECL(Null, null, n)
     HACC_GETTER_R_DECL(Bool, bool, b)
     HACC_GETTER_R_DECL(Integer, integer, i)
@@ -136,6 +140,7 @@ struct Hacc {
     HACC_GETTER_R_DECL(Double, double, d)
     HACC_GETTER_DECL(String, string, s)
     HACC_GETTER_DECL(Ref, ref, r)
+    HACC_GETTER_DECL(Generic, generic, g)
     HACC_GETTER_DECL(AttrRef, attrref, ar)
     HACC_GETTER_DECL(ElemRef, elemref, er)
     HACC_GETTER_DECL(MacroCall, macrocall, mc)
@@ -158,42 +163,47 @@ HACC_VARIANT_S(Float, FLOAT, Float, f)
 HACC_VARIANT_S(Double, DOUBLE, Double, d)
 HACC_VARIANT_S(String, STRING, String, s)
 HACC_VARIANT_S(Ref, REF, Ref, r)
+HACC_VARIANT(Generic, GENERIC,
+    hacc::Generic g;
+    operator hacc::Generic& () { return g; }
+    Generic (const hacc::Generic& g, hacc::String id = "") : Hacc(id), g(g) { }
+)
 HACC_VARIANT(AttrRef, ATTRREF,
     hacc::AttrRef ar;
-    operator const hacc::AttrRef& () const { return ar; }
+    operator hacc::AttrRef& () { return ar; }
     AttrRef (const hacc::AttrRef& ar, hacc::String id = "") : Hacc(id), ar(ar) { }
-    void destroy () const {
+    void destroy () {
         ar.subject->destroy();
         delete ar.subject;
     }
 )
 HACC_VARIANT(ElemRef, ELEMREF,
     hacc::ElemRef er;
-    operator const hacc::ElemRef& () const { return er; }
+    operator hacc::ElemRef& () { return er; }
     ElemRef (const hacc::ElemRef& er, hacc::String id = "") : Hacc(id), er(er) { }
-    void destroy () const {
+    void destroy () {
         er.subject->destroy();
         delete er.subject;
     }
 )
 HACC_VARIANT(MacroCall, MACROCALL,
     hacc::MacroCall mc;
-    operator const hacc::MacroCall& () const { return mc; }
-    MacroCall (const hacc::MacroCall& er, hacc::String id = "") : Hacc(id), mc(mc) { }
-    void destroy () const {
+    operator hacc::MacroCall& () { return mc; }
+    MacroCall (const hacc::MacroCall& mc, hacc::String id = "") : Hacc(id), mc(mc) { }
+    void destroy () {
         mc.arg->destroy();
         delete mc.arg;
     }
 )
 HACC_VARIANT(Array, ARRAY,
     hacc::Array a;
-    operator const hacc::Array& () const { return a; }
+    operator hacc::Array& () { return a; }
     Array (const hacc::Array& a, hacc::String id = "") : Hacc(id), a(a) { }
     Array (hacc::Array&& a, hacc::String id = "") : Hacc(id), a(a) { }
-    Array (std::initializer_list<const Hacc*> l, hacc::String id = "") : Hacc(id), a(l) { }
+    Array (std::initializer_list<Hacc*> l, hacc::String id = "") : Hacc(id), a(l) { }
     size_t n_elems () const { return a.size(); }
-    const Hacc* elem (uint i) const { return a.at(i); }
-    void destroy () const {
+    Hacc* elem (uint i) const { return a.at(i); }
+    void destroy () {
         for (auto p : a) {
             p->destroy();
             delete p;
@@ -202,16 +212,16 @@ HACC_VARIANT(Array, ARRAY,
 )
 HACC_VARIANT(Object, OBJECT,
     hacc::Object o;
-    operator const hacc::Object& () const { return o; }
+    operator hacc::Object& () { return o; }
     Object (const hacc::Object& o, hacc::String id = "") : Hacc(id), o(o) { }
     Object (hacc::Object&& o, hacc::String id = "") : Hacc(id), o(o) { }
-    Object (std::initializer_list<std::pair<hacc::String, const Hacc*>> l, hacc::String id = "") : Hacc(id), o(l) { }
+    Object (std::initializer_list<std::pair<hacc::String, Hacc*>> l, hacc::String id = "") : Hacc(id), o(l) { }
     size_t n_attrs () const { return o.size(); }
     hacc::String name_at (uint i) const { return o.at(i).first; }
-    const Hacc* value_at (uint i) const { return o.at(i).second; }
+    Hacc* value_at (uint i) const { return o.at(i).second; }
     bool has_attr (hacc::String s) const;
-    const Hacc* attr (hacc::String s) const;
-    void destroy () const {
+    Hacc* attr (hacc::String s) const;
+    void destroy () {
         for (auto& pair : o) {
             pair.second->destroy();
             delete pair.second;
@@ -221,10 +231,10 @@ HACC_VARIANT(Object, OBJECT,
 HACC_VARIANT_S(Error, ERROR, Error, e)
 
  // Because ugh
-#define HACC_NEW_DECL(type, letter, name) static inline const Hacc* new_hacc (type letter, String id = "") { return new const Hacc::name(letter, id); }
-#define HACC_NEW_DECL_COPY(type, letter, name) static inline const Hacc* new_hacc (const type& letter, String id = "") { return new const Hacc::name(letter, id); }
-#define HACC_NEW_DECL_MOVE(type, letter, name) static inline const Hacc* new_hacc (type&& letter, String id = "") { return new const Hacc::name(std::forward<type>(letter), id); }
-static inline const Hacc* new_hacc () { return new const Hacc::Null(); }
+#define HACC_NEW_DECL(type, letter, name) static inline Hacc* new_hacc (type letter, String id = "") { return new Hacc::name(letter, id); }
+#define HACC_NEW_DECL_COPY(type, letter, name) static inline Hacc* new_hacc (const type& letter, String id = "") { return new Hacc::name(letter, id); }
+#define HACC_NEW_DECL_MOVE(type, letter, name) static inline Hacc* new_hacc (type&& letter, String id = "") { return new Hacc::name(std::forward<type>(letter), id); }
+static inline Hacc* new_hacc () { return new Hacc::Null(); }
 HACC_NEW_DECL(Null, n, Null)
 HACC_NEW_DECL(Bool, b, Bool)
 HACC_NEW_DECL(char, i, Integer)
@@ -240,25 +250,31 @@ HACC_NEW_DECL(Float, f, Float)
 HACC_NEW_DECL(Double, d, Double)
 HACC_NEW_DECL(String, s, String)
 HACC_NEW_DECL(Ref, r, Ref)
+HACC_NEW_DECL(Generic, g, Generic)
 HACC_NEW_DECL(AttrRef, ar, AttrRef)
 HACC_NEW_DECL(ElemRef, er, ElemRef)
-HACC_NEW_DECL(MacroCall, mc, MacroCall)
+HACC_NEW_DECL_COPY(MacroCall, mc, MacroCall)
+HACC_NEW_DECL_MOVE(MacroCall, mc, MacroCall)
 HACC_NEW_DECL_COPY(Array, a, Array)
 HACC_NEW_DECL_MOVE(Array, a, Array)
 HACC_NEW_DECL_COPY(Object, o, Object)
 HACC_NEW_DECL_MOVE(Object, o, Object)
-HACC_NEW_DECL(std::initializer_list<const Hacc*>, l, Array)
-static inline const Hacc* new_hacc (std::initializer_list<std::pair<std::basic_string<char>, const Hacc*>> l) { return new const Hacc::Object(l); }
+HACC_NEW_DECL(std::initializer_list<Hacc*>, l, Array)
+static inline Hacc* new_hacc (std::initializer_list<std::pair<std::basic_string<char>, Hacc*>> l) { return new Hacc::Object(l); }
 
-static inline std::pair<String, const Hacc*> hacc_attr (String name, const Hacc* val) {
-    return std::pair<String, const Hacc*>(name, val);
+static inline std::pair<String, Hacc*> hacc_attr (String name, Hacc* val) {
+    return std::pair<String, Hacc*>(name, val);
 }
 template <class... Args>
-static inline std::pair<String, const Hacc*> new_attr (String name, Args... args) {
-    return std::pair<String, const Hacc*>(name, new_hacc(args...));
+static inline std::pair<String, Hacc*> new_attr (String name, Args... args) {
+    return std::pair<String, Hacc*>(name, new_hacc(args...));
 }
 
-}
+ // This does various transformations internal to the HACC language.
+ // It also destroys its input!
+Hacc* collapse_hacc (Hacc* h);
+
+} // namespace hacc
 
  // Here's a utility that's frequently used with hacc.
 namespace {

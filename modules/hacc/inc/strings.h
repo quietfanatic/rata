@@ -13,17 +13,17 @@ String escape_string (const String&);
 String escape_ident (const String&);
  // unescape is harder to abstract out, so we'll wait till we need it.
  // Serialize the value part to a string
-String hacc_value_to_string (const Hacc*);
+String hacc_value_to_string (Hacc*);
 
  // Write a Hacc to a string
-String hacc_to_string (const Hacc*);
+String hacc_to_string (Hacc*);
  // Read a Hacc from a string
-const Hacc* hacc_from_string (const String&);
-const Hacc* hacc_from_string (const char*);
+Hacc* hacc_from_string (const String&);
+Hacc* hacc_from_string (const char*);
 
-String string_from_hacc (const Hacc*);
-const Hacc* string_to_hacc (const String&);
-const Hacc* string_to_hacc (const char*);
+String string_from_hacc (Hacc*);
+Hacc* string_to_hacc (const String&);
+Hacc* string_to_hacc (const char*);
 
 }
 

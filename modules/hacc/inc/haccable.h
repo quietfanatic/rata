@@ -30,19 +30,21 @@ struct HaccTable {
     Func<String (void*)> get_id_p;
     Func<void* (String)> find_by_id_p;
      // Leave haccification to something else.
-     // If the inner type of this is const Hacc*, it defines a direct transition.
+     // If the inner type of this is Hacc*, it defines a direct transition.
     GetSet0 delegate;
      // Defined by attributes with names, defaults are TODO
     Map<GetSet0> attrs;
+    Func<Generic (void*, String)> get_attr_p;
      // Defined by a fixed number of elements
     VArray<GetSet0> elems;
+    Func<Generic (void*, size_t)> get_elem_p;
      // Variants with names specific to this interface
      // Note that this will only be used if following a pointer.
     std::unordered_map<String, GetSet0> variants;
     Func<String (void*)> select_variant;
      // Manual direct translation
-    Func<const Hacc* (void*)> to;
-    Func<void (void*, const Hacc*)> update_from;
+    Func<Hacc* (void*)> to;
+    Func<void (void*, Hacc*)> update_from;
      // Records binary-compatible subtypes of the type pointed to by this type, under names.
     std::unordered_map<String, Caster0> subtypes;
      // Allows this to be treated as a pointer.
@@ -58,23 +60,31 @@ struct HaccTable {
     std::unordered_map<String, Defaulter0> values;
     Func<String (void*)> value_name;
     
-    const Hacc* to_hacc (void*);
-    void update_from_hacc (void*, const Hacc*, bool save_id = true);
-    void* new_from_hacc (const Hacc* h);
+    Hacc* to_hacc (void*);
+    void update_from_hacc (void*, Hacc*, bool save_id = true);
+    void* new_from_hacc (Hacc* h);
     String get_id (void*);
     void* find_by_id (String);
     void* require_id (String);
      // Helpers that I'd like to not have to declare here but C++.
-    const Hacc* to_hacc_inner (void*);
-    void update_from_hacc_inner (void*, const Hacc*);
-    void update_with_getset (void*, const Hacc*, const GetSet0&);
+    Hacc* to_hacc_inner (void*);
+    void update_from_hacc_inner (void*, Hacc*);
+    void update_with_getset (void*, Hacc*, const GetSet0&);
     uint8 get_pointer_policy ();
     String get_type_name ();
+
+     // Goes through attrs or get_attr_p
+    Generic get_attr (void*, String);
+     // Goes through elems or get_elem_p
+    Generic get_elem (void*, size_t);
 
      // This throws an error when not found
     static HaccTable* require_cpptype (const std::type_info&);
      // This autovivifies.
     static HaccTable* by_cpptype (const std::type_info&);
+
+    static HaccTable* require_type_name (String);
+    void reg_type_name (String);
     HaccTable (const std::type_info& t);
 };
 
@@ -147,11 +157,13 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     static void deallocate (const Func<void (C*)>& f) { get_table()->deallocate = *(Func<void* ()>*)&f; }
     static void get_id (const Func<String (const C&)>& f) { get_table()->get_id_p = *(Func<String (void*)>*)&f; }
     static void find_by_id (const Func<C* (String)>& f) { get_table()->find_by_id_p = *(Func<void* (String)>*)&f; }
-    static void to (const Func<const Hacc* (const C&)>& f) { get_table()->to = *(Func<const Hacc* (void*)>*)&f; }
-    static void update_from (const Func<void (C&, const Hacc*)>& f) { get_table()->update_from = *(Func<void (void*, const Hacc*)>*)&f; }
+    static void to (const Func<Hacc* (const C&)>& f) { get_table()->to = *(Func<Hacc* (void*)>*)&f; }
+    static void update_from (const Func<void (C&, Hacc*)>& f) { get_table()->update_from = *(Func<void (void*, Hacc*)>*)&f; }
     static void delegate (const GetSet1<C>& gs) { get_table()->delegate = gs; }
     static void attr (String name, const GetSet1<C>& gs) { get_table()->attrs.emplace_back(name, gs); }
+    static void get_attr (const Func<Generic (C&, String)>& f) { get_table()->get_attr_p = *(Func<Generic (void*, String)>*)&f; }
     static void elem (const GetSet1<C>& gs) { get_table()->elems.push_back(gs); }
+    static void get_elem (const Func<Generic (C&, size_t)>& f) { get_table()->get_elem_p = *(Func<Generic (void*, size_t)>*)&f; }
     static void variant (String name, const GetSet1<C>& gs) { get_table()->variants.emplace(name, gs); }
     static void select_variant (const Func<String (const C&)>& f) { get_table()->select_variant = *(Func<String (void*)>*)&f; }
     static void value (String name, const C& val) { get_table()->values.emplace(name, GetSet_Builders<C>::def(val)); }
@@ -187,31 +199,31 @@ HaccTable* require_hacctable () {
  //  will not have been run yet.
 
 template <class C>
-const Hacc* to_hacc (const C& v) {
+Hacc* to_hacc (const C& v) {
     return require_hacctable<C>()->to_hacc((void*)&v);
 }
 template <class C>
-const Hacc* hacc_from (const C& v) {
+Hacc* hacc_from (const C& v) {
     return to_hacc(v);
 }
 template <class C>
-void update_from_hacc (C& v, const Hacc* h) {
+void update_from_hacc (C& v, Hacc* h) {
     return require_hacctable<C>()->update_from_hacc((void*)&v, h);
 }
-template <class C> C value_from_hacc (const Hacc* h) {
+template <class C> C value_from_hacc (Hacc* h) {
     C r;
     require_hacctable<C>()->update_from_hacc((void*)&r, h, false);
     return r;
 }
-template <class C> C hacc_to_value (const Hacc* h) {
+template <class C> C hacc_to_value (Hacc* h) {
     C r;
     require_hacctable<C>()->update_from_hacc((void*)&r, h, false);
     return r;
 }
-template <class C> C* new_from_hacc (const Hacc* h) {
+template <class C> C* new_from_hacc (Hacc* h) {
     return (C*)require_hacctable<C>()->new_from_hacc(h);
 }
-template <class C> C* hacc_to_new (const Hacc* h) {
+template <class C> C* hacc_to_new (Hacc* h) {
     return new_from_hacc<C>(h);
 }
 

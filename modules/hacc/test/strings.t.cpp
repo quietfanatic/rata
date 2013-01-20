@@ -7,7 +7,7 @@
 void hacc_string_test (hacc::String from, hacc::String to) {
     using namespace hacc;
     using namespace tap;
-    const Hacc* tree = hacc_from_string(from);
+    Hacc* tree = hacc_from_string(from);
     const char* name = (escape_string(from) + " -> " + escape_string(to)).c_str();
     if (tree->form() == ERROR) {
         fail(name);

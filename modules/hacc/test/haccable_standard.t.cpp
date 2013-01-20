@@ -15,7 +15,7 @@ HCB_BEGIN(IPp*)
     pointer(supertype<IPp*>());
 HCB_END(IPp*)
 
-const hacc::Hacc* h2;
+hacc::Hacc* h2;
 std::vector<IPp> v2;
 
 
@@ -42,7 +42,7 @@ tap::Tester haccable_standard_tester ("haccable_standard", [](){
     TEST_STD(double, -2.0, double);
     std::vector<int> v {1, 2, 3, 4, 5};
     is(hacc_from(v)->as_array()->elem(2)->get_integer(), 3, "Hacc from std::vector seems to work");
-    const Hacc* h = new_hacc({new_hacc(3), new_hacc(4), new_hacc(5)});
+    Hacc* h = new_hacc({new_hacc(3), new_hacc(4), new_hacc(5)});
     is(hacc_to_value<std::vector<int>>(h)[1], 4, "Hacc to std::vector seems to work");
     h2 = new_hacc({
         new_hacc({new_hacc(4), new_hacc(Ref("thing2"))}, "thing1"),

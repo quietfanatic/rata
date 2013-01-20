@@ -5,7 +5,7 @@
 HCB_BEGIN(cpptype) \
     type_name(#cpptype); \
     to([](const cpptype& x){ return new_hacc(x); }); \
-    update_from([](cpptype& x, const Hacc* h){ x = h->get_##form(); }); \
+    update_from([](cpptype& x, Hacc* h){ x = h->get_##form(); }); \
 HCB_END(cpptype)
 
 using namespace hacc;
