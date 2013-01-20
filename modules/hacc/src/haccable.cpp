@@ -24,12 +24,18 @@ namespace hacc {
         return r;
     }
     HaccTable* HaccTable::require_cpptype (const std::type_info& t) {
+        if (&t == NULL) throw Error("No HaccTable exists for NULL cpptype.\n");
         auto iter = cpptype_map().find(t.hash_code());
-        if (iter == cpptype_map().end()) throw Error("No HaccTable exists for type <mangled: " + String(t.name()) + ">");
+        if (iter == cpptype_map().end()) throw Error("No HaccTable exists for type {" + String(t.name()) + "}");
         return iter->second;
     }
     HaccTable* HaccTable::require_type_name (String name) {
         auto iter = type_name_map().find(name);
+        fprintf(stderr, "Note: Registered types are:");
+        for (auto& p : type_name_map()) {
+            fprintf(stderr, " %s", p.first.c_str());
+        }
+        fprintf(stderr, "\n");
         if (iter == type_name_map().end()) throw Error("No type_name \"" + name + "\" was registered.\n");
         return iter->second;
     }
@@ -389,10 +395,11 @@ namespace hacc {
             case GENERIC: {
                 if (pointer) {
                     Generic g = h->as_generic()->g;
-                    if (*g.cpptype == cpptype) {
+                    if (*g.cpptype == *pointee_type) {
                         pointer.set(p, [&g, this](void* mp){
                             *(void**)mp = g.p;
                         });
+                        break;
                     }
                     else {
                         throw Error(
@@ -401,6 +408,7 @@ namespace hacc {
                         );
                     }
                 }
+                else throw Error("Type " + get_type_name() + " cannot be represented by a \"Generic\" Hacc.");
             }
             case STRING: throw Error("Type " + get_type_name() + " cannot be represented by a string Hacc.");
             case DOUBLE: throw Error("Type " + get_type_name() + " cannot be represented by a double Hacc.");
@@ -491,7 +499,10 @@ namespace hacc {
                 elems[index].get(p, [&mp](void* mp2){ mp = mp2; });
                 return Generic(*elems[index].mtype, mp);
             }
-            else throw Error("Index out of range for instance of " + get_type_name());
+            else {
+                fprintf(stderr, "index: %lu\n", index);
+                throw Error("Index out of range for instance of " + get_type_name());
+            }
         }
     }
 

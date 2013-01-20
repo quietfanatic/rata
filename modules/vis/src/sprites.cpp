@@ -98,7 +98,7 @@ namespace vis {
         Test_Layer () : core::Layer("C.M", "test") { }
         void run () {
             static vis::Image* image = hacc::require_id<vis::Image>("modules/vis/res/test.png");
-            static vis::Layout* layout = hacc::require_id<vis::Layout>("modules/vis/res/test.layout");
+            static vis::Layout* layout = hacc::reference_file<vis::Layout>("modules/vis/res/test.layout");
             static vis::SubImg* white = layout->sub_named("white");
             static vis::SubImg* red = layout->sub_named("red");
             static vis::SubImg* green = layout->sub_named("green");

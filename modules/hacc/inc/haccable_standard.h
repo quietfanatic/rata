@@ -69,6 +69,13 @@ HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
             update_from_hacc(v[oh->name_at(i)], oh->value_at(i));
         }
     });
+    get_attr([](std::unordered_map<std::string, C>& v, std::string name){
+        auto iter = v.find(name);
+        if (iter != v.end()) {
+            return &iter->second;
+        }
+        else return (C*)NULL;
+    });
 HCB_TEMPLATE_END(<class C>, std::unordered_map<std::string HCB_COMMA C>)
 
 HCB_TEMPLATE_BEGIN(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)

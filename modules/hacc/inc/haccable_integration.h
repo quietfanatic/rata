@@ -19,8 +19,8 @@ template <class C> String to_string (const C& v) {
 template <class C> C value_from_string (String s) {
     Hacc* h = hacc_from_string(s);
     const C& r = value_from_hacc<C>(h);
-    h->destroy();
-    delete h;
+//    h->destroy();
+//    delete h;
     return r;
 }
 template <class C> C string_to_value (String s) {

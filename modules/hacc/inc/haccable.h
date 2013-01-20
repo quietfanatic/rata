@@ -152,7 +152,11 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     }
 
      // Alright, here's the DSL for when you're defining haccabilities.
-    static void type_name (String name) { get_table()->type_name = name; }
+    static void type_name (String name) {
+        if (get_table()->type_name.empty())
+            get_table()->type_name = name;
+        get_table()->reg_type_name(name);
+     }
     static void allocate (const Func<C* ()>& f) { get_table()->allocate = *(Func<void* ()>*)&f; }
     static void deallocate (const Func<void (C*)>& f) { get_table()->deallocate = *(Func<void* ()>*)&f; }
     static void get_id (const Func<String (const C&)>& f) { get_table()->get_id_p = *(Func<String (void*)>*)&f; }
@@ -248,7 +252,7 @@ template <class C> String get_type_name () {
 #define HCB_COMMA ,  // because literal commas confuse function-like macros.
 #define HCB_UNQ2(a, b) a##b
 #define HCB_UNQ1(a, b) HCB_UNQ2(a, b)
-#define HCB_INSTANCE(type) static inline void HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) () { static_assert(Haccable<type>::defined_here, "The Haccability requested by HCB_INSTANCE was not defined in this compilation unit."); }
+#define HCB_INSTANCE(type) static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) __attribute__ ((unused)) = Haccable<type>::get_table();
 #define HCB_BEGIN(type) template <> struct Haccable<type> : hacc::Haccability<type> { static void describe () {
 #define HCB_END(type) } }; static bool HCB_UNQ1(_HACCABLE_instantiation_, __COUNTER__) __attribute__ ((unused)) = Haccable<type>::get_table();
 #define HCB_PARAMS(...) __VA_ARGS__
@@ -262,7 +266,9 @@ template <class C> String get_type_name () {
     using hcb::update_from; \
     using hcb::delegate; \
     using hcb::attr; \
+    using hcb::get_attr; \
     using hcb::elem; \
+    using hcb::get_elem; \
     using hcb::variant; \
     using hcb::select_variant; \
     using hcb::value; \

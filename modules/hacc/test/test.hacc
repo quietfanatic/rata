@@ -1,0 +1,4 @@
+#"std::unordered_map<std::string, int32>" {
+    asdf: 47
+    fdsa: 74
+}

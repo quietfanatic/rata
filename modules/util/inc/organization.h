@@ -49,7 +49,7 @@ struct Links {
 HCB_TEMPLATE_BEGIN(<class C>, Links<C>)
     using namespace hacc;
     to([](const Links<C>& v){
-        VArray<const Hacc*> a;
+        VArray<Hacc*> a;
 //        Bomb b ([&a](){ for (auto& p : a) delete p; });
         for (C* p = v.first(); p; p = p->next()) {
             a.push_back(hacc_from(p));
@@ -57,7 +57,7 @@ HCB_TEMPLATE_BEGIN(<class C>, Links<C>)
 //        b.defuse();
         return new_hacc(std::move(a));
     });
-    update_from([](Links<C>& v, const Hacc* h){
+    update_from([](Links<C>& v, Hacc* h){
         auto ah = h->as_array();
         v.destroy_all();
         for (uint i = 0; i < ah->n_elems(); i++) {

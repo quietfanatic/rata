@@ -3,11 +3,11 @@
 
 using namespace hacc;
 
-HCB_BEGIN(int)
-    type_name("int");
-    to([](const int& x){ return new_hacc(x); });
-    update_from([](int& x, Hacc* h){ x = h->get_integer(); });
-HCB_END(int)
+HCB_BEGIN(int32)
+    type_name("int32");
+    to([](const int32& x){ return new_hacc(x); });
+    update_from([](int32& x, Hacc* h){ x = h->get_integer(); });
+HCB_END(int32)
 
 HCB_BEGIN(float)
     to([](const float& x){ return new_hacc(x); });
@@ -63,7 +63,7 @@ HCB_TEMPLATE_BEGIN(<class C>, MyWrapper<C>)
     delegate(member(&MyWrapper<C>::val));
 HCB_TEMPLATE_END(<class C>, MyWrapper<C>)
 
-MyWrapper<int> wi {0};
+MyWrapper<int32> wi {0};
 
 union MyUnion {
     enum Type {
@@ -73,18 +73,18 @@ union MyUnion {
     } type;
     struct I {
         Type type;
-        int i;
+        int32 i;
     } i;
     struct F {
         Type type;
         float f;
     } f;
     MyUnion () : type{NONE} { }
-    MyUnion (int i) : i{INT, i} { }
+    MyUnion (int32 i) : i{INT, i} { }
     MyUnion (float f) : f{FLOAT, f} { }
-    void set_i (int i_) { type = INT; i.i = i_; }
+    void set_i (int32 i_) { type = INT; i.i = i_; }
     void set_f (float f_) { type = FLOAT; f.f = f_; }
-    int get_i () const { return i.i; }
+    int32 get_i () const { return i.i; }
     float get_f () const { return f.f; }
 };
 
@@ -106,9 +106,9 @@ tap::Tester haccable_tester ("haccable", [](){
     using namespace hacc;
     using namespace tap;
     plan(20);
-    is(hacc_from((int)4)->get_integer(), 4, "hacc_from<int> works");
-    is(hacc_to_value<int>(new_hacc(35)), 35, "hacc_to<int> works");
-    doesnt_throw([](){ wi = value_from_hacc<MyWrapper<int>>(new_hacc(34)); }, "from_hacc on a template haccable");
+    is(hacc_from((int32)4)->get_integer(), 4, "hacc_from<int32> works");
+    is(hacc_to_value<int32>(new_hacc(35)), 35, "hacc_to<int32> works");
+    doesnt_throw([](){ wi = value_from_hacc<MyWrapper<int32>>(new_hacc(34)); }, "from_hacc on a template haccable");
     is(wi.val, 34, "...works");
     doesnt_throw([](){ update_from_hacc(wi, new_hacc(52)); }, "update_from_hacc on a template haccable");
     is(wi.val, 52, "...and it works");

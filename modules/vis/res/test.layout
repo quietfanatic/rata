@@ -1,4 +1,4 @@
-{
+#"vis::Layout" {
     subimgs:[
         {name:"white" pos:[16 48] box:[-16 -16 16 16]}
         {name:"red"   pos:[48 48] box:[-16 -16 16 16]}

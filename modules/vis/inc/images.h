@@ -31,14 +31,10 @@ namespace vis {
     };
 
      // A set of subimgs.  Worthy of requiring a file.
-    struct Layout : Resource {
+    struct Layout {
         std::vector<SubImg> subimgs;
 
         SubImg* sub_named (std::string);
-
-        void reload ();
-        Layout (std::string name);
-        Layout ();
     };
 
 }

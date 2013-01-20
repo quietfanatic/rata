@@ -49,13 +49,6 @@ namespace vis {
         return NULL;
     }
 
-    void Layout::reload () {
-        Layout&& tmp = hacc::value_from_file<Layout>(name);
-        subimgs = tmp.subimgs;
-    }
-    Layout::Layout (std::string name) : Resource(name) { reload(); }
-    Layout::Layout () { }
-
 }
 
 using namespace vis;
@@ -77,10 +70,11 @@ HCB_BEGIN(SubImg)
     });
 HCB_END(vis::SubImg)
 
-static ResourceGroup layouts ("layouts");
 HCB_BEGIN(Layout)
     type_name("vis::Layout");
     attr("subimgs", member(&Layout::subimgs));
-    resource_haccability<Layout, &layouts>();
+    get_attr([](Layout& l, std::string name){
+        return hacc::Generic(l.sub_named(name));
+    });
 HCB_END(Layout)
 

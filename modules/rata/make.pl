@@ -27,6 +27,7 @@ workflow {
         ../hacc/tmp/files.o
         ../hacc/tmp/hacc.o
         ../hacc/tmp/haccable.o
+        ../hacc/tmp/haccable_files.o
         ../phys/tmp/phys.o
         ../vis/tmp/images.o
         ../vis/tmp/sprites.o
