@@ -6,6 +6,8 @@
 #ifndef HAVE_HACC_HACC_H
 #define HAVE_HACC_HACC_H
 
+#include "gc/gc_cpp.h"
+
 #ifndef HAVE_HACC
 #define HAVE_HACC
 #endif
@@ -107,12 +109,11 @@ typedef Map<Hacc*> Object;
 
 template <class T> using Func = std::function<T>;
 
-
-struct Hacc {
+ // These are garbage collected, so don't delete them.
+struct Hacc : gc {
     hacc::String type;
     hacc::String id;
     virtual Form form () const = 0;
-    virtual void destroy () const { }
     virtual ~Hacc () { }
     struct Null;
     struct Bool;
@@ -172,28 +173,16 @@ HACC_VARIANT(AttrRef, ATTRREF,
     hacc::AttrRef ar;
     operator hacc::AttrRef& () { return ar; }
     AttrRef (const hacc::AttrRef& ar, hacc::String id = "") : Hacc(id), ar(ar) { }
-    void destroy () {
-        ar.subject->destroy();
-        delete ar.subject;
-    }
 )
 HACC_VARIANT(ElemRef, ELEMREF,
     hacc::ElemRef er;
     operator hacc::ElemRef& () { return er; }
     ElemRef (const hacc::ElemRef& er, hacc::String id = "") : Hacc(id), er(er) { }
-    void destroy () {
-        er.subject->destroy();
-        delete er.subject;
-    }
 )
 HACC_VARIANT(MacroCall, MACROCALL,
     hacc::MacroCall mc;
     operator hacc::MacroCall& () { return mc; }
     MacroCall (const hacc::MacroCall& mc, hacc::String id = "") : Hacc(id), mc(mc) { }
-    void destroy () {
-        mc.arg->destroy();
-        delete mc.arg;
-    }
 )
 HACC_VARIANT(Array, ARRAY,
     hacc::Array a;
@@ -203,12 +192,6 @@ HACC_VARIANT(Array, ARRAY,
     Array (std::initializer_list<Hacc*> l, hacc::String id = "") : Hacc(id), a(l) { }
     size_t n_elems () const { return a.size(); }
     Hacc* elem (uint i) const { return a.at(i); }
-    void destroy () {
-        for (auto p : a) {
-            p->destroy();
-            delete p;
-        }
-    }
 )
 HACC_VARIANT(Object, OBJECT,
     hacc::Object o;
@@ -221,12 +204,6 @@ HACC_VARIANT(Object, OBJECT,
     Hacc* value_at (uint i) const { return o.at(i).second; }
     bool has_attr (hacc::String s) const;
     Hacc* attr (hacc::String s) const;
-    void destroy () {
-        for (auto& pair : o) {
-            pair.second->destroy();
-            delete pair.second;
-        }
-    }
 )
 HACC_VARIANT_S(Error, ERROR, Error, e)
 
@@ -271,20 +248,12 @@ static inline std::pair<String, Hacc*> new_attr (String name, Args... args) {
 }
 
  // This does various transformations internal to the HACC language.
- // It also destroys its input!
 Hacc* collapse_hacc (Hacc* h);
 
 } // namespace hacc
 
- // Here's a utility that's frequently used with hacc.
-namespace {
-     // Auto-deallocate a pointer if an exception happens.
-    struct Bomb {
-        const hacc::Func<void ()>* detonate;
-        Bomb (const hacc::Func<void ()>& d) :detonate(&d) { }
-        ~Bomb () { if (detonate) (*detonate)(); }
-        void defuse () { detonate = NULL; }
-    };
-}
+ // I had a class "Bomb" that acted in place of a "finally" clause.
+ // But it was buggy and prone to explode very messily.
+ // I'm kicking myself for forgetting about libgc until now.
 
 #endif

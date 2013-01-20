@@ -50,11 +50,9 @@ HCB_TEMPLATE_BEGIN(<class C>, Links<C>)
     using namespace hacc;
     to([](const Links<C>& v){
         VArray<Hacc*> a;
-//        Bomb b ([&a](){ for (auto& p : a) delete p; });
         for (C* p = v.first(); p; p = p->next()) {
             a.push_back(hacc_from(p));
         }
-//        b.defuse();
         return new_hacc(std::move(a));
     });
     update_from([](Links<C>& v, Hacc* h){

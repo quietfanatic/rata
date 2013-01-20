@@ -260,15 +260,8 @@ struct Parser {
     Hacc* parse_string () {
         return new_hacc(parse_stringly());
     }
-    struct ArrayBomb {
-        Array* a;
-        ArrayBomb (Array* a) : a(a) { }
-        void defuse () { a = null; }
-        ~ArrayBomb () { if (a) for (auto p : *a) delete p; }
-    };
     Hacc* parse_array () {
         Array a;
-//        ArrayBomb ab (&a);
         p++;  // for the [
         for (;;) {
             parse_ws();
@@ -277,23 +270,15 @@ struct Parser {
                 case ':': throw error("Cannot have : in an array");
                 case ',': p++; break;
                 case ']': p++; {
-//                    ab.defuse();
                     return new_hacc(std::move(a));
                 }
                 default: a.push_back(parse_thing()); break;
             }
         }
     }
-    struct ObjectBomb {
-        Object* o;
-        ObjectBomb (Object* o) : o(o) { }
-        void defuse () { o = null; }
-        ~ObjectBomb () { if (o) for (auto& p : *o) delete p.second; }
-    };
     Hacc* parse_object () {
         Object o;
-//        ObjectBomb ob (&o);
-        p++;  // for the left brace
+        p++;  // for the {
         String key;
         for (;;) {
             parse_ws();
@@ -302,7 +287,6 @@ struct Parser {
                 case ':': throw error("Missing name before : in object");
                 case ',': p++; continue;
                 case '}': p++; {
-//                    ob.defuse();
                     return new_hacc(std::move(o));
                 }
                 default: key = parse_ident("an attribute name or the end of the object"); break;

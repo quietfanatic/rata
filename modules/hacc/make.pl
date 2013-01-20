@@ -41,7 +41,7 @@ workflow {
     cppc_rule('tmp/haccable_pointers.t.o', [qw<test/haccable_pointers.t.cpp inc/haccable_pointers.h>]);
     cppc_rule('tmp/haccable_integration.t.o', [qw<test/haccable_integration.t.cpp inc/haccable_integration.h>]);
     cppc_rule('tmp/haccable_files.t.o', [qw<test/haccable_files.t.cpp inc/haccable_files.h inc/haccable_integration.h inc/haccable_standard.h inc/haccable_pointers.h>]);
-    ld_rule('tmp/t', [targetmatch(qr/^tmp\/[^\/]*\.o$/), '../tap/tmp/tap.o', '../tap/tmp/tap_make_test_main.o']);
+    ld_rule('tmp/t', [targetmatch(qr/^tmp\/[^\/]*\.o$/), '../tap/tmp/tap.o', '../tap/tmp/tap_make_test_main.o'], '-lgc');
 
     test_rule('tmp/t');
 

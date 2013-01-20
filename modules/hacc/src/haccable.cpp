@@ -18,7 +18,6 @@ namespace hacc {
     HaccTable* HaccTable::by_cpptype (const std::type_info& t) {
         auto& r = cpptype_map()[t.hash_code()];
         if (!r) {
-            //fprintf(stderr, " # Creating HaccTable for <mangled: %s>, &typeid: %lx\n", t.name(), (unsigned long)&t);
             r = new HaccTable(t);
         }
         return r;
@@ -31,11 +30,6 @@ namespace hacc {
     }
     HaccTable* HaccTable::require_type_name (String name) {
         auto iter = type_name_map().find(name);
-        fprintf(stderr, "Note: Registered types are:");
-        for (auto& p : type_name_map()) {
-            fprintf(stderr, " %s", p.first.c_str());
-        }
-        fprintf(stderr, "\n");
         if (iter == type_name_map().end()) throw Error("No type_name \"" + name + "\" was registered.\n");
         return iter->second;
     }
@@ -107,23 +101,19 @@ namespace hacc {
          // Then like an object
         else if (attrs.size()) {
             hacc::Object o;
-            Bomb b ([&o](){ for (auto& p : o) { p.second->destroy(); delete p.second; } });
             for (auto& pair : attrs) {
                 HaccTable* t = HaccTable::require_cpptype(*pair.second.mtype);
                 pair.second.get(p, [&pair, &o, t](void* mp){ o.emplace_back(pair.first, t->to_hacc(mp)); });
             }
-            b.defuse();
             return new_hacc(std::move(o));
         }
          // Like an array next
         else if (elems.size()) {
             hacc::Array a;
-            Bomb b ([&a](){ for (auto& p : a) { p->destroy(); delete p; } });
             for (auto& gs : elems) {
                 HaccTable* t = HaccTable::require_cpptype(*gs.mtype);
                 gs.get(p, [&a, t](void* mp){ a.push_back(t->to_hacc(mp)); });
             }
-            b.defuse();
             return new_hacc(std::move(a));
         }
          // Following a pointer happens somewhere in here.
@@ -350,11 +340,7 @@ namespace hacc {
                         auto& caster = iter->second;
                         HaccTable* t = HaccTable::require_cpptype(caster.subtype);
                         pointer.set(p, [&caster, val, t](void* basep){
-                            void* newp = t->allocate();
-                            Bomb b ([newp, t](){ t->deallocate(newp); });
-                            t->update_from_hacc_inner(newp, val);
-                            *(void**)basep = caster.up(newp);
-                            b.defuse();
+                            *(void**)basep = caster.up(t->new_from_hacc(val));
                         });
                         break;
                     }
@@ -442,7 +428,6 @@ namespace hacc {
     void* HaccTable::new_from_hacc (Hacc* h) {
         if (!allocate) throw Error("No known way to allocate a " + get_type_name() + "");
         void* r = allocate();
-         // Bombs are segfaulting again.  *sigh*
         daBomb b {this, r};
         update_from_hacc(r, h);
         b.defuse();
@@ -500,7 +485,6 @@ namespace hacc {
                 return Generic(*elems[index].mtype, mp);
             }
             else {
-                fprintf(stderr, "index: %lu\n", index);
                 throw Error("Index out of range for instance of " + get_type_name());
             }
         }

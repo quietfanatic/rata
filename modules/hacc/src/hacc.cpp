@@ -63,7 +63,6 @@ Hacc* Hacc::Object::attr (hacc::String name) const {
             return it->second;
         }
     }
-    fprintf(stderr, "No atttribute '%s' found.\n", name.c_str());
     throw Error("No atttribute '" + name + "'");
 }
 
@@ -116,7 +115,6 @@ hacc::Double Hacc::get_double () {
 
 
 Hacc* collapse_hacc (Hacc* h) {
-    Hacc* newh;
     switch (h->form()) {
         case MACROCALL: {
             auto mch = static_cast<hacc::Hacc::MacroCall*>(h);
@@ -124,9 +122,7 @@ Hacc* collapse_hacc (Hacc* h) {
                 mch->mc.arg = collapse_hacc(mch->mc.arg);
                 if (mch->mc.arg->form() == STRING) {
                     Generic g = generic_from_file(mch->mc.arg->get_string());
-                    fprintf(stderr, "Collapsing to generic of cpptype: %s\n", g.cpptype->name());
-                    newh = new_hacc(g);
-                    break;
+                    return new_hacc(g);
                 }
                 else throw Error("The \"file\" macro can only be called on a string.\n");
             }
@@ -137,10 +133,8 @@ Hacc* collapse_hacc (Hacc* h) {
             arh->ar.subject = collapse_hacc(arh->ar.subject);
             if (arh->ar.subject->form() == GENERIC) {
                 auto gh = static_cast<hacc::Hacc::Generic*>(arh->ar.subject);
-                fprintf(stderr, "Got cpptype %s\n", gh->g.cpptype->name());
                 HaccTable* t = HaccTable::require_cpptype(*gh->g.cpptype);
-                newh = new_hacc(t->get_attr(gh->g.p, arh->ar.name));
-                break;
+                return new_hacc(t->get_attr(gh->g.p, arh->ar.name));
             }
             else throw Error("Attributes can only be requested from a \"Generic\" hacc, such as produced by file()\n");
         }
@@ -150,19 +144,12 @@ Hacc* collapse_hacc (Hacc* h) {
             if (erh->er.subject->form() == GENERIC) {
                 auto gh = static_cast<hacc::Hacc::Generic*>(erh->er.subject);
                 HaccTable* t = HaccTable::require_cpptype(*gh->g.cpptype);
-                newh = new_hacc(t->get_elem(gh->g.p, erh->er.index));
-                break;
+                return new_hacc(t->get_elem(gh->g.p, erh->er.index));
             }
             else throw Error("Elements can only be requested from a \"Generic\" hacc, such as produced by file()\n");
         }
         default: return h;
     }
-    if (newh != h) {
-        h->destroy();
-        delete h;
-    }
-    fprintf(stderr, "Returning generic of type %s\n", newh->as_generic()->g.cpptype->name());
-    return newh;
 }
 
 

@@ -35,7 +35,7 @@ workflow {
         ../util/tmp/debug.o
         ../ent/tmp/various.o
     >;
-    our @libs = qw(-lGL -lglfw -lSOIL ../../lib/libBox2D.a);
+    our @libs = qw(-lgc -lGL -lglfw -lSOIL ../../lib/libBox2D.a);
 
     include '../..';
 
@@ -44,9 +44,7 @@ workflow {
     cppc_rule('tmp/main.o', 'src/main.cpp');
 
      # Here's the main program
-    rule '../../rata', [@objects], sub {
-        ld @objects, @libs, output '../../rata'
-    };
+    ld_rule('../../rata', [@objects], [@libs]);
 
     clean_rule(glob 'tmp/*');
 
