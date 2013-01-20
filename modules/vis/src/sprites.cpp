@@ -78,6 +78,7 @@ namespace vis {
         Camera_Setup_Layer () : core::Layer("B.M", "camera_setup") { }
         void run () {
             glClearColor(0.5, 0.5, 0.5, 0);
+//            glClearDepth(127);
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
             glMatrixMode(GL_PROJECTION);

@@ -19,20 +19,29 @@ namespace vis {
         GLuint newtex;
         glGenTextures(1, &newtex);
         glBindTexture(GL_TEXTURE_2D, newtex);
+        if (diagnose_opengl("after generating and binding texture")) {
+            throw std::logic_error("OpenGL error");
+        }
+        printf("image->size: [%g %g] offset: [%g %g]\n",
+            image->size.x, image->size.y, offset.x, offset.y
+        );
         glPixelStorei(GL_UNPACK_ROW_LENGTH, image->size.x);
         glPixelStorei(GL_UNPACK_SKIP_PIXELS, offset.x);
          // We're storing textures upside-down
-        glPixelStorei(GL_UNPACK_SKIP_ROWS, size.y - offset.y);
+        glPixelStorei(GL_UNPACK_SKIP_ROWS, image->size.y - (offset.y + size.y));
+        if (diagnose_opengl("after setting PixelStore")) {
+            throw std::logic_error("OpenGL error");
+        }
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->data);
         if (!smooth) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         }
-        if (newtex) tex = newtex;
-        else {
-            diagnose_opengl("After loading a texture");
+        printf("Loaded a texture! %gx%g\n", size.x, size.y);
+        if (diagnose_opengl("after loading a texture")) {
             throw std::logic_error("OpenGL error");
         }
+        if (newtex) tex = newtex;
     }
     void Texture::unload () {
         if (tex) {
@@ -44,7 +53,7 @@ namespace vis {
 
     void Image::load () {
         int iw; int ih; int ich;
-        uint8* data = SOIL_load_image(filename.c_str(), &iw, &ih, &ich, 4);
+        data = SOIL_load_image(filename.c_str(), &iw, &ih, &ich, 4);
         if (!data) {
             throw std::logic_error(SOIL_last_result());
         }
@@ -100,6 +109,7 @@ HCB_BEGIN(Image)
     get_attr([](Image& image, std::string name){
         return image.texture_named(name);
     });
+    finish([](Image& i){ i.load(); fprintf(stderr, "Finished an Image\n"); });
 HCB_END(vis::Image)
 
 HCB_BEGIN(Frame)

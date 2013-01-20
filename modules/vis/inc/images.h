@@ -18,8 +18,8 @@ namespace vis {
     struct Layout;
 
     struct Texture {
-        std::string name;
-        Vec offset;
+        std::string name = "ALL";
+        Vec offset = Vec(0, 0);
         Vec size;
         Layout* layout = NULL;  // Not required
         bool smooth = false;
