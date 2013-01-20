@@ -32,11 +32,11 @@ std::vector<PhaseLayer*>& draw_layers ();
 
 struct Phase : PhaseLayer {
     Phase (std::string order, std::string name = "", bool on = true) :
-        PhaseLayer(game_phases(), order, name, true) { }
+        PhaseLayer(game_phases(), order, name, on) { }
 };
 struct Layer : PhaseLayer {
     Layer (std::string order, std::string name = "", bool on = true) :
-        PhaseLayer(draw_layers(), order, name, true) { }
+        PhaseLayer(draw_layers(), order, name, on) { }
 };
 
 }
