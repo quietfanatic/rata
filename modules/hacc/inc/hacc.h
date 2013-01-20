@@ -47,6 +47,7 @@ enum Form {
     GENERIC,
     ATTRREF,
     ELEMREF,
+    DEREF,
     MACROCALL,
     ARRAY,
     OBJECT,
@@ -97,6 +98,10 @@ struct ElemRef {
     size_t index;
     ElemRef (Hacc* s, size_t i) : subject(s), index(i) { }
 };
+struct DeRef {
+    Hacc* subject;
+    DeRef (Hacc* s) : subject(s) { }
+};
 struct MacroCall {
     String name;
     Hacc* arg;
@@ -125,6 +130,7 @@ struct Hacc : gc {
     struct Generic;
     struct AttrRef;
     struct ElemRef;
+    struct DeRef;
     struct MacroCall;
     struct Array;
     struct Object;
@@ -144,6 +150,7 @@ struct Hacc : gc {
     HACC_GETTER_DECL(Generic, generic, g)
     HACC_GETTER_DECL(AttrRef, attrref, ar)
     HACC_GETTER_DECL(ElemRef, elemref, er)
+    HACC_GETTER_DECL(DeRef, deref, dr)
     HACC_GETTER_DECL(MacroCall, macrocall, mc)
     HACC_GETTER_DECL(Array, array, a)
     HACC_GETTER_DECL(Object, object, o)
@@ -164,6 +171,7 @@ HACC_VARIANT_S(Float, FLOAT, Float, f)
 HACC_VARIANT_S(Double, DOUBLE, Double, d)
 HACC_VARIANT_S(String, STRING, String, s)
 HACC_VARIANT_S(Ref, REF, Ref, r)
+HACC_VARIANT_S(DeRef, DEREF, DeRef, dr)
 HACC_VARIANT(Generic, GENERIC,
     hacc::Generic g;
     operator hacc::Generic& () { return g; }
@@ -230,6 +238,7 @@ HACC_NEW_DECL(Ref, r, Ref)
 HACC_NEW_DECL(Generic, g, Generic)
 HACC_NEW_DECL(AttrRef, ar, AttrRef)
 HACC_NEW_DECL(ElemRef, er, ElemRef)
+HACC_NEW_DECL(DeRef, dr, DeRef)
 HACC_NEW_DECL_COPY(MacroCall, mc, MacroCall)
 HACC_NEW_DECL_MOVE(MacroCall, mc, MacroCall)
 HACC_NEW_DECL_COPY(Array, a, Array)

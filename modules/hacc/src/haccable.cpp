@@ -248,6 +248,12 @@ namespace hacc {
         if (!initialized)
             throw Error("Unhaccable type " + get_type_name());
         else if (update_from) {
+            switch (h->form()) {
+                case ATTRREF:
+                case ELEMREF:
+                case MACROCALL: h = collapse_hacc(h);
+                default: { }
+            }
             update_from(p, h);
         }
         else if (delegate) {
@@ -417,6 +423,7 @@ namespace hacc {
             }
             case ATTRREF:
             case ELEMREF:
+            case DEREF:
             case MACROCALL: {
                 update_from_hacc_inner(p, collapse_hacc(h));
                 break;
@@ -555,6 +562,26 @@ namespace hacc {
                     return new_hacc(t->get_elem(gh->g.p, erh->er.index));
                 }
                 else throw Error("Elements can only be requested from a \"Generic\" hacc, such as produced by file()");
+            }
+            case DEREF: {
+                Hacc* subject = h->as_deref()->dr.subject;
+                if (subject->form() == REF) {
+                    auto iter = read_ids.find(static_cast<hacc::Hacc::Ref*>(subject)->r.id);
+                    if (iter == read_ids.end())
+                        throw Error("ID " + static_cast<hacc::Hacc::Ref*>(subject)->r.id + " not found in this document.");
+                    auto& rid = iter->second;
+                    if (rid.read) {
+                        if (rid.get && !rid.read->type.empty()) {
+                            throw Error("Sorry, derefferencing a typed hacc is NYI");
+                        }
+                        else {
+                            rid.read = collapse_hacc(rid.read);
+                            return rid.read;
+                        }
+                    }
+                    else throw Error("Internal oops: A read_id was created without a .read");
+                }
+                else throw Error("Only a REF hacc can be dereferenced with .^");
             }
              // This will only happen if this ref is being dereffed or similar
             case REF: {

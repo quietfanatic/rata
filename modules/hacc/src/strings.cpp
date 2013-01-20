@@ -42,43 +42,46 @@ String escape_id (const String& unesc) {
 String hacc_value_to_string (Hacc* h) {
     switch (h->form()) {
         case NULLFORM: return "null";
-        case BOOL: return static_cast<const Hacc::Bool*>(h)->b ? "true" : "false";
+        case BOOL: return static_cast<Hacc::Bool*>(h)->b ? "true" : "false";
         case INTEGER: {
             char r[32];
-            sprintf(r, "%" PRIi64, static_cast<const Hacc::Integer*>(h)->i);
+            sprintf(r, "%" PRIi64, static_cast<Hacc::Integer*>(h)->i);
             return r;
         }
         case FLOAT: {
-            auto fh = static_cast<const Hacc::Float*>(h);
+            auto fh = static_cast<Hacc::Float*>(h);
             char r[32];
             sprintf(r, "%g~%08x", fh->f, *(uint32*)&fh->f);
             return r;
         }
         case DOUBLE: {
             char r [64];
-            auto dh = static_cast<const Hacc::Double*>(h);
+            auto dh = static_cast<Hacc::Double*>(h);
             sprintf(r, "%lg~%016" PRIx64, dh->d, *(uint64*)&dh->d);
             return r;
         }
-        case STRING: return "\"" + escape_string(static_cast<const Hacc::String*>(h)->s) + "\"";
-        case REF: return escape_id(static_cast<const Hacc::Ref*>(h)->r.id);
+        case STRING: return "\"" + escape_string(static_cast<Hacc::String*>(h)->s) + "\"";
+        case REF: return escape_id(static_cast<Hacc::Ref*>(h)->r.id);
         case ATTRREF: {
-            auto arh = static_cast<const Hacc::AttrRef*>(h);
+            auto arh = static_cast<Hacc::AttrRef*>(h);
             return hacc_to_string(arh->ar.subject) + "." + escape_ident(arh->ar.name);
         }
         case ELEMREF: {
-            auto erh = static_cast<const Hacc::ElemRef*>(h);
+            auto erh = static_cast<Hacc::ElemRef*>(h);
             char is[32];
             sprintf(is, "%ld", erh->er.index);
             return hacc_to_string(erh->er.subject) + "." + is;
         }
+        case DEREF: {
+            return hacc_to_string(static_cast<Hacc::DeRef*>(h)->dr.subject) + ".^";
+        }
         case MACROCALL: {
-            auto mch = static_cast<const Hacc::MacroCall*>(h);
+            auto mch = static_cast<Hacc::MacroCall*>(h);
             return mch->mc.name + "(" + hacc_to_string(mch->mc.arg) + ")";
         }
         case ARRAY: {
             String r = "[";
-            auto& a = static_cast<const Hacc::Array*>(h)->a;
+            auto& a = static_cast<Hacc::Array*>(h)->a;
             for (auto i = a.begin(); i != a.end(); i++) {
                 r += hacc_to_string(*i);
                 if (i + 1 != a.end()) r += ", ";
@@ -87,7 +90,7 @@ String hacc_value_to_string (Hacc* h) {
         }
         case OBJECT: {
             String r = "{";
-            auto& o = static_cast<const Hacc::Object*>(h)->o;
+            auto& o = static_cast<Hacc::Object*>(h)->o;
             auto nexti = o.begin();
             for (auto i = nexti; i != o.end(); i = nexti) {
                 r += escape_ident(i->first);
@@ -98,7 +101,7 @@ String hacc_value_to_string (Hacc* h) {
             }
             return r + "}";
         }
-        case ERROR: throw static_cast<const Hacc::Error*>(h)->e;
+        case ERROR: throw static_cast<Hacc::Error*>(h)->e;
         default: throw Error("Corrupted Hacc tree\n");
     }
 }
@@ -346,6 +349,10 @@ struct Parser {
     Hacc* parse_derefs (Hacc* subject, String type, String id) {
         if (look() == '.') {
             p++;
+            if (look() == '^') {
+                p++;
+                return parse_derefs(new_hacc(hacc::DeRef(subject)), type, id);
+            }
             if (isdigit(look())) {
                 uint64 index;
                 uint len;
