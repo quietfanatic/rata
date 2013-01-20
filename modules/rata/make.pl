@@ -17,6 +17,7 @@ workflow {
 
     our @objects = qw<
         tmp/main.o
+        tmp/rata.o
         ../core/tmp/game.o
         ../core/tmp/commands.o
         ../core/tmp/resources.o 
@@ -41,8 +42,10 @@ workflow {
     include '../..';
 
     subdep('src/main.cpp', [qw<../core/inc/state.h>]);
+    subdep('src/rata.cpp', [qw<../hacc/inc/everything.h ../phys/inc/phys.h ../vis/inc/models.h ../vis/inc/sprites.h ../core/inc/state.h>]);
 
     cppc_rule('tmp/main.o', 'src/main.cpp');
+    cppc_rule('tmp/rata.o', 'src/rata.cpp');
 
      # Here's the main program
     ld_rule('../../rata', [@objects], [@libs]);
