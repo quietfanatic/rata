@@ -27,7 +27,7 @@ namespace vis {
         glScalef(fliph ? -PX : PX, flipv ? -PX : PX, 1);
 
         if (draw_sprite_logger.on) {
-            draw_sprite_logger.log("img: %s frame: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
+            draw_sprite_logger.log("tex: %s frame: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
                 tex ? tex->name.c_str() : "NULL", frame ? frame->offset.x : 0/0.0, frame ? frame->offset.y : 0/0.0,
                 frame ? frame->box.l : 0/0.0, frame ? frame->box.b : 0/0.0, frame ? frame->box.r : 0/0.0, frame ? frame->box.t : 0/0.0,
                 p.x, p.y, fliph, flipv, z

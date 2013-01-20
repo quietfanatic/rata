@@ -91,8 +91,10 @@ namespace vis {
             );
         }
         for (Skel::Seg*& branch : ss->branches) {
-            Vec pt = ms->pose->frame->points[&branch - ss->branches.data()];
-            draw_seg(&segs[skel->seg_index(branch)], branch, pos + pt*PX, fh, fv, z);
+            Vec pt = PX*ms->pose->frame->points[&branch - ss->branches.data()];
+            if (fh) pt.x = -pt.x;
+            if (fv) pt.y = -pt.y;
+            draw_seg(&segs[skel->seg_index(branch)], branch, pos + pt, fh, fv, z);
         }
     }
     void Model::draw (Vec pos, bool fliph, bool flipv, float z) {
