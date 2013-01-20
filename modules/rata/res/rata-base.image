@@ -1,0 +1,9 @@
+#"vis::Image" {
+    filename: "modules/rata/res/rata-base.png"
+    textures: [
+        ["body"    offset:[ 0  0] layout:file("modules/rata/res/rata.layouts).body    size:[ 85 43]]
+        ["head"    offset:[69  1] layout:file("modules/rata/res/rata.layouts).head    size:[127 88]]
+        ["arm"     offset:[ 0 61] layout:file("modules/rata/res/rata.layouts).arm     size:[100 16]]
+        ["forearm" offset:[ 0 78] layout:file("modules/rata/res/rata.layouts).forearm size:[100 16]]
+    ]
+}

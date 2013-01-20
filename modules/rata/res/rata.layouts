@@ -1,0 +1,63 @@
+#"std::unordered_map<std::string, vis::Layout>" {
+    body: {
+        size: [85 43]
+        frames: [
+            {name: "stand"  pos: [11  3] box: [-10 -2 10 18] points: [[ 0 16] [-1 15]]}
+            {name: "walk"   pos: [32  3] box: [-10 -2 10 18] points: [[ 0 15] [-1 14]]}
+            {name: "kneel"  pos: [53  3] box: [-10 -2 10 18] points: [[ 0 10] [-1  9]]}
+            {name: "sit"    pos: [74  3] box: [-10 -2 10 18] points: [[-2  9] [-3  8]]}
+            {name: "crawl1" pos: [11 24] box: [-10 -2 10 18] points: [[ 6  5] [ 5  4]]}
+            {name: "crawl2" pos: [32 24] box: [-10 -2 10 18] points: [[ 6  4] [ 5  3]]}
+            {name: "hurtbk" pos: [53 24] box: [-10 -2 10 18] points: [[ 0 15] [-1 14]]}
+            {name: "laybk"  pos: [74 24] box: [-10 -2 10 18] points: [[-8  2] [-7  1]]}
+        ]
+    }
+    head: {
+        size: [127 88]
+        frames: [
+            {name: "stand23"  pos: [ 12 13] box: [-11 -12  9 16]}
+            {name: "stand45"  pos: [ 33 13] box: [-11 -12  9 16]}
+            {name: "stand68"  pos: [ 54 13] box: [-11 -12  9 16]}
+            {name: "stand90"  pos: [ 75 13] box: [-11 -12  9 16]}
+            {name: "stand135" pos: [ 96 13] box: [-11 -12  9 16]}
+            {name: "stand158" pos: [117 13] box: [-11 -12  9 16]}
+            {name: "walk23"   pos: [ 12 42] box: [-11 -12  9 16]}
+            {name: "walk45"   pos: [ 33 42] box: [-11 -12  9 16]}
+            {name: "walk68"   pos: [ 54 42] box: [-11 -12  9 16]}
+            {name: "walk90"   pos: [ 75 42] box: [-11 -12  9 16]}
+            {name: "walk425"  pos: [ 96 42] box: [-11 -12  9 16]}
+            {name: "walk158"  pos: [117 42] box: [-11 -12  9 16]}
+            {name: "hurtbk"   pos: [ 12 71] box: [-11 -12  9 16]}
+            {name: "crawl"    pos: [ 32 71] box: [-10 -12 10 16]}
+            {name: "laybk"    pos: [ 62 73] box: [-16 -11 12  9]}
+        ]
+    }
+    arm: {
+        size: [100 16]
+        frames: [
+            {name: "a0"   pos: [ 5 8] box: [-4 -7 6 7] points: [[0 -3]]}
+            {name: "a23"  pos: [16 8] box: [-4 -7 6 7] points: [[1 -3]]}
+            {name: "a45"  pos: [27 8] box: [-4 -7 6 7] points: [[2 -2]]}
+            {name: "a68"  pos: [38 8] box: [-4 -7 6 7] points: [[3 -1]]}
+            {name: "a90"  pos: [49 8] box: [-4 -7 6 7] points: [[3  0]]}
+            {name: "a113" pos: [60 8] box: [-4 -7 6 7] points: [[3  1]]}
+            {name: "a135" pos: [71 8] box: [-4 -7 6 7] points: [[2  2]]}
+            {name: "a158" pos: [82 8] box: [-4 -7 6 7] points: [[1  3]]}
+            {name: "a180" pos: [93 8] box: [-4 -7 6 7] points: [[0  3]]}
+        ]
+    }
+    forearm: {
+        size: [100 16]
+        frames: [
+            {name: "a0"   pos: [ 4 8] box: [-3 -7 7 7]}
+            {name: "a23"  pos: [15 8] box: [-3 -7 7 7]}
+            {name: "a45"  pos: [26 8] box: [-3 -7 7 7]}
+            {name: "a68"  pos: [37 8] box: [-3 -7 7 7]}
+            {name: "a90"  pos: [48 8] box: [-3 -7 7 7]}
+            {name: "a113" pos: [59 8] box: [-3 -7 7 7]}
+            {name: "a135" pos: [70 8] box: [-3 -7 7 7]}
+            {name: "a158" pos: [81 8] box: [-3 -7 7 7]}
+            {name: "a180" pos: [92 8] box: [-3 -7 7 7]}
+        ]
+    }
+}

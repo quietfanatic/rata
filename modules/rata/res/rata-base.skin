@@ -1,0 +1,8 @@
+#"vis::Skin" {
+    apps: [
+        [&"modules/rata/res/rata.skel:body" body]
+        [&"modules/rata/res/rata.skel:head" head]
+        [&"modules/rata/res/rata.skel:arm" arm]
+        [&"modules/rata/res/rata.skel:forearm" forearm]
+    ]
+}

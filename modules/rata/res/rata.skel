@@ -1,60 +1,20 @@
-{  // Skeleton for the main character.  Arms will come later.
+{  // Skeleton for the main character.
     segments:[
-        head    = {name:"head"    branches:[]         layout:&"modules/rata/res/rata/head.layout"    z_offset:-0.02}
-        forearm = {name:"forearm" branches:[]         layout:&"modules/rata/res/rata/forearm.layout" z_offset:-0.06}
-        arm     = {name:"arm"     branches:[forearm]  layout:&"modules/rata/res/rata/arm.layout"     z_offset:-0.04}
-        body    = {name:"body"    branches:[head arm] layout:&"modules/rata/res/rata/body.layout"    z_offset:0.00}
+        head    = {name:"head"    branches:[]         layout:file("modules/rata/res/rata.layouts").head    z_offset:-0.02}
+        forearm = {name:"forearm" branches:[]         layout:file("modules/rata/res/rata.layouts").forearm z_offset:-0.06}
+        arm     = {name:"arm"     branches:[forearm]  layout:file("modules/rata/res/rata.layouts").arm     z_offset:-0.04}
+        body    = {name:"body"    branches:[head arm] layout:file("modules/rata/res/rata.layouts").body    z_offset:0.00}
     ]
     root:body
     root_offset:[0 0]
     poses:[
-        {name:"idle" pieces:[
-            [body "stand"]
-            [head "stand90"]
-            [arm "a0"]
-            [forearm "forearm_a0"]
-        ]}
-        {name:"walk1" pieces:[
-            [body "walk"]
-            [head "walk90"]
-            [arm "a23"]
-            [forearm "a23"]
-        ]}
-        {name:"walk2" pieces:[
-            [body "walk"]
-            [head "walk90"]
-            [arm "a23" true]
-            [forearm "a23" true]
-        ]}
-        {name:"crawl1" pieces:[
-            [body "crawl1"]
-            [head "crawl"]
-            [arm "a0"]
-            [forearm "a90"]
-        ]}
-        {name:"crawl2_1" pieces:[
-            [body "crawl2"]
-            [head "crawl"]
-            [arm "a45"]
-            [forearm "a90"]
-        ]}
-        {name:"crawl2_2" pieces:[
-            [head "crawl"]
-            [body "crawl2"]
-            [arm "a45" true]
-            [forearm "a90"]
-        ]}
-        {name:"hurtbk" pieces:[
-            [head "hurtbk"]
-            [body "hurtbk"]
-            [arm "a23"]
-            [forearm "a68"]
-        ]}
-        {name:"laybk" pieces:[
-            [head "laybk"]
-            [body "laybk"]
-            [arm "a0"]
-            [forearm "a0"]
-        ]}
+        ["stand"  [[body "stand" ] [head "stand90"] [arm "a0"  ] [forearm "a0"  ]]]
+        ["walk1"  [[body "walk"  ] [head "walk90" ] [arm "a23" ] [forearm "a23" ]]]
+        ["walk2"  [[body "walk"  ] [head "walk90" ] [arm "a23" true] [forearm "a23" true]]]
+        ["crawl1" [[body "crawl1"] [head "crawl"  ] [arm "a0"  ] [forearm "a90" ]]]
+        ["crawl2_1" [[body "crawl2"] [head "crawl"] [arm "a45" ] [forearm "a90" ]]]
+        ["crawl2_2" [[body "crawl2"] [head "crawl"] [arm "a45" true] [forearm "a90"]]]
+        ["hurtbk" [[body "hurtbk"] [head "hurtbk" ] [arm "a23" ] [forearm "a68" ]]]
+        ["laybk" [[body "laybk"] [head "laybk"] [arm "a0"] [forearm "a0"]]]
     ]
 }

@@ -14,15 +14,14 @@ namespace vis {
      // Dynamic things
     struct Model;
 
-    struct Pose {
-        struct App;
-
-        std::string name;
-        std::vector<App> apps;
-    };
-
-    struct Skel : Resource {
-        struct Seg;
+    struct Skel {
+        struct Seg {
+            std::string name;
+            Skel::Seg* parent = NULL;  // Null if root, set after creation
+            std::vector<Skel::Seg*> branches;
+            Layout* layout;
+            float z_offset;
+        };
 
         std::vector<Skel::Seg> segs;
         Skel::Seg* root;
@@ -31,57 +30,39 @@ namespace vis {
 
         Skel::Seg* seg_named (std::string name);
         Pose* pose_named (std::string name);
-        uint seg_index (Segment* p);
+        uint seg_index (Skel::Seg* p);
 
-         // as Resource
         void verify ();
-        void reload ();
-        Skel (std::string name);
-        Skel ();
-        ~Skel ();
     };
-    struct Skel::Seg {
+
+    struct Pose {
+        struct App {
+            Skel::Seg* target;
+            Frame* frame;  // Must belong to the target's layout
+            bool fliph;
+            bool flipv;
+        };
+
         std::string name;
-        Skel::Seg* parent;  // Null if root, set after creation
-        std::vector<Skel::Seg*> branches;
-        Layout* layout;
-        float z_offset;
-    };
-    struct Pose::App {
-        Skel::Seg* target;
-        SubImg* subimg;
-        bool fliph;
-        bool flipv;
+        std::vector<App> apps;
     };
 
-    struct Skin : Resource {
-        struct Map;
-        struct App;
+    struct Skin {
+        struct App {
+            Skel::Seg* target;
+            std::vector<Texture*> textures;
+        };
         
-        std::vector<Skin::Map> maps;
-        std::vector<Skin::Seg> apps;
-         // Resource
-        void reload ();
-        Skin ();
-        Skin (std::string name);
+        std::vector<Skin::App> apps;
     };
-
-    struct Skin::Map {
-        Image* image;
-        Layout* layout;
-        Vec img_offset = Vec(0, 0);
-        float z_offset = 0.f;
-    };
-
-    struct Skin::App {
-        Skel::Seg* target;
-        Skin::Map* map;
-        Skin::Seg* also = NULL;
-    };
-
 
     struct Model {
-        struct Seg;
+        struct Model::Seg {
+            Skin::App* skin = NULL;
+            Pose::App* pose = NULL;
+
+            void draw (Skel::Seg* seg, Vec mpos, bool fh, bool fv, float z);
+        };
 
         Skel* skel = NULL;
         std::vector<Model::Seg> segs;
@@ -89,24 +70,12 @@ namespace vis {
         Model ();
         Model (Skeleton*);
 
-        Vec offset_of (Skel::Seg* segment);
-        void apply_pose_seg (Skel::Seg*, Pose::Seg*);
+        Vec offset_of (Skel::Seg* seg);
         void apply_pose (Pose*);
-        void apply_skin_seg (Skin::Seg*);
         void apply_skin (Skin*);
 
         void draw (Vec pos, bool fliph = false, bool flipv = false, float z = 0);
     };
-
-    struct Model::Seg {
-        Skin::Seg* skin_seg = NULL;
-        Pose::Seg* pose_seg = NULL;
-        bool fliph = false;
-        bool flipv = false;
-
-        void draw (Segment* seg, Vec mpos, bool fh, bool fv, float z);
-    };
-
 
 
 }
