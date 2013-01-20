@@ -22,7 +22,7 @@
             ["crawl2_1" [[body b.crawl2] [head h.crawl] [arm a.a45 ] [forearm f.a90 ]]]
             ["crawl2_2" [[body b.crawl2] [head h.crawl] [arm a.a45 true] [forearm f.a90]]]
             ["hurtbk" [[body b.hurtbk] [head h.hurtbk ] [arm a.a23 ] [forearm f.a68 ]]]
-            ["laybk"  [[body b.laybk ] [head h.laybk  ] [arm a.a0  ] [forearm f.a0  ]]]
+            ["laybk"  [[body b.laybk ] [head h.laybk  ] [arm a.a90 ] [forearm f.a90 ]]]
         ]
     ])
 }

@@ -2,14 +2,14 @@
     body: {
         size: [85 43]
         frames: [
-            {name: "stand"  offset: [11  3] box: [-10 -2 10 18] points: [[ 0 16] [-1 15]]}
-            {name: "walk"   offset: [32  3] box: [-10 -2 10 18] points: [[ 0 15] [-1 14]]}
-            {name: "kneel"  offset: [53  3] box: [-10 -2 10 18] points: [[ 0 10] [-1  9]]}
-            {name: "sit"    offset: [74  3] box: [-10 -2 10 18] points: [[-2  9] [-3  8]]}
-            {name: "crawl1" offset: [11 24] box: [-10 -2 10 18] points: [[ 6  5] [ 5  4]]}
-            {name: "crawl2" offset: [32 24] box: [-10 -2 10 18] points: [[ 6  4] [ 5  3]]}
-            {name: "hurtbk" offset: [53 24] box: [-10 -2 10 18] points: [[ 0 15] [-1 14]]}
-            {name: "laybk"  offset: [74 24] box: [-10 -2 10 18] points: [[-8  2] [-7  1]]}
+            {name: "stand"  offset: [11  3] box: [-10 -2 10 18] points: [[ 0 16] [-1 14]]}
+            {name: "walk"   offset: [32  3] box: [-10 -2 10 18] points: [[ 0 15] [-1 13]]}
+            {name: "kneel"  offset: [53  3] box: [-10 -2 10 18] points: [[ 0 10] [-1  8]]}
+            {name: "sit"    offset: [74  3] box: [-10 -2 10 18] points: [[-2  9] [-3  7]]}
+            {name: "crawl1" offset: [11 24] box: [-10 -2 10 18] points: [[ 6  5] [ 4  4]]}
+            {name: "crawl2" offset: [32 24] box: [-10 -2 10 18] points: [[ 6  4] [ 4  3]]}
+            {name: "hurtbk" offset: [53 24] box: [-10 -2 10 18] points: [[ 0 15] [-1 13]]}
+            {name: "laybk"  offset: [74 24] box: [-10 -2 10 18] points: [[-8  2] [-6  1]]}
         ]
     }
     head: {
@@ -29,7 +29,7 @@
             {name: "walk158"  offset: [117 42] box: [-11 -12  9 16]}
             {name: "hurtbk"   offset: [ 12 71] box: [-11 -12  9 16]}
             {name: "crawl"    offset: [ 32 71] box: [-10 -12 10 16]}
-            {name: "laybk"    offset: [ 62 73] box: [-16 -11 12  9]}
+            {name: "laybk"    offset: [ 62 73] box: [-17 -12 11  8]}
         ]
     }
     arm: {
