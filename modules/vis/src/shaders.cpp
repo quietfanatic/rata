@@ -41,7 +41,7 @@ namespace vis {
             GLint status; glGetShaderiv(newid, GL_COMPILE_STATUS, &status);
             GLint loglen; glGetShaderiv(newid, GL_INFO_LOG_LENGTH, &loglen);
             diagnose_opengl("after glCompileShader");
-            if (!status || loglen) {
+            if (!status || loglen > 1) {
                 char log [loglen];
                 glGetShaderInfoLog(newid, loglen, NULL, log);
                 fprintf(stderr, "Shader info log for %s:\n", name.c_str());
@@ -99,7 +99,7 @@ namespace vis {
             GLint status; glGetProgramiv(newid, GL_LINK_STATUS, &status);
             GLint loglen; glGetProgramiv(newid, GL_INFO_LOG_LENGTH, &loglen);
             diagnose_opengl("after linking program");
-            if (!status || loglen) {
+            if (!status || loglen > 1) {
                 char log [loglen];
                 glGetProgramInfoLog(newid, loglen, NULL, log);
                 fprintf(stderr, "Program info log for %s:\n", name.c_str());

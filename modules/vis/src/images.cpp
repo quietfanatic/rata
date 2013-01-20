@@ -22,9 +22,6 @@ namespace vis {
         if (diagnose_opengl("after generating and binding texture")) {
             throw std::logic_error("OpenGL error");
         }
-        printf("image->size: [%g %g] offset: [%g %g]\n",
-            image->size.x, image->size.y, offset.x, offset.y
-        );
         glPixelStorei(GL_UNPACK_ROW_LENGTH, image->size.x);
         glPixelStorei(GL_UNPACK_SKIP_PIXELS, offset.x);
          // We're storing textures upside-down
@@ -37,7 +34,6 @@ namespace vis {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         }
-        printf("Loaded a texture! %gx%g\n", size.x, size.y);
         if (diagnose_opengl("after loading a texture")) {
             throw std::logic_error("OpenGL error");
         }
@@ -109,7 +105,7 @@ HCB_BEGIN(Image)
     get_attr([](Image& image, std::string name){
         return image.texture_named(name);
     });
-    finish([](Image& i){ i.load(); fprintf(stderr, "Finished an Image\n"); });
+    finish([](Image& i){ i.load(); });
 HCB_END(vis::Image)
 
 HCB_BEGIN(Frame)
