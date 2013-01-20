@@ -78,7 +78,6 @@ namespace vis {
         Camera_Setup_Layer () : core::Layer("B.M", "camera_setup") { }
         void run () {
             glClearColor(0.5, 0.5, 0.5, 0);
-//            glClearDepth(127);
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
             glMatrixMode(GL_PROJECTION);
@@ -91,7 +90,6 @@ namespace vis {
 
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
-            glDepthRange(-128, 127);  // Just be honest about our depth buffer precision
         }
     } csl;
 

@@ -92,7 +92,7 @@ namespace vis {
         }
         for (Skel::Seg*& branch : ss->branches) {
             Vec pt = ms->pose->frame->points[&branch - ss->branches.data()];
-            draw_seg(&segs[skel->seg_index(branch)], branch, pos + pt, fh, fv, z);
+            draw_seg(&segs[skel->seg_index(branch)], branch, pos + pt*PX, fh, fv, z);
         }
     }
     void Model::draw (Vec pos, bool fliph, bool flipv, float z) {
@@ -124,7 +124,7 @@ namespace vis {
         Model_Test () : core::Layer("E.M", "model_test", false) { }
         Model model;
         void run () {
-            model.draw(Vec(10, 4));
+            model.draw(Vec(10, 4), false, false, 0.5);
         }
         void init () {
             model = Model(hacc::reference_file<Skel>("modules/rata/res/rata.skel"));
