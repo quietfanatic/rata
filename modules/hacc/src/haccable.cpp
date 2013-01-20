@@ -234,7 +234,9 @@ namespace hacc {
             });
         }
          // For everything else, just do the thing now.
-        else gs.set(p, [&](void* mp){ update_from_hacc_inner(mp, h); });
+        else {
+            gs.set(p, [&](void* mp){ update_from_hacc_inner(mp, h); });
+        }
     }
 
     void HaccTable::update_from_hacc_inner (void* p, Hacc* h) {
@@ -412,11 +414,12 @@ namespace hacc {
             case ELEMREF:
             case MACROCALL: {
                 update_from_hacc_inner(p, collapse_hacc(h));
-                return;
+                break;
             }
             case ERROR: throw h->as_error()->e;
             default: throw Error("Oops, a corrupted hacc snuck in somewhere.\n");
         }
+        if (finish) finish(p);
     }
     struct daBomb {
         HaccTable* t;

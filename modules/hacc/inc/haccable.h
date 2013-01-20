@@ -59,6 +59,8 @@ struct HaccTable {
      // These allow the type to be treated kinda like an enum
     std::unordered_map<String, Defaulter0> values;
     Func<String (void*)> value_name;
+     // Call this after every *_from_hacc
+    Func<void (void*)> finish;
     
     Hacc* to_hacc (void*);
     void update_from_hacc (void*, Hacc*, bool save_id = true);
@@ -159,6 +161,7 @@ template <class C> struct Haccability : GetSet_Builders<C> {
      }
     static void allocate (const Func<C* ()>& f) { get_table()->allocate = *(Func<void* ()>*)&f; }
     static void deallocate (const Func<void (C*)>& f) { get_table()->deallocate = *(Func<void* ()>*)&f; }
+    static void finish (const Func<void (C&)>& f) { get_table()->finish = *(Func<void (void*)>*)&f; }
     static void get_id (const Func<String (const C&)>& f) { get_table()->get_id_p = *(Func<String (void*)>*)&f; }
     static void find_by_id (const Func<C* (String)>& f) { get_table()->find_by_id_p = *(Func<void* (String)>*)&f; }
     static void to (const Func<Hacc* (const C&)>& f) { get_table()->to = *(Func<Hacc* (void*)>*)&f; }
@@ -260,6 +263,8 @@ template <class C> String get_type_name () {
     using hcb = hacc::Haccability<type>; \
     using hcb::type_name; \
     using hcb::allocate; \
+    using hcb::deallocate; \
+    using hcb::finish; \
     using hcb::get_id; \
     using hcb::find_by_id; \
     using hcb::to; \
