@@ -1,7 +1,5 @@
 
 #include "../inc/hacc.h"
-#include "../inc/haccable.h"
-#include "../inc/haccable_files.h"
 
 namespace hacc {
 
@@ -110,45 +108,6 @@ hacc::Double Hacc::get_double () {
         case FLOAT: return static_cast<Hacc::Float*>(this)->f;
         case DOUBLE: return static_cast<Hacc::Double*>(this)->d;
         default: throw form_error("numeric");
-    }
-}
-
-
-Hacc* collapse_hacc (Hacc* h) {
-    switch (h->form()) {
-        case MACROCALL: {
-            auto mch = static_cast<hacc::Hacc::MacroCall*>(h);
-            if (mch->mc.name == "file") {
-                mch->mc.arg = collapse_hacc(mch->mc.arg);
-                if (mch->mc.arg->form() == STRING) {
-                    Generic g = generic_from_file(mch->mc.arg->get_string());
-                    return new_hacc(g);
-                }
-                else throw Error("The \"file\" macro can only be called on a string.\n");
-            }
-            else throw Error("Unrecognized macro \"" + mch->mc.name + "\" (only \"file\" currently exists)\n");
-        }
-        case ATTRREF: {
-            auto arh = static_cast<hacc::Hacc::AttrRef*>(h);
-            arh->ar.subject = collapse_hacc(arh->ar.subject);
-            if (arh->ar.subject->form() == GENERIC) {
-                auto gh = static_cast<hacc::Hacc::Generic*>(arh->ar.subject);
-                HaccTable* t = HaccTable::require_cpptype(*gh->g.cpptype);
-                return new_hacc(t->get_attr(gh->g.p, arh->ar.name));
-            }
-            else throw Error("Attributes can only be requested from a \"Generic\" hacc, such as produced by file()\n");
-        }
-        case ELEMREF: {
-            auto erh = static_cast<hacc::Hacc::ElemRef*>(h);
-            erh->er.subject = collapse_hacc(erh->er.subject);
-            if (erh->er.subject->form() == GENERIC) {
-                auto gh = static_cast<hacc::Hacc::Generic*>(erh->er.subject);
-                HaccTable* t = HaccTable::require_cpptype(*gh->g.cpptype);
-                return new_hacc(t->get_elem(gh->g.p, erh->er.index));
-            }
-            else throw Error("Elements can only be requested from a \"Generic\" hacc, such as produced by file()\n");
-        }
-        default: return h;
     }
 }
 

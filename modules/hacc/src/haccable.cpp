@@ -1,6 +1,6 @@
 #include <unordered_map>
 #include "../inc/haccable.h"
-
+#include "../inc/haccable_files.h"
 
 namespace hacc {
 
@@ -54,7 +54,12 @@ namespace hacc {
         ~write_lock () { if (!--writing) write_history.clear(); }
     };
      // These are used to make sure pointers are updated after the pointed-to data
-    static std::unordered_map<String, Func<void* ()>> read_ids;
+    struct read_id_info {
+        Hacc* read = null;
+        Func<void* ()> get;
+        read_id_info (Hacc* read, const Func<void* ()>& get) : read(read), get(get) { }
+    };
+    static std::unordered_map<String, read_id_info> read_ids;
     static uint reading = 0;
     struct read_lock {
         read_lock () { reading++; }
@@ -180,7 +185,7 @@ namespace hacc {
         if (!h) throw Error("update_from_hacc called with NULL pointer for hacc.");
         read_lock rl;
 
-        if (save_id) read_ids.emplace(h->id, [p](){ return p; });
+        if (save_id) read_ids.emplace(h->id, read_id_info(h, [p](){ return p; }));
         update_from_hacc_inner(p, h);
 
         if (reading == 1) {
@@ -201,18 +206,18 @@ namespace hacc {
                  // If the get function copies too, all hope is lost.
                  //  ...how did you manage to make a pointer to this in the first place?
                 if (gs.copies_on_get) {
-                    read_ids.emplace(h->id, null);  // record that this is unavailable
+                    read_ids.emplace(h->id, read_id_info(h, [this, h]()->void*{throw Error("The " + get_type_name() + " with ID '" + h->id + "' could not be referenced due to too much encapsulation.");}));
                     gs.set(p, [&](void* mp){
                         update_from_hacc_inner(mp, h);
                     });
                 }
                 else {
                     const GetSet0::Get& get = gs.get;
-                    read_ids.emplace(h->id, [get, p](){
+                    read_ids.emplace(h->id, read_id_info(h, [get, p](){
                         void* newmp;
                         get(p, [&newmp](void* mp){ newmp = mp; });
                         return newmp;
-                    });
+                    }));
                     gs.set(p, [&](void* mp){
                         update_from_hacc_inner(mp, h);
                     });
@@ -220,7 +225,7 @@ namespace hacc {
             }
             else {
                 gs.set(p, [&](void* mp){
-                    read_ids.emplace(h->id, [mp](){ return mp; });
+                    read_ids.emplace(h->id, read_id_info(h, [mp](){ return mp; }));
                     update_from_hacc_inner(mp, h);
                 });
             }
@@ -356,13 +361,13 @@ namespace hacc {
                     String id = h->as_ref()->r.id;
                     auto iter = read_ids.find(id);
                     if (iter != read_ids.end()) {
-                        if (iter->second) {
-                            void* addr = iter->second();
+                        if (iter->second.get) {
+                            void* addr = iter->second.get();
                             pointer.set(p, [&addr, this](void* mp){
                                 *(void**)mp = addr;
                             });
                         }
-                        else throw Error("The " + pointee_t->get_type_name() + " with ID '" + id + "' could not be referenced due to too much encapsulation.");
+                        else throw Error("The id " + id + " has no type information.");
                     }
                     else if (void* addr = pointee_t->find_by_id(id)) {
                         pointer.set(p, [&addr, this](void* mp){
@@ -490,6 +495,86 @@ namespace hacc {
             else {
                 throw Error("Index out of range for instance of " + get_type_name());
             }
+        }
+    }
+
+    void just_assign_id (Hacc* h) {
+        if (!h->id.empty()) {
+            if (h->type.empty()) {
+                read_ids.emplace(h->id, read_id_info{h, null});
+            }
+            else {
+                HaccTable* table = HaccTable::require_type_name(h->type);
+                void* p = table->new_from_hacc(h);
+                read_ids.emplace(h->id, read_id_info(h, [p](){ return p; }));
+            }
+        }
+        else throw Error("ID assignment expected in a place where one wasn't");
+    }
+
+    Hacc* collapse_hacc (Hacc* h) {
+        switch (h->form()) {
+            case MACROCALL: {
+                auto mch = static_cast<hacc::Hacc::MacroCall*>(h);
+                if (mch->mc.name == "file") {
+                    mch->mc.arg = collapse_hacc(mch->mc.arg);
+                    if (mch->mc.arg->form() == STRING) {
+                        Generic g = generic_from_file(mch->mc.arg->get_string());
+                        return new_hacc(g);
+                    }
+                    else throw Error("The \"file\" macro can only be called on a string.");
+                }
+                else if (mch->mc.name == "local") {
+                    if (mch->mc.arg->form() == ARRAY) {
+                        auto ah = mch->mc.arg->as_array();
+                        for (auto& subh : ah->a) {
+                            if (&subh == &ah->a.back())
+                                return subh;
+                            else just_assign_id(subh);
+                        }
+                    }
+                }
+                else throw Error("Unrecognized macro \"" + mch->mc.name + "\" (Available: \"file\", \"local\")");
+            }
+            case ATTRREF: {
+                auto arh = static_cast<hacc::Hacc::AttrRef*>(h);
+                arh->ar.subject = collapse_hacc(arh->ar.subject);
+                if (arh->ar.subject->form() == GENERIC) {
+                    auto gh = static_cast<hacc::Hacc::Generic*>(arh->ar.subject);
+                    HaccTable* t = HaccTable::require_cpptype(*gh->g.cpptype);
+                    return new_hacc(t->get_attr(gh->g.p, arh->ar.name));
+                }
+                else throw Error("Attributes can only be requested from a \"Generic\" hacc, such as produced by file()");
+            }
+            case ELEMREF: {
+                auto erh = static_cast<hacc::Hacc::ElemRef*>(h);
+                erh->er.subject = collapse_hacc(erh->er.subject);
+                if (erh->er.subject->form() == GENERIC) {
+                    auto gh = static_cast<hacc::Hacc::Generic*>(erh->er.subject);
+                    HaccTable* t = HaccTable::require_cpptype(*gh->g.cpptype);
+                    return new_hacc(t->get_elem(gh->g.p, erh->er.index));
+                }
+                else throw Error("Elements can only be requested from a \"Generic\" hacc, such as produced by file()");
+            }
+             // This will only happen if this ref is being dereffed or similar
+            case REF: {
+                auto iter = read_ids.find(static_cast<hacc::Hacc::Ref*>(h)->r.id);
+                if (iter == read_ids.end())
+                    throw Error("ID " + static_cast<hacc::Hacc::Ref*>(h)->r.id + " not found in this document.");
+                auto& rid = iter->second;
+                if (rid.read) {
+                    if (rid.get && !rid.read->type.empty()) {
+                        HaccTable* t = HaccTable::require_type_name(rid.read->type);
+                        return new_hacc(Generic(t->cpptype, rid.get()));
+                    }
+                    else {
+                        rid.read = collapse_hacc(rid.read);
+                        return rid.read;
+                    }
+                }
+                else throw Error("Internal oops: A read_id was created without a .read");
+            }
+            default: return h;
         }
     }
 
