@@ -30,6 +30,7 @@ workflow {
         ../hacc/tmp/haccable.o
         ../hacc/tmp/haccable_files.o
         ../phys/tmp/phys.o
+        ../phys/tmp/aux.o
         ../vis/tmp/images.o
         ../vis/tmp/sprites.o
         ../vis/tmp/shaders.o

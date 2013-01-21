@@ -2,7 +2,7 @@
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/state.h"
 #include "../../core/inc/input.h"
-#include "../../phys/inc/phys.h"
+#include "../../phys/inc/aux.h"
 #include "../../vis/inc/sprites.h"
 #include "../../vis/inc/models.h"
 
@@ -19,7 +19,7 @@ static vis::Skel*& skel () {
     return skel;
 }
 
-struct Rata : core::Stateful, phys::Physical, vis::Draws_Sprites {
+struct Rata : core::Stateful, phys::Walking, vis::Draws_Sprites {
      // For drawing
     Model model;
     void draw () {
@@ -31,18 +31,22 @@ struct Rata : core::Stateful, phys::Physical, vis::Draws_Sprites {
     }
 
     void act () {
+        set_walk_friction(6);
         if (core::get_key('A')) {
-            impulse(Vec(-0.1, 0));
+            set_walk_vel(-4);
         }
-        if (core::get_key('D')) {
-            impulse(Vec(0.1, 0));
+        else if (core::get_key('D')) {
+            set_walk_vel(4);
+        }
+        else {
+            set_walk_vel(0);
         }
     }
     void react () {
     }
 
-    Rata () : Physical(bdf()), model(skel()) { }
-    void start () { Physical::start(); Draws_Sprites::appear(); }
+    Rata () : Walking(bdf()), model(skel()) { }
+    void start () { Walking::start(); Draws_Sprites::appear(); }
 };
 
 HCB_BEGIN(Rata)
