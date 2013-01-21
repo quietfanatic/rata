@@ -7,6 +7,7 @@
 #include "../../hacc/inc/haccable_integration.h"
 
 namespace phys {
+    struct Object;
 
     extern b2World* space;
 
@@ -24,7 +25,7 @@ namespace phys {
 
         BodyDef () { b2.active = false; }
 
-        b2Body* manifest (b2World* space, Vec pos = Vec(0, 0), Vec vel = Vec(0, 0));
+        b2Body* manifest (Object* owner, b2World* space, Vec pos = Vec(0, 0), Vec vel = Vec(0, 0));
     };
 
      // The dynamic thing
@@ -46,7 +47,7 @@ namespace phys {
         virtual void while_intangible () { }
         virtual ~Object () { dematerialize(); }
 
-        Object (BodyDef* body_def) { b2body = body_def->manifest(space); }
+        Object (BodyDef* body_def) { b2body = body_def->manifest(this, space); }
     };
     
 }

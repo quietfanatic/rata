@@ -147,8 +147,9 @@ namespace phys {
         return b2f;
     }
 
-    b2Body* BodyDef::manifest (b2World* sim, Vec pos, Vec vel) {
+    b2Body* BodyDef::manifest (Object* owner, b2World* sim, Vec pos, Vec vel) {
         b2Body* b2b = space->CreateBody(&b2);
+        b2b->SetUserData(owner);
         space_logger.log("%d objects in space.", space->GetBodyCount());
         for (FixtureDef& fix : fixtures) {
             fix.manifest(b2b);
