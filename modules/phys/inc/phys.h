@@ -48,6 +48,7 @@ namespace phys {
         void set_pos (Vec v) { body->SetTransform(b2Vec2(v.x, v.y), 0); }
         Vec vel () const { const b2Vec2& v = body->GetLinearVelocity(); return reinterpret_cast<const Vec&>(v); }
         void set_vel (Vec v) { body->SetLinearVelocity(b2Vec2(v.x, v.y)); }
+        void impulse (Vec i) { body->ApplyLinearImpulse(b2Vec2(i.x, i.y), b2Vec2(0, 0)); }
 
         Physical (BodyDef* body_def) { body = body_def->manifest(sim); }
         void activate ();

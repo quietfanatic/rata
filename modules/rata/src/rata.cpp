@@ -1,6 +1,7 @@
 
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/state.h"
+#include "../../core/inc/input.h"
 #include "../../phys/inc/phys.h"
 #include "../../vis/inc/sprites.h"
 #include "../../vis/inc/models.h"
@@ -29,8 +30,19 @@ struct Rata : core::Stateful, phys::Physical, vis::Draws_Sprites {
         model.draw(pos());
     }
 
+    void act () {
+        if (core::get_key('A')) {
+            impulse(Vec(-0.1, 0));
+        }
+        if (core::get_key('D')) {
+            impulse(Vec(0.1, 0));
+        }
+    }
+    void react () {
+    }
+
     Rata () : Physical(bdf()), model(skel()) { }
-    void start () { Physical::activate(); Draws_Sprites::appear(); }
+    void start () { Physical::start(); Draws_Sprites::appear(); }
 };
 
 HCB_BEGIN(Rata)
