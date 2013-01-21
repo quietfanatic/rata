@@ -1,15 +1,15 @@
 {
     things: [
         {Rata: {
-            physical: {pos: [10 10.5]}
+            object: {pos: [10 10.5]}
         }}
         {Test_Actor: {
-            physical: {pos: [10, 7.5]}
+            object: {pos: [10, 7.5]}
             texture: file("modules/vis/res/test.image").ALL
             frame: file("modules/vis/res/test.layout").green
         }}
         {Boundary: {
-            physical: {pos: [0 0]}
+            object: {pos: [0 0]}
         }}
     ]
 }

@@ -5,6 +5,8 @@
 #include "../../hacc/inc/haccable_pointers.h"
 #include "../../util/inc/debug.h"
 
+using namespace phys;
+
  // This is so satisfying
 
 HCB_BEGIN(b2Vec2)
@@ -53,10 +55,11 @@ HCB_BEGIN(b2FixtureDef)
 //    attr("filter", member(&b2FixtureDef::filter))
 HCB_END(b2FixtureDef)
 
-HCB_BEGIN(phys::FixtureDef)
+HCB_BEGIN(FixtureDef)
     using namespace phys;
+    attr("name", member(&FixtureDef::name, def(std::string(""))));
     attr("b2", member(&FixtureDef::b2));
-HCB_END(phys::FixtureDef)
+HCB_END(FixtureDef)
 
 HCB_BEGIN(b2BodyType)
     type_name("b2BodyType");
@@ -85,67 +88,58 @@ HCB_BEGIN(b2BodyDef)
 //    attr("ang_vel", member(&b2BodyDef::angularVelocity), 0.f);
 HCB_END(b2BodyDef)
 
-HCB_BEGIN(phys::BodyDef)
+HCB_BEGIN(BodyDef)
     using namespace phys;
     type_name("phys::BodyDef");
     attr("b2", member(&BodyDef::b2));
     attr("fixtures", member(&BodyDef::fixtures));
-HCB_END(phys::BodyDef)
+HCB_END(BodyDef)
 
-HCB_BEGIN(phys::Physical)
+HCB_BEGIN(Object)
     using namespace phys;
-    type_name("phys::Physical");
-    attr("pos", value_methods(&Physical::pos, &Physical::set_pos));
-    attr("vel", value_methods(&Physical::vel, &Physical::set_vel, def(Vec(0, 0))));
-HCB_END(phys::Physical)
+    type_name("phys::Object");
+    attr("pos", value_methods(&Object::pos, &Object::set_pos));
+    attr("vel", value_methods(&Object::vel, &Object::set_vel, def(Vec(0, 0))));
+HCB_END(Object)
+
+
 namespace phys {
 
-    b2World* sim = NULL;
+    b2World* space = NULL;
 
-    Links<Actor> all_actors;
-    void Actor::start () {
-        link(all_actors);
-    }
+    static Logger space_logger ("space");
 
-
-    struct Act_Phase : core::Phase {
-        Act_Phase () : core::Phase("C.M", "act") { }
-        void run () { // These actions should be parallelizable.
-            for (Actor* p = all_actors.first(); p; p = p->next())
-                p->act();
-        }
-    } act_phase;
-
-    Logger phys_logger ("phys");
-
-    struct Sim_Phase : core::Phase {
-        Sim_Phase () : core::Phase("D.M", "sim") { }
+    struct Space_Phase : core::Phase {
+        Space_Phase () : core::Phase("D.M", "space") { }
         void init () {
-            phys_logger.log("Creating the main sim.");
-            sim = new b2World(
+            space_logger.log("Creating the spacetime continuum.  Well, the space part anyway.");
+            space = new b2World(
                 b2Vec2(0, -20)
             );
         }
         void start () {
         }
         void run () {
-            sim->Step(1/60.0, 10, 10);
+            for (b2Body* b2b = space->GetBodyList(); b2b; b2b = b2b->GetNext()) {
+                if (Object* obj = (Object*)b2b->GetUserData())
+                    if (b2b->IsActive())
+                        obj->before_move();
+            }
+            space->Step(1/60.0, 10, 10);
+            for (b2Body* b2b = space->GetBodyList(); b2b; b2b = b2b->GetNext()) {
+                if (Object* obj = (Object*)b2b->GetUserData()) {
+                    if (b2b->IsActive())
+                        obj->after_move();
+                    else obj->while_intangible();
+                }
+            }
         }
         void stop () {
-            delete sim;
+            space_logger.log("Destroying space.");
+            delete space;
             init();
         }
-    } sim_phase;
-
-    struct React_Phase : core::Phase {
-        React_Phase () : core::Phase("E.M", "react") { }
-        void run () { // These actions should be parallelizable.
-            for (Actor* p = all_actors.first(); p; p = p->next())
-                p->react();
-        }
-
-    } react_phase;
-
+    } space_phase;
 
     b2Fixture* FixtureDef::manifest (b2Body* b2b) {
         b2Fixture* b2f = b2b->CreateFixture(&b2);
@@ -154,16 +148,16 @@ namespace phys {
     }
 
     b2Body* BodyDef::manifest (b2World* sim, Vec pos, Vec vel) {
-        b2Body* b2b = sim->CreateBody(&b2);
-        phys_logger.log("Sim now has %d bodies.\n", sim->GetBodyCount());
+        b2Body* b2b = space->CreateBody(&b2);
+        space_logger.log("%d objects in space.", space->GetBodyCount());
         for (FixtureDef& fix : fixtures) {
             fix.manifest(b2b);
         }
         return b2b;
     }
 
-    void Physical::activate () { body->SetActive(true); }
-    void Physical::deactivate () { body->SetActive(false); }
+    void Object::materialize () { b2body->SetActive(true); }
+    void Object::dematerialize () { b2body->SetActive(false); }
 
 }
 

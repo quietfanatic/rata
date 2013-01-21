@@ -6,8 +6,9 @@
 #include "../../vis/inc/sprites.h"
 #include "../../vis/inc/models.h"
 
-using phys::Physical;
+using namespace phys;
 using namespace vis;
+using namespace core;
 
  // For now we're skipping having a generic Human class
 static phys::BodyDef*& bdf () {
@@ -19,7 +20,7 @@ static vis::Skel*& skel () {
     return skel;
 }
 
-struct Rata : core::Stateful, phys::Walking, vis::Draws_Sprites {
+struct Rata : Stateful, Ambulator, Draws_Sprites {
      // For drawing
     Model model;
     void draw () {
@@ -30,29 +31,29 @@ struct Rata : core::Stateful, phys::Walking, vis::Draws_Sprites {
         model.draw(pos());
     }
 
-    void act () {
-        set_walk_friction(6);
+    void before_move () {
+        ambulate_force(6);
         if (core::get_key('A')) {
-            set_walk_vel(-4);
+            ambulate_x(-4);
         }
         else if (core::get_key('D')) {
-            set_walk_vel(4);
+            ambulate_x(4);
         }
         else {
-            set_walk_vel(0);
+            ambulate_x(0);
         }
     }
-    void react () {
+    void after_move () {
     }
 
-    Rata () : Walking(bdf()), model(skel()) { }
-    void start () { Walking::start(); Draws_Sprites::appear(); }
+    Rata () : Ambulator(bdf()), model(skel()) { }
+    void start () { materialize(); appear(); }
 };
 
 HCB_BEGIN(Rata)
     type_name("Rata");
     base<core::Stateful>("Rata");
-    attr("physical", supertype<Physical>());
+    attr("object", supertype<Object>());
 HCB_END(Rata)
 
 

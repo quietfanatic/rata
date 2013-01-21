@@ -5,23 +5,23 @@
 
 namespace phys {
 
-    struct Walking : Physical {
+    struct Ambulator : Object {
         b2Body* friction_body;
         b2FrictionJoint* friction_joint;
 
-        Walking (BodyDef* bdf);
+        Ambulator (BodyDef* bdf);
 
-         // It is recommended to call these every frame.
-        void set_walk_vel (float f);
-        void set_walk_friction (float f);
+         // ambulate_x and ambulate_y set the friction_body's velocity in the other
+         // axis to that of the main body, so call them every frame that velocity changes.
+        void ambulate_x (float x);
+        void ambulate_y (float y);
+        void ambulate_both (Vec v);
+        void ambulate_force (float f);
 
-        void activate () { Physical::activate(); friction_body->SetActive(true); }
-        void deactivate () { Physical::deactivate(); friction_body->SetActive(false); }
+        void materialize ();
+        void dematerialize ();
+        ~Ambulator () { dematerialize(); }
         
-        void start () {
-            Physical::start();  // activate is virtual, so it calls Walking::activate
-        }
-
     };
 
 }

@@ -8,52 +8,45 @@
 
 namespace phys {
 
-    extern b2World* sim;
+    extern b2World* space;
+
+     // Static things, probably stored in files
 
     struct FixtureDef {
+        std::string name;
         b2FixtureDef b2;
 
         b2Fixture* manifest (b2Body*);
     };
-
     struct BodyDef {
         b2BodyDef b2;
         std::vector<FixtureDef> fixtures;
 
         BodyDef () { b2.active = false; }
 
-        b2Body* manifest (b2World* sim, Vec pos = Vec(0, 0), Vec vel = Vec(0, 0));
+        b2Body* manifest (b2World* space, Vec pos = Vec(0, 0), Vec vel = Vec(0, 0));
     };
 
-    struct Actor : Linkable<Actor> {
-        virtual Vec pos () const = 0;
-//        virtual Room* room ();
-        virtual void activate () { }
-        virtual void deactivate () { }
-        virtual void act () { }
-        virtual void react () { }
-        virtual void away () { }
-        virtual ~Actor () { }
+     // The dynamic thing
 
-        void start ();
-    };
+    struct Object {
+        b2Body* b2body = NULL;
 
-     // This will be replaced by per-room lists.
-    extern Links<Actor> all_actors;
+        Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }
+        void set_pos (Vec v) { b2body->SetTransform(b2Vec2(v.x, v.y), 0); }
+        Vec vel () const { const b2Vec2& v = b2body->GetLinearVelocity(); return reinterpret_cast<const Vec&>(v); }
+        void set_vel (Vec v) { b2body->SetLinearVelocity(b2Vec2(v.x, v.y)); }
+        void impulse (Vec i) { b2body->ApplyLinearImpulse(b2Vec2(i.x, i.y), b2Vec2(0, 0)); }
 
-    struct Physical : Actor {
-        b2Body* body = NULL;
+        void materialize ();
+        void dematerialize ();
 
-        Vec pos () const { return reinterpret_cast<const Vec&>(body->GetPosition()); }
-        void set_pos (Vec v) { body->SetTransform(b2Vec2(v.x, v.y), 0); }
-        Vec vel () const { const b2Vec2& v = body->GetLinearVelocity(); return reinterpret_cast<const Vec&>(v); }
-        void set_vel (Vec v) { body->SetLinearVelocity(b2Vec2(v.x, v.y)); }
-        void impulse (Vec i) { body->ApplyLinearImpulse(b2Vec2(i.x, i.y), b2Vec2(0, 0)); }
+        virtual void before_move () { }
+        virtual void after_move () { }
+        virtual void while_intangible () { }
+        virtual ~Object () { dematerialize(); }
 
-        Physical (BodyDef* body_def) { body = body_def->manifest(sim); }
-        void activate ();
-        void deactivate ();
-        void start () { Actor::start(); activate(); }
+        Object (BodyDef* body_def) { b2body = body_def->manifest(space); }
     };
     
 }
