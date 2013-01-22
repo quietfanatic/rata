@@ -1,4 +1,5 @@
 
+#include <stdexcept>
 #include "../inc/phys.h"
 #include "../../core/inc/game.h"
 #include "../../hacc/inc/haccable_standard.h"
@@ -105,6 +106,40 @@ HCB_END(Object)
 
 namespace phys {
 
+     // Collision rules
+
+    static uint& n_coll_rules () {
+        static uint n_coll_rules = 0;
+        return n_coll_rules;
+    }
+    Collision_Rule* coll_rules [64];
+
+    Collision_Rule::Collision_Rule (Func<void (b2Contact*, Object*, Object*)> post) :
+        index(n_coll_rules()++), post(post)
+    {
+        if (index < 64)
+            coll_rules[index] = this;
+        else throw std::logic_error("Too many Collision_Rules were created (> 64)");
+    }
+
+    struct myCL : b2ContactListener {
+        void PostSolve (b2Contact*, const b2ContactImpulse*);
+    } mycl;
+    void myCL::PostSolve (b2Contact* contact, const b2ContactImpulse* ci) {
+        Object* a = (Object*)contact->GetFixtureA()->GetBody()->GetUserData();
+        Object* b = (Object*)contact->GetFixtureB()->GetBody()->GetUserData();
+        uint64 consequentiality = a->collision_bits & b->collision_bits;
+        uint i = 0;
+        while (consequentiality) {
+            if (consequentiality & 1) coll_rules[i]->post(contact, a, b);
+            i++;
+            consequentiality >>= 1;
+        }
+    }
+
+
+     // Space handling
+
     b2World* space = NULL;
 
     static Logger space_logger ("space");
@@ -141,6 +176,8 @@ namespace phys {
         }
     } space_phase;
 
+     // Definitions
+
     b2Fixture* FixtureDef::manifest (b2Body* b2b) {
         b2Fixture* b2f = b2b->CreateFixture(&b2);
         b2f->SetUserData(this);
@@ -156,6 +193,8 @@ namespace phys {
         }
         return b2b;
     }
+
+     // Objects
 
     void Object::materialize () { b2body->SetActive(true); }
     void Object::dematerialize () { b2body->SetActive(false); }

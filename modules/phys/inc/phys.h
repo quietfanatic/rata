@@ -32,6 +32,7 @@ namespace phys {
 
     struct Object {
         b2Body* b2body = NULL;
+        uint64 collision_bits = 0;
 
         Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }
         void set_pos (Vec v) { b2body->SetTransform(b2Vec2(v.x, v.y), 0); }
@@ -49,7 +50,19 @@ namespace phys {
 
         Object (BodyDef* body_def) { b2body = body_def->manifest(this, space); }
     };
+
+     // Collision handling is done through registered collision rules.
+     // A maximum of 64 collision rules can be registered.
     
+    struct Collision_Rule {
+        uint index;
+        Func<void (b2Contact*, Object*, Object*)> post;
+
+        uint64 bit () { return 1 << index; }
+
+        Collision_Rule (Func<void (b2Contact*, Object*, Object*)>);
+    };
+
 }
 
 #endif
