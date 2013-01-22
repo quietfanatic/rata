@@ -140,6 +140,7 @@ HCB_BEGIN(Object)
     attr("pos", value_methods(&Object::pos, &Object::set_pos));
     attr("vel", value_methods(&Object::vel, &Object::set_vel, def(Vec(0, 0))));
 HCB_END(Object)
+HCB_INSTANCE(Object*)
 
 namespace phys {
 

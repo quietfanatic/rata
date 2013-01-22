@@ -40,6 +40,7 @@ namespace phys {
         Vec vel () const { const b2Vec2& v = b2body->GetLinearVelocity(); return reinterpret_cast<const Vec&>(v); }
         void set_vel (Vec v) { b2body->SetLinearVelocity(b2Vec2(v.x, v.y)); }
         void impulse (Vec i) { b2body->ApplyLinearImpulse(b2Vec2(i.x, i.y), b2Vec2(0, 0)); }
+        void force (Vec f) { b2body->ApplyForceToCenter(b2Vec2(f.x, f.y)); }
 
         void materialize ();
         void dematerialize ();
