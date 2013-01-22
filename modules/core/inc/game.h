@@ -39,6 +39,8 @@ struct Layer : PhaseLayer {
         PhaseLayer(draw_layers(), order, name, on) { }
 };
 
+extern bool initialized;
+
 }
 
 #endif

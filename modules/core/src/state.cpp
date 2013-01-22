@@ -30,8 +30,9 @@ namespace core {
     }
 
     void load (std::string filename) {
-        init();
-        stop();
+        if (initialized)
+            stop();
+        else init();
         try {
             if (current_state) delete current_state;
             current_state = hacc::new_from_file<Game_State>(filename);

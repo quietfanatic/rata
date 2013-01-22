@@ -35,7 +35,7 @@ namespace core {
         );
     }
     
-    static bool initialized = false;
+    bool initialized = false;
 
     void init () {
         if (initialized) return;
