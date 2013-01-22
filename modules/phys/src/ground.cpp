@@ -24,6 +24,13 @@ namespace phys {
                 if (grd) grd->ground = (Object*)ground->GetBody()->GetUserData();
             }
         }
+        void end (b2Contact* contact, b2Fixture* grounded, b2Fixture* ground) {
+            Grounded* grd = dynamic_cast<Grounded*>(
+                (Object*)grounded->GetBody()->GetUserData()
+            );
+            if (grd && grd->ground == (Object*)ground->GetBody()->GetUserData())
+                grd->ground = NULL;
+        }
     } gr;
     Collision_Rule* ground_rule = &gr;
 

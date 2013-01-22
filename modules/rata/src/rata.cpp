@@ -3,6 +3,7 @@
 #include "../../core/inc/state.h"
 #include "../../core/inc/input.h"
 #include "../../phys/inc/aux.h"
+#include "../../phys/inc/ground.h"
 #include "../../vis/inc/sprites.h"
 #include "../../vis/inc/models.h"
 
@@ -20,15 +21,19 @@ static Skel*& skel () {
     return skel;
 }
 
-struct Rata : Stateful, Object, Draws_Sprites {
+struct Rata : Stateful, Object, Grounded, Draws_Sprites {
 
     Ambulator legs;
     Model model;
 
     void draw () {
         static auto stand = skel()->poses.named("stand");
+        static auto walk1 = skel()->poses.named("walk1");
         static auto base = hacc::reference_file<vis::Skin>("modules/rata/res/rata-base.skin");
-        model.apply_pose(stand);
+        if (ground)
+            model.apply_pose(stand);
+        else
+            model.apply_pose(walk1);
         model.apply_skin(base);
         model.draw(pos());
     }
