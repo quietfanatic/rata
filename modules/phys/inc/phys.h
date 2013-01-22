@@ -16,6 +16,8 @@ namespace phys {
     struct FixtureDef {
         std::string name;
         b2FixtureDef b2;
+        uint64 collidable_a = 0;
+        uint64 collidable_b = 0;
 
         b2Fixture* manifest (b2Body*);
     };
@@ -32,7 +34,6 @@ namespace phys {
 
     struct Object {
         b2Body* b2body = NULL;
-        uint64 collision_bits = 0;
 
         Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }
         void set_pos (Vec v) { b2body->SetTransform(b2Vec2(v.x, v.y), 0); }
@@ -46,7 +47,7 @@ namespace phys {
         virtual void before_move () { }
         virtual void after_move () { }
         virtual void while_intangible () { }
-        virtual ~Object () { dematerialize(); }
+        virtual ~Object () { if (b2body) space->DestroyBody(b2body); }
 
         Object (BodyDef* body_def) { b2body = body_def->manifest(this, space); }
     };
@@ -56,11 +57,14 @@ namespace phys {
     
     struct Collision_Rule {
         uint index;
-        Func<void (b2Contact*, Object*, Object*)> post;
+        virtual std::string name () const = 0;
+        virtual void post (b2Contact*, b2Fixture*, b2Fixture*) { }
+        virtual void end (b2Contact*, b2Fixture*, b2Fixture*) { }
+        virtual ~Collision_Rule () { }  // To make the compiler happy, mostly
+
+        Collision_Rule ();
 
         uint64 bit () { return 1 << index; }
-
-        Collision_Rule (Func<void (b2Contact*, Object*, Object*)>);
     };
 
 }

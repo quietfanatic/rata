@@ -1,27 +1,35 @@
 #ifndef HAVE_PHYS_AUX_H
 #define HAVE_PHYS_AUX_H
 
+
 #include "phys.h"
 
 namespace phys {
 
-    struct Ambulator : Object {
+    struct Ambulator {
         b2Body* friction_body;
         b2FrictionJoint* friction_joint;
 
-        Ambulator (BodyDef* bdf);
+        Ambulator (Object* obj);
 
          // ambulate_x and ambulate_y set the friction_body's velocity in the other
          // axis to that of the main body, so call them every frame that velocity changes.
-        void ambulate_x (float x);
-        void ambulate_y (float y);
-        void ambulate_both (Vec v);
-        void ambulate_force (float f);
+        void ambulate_x (Object*, float);
+        void ambulate_y (Object*, float);
+        void ambulate_both (Object*, Vec);
+        void ambulate_force (float);
 
-        void materialize ();
-        void dematerialize ();
-        ~Ambulator () { dematerialize(); }
+        void enable ();
+        void disable ();
+        ~Ambulator ();
         
+    };
+
+    struct Grounded {
+        Object* ground;
+    };
+
+    struct Ground {
     };
 
 }

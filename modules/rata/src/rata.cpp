@@ -20,9 +20,11 @@ static Skel*& skel () {
     return skel;
 }
 
-struct Rata : Stateful, Ambulator, Draws_Sprites {
-     // For drawing
+struct Rata : Stateful, Object, Grounded, Draws_Sprites {
+
+    Ambulator legs;
     Model model;
+
     void draw () {
         static auto stand = skel()->poses.named("stand");
         static auto base = hacc::reference_file<vis::Skin>("modules/rata/res/rata-base.skin");
@@ -32,22 +34,22 @@ struct Rata : Stateful, Ambulator, Draws_Sprites {
     }
 
     void before_move () {
-        ambulate_force(8);
+        legs.ambulate_force(8);
         if (get_key('A')) {
-            ambulate_x(-4);
+            legs.ambulate_x(this, -4);
         }
         else if (get_key('D')) {
-            ambulate_x(4);
+            legs.ambulate_x(this, 4);
         }
         else {
-            ambulate_x(0);
+            legs.ambulate_x(this, 0);
         }
     }
     void after_move () {
     }
 
-    Rata () : Ambulator(bdf()), model(skel()) { }
-    void start () { materialize(); appear(); }
+    Rata () : Object(bdf()), legs(this), model(skel()) { }
+    void start () { materialize(); legs.enable(); appear(); }
 };
 
 HCB_BEGIN(Rata)

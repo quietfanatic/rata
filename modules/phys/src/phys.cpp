@@ -10,6 +10,18 @@ using namespace phys;
 
  // This is so satisfying
 
+std::vector<Collision_Rule*> coll_rules;
+HCB_BEGIN(Collision_Rule)
+    type_name("phys::Collision_Rule");
+    get_id([](const Collision_Rule& cr){ return cr.name(); });
+    find_by_id([](std::string name){
+        for (auto rule : coll_rules)
+            if (rule->name() == name)
+                return rule;
+        return (Collision_Rule*)NULL;
+    });
+HCB_END(Collision_Rule)
+
 HCB_BEGIN(b2Vec2)
     type_name("b2Vec2");
     elem(member(&b2Vec2::x));
@@ -56,10 +68,38 @@ HCB_BEGIN(b2FixtureDef)
 //    attr("filter", member(&b2FixtureDef::filter))
 HCB_END(b2FixtureDef)
 
+static std::vector<Collision_Rule*> coll_b2v (uint64 b) {
+    std::vector<Collision_Rule*> v;
+    for (uint i = 0; b; i++, b >>= 1) {
+        if (b & 1) v.push_back(coll_rules[i]);
+    }
+    return v;
+}
+static uint64 coll_v2b (const std::vector<Collision_Rule*>& v) {
+    uint64 b = 0;
+    for (auto rule : v)
+        b |= rule->bit();
+    return b;
+}
+
 HCB_BEGIN(FixtureDef)
     using namespace phys;
     attr("name", member(&FixtureDef::name, def(std::string(""))));
     attr("b2", member(&FixtureDef::b2));
+    attr("collidable_a", value_functions<std::vector<Collision_Rule*>>(
+        [](const FixtureDef& fdf){ return coll_b2v(fdf.collidable_a); },
+        [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
+            fdf.collidable_a = coll_v2b(rules);
+        },
+        optional<std::vector<Collision_Rule*>>()
+    ));
+    attr("collidable_b", value_functions<std::vector<Collision_Rule*>>(
+        [](const FixtureDef& fdf){ return coll_b2v(fdf.collidable_b); },
+        [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
+            fdf.collidable_b = coll_v2b(rules);
+        },
+        optional<std::vector<Collision_Rule*>>()
+    ));
 HCB_END(FixtureDef)
 
 HCB_BEGIN(b2BodyType)
@@ -90,19 +130,16 @@ HCB_BEGIN(b2BodyDef)
 HCB_END(b2BodyDef)
 
 HCB_BEGIN(BodyDef)
-    using namespace phys;
     type_name("phys::BodyDef");
     attr("b2", member(&BodyDef::b2));
     attr("fixtures", member(&BodyDef::fixtures));
 HCB_END(BodyDef)
 
 HCB_BEGIN(Object)
-    using namespace phys;
     type_name("phys::Object");
     attr("pos", value_methods(&Object::pos, &Object::set_pos));
     attr("vel", value_methods(&Object::vel, &Object::set_vel, def(Vec(0, 0))));
 HCB_END(Object)
-
 
 namespace phys {
 
@@ -112,28 +149,47 @@ namespace phys {
         static uint n_coll_rules = 0;
         return n_coll_rules;
     }
-    Collision_Rule* coll_rules [64];
 
-    Collision_Rule::Collision_Rule (Func<void (b2Contact*, Object*, Object*)> post) :
-        index(n_coll_rules()++), post(post)
-    {
+    Collision_Rule::Collision_Rule () : index(n_coll_rules()++) {
         if (index < 64)
-            coll_rules[index] = this;
+            coll_rules.push_back(this);
         else throw std::logic_error("Too many Collision_Rules were created (> 64)");
     }
 
     struct myCL : b2ContactListener {
         void PostSolve (b2Contact*, const b2ContactImpulse*);
+        void EndContact (b2Contact*);
     } mycl;
     void myCL::PostSolve (b2Contact* contact, const b2ContactImpulse* ci) {
-        Object* a = (Object*)contact->GetFixtureA()->GetBody()->GetUserData();
-        Object* b = (Object*)contact->GetFixtureB()->GetBody()->GetUserData();
-        uint64 consequentiality = a->collision_bits & b->collision_bits;
-        uint i = 0;
-        while (consequentiality) {
-            if (consequentiality & 1) coll_rules[i]->post(contact, a, b);
-            i++;
-            consequentiality >>= 1;
+        b2Fixture* a = contact->GetFixtureA();
+        b2Fixture* b = contact->GetFixtureB();
+        FixtureDef* afdf = (FixtureDef*)a->GetUserData();
+        FixtureDef* bfdf = (FixtureDef*)b->GetUserData();
+        uint64 coll_ab = afdf->collidable_a & bfdf->collidable_b;
+        for (uint i = 0; coll_ab; i++) {
+            if (coll_ab & 1) coll_rules[i]->post(contact, a, b);
+            coll_ab >>= 1;
+        }
+        uint64 coll_ba = afdf->collidable_b & bfdf->collidable_a;
+        for (uint i = 0; coll_ba; i++) {
+            if (coll_ba & 1) coll_rules[i]->post(contact, b, a);
+            coll_ba >>= 1;
+        }
+    }
+    void myCL::EndContact (b2Contact* contact) {
+        b2Fixture* a = contact->GetFixtureA();
+        b2Fixture* b = contact->GetFixtureB();
+        FixtureDef* afdf = (FixtureDef*)a->GetUserData();
+        FixtureDef* bfdf = (FixtureDef*)b->GetUserData();
+        uint64 coll_ab = afdf->collidable_a & bfdf->collidable_b;
+        for (uint i = 0; coll_ab; i++) {
+            if (coll_ab & 1) coll_rules[i]->end(contact, a, b);
+            coll_ab >>= 1;
+        }
+        uint64 coll_ba = afdf->collidable_b & bfdf->collidable_a;
+        for (uint i = 0; coll_ba; i++) {
+            if (coll_ba & 1) coll_rules[i]->end(contact, b, a);
+            coll_ba >>= 1;
         }
     }
 
@@ -151,6 +207,7 @@ namespace phys {
             space = new b2World(
                 b2Vec2(0, -20)
             );
+            space->SetContactListener(&mycl);
         }
         void start () {
         }
