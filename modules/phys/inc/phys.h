@@ -16,8 +16,8 @@ namespace phys {
     struct FixtureDef {
         std::string name;
         b2FixtureDef b2;
-        uint64 collidable_a = 0;
-        uint64 collidable_b = 0;
+        uint64 coll_a = 0;
+        uint64 coll_b = 0;
 
         b2Fixture* manifest (b2Body*);
     };

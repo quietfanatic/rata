@@ -1,6 +1,8 @@
 #"phys::BodyDef" {
-    b2: { }
-    fixtures: [
-        {b2: {shape: {polygon: {verts: [[-1 -1] [1 -1] [1 1] [-1 1]]}}}}
+    b2:{ }
+    fixtures:[
+        { b2:{ shape:{ polygon:{ verts: [
+            [-1 -1] [1 -1] [1 1] [-1 1]
+        ] } } } coll_b:[ground] }
     ]
 }

@@ -25,13 +25,6 @@ namespace phys {
         
     };
 
-    struct Grounded {
-        Object* ground;
-    };
-
-    struct Ground {
-    };
-
 }
 
 #endif

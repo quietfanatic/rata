@@ -86,17 +86,17 @@ HCB_BEGIN(FixtureDef)
     using namespace phys;
     attr("name", member(&FixtureDef::name, def(std::string(""))));
     attr("b2", member(&FixtureDef::b2));
-    attr("collidable_a", value_functions<std::vector<Collision_Rule*>>(
-        [](const FixtureDef& fdf){ return coll_b2v(fdf.collidable_a); },
+    attr("coll_a", value_functions<std::vector<Collision_Rule*>>(
+        [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_a); },
         [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
-            fdf.collidable_a = coll_v2b(rules);
+            fdf.coll_a = coll_v2b(rules);
         },
         optional<std::vector<Collision_Rule*>>()
     ));
-    attr("collidable_b", value_functions<std::vector<Collision_Rule*>>(
-        [](const FixtureDef& fdf){ return coll_b2v(fdf.collidable_b); },
+    attr("coll_b", value_functions<std::vector<Collision_Rule*>>(
+        [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_b); },
         [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
-            fdf.collidable_b = coll_v2b(rules);
+            fdf.coll_b = coll_v2b(rules);
         },
         optional<std::vector<Collision_Rule*>>()
     ));
@@ -165,12 +165,12 @@ namespace phys {
         b2Fixture* b = contact->GetFixtureB();
         FixtureDef* afdf = (FixtureDef*)a->GetUserData();
         FixtureDef* bfdf = (FixtureDef*)b->GetUserData();
-        uint64 coll_ab = afdf->collidable_a & bfdf->collidable_b;
+        uint64 coll_ab = afdf->coll_a & bfdf->coll_b;
         for (uint i = 0; coll_ab; i++) {
             if (coll_ab & 1) coll_rules[i]->post(contact, a, b);
             coll_ab >>= 1;
         }
-        uint64 coll_ba = afdf->collidable_b & bfdf->collidable_a;
+        uint64 coll_ba = afdf->coll_b & bfdf->coll_a;
         for (uint i = 0; coll_ba; i++) {
             if (coll_ba & 1) coll_rules[i]->post(contact, b, a);
             coll_ba >>= 1;
@@ -181,12 +181,12 @@ namespace phys {
         b2Fixture* b = contact->GetFixtureB();
         FixtureDef* afdf = (FixtureDef*)a->GetUserData();
         FixtureDef* bfdf = (FixtureDef*)b->GetUserData();
-        uint64 coll_ab = afdf->collidable_a & bfdf->collidable_b;
+        uint64 coll_ab = afdf->coll_a & bfdf->coll_b;
         for (uint i = 0; coll_ab; i++) {
             if (coll_ab & 1) coll_rules[i]->end(contact, a, b);
             coll_ab >>= 1;
         }
-        uint64 coll_ba = afdf->collidable_b & bfdf->collidable_a;
+        uint64 coll_ba = afdf->coll_b & bfdf->coll_a;
         for (uint i = 0; coll_ba; i++) {
             if (coll_ba & 1) coll_rules[i]->end(contact, b, a);
             coll_ba >>= 1;

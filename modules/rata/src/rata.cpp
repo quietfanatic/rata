@@ -20,7 +20,7 @@ static Skel*& skel () {
     return skel;
 }
 
-struct Rata : Stateful, Object, Grounded, Draws_Sprites {
+struct Rata : Stateful, Object, Draws_Sprites {
 
     Ambulator legs;
     Model model;
