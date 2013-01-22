@@ -1,4 +1,4 @@
-
+#include "GL/glfw.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/state.h"
 #include "../../core/inc/input.h"
@@ -25,6 +25,7 @@ struct Rata : Stateful, Object, Grounded, Draws_Sprites {
 
     Ambulator legs;
     Model model;
+    uint8 direction = 1;
 
     void draw () {
         static auto stand = skel()->poses.named("stand");
@@ -35,19 +36,50 @@ struct Rata : Stateful, Object, Grounded, Draws_Sprites {
         else
             model.apply_pose(walk1);
         model.apply_skin(base);
-        model.draw(pos());
+        model.draw(pos(), direction < 0);
     }
 
     void before_move () {
-        legs.ambulate_force(8);
-        if (get_key('A')) {
-            legs.ambulate_x(this, -4);
-        }
-        else if (get_key('D')) {
-            legs.ambulate_x(this, 4);
+         // Control logic takes so much space always
+        if (ground) {
+            if (get_key(GLFW_KEY_SPACE)) {
+                legs.disable();
+                 // I'd like to be able to do a mutual push between the ground and
+                 //  the character, but Box2D isn't well-equipped for that.
+                impulse(Vec(0, 12));
+                ground = NULL;
+            }
+            else {
+                legs.enable();
+                if (get_key('A') && !get_key('D')) {
+                    legs.ambulate_x(this, -4);
+                    if (vel().x <= 0) direction = -1;
+                    if (vel().x < -4)
+                        legs.ambulate_force(8);
+                    else legs.ambulate_force(12);
+                }
+                else if (get_key('D')) {
+                    legs.ambulate_x(this, 4);
+                    if (vel().x >= 0) direction = 1;
+                    if (vel().x > 4)
+                        legs.ambulate_force(8);
+                    else legs.ambulate_force(12);
+                }
+                else {
+                    legs.ambulate_force(8);
+                    legs.ambulate_x(this, 0);
+                }
+            }
         }
         else {
-            legs.ambulate_x(this, 0);
+            legs.disable();
+             // If you were in a 2D platformer, you'd be able to push against the air too.
+            if (get_key('A') && !get_key('D')) {
+                force(Vec(-2, 0));
+            }
+            else if (get_key('D')) {
+                force(Vec(2, 0));
+            }
         }
     }
     void after_move () {
@@ -61,6 +93,8 @@ HCB_BEGIN(Rata)
     type_name("Rata");
     base<Stateful>("Rata");
     attr("object", supertype<Object>());
+    attr("direction", member(&Rata::direction));
+    attr("grounded", supertype<Grounded>());
 HCB_END(Rata)
 
 

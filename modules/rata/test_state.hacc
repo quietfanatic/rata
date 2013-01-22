@@ -2,6 +2,8 @@
     things: [
         {Rata: {
             object: {pos: [10 10.5]}
+            grounded: {ground: null}
+            direction: 1
         }}
         {Test_Actor: {
             object: {pos: [10, 7.5]}
