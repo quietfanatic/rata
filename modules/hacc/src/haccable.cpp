@@ -129,15 +129,7 @@ namespace hacc {
             pointer.get(p, [&pp](void* mp){ pp = *(void**)mp; });
              // All pointer types can be null
             if (!pp) return new_hacc(null);
-             // Make sure all references to this address are on the same page
             auto& hist = write_history[pp];
-            if (!hist.referenced) {
-                hist.referenced = true;
-                hist.id = pointee_t->get_id(pp);
-                if (hist.written)
-                    hist.written->id = hist.id;
-                else hist.table = pointee_t;
-            }
             bool should_follow;
             switch (get_pointer_policy()) {
                 case ALWAYS_FOLLOW: should_follow = true; break;
@@ -162,6 +154,14 @@ namespace hacc {
                 }
             }
             else {
+                 // Make sure all references to this address are on the same page
+                if (!hist.referenced) {
+                    hist.referenced = true;
+                    hist.id = pointee_t->get_id(pp);
+                    if (hist.written)
+                        hist.written->id = hist.id;
+                    else hist.table = pointee_t;
+                }
                 return new_hacc(hacc::Ref(hist.id));
             }
         }
