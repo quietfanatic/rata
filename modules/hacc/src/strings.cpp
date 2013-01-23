@@ -38,8 +38,21 @@ String escape_id (const String& unesc) {
     return r;
 }
 
+static String indent (uint n) {
+    String r = "";
+    for (; n; n--) r += "    ";
+    return r;
+}
+static String hacc_to_string_b (Hacc* h, uint ind, uint prior_ind, bool sp) {
+    String r = hacc_value_to_string(h, ind, prior_ind);
+    if (!h->id.empty()) {
+        r = escape_id(h->id) + " = " + r;
+        if (sp) r = " " + r;
+    }
+    return r;
+}
 
-String hacc_value_to_string (Hacc* h) {
+String hacc_value_to_string (Hacc* h, uint ind, uint prior_ind) {
     switch (h->form()) {
         case NULLFORM: return "null";
         case BOOL: return static_cast<Hacc::Bool*>(h)->b ? "true" : "false";
@@ -80,38 +93,53 @@ String hacc_value_to_string (Hacc* h) {
             return mch->mc.name + "(" + hacc_to_string(mch->mc.arg) + ")";
         }
         case ARRAY: {
-            String r = "[";
             auto& a = static_cast<Hacc::Array*>(h)->a;
+            if (a.size() == 0) return "[]";
+            String r = "[";
+            if (ind) r += "\n" + indent(prior_ind + 1);
             for (auto i = a.begin(); i != a.end(); i++) {
-                r += hacc_to_string(*i);
-                if (i + 1 != a.end()) r += ", ";
+                if (ind) r += hacc_to_string(*i, ind - 1, prior_ind + 1);
+                else r += hacc_to_string(*i);
+                if (i + 1 != a.end()) {
+                    if (ind)
+                        r += "\n" + indent(prior_ind + 1);
+                    else r += " ";
+                }
             }
+            if (ind) r + "\n" + indent(prior_ind);
             return r + "]";
         }
         case OBJECT: {
-            String r = "{";
             auto& o = static_cast<Hacc::Object*>(h)->o;
+            if (o.size() == 0) return "{}";
+            String r = "{";
+            if (ind) r += "\n" + indent(prior_ind + 1);
+            else r += " ";
             auto nexti = o.begin();
             for (auto i = nexti; i != o.end(); i = nexti) {
                 r += escape_ident(i->first);
-                r += ": ";
-                r += hacc_to_string(i->second);
+                r += ":";
+                if (ind) r += hacc_to_string_b(i->second, ind - 1, prior_ind + 1, true);
+                r += hacc_to_string_b(i->second, 0, 0, true);
                 nexti++;
-                if (nexti != o.end()) r += ", ";
+                if (nexti != o.end()) {
+                    if (ind) r += "\n" + indent(prior_ind + 1);
+                    else r += " ";
+                }
             }
+            if (ind) r + "\n" + indent(prior_ind);
+            else r += " ";
             return r + "}";
         }
         case ERROR: throw static_cast<Hacc::Error*>(h)->e;
         default: throw Error("Corrupted Hacc tree\n");
     }
 }
-String hacc_to_string (Hacc* h) {
-    String r = hacc_value_to_string(h);
-    if (!h->id.empty()) r = escape_id(h->id) + " = " + r;
-    return r;
+String hacc_to_string (Hacc* h, uint ind, uint prior_ind) {
+    return hacc_to_string_b(h, ind, prior_ind, false);
 }
-String string_from_hacc (Hacc* h) {
-    return hacc_to_string(h);
+String string_from_hacc (Hacc* h, uint ind, uint prior_ind) {
+    return hacc_to_string(h, ind, prior_ind);
 }
 
 

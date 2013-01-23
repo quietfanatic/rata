@@ -50,23 +50,23 @@ tap::Tester hacc_strings_tester ("hacc-strings", [](){
      printf(" # Arrays\n");  // 8
     hacc_string_test("[]", "[]");
     hacc_string_test("[1]", "[1]");
-    hacc_string_test("[1, 2, 3]", "[1, 2, 3]");
-    hacc_string_test("[ 1, 2, 3 ]", "[1, 2, 3]");
-    hacc_string_test("[, 1 2,,,, 3,]", "[1, 2, 3]");
-    hacc_string_test("[~3f800000, -45, \"asdf]\", null]", "[1~3f800000, -45, \"asdf]\", null]");
-    hacc_string_test("[[[][]][[]][][][][[[[[[]]]]]]]", "[[[], []], [[]], [], [], [], [[[[[[]]]]]]]");
-    hacc_string_test("[1, 2, [3, 4, 5], 6, 7]", "[1, 2, [3, 4, 5], 6, 7]");
+    hacc_string_test("[1, 2, 3]", "[1 2 3]");
+    hacc_string_test("[ 1, 2, 3 ]", "[1 2 3]");
+    hacc_string_test("[, 1 2,,,, 3,]", "[1 2 3]");
+    hacc_string_test("[~3f800000, -45, \"asdf]\", null]", "[1~3f800000 -45 \"asdf]\" null]");
+    hacc_string_test("[[[][]][[]][][][][[[[[[]]]]]]]", "[[[] []] [[]] [] [] [] [[[[[[]]]]]]]");
+    hacc_string_test("[1, 2, [3, 4, 5], 6, 7]", "[1 2 [3 4 5] 6 7]");
      printf(" # Objects\n");  // 7
     hacc_string_test("{}", "{}");
-    hacc_string_test("{\"a\": 1}", "{a: 1}");
-    hacc_string_test("{a: 1}", "{a: 1}");
-    hacc_string_test("{a: 1, b: 2, ccc: 3}", "{a: 1, b: 2, ccc: 3}");
-    hacc_string_test("{ , a: -32 b:\"sadf\" ,,,,,,,c:null,}", "{a: -32, b: \"sadf\", c: null}");
-    hacc_string_test("{\"\\\"\\\\\\b\\f\\n\\r\\t\": null}", "{\"\\\"\\\\\\b\\f\\n\\r\\t\": null}");
-    hacc_string_test("{a: {b: {c: {} d: {}} e: {}}}", "{a: {b: {c: {}, d: {}}, e: {}}}");
+    hacc_string_test("{\"a\": 1}", "{ a:1 }");
+    hacc_string_test("{a: 1}", "{ a:1 }");
+    hacc_string_test("{a: 1, b: 2, ccc: 3}", "{ a:1 b:2 ccc:3 }");
+    hacc_string_test("{ , a: -32 b:\"sadf\" ,,,,,,,c:null,}", "{ a:-32 b:\"sadf\" c:null }");
+    hacc_string_test("{\"\\\"\\\\\\b\\f\\n\\r\\t\": null}", "{ \"\\\"\\\\\\b\\f\\n\\r\\t\":null }");
+    hacc_string_test("{a: {b: {c: {} d: {}} e: {}}}", "{ a:{ b:{ c:{} d:{} } e:{} } }");
      printf(" # Arrays and Objects\n");  // 2
-    hacc_string_test("[{a: 1, b: []} [4, {c: {d: []}}]]", "[{a: 1, b: []}, [4, {c: {d: []}}]]");
-    hacc_string_test("{a: []}", "{a: []}");
+    hacc_string_test("[{a: 1, b: []} [4, {c: {d: []}}]]", "[{ a:1 b:[] } [4 { c:{ d:[] } }]]");
+    hacc_string_test("{a: []}", "{ a:[] }");
      printf(" # Refs\n");  // 3
     hacc_string_test("bareword_3432", "bareword_3432");
     hacc_string_test("&\"stringish\\nid\"", "&\"stringish\\nid\"");
@@ -74,9 +74,9 @@ tap::Tester hacc_strings_tester ("hacc-strings", [](){
      printf(" # Prefixes\n");  // 3
     hacc_string_test("one = 1", "one = 1");
     hacc_string_test("&two=2", "two = 2");
-    hacc_string_test("{ak: ai = \"as\" bk: &\"bi\" = \"bs\"}", "{ak: ai = \"as\", bk: bi = \"bs\"}");
+    hacc_string_test("{ak: ai = \"as\" bk: &\"bi\" = \"bs\"}", "{ ak: ai = \"as\" bk: bi = \"bs\" }");
      printf(" # Misc\n");  // 1
-    hacc_string_test("{ things: [ {test_actor: {}} ] }", "{things: [{test_actor: {}}]}");
+    hacc_string_test("{ things: [ {test_actor: {}} ] }", "{ things:[{ test_actor:{} }] }");
     
 });
 
