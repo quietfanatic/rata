@@ -47,7 +47,7 @@ namespace core {
 
     void save (std::string filename) {
         try {
-            hacc::file_from(filename, *current_state);
+            hacc::file_from(filename, *current_state, 4);
         } catch (hacc::Error& e) {
             printf("Failed to save state due to hacc error: %s\n", e.what());
         } catch (std::exception& e) {
