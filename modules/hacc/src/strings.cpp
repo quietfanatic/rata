@@ -96,38 +96,44 @@ String hacc_value_to_string (Hacc* h, uint ind, uint prior_ind) {
             auto& a = static_cast<Hacc::Array*>(h)->a;
             if (a.size() == 0) return "[]";
             String r = "[";
-            if (ind) r += "\n" + indent(prior_ind + 1);
+            if (ind && a.size() > 1)
+                r += "\n" + indent(prior_ind + 1);
             for (auto i = a.begin(); i != a.end(); i++) {
-                if (ind) r += hacc_to_string(*i, ind - 1, prior_ind + 1);
+                if (ind)
+                    r += hacc_to_string(*i, ind - 1, prior_ind + (a.size() > 1));
                 else r += hacc_to_string(*i);
                 if (i + 1 != a.end()) {
-                    if (ind)
+                    if (ind && a.size() > 1)
                         r += "\n" + indent(prior_ind + 1);
                     else r += " ";
                 }
             }
-            if (ind) r + "\n" + indent(prior_ind);
+            if (ind && a.size() > 1)
+                r += "\n" + indent(prior_ind);
             return r + "]";
         }
         case OBJECT: {
             auto& o = static_cast<Hacc::Object*>(h)->o;
             if (o.size() == 0) return "{}";
             String r = "{";
-            if (ind) r += "\n" + indent(prior_ind + 1);
+            if (ind && o.size() > 1)
+                r += "\n" + indent(prior_ind + 1);
             else r += " ";
             auto nexti = o.begin();
             for (auto i = nexti; i != o.end(); i = nexti) {
                 r += escape_ident(i->first);
                 r += ":";
-                if (ind) r += hacc_to_string_b(i->second, ind - 1, prior_ind + 1, true);
-                r += hacc_to_string_b(i->second, 0, 0, true);
+                if (ind)
+                    r += hacc_to_string_b(i->second, ind - 1, prior_ind + (o.size() > 1), true);
+                else r += hacc_to_string_b(i->second, 0, 0, true);
                 nexti++;
                 if (nexti != o.end()) {
                     if (ind) r += "\n" + indent(prior_ind + 1);
                     else r += " ";
                 }
             }
-            if (ind) r + "\n" + indent(prior_ind);
+            if (ind && o.size() > 1)
+                r += "\n" + indent(prior_ind);
             else r += " ";
             return r + "}";
         }
