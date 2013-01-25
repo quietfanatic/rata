@@ -258,7 +258,7 @@ struct Parser {
         int64 val;
         uint len;
         if (!sscanf(safebuf(), "%" SCNi64 "%n", &val, &len))
-            throw error("Weird number");
+            return parse_floating();
         p += len;
         switch (look()) {
             case '~': return parse_bitrep();
