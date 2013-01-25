@@ -6,10 +6,12 @@
 #include "../../phys/inc/ground.h"
 #include "../../vis/inc/sprites.h"
 #include "../../vis/inc/models.h"
+#include "../../geo/inc/rooms.h"
 
 using namespace phys;
 using namespace vis;
 using namespace core;
+using namespace geo;
 
  // For now we're skipping having a generic Human class
 static BodyDef*& bdf () {
@@ -21,7 +23,7 @@ static Skel*& skel () {
     return skel;
 }
 
-struct Rata : Stateful, Object, Grounded, Draws_Sprites {
+struct Rata : Stateful, Object, Grounded, Resident, Draws_Sprites {
 
     Ambulator legs;
     Model model;
@@ -83,16 +85,20 @@ struct Rata : Stateful, Object, Grounded, Draws_Sprites {
         }
     }
     void after_move () {
+        reroom(pos());
     }
 
     Rata () : Object(bdf()), legs(this), model(skel()) { }
-    void start () { materialize(); legs.enable(); appear(); }
+    void emerge () { printf("Emerging\n"); materialize(); legs.enable(); appear(); }
+    void reclude () { }
+    void start () { beholder = this; }
 };
 
 HCB_BEGIN(Rata)
     type_name("Rata");
     base<Stateful>("Rata");
     attr("object", supertype<Object>());
+    attr("resident", supertype<Resident>());
     attr("direction", member(&Rata::direction));
     attr("grounded", supertype<Grounded>());
 HCB_END(Rata)

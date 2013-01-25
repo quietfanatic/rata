@@ -1,0 +1,5 @@
+#"geo::Room" {
+    boundary:[0 0 20 15]
+    neighbors:[]
+    furniture:[]
+}

@@ -23,6 +23,7 @@ workflow {
         ../core/tmp/resources.o 
         ../core/tmp/state.o
         ../core/tmp/input.o
+        ../geo/tmp/rooms.o
         ../hacc/tmp/haccable_standard.o
         ../hacc/tmp/strings.o
         ../hacc/tmp/files.o
