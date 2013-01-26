@@ -1,4 +1,5 @@
 
+#include <stdexcept>
 #include "../../hacc/inc/everything.h"
 #include "../../util/inc/math.h"
 #include "../../util/inc/debug.h"
@@ -59,107 +60,131 @@ struct TileData {
     TileEdge edges [MAX_EDGES];
 };
 
-static inline bool vecs_are_close (Vec a, Vec b) {
+static bool vecs_are_close (Vec a, Vec b) {
     return (a.x - b.x)*(a.x - b.x)
          + (a.y - b.y)*(a.y - b.y)
          < 0.01;
 }
-static inline void try_connecting_edges (TileEdge* te, TileEdge* pe, uint* count) {
-    if (te->def && pe->def) {
-         // Vertices should always wind in CCW direction, so
-         //  compatible edges will be backwards from one another
-        if (vecs_are_close(te->v1, pe->v2))
-        if (vecs_are_close(te->v2, pe->v1)) {
-            te->next = pe->next;
-            te->prev = pe->prev;
-            pe->def = NULL;  // disable old edge
-            (*count)++;
+static void connect_edges (TileEdge* te, TileEdge* pe, uint* cancelled) {
+    if (vecs_are_close(te->v1, pe->v2)) {
+        te->prev = pe;
+        pe->next = te;
+    }
+    if (vecs_are_close(te->v2, pe->v1)) {
+        te->next = pe;
+        pe->prev = te;
+    }
+    if (te->next == pe && te->prev == pe) {
+        te->def = NULL;
+        pe->def = NULL;
+        *cancelled += 2;
+    }
+}
+static bool merge_edges (TileEdge* te, uint* merged, uint* eaten) {
+    TileEdge* ne = te->next;
+    if (ne == te)
+        throw std::logic_error("The tile edge merging algorithm went wrong somewhere.\n");
+    float angle = ang_diff((te->v2 - te->v1).ang(), (ne->v2 - ne->v1).ang());
+    fprintf(stderr, "Edges [[%g %g] [%g %g]] and [[%g %g] [%g %g]] angle:%g op:",
+        te->v1.x, te->v1.y, te->v2.x, te->v2.y, ne->v1.x, ne->v1.y, ne->v2.x, ne->v2.y, angle
+    );
+    if (angle < 0.01 && te->def == ne->def) {
+        fprintf(stderr, "merge\n");
+         // merge edges only with the same nature
+        te->next = ne->next;
+        te->next->prev = te;
+        te->v2 = ne->v2;
+        ne->def = NULL;
+        (*merged)++;
+        return true;
+    }
+    else if (angle > PI - 0.01) {
+        fprintf(stderr, "eat\n");
+         // Different natured edges can eat one another though
+        te->next = ne->next;
+        te->next->prev = te;
+        te->v2 = ne->v2;
+        if ((te->v2 - te->v1).mag2() < (ne->v2 - ne->v1).mag2()) {
+            te->def = ne->def;
         }
+        ne->def = NULL;
+        (*eaten)++;
+        return true;
     }
+    fprintf(stderr, "ignore\n");
+    return false;
 }
-static inline void try_connecting_tiles (TileData* td, TileData* pd, uint* count) {
-    for (TileEdge* te = td->edges; te < td->edges + MAX_EDGES; te++)
-    for (TileEdge* pe = pd->edges; pe < pd->edges + MAX_EDGES; pe++) {
-        try_connecting_edges(te, pe, count);
-    }
-}
-static inline void try_merging_edges (TileEdge* te, TileEdge* ne, uint* count) {
-    if (te->def) {  // skip disabled edges
-        if (te->def == ne->def) {  // don't merge edges with different natures
-            if (ang_diff((te->v2 - te->v1).ang(), (ne->v2 - ne->v1).ang()) < 0.01) {
-                te->next = ne->next;
-                te->next->prev = te;
-                te->v2 = ne->v2;
-                ne->def = NULL;  // disable next edge
-                (*count)++;
-            }
-        }
-    }
-}
-static inline void try_creating_edge (b2Body* b2body, TileEdge* te, uint* count) {
-    if (te->def) {
-        b2EdgeShape b2es;
-        b2es.m_hasVertex0 = true;
-        b2es.m_vertex0 = te->prev->v1;
-        b2es.m_vertex1 = te->v1;
-        b2es.m_vertex2 = te->v2;
-        b2es.m_hasVertex3 = true;
-        b2es.m_vertex3 = te->next->v2;
-        b2FixtureDef b2fdf = te->def->nature.b2;
-        b2fdf.shape = &b2es;
-        b2fdf.userData = te->def;
-        b2body->CreateFixture(&b2fdf);
-        (*count)++;
-    }
+static void create_edge (b2Body* b2body, TileEdge* te, uint* final) {
+    b2EdgeShape b2es;
+    b2es.m_hasVertex0 = true;
+    b2es.m_vertex0 = te->prev->v1;
+    b2es.m_vertex1 = te->v1;
+    b2es.m_vertex2 = te->v2;
+    b2es.m_hasVertex3 = true;
+    b2es.m_vertex3 = te->next->v2;
+    b2FixtureDef b2fdf = te->def->nature.b2;
+    b2fdf.shape = &b2es;
+    b2fdf.userData = te->def;
+    b2body->CreateFixture(&b2fdf);
+    (*final)++;
 }
 
 void Tilemap::start () {
      // Build up all the edges
-    TileData* tilegeoms = new TileData [width * height];
-    uint raw_count = 0;
-    uint connect_count = 0;
-    uint merge_count = 0;
-    uint final_count = 0;
+    auto es = new TileEdge [height][width][MAX_EDGES];
+    uint initial = 0;
+    uint cancelled = 0;
+    uint merged = 0;
+    uint eaten = 0;
+    uint final = 0;
     for (uint y = 0; y < height; y++)
     for (uint x = 0; x < width; x++) {
-        TileData* td = &tilegeoms[y*width + x];
         TileDef* def = tileset->tiles[tiles[y*width+x]];
         if (def) {
             uint n_edges = def->vertices.size();
              // Create the edges for this tile
             for (uint e = 0; e < n_edges; e++) {
-                td->edges[e].v1 = def->vertices[e] + pos + Vec(x, y);
-                td->edges[e].v2 = def->vertices[e+1 == n_edges ? e+1 : 0] + pos + Vec(x, y);
-                td->edges[e].next = &td->edges[e+1 == n_edges ? e+1 : 0];
-                td->edges[e].prev = &td->edges[e < 0 ? n_edges-1 : e-1];
-                td->edges[e].def = def;
-                raw_count++;
+                es[y][x][e].v1 = def->vertices[e] + Vec(x, height - y - 1);
+                es[y][x][e].v2 = def->vertices[e+1 == n_edges ? 0 : e+1] + Vec(x, height - y - 1);
+                es[y][x][e].next = &es[y][x][e+1 == n_edges ? 0 : e+1];
+                es[y][x][e].prev = &es[y][x][e == 0 ? n_edges-1 : e-1];
+                es[y][x][e].def = def;
+                initial++;
+                 // Connect edges
+                if (x > 0)
+                    for (uint pe = 0; pe < MAX_EDGES; pe++)
+                        if (es[y][x-1][pe].def)
+                            connect_edges(&es[y][x][e], &es[y][x-1][pe], &cancelled);
+                if (y > 0)
+                    for (uint pe = 0; pe < MAX_EDGES; pe++)
+                        if (es[y-1][x][pe].def)
+                            connect_edges(&es[y][x][e], &es[y-1][x][pe], &cancelled);
             }
-             // Connect tiles
-            if (x > 0)
-                try_connecting_tiles(td, &tilegeoms[y*width + (x - 1)], &connect_count);
-            if (y > 0)
-                try_connecting_tiles(td, &tilegeoms[(y - 1)*width + x], &connect_count);
         }
     }
-     // Merge edges with straight corners
+     // Merge edges
     for (uint y = 0; y < height; y++)
     for (uint x = 0; x < width; x++)
     for (uint e = 0; e < MAX_EDGES; e++) {
-        TileEdge* te = &tilegeoms[y*width + x].edges[e];
-        try_merging_edges(te, te->next, &merge_count);
+        if (es[y][x][e].def) {
+            while(merge_edges(&es[y][x][e], &merged, &eaten));
+        }
     }
      // The bodydef has already been manifested through phys::Object
      // Add the fixtures
     for (uint y = 0; y < height; y++)
     for (uint x = 0; x < width; x++)
     for (uint e = 0; e < MAX_EDGES; e++) {
-        try_creating_edge(b2body, &tilegeoms[y*width + x].edges[e], &final_count);
+        if (es[y][x][e].def) {
+            create_edge(b2body, &es[y][x][e], &final);
+        }
     }
-    tilemap_logger.log("Created tilemap...raw edges: %u, connections: %u, merges: %u, final edges: %u\n",
-        raw_count, connect_count, merge_count, final_count
+    tilemap_logger.log("Optimized tilemap edges.  initial:%u cancelled:%u merged:%u eaten:%u final:%u\n",
+        initial, cancelled, merged, eaten, final
     );
      // And...we're done.
+    delete[] es;
+    set_pos(pos);
 }
 
 }  // namespace geo
