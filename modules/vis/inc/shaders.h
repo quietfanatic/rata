@@ -2,6 +2,7 @@
 #define HAVE_VIS_SHADERS_H
 
 #include <stdexcept>
+#include <GL/glfw.h>
 #include "../../core/inc/resources.h"
 
 namespace vis {

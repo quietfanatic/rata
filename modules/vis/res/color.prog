@@ -1,0 +1,6 @@
+{
+    shaders: [
+        &"modules/vis/res/color.vert"
+        &"modules/vis/res/color.frag"
+    ]
+}
