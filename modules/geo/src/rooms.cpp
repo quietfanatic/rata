@@ -73,6 +73,7 @@ namespace geo {
         if (!origin->boundary.covers(pos)) {
             for (auto n : origin->neighbors) {
                 if (n->boundary.covers(pos)) {
+                    room = n;
                     link(n->residents);
                     if (beholder == this)
                         n->enter();
@@ -86,6 +87,7 @@ namespace geo {
                     geo_logger.log("Resident @%lx ended up in tumbolia.", this);
                 else
                     geo_logger.log("The Beholder has left the building.  Party's over.", this);
+                room = tumbolia();
                 link(tumbolia()->residents);
                 reclude();
             }
