@@ -296,6 +296,10 @@ namespace phys {
                             case b2Shape::e_edge: {
                                 auto b2es = static_cast<b2EdgeShape*>(b2s);
                                 vis::draw_line(b2es->m_vertex1, b2es->m_vertex2, fcolor);
+                                if (b2es->m_hasVertex0)
+                                    vis::draw_line(Vec(b2es->m_vertex0)-Vec(.25,.25), b2es->m_vertex1, (fcolor&~0xff)|0x3f);
+                                if (b2es->m_hasVertex3)
+                                    vis::draw_line(b2es->m_vertex2, Vec(b2es->m_vertex3)+Vec(.25,.25), (fcolor&~0xff)|0x3f);
                                 break;
                             }
                             case b2Shape::e_chain: {
