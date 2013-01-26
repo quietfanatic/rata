@@ -85,11 +85,7 @@ static bool merge_edges (TileEdge* te, uint* merged, uint* eaten) {
     if (ne == te)
         throw std::logic_error("The tile edge merging algorithm went wrong somewhere.\n");
     float angle = ang_diff((te->v2 - te->v1).ang(), (ne->v2 - ne->v1).ang());
-    fprintf(stderr, "Edges [[%g %g] [%g %g]] and [[%g %g] [%g %g]] angle:%g op:",
-        te->v1.x, te->v1.y, te->v2.x, te->v2.y, ne->v1.x, ne->v1.y, ne->v2.x, ne->v2.y, angle
-    );
     if (angle < 0.01 && te->def == ne->def) {
-        fprintf(stderr, "merge\n");
          // merge edges only with the same nature
         te->next = ne->next;
         te->next->prev = te;
@@ -99,7 +95,6 @@ static bool merge_edges (TileEdge* te, uint* merged, uint* eaten) {
         return true;
     }
     else if (angle > PI - 0.01) {
-        fprintf(stderr, "eat\n");
          // Different natured edges can eat one another though
         te->next = ne->next;
         te->next->prev = te;
@@ -111,7 +106,6 @@ static bool merge_edges (TileEdge* te, uint* merged, uint* eaten) {
         (*eaten)++;
         return true;
     }
-    fprintf(stderr, "ignore\n");
     return false;
 }
 static void create_edge (b2Body* b2body, TileEdge* te, uint* final) {
@@ -179,7 +173,7 @@ void Tilemap::start () {
             create_edge(b2body, &es[y][x][e], &final);
         }
     }
-    tilemap_logger.log("Optimized tilemap edges.  initial:%u cancelled:%u merged:%u eaten:%u final:%u\n",
+    tilemap_logger.log("Optimized tilemap edges.  initial:%u cancelled:%u merged:%u eaten:%u final:%u",
         initial, cancelled, merged, eaten, final
     );
      // And...we're done.
