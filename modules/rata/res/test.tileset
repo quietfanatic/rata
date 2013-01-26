@@ -1,0 +1,9 @@
+#"geo::Tileset" {
+    tiles: local([
+        solid = #"geo::TileDef" {
+            nature:{ b2:{ } coll_b:[ground] }
+            vertices:[[0 0] [0 1] [1 1] [1 0]]
+        }
+        [null solid]
+    ])
+}

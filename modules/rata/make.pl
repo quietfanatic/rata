@@ -24,6 +24,7 @@ workflow {
         ../core/tmp/state.o
         ../core/tmp/input.o
         ../geo/tmp/rooms.o
+        ../geo/tmp/tiles.o
         ../hacc/tmp/haccable_standard.o
         ../hacc/tmp/strings.o
         ../hacc/tmp/files.o
@@ -37,7 +38,9 @@ workflow {
         ../vis/tmp/sprites.o
         ../vis/tmp/shaders.o
         ../vis/tmp/models.o
+        ../vis/tmp/graffiti.o
         ../util/tmp/debug.o
+        ../util/tmp/math.o
         ../ent/tmp/various.o
     >;
     our @libs = qw(-lgc -lGL -lglfw -lSOIL ../../lib/libBox2D.a);
