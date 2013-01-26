@@ -115,6 +115,7 @@ HCB_BEGIN(Room)
     attr("boundary", member(&Room::boundary));
     attr("neighbors", member(&Room::neighbors));
     attr("furniture", member(&Room::furniture, optional<decltype(((Room*)NULL)->furniture)>()));
+    finish([](Room& r){ for (auto f : r.furniture) f->start(); });
 HCB_END(Room)
 HCB_BEGIN(Furniture)
     type_name("geo::Furniture");

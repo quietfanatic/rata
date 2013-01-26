@@ -33,6 +33,7 @@ namespace geo {
     struct Furniture {
         virtual void emerge () = 0;
         virtual void reclude () = 0;
+        virtual void start () { }
         virtual ~Furniture () { }
     };
 
