@@ -5,6 +5,7 @@
 #include "../../hacc/inc/haccable_standard.h"
 #include "../../hacc/inc/haccable_pointers.h"
 #include "../../util/inc/debug.h"
+#include "../../vis/inc/graffiti.h"
 
 using namespace phys;
 
@@ -60,7 +61,7 @@ HCB_END(b2EdgeShape)
 
 HCB_BEGIN(b2FixtureDef)
     type_name("b2FixtureDef");
-    attr("shape", member(&b2FixtureDef::shape));
+    attr("shape", member(&b2FixtureDef::shape, def((const b2Shape*)NULL)));
     attr("friction", member(&b2FixtureDef::friction, def(0.f)));
     attr("restitution", member(&b2FixtureDef::restitution, def(0.f)));
     attr("density", member(&b2FixtureDef::density, def(0.f)));
@@ -256,6 +257,59 @@ namespace phys {
 
     void Object::materialize () { b2body->SetActive(true); }
     void Object::dematerialize () { b2body->SetActive(false); }
+
+     // Debug fixture drawing
+    
+    struct Phys_Debug_Layer : core::Layer {
+        Phys_Debug_Layer () : core::Layer("G.M", "phys_debug", false) { }
+        void run () {
+            for (b2Body* b2b = space->GetBodyList(); b2b; b2b = b2b->GetNext()) {
+                if (b2b->IsActive()) {
+                    uint32 color = 0xffffff7f;
+                    switch (b2b->GetType()) {
+                        case b2_staticBody: color = 0x00ff007f; break;
+                        case b2_dynamicBody: color = 0x0000ff7f; break;
+                        case b2_kinematicBody: color = 0x00ffff7f; break;
+                        default: color = 0xffffff7f; break;  // shouldn't happen
+                    }
+                    vis::shift_graffiti(b2b->GetPosition());
+                    for (b2Fixture* b2f = b2b->GetFixtureList(); b2f; b2f = b2f->GetNext()) {
+                        uint32 fcolor = b2f->IsSensor() ? 0xff00ff7f : color;
+                        b2Shape* b2s = b2f->GetShape();
+                        switch (b2s->m_type) {
+                            case b2Shape::e_circle: {
+                                auto b2cs = static_cast<b2CircleShape*>(b2s);
+                                Vec pts [4];  // Just draw a diamond until draw_circle exists
+                                pts[0] = Vec(b2cs->m_p.x - b2cs->m_radius, b2cs->m_p.y);
+                                pts[1] = Vec(b2cs->m_p.x, b2cs->m_p.y - b2cs->m_radius);
+                                pts[2] = Vec(b2cs->m_p.x + b2cs->m_radius, b2cs->m_p.y);
+                                pts[3] = Vec(b2cs->m_p.x, b2cs->m_p.y + b2cs->m_radius);
+                                vis::draw_loop(4, pts, fcolor);
+                                break;
+                            }
+                            case b2Shape::e_polygon: {
+                                auto b2ps = static_cast<b2PolygonShape*>(b2s);
+                                 // I love binary compatibility
+                                vis::draw_loop(b2ps->m_vertexCount, (Vec*)b2ps->m_vertices, fcolor);
+                                break;
+                            }
+                            case b2Shape::e_edge: {
+                                auto b2es = static_cast<b2EdgeShape*>(b2s);
+                                vis::draw_line(b2es->m_vertex1, b2es->m_vertex2, fcolor);
+                                break;
+                            }
+                            case b2Shape::e_chain: {
+                                auto b2cs = static_cast<b2ChainShape*>(b2s);
+                                vis::draw_chain(b2cs->m_count, (Vec*)b2cs->m_vertices, fcolor);
+                                break;
+                            }
+                            default: { }  // shouldn't happen
+                        }
+                    }
+                }
+            }
+        }
+    } pdl;
 
 }
 
