@@ -3,17 +3,17 @@
 #include "../../core/inc/game.h"
 #include "../inc/graffiti.h"
 #include "../inc/shaders.h"
-#include "../../hacc/inc/haccable.h"
+#include "../../hacc/inc/haccable_files.h"
 
 namespace vis {
 
-    static vis::Program*& graffiti_program () {
-        static auto r = hacc::require_id<vis::Program>("modules/vis/res/color.prog");
-        return r;
-    }
+    static vis::Program* graffiti_program;
 
     struct Graffiti_Layer : core::Layer {
         Graffiti_Layer () : core::Layer("F.M", "graffiti") { }
+        void init () {
+            graffiti_program = hacc::reference_file<Program>("modules/vis/res/color.prog");
+        }
         void run () {
             glLoadIdentity();  // MODELVIEW matrix
             glDisable(GL_TEXTURE_2D);
@@ -38,7 +38,7 @@ namespace vis {
         draw_primitive(GL_LINE_LOOP, n_pts, pts, color);
     }
     void draw_primitive (uint type, uint n_pts, Vec* pts, uint32 color) {
-        graffiti_program()->use();
+        graffiti_program->use();
         glColor4ub(color >> 24, color >> 16, color >> 8, color);
         glBegin(type);
         for (uint i = 0; i < n_pts; i++)

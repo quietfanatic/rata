@@ -61,7 +61,7 @@ namespace vis {
     Shader::Shader (std::string name) : Resource(name) { reload(); }
     Shader::~Shader () {
         static auto glDeleteShader = glproc<void (GLuint)>("glDeleteShader");
-        glDeleteShader(glid);
+        if (glid) glDeleteShader(glid);
     }
     static Program* currently_using = NULL;
 
@@ -116,14 +116,6 @@ namespace vis {
         }
     }
 
-    void Program::reload () {
-        hacc::update_from_file(*this, name);
-        link();
-    }
-    Program::Program (std::string name) : Resource(name) {
-        hacc::update_from_file(*this, name);
-        link();
-    }
     Program::~Program () {
         static auto glDeleteProgram = glproc<void (GLuint)>("glDeleteProgram");
         if (glid) glDeleteProgram(glid);
@@ -149,12 +141,10 @@ HCB_BEGIN(Shader)
     resource_haccability<Shader, &shaders>();
 HCB_END(Shader)
 
-static ResourceGroup programs;
 HCB_BEGIN(Program)
     type_name("vis::Program");
-    resource_haccability<Program, &programs>();
+    attr("name", member(&Program::name, def(std::string("anonymous program"))));
     attr("shaders", member(&Program::shaders));
+    finish([](Program& p){ p.link(); });
 HCB_END(Program)
-
-
 

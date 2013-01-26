@@ -108,7 +108,7 @@ namespace vis {
         }
         void init () {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
-            sprite_program = hacc::require_id<Program>("modules/vis/res/sprite.prog");
+            sprite_program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
             sprite_program->use();
             int tex_uni = sprite_program->require_uniform("tex");
             glUniform1i(tex_uni, 0);  // Texture unit 0

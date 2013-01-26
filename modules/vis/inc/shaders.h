@@ -24,15 +24,14 @@ namespace vis {
         ~Shader ();
     };
 
-    struct Program : Resource {
+    struct Program {
+        std::string name;
         uint glid = 0;
         std::vector<Shader*> shaders;
 
         int require_uniform (const char* name);
         void use ();
         void link ();
-        void reload ();
-        Program (std::string name);
         ~Program ();
     };
 
