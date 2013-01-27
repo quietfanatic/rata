@@ -200,7 +200,6 @@ struct Tilemap_Layer : core::Layer {
         }
     }
     void run () {
-        glDisable(GL_DEPTH_TEST);
         glLoadIdentity();  // MODELVIEW
         tiles_program->use();
         for (Tilemap* map = active_tilemaps.first(); map; map = map->next()) {
