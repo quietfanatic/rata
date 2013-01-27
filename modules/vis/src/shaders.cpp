@@ -5,7 +5,7 @@
 
 namespace vis {
 
-    static GLenum diagnose_opengl (std::string s = "") {
+    GLenum diagnose_opengl (std::string s = "") {
         GLenum err = glGetError();
         if (err)
             fprintf(stderr, "OpenGL error %04x %s\n", err, s.c_str());

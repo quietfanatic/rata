@@ -113,7 +113,7 @@ namespace vis {
             int tex_uni = sprite_program->require_uniform("tex");
             glUniform1i(tex_uni, 0);  // Texture unit 0
             if (diagnose_opengl("after setting uniform")) {
-                throw std::logic_error("image_drawing init failed due to GL error");
+                throw std::logic_error("sprites init failed due to GL error");
             }
         }
     } sprite_layer;

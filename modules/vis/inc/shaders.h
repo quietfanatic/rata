@@ -15,6 +15,7 @@ namespace vis {
         }
         return r;
     }
+    GLenum diagnose_opengl (std::string when);
 
     struct Shader : Resource {
         uint glid = 0;
