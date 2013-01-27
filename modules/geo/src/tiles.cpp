@@ -3,6 +3,8 @@
 #include "../../hacc/inc/everything.h"
 #include "../../util/inc/math.h"
 #include "../../util/inc/debug.h"
+#include "../../vis/inc/shaders.h"
+#include "../../core/inc/game.h"
 #include "../inc/tiles.h"
 
 using namespace geo;
@@ -180,6 +182,53 @@ void Tilemap::start () {
     delete[] es;
     set_pos(pos);
 }
+
+ // Now for drawing tilemaps.
+
+static vis::Program* tiles_program;
+
+struct Tilemap_Layer : core::Layer {
+    Tilemap_Layer () : core::Layer("E.M", "tilemaps") { }
+    void init () {
+        static auto glUniform1i = vis::glproc<void (GLint, GLint)>("glUniform1i");
+        tiles_program = hacc::reference_file<vis::Program>("modules/geo/res/tiles.prog");
+        tiles_program->use();
+        int tex_uni = tiles_program->require_uniform("tex");
+        glUniform1i(tex_uni, 0);  // Texture unit 0
+        if (vis::diagnose_opengl("after setting uniform")) {
+            throw std::logic_error("tilemaps layer init failed due to GL error");
+        }
+    }
+    void run () {
+        glDisable(GL_DEPTH_TEST);
+        glLoadIdentity();  // MODELVIEW
+        tiles_program->use();
+        for (Tilemap* map = active_tilemaps.first(); map; map = map->next()) {
+            glBindTexture(GL_TEXTURE_2D, map->texture->tex);
+            glBegin(GL_QUADS);
+            Vec ts = map->texture->size;
+            for (uint y = 0; y < map->height; y++)
+            for (uint x = 0; x < map->width; x++) {
+                uint16 tile = map->tiles[y*map->width + x] & 0x3fff;
+                if (tile == 0) continue;
+                float tex_x = (tile % ((int)ts.x/16)) / (ts.x/16);
+                float tex_y = 1 - (tile / ((int)ts.x/16)) / ts.y;
+                Vec pos = map->Object::pos() + Vec(x, map->height - y - 1);
+                glTexCoord2f(tex_x, tex_y);
+                glVertex2f(pos.x, pos.y);
+                glTexCoord2f(tex_x + 16/ts.x, tex_y);
+                glVertex2f(pos.x + 1, pos.y);
+                glTexCoord2f(tex_x + 16/ts.x, tex_y + 16/ts.y);
+                glVertex2f(pos.x + 1, pos.y + 1);
+                glTexCoord2f(tex_x, tex_y + 16/ts.y);
+                glVertex2f(pos.x, pos.y + 1);
+            }
+            glEnd();
+        }
+    }
+} tilemap_layer;
+
+
 
 }  // namespace geo
 
