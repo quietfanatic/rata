@@ -44,16 +44,21 @@ namespace vis {
     };
 
     struct Frame {
+        Layout* parent;
         std::string name;
         Vec offset;
         Rect box;
         std::vector<Vec> points;
     };
 
-     // This may store a VBO in the future.
     struct Layout {
         Vec size;
         std::vector<Frame> frames;
+        uint vbo_id;
+        uint vao_id;
+
+        void finish ();
+        ~Layout ();
 
         Frame* frame_named (std::string);
     };

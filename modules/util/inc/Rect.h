@@ -17,7 +17,9 @@ struct Rect {
         l(lb.x), b(lb.y), r(rt.x), t(rt.y)
     { }
     CE Vec lb () const { return Vec(l, b); }
+    CE Vec rb () const { return Vec(r, b); }
     CE Vec rt () const { return Vec(r, t); }
+    CE Vec lt () const { return Vec(l, t); }
     CE bool is_defined () const { return l==l && b==b && r==r && t==t; }
     CE bool is_proper () const { return l <= r && b <= t; }
     CE bool covers (Vec p) const {

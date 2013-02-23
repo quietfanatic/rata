@@ -4,15 +4,9 @@
 #include <SOIL/SOIL.h>
 #include "../../hacc/inc/everything.h"
 #include "../inc/images.h"
+#include "../inc/shaders.h"  // for glproc
 
 namespace vis {
-
-    static GLenum diagnose_opengl (std::string s = "") {
-        GLenum err = glGetError();
-        if (err)
-            fprintf(stderr, "OpenGL error %04x %s\n", err, s.c_str());
-        return err;
-    }
 
     void Texture::load (Image* image) {
         if (!size.is_defined()) size = image->size;
@@ -79,6 +73,67 @@ namespace vis {
         return NULL;
     }
 
+    struct Layout_VBO_Data {
+        Vec lbp;
+        Vec lbt;
+        Vec rbp;
+        Vec rbt;
+        Vec rtp;
+        Vec rtt;
+        Vec ltp;
+        Vec ltt;
+    };
+
+    void Layout::finish () {
+        for (Frame& f : frames)
+            f.parent = this;
+        static auto glGenBuffers = glproc<void (GLsizei, GLuint*)>("glGenBuffers");
+        static auto glBindBuffer = glproc<void (GLenum, GLuint)>("glBindBuffer");
+        static auto glBufferData = glproc<void (GLenum, GLsizeiptr, const GLvoid*, GLenum)>("glBufferData");
+        static auto glGenVertexArrays = glproc<void (GLsizei, GLuint*)>("glGenVertexArrays");
+        static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
+        static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
+        static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
+         // Create OpenGL VBO
+        Layout_VBO_Data data [frames.size()];
+        for (uint i = 0; i < frames.size(); i++) {
+            data[i].lbp = frames[i].box.lb() * PX;
+            data[i].lbt = frames[i].offset + frames[i].box.lb();
+            data[i].lbt.x /= size.x;
+            data[i].lbt.y /= size.y;
+            data[i].rbp = frames[i].box.rb() * PX;
+            data[i].rbt = frames[i].offset + frames[i].box.rb();
+            data[i].rbt.x /= size.x;
+            data[i].rbt.y /= size.y;
+            data[i].rtp = frames[i].box.rt() * PX;
+            data[i].rtt = frames[i].offset + frames[i].box.rt();
+            data[i].rtt.x /= size.x;
+            data[i].rtt.y /= size.y;
+            data[i].ltp = frames[i].box.lt() * PX;
+            data[i].ltt = frames[i].offset + frames[i].box.lt();
+            data[i].ltt.x /= size.x;
+            data[i].ltt.y /= size.y;
+        }
+        glGenBuffers(1, &vbo_id);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
+        glBufferData(GL_ARRAY_BUFFER, frames.size() * sizeof(Layout_VBO_Data), data, GL_STATIC_DRAW);
+         // And create the VAO.
+        glGenVertexArrays(1, &vao_id);
+        glBindVertexArray(vao_id);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+         // index, n_elements, type, normalize, stride, offset
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)(sizeof(Vec)));
+
+    }
+    Layout::~Layout () {
+        static auto glDeleteBuffers = glproc<void (GLsizei, const GLuint*)>("glDeleteBuffers");
+        static auto glDeleteVertexArrays = glproc<void (GLsizei, const GLuint*)>("glDeleteVertexArrays");
+        glDeleteBuffers(1, &vbo_id);
+        glDeleteVertexArrays(1, &vao_id);
+    }
+
     Frame* Layout::frame_named (std::string name) {
         for (Frame& s : frames)
             if (s.name == name)
@@ -122,6 +177,9 @@ HCB_BEGIN(Layout)
     attr("frames", member(&Layout::frames));
     get_attr([](Layout& layout, std::string name){
         return layout.frame_named(name);
+    });
+    finish([](Layout& layout){
+        layout.finish();
     });
 HCB_END(Layout)
  // For convenience

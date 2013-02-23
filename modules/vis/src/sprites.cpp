@@ -19,12 +19,19 @@ namespace vis {
 
     static Logger draw_sprite_logger ("draw_sprite", false);
     static Program* sprite_program = NULL;
+     // uniforms
+    GLint sprite_program_tex = 0;
+    GLint sprite_program_camera_pos = 0;
+    GLint sprite_program_model_pos = 0;
+     // vertex attributes
+    GLint sprite_program_vert_pos = 0;
+    GLint sprite_program_vert_tex = 1;
+    GLuint last_bound_vao = 0;
 
     void draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
+        static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
+        static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
          // manipulate MODELVIEW matrix
-        glLoadIdentity();
-        glTranslatef(p.x, p.y, z);
-        glScalef(fliph ? -PX : PX, flipv ? -PX : PX, 1);
 
         if (draw_sprite_logger.on) {
             draw_sprite_logger.log("tex: %s frame: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
@@ -33,21 +40,21 @@ namespace vis {
                 p.x, p.y, fliph, flipv, z
             );
         }
-         // TODO: do this when loading the layout.
-        float tl = (frame->offset.x + frame->box.l) / tex->size.x;
-        float tb = (frame->offset.y + frame->box.b) / tex->size.y;
-        float tr = (frame->offset.x + frame->box.r) / tex->size.x;
-        float tt = (frame->offset.y + frame->box.t) / tex->size.y;
+
 
         sprite_program->use();
+        glUniform2f(sprite_program_model_pos, p.x, p.y);
+//        glUniform2f(sprite_program_model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0, 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->tex);
-         // Direct Mode is still the easiest for drawing individual images.
-        glBegin(GL_QUADS);
-            glTexCoord2f(tl, 1-tb); glVertex2f(frame->box.l, frame->box.b);
-            glTexCoord2f(tr, 1-tb); glVertex2f(frame->box.r, frame->box.b);
-            glTexCoord2f(tr, 1-tt); glVertex2f(frame->box.r, frame->box.t);
-            glTexCoord2f(tl, 1-tt); glVertex2f(frame->box.l, frame->box.t);
-        glEnd();
+
+        if (last_bound_vao != frame->parent->vao_id) {
+            last_bound_vao = frame->parent->vao_id;
+            glBindVertexArray(frame->parent->vao_id);
+        }
+
+        glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
+        diagnose_opengl("After rendering a sprite");
+
     }
 
     struct Camera_Setup_Layer : core::Layer {
@@ -108,11 +115,18 @@ namespace vis {
         }
         void init () {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
+            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+            static auto glBindAttribLocation = glproc<void (GLuint, GLuint, const GLchar*)>("glBindAttribLocation");
             sprite_program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
             sprite_program->use();
-            int tex_uni = sprite_program->require_uniform("tex");
-            glUniform1i(tex_uni, 0);  // Texture unit 0
-            if (diagnose_opengl("after setting uniform")) {
+            sprite_program_tex = sprite_program->require_uniform("tex");
+            sprite_program_camera_pos = sprite_program->require_uniform("camera_pos");
+            sprite_program_model_pos = sprite_program->require_uniform("model_pos");
+            glUniform1i(sprite_program_tex, 0);  // Texture unit 0
+            glUniform2f(sprite_program_camera_pos, 0, 0);  // TODO: Control the camera with this
+            glBindAttribLocation(sprite_program->glid, sprite_program_vert_pos, "vert_pos");
+            glBindAttribLocation(sprite_program->glid, sprite_program_vert_tex, "vert_tex");
+            if (diagnose_opengl("after setting uniforms and stuff")) {
                 throw std::logic_error("sprites init failed due to GL error");
             }
         }
