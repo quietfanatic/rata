@@ -135,7 +135,6 @@ namespace vis {
          // index, n_elements, type, normalize, stride, offset
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbp));
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbt));
-        glBindVertexArray(0);
 
     }
     Layout::~Layout () {

@@ -26,7 +26,6 @@ namespace vis {
      // vertex attributes
 //    GLint sprite_program_vert_pos = 0;
 //    GLint sprite_program_vert_tex = 1;
-    GLuint last_bound_vao = 0;
 
     void draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
@@ -45,15 +44,10 @@ namespace vis {
         glUniform2f(sprite_program_model_pos, p.x, p.y);
 //        glUniform2f(sprite_program_model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0, 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->tex);
-
-        if (last_bound_vao != frame->parent->vao_id) {
-            last_bound_vao = frame->parent->vao_id;
-            glBindVertexArray(frame->parent->vao_id);
-        }
-
+        glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
-        diagnose_opengl("After rendering a sprite");
 
+        diagnose_opengl("After rendering a sprite");
     }
 
     struct Camera_Setup_Layer : core::Layer {

@@ -1,7 +1,11 @@
 #"vis::Program" {
     shaders:[
-        &"modules/vis/res/sprite.vert"
+        &"modules/geo/res/tiles.vert"
         &"modules/geo/res/tiles.frag"
     ]
+    attributes:{
+        vert_pos: 0
+        vert_tex: 1
+    }
 }
 

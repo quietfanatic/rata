@@ -23,10 +23,14 @@ namespace geo {
         uint32 width;
         uint32 height;
         std::vector<uint16> tiles;
+        uint vbo_id;
+        uint vao_id;
+        size_t vao_size;
 
         void emerge ();
         void reclude ();
         void start ();
+
         Tilemap ();
     };
 
