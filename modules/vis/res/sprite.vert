@@ -10,7 +10,7 @@ attribute vec2 vert_tex;
 varying vec2 tex_coords;
 
 void main () {
-    gl_Position.xy = (model_pos.xy - camera_pos + vert_pos) * model_scale / vec2(10.0, 7.5);
+    gl_Position.xy = (model_pos.xy - camera_pos + vert_pos * model_scale) / vec2(10.0, 7.5);
     gl_Position.zw = vec2(model_pos.z, 1.0);
     tex_coords = vert_tex;
 }
