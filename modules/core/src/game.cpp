@@ -96,11 +96,20 @@ HCB_END(Phase)
 
 struct Allow_Command : Command {
     Phase* phase;
-    void operator () () { if (phase) phase->on = true; }
+    void operator () () {
+        if (phase)
+            phase->on = true;
+        else {
+            printf("Available phases are:\n");
+            for (auto p : game_phases()) {
+                printf("\t%s \"%s\" %s\n", p->name.c_str(), p->order.c_str(), p->on ? "true" : "false");
+            }
+        }
+    }
 };
 HCB_BEGIN(Allow_Command)
     base<Command>("allow");
-    elem(member(&Allow_Command::phase));
+    elem(member(&Allow_Command::phase, def((Phase*)NULL)));
 HCB_END(Allow_Command)
 
 struct Disallow_Command : Command {
@@ -126,11 +135,20 @@ HCB_END(Layer)
 
 struct Show_Command : Command {
     Layer* layer;
-    void operator () () { if (layer) layer->on = true; }
+    void operator () () {
+        if (layer)
+            layer->on = true;
+        else {
+            printf("Available layers are:\n");
+            for (auto l : draw_layers()) {
+                printf("\t%s \"%s\" %s\n", l->name.c_str(), l->order.c_str(), l->on ? "true" : "false");
+            }
+        }
+    }
 };
 HCB_BEGIN(Show_Command)
     base<Command>("show");
-    elem(member(&Show_Command::layer));
+    elem(member(&Show_Command::layer, def((Layer*)NULL)));
 HCB_END(Show_Command)
 
 struct Hide_Command : Command {
