@@ -8,18 +8,30 @@
 namespace vis {
 
     static vis::Program* graffiti_program;
+    static int graffiti_program_camera_pos = 0;
+    static int graffiti_program_model_pos = 0;
+    static int graffiti_program_color = 0;
 
     struct Graffiti_Layer : core::Layer {
         Graffiti_Layer () : core::Layer("F.M", "graffiti") { }
         void init () {
+            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             graffiti_program = hacc::reference_file<Program>("modules/vis/res/color.prog");
+            graffiti_program_camera_pos = graffiti_program->require_uniform("camera_pos");
+            graffiti_program_model_pos = graffiti_program->require_uniform("model_pos");
+            graffiti_program_color = graffiti_program->require_uniform("color");
+            glUniform2f(graffiti_program_camera_pos, 10.0, 7.5);
         }
         void run () {
-            glLoadIdentity();  // MODELVIEW matrix
+            static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
+            static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
             glDisable(GL_TEXTURE_2D);
             glDisable(GL_DEPTH_TEST);
+            glEnable(GL_VERTEX_ARRAY);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBindVertexArray(0);
+            glEnableVertexAttribArray(0);
         }
     } graffiti_layer;
 
@@ -30,24 +42,34 @@ namespace vis {
         draw_chain(2, pts, color, width);
     }
     void draw_chain (uint n_pts, Vec* pts, uint32 color, float width) {
+        printf("Drawing a chain\n");
         glLineWidth(width);
         draw_primitive(GL_LINE_STRIP, n_pts, pts, color);
     }
     void draw_loop (uint n_pts, Vec* pts, uint32 color, float width) {
+        printf("Drawing a loop\n");
         glLineWidth(width);
         draw_primitive(GL_LINE_LOOP, n_pts, pts, color);
     }
     void draw_primitive (uint type, uint n_pts, Vec* pts, uint32 color) {
+        static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
+        static auto glUniform4f = glproc<void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)>("glUniform4f");
+        static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
+        glBindVertexArray(0);
         graffiti_program->use();
-        glColor4ub(color >> 24, color >> 16, color >> 8, color);
-        glBegin(type);
-        for (uint i = 0; i < n_pts; i++)
-            glVertex2f(pts[i].x, pts[i].y);
-        glEnd();
+        glUniform4f(graffiti_program_color,
+            ((color >> 24) & 255) / 255.0,
+            ((color >> 16) & 255) / 255.0,
+            ((color >> 8) & 255) / 255.0,
+            (color & 255) / 255.0
+        );
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, pts);
+        glDrawArrays(type, 0, n_pts);
+        diagnose_opengl("after drawing some graffiti");
     }
-    void shift_graffiti (Vec new_pos) {
-        glLoadIdentity();
-        glTranslatef(new_pos.x, new_pos.y, 0);
+    void graffiti_pos (Vec pos) {
+        static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+        glUniform2f(graffiti_program_model_pos, pos.x, pos.y);
     }
 
 }

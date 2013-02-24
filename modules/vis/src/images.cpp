@@ -120,10 +120,6 @@ namespace vis {
             data[i].ltt.y /= size.y;
             data[i].ltt.y = 1 - data[i].ltt.y;
         }
-        printf("Some texture coordinates: [%g %g] [%g %g] [%g %g] [%g %g]\n",
-            data[0].lbt.x, data[0].lbt.y, data[0].rbt.x, data[0].rbt.y,
-            data[0].rtt.x, data[0].rtt.y, data[0].ltt.x, data[0].ltt.y
-        );
         glGenBuffers(1, &vbo_id);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
         glBufferData(GL_ARRAY_BUFFER, frames.size() * sizeof(Layout_VBO_Data), data, GL_STATIC_DRAW);
@@ -135,6 +131,8 @@ namespace vis {
          // index, n_elements, type, normalize, stride, offset
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbp));
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbt));
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        diagnose_opengl("after creating a layout vao");
 
     }
     Layout::~Layout () {

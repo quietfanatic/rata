@@ -226,6 +226,7 @@ void Tilemap::start () {
      // index, n_elements, type, normalize, stride, offset
     glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tilemap_Vertex), (void*)offsetof(Tilemap_Vertex, px));
     glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tilemap_Vertex), (void*)offsetof(Tilemap_Vertex, tx));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
      // Done.
     delete[] vdats;
 

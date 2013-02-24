@@ -272,7 +272,7 @@ namespace phys {
                         case b2_kinematicBody: color = 0x00ffff7f; break;
                         default: color = 0xffffff7f; break;  // shouldn't happen
                     }
-                    vis::shift_graffiti(b2b->GetPosition());
+                    vis::graffiti_pos(b2b->GetPosition());
                     for (b2Fixture* b2f = b2b->GetFixtureList(); b2f; b2f = b2f->GetNext()) {
                         uint32 fcolor = b2f->IsSensor() ? 0xff00ff7f : color;
                         b2Shape* b2s = b2f->GetShape();
