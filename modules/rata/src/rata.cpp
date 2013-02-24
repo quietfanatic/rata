@@ -37,7 +37,7 @@ struct Rata : Stateful, Object, Grounded, Resident, Draws_Sprites {
 
     Feet feet;
     Model model;
-    uint8 direction = 1;
+    int8 direction = 1;
 
     void draw () {
         static auto stand = skel()->poses.named("stand");
