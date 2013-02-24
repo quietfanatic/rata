@@ -23,6 +23,7 @@ namespace vis {
     GLint sprite_program_tex = 0;
     GLint sprite_program_camera_pos = 0;
     GLint sprite_program_model_pos = 0;
+    GLint sprite_program_model_scale = 0;
      // vertex attributes
 //    GLint sprite_program_vert_pos = 0;
 //    GLint sprite_program_vert_tex = 1;
@@ -42,7 +43,7 @@ namespace vis {
 
         sprite_program->use();
         glUniform2f(sprite_program_model_pos, p.x, p.y);
-//        glUniform2f(sprite_program_model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0, 1.0);
+        glUniform2f(sprite_program_model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->tex);
         glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
@@ -114,6 +115,7 @@ namespace vis {
             sprite_program_tex = sprite_program->require_uniform("tex");
             sprite_program_camera_pos = sprite_program->require_uniform("camera_pos");
             sprite_program_model_pos = sprite_program->require_uniform("model_pos");
+            sprite_program_model_scale = sprite_program->require_uniform("model_scale");
             glUniform1i(sprite_program_tex, 0);  // Texture unit 0
             glUniform2f(sprite_program_camera_pos, 10, 7.5);  // TODO: Control the camera with this
             if (diagnose_opengl("after setting uniforms and stuff")) {
