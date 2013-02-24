@@ -110,6 +110,10 @@ namespace vis {
             segs[skel->seg_index(app.target)].pose = &app;
         }
     }
+    void Model::apply_pose_index (uint i) {
+        if (!skel) return;
+        apply_pose(&skel->poses.at(i));
+    }
     void Model::apply_skin (Skin* skin) {
         for (auto& app : skin->apps) {
             segs[skel->seg_index(app.target)].skin = &app;

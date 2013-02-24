@@ -23,6 +23,8 @@ workflow {
         ../core/tmp/resources.o 
         ../core/tmp/state.o
         ../core/tmp/input.o
+        ../ent/tmp/humans.o
+        ../ent/tmp/various.o
         ../geo/tmp/rooms.o
         ../geo/tmp/tiles.o
         ../hacc/tmp/haccable_standard.o
@@ -41,14 +43,13 @@ workflow {
         ../vis/tmp/graffiti.o
         ../util/tmp/debug.o
         ../util/tmp/math.o
-        ../ent/tmp/various.o
     >;
     our @libs = qw(-lgc -lGL -lglfw -lSOIL ../../lib/libBox2D.a);
 
     include '../..';
 
     subdep('src/main.cpp', [qw<../core/inc/state.h>]);
-    subdep('src/rata.cpp', [qw<../hacc/inc/everything.h ../phys/inc/phys.h ../vis/inc/models.h ../vis/inc/sprites.h ../core/inc/state.h>]);
+    subdep('src/rata.cpp', [qw<../hacc/inc/everything.h ../ent/inc/humans.h ../vis/inc/sprites.h ../core/inc/state.h ../core/inc/input.h>]);
 
     cppc_rule('tmp/main.o', 'src/main.cpp');
     cppc_rule('tmp/rata.o', 'src/rata.cpp');

@@ -1,18 +1,20 @@
 {
     things:[
         {Rata:{
-            object: { pos:[10 10.5] }
-            resident: { room: file("modules/rata/res/test.room") }
-            grounded: { ground:null }
-            direction: 1
+            biped:{
+                object:{ pos:[10 10.5] }
+                resident:{ room:file("modules/rata/res/test.room") }
+                grounded:{ ground:null }
+                direction:1
+            }
         }}
         {Test_Actor:{
-            object: { pos:[10 7.5] }
-            texture: file("modules/vis/res/test.image").ALL
-            frame: file("modules/vis/res/test.layout").green
+            object:{ pos:[10 7.5] }
+            texture:file("modules/vis/res/test.image").ALL
+            frame:file("modules/vis/res/test.layout").green
         }}
         {Boundary:{
-            object: { pos:[0 0] }
+            object:{ pos:[0 0] }
         }}
     ]
 }

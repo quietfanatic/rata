@@ -4,7 +4,10 @@
 #include "../../phys/inc/phys.h"
 #include "../../vis/inc/sprites.h"
 
-auto test_bdf = hacc::reference_file<phys::BodyDef>("modules/ent/res/test_actor.bdf");
+static phys::BodyDef*& test_bdf () {
+    static auto test_bdf = hacc::reference_file<phys::BodyDef>("modules/ent/res/test_actor.bdf");
+    return test_bdf;
+}
 struct Test_Actor : core::Stateful, phys::Object, vis::Sprite {
     vis::Texture* texture;
     vis::Frame* frame;
@@ -13,7 +16,7 @@ struct Test_Actor : core::Stateful, phys::Object, vis::Sprite {
     vis::Frame* sprite_frame () { return frame; }
 
 
-    Test_Actor () : Object(test_bdf) { }
+    Test_Actor () : Object(test_bdf()) { }
     void start () { materialize(); appear(); }
 };
 
@@ -24,9 +27,12 @@ HCB_BEGIN(Test_Actor)
     attr("frame", member(&Test_Actor::frame));
 HCB_END(Test_Actor)
 
-auto boundary_bdf = hacc::reference_file<phys::BodyDef>("modules/ent/res/boundary.bdf");
+static phys::BodyDef*& boundary_bdf () {
+    static auto boundary_bdf = hacc::reference_file<phys::BodyDef>("modules/ent/res/boundary.bdf");
+    return boundary_bdf;
+}
 struct Boundary : core::Stateful, phys::Object {
-    Boundary () : Object(boundary_bdf) { }
+    Boundary () : Object(boundary_bdf()) { }
     void start () { materialize(); }
 };
 

@@ -70,6 +70,7 @@ namespace vis {
 
         Vec offset_of (Skel::Seg* seg);
         void apply_pose (Pose*);
+        void apply_pose_index (uint);
         void apply_skin (Skin*);
 
         void draw_seg (Model::Seg* ms, Skel::Seg* ss, Vec pos, bool fh, bool fv, float z);
