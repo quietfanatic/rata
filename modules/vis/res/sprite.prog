@@ -3,4 +3,8 @@
         &"modules/vis/res/sprite.vert"
         &"modules/vis/res/sprite.frag"
     ]
+    attributes: {
+        vert_pos: 0
+        vert_tex: 1
+    }
 }

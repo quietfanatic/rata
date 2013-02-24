@@ -77,6 +77,7 @@ namespace vis {
 
         static auto glCreateProgram = glproc<GLuint ()>("glCreateProgram");
         static auto glAttachShader = glproc<void (GLuint, GLuint)>("glAttachShader");
+        static auto glBindAttribLocation = glproc<void (GLuint, GLuint, const GLchar*)>("glBindAttribLocation");
         static auto glLinkProgram = glproc<void (GLuint)>("glLinkProgram");
         static auto glGetProgramiv = glproc<void (GLuint, GLenum, GLint*)>("glGetProgramiv");
         static auto glGetProgramInfoLog = glproc<void (GLuint, GLsizei, GLsizei*, GLchar*)>("glGetProgramInfoLog");
@@ -94,6 +95,9 @@ namespace vis {
                 if (diagnose_opengl("after attaching shader " + s->name)) {
                     throw std::logic_error("Look up the above GL error code.");
                 }
+            }
+            for (auto& va : attributes) {
+                glBindAttribLocation(newid, va.second, va.first.c_str());
             }
             glLinkProgram(newid);
             GLint status; glGetProgramiv(newid, GL_LINK_STATUS, &status);
@@ -145,6 +149,7 @@ HCB_BEGIN(Program)
     type_name("vis::Program");
     attr("name", member(&Program::name, def(std::string("anonymous program"))));
     attr("shaders", member(&Program::shaders));
+    attr("attributes", member(&Program::attributes, optional<decltype(((Program*)NULL)->attributes)>()));
     finish([](Program& p){ p.link(); });
 HCB_END(Program)
 

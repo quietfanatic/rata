@@ -24,14 +24,13 @@ namespace vis {
     GLint sprite_program_camera_pos = 0;
     GLint sprite_program_model_pos = 0;
      // vertex attributes
-    GLint sprite_program_vert_pos = 0;
-    GLint sprite_program_vert_tex = 1;
+//    GLint sprite_program_vert_pos = 0;
+//    GLint sprite_program_vert_tex = 1;
     GLuint last_bound_vao = 0;
 
     void draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
         static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-         // manipulate MODELVIEW matrix
 
         if (draw_sprite_logger.on) {
             draw_sprite_logger.log("tex: %s frame: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
@@ -116,16 +115,13 @@ namespace vis {
         void init () {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
             static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-            static auto glBindAttribLocation = glproc<void (GLuint, GLuint, const GLchar*)>("glBindAttribLocation");
             sprite_program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
             sprite_program->use();
             sprite_program_tex = sprite_program->require_uniform("tex");
             sprite_program_camera_pos = sprite_program->require_uniform("camera_pos");
             sprite_program_model_pos = sprite_program->require_uniform("model_pos");
             glUniform1i(sprite_program_tex, 0);  // Texture unit 0
-            glUniform2f(sprite_program_camera_pos, 0, 0);  // TODO: Control the camera with this
-            glBindAttribLocation(sprite_program->glid, sprite_program_vert_pos, "vert_pos");
-            glBindAttribLocation(sprite_program->glid, sprite_program_vert_tex, "vert_tex");
+            glUniform2f(sprite_program_camera_pos, 10, 7.5);  // TODO: Control the camera with this
             if (diagnose_opengl("after setting uniforms and stuff")) {
                 throw std::logic_error("sprites init failed due to GL error");
             }

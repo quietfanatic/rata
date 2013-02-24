@@ -28,6 +28,8 @@ namespace vis {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         }
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
         if (diagnose_opengl("after loading a texture")) {
             throw std::logic_error("OpenGL error");
         }
@@ -101,19 +103,27 @@ namespace vis {
             data[i].lbt = frames[i].offset + frames[i].box.lb();
             data[i].lbt.x /= size.x;
             data[i].lbt.y /= size.y;
+            data[i].lbt.y = 1 - data[i].lbt.y;
             data[i].rbp = frames[i].box.rb() * PX;
             data[i].rbt = frames[i].offset + frames[i].box.rb();
             data[i].rbt.x /= size.x;
             data[i].rbt.y /= size.y;
+            data[i].rbt.y = 1 - data[i].rbt.y;
             data[i].rtp = frames[i].box.rt() * PX;
             data[i].rtt = frames[i].offset + frames[i].box.rt();
             data[i].rtt.x /= size.x;
             data[i].rtt.y /= size.y;
+            data[i].rtt.y = 1 - data[i].rtt.y;
             data[i].ltp = frames[i].box.lt() * PX;
             data[i].ltt = frames[i].offset + frames[i].box.lt();
             data[i].ltt.x /= size.x;
             data[i].ltt.y /= size.y;
+            data[i].ltt.y = 1 - data[i].ltt.y;
         }
+        printf("Some texture coordinates: [%g %g] [%g %g] [%g %g] [%g %g]\n",
+            data[0].lbt.x, data[0].lbt.y, data[0].rbt.x, data[0].rbt.y,
+            data[0].rtt.x, data[0].rtt.y, data[0].ltt.x, data[0].ltt.y
+        );
         glGenBuffers(1, &vbo_id);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
         glBufferData(GL_ARRAY_BUFFER, frames.size() * sizeof(Layout_VBO_Data), data, GL_STATIC_DRAW);
@@ -123,8 +133,9 @@ namespace vis {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
          // index, n_elements, type, normalize, stride, offset
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)(sizeof(Vec)));
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbp));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbt));
+        glBindVertexArray(0);
 
     }
     Layout::~Layout () {
