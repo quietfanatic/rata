@@ -31,6 +31,7 @@ namespace vis {
     void draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
         static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+        static auto glUniform3f = glproc<void (GLint, GLfloat, GLfloat, GLfloat)>("glUniform3f");
 
         if (draw_sprite_logger.on) {
             draw_sprite_logger.log("tex: %s frame: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
@@ -42,7 +43,7 @@ namespace vis {
 
 
         sprite_program->use();
-        glUniform2f(sprite_program_model_pos, p.x, p.y);
+        glUniform3f(sprite_program_model_pos, p.x, p.y, z);
         glUniform2f(sprite_program_model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->tex);
         glBindVertexArray(frame->parent->vao_id);
