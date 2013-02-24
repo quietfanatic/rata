@@ -8,6 +8,16 @@
 #include "../../vis/inc/models.h"
 #include "../../geo/inc/rooms.h"
 
+ // Here are some parameters.
+ // TODO: make these changable with stats and equipment.
+const float WALK_FRICTION = 8;
+const float STOP_FRICTION = 8;
+const float SKID_FRICTION = 12;
+const float AIR_FORCE = 3;
+const float AIR_SPEED = 3;
+const float WALK_SPEED = 4;
+const float JUMP_IMPULSE = 6;
+
 using namespace phys;
 using namespace vis;
 using namespace core;
@@ -25,7 +35,7 @@ static Skel*& skel () {
 
 struct Rata : Stateful, Object, Grounded, Resident, Draws_Sprites {
 
-    Ambulator legs;
+    Feet feet;
     Model model;
     uint8 direction = 1;
 
@@ -45,42 +55,42 @@ struct Rata : Stateful, Object, Grounded, Resident, Draws_Sprites {
          // Control logic takes so much space always
         if (ground) {
             if (get_key(GLFW_KEY_SPACE)) {
-                legs.disable();
+                feet.disable();
                  // I'd like to be able to do a mutual push between the ground and
                  //  the character, but Box2D isn't well-equipped for that.
-                impulse(Vec(0, 12));
+                impulse(Vec(0, JUMP_IMPULSE));
                 ground = NULL;
             }
             else {
-                legs.enable();
+                feet.enable();
                 if (get_key('A') && !get_key('D')) {
-                    legs.ambulate_x(this, -4);
+                    feet.ambulate_x(this, -WALK_SPEED);
                     if (vel().x <= 0) direction = -1;
-                    if (vel().x < -4)
-                        legs.ambulate_force(8);
-                    else legs.ambulate_force(12);
+                    if (vel().x < -WALK_SPEED)
+                        feet.ambulate_force(WALK_FRICTION);
+                    else feet.ambulate_force(SKID_FRICTION);
                 }
                 else if (get_key('D')) {
-                    legs.ambulate_x(this, 4);
+                    feet.ambulate_x(this, WALK_SPEED);
                     if (vel().x >= 0) direction = 1;
-                    if (vel().x > 4)
-                        legs.ambulate_force(8);
-                    else legs.ambulate_force(12);
+                    if (vel().x > WALK_SPEED)
+                        feet.ambulate_force(WALK_FRICTION);
+                    else feet.ambulate_force(SKID_FRICTION);
                 }
                 else {
-                    legs.ambulate_force(8);
-                    legs.ambulate_x(this, 0);
+                    feet.ambulate_force(STOP_FRICTION);
+                    feet.ambulate_x(this, 0);
                 }
             }
         }
         else {
-            legs.disable();
+            feet.disable();
              // If you were in a 2D platformer, you'd be able to push against the air too.
             if (get_key('A') && !get_key('D')) {
-                force(Vec(-2, 0));
+                force(Vec(-AIR_FORCE, 0));
             }
             else if (get_key('D')) {
-                force(Vec(2, 0));
+                force(Vec(AIR_FORCE, 0));
             }
         }
     }
@@ -88,8 +98,8 @@ struct Rata : Stateful, Object, Grounded, Resident, Draws_Sprites {
         reroom(pos());
     }
 
-    Rata () : Object(bdf()), legs(this), model(skel()) { }
-    void emerge () { printf("Emerging\n"); materialize(); legs.enable(); appear(); }
+    Rata () : Object(bdf()), feet(this), model(skel()) { }
+    void emerge () { printf("Emerging\n"); materialize(); feet.enable(); appear(); }
     void reclude () { }
     void start () { beholder = this; }
 };
