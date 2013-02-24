@@ -15,23 +15,24 @@ namespace vis {
     struct Graffiti_Layer : core::Layer {
         Graffiti_Layer () : core::Layer("F.M", "graffiti") { }
         void init () {
-            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             graffiti_program = hacc::reference_file<Program>("modules/vis/res/color.prog");
             graffiti_program_camera_pos = graffiti_program->require_uniform("camera_pos");
             graffiti_program_model_pos = graffiti_program->require_uniform("model_pos");
             graffiti_program_color = graffiti_program->require_uniform("color");
-            glUniform2f(graffiti_program_camera_pos, 10.0, 7.5);
         }
         void run () {
             static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
             static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
+            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             glDisable(GL_TEXTURE_2D);
             glDisable(GL_DEPTH_TEST);
-            glEnable(GL_VERTEX_ARRAY);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glBindVertexArray(0);
             glEnableVertexAttribArray(0);
+            graffiti_program->use();
+            glUniform2f(graffiti_program_camera_pos, 10.0, 7.5);
+            glUniform2f(graffiti_program_model_pos, 0, 0);
         }
     } graffiti_layer;
 
@@ -42,12 +43,10 @@ namespace vis {
         draw_chain(2, pts, color, width);
     }
     void draw_chain (uint n_pts, Vec* pts, uint32 color, float width) {
-        printf("Drawing a chain\n");
         glLineWidth(width);
         draw_primitive(GL_LINE_STRIP, n_pts, pts, color);
     }
     void draw_loop (uint n_pts, Vec* pts, uint32 color, float width) {
-        printf("Drawing a loop\n");
         glLineWidth(width);
         draw_primitive(GL_LINE_LOOP, n_pts, pts, color);
     }

@@ -54,21 +54,15 @@ namespace vis {
     struct Camera_Setup_Layer : core::Layer {
         Camera_Setup_Layer () : core::Layer("B.M", "camera_setup") { }
         void run () {
+            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             glClearColor(0.5, 0.5, 0.5, 0);
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            glTranslatef(-1, -1, 0);  // 0,0 starts out in the center
-            glScalef(1/10.0, 1/7.5, 1);  // This is independent of window scale
-
-             // Make coordinates point to pixels, not the corners between pixels
-            glTranslatef(0.45*PX/2, 0.45*PX/2, 0);
-
+            glDisable(GL_BLEND);
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
-
-            glMatrixMode(GL_MODELVIEW);
+            sprite_program->use();
+            glUniform2f(sprite_program_camera_pos, 10, 7.5);  // TODO: Control the camera with this
         }
     } csl;
 
@@ -109,7 +103,6 @@ namespace vis {
         }
         void init () {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
-            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             sprite_program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
             sprite_program->use();
             sprite_program_tex = sprite_program->require_uniform("tex");
@@ -117,7 +110,6 @@ namespace vis {
             sprite_program_model_pos = sprite_program->require_uniform("model_pos");
             sprite_program_model_scale = sprite_program->require_uniform("model_scale");
             glUniform1i(sprite_program_tex, 0);  // Texture unit 0
-            glUniform2f(sprite_program_camera_pos, 10, 7.5);  // TODO: Control the camera with this
             if (diagnose_opengl("after setting uniforms and stuff")) {
                 throw std::logic_error("sprites init failed due to GL error");
             }
