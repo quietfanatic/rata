@@ -42,6 +42,24 @@ namespace phys {
         void impulse (Vec i) { b2body->ApplyLinearImpulse(b2Vec2(i.x, i.y), b2Vec2(0, 0)); }
         void force (Vec f) { b2body->ApplyForceToCenter(b2Vec2(f.x, f.y)); }
 
+        b2Fixture* fix_no (uint i) {
+            b2Fixture* fix = b2body->GetFixtureList();
+            while (fix && i) {
+                fix = fix->GetNext();
+                i--;
+            }
+            return fix;
+        }
+        uint fix_index (b2Fixture* fix) {
+            b2Fixture* bfix = b2body->GetFixtureList();
+            uint r = 0;
+            while (bfix && bfix != fix) {
+                bfix = bfix->GetNext();
+                r++;
+            }
+            return r;
+        }   
+
         void materialize ();
         void dematerialize ();
 

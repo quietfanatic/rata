@@ -5,6 +5,7 @@ using namespace phys;
 HCB_BEGIN(Grounded)
     type_name("phys::Grounded");
     attr("ground", member(&Grounded::ground));
+    attr("ground_fix_index", member(&Grounded::ground_fix_index, def((uint)0)));
 HCB_END(Grounded)
 
 namespace phys {
@@ -21,15 +22,20 @@ namespace phys {
                 Grounded* grd = dynamic_cast<Grounded*>(
                     (Object*)grounded->GetBody()->GetUserData()
                 );
-                if (grd) grd->ground = (Object*)ground->GetBody()->GetUserData();
+                if (grd) {
+                    grd->ground = (Object*)ground->GetBody()->GetUserData();
+                    grd->ground_fix_index = grd->ground->fix_index(ground);
+                }
             }
         }
         void end (b2Contact* contact, b2Fixture* grounded, b2Fixture* ground) {
             Grounded* grd = dynamic_cast<Grounded*>(
                 (Object*)grounded->GetBody()->GetUserData()
             );
-            if (grd && grd->ground == (Object*)ground->GetBody()->GetUserData())
+            if (grd && grd->get_ground_fix() == ground) {
                 grd->ground = NULL;
+                grd->ground_fix_index = 0;
+            }
         }
     } gr;
     Collision_Rule* ground_rule = &gr;

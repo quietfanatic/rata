@@ -14,6 +14,7 @@ namespace ent {
 
     bool Biped::allow_movement (Biped::Stats* stats, Biped::Controls* controls) {
         if (ground) {
+            legs.enable();
             allow_walk(stats, controls);
             allow_jump(stats, controls);
         }
@@ -26,26 +27,42 @@ namespace ent {
     void Biped::reclude () { dematerialize(); legs.disable(); disappear(); }
     void Biped::after_move () { reroom(pos()); }
 
+    void set_ambulate_friction (Biped* b, float fric) {
+        b->legs.ambulate_force(
+            b->b2body->GetMass() * 30 * sqrt(fric * b->get_ground_fix()->GetFriction())
+        );
+    }
+
     bool Biped::allow_walk (Biped::Stats* stats, Biped::Controls* controls) {
-        if (controls->left && !controls->right) {
-            legs.ambulate_x(this, stats->walk_speed);
-            if (vel().x <= 0) direction = -1;
-            if (vel().x < -stats->walk_speed)
-                legs.ambulate_force(stats->walk_force);
-            else legs.ambulate_force(stats->skid_force);
+        if (ground) {
+            legs.enable();
+            if (controls->left && !controls->right) {
+                legs.ambulate_x(this, -stats->walk_speed);
+                if (vel().x <= 0) {
+                    direction = -1;
+                    set_ambulate_friction(this, stats->walk_friction);
+                }
+                else {
+                    set_ambulate_friction(this, stats->skid_friction);
+                }
+            }
+            else if (controls->right) {
+                legs.ambulate_x(this, stats->walk_speed);
+                if (vel().x >= 0) {
+                    direction = 1;
+                    set_ambulate_friction(this, stats->walk_friction);
+                }
+                else {
+                    set_ambulate_friction(this, stats->skid_friction);
+                }
+            }
+            else {
+                set_ambulate_friction(this, stats->stop_friction);
+                legs.ambulate_x(this, 0);
+            }
+            return fabs(vel().x) >= 0.01;
         }
-        else if (controls->right) {
-            legs.ambulate_x(this, -stats->walk_speed);
-            if (vel().x >= 0) direction = 1;
-            if (vel().x > stats->walk_speed)
-                legs.ambulate_force(stats->walk_force);
-            else legs.ambulate_force(stats->skid_force);
-        }
-        else {
-            legs.ambulate_force(stats->stop_force);
-            legs.ambulate_x(this, 0);
-        }
-        return fabs(vel().x) >= 0.01;
+        else return false;
     }
     bool Biped::allow_jump (Biped::Stats* stats, Biped::Controls* controls) {
         if (controls->jump) {
@@ -97,14 +114,14 @@ HCB_END(Biped)
 
 HCB_BEGIN(Biped::Stats)
     type_name("ent::Biped::Stats");
-    attr("walk_force", member(&Biped::Stats::walk_force, def((float)1)));
+    attr("walk_friction", member(&Biped::Stats::walk_friction, def((float)1)));
     attr("walk_speed", member(&Biped::Stats::walk_speed, def((float)1)));
-    attr("run_force", member(&Biped::Stats::run_force, def((float)1)));
+    attr("run_friction", member(&Biped::Stats::run_friction, def((float)1)));
     attr("run_speed", member(&Biped::Stats::run_speed, def((float)1)));
-    attr("crawl_force", member(&Biped::Stats::crawl_force, def((float)1)));
+    attr("crawl_friction", member(&Biped::Stats::crawl_friction, def((float)1)));
     attr("crawl_speed", member(&Biped::Stats::crawl_speed, def((float)1)));
-    attr("stop_force", member(&Biped::Stats::stop_force, def((float)1)));
-    attr("skid_force", member(&Biped::Stats::skid_force, def((float)1)));
+    attr("stop_friction", member(&Biped::Stats::stop_friction, def((float)1)));
+    attr("skid_friction", member(&Biped::Stats::skid_friction, def((float)1)));
     attr("air_force", member(&Biped::Stats::air_force, def((float)1)));
     attr("air_speed", member(&Biped::Stats::air_speed, def((float)1)));
     attr("jump_impulse", member(&Biped::Stats::jump_impulse, def((float)1)));

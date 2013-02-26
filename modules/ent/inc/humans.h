@@ -23,14 +23,14 @@ namespace ent {
             LAYBK
         };
         struct Stats {
-            float walk_force;
+            float walk_friction;
             float walk_speed;
-            float run_force;
+            float run_friction;
             float run_speed;
-            float crawl_force;
+            float crawl_friction;
             float crawl_speed;
-            float stop_force;
-            float skid_force;
+            float stop_friction;
+            float skid_friction;
             float air_force;
             float air_speed;
             float jump_impulse;
