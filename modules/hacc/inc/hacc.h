@@ -6,7 +6,7 @@
 #ifndef HAVE_HACC_HACC_H
 #define HAVE_HACC_HACC_H
 
-#include "gc/gc_cpp.h"
+#include <gc/gc_cpp.h>
 
 #ifndef HAVE_HACC
 #define HAVE_HACC
