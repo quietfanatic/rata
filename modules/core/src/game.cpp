@@ -1,6 +1,6 @@
 
 #include <stdlib.h>
-#include "GL/glfw.h"
+#include <GL/glfw.h>
 
 #include "../inc/game.h"
 #include "../inc/input.h"

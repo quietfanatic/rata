@@ -1,4 +1,4 @@
-#include "GL/glfw.h"
+#include <GL/glfw.h>
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/state.h"
 #include "../../core/inc/input.h"

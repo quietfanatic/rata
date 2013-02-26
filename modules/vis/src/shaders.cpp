@@ -1,5 +1,5 @@
-#include "GL/gl.h"
-#include "GL/glfw.h"
+#include <GL/gl.h>
+#include <GL/glfw.h>
 #include "../../hacc/inc/everything.h"
 #include "../inc/shaders.h"
 
