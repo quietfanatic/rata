@@ -48,9 +48,6 @@ workflow {
 
     include '../..';
 
-    subdep('src/main.cpp', [qw<../core/inc/state.h>]);
-    subdep('src/rata.cpp', [qw<../hacc/inc/everything.h ../ent/inc/humans.h ../vis/inc/sprites.h ../core/inc/state.h ../core/inc/input.h>]);
-
     cppc_rule('tmp/main.o', 'src/main.cpp');
     cppc_rule('tmp/rata.o', 'src/rata.cpp');
 

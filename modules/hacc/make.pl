@@ -17,30 +17,21 @@ workflow {
 
     include '../..';
 
-    subdep('inc/strings.h', 'inc/hacc.h');
-    subdep('inc/files.h', 'inc/hacc.h');
-    subdep('inc/haccers.h', 'inc/hacc.h');
-    subdep('inc/haccable.h', [qw<inc/haccable_getset.h inc/hacc.h>]);
-    subdep('inc/haccable_standard.h', 'inc/haccable.h');
-    subdep('inc/haccable_pointers.h', 'inc/haccable.h');
-    subdep('inc/haccable_integration.h', [qw<inc/haccable.h inc/strings.h inc/files.h>]);
-    subdep('inc/everything.h', [qw<inc/haccable_standard.h inc/haccable_pointers.h inc/haccable_integration.h inc/haccable_files.h>]);
-
-    cppc_rule('tmp/hacc.o', [qw<src/hacc.cpp inc/hacc.h>]);
-    cppc_rule('tmp/strings.o', [qw<src/strings.cpp inc/strings.h>]);
-    cppc_rule('tmp/files.o', [qw<src/files.cpp inc/files.h>]);
-    cppc_rule('tmp/haccable.o', [qw<src/haccable.cpp inc/haccable.h inc/haccable_files.h>]);
-    cppc_rule('tmp/haccable_standard.o', [qw<src/haccable_standard.cpp inc/haccable_standard.h>]);
-    cppc_rule('tmp/haccable_files.o', [qw<src/haccable_files.cpp inc/haccable_files.h inc/haccable.h>]);
-    cppc_rule('tmp/hacc.t.o', [qw<test/hacc.t.cpp inc/hacc.h>]);
-    cppc_rule('tmp/strings.t.o', [qw<test/strings.t.cpp inc/strings.h>]);
-    cppc_rule('tmp/files.t.o', [qw<test/files.t.cpp inc/files.h>]);
-    cppc_rule('tmp/haccable.t.o', [qw<test/haccable.t.cpp inc/haccable.h>]);
-    cppc_rule('tmp/everything.t.o', [qw<test/everything.t.cpp inc/everything.h>]);
-    cppc_rule('tmp/haccable_standard.t.o', [qw<test/haccable_standard.t.cpp inc/haccable_standard.h>]);
-    cppc_rule('tmp/haccable_pointers.t.o', [qw<test/haccable_pointers.t.cpp inc/haccable_pointers.h>]);
-    cppc_rule('tmp/haccable_integration.t.o', [qw<test/haccable_integration.t.cpp inc/haccable_integration.h>]);
-    cppc_rule('tmp/haccable_files.t.o', [qw<test/haccable_files.t.cpp inc/haccable_files.h inc/haccable_integration.h inc/haccable_standard.h inc/haccable_pointers.h>]);
+    cppc_rule('tmp/hacc.o', 'src/hacc.cpp');
+    cppc_rule('tmp/strings.o', 'src/strings.cpp');
+    cppc_rule('tmp/files.o', 'src/files.cpp');
+    cppc_rule('tmp/haccable.o', 'src/haccable.cpp');
+    cppc_rule('tmp/haccable_standard.o', 'src/haccable_standard.cpp');
+    cppc_rule('tmp/haccable_files.o', 'src/haccable_files.cpp');
+    cppc_rule('tmp/hacc.t.o', 'test/hacc.t.cpp');
+    cppc_rule('tmp/strings.t.o', 'test/strings.t.cpp');
+    cppc_rule('tmp/files.t.o', 'test/files.t.cpp');
+    cppc_rule('tmp/haccable.t.o', 'test/haccable.t.cpp');
+    cppc_rule('tmp/everything.t.o', 'test/everything.t.cpp');
+    cppc_rule('tmp/haccable_standard.t.o', 'test/haccable_standard.t.cpp');
+    cppc_rule('tmp/haccable_pointers.t.o', 'test/haccable_pointers.t.cpp');
+    cppc_rule('tmp/haccable_integration.t.o', 'test/haccable_integration.t.cpp');
+    cppc_rule('tmp/haccable_files.t.o', 'test/haccable_files.t.cpp');
     ld_rule('tmp/t', [targetmatch(qr/^tmp\/[^\/]*\.o$/), '../tap/tmp/tap.o', '../tap/tmp/tap_make_test_main.o'], '-lgc');
 
     test_rule('tmp/t');
