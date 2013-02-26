@@ -29,7 +29,9 @@ namespace ent {
 
     void set_ambulate_friction (Biped* b, float fric) {
         b->legs.ambulate_force(
-            b->b2body->GetMass() * 30 * sqrt(fric * b->get_ground_fix()->GetFriction())
+            b->b2body->GetMass()
+          * -phys::space->GetGravity().y
+          * sqrt(fric * b->get_ground_fix()->GetFriction())
         );
     }
 
