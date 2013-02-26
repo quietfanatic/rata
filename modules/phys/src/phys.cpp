@@ -207,7 +207,7 @@ namespace phys {
         void init () {
             space_logger.log("Creating the spacetime continuum.  Well, the space part anyway.");
             space = new b2World(
-                b2Vec2(0, -20)
+                b2Vec2(0, -30)
             );
             space->SetContactListener(&mycl);
         }
