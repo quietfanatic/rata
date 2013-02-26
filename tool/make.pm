@@ -317,11 +317,11 @@ sub add_subdeps {
     my $old_cwd = cwd;
      # Using this style of loop because @deps will keep expanding.
     for (my $i = 0; $i < @deps; $i++) {
+        push @deps, grep { my $d = $_; not grep $d eq $_, @deps } get_auto_subdeps($deps[$i]);
         for my $subdep (@{$workflow{subdeps}{$deps[$i]}}) {
             Cwd::chdir $subdep->{base};
             $subdep->{from} = [delazify($subdep->{from}, $subdep->{to})];
-            my @autos = get_auto_subdeps(realpaths(@{$subdep->{to}}));
-            push @deps, grep { my $d = $_; not grep $d eq $_, @deps } realpaths(@{$subdep->{from}});#, @autos;
+            push @deps, grep { my $d = $_; not grep $d eq $_, @deps } realpaths(@{$subdep->{from}});
         }
     }
     Cwd::chdir $old_cwd;

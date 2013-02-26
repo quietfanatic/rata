@@ -52,10 +52,10 @@ workflow {
         my @vdf = splitpath($file);
         my $base = catpath($vdf[0], $vdf[1], '');
         open my $F, '<', $file or die "bleargh! $! $file";
-        read $F, my $head, 500;
+        read $F, my $head, 1000;
         close $F;
         my @r;
-        for ($head =~ /^\s*#include\s* "([^"]*)"/gmi) {
+        for ($head =~ /^\s*#include\s*"([^"]*)"/gmi) {
             push @r, rel2abs($_, $base);
         }
         return @r;
