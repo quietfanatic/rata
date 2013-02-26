@@ -11,6 +11,7 @@ BEGIN {
 }
 use autodie qw(:all);
 use File::Path qw<remove_tree>;
+use File::Spec::Functions qw(:ALL);
 
 my $here;
 
@@ -43,6 +44,22 @@ workflow {
         my @tmps = @_;
         phony 'clean', [], sub { no autodie; remove_tree @tmps; }
     }
+
+     # Automatically gleam subdeps from #includes
+    subdep sub {
+        my ($file) = @_;
+        $file =~ /\.(?:cpp|h)$/ or return ();
+        my @vdf = splitpath($file);
+        my $base = catpath($vdf[0], $vdf[1], '');
+        open my $F, '<', $file or die "bleargh! $! $file";
+        read $F, my $head, 500;
+        close $F;
+        my @r;
+        for ($head =~ /^\s*#include\s* "([^"]*)"/gmi) {
+            push @r, rel2abs($_, $base);
+        }
+        return @r;
+    };
 
     include glob 'modules/*';
 

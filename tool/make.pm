@@ -45,6 +45,8 @@ sub workflow (&) {
         rules => [],
         targets => {},
         subdeps => {},
+        auto_subdeps => [],
+        autoed_subdeps => {},
         phonies => {},
         defaults => undef,
     );
@@ -109,17 +111,28 @@ sub rules ($$) {
         rule_with_caller($package, $file, $line, $_->[0], $_->[1], $recipe);
     }
 }
-sub subdep ($$) {
+sub subdep ($;$) {
     %workflow or croak "subdep was called outside of a workflow";
     my ($to, $from) = @_;
-    my $subdep = {
-        base => cwd,
-        to => [arrayify($to)],
-        from => lazify($from),
-    };
-    for my $to (@{$subdep->{to}}) {
-        my $rp = realpath($to);
-        push @{$workflow{subdeps}{$rp}}, $subdep;
+    if (ref $to eq 'CODE') {
+        push @{$workflow{auto_subdeps}}, {
+            base => cwd,
+            code => $to
+        };
+    }
+    elsif (defined $from) {
+        my $subdep = {
+            base => cwd,
+            to => [arrayify($to)],
+            from => lazify($from),
+        };
+        for my $to (@{$subdep->{to}}) {
+            my $rp = realpath($to);
+            push @{$workflow{subdeps}{$rp}}, $subdep;
+        }
+    }
+    else {
+        croak 'subdep must be called with two arguments unless the first is a CODE ref';
     }
 }
 sub arrayify {
@@ -283,23 +296,49 @@ sub plan_target {
      # In general, there should be only rule per target, but there can be more.
     return grep plan_rule($plan, $_), @{$workflow{targets}{$target}};
 }
+
+sub get_auto_subdeps {
+    my $old_cwd = cwd;
+    my @r = map {
+        my $target = $_;
+        @{$workflow{autoed_subdeps}{$target} //= [
+            map {
+                Cwd::chdir $_->{base};
+                realpaths($_->{code}($target));
+            } @{$workflow{auto_subdeps}}
+        ]}
+    } @_;
+    Cwd::chdir $old_cwd;
+    return @r;
+}
+
 sub add_subdeps {
     my @deps = @_;
     my $old_cwd = cwd;
      # Using this style of loop because @deps will keep expanding.
     for (my $i = 0; $i < @deps; $i++) {
         for my $subdep (@{$workflow{subdeps}{$deps[$i]}}) {
-            Cwd::chdir rel2abs($subdep->{base});
+            Cwd::chdir $subdep->{base};
             $subdep->{from} = [delazify($subdep->{from}, $subdep->{to})];
-            push @deps, grep { my $d = $_; not grep $d eq $_, @deps } realpaths(@{$subdep->{from}});
+            my @autos = get_auto_subdeps(realpaths(@{$subdep->{to}}));
+            push @deps, grep { my $d = $_; not grep $d eq $_, @deps } realpaths(@{$subdep->{from}});#, @autos;
         }
     }
     Cwd::chdir $old_cwd;
     return @deps;
 }
+
+sub resolve_deps {
+    my ($rule) = @_;
+     # Get the realpaths of all dependencies and their subdeps
+    Cwd::chdir $rule->{base};
+    $rule->{from} = [delazify($rule->{from}, $rule->{to})];
+    return add_subdeps(realpaths(@{$rule->{from}}));
+}
+
 sub plan_rule {
     my ($plan, $rule) = @_;
-    Cwd::chdir rel2abs($rule->{base});
+    Cwd::chdir $rule->{base};
      # detect loops
     if (not defined $rule->{planned}) {
         my $mess = "☢ Dependency loop\n";
@@ -315,10 +354,8 @@ sub plan_rule {
     push @{$plan->{stack}}, $rule;
     $rule->{planned} = undef;  # Mark that we're currently planning this
 
-     # Now is when we officially collapse lazy dependencies.
-    $rule->{from} = [delazify($rule->{from}, $rule->{to})];
-     # Get the realpaths of all dependencies and their subdeps
-    my @deps = add_subdeps(realpaths(@{$rule->{from}}));
+     # Now is when we officially collapse lazy dependencies and stuff like that
+    my @deps = resolve_deps($rule);
      # always recurse to plan_target
     my $stale = grep plan_target($plan, $_), @deps;
     $stale ||= grep {
