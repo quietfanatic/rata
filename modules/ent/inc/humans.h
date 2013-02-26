@@ -45,6 +45,9 @@ namespace ent {
         phys::Ambulator legs;
         vis::Model model;  // Must be a humanlike model
         int8 direction;  // 1 = right, -1 = left
+         // For animation purposes
+        float distance_walked;
+        float oldxrel;
 
         Biped (phys::BodyDef*, vis::Skel*);
 

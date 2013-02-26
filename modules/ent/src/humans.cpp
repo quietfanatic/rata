@@ -5,10 +5,26 @@
 namespace ent {
 
     void Biped::draw () {
-        if (ground)
-            model.apply_pose_index(Pose::STAND);
-        else
+        if (ground) {
+            if (fabs(vel().x) < 0.01) {
+                model.apply_pose_index(Pose::STAND);
+            }
+            else {
+                float stepdist = fmod(distance_walked, 2.0);
+                if (stepdist < 0.5) {
+                    model.apply_pose_index(Pose::WALK1);
+                }
+                else if (stepdist >= 1 && stepdist < 1.5) {
+                    model.apply_pose_index(Pose::WALK2);
+                }
+                else {
+                    model.apply_pose_index(Pose::STAND);
+                }
+            }
+        }
+        else {
             model.apply_pose_index(Pose::WALK1);
+        }
         model.draw(pos(), direction < 0);
     }
 
@@ -21,11 +37,12 @@ namespace ent {
         else {
             allow_airmove(stats, controls);
         }
+        if (ground)
+            oldxrel = pos().x - ground->pos().x;
         return true;
     }
     void Biped::emerge () { materialize(); legs.enable(); appear(); }
     void Biped::reclude () { dematerialize(); legs.disable(); disappear(); }
-    void Biped::after_move () { reroom(pos()); }
 
     void set_ambulate_friction (Biped* b, float fric) {
         b->legs.ambulate_force(
@@ -98,6 +115,21 @@ namespace ent {
         }
         else return false;
     }
+     // Ensure we're in the right room and also calculate walk animation.
+    void Biped::after_move () {
+        reroom(pos());
+        if (ground) {
+            if (fabs(vel().x) < 0.01) {
+                distance_walked = 0;
+            }
+            else {
+                distance_walked += fabs(pos().x - ground->pos().x - oldxrel);
+            }
+        }
+        else {
+            distance_walked = 0;
+        }
+    }
 
     Biped::Biped (phys::BodyDef* bdf, vis::Skel* skel) :
         phys::Object(bdf), legs(this), model(skel)
@@ -112,6 +144,8 @@ HCB_BEGIN(Biped)
     attr("resident", supertype<geo::Resident>());
     attr("grounded", supertype<phys::Grounded>());
     attr("direction", member(&Biped::direction, def((int8)1)));
+    attr("distance_walked", member(&Biped::distance_walked, def((float)0)));
+    attr("oldxrel", member(&Biped::oldxrel, def((float)0)));
 HCB_END(Biped)
 
 HCB_BEGIN(Biped::Stats)
