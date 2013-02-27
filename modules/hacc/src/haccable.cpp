@@ -604,4 +604,15 @@ namespace hacc {
         }
     }
 
+    std::unordered_map<void*, Hacc*> incantations;
+    void record_incantation (void* p, Hacc* h) {
+        incantations.emplace(p, h);
+    }
+    Hacc* remember_incantation (void* p) {
+        auto iter = incantations.find(p);
+        if (iter == incantations.end())
+            return NULL;
+        else return iter->second;
+    }
+
 }

@@ -295,5 +295,11 @@ template <class C> String get_type_name () {
     static void describe () {
 #define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
 
+namespace hacc {
+     // As a heroic last-ditch effort to preserve relationships, we provide
+     //  a system to register arbitrary pointers with the Hacc that generated them
+    void record_incantation (void*, Hacc*);
+    Hacc* remember_incantation (void*);
+}
 
 #endif
