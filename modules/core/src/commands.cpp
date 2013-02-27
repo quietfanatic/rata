@@ -110,24 +110,26 @@ namespace core {
                     }
                     break;
                 }
-                default: {
-                    if (keycode < 256) {
-                        cli_contents = cli_contents.substr(0, cli_pos)
-                                     + std::string(1, keycode)
-                                     + cli_contents.substr(cli_pos);
-                        cli_pos++;
-                    }
-                    break;
-                }
+                default: break;
             }
+        }
+    }
+    void GLFWCALL console_char_cb (int code, int action) {
+        if (code < 256) {
+            cli_contents = cli_contents.substr(0, cli_pos)
+                         + std::string(1, code)
+                         + cli_contents.substr(cli_pos);
+            cli_pos++;
         }
     }
 
     void enter_console () {
         console_is_active = true;
         temp_key_cb(console_key_cb);
+        glfwSetCharCallback(console_char_cb);
     }
     void exit_console () {
+        glfwSetCharCallback(NULL);
         undo_temp_key_cb();
         console_is_active = false;
     }
