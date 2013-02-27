@@ -9,6 +9,8 @@
 
 namespace core {
 
+    uint64 frame_number = 0;
+
     void all_phases (void (PhaseLayer::* method )()) {
         for (PhaseLayer* p : game_phases())
             (p->*method)();
@@ -50,6 +52,7 @@ namespace core {
             init();
             all_phaselayers(&PhaseLayer::start);
             for (;;) {
+                frame_number++;
                 all_phases(&PhaseLayer::run_if_on);
                 all_layers(&PhaseLayer::run_if_on);
                 glfwSwapBuffers();

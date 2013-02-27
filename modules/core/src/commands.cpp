@@ -6,6 +6,7 @@
 
 #include "../../hacc/inc/everything.h"
 #include "../inc/commands.h"
+#include "../inc/input.h"
 #include "../inc/game.h"
 #include "../inc/resources.h"
 
@@ -39,15 +40,96 @@ namespace core {
     std::string console_contents = "This is the console.\n";
     std::string cli_contents = "command...";
     uint cli_pos = 0;
+    void print_to_console (std::string message) {
+        if (console_is_active)
+            console_contents += message;
+        else
+            fputs(message.c_str(), stderr);
+    }
+
+    void GLFWCALL console_key_cb (int keycode, int action) {
+        if (action == GLFW_PRESS) {
+            switch (keycode) {
+                case GLFW_KEY_ESC: {
+                    exit_console();
+                    break;
+                }
+                case GLFW_KEY_LEFT: {
+                    if (cli_pos) cli_pos--;
+                    break;
+                }
+                case GLFW_KEY_RIGHT: {
+                    if (cli_pos < cli_contents.size()) cli_pos++;
+                    break;
+                }
+                case GLFW_KEY_HOME: {
+                    cli_pos = 0;
+                    break;
+                }
+                case GLFW_KEY_END: {
+                    cli_pos = cli_contents.size();
+                    break;
+                }
+                case GLFW_KEY_ENTER: {
+                    print_to_console(cli_contents);
+                    if (!cli_contents.empty()) {
+                        canonical_ptr<Command> cmd;
+                        bool good_command = false;
+                        try {
+                            hacc::update_from_string(cmd, "[" + cli_contents + "]");
+                            good_command = true;
+                        } catch (hacc::Error& e) {
+                            print_to_console("Error parsing command: " + std::string(e.what()) + "\n");
+                        } catch (std::exception& e) {
+                            print_to_console("Error generating command: " + std::string(e.what()) + "\n");
+                        }
+                        if (good_command) {
+                            try {
+                                (*cmd)();
+                            } catch (std::exception& e) {
+                                print_to_console("Error: The command threw an exception: " + std::string(e.what()) + "\n");
+                            }
+                        }
+                    }
+                    cli_contents = "";
+                    cli_pos = 0;
+                    break;
+                }
+                case GLFW_KEY_BACKSPACE: {
+                    if (cli_pos) {
+                        cli_contents = cli_contents.substr(0, cli_pos - 1)
+                                     + cli_contents.substr(cli_pos);
+                        cli_pos--;
+                    }
+                    break;
+                }
+                case GLFW_KEY_DEL: {
+                    if (cli_pos < cli_contents.size()) {
+                        cli_contents = cli_contents.substr(0, cli_pos)
+                                     + cli_contents.substr(cli_pos + 1);
+                    }
+                    break;
+                }
+                default: {
+                    if (keycode < 256) {
+                        cli_contents = cli_contents.substr(0, cli_pos)
+                                     + std::string(1, keycode)
+                                     + cli_contents.substr(cli_pos);
+                        cli_pos++;
+                    }
+                    break;
+                }
+            }
+        }
+    }
 
     void enter_console () {
         console_is_active = true;
+        temp_key_cb(console_key_cb);
     }
     void exit_console () {
+        undo_temp_key_cb();
         console_is_active = false;
-    }
-    void print_to_console (std::string message) {
-        console_contents += message;
     }
 
 }

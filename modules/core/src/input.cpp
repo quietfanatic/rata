@@ -25,6 +25,7 @@ namespace core {
         return true;  // not gonna happen
     }
 
+
     static void GLFWCALL key_cb (int keycode, int action) {
         if (action == GLFW_PRESS) {
             switch (keycode) {
@@ -47,6 +48,13 @@ namespace core {
         else { // action == GLFW_RELEASE
             register_keyrelease(keycode);
         }
+    }
+
+    void temp_key_cb (void GLFWCALL (* cb ) (int keycode, int action)) {
+        glfwSetKeyCallback(cb);
+    }
+    void undo_temp_key_cb () {
+        glfwSetKeyCallback(key_cb);
     }
 
     struct Input_Phase : core::Phase {

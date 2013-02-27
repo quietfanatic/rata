@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "../../util/inc/honestly.h"
 
 namespace core {
 
@@ -12,6 +13,8 @@ void stop ();
 
 void quit_game ();
 void set_video ();
+
+extern uint64 frame_number;
 
 struct PhaseLayer {
     std::string order;
