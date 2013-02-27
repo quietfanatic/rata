@@ -24,7 +24,7 @@ namespace vis {
      // align.x: 1 -> left justification, 0 -> center, -1 -> right
      // align.y: 1 -> top of text is at pos, 0 -> center, -1 -> bottom
      //  horizontal alignment affects each line individually.
-    void draw_text (std::string text, Font* font, Vec pos, Vec align = Vec(1, 1), uint32 color = 0xffffffff);
+    void draw_text (std::string text, Font* font, Vec pos, Vec align = Vec(1, 1), uint32 color = 0xffffffff, float wrap = 0);
 
     struct Draws_Text : Linkable<Draws_Text> {
         virtual void text_draw () = 0;

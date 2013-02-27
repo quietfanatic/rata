@@ -22,7 +22,7 @@ namespace vis {
     GLint text_program_model_pos = 0;
 
      // TODO: Make align.x affect each line individually
-    void draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color) {
+    void draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color, float wrap) {
          // Coordinates here work with y being down instead of up.
          //  This may be a little confusing.
         auto verts = new Text_Vert [text.length()][4];
@@ -37,13 +37,19 @@ namespace vis {
                 cury += font->line_height;
             }
             else {
+                uint16 nextx = curx + (font->widths.empty() ? font->width : font->widths[text[i]]);
+                if (wrap && nextx > wrap/PX) {
+                    curx = 0;
+                    nextx = curx + font->widths.empty() ? font->width : font->widths[text[i]];
+                    cury += font->line_height;
+                }
                 uint16 tx = text[i] % 16;
                 uint16 ty = text[i] / 16;
                 verts[vert_i][0] = Text_Vert(curx, cury, tx, ty);
                 verts[vert_i][1] = Text_Vert(curx, cury+font->height, tx, ty+1);
                 verts[vert_i][2] = Text_Vert(curx+font->width, cury+font->height, tx+1, ty+1);
                 verts[vert_i][3] = Text_Vert(curx+font->width, cury, tx+1, ty);
-                curx += font->widths.empty() ? font->width : font->widths[text[i]];
+                curx = nextx;
                 if (curx > maxx) maxx = curx;
                 if (cury + font->line_height > maxy) maxy = cury + font->line_height;
                 //printf("'%c' [[[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]]]\n",
@@ -120,10 +126,13 @@ namespace vis {
             glUniform2f(text_program_camera_pos, 10.0, 7.5);
             if (console_font && core::console_is_active) {
                 glUniform2f(text_program_camera_pos, 10.0, 7.5);
-                draw_text(core::console_contents, console_font, Vec(1, console_font->line_height)*PX, Vec(1, -1), 0x00ff00ff);
-                draw_text(core::cli_contents, console_font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff);
+                float chars_available = floor(320 / console_font->width);
+                float cli_lines = 1 + floor(core::cli_contents.size() / chars_available);
+                draw_text(core::console_contents, console_font, Vec(1, cli_lines * console_font->line_height)*PX, Vec(1, -1), 0x00ff00ff, 20);
+                draw_text(core::cli_contents, console_font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, 20);
                 if (core::frame_number % 40 < 20) {
-                    draw_text("_", console_font, Vec(core::cli_pos*console_font->width, -1)*PX, Vec(1, -1), 0xffffffff);
+                    float cursor_pos = fmod(core::cli_pos, chars_available);
+                    draw_text("_", console_font, Vec(cursor_pos * console_font->width, -1)*PX, Vec(1, -1), 0xffffffff);
                 }
             }
             else for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
