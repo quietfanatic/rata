@@ -85,7 +85,7 @@ namespace vis {
         if (!ms->skin) return;
         if (!ms->pose) return;
         for (Texture* tex : ms->skin->textures) {
-            draw_sprite(
+            Draws_Sprites::draw_sprite(
                 ms->pose->frame, tex, pos,
                 ms->pose->fliph?!fh:fh, ms->pose->flipv?!fv:fv,
                 z + ss->z_offset

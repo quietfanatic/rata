@@ -4,7 +4,7 @@
 
 namespace ent {
 
-    void Biped::draw () {
+    void Biped::draws_sprites () {
         if (ground) {
             if (fabs(vel().x) < 0.01) {
                 model.apply_pose_index(Pose::STAND);
@@ -41,8 +41,8 @@ namespace ent {
             oldxrel = pos().x - ground->pos().x;
         return true;
     }
-    void Biped::emerge () { materialize(); legs.enable(); appear(); }
-    void Biped::reclude () { dematerialize(); legs.disable(); disappear(); }
+    void Biped::emerge () { materialize(); legs.enable(); Draws_Sprites::activate(); }
+    void Biped::reclude () { dematerialize(); legs.disable(); Draws_Sprites::deactivate(); }
 
     void set_ambulate_friction (Biped* b, float fric) {
         b->legs.ambulate_force(

@@ -52,7 +52,7 @@ namespace ent {
         Biped (phys::BodyDef*, vis::Skel*);
 
          // Make sure to supercall these if you override them.
-        void draw ();
+        void draws_sprites ();
         void emerge ();
         void reclude ();
         void after_move ();

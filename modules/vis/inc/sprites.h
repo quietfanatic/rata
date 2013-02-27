@@ -13,7 +13,7 @@ namespace vis {
         bool is_active () { return is_linked(); }
         void activate ();
         void deactivate ();
-        void draw_sprite (Frame*, Texture*, Vec p, bool fliph, bool flipv, float z);
+        static void draw_sprite (Frame*, Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
     };
 
 }

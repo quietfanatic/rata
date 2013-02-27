@@ -53,10 +53,9 @@ namespace vis {
         diagnose_opengl("After rendering a sprite");
     }
 
-    struct Test_Layer : core::Layer, core::Stateful {
-        Test_Layer () : core::Layer("D.M", "test") { }
-        void start () { }
-        void run () {
+    struct Sprite_Test : core::Stateful, Draws_Sprites {
+        void start () { Draws_Sprites::activate(); }
+        void draws_sprites () {
             static Image* image = hacc::reference_file<Image>("modules/vis/res/test.image");
             static Texture* texture = image->texture_named("ALL");
             static Layout* layout = hacc::reference_file<Layout>("modules/vis/res/test.layout");
@@ -108,7 +107,7 @@ namespace vis {
             sprite_program->use();
             glUniform2f(sprite_program_camera_pos, 10, 7.5);  // TODO: Control the camera with this
             for (Draws_Sprites* p = sprite_drawers.first(); p; p = p->next()) {
-                p->draw();
+                p->draws_sprites();
             }
         }
     };
@@ -123,8 +122,8 @@ HCB_BEGIN(Sprite_Layer)
     empty();
 HCB_END(Sprite_Layer)
 
-HCB_BEGIN(Test_Layer)
-    type_name("vis::Test_Layer");
-    base<core::Stateful>("Test_Layer");
+HCB_BEGIN(Sprite_Test)
+    type_name("vis::Sprite_Test");
+    base<core::Stateful>("Sprite_Test");
     empty();
-HCB_END(Test_Layer)
+HCB_END(Sprite_Test)

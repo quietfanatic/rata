@@ -51,9 +51,9 @@ struct Rata : Stateful, Biped, Draws_Text, Key_Listener {
         }
     }
 
-    void draw () {
+    void draws_sprites () {
         model.apply_skin(base());
-        Biped::draw();
+        Biped::draws_sprites();
     }
     void text_draw () {
         draw_text("asdf", monospace(), Vec(4, 4));

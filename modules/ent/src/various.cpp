@@ -8,16 +8,16 @@ static phys::BodyDef*& test_bdf () {
     static auto test_bdf = hacc::reference_file<phys::BodyDef>("modules/ent/res/test_actor.bdf");
     return test_bdf;
 }
-struct Test_Actor : core::Stateful, phys::Object, vis::Sprite {
+struct Test_Actor : core::Stateful, phys::Object, vis::Draws_Sprites {
     vis::Texture* texture;
     vis::Frame* frame;
-    Vec sprite_pos () { return pos(); }
-    vis::Texture* sprite_texture () { return texture; }
-    vis::Frame* sprite_frame () { return frame; }
 
+    void draws_sprites () {
+        draw_sprite(frame, texture, pos());
+    }
 
     Test_Actor () : Object(test_bdf()) { }
-    void start () { materialize(); appear(); }
+    void start () { materialize(); vis::Draws_Sprites::activate(); }
 };
 
 HCB_BEGIN(Test_Actor)
