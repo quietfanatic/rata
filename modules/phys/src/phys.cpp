@@ -1,7 +1,7 @@
 
 #include <stdexcept>
 #include "../inc/phys.h"
-#include "../../core/inc/game.h"
+#include "../../core/inc/phases.h"
 #include "../../hacc/inc/haccable_standard.h"
 #include "../../hacc/inc/haccable_pointers.h"
 #include "../../util/inc/debug.h"

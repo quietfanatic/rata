@@ -1,8 +1,9 @@
 
 #include <GL/glfw.h>
 #include "../inc/input.h"
-#include "../inc/game.h"
 #include "../inc/commands.h"
+#include "../inc/game.h"
+#include "../inc/phases.h"
 
 namespace core {
 

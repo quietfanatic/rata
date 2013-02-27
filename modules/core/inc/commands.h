@@ -1,10 +1,10 @@
 #ifndef HAVE_CORE_COMMANDS_H
 #define HAVE_CORE_COMMANDS_H
 
-#include "../../util/inc/honestly.h"
 #include <typeinfo>
 #include <string>
 #include <vector>
+#include "../../util/inc/honestly.h"
 
 struct Command {
     virtual void operator() () = 0;

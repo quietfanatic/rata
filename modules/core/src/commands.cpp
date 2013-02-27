@@ -7,8 +7,8 @@
 #include "../../hacc/inc/everything.h"
 #include "../inc/commands.h"
 #include "../inc/input.h"
-#include "../inc/game.h"
 #include "../inc/resources.h"
+#include "../inc/game.h"
 
 using namespace hacc;
 

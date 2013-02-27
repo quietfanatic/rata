@@ -4,7 +4,7 @@
 #include "../../util/inc/math.h"
 #include "../../util/inc/debug.h"
 #include "../../vis/inc/shaders.h"
-#include "../../core/inc/game.h"
+#include "../../core/inc/phases.h"
 #include "../inc/tiles.h"
 
 using namespace geo;

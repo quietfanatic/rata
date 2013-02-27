@@ -2,6 +2,7 @@
 #include "../inc/graffiti.h"
 #include "../inc/shaders.h"
 #include "../../hacc/inc/everything.h"
+#include "../../core/inc/phases.h"
 #include "../../core/inc/game.h"
 
 namespace vis {

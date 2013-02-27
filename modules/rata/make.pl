@@ -19,6 +19,7 @@ workflow {
         tmp/main.o
         tmp/rata.o
         ../core/tmp/game.o
+        ../core/tmp/phases.o
         ../core/tmp/commands.o
         ../core/tmp/resources.o 
         ../core/tmp/state.o

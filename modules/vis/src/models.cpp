@@ -2,7 +2,7 @@
 #include "../inc/models.h"
 #include "../inc/sprites.h"
 #include "../../hacc/inc/everything.h"
-#include "../../core/inc/game.h"
+#include "../../core/inc/phases.h"
 #include "../../core/inc/commands.h"
 
 using namespace vis;

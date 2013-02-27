@@ -1,6 +1,6 @@
 
 #include "../inc/rooms.h"
-#include "../../core/inc/game.h"
+#include "../../core/inc/phases.h"
 #include "../../util/inc/debug.h"
 #include "../../hacc/inc/everything.h"
 

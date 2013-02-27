@@ -1,7 +1,7 @@
 
 #include <GL/gl.h>
-#include "../../core/inc/game.h"
 #include "../inc/graffiti.h"
+#include "../../core/inc/phases.h"
 #include "../inc/shaders.h"
 #include "../../hacc/inc/haccable_files.h"
 

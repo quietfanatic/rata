@@ -4,7 +4,7 @@
 #include <SOIL/SOIL.h>
 #include "../../hacc/inc/everything.h"
 #include "../inc/sprites.h"
-#include "../../core/inc/game.h"
+#include "../../core/inc/phases.h"
 #include "../../util/inc/debug.h"
 #include "../inc/shaders.h"
 
