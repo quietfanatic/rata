@@ -129,11 +129,14 @@ namespace core {
         }
     }
 
+    static void console_help ();
+
     void enter_console () {
         console_is_active = true;
         ignore_a_backtick = true;
         temp_key_cb(console_key_cb);
         glfwSetCharCallback(console_char_cb);
+        if (console_contents.empty()) console_help();
     }
     void exit_console () {
         glfwSetCharCallback(NULL);
@@ -150,6 +153,15 @@ std::unordered_map<size_t, std::string> command_descriptions;
 HCB_BEGIN(Command)
     type_name("Command");
 HCB_END(Command)
+namespace core {
+    static void console_help () {
+        print_to_console("This is the in-game console.  List of available commands are:\n\n");
+        for (auto& sub : Haccable<Command>::get_table()->subtypes) {
+            print_to_console(sub.first + " ");
+        }
+        print_to_console("\n\nFor more instructions on a particular command, type 'help <Command>'\n");
+    }
+}
 
  // Some trivial builtin commands
 
@@ -203,11 +215,7 @@ struct HelpCommand : Command {
     Command_Type* ct = NULL;
     void operator() () {
         if (ct == NULL) {
-            print_to_console("This is the in-game console.  List of available commands are:\n\n");
-            for (auto& sub : Haccable<Command>::get_table()->subtypes) {
-                print_to_console(sub.first + " ");
-            }
-            print_to_console("\n\nFor more instructions on a particular command, type 'help <Command>'\n");
+            console_help();
         }
         else {
             print_to_console(ct->name);
