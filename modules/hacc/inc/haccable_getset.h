@@ -13,12 +13,16 @@ namespace hacc {
      // This file is starting to show its age already.
     template <class C> inline void instantiate_table ();
 
+    struct Required { };
+    struct Optional { };
 
     template <class M>
     struct Defaulter1 {
         Func<void (M&)> def;
-        Defaulter1 (const Func<void (M&)>& def) : def(def) { }
-        Defaulter1 (Null) { }
+        Defaulter1 (Optional, const Func<void (M&)>& def) : def(def) { }
+        Defaulter1 (Optional) : def([](M&){}) { }
+        Defaulter1 (Required) : def() { }
+        Defaulter1 (M v) : def([v](M& m){ m = v; }) { }
     };
 
     struct Defaulter0 {
@@ -47,6 +51,7 @@ namespace hacc {
         GetSet2 (Get get, Set set, bool cg = true, bool cs = true, Defaulter1<M> def = null) :
             get(get), set(set), copies_on_get(cg), copies_on_set(cs), def(def)
         { instantiate_table<M>(); }  // Be sure to instantiate M's HCB.
+        const GetSet2<X, M>& operator () (Defaulter1<M> _def) { def = _def; return *this; }
     };
 
     template <class X>
@@ -99,14 +104,13 @@ namespace hacc {
 
     template <class C, bool has_members = std::is_class<C>::value || std::is_union<C>::value> struct GetSet_Builders;
     template <class C> struct GetSet_Builders<C, false> {
+        static constexpr Required required {};
+        static constexpr Optional optional {};
         
         template <class M>
         static Defaulter1<M> def (const M& def) {
-            return Defaulter1<M>([def](M& m){ m = def; });
+            return Defaulter1<M>(optional, [def](M& m){ m = def; });
         }
-        static constexpr Null required = null;
-        template <class M>
-        static Defaulter1<M> optional () { return Defaulter1<M>([](M&){}); }
 
         template <class M>
         static GetSet2<C, M> value_functions (const Func<M (const C&)>& g, const Func<void (C&, M)>& s, Defaulter1<M> def = required) {
@@ -168,7 +172,8 @@ namespace hacc {
         static GetSet2<C, M> ref_method (Args... args) { throw Error("hcb::ref_method is not available for non-class types."); }
     };
     template <class C> struct GetSet_Builders<C, true> : GetSet_Builders<C, false> {
-        static constexpr Null required = null;
+        static constexpr Required required {};
+        static constexpr Optional optional {};
         template <class M>
         static GetSet2<C, M> member (M C::* mp, Defaulter1<M> def = required) {
             return GetSet2<C, M>(
