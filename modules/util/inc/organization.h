@@ -107,9 +107,10 @@ struct Linkable : Linkable_Link<C, which> {
 
 
  // Things that are registered in an order
-template <class C, std::vector<C*>& all, uint which = 0>
+template <class C, std::vector<C*>& all>
 struct Ordered {
-    Ordered (std::string order) {
+    std::string order;
+    Ordered (std::string order) : order(order) {
         for (auto i = all.begin(); i != all.end(); i++) {
             if (order < (*i)->order) {
                 all.insert(i, static_cast<C*>(this));
