@@ -47,8 +47,8 @@ namespace core {
                     to_load = "";
                 }
                 frame_number++;
-                for (PhaseLayer* p : game_phases()) p->run_if_on();
-                for (PhaseLayer* l : draw_layers()) l->run_if_on();
+                for (Phase* p : Ordered<Phase>::all) p->run_if_on();
+                for (Layer* l : Ordered<Layer>::all) l->run_if_on();
                 glfwSwapBuffers();
                 glfwSleep(1/60.0);
             }

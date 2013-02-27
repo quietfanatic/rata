@@ -4,32 +4,37 @@
 #include <string>
 #include <vector>
 #include "../../util/inc/honestly.h"
+#include "../../util/inc/organization.h"
 
 namespace core {
 
-struct PhaseLayer {
+struct Phase : Ordered<Phase> {
     std::string order;
     std::string name;
     bool on;
-    std::vector<PhaseLayer*>& type;
-    PhaseLayer (std::vector<PhaseLayer*>& type, std::string order, std::string name, bool on);
 
     virtual void run () { }
-    virtual ~PhaseLayer ();
+    virtual ~Phase () { }  // This won't happen
+
+    Phase (std::string order, std::string name = "", bool on = true) :
+        Ordered<Phase>(order), order(order), name(name), on(on)
+    { }
 
     void run_if_on () { if (on) run(); }
 };
+struct Layer : Ordered<Layer> {
+    std::string order;
+    std::string name;
+    bool on;
 
-std::vector<PhaseLayer*>& game_phases ();
-std::vector<PhaseLayer*>& draw_layers ();
+    virtual void run () { }
+    virtual ~Layer () { }  // This won't happen
 
-struct Phase : PhaseLayer {
-    Phase (std::string order, std::string name = "", bool on = true) :
-        PhaseLayer(game_phases(), order, name, on) { }
-};
-struct Layer : PhaseLayer {
     Layer (std::string order, std::string name = "", bool on = true) :
-        PhaseLayer(draw_layers(), order, name, on) { }
+        Ordered<Layer>(order), order(order), name(name), on(on)
+    { }
+
+    void run_if_on () { if (on) run(); }
 };
 
 }
