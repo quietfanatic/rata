@@ -36,8 +36,8 @@ struct Links {
     operator bool () const { return !empty(); }
     void destroy_all () {
         C* nextp = NULL;
-        for (C* p = first(); p; p = nextp) {
-            nextp = p->next();
+        for (C* p = last(); p; p = nextp) {
+            nextp = p->prev();
             p->unlink();
             delete p;
         }
