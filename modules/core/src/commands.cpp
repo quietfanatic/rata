@@ -47,6 +47,8 @@ namespace core {
             fputs(message.c_str(), stderr);
     }
 
+    static bool ignore_a_backtick = false;
+
     void GLFWCALL console_key_cb (int keycode, int action) {
         if (action == GLFW_PRESS) {
             switch (keycode) {
@@ -116,6 +118,10 @@ namespace core {
     }
     void GLFWCALL console_char_cb (int code, int action) {
         if (code < 256) {
+            if (ignore_a_backtick && code == '`') {
+                ignore_a_backtick = false;
+                return;
+            }
             cli_contents = cli_contents.substr(0, cli_pos)
                          + std::string(1, code)
                          + cli_contents.substr(cli_pos);
@@ -125,6 +131,7 @@ namespace core {
 
     void enter_console () {
         console_is_active = true;
+        ignore_a_backtick = true;
         temp_key_cb(console_key_cb);
         glfwSetCharCallback(console_char_cb);
     }
