@@ -1,4 +1,5 @@
 #include "../inc/text.h"
+#include "../inc/graffiti.h"
 #include "../inc/shaders.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/game.h"
@@ -96,6 +97,16 @@ namespace vis {
             static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
             static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
             static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+            if (console_font && core::console_is_active) {
+                 // We came after the graffiti layer
+                Vec pts [4];
+                pts[0] = Vec(0, 0);
+                pts[1] = Vec(20, 0);
+                pts[2] = Vec(20, 15);
+                pts[3] = Vec(0, 15);
+                graffiti_pos(Vec(0, 0));
+                draw_primitive(GL_QUADS, 4, pts, 0x000000cf);
+            }
             glDisable(GL_DEPTH_TEST);
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_BLEND);
@@ -105,14 +116,13 @@ namespace vis {
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
             glUniform2f(text_program_camera_pos, 10.0, 7.5);
-            for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
-                p->text_draw();
-            }
-             // Now print the in-game console, if it's active.
             if (console_font && core::console_is_active) {
                 glUniform2f(text_program_camera_pos, 10.0, 7.5);
                 draw_text(core::console_contents, console_font, Vec(1, console_font->line_height)*PX, Vec(1, -1), 0x00ff00ff);
                 draw_text(core::cli_contents, console_font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff);
+            }
+            else for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
+                p->text_draw();
             }
 
         }
