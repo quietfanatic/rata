@@ -646,7 +646,6 @@ namespace hacc {
             if (i.second->form() == MACROCALL) {
                 auto mch = static_cast<Hacc::MacroCall*>(i.second);
                 if (mch->mc.name == "file" && mch->mc.arg->form() == STRING) {
-                    deallocate_file_object(mch->mc.arg->get_string());
                 }
             }
         }
