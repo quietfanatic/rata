@@ -137,6 +137,7 @@ String hacc_value_to_string (Hacc* h, uint ind, uint prior_ind) {
             else r += " ";
             return r + "}";
         }
+        case GENERIC: throw Error("Cannot stringify a Generic.  This may be an internal error.");
         case ERROR: throw static_cast<Hacc::Error*>(h)->e;
         default: throw Error("Corrupted Hacc tree\n");
     }

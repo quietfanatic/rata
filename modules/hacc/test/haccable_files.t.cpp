@@ -3,15 +3,20 @@
 #include "../inc/haccable_integration.h"
 #include "../inc/haccable_standard.h"
 #include "../inc/haccable_pointers.h"
+#include "../inc/strings.h"
 
 HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA int32>)
 
 #include "../../tap/inc/tap.h"
 
+int32* p;
+
 tap::Tester tester ("haccable_files", [](){
     using namespace tap;
     using namespace hacc;
-    plan(2);
+    plan(4);
     doesnt_throw([](){generic_from_file("/home/lewis/stash/git/rata/modules/hacc/test/test.hacc"); }, "Can use generic_from_file()\n");
-    is(*value_from_string<int32*>("file(\"/home/lewis/stash/git/rata/modules/hacc/test/test.hacc\").asdf"), (int32)47, "file(\"name\").attr seems to work");
+    doesnt_throw([](){p = value_from_string<int32*>("file(\"/home/lewis/stash/git/rata/modules/hacc/test/test.hacc\").asdf");}, "file(\"name\").attr doesn't break");
+    is(*p, (int32)47, "...and it seems to work.");
+    is(string_from(p), string("file(\"/home/lewis/stash/git/rata/modules/hacc/test/test.hacc\").asdf"), "We can remember the incantation required to get something from a file.");
 });

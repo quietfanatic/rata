@@ -256,9 +256,6 @@ static inline std::pair<String, Hacc*> new_attr (String name, Args... args) {
     return std::pair<String, Hacc*>(name, new_hacc(args...));
 }
 
- // This does various transformations internal to the HACC language.
-Hacc* collapse_hacc (Hacc* h);
-
 } // namespace hacc
 
  // I had a class "Bomb" that acted in place of a "finally" clause.

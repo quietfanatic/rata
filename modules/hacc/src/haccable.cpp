@@ -1,6 +1,7 @@
 #include <unordered_map>
 #include "../inc/haccable.h"
 #include "../inc/haccable_files.h"
+#include "../inc/strings.h"
 
 namespace hacc {
 
@@ -154,6 +155,11 @@ namespace hacc {
                 }
             }
             else {
+                 // Not sure we should prefer an incantation over an id,
+                 //  but this is much easier to implement.
+                if (Hacc* h = remember_incantation(pp)) {
+                    return h;
+                }
                  // Make sure all references to this address are on the same page
                 if (!hist.referenced) {
                     hist.referenced = true;
@@ -518,7 +524,8 @@ namespace hacc {
         else throw Error("ID assignment expected in a place where one wasn't");
     }
 
-    Hacc* collapse_hacc (Hacc* h) {
+    Hacc* collapse_hacc (Hacc* h, Hacc** return_incantation) {
+        if (return_incantation) *return_incantation = NULL;
         switch (h->form()) {
             case MACROCALL: {
                 auto mch = static_cast<hacc::Hacc::MacroCall*>(h);
@@ -526,6 +533,8 @@ namespace hacc {
                     mch->mc.arg = collapse_hacc(mch->mc.arg);
                     if (mch->mc.arg->form() == STRING) {
                         Generic g = generic_from_file(mch->mc.arg->get_string());
+                        record_incantation(g.p, mch);
+                        if (return_incantation) *return_incantation = mch;
                         return new_hacc(g);
                     }
                     else throw Error("The \"file\" macro can only be called on a string.");
@@ -544,21 +553,35 @@ namespace hacc {
             }
             case ATTRREF: {
                 auto arh = static_cast<hacc::Hacc::AttrRef*>(h);
-                arh->ar.subject = collapse_hacc(arh->ar.subject);
+                Hacc* incantation;
+                arh->ar.subject = collapse_hacc(arh->ar.subject, &incantation);
                 if (arh->ar.subject->form() == GENERIC) {
                     auto gh = static_cast<hacc::Hacc::Generic*>(arh->ar.subject);
                     HaccTable* t = HaccTable::require_cpptype(*gh->g.cpptype);
-                    return new_hacc(t->get_attr(gh->g.p, arh->ar.name));
+                    Generic attr_g = t->get_attr(gh->g.p, arh->ar.name);
+                    if (incantation) {
+                        incantation = new_hacc(AttrRef(incantation, arh->ar.name));
+                        record_incantation(attr_g.p, incantation);
+                        if (return_incantation) *return_incantation = incantation;
+                    }
+                    return new_hacc(attr_g);
                 }
                 else throw Error("Attributes can only be requested from a \"Generic\" hacc, such as produced by file()");
             }
             case ELEMREF: {
                 auto erh = static_cast<hacc::Hacc::ElemRef*>(h);
-                erh->er.subject = collapse_hacc(erh->er.subject);
+                Hacc* incantation;
+                erh->er.subject = collapse_hacc(erh->er.subject, &incantation);
                 if (erh->er.subject->form() == GENERIC) {
                     auto gh = static_cast<hacc::Hacc::Generic*>(erh->er.subject);
                     HaccTable* t = HaccTable::require_cpptype(*gh->g.cpptype);
-                    return new_hacc(t->get_elem(gh->g.p, erh->er.index));
+                    Generic elem_g = t->get_elem(gh->g.p, erh->er.index);
+                    if (incantation) {
+                        incantation = new_hacc(ElemRef(incantation, erh->er.index));
+                        record_incantation(elem_g.p, incantation);
+                        if (return_incantation) *return_incantation = incantation;
+                    }
+                    return new_hacc(elem_g);
                 }
                 else throw Error("Elements can only be requested from a \"Generic\" hacc, such as produced by file()");
             }
@@ -594,7 +617,10 @@ namespace hacc {
                         return new_hacc(Generic(t->cpptype, rid.get()));
                     }
                     else {
-                        rid.read = collapse_hacc(rid.read);
+                        Hacc* incantation;
+                        rid.read = collapse_hacc(rid.read, &incantation);
+                        if (incantation && return_incantation)
+                            *return_incantation = incantation;
                         return rid.read;
                     }
                 }
@@ -607,6 +633,7 @@ namespace hacc {
     std::unordered_map<void*, Hacc*> incantations;
     void record_incantation (void* p, Hacc* h) {
         incantations.emplace(p, h);
+         // If there are multiple incantations they'd better be equivalent.
     }
     Hacc* remember_incantation (void* p) {
         auto iter = incantations.find(p);

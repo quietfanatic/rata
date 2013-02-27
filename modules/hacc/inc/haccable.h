@@ -296,8 +296,12 @@ template <class C> String get_type_name () {
 #define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
 
 namespace hacc {
-     // As a heroic last-ditch effort to preserve relationships, we provide
-     //  a system to register arbitrary pointers with the Hacc that generated them
+     // This does various transformations internal to the HACC language.
+    Hacc* collapse_hacc (Hacc* h, Hacc** return_incantion = NULL);
+
+     // In order for saved information to reference static information in files,
+     //  we provide a system to register arbitrary pointers with the Hacc that
+     //  generated them.  This is for things like file("tex.image").ALL
     void record_incantation (void*, Hacc*);
     Hacc* remember_incantation (void*);
 }
