@@ -1,5 +1,6 @@
 {
     things:[
+        {Space:{ gravity: [0 -30] }}
         {Rata:{
             biped:{
                 object:{ pos:[10 10.5] }

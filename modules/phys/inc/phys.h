@@ -2,6 +2,8 @@
 #define HAVE_PHYS_PHYS_H
 
 #include <Box2D/Box2D.h>
+#include "../../core/inc/phases.h"
+#include "../../core/inc/state.h"
 #include "../../util/inc/Vec.h"
 #include "../../util/inc/organization.h"
 #include "../../hacc/inc/haccable_integration.h"
@@ -9,7 +11,19 @@
 namespace phys {
     struct Object;
 
-    extern b2World* space;
+    struct Space : core::Phase, core::Stateful {
+        b2World* b2world;
+        Space ();
+
+        Vec get_gravity () const;
+        void set_gravity (Vec g);
+
+        void start ();
+        void run ();
+        ~Space ();
+    };
+    extern Space* space;
+
 
      // Static things, probably stored in files
 
@@ -27,7 +41,7 @@ namespace phys {
 
         BodyDef () { b2.active = false; }
 
-        b2Body* manifest (Object* owner, b2World* space, Vec pos = Vec(0, 0), Vec vel = Vec(0, 0));
+        b2Body* manifest (Object* owner, Space* space, Vec pos = Vec(0, 0), Vec vel = Vec(0, 0));
     };
 
      // The dynamic thing
@@ -66,7 +80,7 @@ namespace phys {
         virtual void before_move () { }
         virtual void after_move () { }
         virtual void while_intangible () { }
-        virtual ~Object () { if (b2body) space->DestroyBody(b2body); }
+        virtual ~Object () { if (b2body) space->b2world->DestroyBody(b2body); }
 
         Object (BodyDef* body_def) { b2body = body_def->manifest(this, space); }
     };
@@ -85,7 +99,6 @@ namespace phys {
 
         uint64 bit () { return 1 << index; }
     };
-
 }
 
 #endif

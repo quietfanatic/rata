@@ -11,6 +11,12 @@ using namespace phys;
 
  // This is so satisfying
 
+HCB_BEGIN(Space)
+    type_name("phys::Space");
+    base<core::Stateful>("Space");
+    attr("gravity", value_methods(&Space::get_gravity, &Space::set_gravity));
+HCB_END(Space)
+
 std::vector<Collision_Rule*> coll_rules;
 HCB_BEGIN(Collision_Rule)
     type_name("phys::Collision_Rule");
@@ -196,42 +202,41 @@ namespace phys {
 
      // Space handling
 
-    b2World* space = NULL;
 
     static Logger space_logger ("space");
 
-    struct Space_Phase : core::Phase {
-        Space_Phase () : core::Phase("D.M", "space") { }
-        void init () {
-            space_logger.log("Creating the spacetime continuum.  Well, the space part anyway.");
-            space = new b2World(
-                b2Vec2(0, -30)
-            );
-            space->SetContactListener(&mycl);
+    Space* space = NULL;
+
+    Space::Space () : core::Phase("D.M", "space") {
+        space_logger.log("Creating the spacetime continuum.  Well, the space part anyway.");
+        b2world = new b2World(
+            b2Vec2(0, 0)
+        );
+        b2world->SetContactListener(&mycl);
+        space = this;
+    }
+    void Space::start () { }
+    Vec Space::get_gravity () const { return b2world->GetGravity(); }
+    void Space::set_gravity (Vec g) { b2world->SetGravity(g); }
+    void Space::run () {
+        for (b2Body* b2b = b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
+            if (Object* obj = (Object*)b2b->GetUserData())
+                if (b2b->IsActive())
+                    obj->before_move();
         }
-        void start () {
-        }
-        void run () {
-            for (b2Body* b2b = space->GetBodyList(); b2b; b2b = b2b->GetNext()) {
-                if (Object* obj = (Object*)b2b->GetUserData())
-                    if (b2b->IsActive())
-                        obj->before_move();
+        b2world->Step(1/60.0, 10, 10);
+        for (b2Body* b2b = b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
+            if (Object* obj = (Object*)b2b->GetUserData()) {
+                if (b2b->IsActive())
+                    obj->after_move();
+                else obj->while_intangible();
             }
-            space->Step(1/60.0, 10, 10);
-            for (b2Body* b2b = space->GetBodyList(); b2b; b2b = b2b->GetNext()) {
-                if (Object* obj = (Object*)b2b->GetUserData()) {
-                    if (b2b->IsActive())
-                        obj->after_move();
-                    else obj->while_intangible();
-                }
-            }
         }
-        void stop () {
-            space_logger.log("Destroying space.");
-            delete space;
-            init();
-        }
-    } space_phase;
+    }
+    Space::~Space () { 
+        space_logger.log("Destroying space.");
+        delete space;
+    }
 
      // Definitions
 
@@ -241,10 +246,10 @@ namespace phys {
         return b2f;
     }
 
-    b2Body* BodyDef::manifest (Object* owner, b2World* sim, Vec pos, Vec vel) {
-        b2Body* b2b = space->CreateBody(&b2);
+    b2Body* BodyDef::manifest (Object* owner, Space* sim, Vec pos, Vec vel) {
+        b2Body* b2b = sim->b2world->CreateBody(&b2);
         b2b->SetUserData(owner);
-        space_logger.log("%d objects in space.", space->GetBodyCount());
+        space_logger.log("%d objects in space.", sim->b2world->GetBodyCount());
         for (FixtureDef& fix : fixtures) {
             fix.manifest(b2b);
         }
@@ -261,7 +266,7 @@ namespace phys {
     struct Phys_Debug_Layer : core::Layer {
         Phys_Debug_Layer () : core::Layer("G.M", "phys_debug", false) { }
         void run () {
-            for (b2Body* b2b = space->GetBodyList(); b2b; b2b = b2b->GetNext()) {
+            for (b2Body* b2b = space->b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
                 if (b2b->IsActive()) {
                     uint32 color = 0xffffff7f;
                     switch (b2b->GetType()) {

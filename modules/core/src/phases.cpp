@@ -8,7 +8,7 @@
 namespace core {
 
     PhaseLayer::PhaseLayer (std::vector<PhaseLayer*>& type, std::string order, std::string name, bool on) :
-        order(order), name(name), on(on)
+        order(order), name(name), on(on), type(type)
     {
         for (auto i = type.begin(); i != type.end(); i++) {
             if (order < (*i)->order) {
@@ -17,6 +17,11 @@ namespace core {
             }
         }
         type.push_back(this);
+    }
+    PhaseLayer::~PhaseLayer () {
+        for (auto iter = type.begin(); iter != type.end(); iter++) {
+            if (*iter == this) type.erase(iter);
+        }
     }
 
     std::vector<PhaseLayer*>& game_phases () { static std::vector<PhaseLayer*> r; return r; }

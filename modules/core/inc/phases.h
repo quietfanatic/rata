@@ -18,7 +18,7 @@ struct PhaseLayer {
     virtual void run () { }
     virtual void stop () { }
     void run_if_on () { if (on) run(); }
-    virtual ~PhaseLayer () { type.erase(this); }
+    virtual ~PhaseLayer ();
 };
 
 std::vector<PhaseLayer*>& game_phases ();
