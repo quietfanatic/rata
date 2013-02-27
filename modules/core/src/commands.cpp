@@ -71,7 +71,7 @@ namespace core {
                     break;
                 }
                 case GLFW_KEY_ENTER: {
-                    print_to_console(cli_contents);
+                    print_to_console(cli_contents + "\n");
                     if (!cli_contents.empty()) {
                         canonical_ptr<Command> cmd;
                         bool good_command = false;
