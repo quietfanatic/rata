@@ -35,6 +35,21 @@ namespace core {
         }
     }
 
+    bool console_is_active = false;
+    std::string console_contents = "This is the console.\n";
+    std::string cli_contents = "command...";
+    uint cli_pos = 0;
+
+    void enter_console () {
+        console_is_active = true;
+    }
+    void exit_console () {
+        console_is_active = false;
+    }
+    void print_to_console (std::string message) {
+        console_contents += message;
+    }
+
 }
 
 std::unordered_map<size_t, std::string> command_descriptions;

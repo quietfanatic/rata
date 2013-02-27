@@ -51,7 +51,6 @@ namespace vis {
         draw_primitive(GL_LINE_LOOP, n_pts, pts, color);
     }
     void draw_primitive (uint type, uint n_pts, Vec* pts, uint32 color) {
-        static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
         static auto glUniform4f = glproc<void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)>("glUniform4f");
         static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
         graffiti_program->use();

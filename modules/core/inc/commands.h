@@ -1,7 +1,10 @@
 #ifndef HAVE_CORE_COMMANDS_H
 #define HAVE_CORE_COMMANDS_H
 
+#include "../../util/inc/honestly.h"
 #include <typeinfo>
+#include <string>
+#include <vector>
 
 struct Command {
     virtual void operator() () = 0;
@@ -11,6 +14,14 @@ struct Command {
 namespace core {
 
     void command_from_terminal ();
+
+    void enter_console ();
+    void exit_console ();
+    void print_to_console (std::string message);
+    extern bool console_is_active;
+    extern std::string console_contents;
+    extern std::string cli_contents;
+    extern uint cli_pos;
 
 }
 

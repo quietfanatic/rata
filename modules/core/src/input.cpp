@@ -32,6 +32,10 @@ namespace core {
                     quit_game();
                     break;
                 }
+                case GLFW_KEY_TAB: {
+                    enter_console();
+                    break;
+                }
                 case '`': {
                     command_from_terminal();
                     break;

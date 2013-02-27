@@ -43,13 +43,13 @@ namespace vis {
                 curx += font->widths.empty() ? font->width : font->widths[text[i]];
                 if (curx > maxx) maxx = curx;
                 if (cury > maxy) maxy = cury;
-                printf("'%c' [[[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]]]\n",
-                    text[i],
-                    verts[vert_i][0].px, verts[vert_i][0].py, verts[vert_i][0].tx, verts[vert_i][0].ty,
-                    verts[vert_i][1].px, verts[vert_i][1].py, verts[vert_i][1].tx, verts[vert_i][1].ty,
-                    verts[vert_i][2].px, verts[vert_i][2].py, verts[vert_i][2].tx, verts[vert_i][2].ty,
-                    verts[vert_i][3].px, verts[vert_i][3].py, verts[vert_i][3].tx, verts[vert_i][3].ty
-                );
+                //printf("'%c' [[[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]]]\n",
+                //    text[i],
+                //    verts[vert_i][0].px, verts[vert_i][0].py, verts[vert_i][0].tx, verts[vert_i][0].ty,
+                //    verts[vert_i][1].px, verts[vert_i][1].py, verts[vert_i][1].tx, verts[vert_i][1].ty,
+                //    verts[vert_i][2].px, verts[vert_i][2].py, verts[vert_i][2].tx, verts[vert_i][2].ty,
+                //    verts[vert_i][3].px, verts[vert_i][3].py, verts[vert_i][3].tx, verts[vert_i][3].ty
+                //);
                 vert_i++;
             }
         }
@@ -77,6 +77,8 @@ namespace vis {
     static Links<Draws_Text> text_drawers;
     void Draws_Text::text_appear () { link(text_drawers); }
     void Draws_Text::text_disappear () { unlink(); }
+
+    Font* console_font = NULL;
 
     struct Text_Layer : core::Layer {
         Text_Layer () : core::Layer("G.M", "text") { }
@@ -106,6 +108,13 @@ namespace vis {
             for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
                 p->text_draw();
             }
+             // Now print the in-game console, if it's active.
+            if (console_font && core::console_is_active) {
+                glUniform2f(text_program_camera_pos, 10.0, 7.5);
+                draw_text(core::console_contents, console_font, Vec(1, console_font->line_height)*PX, Vec(1, -1), 0x00ff00ff);
+                draw_text(core::cli_contents, console_font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff);
+            }
+
         }
     } text_layer;
 
