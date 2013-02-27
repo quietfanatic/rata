@@ -8,10 +8,7 @@
 
 namespace core {
 
-    static Links<Key_Listener> key_listeners;
-
-    void Key_Listener::activate () { link(key_listeners); }
-    void Key_Listener::deactivate () { unlink(); }
+    std::vector<Key_Listener*> key_listeners;
 
     static int GLFWCALL close_cb () {
         quit_game();
@@ -32,7 +29,7 @@ namespace core {
                 default: break;
             }
         }
-        for (auto kl = key_listeners.first(); kl; kl = kl->next()) {
+        for (auto kl : key_listeners) {
             kl->hear_key(keycode, action);
         }
     }
