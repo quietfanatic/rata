@@ -29,27 +29,33 @@ namespace core {
         }
     }
 
-    void load_state (std::string filename) {
+    bool load_state (std::string filename) {
         try {
             if (current_state) delete current_state;
             hacc::clear_incantations();  // important to deallocate rooms!
             if (!initialized) init();
             current_state = hacc::new_from_file<Game_State>(filename);
             current_state->start();
+            return true;
         } catch (hacc::Error& e) {
             printf("Failed to load state due to hacc error: %s\n", e.what());
+            return false;
         } catch (std::exception& e) {
             printf("Failed to load state due to an exception: %s\n", e.what());
+            return false;
         }
     }
 
-    void save_state (std::string filename) {
+    bool save_state (std::string filename) {
         try {
             hacc::file_from(filename, *current_state, 4);
+            return true;
         } catch (hacc::Error& e) {
             printf("Failed to save state due to hacc error: %s\n", e.what());
+            return false;
         } catch (std::exception& e) {
             printf("Failed to save state due to an exception: %s\n", e.what());
+            return false;
         }
     }
 

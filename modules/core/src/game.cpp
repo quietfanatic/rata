@@ -43,8 +43,9 @@ namespace core {
                     to_save = "";
                 }
                 if (!to_load.empty()) {
-                    load_state(to_load);
+                    bool success = load_state(to_load);
                     to_load = "";
+                    if (!success) return;
                 }
                 frame_number++;
                 for (Phase* p : Ordered<Phase>::all) p->run_if_on();

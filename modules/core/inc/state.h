@@ -25,8 +25,8 @@ struct Stateful : Linkable<Stateful> {
     virtual ~Stateful () { }
 };
 
-void load_state (std::string filename);
-void save_state (std::string filename);
+bool load_state (std::string filename);
+bool save_state (std::string filename);
 
 }
 
