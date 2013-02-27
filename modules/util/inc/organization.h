@@ -106,4 +106,28 @@ struct Linkable : Linkable_Link<C, which> {
 };
 
 
+ // Things that are registered in an order
+template <class C, uint which = 0>
+struct Ordered {
+    static std::vector<C*> all;
+    Ordered (std::string order) {
+        for (auto i = all.begin(); i != all.end(); i++) {
+            if (order < (*i)->order) {
+                all.insert(i, static_cast<C*>(this));
+                return;
+            }
+        }
+        all.push_back(static_cast<C*>(this));
+    }
+    ~Ordered () {
+        for (auto i = all.begin(); i != all.end(); i++) {
+            if (*i == static_cast<C*>(this)) {
+                all.erase(i);
+                return;
+            }
+        }
+    }
+};
+template <class C, uint which> std::vector<C*> Ordered<C, which>::all;
+
 #endif
