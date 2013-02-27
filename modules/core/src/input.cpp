@@ -25,6 +25,10 @@ namespace core {
                     quit_game();
                     break;
                 }
+                case '`': {
+                    command_from_terminal();
+                    break;
+                }
                 default: break;
             }
         }
