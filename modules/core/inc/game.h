@@ -12,7 +12,9 @@ namespace core {
 
     void init ();
     void start ();
-    void stop ();
+
+    void load (std::string filename);
+    void save (std::string filename);
 }
 
 #endif

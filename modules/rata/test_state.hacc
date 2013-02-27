@@ -1,6 +1,15 @@
 {
     things:[
         {Space:{ gravity: [0 -30] }}
+        {Phys_Debug_Layer:{}}
+        {Tilemap_Layer:{}}
+        {Room_Phase:{}}
+        {Graffiti_Layer:{}}
+        {Model_Tester:{}}
+        {Sprite_Layer:{}}
+        {Camera_Setup_Layer:{}}
+        {Test_Layer:{}}
+        {Text_Layer:{}}
         {Rata:{
             biped:{
                 object:{ pos:[10 10.5] }

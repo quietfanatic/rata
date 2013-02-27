@@ -5,6 +5,7 @@
 #include "../../hacc/inc/everything.h"
 #include "../inc/sprites.h"
 #include "../../core/inc/phases.h"
+#include "../../core/inc/state.h"
 #include "../../util/inc/debug.h"
 #include "../inc/shaders.h"
 
@@ -52,8 +53,9 @@ namespace vis {
         diagnose_opengl("After rendering a sprite");
     }
 
-    struct Camera_Setup_Layer : core::Layer {
+    struct Camera_Setup_Layer : core::Layer, core::Stateful {
         Camera_Setup_Layer () : core::Layer("B.M", "camera_setup") { }
+        void start () { }
         void run () {
             static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             glClearColor(0.5, 0.5, 0.5, 0);
@@ -65,10 +67,11 @@ namespace vis {
             sprite_program->use();
             glUniform2f(sprite_program_camera_pos, 10, 7.5);  // TODO: Control the camera with this
         }
-    } csl;
+    };
 
-    struct Test_Layer : core::Layer {
+    struct Test_Layer : core::Layer, core::Stateful {
         Test_Layer () : core::Layer("C.M", "test") { }
+        void start () { }
         void run () {
             static Image* image = hacc::reference_file<Image>("modules/vis/res/test.image");
             static Texture* texture = image->texture_named("ALL");
@@ -83,7 +86,7 @@ namespace vis {
             draw_sprite(green, texture, Vec(18, 13), false, false, 0);
             draw_sprite(blue, texture, Vec(2, 13), false, false, 0);
         }
-    } test_layer;
+    };
 
     static Links<Draws_Sprites> sprite_drawers;
 
@@ -95,14 +98,14 @@ namespace vis {
     }
 
 
-    struct Sprite_Layer : core::Layer {
+    struct Sprite_Layer : core::Layer, core::Stateful {
         Sprite_Layer () : core::Layer("D.M", "sprites") { }
         void run () {
             for (Draws_Sprites* p = sprite_drawers.first(); p; p = p->next()) {
                 p->draw();
             }
         }
-        void init () {
+        void start () {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
             sprite_program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
             sprite_program->use();
@@ -115,9 +118,26 @@ namespace vis {
                 throw std::logic_error("sprites init failed due to GL error");
             }
         }
-    } sprite_layer;
+    };
 
 }
 
 using namespace vis;
 
+HCB_BEGIN(Camera_Setup_Layer)
+    type_name("vis::Camera_Setup_Layer");
+    base<core::Stateful>("Camera_Setup_Layer");
+    empty();
+HCB_END(Camera_Setup_Layer)
+
+HCB_BEGIN(Sprite_Layer)
+    type_name("vis::Sprite_Layer");
+    base<core::Stateful>("Sprite_Layer");
+    empty();
+HCB_END(Sprite_Layer)
+
+HCB_BEGIN(Test_Layer)
+    type_name("vis::Test_Layer");
+    base<core::Stateful>("Test_Layer");
+    empty();
+HCB_END(Test_Layer)

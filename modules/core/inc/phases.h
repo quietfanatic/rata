@@ -13,12 +13,11 @@ struct PhaseLayer {
     bool on;
     std::vector<PhaseLayer*>& type;
     PhaseLayer (std::vector<PhaseLayer*>& type, std::string order, std::string name, bool on);
-    virtual void init () { }
-    virtual void start () { }
+
     virtual void run () { }
-    virtual void stop () { }
-    void run_if_on () { if (on) run(); }
     virtual ~PhaseLayer ();
+
+    void run_if_on () { if (on) run(); }
 };
 
 std::vector<PhaseLayer*>& game_phases ();

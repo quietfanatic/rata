@@ -20,7 +20,7 @@ namespace core {
     }
     PhaseLayer::~PhaseLayer () {
         for (auto iter = type.begin(); iter != type.end(); iter++) {
-            if (*iter == this) type.erase(iter);
+//            if (*iter == this) type.erase(iter);
         }
     }
 

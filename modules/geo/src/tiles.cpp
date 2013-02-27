@@ -41,7 +41,7 @@ static Logger tilemap_logger ("tilemap");
 
 Links<Tilemap> active_tilemaps;
 
-Tilemap::Tilemap () : phys::Object(tilemap_bdf()) { fprintf(stderr, "allocated a tilemap\n"); }
+Tilemap::Tilemap () : phys::Object(tilemap_bdf()) { }
 void Tilemap::emerge () { materialize(); link(active_tilemaps); }
 void Tilemap::reclude () { dematerialize(); unlink(); }
 
@@ -236,9 +236,8 @@ void Tilemap::start () {
 
 static vis::Program* tiles_program;
 
-struct Tilemap_Layer : core::Layer {
-    Tilemap_Layer () : core::Layer("E.M", "tilemaps") { }
-    void init () {
+struct Tilemap_Layer : core::Layer, core::Stateful {
+    Tilemap_Layer () : core::Layer("E.M", "tilemaps") {
         static auto glUniform1i = vis::glproc<void (GLint, GLint)>("glUniform1i");
         static auto glUniform2f = vis::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
         tiles_program = hacc::reference_file<vis::Program>("modules/geo/res/tiles.prog");
@@ -256,6 +255,7 @@ struct Tilemap_Layer : core::Layer {
     int camera_pos;
     int model_pos;
     int tileset_size;
+    void start () { }
     void run () {
         static auto glUniform2f = vis::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
         static auto glBindVertexArray = vis::glproc<void (GLuint)>("glBindVertexArray");
@@ -268,12 +268,18 @@ struct Tilemap_Layer : core::Layer {
             glBindTexture(GL_TEXTURE_2D, map->texture->tex);
             glBindVertexArray(map->vao_id);
             glDrawArrays(GL_QUADS, 0, map->vao_size);
-//            diagnose_opengl("After rendering a tilemap");
+            vis::diagnose_opengl("After rendering a tilemap");
         }
     }
-} tilemap_layer;
-
-
+};
 
 }  // namespace geo
+
+using namespace geo;
+HCB_BEGIN(Tilemap_Layer)
+    type_name("geo::Tilemap_Layer");
+    base<core::Stateful>("Tilemap_Layer");
+    empty();
+HCB_END(Tilemap_Layer)
+
 

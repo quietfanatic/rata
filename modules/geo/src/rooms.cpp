@@ -1,6 +1,7 @@
 
 #include "../inc/rooms.h"
 #include "../../core/inc/phases.h"
+#include "../../core/inc/state.h"
 #include "../../util/inc/debug.h"
 #include "../../hacc/inc/everything.h"
 
@@ -98,7 +99,7 @@ namespace geo {
         }
     }
 
-    struct Room_Phase : core::Phase {
+    struct Room_Phase : core::Phase, core::Stateful {
         Room_Phase () : core::Phase ("T.M") { }
         void start () {
             Resident* nextr;
@@ -115,11 +116,16 @@ namespace geo {
             current_room = NULL;
             beholder = NULL;
         }
-    } room_phase;
+    };
 
 }
 
 using namespace geo;
+HCB_BEGIN(Room_Phase)
+    type_name("geo::Room_Phase");
+    base<core::Stateful>("Room_Phase");
+    empty();
+HCB_END(Room_Phase)
 HCB_BEGIN(Room)
     type_name("geo::Room");
     attr("boundary", member(&Room::boundary));

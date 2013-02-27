@@ -29,16 +29,13 @@ namespace core {
         }
     }
 
-    void load (std::string filename) {
+    void load_state (std::string filename) {
         try {
             if (current_state) delete current_state;
             hacc::clear_incantations();  // important to deallocate rooms!
-            if (initialized)
-                stop();
-            else init();
+            if (!initialized) init();
             current_state = hacc::new_from_file<Game_State>(filename);
             current_state->start();
-            start();
         } catch (hacc::Error& e) {
             printf("Failed to load state due to hacc error: %s\n", e.what());
         } catch (std::exception& e) {
@@ -46,7 +43,7 @@ namespace core {
         }
     }
 
-    void save (std::string filename) {
+    void save_state (std::string filename) {
         try {
             hacc::file_from(filename, *current_state, 4);
         } catch (hacc::Error& e) {

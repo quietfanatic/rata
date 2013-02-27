@@ -1,5 +1,6 @@
 #include <GL/glfw.h>
 #include "../inc/game.h"
+#include "../inc/state.h"
 #include "../inc/phases.h"
 
 namespace core {
@@ -26,16 +27,25 @@ namespace core {
         initialized = true;
         glfwInit();
         set_video(3);
-        for (PhaseLayer* p : game_phases()) p->init();
-        for (PhaseLayer* l : draw_layers()) l->init();
     }
+
+    static std::string to_load;
+    static std::string to_save;
+    void load (std::string filename) { to_load = filename; }
+    void save (std::string filename) { to_save = filename; }
 
     void start () {
         try {
             init();
-            for (PhaseLayer* p : game_phases()) p->start();
-            for (PhaseLayer* l : draw_layers()) l->start();
             for (;;) {
+                if (!to_save.empty()) {
+                    save_state(to_save);
+                    to_save = "";
+                }
+                if (!to_load.empty()) {
+                    load_state(to_load);
+                    to_load = "";
+                }
                 frame_number++;
                 for (PhaseLayer* p : game_phases()) p->run_if_on();
                 for (PhaseLayer* l : draw_layers()) l->run_if_on();
@@ -45,11 +55,6 @@ namespace core {
         } catch (std::exception& e) {
             fprintf(stderr, "Game was aborted due to an exception: %s\n", e.what());
         }
-    }
-
-    void stop () {
-        for (PhaseLayer* p : game_phases()) p->stop();
-        for (PhaseLayer* l : draw_layers()) l->stop();
     }
 
 }

@@ -3,6 +3,7 @@
 #include "../inc/shaders.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/phases.h"
+#include "../../core/inc/state.h"
 #include "../../core/inc/game.h"
 
 namespace vis {
@@ -90,9 +91,9 @@ namespace vis {
 
     Font* console_font = NULL;
 
-    struct Text_Layer : core::Layer {
+    struct Text_Layer : core::Layer, core::Stateful {
         Text_Layer () : core::Layer("G.M", "text") { }
-        void init () {
+        void start () {
             text_program = hacc::reference_file<Program>("modules/vis/res/text.prog");
             text_program_tex = text_program->require_uniform("tex");
             text_program_camera_pos = text_program->require_uniform("camera_pos");
@@ -141,7 +142,7 @@ namespace vis {
             }
 
         }
-    } text_layer;
+    };
 
 }
 
@@ -154,4 +155,10 @@ HCB_BEGIN(Font)
     attr("line_height", member(&Font::line_height));
     attr("widths", member(&Font::widths, def(std::vector<uint8>())));
 HCB_END(Font)
+
+HCB_BEGIN(Text_Layer)
+    type_name("vis::Text_Layer");
+    base<core::Stateful>("Text_Layer");
+    empty();
+HCB_END(Text_Layer)
 

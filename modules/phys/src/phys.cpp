@@ -235,7 +235,7 @@ namespace phys {
     }
     Space::~Space () { 
         space_logger.log("Destroying space.");
-        delete space;
+        delete b2world;
     }
 
      // Definitions
@@ -263,8 +263,9 @@ namespace phys {
 
      // Debug fixture drawing
     
-    struct Phys_Debug_Layer : core::Layer {
+    struct Phys_Debug_Layer : core::Layer, core::Stateful {
         Phys_Debug_Layer () : core::Layer("G.M", "phys_debug", false) { }
+        void start () { }
         void run () {
             for (b2Body* b2b = space->b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
                 if (b2b->IsActive()) {
@@ -316,7 +317,13 @@ namespace phys {
                 }
             }
         }
-    } pdl;
+    };
 
 }
+
+HCB_BEGIN(Phys_Debug_Layer)
+    type_name("phys::Phys_Debug_Layer");
+    base<core::Stateful>("Phys_Debug_Layer");
+    empty();
+HCB_END(Phys_Debug_Layer)
 

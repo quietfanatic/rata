@@ -3,6 +3,7 @@
 #include "../inc/sprites.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/phases.h"
+#include "../../core/inc/state.h"
 #include "../../core/inc/commands.h"
 
 using namespace vis;
@@ -124,28 +125,28 @@ namespace vis {
     Model::Model (Skel* skel) : skel(skel), segs(skel ? skel->segs.size() : 0) { }
 
 
-
-
-    struct Model_Test : core::Layer {
-        Model_Test () : core::Layer("E.M", "model_test", false) { }
+    struct Model_Tester;
+    static Model_Tester* model_tester;
+    struct Model_Tester : core::Layer, core::Stateful {
+        Model_Tester () : core::Layer("E.M", "model_tester", false) { model_tester = this; }
         bool flip = false;
         Model model;
         void run () {
             model.draw(Vec(10, 4), flip, false, 0.5);
         }
-        void init () {
+        void start () {
             model = Model(hacc::reference_file<Skel>("modules/rata/res/rata.skel"));
             model.apply_skin(hacc::reference_file<Skin>("modules/rata/res/rata-base.skin"));
             model.apply_pose(model.skel->poses.named("stand"));
         }
-    } model_tester;
+    };
 
 }
 
 struct MT_Load_Command : Command {
     Skel* skel;
     void operator() () {
-        model_tester.model = Model(skel);
+        model_tester->model = Model(skel);
     }
 };
 HCB_BEGIN(MT_Load_Command)
@@ -157,7 +158,7 @@ HCB_END(MT_Load_Command)
 struct MT_Skin_Command : Command {
     Skin* skin;
     void operator() () {
-        model_tester.model.apply_skin(skin);
+        model_tester->model.apply_skin(skin);
     }
 };
 HCB_BEGIN(MT_Skin_Command)
@@ -169,7 +170,7 @@ HCB_END(MT_Skin_Command)
 struct MT_Pose_Command : Command {
     std::string name;
     void operator() () {
-        model_tester.model.apply_pose(model_tester.model.skel->poses.named(name));
+        model_tester->model.apply_pose(model_tester->model.skel->poses.named(name));
     }
 };
 
@@ -181,7 +182,7 @@ HCB_END(MT_Pose_Command)
 
 struct MT_Flip_Command : Command {
     void operator() () {
-        model_tester.flip = !model_tester.flip;
+        model_tester->flip = !model_tester->flip;
     }
 };
 HCB_BEGIN(MT_Flip_Command)
@@ -189,3 +190,9 @@ HCB_BEGIN(MT_Flip_Command)
     command_description<MT_Pose_Command>("Flip the model tester horizontally");
     empty();
 HCB_END(MT_Flip_Command)
+
+HCB_BEGIN(Model_Tester)
+    type_name("vis::Model_Tester");
+    base<core::Stateful>("Model_Tester");
+    empty();
+HCB_END(Model_Tester)

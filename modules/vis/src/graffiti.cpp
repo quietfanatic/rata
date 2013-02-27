@@ -1,8 +1,9 @@
 
 #include <GL/gl.h>
 #include "../inc/graffiti.h"
-#include "../../core/inc/phases.h"
 #include "../inc/shaders.h"
+#include "../../core/inc/phases.h"
+#include "../../core/inc/state.h"
 #include "../../hacc/inc/haccable_files.h"
 
 namespace vis {
@@ -12,9 +13,9 @@ namespace vis {
     static int graffiti_program_model_pos = 0;
     static int graffiti_program_color = 0;
 
-    struct Graffiti_Layer : core::Layer {
+    struct Graffiti_Layer : core::Layer, core::Stateful {
         Graffiti_Layer () : core::Layer("F.M", "graffiti") { }
-        void init () {
+        void start () {
             graffiti_program = hacc::reference_file<Program>("modules/vis/res/color.prog");
             graffiti_program_camera_pos = graffiti_program->require_uniform("camera_pos");
             graffiti_program_model_pos = graffiti_program->require_uniform("model_pos");
@@ -34,7 +35,7 @@ namespace vis {
             glUniform2f(graffiti_program_camera_pos, 10.0, 7.5);
             glUniform2f(graffiti_program_model_pos, 0, 0);
         }
-    } graffiti_layer;
+    };
 
     void draw_line (Vec a, Vec b, uint32 color, float width) {
         Vec pts [2];
@@ -70,4 +71,10 @@ namespace vis {
     }
 
 }
+
+HCB_BEGIN(vis::Graffiti_Layer)
+    type_name("vis::Graffiti_Layer");
+    base<core::Stateful>("Graffiti_Layer");
+    empty();
+HCB_END(vis::Graffiti_Layer)
 
