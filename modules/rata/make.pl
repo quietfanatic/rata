@@ -41,6 +41,7 @@ workflow {
         ../vis/tmp/shaders.o
         ../vis/tmp/models.o
         ../vis/tmp/graffiti.o
+        ../vis/tmp/text.o
         ../util/tmp/debug.o
         ../util/tmp/math.o
     >;

@@ -54,7 +54,6 @@ namespace vis {
         static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
         static auto glUniform4f = glproc<void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)>("glUniform4f");
         static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
-        glBindVertexArray(0);
         graffiti_program->use();
         glUniform4f(graffiti_program_color,
             ((color >> 24) & 255) / 255.0,

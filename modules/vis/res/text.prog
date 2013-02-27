@@ -1,7 +1,7 @@
 #"vis::Program" {
     shaders: [
-        &"modules/vis/res/sprite.vert"
-        &"modules/vis/res/sprite.frag"
+        &"modules/vis/res/text.vert"
+        &"modules/vis/res/text.frag"
     ]
     attributes: {
         vert_pos: 0
