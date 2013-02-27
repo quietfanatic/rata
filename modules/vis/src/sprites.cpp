@@ -29,7 +29,7 @@ namespace vis {
 //    GLint sprite_program_vert_pos = 0;
 //    GLint sprite_program_vert_tex = 1;
 
-    void draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
+    void Draws_Sprites::draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
         static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
         static auto glUniform3f = glproc<void (GLint, GLfloat, GLfloat, GLfloat)>("glUniform3f");
@@ -53,24 +53,8 @@ namespace vis {
         diagnose_opengl("After rendering a sprite");
     }
 
-    struct Camera_Setup_Layer : core::Layer, core::Stateful {
-        Camera_Setup_Layer () : core::Layer("B.M", "camera_setup") { }
-        void start () { }
-        void run () {
-            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-            glClearColor(0.5, 0.5, 0.5, 0);
-            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-            glDisable(GL_BLEND);
-            glEnable(GL_TEXTURE_2D);
-            glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
-            sprite_program->use();
-            glUniform2f(sprite_program_camera_pos, 10, 7.5);  // TODO: Control the camera with this
-        }
-    };
-
     struct Test_Layer : core::Layer, core::Stateful {
-        Test_Layer () : core::Layer("C.M", "test") { }
+        Test_Layer () : core::Layer("D.M", "test") { }
         void start () { }
         void run () {
             static Image* image = hacc::reference_file<Image>("modules/vis/res/test.image");
@@ -90,21 +74,16 @@ namespace vis {
 
     static Links<Draws_Sprites> sprite_drawers;
 
-    void Draws_Sprites::appear () {
+    void Draws_Sprites::activate () {
         link(sprite_drawers);
     }
-    void Draws_Sprites::disappear () {
+    void Draws_Sprites::deactivate () {
         unlink();
     }
 
 
     struct Sprite_Layer : core::Layer, core::Stateful {
-        Sprite_Layer () : core::Layer("D.M", "sprites") { }
-        void run () {
-            for (Draws_Sprites* p = sprite_drawers.first(); p; p = p->next()) {
-                p->draw();
-            }
-        }
+        Sprite_Layer () : core::Layer("C.M", "sprites") { }
         void start () {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
             sprite_program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
@@ -118,17 +97,25 @@ namespace vis {
                 throw std::logic_error("sprites init failed due to GL error");
             }
         }
+        void run () {
+            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+            glClearColor(0.5, 0.5, 0.5, 0);
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+            glDisable(GL_BLEND);
+            glEnable(GL_TEXTURE_2D);
+            glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
+            sprite_program->use();
+            glUniform2f(sprite_program_camera_pos, 10, 7.5);  // TODO: Control the camera with this
+            for (Draws_Sprites* p = sprite_drawers.first(); p; p = p->next()) {
+                p->draw();
+            }
+        }
     };
 
 }
 
 using namespace vis;
-
-HCB_BEGIN(Camera_Setup_Layer)
-    type_name("vis::Camera_Setup_Layer");
-    base<core::Stateful>("Camera_Setup_Layer");
-    empty();
-HCB_END(Camera_Setup_Layer)
 
 HCB_BEGIN(Sprite_Layer)
     type_name("vis::Sprite_Layer");
