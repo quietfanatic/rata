@@ -11,14 +11,14 @@ struct PhaseLayer {
     std::string order;
     std::string name;
     bool on;
+    std::vector<PhaseLayer*>& type;
     PhaseLayer (std::vector<PhaseLayer*>& type, std::string order, std::string name, bool on);
     virtual void init () { }
     virtual void start () { }
     virtual void run () { }
     virtual void stop () { }
-    virtual void quit () { }
     void run_if_on () { if (on) run(); }
-    virtual ~PhaseLayer () { }  // Though this should never happen
+    virtual ~PhaseLayer () { type.erase(this); }
 };
 
 std::vector<PhaseLayer*>& game_phases ();

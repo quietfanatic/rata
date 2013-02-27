@@ -3,18 +3,6 @@
 #include "../inc/phases.h"
 
 namespace core {
-    void all_phases (void (PhaseLayer::* method )()) {
-        for (PhaseLayer* p : game_phases())
-            (p->*method)();
-    }
-    void all_layers (void (PhaseLayer::* method )()) {
-        for (PhaseLayer* p : draw_layers())
-            (p->*method)();
-    }
-    void all_phaselayers (void (PhaseLayer::* method )()) {
-        all_phases(method);
-        all_layers(method);
-    }
 
     uint64 frame_number = 0;
 
@@ -38,17 +26,19 @@ namespace core {
         initialized = true;
         glfwInit();
         set_video(3);
-        all_phaselayers(&PhaseLayer::init);
+        for (PhaseLayer* p : game_phases()) p->init();
+        for (PhaseLayer* l : draw_layers()) l->init();
     }
 
     void start () {
         try {
             init();
-            all_phaselayers(&PhaseLayer::start);
+            for (PhaseLayer* p : game_phases()) p->start();
+            for (PhaseLayer* l : draw_layers()) l->start();
             for (;;) {
                 frame_number++;
-                all_phases(&PhaseLayer::run_if_on);
-                all_layers(&PhaseLayer::run_if_on);
+                for (PhaseLayer* p : game_phases()) p->run_if_on();
+                for (PhaseLayer* l : draw_layers()) l->run_if_on();
                 glfwSwapBuffers();
                 glfwSleep(1/60.0);
             }
@@ -58,7 +48,8 @@ namespace core {
     }
 
     void stop () {
-        all_phaselayers(&PhaseLayer::stop);
+        for (PhaseLayer* p : game_phases()) p->stop();
+        for (PhaseLayer* l : draw_layers()) l->stop();
     }
 
 }
