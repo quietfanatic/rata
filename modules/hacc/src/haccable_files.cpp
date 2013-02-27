@@ -17,6 +17,12 @@ namespace hacc {
         r.p = p;
         return r;
     }
+    void deallocate_file_object (String name) {
+        Generic& g = files.at(name);
+        HaccTable* table = HaccTable::require_cpptype(*g.cpptype);
+        table->deallocate(g.p);
+        files.erase(name);
+    }
 
 }
 

@@ -304,6 +304,8 @@ namespace hacc {
      //  generated them.  This is for things like file("tex.image").ALL
     void record_incantation (void*, Hacc*);
     Hacc* remember_incantation (void*);
+    void clear_incantations ();
+    static inline void deallocate_bundled_files () { clear_incantations(); }
 }
 
 #endif

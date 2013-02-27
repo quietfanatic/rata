@@ -14,6 +14,7 @@ namespace hacc {
         }
         else throw Error("Requested file \"" + name + "\" is not of type " + get_type_name<C>() + ".");
     }
+    void deallocate_file_object (String name);
 
 }
 
