@@ -7,8 +7,9 @@
 #include "../../util/inc/organization.h"
 
 namespace core {
-
-struct Phase : Ordered<Phase> {
+struct Phase;
+extern std::vector<Phase*> all_phases;
+struct Phase : Ordered<Phase, all_phases> {
     std::string order;
     std::string name;
     bool on;
@@ -17,12 +18,14 @@ struct Phase : Ordered<Phase> {
     virtual ~Phase () { }  // This won't happen
 
     Phase (std::string order, std::string name = "", bool on = true) :
-        Ordered<Phase>(order), order(order), name(name), on(on)
+        Ordered(order), order(order), name(name), on(on)
     { }
 
     void run_if_on () { if (on) run(); }
 };
-struct Layer : Ordered<Layer> {
+struct Layer;
+extern std::vector<Layer*> all_layers;
+struct Layer : Ordered<Layer, all_layers> {
     std::string order;
     std::string name;
     bool on;
@@ -31,7 +34,7 @@ struct Layer : Ordered<Layer> {
     virtual ~Layer () { }  // This won't happen
 
     Layer (std::string order, std::string name = "", bool on = true) :
-        Ordered<Layer>(order), order(order), name(name), on(on)
+        Ordered(order), order(order), name(name), on(on)
     { }
 
     void run_if_on () { if (on) run(); }

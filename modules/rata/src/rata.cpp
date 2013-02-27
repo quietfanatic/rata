@@ -46,7 +46,7 @@ struct Rata : Stateful, Biped, Draws_Text, Key_Listener {
             case 'A': controls.left = on; return true;
             case 'D': controls.right = on; return true;
             case 'W': controls.jump = on; return true;
-            case 'S': controls.jump = on; return true;
+            case 'S': controls.crouch = on; return true;
             default: return false;
         }
     }

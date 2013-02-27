@@ -36,10 +36,10 @@ namespace ent {
             float jump_impulse;
         };
         struct Controls {
-            bool left;
-            bool right;
-            bool jump;
-            bool crouch;
+            bool left = false;
+            bool right = false;
+            bool jump = false;
+            bool crouch = false;
         };
 
         phys::Ambulator legs;

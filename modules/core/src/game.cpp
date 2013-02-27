@@ -48,8 +48,8 @@ namespace core {
                     if (!success) return;
                 }
                 frame_number++;
-                for (Phase* p : Ordered<Phase>::all) p->run_if_on();
-                for (Layer* l : Ordered<Layer>::all) l->run_if_on();
+                for (Phase* p : all_phases) p->run_if_on();
+                for (Layer* l : all_layers) l->run_if_on();
                 glfwSwapBuffers();
                 glfwSleep(1/60.0);
             }
