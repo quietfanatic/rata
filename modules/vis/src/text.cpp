@@ -23,6 +23,8 @@ namespace vis {
 
      // TODO: Make align.x affect each line individually
     void draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color) {
+         // Coordinates here work with y being down instead of up.
+         //  This may be a little confusing.
         auto verts = new Text_Vert [text.length()][4];
         uint vert_i = 0;
         uint16 maxx = 0;
@@ -37,13 +39,13 @@ namespace vis {
             else {
                 uint16 tx = text[i] % 16;
                 uint16 ty = text[i] / 16;
-                verts[vert_i][0] = Text_Vert(curx, cury, tx, ty+1);
-                verts[vert_i][1] = Text_Vert(curx, cury+font->height, tx, ty);
-                verts[vert_i][2] = Text_Vert(curx+font->width, cury+font->height, tx+1, ty);
-                verts[vert_i][3] = Text_Vert(curx+font->width, cury, tx+1, ty+1);
+                verts[vert_i][0] = Text_Vert(curx, cury, tx, ty);
+                verts[vert_i][1] = Text_Vert(curx, cury+font->height, tx, ty+1);
+                verts[vert_i][2] = Text_Vert(curx+font->width, cury+font->height, tx+1, ty+1);
+                verts[vert_i][3] = Text_Vert(curx+font->width, cury, tx+1, ty);
                 curx += font->widths.empty() ? font->width : font->widths[text[i]];
                 if (curx > maxx) maxx = curx;
-                if (cury > maxy) maxy = cury;
+                if (cury + font->line_height > maxy) maxy = cury + font->line_height;
                 //printf("'%c' [[[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]]]\n",
                 //    text[i],
                 //    verts[vert_i][0].px, verts[vert_i][0].py, verts[vert_i][0].tx, verts[vert_i][0].ty,
@@ -58,7 +60,7 @@ namespace vis {
         static auto glUniform4f = glproc<void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)>("glUniform4f");
         static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
         Vec size = Vec(maxx*PX, maxy*PX);
-        Vec ul = pos + (Vec(1, 1) - align).scale(size) / 2;
+        Vec ul = Vec(pos.x - (1 - align.x) / 2 * size.x, pos.y + (1 - align.y) / 2 * size.y);
         text_program->use();
         glUniform2f(text_program_model_pos, ul.x, ul.y);
         glUniform4f(text_program_color,
