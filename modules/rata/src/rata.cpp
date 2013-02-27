@@ -4,6 +4,7 @@
 #include "../../core/inc/input.h"
 #include "../../ent/inc/humans.h"
 #include "../../vis/inc/sprites.h"
+#include "../../vis/inc/text.h"
 
 using namespace phys;
 using namespace ent;
@@ -31,11 +32,19 @@ static Skin*& base () {
     return base;
 }
 
-struct Rata : Stateful, Biped {
+static Font*& monospace () {
+    static auto monospace = hacc::reference_file<Font>("modules/rata/res/monospace.font");
+    return monospace;
+}
+
+struct Rata : Stateful, Biped, Draws_Text {
 
     void draw () {
         model.apply_skin(base());
         Biped::draw();
+    }
+    void text_draw () {
+        draw_text("asdf", monospace(), Vec(4, 4));
     }
 
     void before_move () {
@@ -48,8 +57,8 @@ struct Rata : Stateful, Biped {
     }
 
     Rata () : Biped(bdf(), skel()) { }
-    void emerge () { printf("Emerging\n"); Biped::emerge(); }
-    void reclude () { }
+    void emerge () { printf("Emerging\n"); Biped::emerge(); text_appear(); }
+    void reclude () { Biped::reclude(); text_disappear(); }
     void start () { beholder = this; }
 };
 
