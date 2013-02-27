@@ -132,16 +132,16 @@ namespace core {
     static void console_help ();
 
     void enter_console () {
-        console_is_active = true;
-        ignore_a_backtick = true;
-        temp_key_cb(console_key_cb);
-        glfwSetCharCallback(console_char_cb);
-        if (console_contents.empty()) console_help();
+//        console_is_active = true;
+//        ignore_a_backtick = true;
+//        temp_key_cb(console_key_cb);
+//        glfwSetCharCallback(console_char_cb);
+//        if (console_contents.empty()) console_help();
     }
     void exit_console () {
-        glfwSetCharCallback(NULL);
-        undo_temp_key_cb();
-        console_is_active = false;
+//        glfwSetCharCallback(NULL);
+//        undo_temp_key_cb();
+//        console_is_active = false;
     }
 
 }

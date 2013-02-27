@@ -37,7 +37,19 @@ static Font*& monospace () {
     return monospace;
 }
 
-struct Rata : Stateful, Biped, Draws_Text {
+struct Rata : Stateful, Biped, Draws_Text, Key_Listener {
+    Controls controls;
+
+    bool hear_key (int keycode, int action) {
+        bool on = action == GLFW_PRESS;
+        switch (keycode) {
+            case 'A': controls.left = on; return true;
+            case 'D': controls.right = on; return true;
+            case 'W': controls.jump = on; return true;
+            case 'S': controls.jump = on; return true;
+            default: return false;
+        }
+    }
 
     void draw () {
         model.apply_skin(base());
@@ -48,11 +60,6 @@ struct Rata : Stateful, Biped, Draws_Text {
     }
 
     void before_move () {
-        Controls controls;
-        controls.left = get_key('A');
-        controls.right = get_key('D');
-        controls.jump = get_key('W');
-        controls.crouch = get_key('S');
         allow_movement(stats(), &controls);
     }
 

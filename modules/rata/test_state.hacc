@@ -10,6 +10,7 @@
         {Camera_Setup_Layer:{}}
         {Test_Layer:{}}
         {Text_Layer:{}}
+        {Input_Phase:{}}
         {Rata:{
             biped:{
                 object:{ pos:[10 10.5] }

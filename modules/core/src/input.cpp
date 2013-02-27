@@ -4,28 +4,19 @@
 #include "../inc/commands.h"
 #include "../inc/game.h"
 #include "../inc/phases.h"
+#include "../inc/state.h"
 
 namespace core {
 
-    static const uint NUM_KEYS = 400;
+    static Links<Key_Listener> key_listeners;
 
-    static uint8 keys [NUM_KEYS];
-
-    static void register_keypress (uint code) {
-        if (code < NUM_KEYS) keys[code] = 1;
-    }
-    static void register_keyrelease (uint code) {
-        if (code < NUM_KEYS) keys[code] = 0;
-    }
-    uint8 get_key (uint code) {
-        return code < NUM_KEYS ? keys[code] : 0;
-    }
+    void Key_Listener::activate () { link(key_listeners); }
+    void Key_Listener::deactivate () { unlink(); }
 
     static int GLFWCALL close_cb () {
         quit_game();
         return true;  // not gonna happen
     }
-
 
     static void GLFWCALL key_cb (int keycode, int action) {
         if (action == GLFW_PRESS) {
@@ -34,43 +25,34 @@ namespace core {
                     quit_game();
                     break;
                 }
-                case '`': {
-                    enter_console();
-                    break;
-                }
                 default: break;
             }
-            register_keypress(keycode);
         }
-        else { // action == GLFW_RELEASE
-            register_keyrelease(keycode);
+        for (auto kl = key_listeners.first(); kl; kl = kl->next()) {
+            kl->hear_key(keycode, action);
         }
     }
 
-    void temp_key_cb (void GLFWCALL (* cb ) (int keycode, int action)) {
-        glfwSetKeyCallback(cb);
-    }
-    void undo_temp_key_cb () {
-        glfwSetKeyCallback(key_cb);
-    }
-
-    struct Input_Phase : core::Phase {
+    struct Input_Phase : core::Phase, core::Stateful {
          // Input phase doesn't have a name to keep you from locking out your controls.
         Input_Phase () : core::Phase("A.M") { }
-        void init () {
-            for (uint i = 0; i < NUM_KEYS; i++)
-                keys[i] = 0;
+        void start () {
             glfwSetKeyCallback(key_cb);
             glfwSetWindowCloseCallback(close_cb);
             glfwDisable(GLFW_AUTO_POLL_EVENTS);
         }
         void run () {
-            for (uint i = 0; i < NUM_KEYS; i++)
-                if (keys[i] && keys[i] != 255)
-                    keys[i]++;
             glfwPollEvents();
         }
-    } input_phase;
+    };
 
 }
+
+using namespace core;
+
+HCB_BEGIN(Input_Phase)
+    type_name("core::Input_Phase");
+    base<Stateful>("Input_Phase");
+    empty();
+HCB_END(Input_Phase)
 
