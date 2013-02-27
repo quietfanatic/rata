@@ -103,9 +103,10 @@ struct Allow_Command : Command {
         if (phase)
             phase->on = true;
         else {
-            printf("Available phases are:\n");
+            print_to_console("Available phases are:\n");
             for (auto p : game_phases()) {
-                printf("\t%s \"%s\" %s\n", p->name.c_str(), p->order.c_str(), p->on ? "true" : "false");
+                std::string name = p->name.empty() ? "<anonymous>" : p->name;
+                print_to_console("\t" + name + " \"" + p->order + "\" " + (p->on ? "true" : "false"));
             }
         }
     }
@@ -142,9 +143,10 @@ struct Show_Command : Command {
         if (layer)
             layer->on = true;
         else {
-            printf("Available layers are:\n");
+            print_to_console("Available layers are:\n");
             for (auto l : draw_layers()) {
-                printf("\t%s \"%s\" %s\n", l->name.c_str(), l->order.c_str(), l->on ? "true" : "false");
+                std::string name = l->name.empty() ? "<anonymous>" : l->name;
+                print_to_console("\t" + name + " \"" + l->order + "\" " + (l->on ? "true" : "false"));
             }
         }
     }

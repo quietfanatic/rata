@@ -136,6 +136,8 @@ namespace core {
 
 }
 
+using namespace core;
+
 std::unordered_map<size_t, std::string> command_descriptions;
 
 HCB_BEGIN(Command)
@@ -147,7 +149,7 @@ HCB_END(Command)
 
 struct EchoCommand : Command {
     std::string s;
-    void operator() () { printf("%s\n", s.c_str()); }
+    void operator() () { print_to_console(s + "\n"); }
 };
 HCB_BEGIN(EchoCommand)
     base<Command>("echo");
@@ -194,23 +196,23 @@ struct HelpCommand : Command {
     Command_Type* ct = NULL;
     void operator() () {
         if (ct == NULL) {
-            printf("This is the in-game console.  List of available commands are:\n\n");
+            print_to_console("This is the in-game console.  List of available commands are:\n\n");
             for (auto& sub : Haccable<Command>::get_table()->subtypes) {
-                printf("%s ", sub.first.c_str());
+                print_to_console(sub.first + " ");
             }
-            printf("\n\nFor more instructions on a particular command, type 'help <Command>'\n");
+            print_to_console("\n\nFor more instructions on a particular command, type 'help <Command>'\n");
         }
         else {
-            fputs(ct->name.c_str(), stdout);
+            print_to_console(ct->name);
             auto& elemlist = HaccTable::require_cpptype(*ct->cpptype)->elems;
             for (auto& e : elemlist) {
-                printf(" <%s>", HaccTable::require_cpptype(*e.mtype)->get_type_name().c_str());
-                if (e.def.def) printf("?");
+                print_to_console(" <" + HaccTable::require_cpptype(*e.mtype)->get_type_name() + ">");
+                if (e.def.def) print_to_console("?");
             }
             auto iter2 = command_descriptions.find(ct->cpptype->hash_code());
             if (iter2 == command_descriptions.end())
-                printf("\nNo information is available about this command.\n");
-            else printf("\n%s\n", iter2->second.c_str());
+                print_to_console("\nNo information is available about this command.\n");
+            else print_to_console("\n" + iter2->second + "\n");
         }
     }
 };
