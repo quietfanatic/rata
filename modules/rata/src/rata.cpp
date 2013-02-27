@@ -66,7 +66,7 @@ struct Rata : Stateful, Biped, Draws_Text, Key_Listener {
     Rata () : Biped(bdf(), skel()) { }
     void emerge () { printf("Emerging\n"); Biped::emerge(); text_appear(); }
     void reclude () { Biped::reclude(); text_disappear(); }
-    void start () { beholder = this; }
+    void start () { beholder = this; room->enter(); }
 };
 
 HCB_BEGIN(Rata)

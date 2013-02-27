@@ -66,7 +66,6 @@ namespace geo {
     }
 
     Room::~Room () {
-        for (auto f : furniture) delete f;
     }
 
     Resident::Resident () { link(housing_office); }
@@ -109,10 +108,8 @@ namespace geo {
                     r->link(r->room->residents);
                 }
             }
-            if (beholder && beholder->room)
-                beholder->room->enter();
         }
-        void stop () {
+        ~Room_Phase () {
             current_room = NULL;
             beholder = NULL;
         }

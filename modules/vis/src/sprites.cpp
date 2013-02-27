@@ -43,7 +43,6 @@ namespace vis {
         }
 
 
-        sprite_program->use();
         glUniform3f(sprite_program_model_pos, p.x, p.y, z);
         glUniform2f(sprite_program_model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->tex);
