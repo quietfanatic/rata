@@ -120,6 +120,9 @@ namespace vis {
                 glUniform2f(text_program_camera_pos, 10.0, 7.5);
                 draw_text(core::console_contents, console_font, Vec(1, console_font->line_height)*PX, Vec(1, -1), 0x00ff00ff);
                 draw_text(core::cli_contents, console_font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff);
+                if (core::frame_number % 40 < 20) {
+                    draw_text("_", console_font, Vec(core::cli_pos*console_font->width, -1)*PX, Vec(1, -1), 0xffffffff);
+                }
             }
             else for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
                 p->text_draw();

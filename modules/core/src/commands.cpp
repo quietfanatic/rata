@@ -37,8 +37,8 @@ namespace core {
     }
 
     bool console_is_active = false;
-    std::string console_contents = "This is the console.\n";
-    std::string cli_contents = "command...";
+    std::string console_contents = "";
+    std::string cli_contents = "";
     uint cli_pos = 0;
     void print_to_console (std::string message) {
         if (console_is_active)
