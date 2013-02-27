@@ -149,7 +149,7 @@ HCB_BEGIN(Program)
     type_name("vis::Program");
     attr("name", member(&Program::name, def(std::string("anonymous program"))));
     attr("shaders", member(&Program::shaders));
-    attr("attributes", member(&Program::attributes, optional<decltype(((Program*)NULL)->attributes)>()));
+    attr("attributes", member(&Program::attributes)(optional));
     finish([](Program& p){ p.link(); });
 HCB_END(Program)
 

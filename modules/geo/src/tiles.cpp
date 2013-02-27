@@ -41,7 +41,7 @@ static Logger tilemap_logger ("tilemap");
 
 Links<Tilemap> active_tilemaps;
 
-Tilemap::Tilemap () : phys::Object(tilemap_bdf()) { }
+Tilemap::Tilemap () : phys::Object(tilemap_bdf()) { fprintf(stderr, "allocated a tilemap\n"); }
 void Tilemap::emerge () { materialize(); link(active_tilemaps); }
 void Tilemap::reclude () { dematerialize(); unlink(); }
 

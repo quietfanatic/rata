@@ -28,6 +28,7 @@ namespace geo {
         void activate ();
         void deactivate ();
         void enter ();
+        ~Room ();
     };
 
     struct Furniture {

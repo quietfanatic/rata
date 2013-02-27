@@ -30,11 +30,12 @@ namespace core {
     }
 
     void load (std::string filename) {
-        if (initialized)
-            stop();
-        else init();
         try {
             if (current_state) delete current_state;
+            hacc::clear_incantations();  // important to deallocate rooms!
+            if (initialized)
+                stop();
+            else init();
             current_state = hacc::new_from_file<Game_State>(filename);
             current_state->start();
             start();

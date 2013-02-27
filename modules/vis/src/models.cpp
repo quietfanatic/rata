@@ -19,7 +19,7 @@ HCB_END(Skel)
 HCB_BEGIN(Skel::Seg)
     type_name("vis::Skel::Seg");
     attr("name", member(&Skel::Seg::name));
-    attr("branches", member(&Skel::Seg::branches, optional<decltype(((Skel::Seg*)NULL)->branches)>()));
+    attr("branches", member(&Skel::Seg::branches)(optional));
     attr("layout", member(&Skel::Seg::layout));
     attr("z_offset", member(&Skel::Seg::z_offset, def(0.f)));
 HCB_END(Skel::Seg)

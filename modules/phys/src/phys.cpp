@@ -39,7 +39,7 @@ HCB_END(b2CircleShape)
 HCB_BEGIN(b2PolygonShape)
     type_name("b2PolygonShape");
     base<b2Shape>("polygon");
-    attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius, def(b2_polygonRadius)));
+    attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius)(b2_polygonRadius));
     attr("verts", value_functions<std::vector<b2Vec2>>(
         [](const b2PolygonShape& ps){
             return std::vector<b2Vec2>(ps.m_vertices, ps.m_vertices + ps.m_vertexCount);
@@ -61,11 +61,11 @@ HCB_END(b2EdgeShape)
 
 HCB_BEGIN(b2FixtureDef)
     type_name("b2FixtureDef");
-    attr("shape", member(&b2FixtureDef::shape, def((const b2Shape*)NULL)));
-    attr("friction", member(&b2FixtureDef::friction, def(0.f)));
-    attr("restitution", member(&b2FixtureDef::restitution, def(0.f)));
-    attr("density", member(&b2FixtureDef::density, def(0.f)));
-    attr("is_sensor", member(&b2FixtureDef::isSensor, def(false)));
+    attr("shape", member(&b2FixtureDef::shape)(NULL));
+    attr("friction", member(&b2FixtureDef::friction)(0.f));
+    attr("restitution", member(&b2FixtureDef::restitution)(0.f));
+    attr("density", member(&b2FixtureDef::density)(0.f));
+    attr("is_sensor", member(&b2FixtureDef::isSensor)(false));
 //    attr("filter", member(&b2FixtureDef::filter))
 HCB_END(b2FixtureDef)
 
@@ -91,16 +91,14 @@ HCB_BEGIN(FixtureDef)
         [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_a); },
         [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
             fdf.coll_a = coll_v2b(rules);
-        },
-        optional<std::vector<Collision_Rule*>>()
-    ));
+        }
+    )(optional));
     attr("coll_b", value_functions<std::vector<Collision_Rule*>>(
         [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_b); },
         [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
             fdf.coll_b = coll_v2b(rules);
-        },
-        optional<std::vector<Collision_Rule*>>()
-    ));
+        }
+    )(optional));
 HCB_END(FixtureDef)
 
 HCB_BEGIN(b2BodyType)

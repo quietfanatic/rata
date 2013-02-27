@@ -64,6 +64,10 @@ namespace geo {
         }
     }
 
+    Room::~Room () {
+        for (auto f : furniture) delete f;
+    }
+
     Resident::Resident () { link(housing_office); }
 
     void Resident::reroom (Vec pos) {
@@ -107,6 +111,10 @@ namespace geo {
             if (beholder && beholder->room)
                 beholder->room->enter();
         }
+        void stop () {
+            current_room = NULL;
+            beholder = NULL;
+        }
     } room_phase;
 
 }
@@ -116,7 +124,7 @@ HCB_BEGIN(Room)
     type_name("geo::Room");
     attr("boundary", member(&Room::boundary));
     attr("neighbors", member(&Room::neighbors));
-    attr("furniture", member(&Room::furniture, optional<decltype(((Room*)NULL)->furniture)>()));
+    attr("furniture", member(&Room::furniture)(optional));
     finish([](Room& r){ for (auto f : r.furniture) f->start(); });
 HCB_END(Room)
 HCB_BEGIN(Furniture)

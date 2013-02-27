@@ -176,7 +176,7 @@ HCB_BEGIN(Frame)
     attr("name", member(&Frame::name));
     attr("offset", member(&Frame::offset));
     attr("box", member(&Frame::box));
-    attr("points", member(&Frame::points, optional<decltype(((Frame*)NULL)->points)>()));
+    attr("points", member(&Frame::points)(optional));
 HCB_END(vis::Frame)
 
 HCB_BEGIN(Layout)
