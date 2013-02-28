@@ -341,10 +341,10 @@ namespace hacc {
                     if (ah->n_elems() < 1) {
                         throw Error("An array Hacc representing a polymorphic type (" + get_type_name() + ") must not be empty.");
                     }
-                    if (ah->elem(0)->form() != REF) {
-                        throw Error("An array Hacc representing a polymorphic type (" + get_type_name() + ") must have a Ref as it's first element.");
+                    if (ah->elem(0)->form() != STRING) {
+                        throw Error("An array Hacc representing a polymorphic type (" + get_type_name() + ") must have a String as it's first element.");
                     }
-                    String sub = ah->elem(0)->as_ref()->r.id;
+                    String sub = ah->elem(0)->as_string()->s;
                     Hacc* val = new_hacc(Array(ah->a.begin()+1, ah->a.end()));
                     auto iter = pointee_t->subtypes.find(sub);
                     if (iter == pointee_t->subtypes.end()) {
