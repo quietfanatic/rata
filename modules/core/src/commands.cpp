@@ -14,15 +14,12 @@ using namespace hacc;
 
 namespace core {
 
-    void command_from_terminal () {
+    void command_from_string (std::string s) {
+        if (s.empty()) return;
         Command* cmd = NULL;
         bool success = false;
         try {
-            printf("Command: ");
-            std::string cmdline;
-            std::getline(std::cin, cmdline);
-            if (cmdline.empty()) return;
-            hacc::update_from_string(cmd, "[" + cmdline + "]");
+            hacc::update_from_string(cmd, "[" + s + "]");
             success = true;
         } catch (hacc::Error& e) {
             printf("Error parsing command: %s\n", e.what());
@@ -37,6 +34,13 @@ namespace core {
             }
         }
         if (cmd) delete cmd;
+    }
+
+    void command_from_terminal () {
+        printf("Command: ");
+        std::string cmdline;
+        std::getline(std::cin, cmdline);
+        command_from_string(cmdline);
     }
 
     bool console_is_active = false;

@@ -13,6 +13,7 @@ struct Command {
 
 namespace core {
 
+    void command_from_string (std::string s);
     void command_from_terminal ();
 
     void enter_console ();
