@@ -62,18 +62,15 @@ struct Reffable {
 Reffable r1 {14};
 Reffable r2 {28};
 
-HCB_BEGIN(Reffable)
-    find_by_id([](hacc::String s){
-        if (s == "r1") return &r1;
-        if (s == "r2") return &r2;
-        return (Reffable*)NULL;
-    });
-    get_id([](const Reffable& r) -> hacc::String {
-        if (&r == &r1) return "r1";
-        if (&r == &r2) return "r2";
+HCB_BEGIN(Reffable*)
+    value("r1", &r1);
+    value("r2", &r2);
+    value_name([](Reffable* const& r){
+        if (r == &r1) return "r1";
+        if (r == &r2) return "r2";
         return "";
     });
-HCB_END(Reffable)
+HCB_END(Reffable*)
 
 Reffable* rp2;
 
@@ -96,21 +93,21 @@ tap::Tester haccable_pointers_tester ("haccable_pointers", [](){
     using namespace hacc;
     using namespace tap;
     plan(18);
-    doesnt_throw([](){ update_from_hacc(the_p, new_hacc({new_attr("sub1", 54)})); }, "Can update_from_hacc on polymorphic canonical_ptr...");
+    doesnt_throw([](){ update_from_hacc(the_p, new_hacc({new_attr("sub1", 54)})); }, "Can update_from_hacc on polymorphic ptr...");
     is(the_p->number(), 54.f, "...which works correctly");
-    is(to_hacc(the_p)->form(), OBJECT, "polymorphic canonical_pointer produces an object hacc");
-    is(to_hacc(the_p)->as_object()->attr("sub1")->get_integer(), 54, "to_hacc on polymorphic canonical_pointer works.");
-    doesnt_throw([](){ update_from_hacc(the_p, new_hacc({new_attr("sub2", 20.f)})); }, "Can update_from_hacc on polymorphic canonical_ptr...");
+    is(to_hacc(the_p)->form(), OBJECT, "polymorphic pointer produces an object hacc");
+    is(to_hacc(the_p)->as_object()->attr("sub1")->get_integer(), 54, "to_hacc on polymorphic pointer works.");
+    doesnt_throw([](){ update_from_hacc(the_p, new_hacc({new_attr("sub2", 20.f)})); }, "Can update_from_hacc on polymorphic ptr...");
     is(the_p->number(), 20.f, "...which works correctly");
-    is(to_hacc(the_p)->form(), OBJECT, "polymorphic canonical_pointer produces an object hacc");
-    is(to_hacc(the_p)->as_object()->attr("sub2")->get_float(), 20.f, "to_hacc on polymorphic canonical_pointer works.");
-    doesnt_throw([](){ update_from_hacc(the_p, new_hacc({new_hacc(Ref("sub3")), new_hacc(32)})); }, "polymorphic canonical_ptr can accept array-type union notation...");
+    is(to_hacc(the_p)->form(), OBJECT, "polymorphic pointer produces an object hacc");
+    is(to_hacc(the_p)->as_object()->attr("sub2")->get_float(), 20.f, "to_hacc on polymorphic pointer works.");
+    doesnt_throw([](){ update_from_hacc(the_p, new_hacc({new_hacc(String("sub3")), new_hacc(32)})); }, "polymorphic ptr can accept array-type union notation...");
     is(the_p->number(), 32.f, "...which works correctly");
     Reffable* rp = &r1;
-    is(to_hacc(rp)->form(), REF, "pointers become REFs");
-    is(to_hacc(rp)->as_ref()->r.id, String("r1"), "to_hacc on pointer uses get_id");
+    is(to_hacc(rp)->form(), STRING, "pointers become strings");
+    is(to_hacc(rp)->get_string(), String("r1"), "to_hacc on pointer made a string");
     rp2 = NULL;
-    doesnt_throw([](){ update_from_hacc(rp2, new_hacc(Ref("r2"))); }, "Can update_from_hacc a pointer");
+    doesnt_throw([](){ update_from_hacc(rp2, new_hacc(String("r2"))); }, "Can update_from_hacc a pointer");
     ok(rp2, "...said pointer was in fact updated");
     is(rp2->i, (int)28, "...and was updated correctly!");
     doesnt_throw([](){ haccself = to_hacc(myself); }, "Can to_hacc a self-pointing thing");

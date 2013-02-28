@@ -1,6 +1,5 @@
 
 #include "../inc/haccable.h"
-
 using namespace hacc;
 
 HCB_BEGIN(int32)
@@ -23,17 +22,20 @@ struct Vectorly {
 Vectorly vy1 { 1, 2 };
 Vectorly vy2 { 3, 4 };
 
+HCB_BEGIN(Vectorly*)
+    to([](Vectorly* const& vy){
+        if (vy == &vy1) return new_hacc(String("vy1"));
+        else if (vy == &vy2) return new_hacc(String("vy2"));
+        else return new_hacc(null);
+    });
+    update_from([](Vectorly*& vy, Hacc* h){
+        std::string id = h->get_string();
+        if (id == "vy1") vy = &vy1;
+        else if (id == "vy2") vy = &vy2;
+        else vy = null;
+    });
+HCB_END(Vectorly*)
 HCB_BEGIN(Vectorly)
-    get_id([](const Vectorly& vy){
-        if (&vy == &vy1) return "vy1";
-        else if (&vy == &vy2) return "vy2";
-        else return "";
-    });
-    find_by_id([](String id){
-        if (id == "vy1") return &vy1;
-        else if (id == "vy2") return &vy2;
-        else return (Vectorly*)null;
-    });
     attr("x", member(&Vectorly::x));
     attr("y", member(&Vectorly::y));
     elem(member(&Vectorly::x));
@@ -116,9 +118,9 @@ tap::Tester haccable_tester ("haccable", [](){
     is(value_from_hacc<Vectorly>(new_hacc({new_attr("x", 32.0), new_attr("y", 54.0)})), Vectorly{32.0, 54.0}, "Vectorly accepts Object");
     is(to_hacc(Vectorly{2.0, 4.0})->form(), OBJECT, "Vectorly turns into Object by default");
     is(to_hacc(Vectorly{2.0, 4.0})->as_object()->attr("y")->as_float()->f, 4.f, "Vectorly Object has atribute 'y'");
-    is(get_id(vy1), String("vy1"), "get_id");
-    is(get_id(vy2), String("vy2"), "get_id");
-    is(find_by_id<Vectorly>("vy1"), &vy1, "find_by_id");
+    is(to_hacc(&vy1)->get_string(), String("vy1"), "string <- pointer");
+    is(to_hacc(&vy2)->get_string(), String("vy2"), "string <- pointer");
+    is(value_from_hacc<Vectorly*>(new_hacc(String("vy1"))), &vy1, "string -> pointer");
     is(value_from_hacc<MyUnion>(new_hacc({new_attr("i", 35)})).i.i, 35, "Union with declared variants can be read from hacc");
     is(value_from_hacc<MyUnion>(new_hacc({new_attr("f", 32.f)})).f.f, 32.f, "Union with declared variants can be read from hacc");
     is(hacc_from(MyUnion(71))->form(), OBJECT, "Union with declared variants is written as object");

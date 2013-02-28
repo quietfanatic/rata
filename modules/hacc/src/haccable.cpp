@@ -172,7 +172,7 @@ namespace hacc {
             }
         }
         else if (value_name) {
-            return new_hacc(Ref(value_name(p)));
+            return new_hacc(value_name(p));
         }
         else if (empty) {
             return new_hacc(Array());
@@ -387,12 +387,6 @@ namespace hacc {
                     }
                     else throw Error("No " + pointee_t->get_type_name() + " with ID '" + id + "' could be found.");
                 }
-                else if (values.size()) {
-                    auto iter = values.find(h->as_ref()->r.id);
-                    if (iter != values.end())
-                        iter->second.def(p);
-                    else throw Error("Type " + get_type_name() + " has no value '" + h->as_ref()->r.id);
-                }
                 else throw Error("Type " + get_type_name() + " cannot be represented by a reference Hacc.");
                 break;
             }
@@ -414,7 +408,16 @@ namespace hacc {
                 }
                 else throw Error("Type " + get_type_name() + " cannot be represented by a \"Generic\" Hacc.");
             }
-            case STRING: throw Error("Type " + get_type_name() + " cannot be represented by a string Hacc.");
+            case STRING: {
+                if (values.size()) {
+                    auto iter = values.find(h->get_string());
+                    if (iter != values.end())
+                        iter->second.def(p);
+                    else throw Error("Type " + get_type_name() + " has no value '" + h->get_string());
+                }
+                else throw Error("Type " + get_type_name() + " cannot be represented by a string Hacc.");
+                break;
+            }
             case DOUBLE: throw Error("Type " + get_type_name() + " cannot be represented by a double Hacc.");
             case FLOAT: throw Error("Type " + get_type_name() + " cannot be represented by a float Hacc.");
             case INTEGER: throw Error("Type " + get_type_name() + " cannot be represented by an integer Hacc.");
