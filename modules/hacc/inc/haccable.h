@@ -26,9 +26,6 @@ struct HaccTable {
     Func<void* ()> allocate;
      // Pretty much no reason to override this.  It calls delete by default.
     Func<void (void*)> deallocate;
-     // ID manipulation turns out to be important.
-    Func<String (void*)> get_id_p;
-    Func<void* (String)> find_by_id_p;
      // Leave haccification to something else.
      // If the inner type of this is Hacc*, it defines a direct transition.
     GetSet0 delegate;
@@ -65,9 +62,6 @@ struct HaccTable {
     Hacc* to_hacc (void*);
     void update_from_hacc (void*, Hacc*, bool save_id = true);
     void* new_from_hacc (Hacc* h);
-    String get_id (void*);
-    void* find_by_id (String);
-    void* require_id (String);
      // Helpers that I'd like to not have to declare here but C++.
     Hacc* to_hacc_inner (void*);
     void update_from_hacc_inner (void*, Hacc*);
@@ -162,8 +156,6 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     static void allocate (const Func<C* ()>& f) { get_table()->allocate = *(Func<void* ()>*)&f; }
     static void deallocate (const Func<void (C*)>& f) { get_table()->deallocate = *(Func<void* ()>*)&f; }
     static void finish (const Func<void (C&)>& f) { get_table()->finish = *(Func<void (void*)>*)&f; }
-    static void get_id (const Func<String (const C&)>& f) { get_table()->get_id_p = *(Func<String (void*)>*)&f; }
-    static void find_by_id (const Func<C* (String)>& f) { get_table()->find_by_id_p = *(Func<void* (String)>*)&f; }
     static void to (const Func<Hacc* (const C&)>& f) { get_table()->to = *(Func<Hacc* (void*)>*)&f; }
     static void update_from (const Func<void (C&, Hacc*)>& f) { get_table()->update_from = *(Func<void (void*, Hacc*)>*)&f; }
     static void delegate (const GetSet1<C>& gs) { get_table()->delegate = gs; }
@@ -234,15 +226,6 @@ template <class C> C* hacc_to_new (Hacc* h) {
     return new_from_hacc<C>(h);
 }
 
-template <class C> String get_id (const C& v) {
-    return require_hacctable<C>()->get_id((void*)&v);
-}
-template <class C> C* find_by_id (String id) {
-    return (C*)require_hacctable<C>()->find_by_id(id);
-}
-template <class C> C* require_id (String id) {
-    return (C*)require_hacctable<C>()->require_id(id);
-}
 template <class C> String get_type_name () {
     return Haccable<C>::get_table()->get_type_name();
 }
@@ -265,8 +248,6 @@ template <class C> String get_type_name () {
     using hcb::allocate; \
     using hcb::deallocate; \
     using hcb::finish; \
-    using hcb::get_id; \
-    using hcb::find_by_id; \
     using hcb::to; \
     using hcb::update_from; \
     using hcb::delegate; \

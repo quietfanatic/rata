@@ -70,6 +70,11 @@ namespace hacc {
             }
         }
     };
+    String generate_id (void* p) {
+        char r [17];
+        sprintf(r, "@%lx", (unsigned long)p);
+        return String((const char*)r);
+    }
 
     Hacc* HaccTable::to_hacc (void* p) {
         write_lock wl;
@@ -163,7 +168,7 @@ namespace hacc {
                  // Make sure all references to this address are on the same page
                 if (!hist.referenced) {
                     hist.referenced = true;
-                    hist.id = pointee_t->get_id(pp);
+                    hist.id = generate_id(pp);
                     if (hist.written)
                         hist.written->id = hist.id;
                     else hist.table = pointee_t;
@@ -368,7 +373,6 @@ namespace hacc {
             }
             case REF: {
                 if (pointer) {
-                    HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
                     String id = h->as_ref()->r.id;
                     auto iter = read_ids.find(id);
                     if (iter != read_ids.end()) {
@@ -378,16 +382,11 @@ namespace hacc {
                                 *(void**)mp = addr;
                             });
                         }
-                        else throw Error("The id " + id + " has no type information.");
+                        else throw Error("The variable $" + id + " has no type information.");
                     }
-                    else if (void* addr = pointee_t->find_by_id(id)) {
-                        pointer.set(p, [&addr, this](void* mp){
-                            *(void**)mp = addr;
-                        });
-                    }
-                    else throw Error("No " + pointee_t->get_type_name() + " with ID '" + id + "' could be found.");
+                    else throw Error("Unknown variable $" + id + " was encountered");
                 }
-                else throw Error("Type " + get_type_name() + " cannot be represented by a reference Hacc.");
+                else throw Error("Type " + get_type_name() + " cannot be represented by a variable Hacc.");
                 break;
             }
             case GENERIC: {
@@ -467,23 +466,6 @@ namespace hacc {
         daBomb b {this, r};
         update_from_hacc(r, h);
         b.defuse();
-        return r;
-    }
-
-    String HaccTable::get_id (void* p) {
-        if (get_id_p) return get_id_p(p);
-        else {
-            char r [17];
-            sprintf(r, "@%lx", (unsigned long)p);
-            return String((const char*)r);
-        }
-    }
-    void* HaccTable::find_by_id (String s) {
-        return find_by_id_p ? find_by_id_p(s) : NULL;
-    }
-    void* HaccTable::require_id (String s) {
-        void* r = find_by_id(s);
-        if (!r) throw Error("No " + get_type_name() + " was found with id '" + s + "'.");
         return r;
     }
 
