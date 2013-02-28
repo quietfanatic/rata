@@ -37,7 +37,7 @@ struct Allow_Command : Command {
             print_to_console("Available phases are:\n");
             for (auto p : all_phases) {
                 std::string name = p->name.empty() ? "<anonymous>" : p->name;
-                print_to_console("\t" + name + " \"" + p->order + "\" " + (p->on ? "true" : "false"));
+                print_to_console("\t" + name + " \"" + p->order + "\" " + (p->on ? "true" : "false") + "\n");
             }
         }
     }
@@ -79,7 +79,7 @@ struct Show_Command : Command {
             print_to_console("Available layers are:\n");
             for (auto l : all_layers) {
                 std::string name = l->name.empty() ? "<anonymous>" : l->name;
-                print_to_console("\t" + name + " \"" + l->order + "\" " + (l->on ? "true" : "false"));
+                print_to_console("\t" + name + " \"" + l->order + "\" " + (l->on ? "true" : "false") + "\n");
             }
         }
     }
