@@ -1,6 +1,6 @@
 #"vis::Program" {
     shaders: [
-        { type:"vertex" source:
+        new({ type:"vertex" source:
 
 "#version 110
 
@@ -19,8 +19,8 @@ void main () {
     tex_coords = vert_tex;
 }
 "
-        }
-        { type:"fragment" source:
+        })
+        new({ type:"fragment" source:
 
 "#version 110
 
@@ -33,7 +33,7 @@ void main () {
         discard;
 }
 "
-        }
+        })
     ]
     attributes: {
         vert_pos: 0

@@ -1,6 +1,6 @@
 #"vis::Program" {
     shaders: [
-        { type:"vertex" source:
+        new({ type:"vertex" source:
 "#version 110
 
 uniform vec2 camera_pos;
@@ -16,8 +16,8 @@ void main () {
     gl_Position.zw = vec2(0.0, 1.0);
     tex_coords = vert_tex / 16.0;
 }"
-        }
-        { type:"fragment" source:
+        })
+        new({ type:"fragment" source:
 "#version 110
 
 uniform sampler2D tex;
@@ -27,7 +27,7 @@ varying vec2 tex_coords;
 void main () {
     gl_FragColor = texture2D(tex, tex_coords) * color;
 }"
-        }
+        })
     ]
     attributes: {
         vert_pos: 0
