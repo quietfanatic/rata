@@ -16,13 +16,9 @@ namespace core {
     void command_from_string (std::string s);
     void command_from_terminal ();
 
-    void enter_console ();
-    void exit_console ();
-    void print_to_console (std::string message);
-    extern bool console_is_active;
-    extern std::string console_contents;
-    extern std::string cli_contents;
-    extern uint cli_pos;
+    void console_help ();
+
+    void print_to_console (std::string);
 
 }
 

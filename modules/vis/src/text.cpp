@@ -104,40 +104,7 @@ namespace vis {
             glUniform1i(text_program_tex, 0);
         }
         void run () {
-            static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
-            static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
-            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-            if (console_font && core::console_is_active) {
-                 // We came after the graffiti layer
-                Vec pts [4];
-                pts[0] = Vec(0, 0);
-                pts[1] = Vec(20, 0);
-                pts[2] = Vec(20, 15);
-                pts[3] = Vec(0, 15);
-                graffiti_pos(Vec(0, 0));
-                draw_primitive(GL_QUADS, 4, pts, 0x000000cf);
-            }
-            glDisable(GL_DEPTH_TEST);
-            glEnable(GL_TEXTURE_2D);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            text_program->use();
-            glBindVertexArray(0);
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            glUniform2f(text_program_camera_pos, 10.0, 7.5);
-            if (console_font && core::console_is_active) {
-                glUniform2f(text_program_camera_pos, 10.0, 7.5);
-                float chars_available = floor(320 / console_font->width);
-                float cli_lines = 1 + floor(core::cli_contents.size() / chars_available);
-                draw_text(core::console_contents, console_font, Vec(1, cli_lines * console_font->line_height)*PX, Vec(1, -1), 0x00ff00ff, 20);
-                draw_text(core::cli_contents, console_font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, 20);
-                if (core::frame_number % 40 < 20) {
-                    float cursor_pos = fmod(core::cli_pos, chars_available);
-                    draw_text("_", console_font, Vec(cursor_pos * console_font->width, -1)*PX, Vec(1, -1), 0xffffffff);
-                }
-            }
-            else for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
+            for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
                 p->text_draw();
             }
 

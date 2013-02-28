@@ -12,6 +12,12 @@
 
 using namespace hacc;
 
+HCB_BEGIN(Command)
+    type_name("Command");
+    pointee_policy(FOLLOW);
+HCB_END(Command)
+
+
 namespace core {
 
     void command_from_string (std::string s) {
@@ -43,114 +49,18 @@ namespace core {
         command_from_string(cmdline);
     }
 
-    bool console_is_active = false;
-    std::string console_contents = "";
-    std::string cli_contents = "";
-    uint cli_pos = 0;
+    void console_help () {
+        print_to_console("This is the in-game console.  List of available commands are:\n\n");
+        for (auto& sub : Haccable<Command>::get_table()->subtypes) {
+            print_to_console(sub.first + " ");
+        }
+        print_to_console("\n\nFor more instructions on a particular command, type 'help <Command>'\n");
+    }
+
     void print_to_console (std::string message) {
-        if (console_is_active)
-            console_contents += message;
-        else
-            fputs(message.c_str(), stderr);
+        fputs(message.c_str(), stdout);
     }
 
-    static bool ignore_a_backtick = false;
-
-    void GLFWCALL console_key_cb (int keycode, int action) {
-        if (action == GLFW_PRESS) {
-            switch (keycode) {
-                case GLFW_KEY_ESC: {
-                    exit_console();
-                    break;
-                }
-                case GLFW_KEY_LEFT: {
-                    if (cli_pos) cli_pos--;
-                    break;
-                }
-                case GLFW_KEY_RIGHT: {
-                    if (cli_pos < cli_contents.size()) cli_pos++;
-                    break;
-                }
-                case GLFW_KEY_HOME: {
-                    cli_pos = 0;
-                    break;
-                }
-                case GLFW_KEY_END: {
-                    cli_pos = cli_contents.size();
-                    break;
-                }
-                case GLFW_KEY_ENTER: {
-                    print_to_console(cli_contents + "\n");
-                    if (!cli_contents.empty()) {
-                        Command* cmd;
-                        bool good_command = false;
-                        try {
-                            hacc::update_from_string(cmd, "[" + cli_contents + "]");
-                            good_command = true;
-                        } catch (hacc::Error& e) {
-                            print_to_console("Error parsing command: " + std::string(e.what()) + "\n");
-                        } catch (std::exception& e) {
-                            print_to_console("Error generating command: " + std::string(e.what()) + "\n");
-                        }
-                        if (good_command) {
-                            try {
-                                (*cmd)();
-                            } catch (std::exception& e) {
-                                print_to_console("Error: The command threw an exception: " + std::string(e.what()) + "\n");
-                            }
-                        }
-                        if (cmd) delete cmd;
-                    }
-                    cli_contents = "";
-                    cli_pos = 0;
-                    break;
-                }
-                case GLFW_KEY_BACKSPACE: {
-                    if (cli_pos) {
-                        cli_contents = cli_contents.substr(0, cli_pos - 1)
-                                     + cli_contents.substr(cli_pos);
-                        cli_pos--;
-                    }
-                    break;
-                }
-                case GLFW_KEY_DEL: {
-                    if (cli_pos < cli_contents.size()) {
-                        cli_contents = cli_contents.substr(0, cli_pos)
-                                     + cli_contents.substr(cli_pos + 1);
-                    }
-                    break;
-                }
-                default: break;
-            }
-        }
-    }
-    void GLFWCALL console_char_cb (int code, int action) {
-        if (code < 256) {
-            if (ignore_a_backtick && code == '`') {
-                ignore_a_backtick = false;
-                return;
-            }
-            cli_contents = cli_contents.substr(0, cli_pos)
-                         + std::string(1, code)
-                         + cli_contents.substr(cli_pos);
-            cli_pos++;
-        }
-    }
-
-    static void console_help ();
-
-    void enter_console () {
-//        console_is_active = true;
-//        ignore_a_backtick = true;
-//        temp_key_cb(console_key_cb);
-//        glfwSetCharCallback(console_char_cb);
-//        if (console_contents.empty()) console_help();
-    }
-    void exit_console () {
-//        glfwSetCharCallback(NULL);
-//        undo_temp_key_cb();
-//        console_is_active = false;
-    }
 
 }
 
@@ -158,22 +68,7 @@ using namespace core;
 
 std::unordered_map<size_t, std::string> command_descriptions;
 
-HCB_BEGIN(Command)
-    type_name("Command");
-    pointee_policy(FOLLOW);
-HCB_END(Command)
-namespace core {
-    static void console_help () {
-        print_to_console("This is the in-game console.  List of available commands are:\n\n");
-        for (auto& sub : Haccable<Command>::get_table()->subtypes) {
-            print_to_console(sub.first + " ");
-        }
-        print_to_console("\n\nFor more instructions on a particular command, type 'help <Command>'\n");
-    }
-}
-
  // Some trivial builtin commands
-
 
 struct EchoCommand : Command {
     std::string s;
