@@ -88,7 +88,7 @@ struct QuitCommand : Command {
     void operator() () { core::quit_game(); }
 };
 HCB_BEGIN(QuitCommand)
-    base<Command>("quit_immediately");
+    base<Command>("quit");
     empty();
     command_description<QuitCommand>("Quit the program without saving anything.");
 HCB_END(QuitCommand)
