@@ -2,7 +2,6 @@
 #include "../inc/haccable_files.h"
 #include "../inc/haccable_integration.h"
 #include "../inc/haccable_standard.h"
-#include "../inc/haccable_pointers.h"
 #include "../inc/strings.h"
 
 HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA int32>)

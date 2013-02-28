@@ -1,6 +1,6 @@
 #include "../inc/haccable_standard.h"
 
-
+using namespace hacc;
 
 struct SuperThing {
     virtual float number () = 0;
@@ -8,7 +8,7 @@ struct SuperThing {
 };
 
 HCB_BEGIN(SuperThing)
-    pointee_policy(FOLLOW)
+    pointee_policy(FOLLOW);
 HCB_END(SuperThing)
 
 struct SubThing1 : SuperThing {
@@ -53,7 +53,7 @@ HCB_BEGIN(SubThing3)
     elem(member(&SubThing3::val));
 HCB_END(SubThing3)
 
-SuperThing the_p;
+SuperThing* the_p;
 
 struct Reffable {
     int i;
