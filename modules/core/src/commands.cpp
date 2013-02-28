@@ -103,10 +103,11 @@ HCB_END(SeqCommand)
 
  // This will be useful in the future
 
-struct Command_Type : Resource {
+struct Command_Type;
+std::vector<Command_Type*> command_types;
+struct Command_Type : Ordered<Command_Type, command_types> {
     const std::type_info* cpptype;
-    void reload () { }
-    Command_Type (std::string name) : Resource(name) {
+    Command_Type (std::string name) : Ordered(name) {
         auto& sublist = Haccable<Command>::get_table()->subtypes;
         auto iter = sublist.find(name);
         if (iter == sublist.end())
@@ -114,11 +115,24 @@ struct Command_Type : Resource {
         cpptype = &iter->second.subtype;
     }
 };
-static ResourceGroup command_types;
-HCB_BEGIN(Command_Type)
-    type_name("Command_Type");
-    resource_haccability<Command_Type, &command_types>();
-HCB_END(Command_Type)
+
+HCB_BEGIN(Command_Type*)
+    type_name("Command_Type*");
+    delegate(value_functions<std::string>(
+        [](Command_Type* const& ct){
+            return ct ? ct->order : std::string("null");
+        },
+        [](Command_Type*& ctr, std::string s){
+            for (auto& ct : command_types) {
+                if (ct->order == s) {
+                    ctr = ct;
+                    return;
+                }
+            }
+            ctr = NULL;
+        }
+    ));
+HCB_END(Command_Type*)
 
 struct HelpCommand : Command {
     Command_Type* ct = NULL;
@@ -127,7 +141,7 @@ struct HelpCommand : Command {
             console_help();
         }
         else {
-            print_to_console(ct->name);
+            print_to_console(ct->order);
             auto& elemlist = HaccTable::require_cpptype(*ct->cpptype)->elems;
             for (auto& e : elemlist) {
                 print_to_console(" <" + HaccTable::require_cpptype(*e.mtype)->get_type_name() + ">");
