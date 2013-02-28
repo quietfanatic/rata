@@ -140,8 +140,10 @@ namespace hacc {
             [](C* const& x)-> M { throw Error("Shouldn't happen"); },
             [p, &all](C*& x, M m){
                 for (auto c : all) {
-                    if (c->*p == m)
+                    if (c->*p == m) {
                         x = c;
+                        return;
+                    }
                 }
                 x = NULL;
             }
