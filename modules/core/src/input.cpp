@@ -26,12 +26,12 @@ namespace core {
             }
         }
         for (auto kl : key_listeners) {
-            kl->hear_key(keycode, action);
+            if (kl->hear_key(keycode, action)) return;
         }
     }
     static void GLFWCALL char_cb (int code, int action) {
         for (auto cl : char_listeners) {
-            cl->hear_char(code, action);
+            if (cl->hear_char(code, action)) return;
         }
     }
 
