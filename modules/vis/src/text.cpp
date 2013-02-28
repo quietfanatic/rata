@@ -8,21 +8,25 @@
 
 namespace vis {
 
-    struct Text_Vert {
-        uint16 px;
-        uint16 py;
-        uint16 tx;
-        uint16 ty;
-        Text_Vert() { }
-        Text_Vert(uint16 px, uint16 py, uint16 tx, uint16 ty) : px(px), py(py), tx(tx), ty(ty) { }
-    };
+    static Links<Draws_Text> text_drawers;
+    void Draws_Text::text_appear () { link(text_drawers); }
+    void Draws_Text::text_disappear () { unlink(); }
 
-    struct Text_Renderer : Renderer {
-        Program* program;
-        GLint tex = 0;
-        GLint color = 0;
-        GLint camera_pos = 0;
-        GLint model_pos = 0;
+    struct Text_Layer;
+    Text_Layer* tr = NULL;
+    struct Text_Layer : core::Layer, core::Stateful, Renderer {
+        Program* program = hacc::reference_file<Program>("modules/vis/res/text.prog");
+        GLint tex = program->require_uniform("tex");
+        GLint camera_pos = program->require_uniform("camera_pos");
+        GLint model_pos = program->require_uniform("model_pos");
+        GLint color = program->require_uniform("color");
+
+        Text_Layer () : core::Layer("G.M", "text") {
+            static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
+            glUniform1i(tex, 0);
+            tr = this;
+        }
+         // for Renderer
         void start_rendering () {
             static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
             static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
@@ -38,7 +42,25 @@ namespace vis {
             glUseProgram(program->glid);
             glUniform2f(camera_pos, 10.0, 7.5);
         }
-    } tr;
+         // for Stateful
+        void start () { }
+         // for Layer
+        void run () {
+            for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
+                p->text_draw();
+            }
+
+        }
+    };
+
+    struct Text_Vert {
+        uint16 px;
+        uint16 py;
+        uint16 tx;
+        uint16 ty;
+        Text_Vert() { }
+        Text_Vert(uint16 px, uint16 py, uint16 tx, uint16 ty) : px(px), py(py), tx(tx), ty(ty) { }
+    };
 
      // TODO: Make align.x affect each line individually
     void draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color, float wrap) {
@@ -86,9 +108,9 @@ namespace vis {
         static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
         Vec size = Vec(maxx*PX, maxy*PX);
         Vec ul = Vec(pos.x - (1 - align.x) / 2 * size.x, pos.y + (1 - align.y) / 2 * size.y);
-        tr.use();
-        glUniform2f(tr.model_pos, ul.x, ul.y);
-        glUniform4f(tr.color,
+        tr->use();
+        glUniform2f(tr->model_pos, ul.x, ul.y);
+        glUniform4f(tr->color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,
             ((color >> 8) & 255) / 255.0,
@@ -101,31 +123,6 @@ namespace vis {
         diagnose_opengl("after drawing some text");
         delete[] verts;
     }
-
-    static Links<Draws_Text> text_drawers;
-    void Draws_Text::text_appear () { link(text_drawers); }
-    void Draws_Text::text_disappear () { unlink(); }
-
-    Font* console_font = NULL;
-
-    struct Text_Layer : core::Layer, core::Stateful {
-        Text_Layer () : core::Layer("G.M", "text") { }
-        void start () {
-            tr.program = hacc::reference_file<Program>("modules/vis/res/text.prog");
-            tr.tex = tr.program->require_uniform("tex");
-            tr.camera_pos = tr.program->require_uniform("camera_pos");
-            tr.model_pos = tr.program->require_uniform("model_pos");
-            tr.color = tr.program->require_uniform("color");
-            static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
-            glUniform1i(tr.tex, 0);
-        }
-        void run () {
-            for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
-                p->text_draw();
-            }
-
-        }
-    };
 
 }
 

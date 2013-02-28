@@ -18,15 +18,34 @@ namespace vis {
         return err;
     }
 
+    static Links<Draws_Sprites> sprite_drawers;
 
-    static Logger draw_sprite_logger ("draw_sprite", false);
+    void Draws_Sprites::activate () {
+        link(sprite_drawers);
+    }
+    void Draws_Sprites::deactivate () {
+        unlink();
+    }
 
-    struct Sprite_Renderer : Renderer {
-        Program* program;
-        GLint tex = 0;
-        GLint camera_pos = 0;
-        GLint model_pos = 0;
-        GLint model_scale = 0;
+
+    struct Sprite_Layer;
+    Sprite_Layer* sr = NULL;
+    struct Sprite_Layer : core::Layer, core::Stateful, Renderer {
+        Program* program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
+        GLint tex = program->require_uniform("tex");
+        GLint camera_pos = program->require_uniform("camera_pos");
+        GLint model_pos = program->require_uniform("model_pos");
+        GLint model_scale = program->require_uniform("model_scale");
+
+        Sprite_Layer () : core::Layer("C.M", "sprites") {
+            static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
+            glUniform1i(tex, 0);  // Texture unit 0
+            if (diagnose_opengl("after setting uniforms and stuff")) {
+                throw std::logic_error("sprites init failed due to GL error");
+            }
+            sr = this;
+        }
+         // for Renderer
         void start_rendering () {
             static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
@@ -36,7 +55,19 @@ namespace vis {
             glUseProgram(program->glid);
             glUniform2f(camera_pos, 10, 7.5);  // TODO: Control the camera with this
         }
-    } sr;
+         // for Layer
+        void start () { }
+        void run () {
+            glClearColor(0.5, 0.5, 0.5, 0);
+            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+            for (Draws_Sprites* p = sprite_drawers.first(); p; p = p->next()) {
+                p->draws_sprites();
+            }
+        }
+    };
+
+    static Logger draw_sprite_logger ("draw_sprite", false);
 
     void Draws_Sprites::draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
@@ -51,10 +82,10 @@ namespace vis {
             );
         }
 
-        sr.use();
+        sr->use();
 
-        glUniform3f(sr.model_pos, p.x, p.y, z);
-        glUniform2f(sr.model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
+        glUniform3f(sr->model_pos, p.x, p.y, z);
+        glUniform2f(sr->model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->tex);
         glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
@@ -77,40 +108,6 @@ namespace vis {
             draw_sprite(red, texture, Vec(18, 2), false, false, 0);
             draw_sprite(green, texture, Vec(18, 13), false, false, 0);
             draw_sprite(blue, texture, Vec(2, 13), false, false, 0);
-        }
-    };
-
-    static Links<Draws_Sprites> sprite_drawers;
-
-    void Draws_Sprites::activate () {
-        link(sprite_drawers);
-    }
-    void Draws_Sprites::deactivate () {
-        unlink();
-    }
-
-
-    struct Sprite_Layer : core::Layer, core::Stateful {
-        Sprite_Layer () : core::Layer("C.M", "sprites") { }
-        void start () {
-            static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
-            sr.program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
-            sr.tex = sr.program->require_uniform("tex");
-            sr.camera_pos = sr.program->require_uniform("camera_pos");
-            sr.model_pos = sr.program->require_uniform("model_pos");
-            sr.model_scale = sr.program->require_uniform("model_scale");
-            glUniform1i(sr.tex, 0);  // Texture unit 0
-            if (diagnose_opengl("after setting uniforms and stuff")) {
-                throw std::logic_error("sprites init failed due to GL error");
-            }
-        }
-        void run () {
-            glClearColor(0.5, 0.5, 0.5, 0);
-            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-            for (Draws_Sprites* p = sprite_drawers.first(); p; p = p->next()) {
-                p->draws_sprites();
-            }
         }
     };
 

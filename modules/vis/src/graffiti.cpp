@@ -8,11 +8,15 @@
 
 namespace vis {
 
-    struct Graffiti_Renderer : Renderer {
-        vis::Program* program;
-        int camera_pos = 0;
-        int model_pos = 0;
-        int color = 0;
+    struct Graffiti_Renderer;
+    Graffiti_Renderer* gr = NULL;
+    struct Graffiti_Renderer : Renderer, core::Stateful {
+        Program* program = hacc::reference_file<Program>("modules/vis/res/color.prog");
+        int camera_pos = program->require_uniform("camera_pos");
+        int model_pos = program->require_uniform("model_pos");
+        int color = program->require_uniform("color");
+        Graffiti_Renderer () { gr = this; }
+        void start () { }
         void start_rendering () {
             static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
@@ -28,18 +32,6 @@ namespace vis {
             glDisableVertexAttribArray(1);
             glUseProgram(program->glid);
             glUniform2f(camera_pos, 10.0, 7.5);
-        }
-    } gr;
-
-    struct Graffiti_Layer : core::Layer, core::Stateful {
-        Graffiti_Layer () : core::Layer("F.M", "graffiti") { }
-        void start () {
-            gr.program = hacc::reference_file<Program>("modules/vis/res/color.prog");
-            gr.camera_pos = gr.program->require_uniform("camera_pos");
-            gr.model_pos = gr.program->require_uniform("model_pos");
-            gr.color = gr.program->require_uniform("color");
-        }
-        void run () {
         }
     };
 
@@ -60,8 +52,8 @@ namespace vis {
     void draw_primitive (uint type, uint n_pts, Vec* pts, uint32 color) {
         static auto glUniform4f = glproc<void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)>("glUniform4f");
         static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
-        gr.use();
-        glUniform4f(gr.color,
+        gr->use();
+        glUniform4f(gr->color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,
             ((color >> 8) & 255) / 255.0,
@@ -73,15 +65,15 @@ namespace vis {
     }
     void graffiti_pos (Vec pos) {
         static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-        gr.use();
-        glUniform2f(gr.model_pos, pos.x, pos.y);
+        gr->use();
+        glUniform2f(gr->model_pos, pos.x, pos.y);
     }
 
 }
 
-HCB_BEGIN(vis::Graffiti_Layer)
-    type_name("vis::Graffiti_Layer");
-    base<core::Stateful>("Graffiti_Layer");
+HCB_BEGIN(vis::Graffiti_Renderer)
+    type_name("vis::Graffiti_Renderer");
+    base<core::Stateful>("Graffiti_Renderer");
     empty();
-HCB_END(vis::Graffiti_Layer)
+HCB_END(vis::Graffiti_Renderer)
 

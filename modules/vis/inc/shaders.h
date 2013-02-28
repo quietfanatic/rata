@@ -46,6 +46,8 @@ namespace vis {
         void use ();
          // Keeps track
         static Renderer* current;
+
+        virtual ~Renderer () { }
     };
 
 
