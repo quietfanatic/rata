@@ -3,7 +3,7 @@
 
 #include "../../util/inc/honestly.h"
 #include "../../hacc/inc/haccable.h"
-#include "../../hacc/inc/haccable_pointers.h"
+#include "../../hacc/inc/haccable_standard.h"
 #include "commands.h"
 
  // The class for a resource.  Each resource has a name, and each

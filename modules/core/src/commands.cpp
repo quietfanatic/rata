@@ -78,7 +78,7 @@ namespace core {
                 case GLFW_KEY_ENTER: {
                     print_to_console(cli_contents + "\n");
                     if (!cli_contents.empty()) {
-                        canonical_ptr<Command> cmd;
+                        Command* cmd;
                         bool good_command = false;
                         try {
                             hacc::update_from_string(cmd, "[" + cli_contents + "]");
@@ -95,6 +95,7 @@ namespace core {
                                 print_to_console("Error: The command threw an exception: " + std::string(e.what()) + "\n");
                             }
                         }
+                        if (cmd) delete cmd;
                     }
                     cli_contents = "";
                     cli_pos = 0;
@@ -155,6 +156,7 @@ std::unordered_map<size_t, std::string> command_descriptions;
 
 HCB_BEGIN(Command)
     type_name("Command");
+    pointee_policy(FOLLOW);
 HCB_END(Command)
 namespace core {
     static void console_help () {
@@ -187,7 +189,7 @@ HCB_BEGIN(QuitImmediatelyCommand)
 HCB_END(QuitImmediatelyCommand)
 
 struct SeqCommand : Command {
-    std::vector<canonical_ptr<Command>> seq;
+    std::vector<Command*> seq;
     void operator() () { for (auto& c : seq) (*c)(); }
 };
 HCB_BEGIN(SeqCommand)
