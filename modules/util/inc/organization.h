@@ -108,7 +108,7 @@ struct Linkable : Linkable_Link<C, which> {
 
 template <class C, Links<C>& all>
 struct Linked : Linkable<C> {
-    Linked (bool a = false) { if (a) activate(); }
+    Linked (bool a = true) { if (a) activate(); }
     void activate () { Linkable<C>::link(all); }
     void deactivate () { Linkable<C>::unlink(); }
 };
