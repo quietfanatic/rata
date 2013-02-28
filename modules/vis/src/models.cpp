@@ -128,7 +128,7 @@ namespace vis {
     struct Model_Tester;
     static Model_Tester* model_tester;
     struct Model_Tester : core::Layer, core::Stateful {
-        Model_Tester () : core::Layer("E.M", "model_tester", false) { model_tester = this; }
+        Model_Tester () : core::Layer("D.M", "model_tester", false) { model_tester = this; }
         bool flip = false;
         Model model;
         void run () {

@@ -17,16 +17,10 @@ HCB_BEGIN(Space)
 HCB_END(Space)
 
 std::vector<Collision_Rule*> coll_rules;
-HCB_BEGIN(Collision_Rule)
-    type_name("phys::Collision_Rule");
-    get_id([](const Collision_Rule& cr){ return cr.name(); });
-    find_by_id([](std::string name){
-        for (auto rule : coll_rules)
-            if (rule->name() == name)
-                return rule;
-        return (Collision_Rule*)NULL;
-    });
-HCB_END(Collision_Rule)
+HCB_BEGIN(Collision_Rule*)
+    type_name("phys::Collision_Rule*");
+    hacc::hacc_pointer_by_method(&Collision_Rule::name, coll_rules, true);
+HCB_END(Collision_Rule*)
 
 HCB_BEGIN(b2Vec2)
     type_name("b2Vec2");
@@ -83,8 +77,10 @@ static std::vector<Collision_Rule*> coll_b2v (uint64 b) {
 }
 static uint64 coll_v2b (const std::vector<Collision_Rule*>& v) {
     uint64 b = 0;
-    for (auto rule : v)
+    for (auto rule : v) {
+        if (!rule) throw std::logic_error("Somehow a null pointer got into a collision rule list.\n");
         b |= rule->bit();
+    }
     return b;
 }
 

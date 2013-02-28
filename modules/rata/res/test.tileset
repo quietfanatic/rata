@@ -1,7 +1,7 @@
 #"geo::Tileset" {
     tiles: local([
         $solid = #"geo::TileDef" {
-            nature:{ b2:{ friction:0.4 } coll_b:[$ground] }
+            nature:{ b2:{ friction:0.4 } coll_b:[ground] }
             vertices:[[0 0] [1 0] [1 1] [0 1]]
         }
         [null $solid]
