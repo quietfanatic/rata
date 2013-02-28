@@ -139,7 +139,7 @@ namespace hacc {
             }
             if (should_follow) {
                 if (pointee_t->subtypes.empty()) { // Non-polymorphic
-                    return pointee_t->to_hacc(pp);
+                    return new_hacc(MacroCall("new", pointee_t->to_hacc(pp)));
                 }
                 else { // Polymorphic, needs casting and tagging
                     const std::type_info* realtype = pointee_realtype(pp);
@@ -428,9 +428,22 @@ namespace hacc {
             }
             case ATTRREF:
             case ELEMREF:
-            case DEREF:
-            case MACROCALL: {
+            case DEREF: {
                 update_from_hacc_inner(p, collapse_hacc(h));
+                break;
+            }
+            case MACROCALL: {
+                auto mch = static_cast<Hacc::MacroCall*>(h);
+                if (mch->mc.name == "new") {
+                    if (pointer) {
+                        HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
+                        pointer.set(p, [pointee_t, mch](void* mp){ *(void**)mp = pointee_t->new_from_hacc(mch->mc.arg); });
+                    }
+                    else throw Error("Type " + get_type_name() + " cannot be represented with a new() macro.");
+                }
+                else {
+                    update_from_hacc_inner(p, collapse_hacc(h));
+                }
                 break;
             }
             case ERROR: throw h->as_error()->e;
