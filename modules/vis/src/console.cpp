@@ -1,4 +1,13 @@
 
+#include "../../core/inc/phases.h"
+#include "../../core/inc/state.h"
+#include "../../core/inc/input.h"
+#include "../../core/inc/commands.h"
+#include "../../core/inc/game.h"
+#include "../inc/shaders.h"
+#include "../inc/graffiti.h"
+#include "../inc/text.h"
+
 namespace vis {
 
     using namespace core;
@@ -15,11 +24,11 @@ namespace vis {
         Console () : Layer("Z.M"), Key_Listener("A"), Char_Listener("A") { }
 
         void receive_output (std::string message) {
-            console_contents += message;
+            contents += message;
         }
 
         bool hear_key (int keycode, int action) {
-            if (is_active)
+            if (is_active) {
                 if (action == GLFW_PRESS) {
                     switch (keycode) {
                         case GLFW_KEY_ESC: {
@@ -95,12 +104,10 @@ namespace vis {
         void exit_console () {
             is_active = false;
         }
+        void start () { }
         void run () {
             if (!font || !is_active) return;
-            static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
-            static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
-            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-             // We came after the graffiti layer
+             // Darken background
             Vec pts [4];
             pts[0] = Vec(0, 0);
             pts[1] = Vec(20, 0);
@@ -108,15 +115,7 @@ namespace vis {
             pts[3] = Vec(0, 15);
             graffiti_pos(Vec(0, 0));
             draw_primitive(GL_QUADS, 4, pts, 0x000000cf);
-            glDisable(GL_DEPTH_TEST);
-            glEnable(GL_TEXTURE_2D);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            text_program->use();
-            glBindVertexArray(0);
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            glUniform2f(text_program_camera_pos, 10.0, 7.5);
+             // Draw console
             float chars_available = floor(320 / font->width);
             float cli_lines = 1 + floor(cli.size() / chars_available);
             draw_text(contents, font, Vec(1, cli_lines * font->line_height)*PX, Vec(1, -1), 0x00ff00ff, 20);

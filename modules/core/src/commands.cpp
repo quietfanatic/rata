@@ -48,12 +48,12 @@ namespace core {
         command_from_string(cmdline);
     }
 
-    void console_help () {
-        print_to_console("This is the in-game console.  List of available commands are:\n\n");
+    std::string console_help () {
+        std::string r = "This is the in-game console.  List of available commands are:\n\n";
         for (auto& sub : Haccable<Command>::get_table()->subtypes) {
-            print_to_console(sub.first + " ");
+            r += sub.first + " ";
         }
-        print_to_console("\n\nFor more instructions on a particular command, type 'help <Command>'\n");
+        return r + "\n\nFor more instructions on a particular command, type 'help <Command>'\n";
     }
 
     void print_to_console (std::string message) {

@@ -1,7 +1,6 @@
 
 #include <GL/glfw.h>
 #include "../inc/input.h"
-#include "../inc/commands.h"
 #include "../inc/game.h"
 #include "../inc/phases.h"
 #include "../inc/state.h"
@@ -21,10 +20,6 @@ namespace core {
             switch (keycode) {
                 case GLFW_KEY_ESC: {
                     quit_game();
-                    break;
-                }
-                case '`': {
-                    command_from_terminal();
                     break;
                 }
                 default: break;

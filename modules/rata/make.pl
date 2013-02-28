@@ -42,6 +42,7 @@ workflow {
         ../vis/tmp/models.o
         ../vis/tmp/graffiti.o
         ../vis/tmp/text.o
+        ../vis/tmp/console.o
         ../util/tmp/debug.o
         ../util/tmp/math.o
     >;

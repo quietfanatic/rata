@@ -10,6 +10,7 @@
         {Sprite_Test:{}}
         {Text_Layer:{}}
         {Input_Phase:{}}
+        {Console:{ font:file("modules/rata/res/monospace.font") }}
         {Rata:{
             biped:{
                 object:{ pos:[10 10.5] }

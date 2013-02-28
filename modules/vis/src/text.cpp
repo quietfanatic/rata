@@ -135,6 +135,7 @@ HCB_BEGIN(Font)
     attr("line_height", member(&Font::line_height));
     attr("widths", member(&Font::widths, def(std::vector<uint8>())));
 HCB_END(Font)
+HCB_INSTANCE(Font*)
 
 HCB_BEGIN(Text_Layer)
     type_name("vis::Text_Layer");
