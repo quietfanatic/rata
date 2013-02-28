@@ -12,7 +12,7 @@ namespace vis {
         return err;
     }
     
-    void Shader::reload () {
+    void Shader::finish () {
 
         static auto glCreateShader = glproc<GLuint (GLenum)>("glCreateShader");
         static auto glShaderSource = glproc<void (GLuint, GLsizei, const GLchar**, const GLint*)>("glShaderSource");
@@ -21,21 +21,14 @@ namespace vis {
         static auto glGetShaderInfoLog = glproc<void (GLuint, GLsizei, GLsizei*, GLchar*)>("glGetShaderInfoLog");
         static auto glDeleteShader = glproc<void (GLuint)>("glDeleteShader");
 
-        std::string ext = name.substr(name.length() - 5);
-        GLuint newid;
-        if (ext == ".vert")
-            newid = glCreateShader(GL_VERTEX_SHADER);
-        else if (ext == ".frag")
-            newid = glCreateShader(GL_FRAGMENT_SHADER);
-        else throw std::logic_error("Filename for shader doesn't end in .vert or .frag");
-        std::string src = hacc::string_from_file(name);
+        GLuint newid = glCreateShader(type);
         if (!newid) {
             diagnose_opengl("after glCreateShader");
             throw std::logic_error("Look up the above GL error code.");
         }
         try {
-            const char* srcp = src.c_str();
-            int srclen = src.length();
+            const char* srcp = source.c_str();
+            int srclen = source.length();
             glShaderSource(newid, 1, &srcp, &srclen);
             glCompileShader(newid);
             GLint status; glGetShaderiv(newid, GL_COMPILE_STATUS, &status);
@@ -44,7 +37,7 @@ namespace vis {
             if (!status || loglen > 1) {
                 char log [loglen];
                 glGetShaderInfoLog(newid, loglen, NULL, log);
-                fprintf(stderr, "Shader info log for %s:\n", name.c_str());
+                fprintf(stderr, "Shader info log:\n");
                 fputs(log, stderr);
                 if (!status) throw std::logic_error("Failed to compile GL shader.");
             }
@@ -53,12 +46,12 @@ namespace vis {
              // Everything is successful.
             if (glid) glDeleteShader(glid);
             glid = newid;
+            source = "";
         } catch (std::exception& e) {
             glDeleteShader(newid);
         }
     }
 
-    Shader::Shader (std::string name) : Resource(name) { reload(); }
     Shader::~Shader () {
         static auto glDeleteShader = glproc<void (GLuint)>("glDeleteShader");
         if (glid) glDeleteShader(glid);
@@ -92,7 +85,7 @@ namespace vis {
         try {
             for (Shader* s : shaders) {
                 glAttachShader(newid, s->glid);
-                if (diagnose_opengl("after attaching shader " + s->name)) {
+                if (diagnose_opengl("after attaching a shader")) {
                     throw std::logic_error("Look up the above GL error code.");
                 }
             }
@@ -139,10 +132,19 @@ namespace vis {
 
 using namespace vis;
 
-static ResourceGroup shaders;
 HCB_BEGIN(Shader)
     type_name("vis::Shader");
-    resource_haccability<Shader, &shaders>();
+    attr("type", value_functions<std::string>(
+        [](const Shader& s)->std::string{ return s.type == GL_FRAGMENT_SHADER ? "fragment" : "vertex"; },
+        [](Shader& s, std::string t){
+            if (t == "fragment") s.type = GL_FRAGMENT_SHADER;
+            else if (t == "vertex") s.type = GL_VERTEX_SHADER;
+            else throw std::logic_error("Unknown shader type\n");
+        }
+    )(required));
+    attr("source", member(&Shader::source)(required));
+    finish([](Shader& s){ s.finish(); });
+    pointee_policy(hacc::FOLLOW);
 HCB_END(Shader)
 
 HCB_BEGIN(Program)

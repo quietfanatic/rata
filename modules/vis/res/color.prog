@@ -1,7 +1,27 @@
 #"vis::Program" {
     shaders: [
-        &"modules/vis/res/color.vert"
-        &"modules/vis/res/color.frag"
+        { type:"vertex" source:
+"#version 110
+
+uniform vec2 camera_pos;
+uniform vec2 model_pos;
+
+attribute vec2 vert_pos;
+
+void main () {
+    gl_Position.xy = (model_pos - camera_pos + vert_pos) / vec2(10.0, 7.5);
+    gl_Position.zw = vec2(0.0, 1.0);
+}"
+        }
+        { type:"fragment" source:
+"#version 110
+
+uniform vec4 color;
+
+void main () {
+    gl_FragColor = color;
+}"
+        }
     ]
     attributes: {
         vert_pos: 0

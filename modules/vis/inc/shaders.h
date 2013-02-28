@@ -17,11 +17,12 @@ namespace vis {
     }
     GLenum diagnose_opengl (std::string when);
 
-    struct Shader : Resource {
+    struct Shader {
         uint glid = 0;
-
-        void reload ();
-        Shader (std::string name);
+        GLenum type;
+        std::string source;
+    
+        void finish ();
         ~Shader ();
     };
 
