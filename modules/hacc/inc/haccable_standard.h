@@ -120,5 +120,11 @@ void chain_find_by_id (const Func<C* (Parent*, std::string)>& f, std::string sep
     });
 }
 
+HCB_TEMPLATE_BEGIN(<class C>, C*)
+    type_name(hacc::get_type_name<C>() + "*");
+    pointer(hacc::Haccability<C*>::template supertype<C*>());
+    pointer_policy(hacc::ASK_POINTEE);
+HCB_TEMPLATE_END(<class C>, C*)
+
 
 #endif

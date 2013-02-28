@@ -1,4 +1,4 @@
-#include "../inc/haccable_pointers.h"
+#include "../inc/haccable_standard.h"
 
 
 
@@ -6,6 +6,10 @@ struct SuperThing {
     virtual float number () = 0;
     virtual ~SuperThing () { }
 };
+
+HCB_BEGIN(SuperThing)
+    pointee_policy(FOLLOW)
+HCB_END(SuperThing)
 
 struct SubThing1 : SuperThing {
     int subint;
@@ -49,7 +53,7 @@ HCB_BEGIN(SubThing3)
     elem(member(&SubThing3::val));
 HCB_END(SubThing3)
 
-hacc::canonical_ptr<SuperThing> the_p;
+SuperThing the_p;
 
 struct Reffable {
     int i;
