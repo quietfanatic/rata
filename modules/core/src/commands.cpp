@@ -142,4 +142,19 @@ HCB_BEGIN(HelpCommand)
     elem(member(&HelpCommand::type)(optional));
 HCB_END(HelpCommand)
 
+struct SubtypesCommand : Command {
+    std::string supertype;
+    void operator () () {
+        HaccTable* t = HaccTable::require_type_name(supertype);
+        for (auto& sub : t->subtypes) {
+            print_to_console(sub.first + " ");
+        }
+    }
+};
+
+HCB_BEGIN(SubtypesCommand)
+    base<Command>("subtypes");
+    command_description<SubtypesCommand>("Show all registered haccable subtypes of the given type");
+    elem(member(&SubtypesCommand::supertype)(required));
+HCB_END(SubtypesCommand)
 
