@@ -18,6 +18,8 @@ namespace vis {
         std::string cli = "";
         uint cli_pos = 0;
 
+        bool ignore_a_trigger = false;
+
         Font* font = NULL;
         char trigger = '`';
 
@@ -80,8 +82,10 @@ namespace vis {
             else {
                 if (action == GLFW_PRESS) {
                     if (keycode == trigger) {
-                        if (font)
+                        if (font) {
+                            ignore_a_trigger = true;
                             enter_console();
+                        }
                     }
                 }
             }
@@ -89,6 +93,10 @@ namespace vis {
         }
         bool hear_char (int code, int action) {
             if (!is_active) return false;
+            if (ignore_a_trigger && code == trigger) {
+                ignore_a_trigger = false;
+                return false;
+            }
             if (code < 256) {
                 cli = cli.substr(0, cli_pos)
                     + std::string(1, code)
