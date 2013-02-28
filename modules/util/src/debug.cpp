@@ -11,24 +11,30 @@ std::unordered_map<std::string, Logger*>& Logger::all () {
     return all;
 }
 
-HCB_BEGIN(Logger)
-    type_name("Logger");
-    pointee_policy(hacc::REFERENCE);
-    get_id([](const Logger& l){ return l.name; });
-    find_by_id([](std::string id){
-        printf("Searchin for logger %s\n", id.c_str());
-        auto iter = Logger::all().find(id);
-        if (iter != Logger::all().end())
-            return iter->second;
-        else
-            return (Logger*)NULL;
-    });
-HCB_END(Logger)
+HCB_BEGIN(Logger*)
+    type_name("Logger*");
+    to([](Logger* const& l){ return hacc::new_hacc(l->name); });
+    delegate(value_functions<std::string>(
+        [](Logger* const& l){ return l->name; },
+        [](Logger*& l, std::string name){
+            printf("Searchin for logger %s\n", name.c_str());
+            auto iter = Logger::all().find(name);
+            if (iter != Logger::all().end())
+                l = iter->second;
+            else
+                l = NULL;
+        }
+    ));
+HCB_END(Logger*)
 
 struct Log_Command : Command {
     Logger* logger;
     bool on;
-    void operator () () { logger->on = on; }
+    void operator () () {
+        if (logger)
+            logger->on = on;
+        else core::print_to_console("No such logger found.\n");
+    }
 };
 
 HCB_BEGIN(Log_Command)
