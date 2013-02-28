@@ -105,6 +105,13 @@ struct Linkable : Linkable_Link<C, which> {
     Linkable (Links<C, which>& l) { link(l); }
 };
 
+template <class C, Links<C>& all>
+struct Linked : Linkable<C> {
+    Linked (bool a = false) { if (a) activate(); }
+    void activate () { Linkable<C>::link(all); }
+    void deactivate () { Linkable<C>::unlink(); }
+};
+
 
  // Things that are registered in an order
 template <class C, std::vector<C*>& all>
