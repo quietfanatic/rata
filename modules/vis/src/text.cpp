@@ -17,11 +17,28 @@ namespace vis {
         Text_Vert(uint16 px, uint16 py, uint16 tx, uint16 ty) : px(px), py(py), tx(tx), ty(ty) { }
     };
 
-    Program* text_program;
-    GLint text_program_tex = 0;
-    GLint text_program_color = 0;
-    GLint text_program_camera_pos = 0;
-    GLint text_program_model_pos = 0;
+    struct Text_Renderer : Renderer {
+        Program* program;
+        GLint tex = 0;
+        GLint color = 0;
+        GLint camera_pos = 0;
+        GLint model_pos = 0;
+        void start_rendering () {
+            static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
+            static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
+            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+            static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
+            glDisable(GL_DEPTH_TEST);
+            glEnable(GL_TEXTURE_2D);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBindVertexArray(0);
+            glEnableVertexAttribArray(0);
+            glEnableVertexAttribArray(1);
+            glUseProgram(program->glid);
+            glUniform2f(camera_pos, 10.0, 7.5);
+        }
+    } tr;
 
      // TODO: Make align.x affect each line individually
     void draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color, float wrap) {
@@ -69,9 +86,9 @@ namespace vis {
         static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
         Vec size = Vec(maxx*PX, maxy*PX);
         Vec ul = Vec(pos.x - (1 - align.x) / 2 * size.x, pos.y + (1 - align.y) / 2 * size.y);
-        text_program->use();
-        glUniform2f(text_program_model_pos, ul.x, ul.y);
-        glUniform4f(text_program_color,
+        tr.use();
+        glUniform2f(tr.model_pos, ul.x, ul.y);
+        glUniform4f(tr.color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,
             ((color >> 8) & 255) / 255.0,
@@ -94,28 +111,15 @@ namespace vis {
     struct Text_Layer : core::Layer, core::Stateful {
         Text_Layer () : core::Layer("G.M", "text") { }
         void start () {
-            text_program = hacc::reference_file<Program>("modules/vis/res/text.prog");
-            text_program_tex = text_program->require_uniform("tex");
-            text_program_camera_pos = text_program->require_uniform("camera_pos");
-            text_program_model_pos = text_program->require_uniform("model_pos");
-            text_program_color = text_program->require_uniform("color");
-            text_program->use();
+            tr.program = hacc::reference_file<Program>("modules/vis/res/text.prog");
+            tr.tex = tr.program->require_uniform("tex");
+            tr.camera_pos = tr.program->require_uniform("camera_pos");
+            tr.model_pos = tr.program->require_uniform("model_pos");
+            tr.color = tr.program->require_uniform("color");
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
-            glUniform1i(text_program_tex, 0);
+            glUniform1i(tr.tex, 0);
         }
         void run () {
-            static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
-            static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
-            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-            glDisable(GL_DEPTH_TEST);
-            glEnable(GL_TEXTURE_2D);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            text_program->use();
-            glBindVertexArray(0);
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            glUniform2f(text_program_camera_pos, 10.0, 7.5);
             for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
                 p->text_draw();
             }

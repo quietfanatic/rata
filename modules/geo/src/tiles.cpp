@@ -234,32 +234,39 @@ void Tilemap::start () {
 
  // Now for drawing tilemaps.
 
-static vis::Program* tiles_program;
+struct Tilemap_Layer : core::Layer, core::Stateful, vis::Renderer {
+    vis::Program* program = hacc::reference_file<vis::Program>("modules/geo/res/tiles.prog");
+    int tex = program->require_uniform("tex");
+    int camera_pos = program->require_uniform("camera_pos");
+    int model_pos = program->require_uniform("model_pos");
+    int tileset_size = program->require_uniform("tileset_size");
 
-struct Tilemap_Layer : core::Layer, core::Stateful {
     Tilemap_Layer () : core::Layer("E.M", "tilemaps") {
         static auto glUniform1i = vis::glproc<void (GLint, GLint)>("glUniform1i");
-        static auto glUniform2f = vis::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-        tiles_program = hacc::reference_file<vis::Program>("modules/geo/res/tiles.prog");
-        tiles_program->use();
-        int tex_uni = tiles_program->require_uniform("tex");
-        glUniform1i(tex_uni, 0);  // Texture unit 0
-        camera_pos = tiles_program->require_uniform("camera_pos");
-        glUniform2f(camera_pos, 10, 7.5);  // TODO make this dynamic
-        if (vis::diagnose_opengl("after setting uniform")) {
+        static auto glUseProgram = vis::glproc<void (GLuint)>("glUseProgram");
+        glUseProgram(program->glid);
+        glUniform1i(tex, 0);  // Texture unit 0
+        if (vis::diagnose_opengl("after creating tilemap renderer")) {
             throw std::logic_error("tilemaps layer init failed due to GL error");
         }
-        model_pos = tiles_program->require_uniform("model_pos");
-        tileset_size = tiles_program->require_uniform("tileset_size");
     }
-    int camera_pos;
-    int model_pos;
-    int tileset_size;
+
+     // for Renderer
+    void start_rendering () {
+        static auto glUseProgram = vis::glproc<void (GLuint)>("glUseProgram");
+        static auto glUniform2f = vis::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+        glEnable(GL_TEXTURE_2D);
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
+        glUseProgram(program->glid);
+        glUniform2f(camera_pos, 10, 7.5);  // TODO make this dynamic
+    }
+     // for Layer
     void start () { }
     void run () {
         static auto glUniform2f = vis::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
         static auto glBindVertexArray = vis::glproc<void (GLuint)>("glBindVertexArray");
-        tiles_program->use();
+        use();
         for (Tilemap* map = active_tilemaps.first(); map; map = map->next()) {
             Vec pos = map->Object::pos();
             glUniform2f(model_pos, pos.x, pos.y);

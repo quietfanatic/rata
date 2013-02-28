@@ -8,32 +8,38 @@
 
 namespace vis {
 
-    static vis::Program* graffiti_program;
-    static int graffiti_program_camera_pos = 0;
-    static int graffiti_program_model_pos = 0;
-    static int graffiti_program_color = 0;
-
-    struct Graffiti_Layer : core::Layer, core::Stateful {
-        Graffiti_Layer () : core::Layer("F.M", "graffiti") { }
-        void start () {
-            graffiti_program = hacc::reference_file<Program>("modules/vis/res/color.prog");
-            graffiti_program_camera_pos = graffiti_program->require_uniform("camera_pos");
-            graffiti_program_model_pos = graffiti_program->require_uniform("model_pos");
-            graffiti_program_color = graffiti_program->require_uniform("color");
-        }
-        void run () {
+    struct Graffiti_Renderer : Renderer {
+        vis::Program* program;
+        int camera_pos = 0;
+        int model_pos = 0;
+        int color = 0;
+        void start_rendering () {
+            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
             static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
-            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+            static auto glDisableVertexAttribArray = glproc<void (GLuint)>("glDisableVertexAttribArray");
+            static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
             glDisable(GL_TEXTURE_2D);
             glDisable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glBindVertexArray(0);
             glEnableVertexAttribArray(0);
-            graffiti_program->use();
-            glUniform2f(graffiti_program_camera_pos, 10.0, 7.5);
-            glUniform2f(graffiti_program_model_pos, 0, 0);
+            glDisableVertexAttribArray(1);
+            glUseProgram(program->glid);
+            glUniform2f(camera_pos, 10.0, 7.5);
+        }
+    } gr;
+
+    struct Graffiti_Layer : core::Layer, core::Stateful {
+        Graffiti_Layer () : core::Layer("F.M", "graffiti") { }
+        void start () {
+            gr.program = hacc::reference_file<Program>("modules/vis/res/color.prog");
+            gr.camera_pos = gr.program->require_uniform("camera_pos");
+            gr.model_pos = gr.program->require_uniform("model_pos");
+            gr.color = gr.program->require_uniform("color");
+        }
+        void run () {
         }
     };
 
@@ -54,8 +60,8 @@ namespace vis {
     void draw_primitive (uint type, uint n_pts, Vec* pts, uint32 color) {
         static auto glUniform4f = glproc<void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)>("glUniform4f");
         static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
-        graffiti_program->use();
-        glUniform4f(graffiti_program_color,
+        gr.use();
+        glUniform4f(gr.color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,
             ((color >> 8) & 255) / 255.0,
@@ -67,7 +73,8 @@ namespace vis {
     }
     void graffiti_pos (Vec pos) {
         static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-        glUniform2f(graffiti_program_model_pos, pos.x, pos.y);
+        gr.use();
+        glUniform2f(gr.model_pos, pos.x, pos.y);
     }
 
 }

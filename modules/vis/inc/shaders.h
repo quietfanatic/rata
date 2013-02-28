@@ -32,10 +32,22 @@ namespace vis {
         std::vector<std::pair<std::string, uint>> attributes;
 
         int require_uniform (const char* name);
-        void use ();
         void link ();
         ~Program ();
     };
+
+     // These should be global singletons.
+    struct Renderer {
+         // Called when the current renderer is switched to this one
+        virtual void start_rendering () = 0;
+         // Called when the current renderer is switched away from this one
+        virtual void finish_rendering () { }
+         // Does the aforementioned switch
+        void use ();
+         // Keeps track
+        static Renderer* current;
+    };
+
 
 }
 

@@ -56,15 +56,6 @@ namespace vis {
         static auto glDeleteShader = glproc<void (GLuint)>("glDeleteShader");
         if (glid) glDeleteShader(glid);
     }
-    static Program* currently_using = NULL;
-
-    void Program::use () {
-        static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
-        if (currently_using != this) {
-            glUseProgram(glid);
-            currently_using = this;
-        }
-    }
 
     void Program::link () {
 
@@ -126,6 +117,16 @@ namespace vis {
             throw std::logic_error("Uniform not found.");
         }
         return r;
+    }
+
+    Renderer* Renderer::current = NULL;
+
+    void Renderer::use () {
+        if (current != this) {
+            if (current) current->finish_rendering();
+            start_rendering();
+            current = this;
+        }
     }
 
 }

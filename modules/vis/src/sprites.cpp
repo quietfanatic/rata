@@ -18,16 +18,25 @@ namespace vis {
         return err;
     }
 
+
     static Logger draw_sprite_logger ("draw_sprite", false);
-    static Program* sprite_program = NULL;
-     // uniforms
-    GLint sprite_program_tex = 0;
-    GLint sprite_program_camera_pos = 0;
-    GLint sprite_program_model_pos = 0;
-    GLint sprite_program_model_scale = 0;
-     // vertex attributes
-//    GLint sprite_program_vert_pos = 0;
-//    GLint sprite_program_vert_tex = 1;
+
+    struct Sprite_Renderer : Renderer {
+        Program* program;
+        GLint tex = 0;
+        GLint camera_pos = 0;
+        GLint model_pos = 0;
+        GLint model_scale = 0;
+        void start_rendering () {
+            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+            static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
+            glDisable(GL_BLEND);
+            glEnable(GL_TEXTURE_2D);
+            glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
+            glUseProgram(program->glid);
+            glUniform2f(camera_pos, 10, 7.5);  // TODO: Control the camera with this
+        }
+    } sr;
 
     void Draws_Sprites::draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
@@ -42,9 +51,10 @@ namespace vis {
             );
         }
 
+        sr.use();
 
-        glUniform3f(sprite_program_model_pos, p.x, p.y, z);
-        glUniform2f(sprite_program_model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
+        glUniform3f(sr.model_pos, p.x, p.y, z);
+        glUniform2f(sr.model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->tex);
         glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
@@ -84,27 +94,20 @@ namespace vis {
         Sprite_Layer () : core::Layer("C.M", "sprites") { }
         void start () {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
-            sprite_program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
-            sprite_program->use();
-            sprite_program_tex = sprite_program->require_uniform("tex");
-            sprite_program_camera_pos = sprite_program->require_uniform("camera_pos");
-            sprite_program_model_pos = sprite_program->require_uniform("model_pos");
-            sprite_program_model_scale = sprite_program->require_uniform("model_scale");
-            glUniform1i(sprite_program_tex, 0);  // Texture unit 0
+            sr.program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
+            sr.tex = sr.program->require_uniform("tex");
+            sr.camera_pos = sr.program->require_uniform("camera_pos");
+            sr.model_pos = sr.program->require_uniform("model_pos");
+            sr.model_scale = sr.program->require_uniform("model_scale");
+            glUniform1i(sr.tex, 0);  // Texture unit 0
             if (diagnose_opengl("after setting uniforms and stuff")) {
                 throw std::logic_error("sprites init failed due to GL error");
             }
         }
         void run () {
-            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             glClearColor(0.5, 0.5, 0.5, 0);
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-            glDisable(GL_BLEND);
-            glEnable(GL_TEXTURE_2D);
-            glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
-            sprite_program->use();
-            glUniform2f(sprite_program_camera_pos, 10, 7.5);  // TODO: Control the camera with this
             for (Draws_Sprites* p = sprite_drawers.first(); p; p = p->next()) {
                 p->draws_sprites();
             }
