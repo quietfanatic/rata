@@ -32,11 +32,6 @@ String escape_ident (const String& unesc) {
     }
     return unesc;
 }
-String escape_id (const String& unesc) {
-    String r = escape_ident(unesc);
-    if (r[0] == '"') r = "&" + r;
-    return r;
-}
 
 static String indent (uint n) {
     String r = "";
@@ -46,7 +41,7 @@ static String indent (uint n) {
 static String hacc_to_string_b (Hacc* h, uint ind, uint prior_ind, bool sp) {
     String r = hacc_value_to_string(h, ind, prior_ind);
     if (!h->id.empty()) {
-        r = escape_id(h->id) + " = " + r;
+        r = "$" + escape_ident(h->id) + " = " + r;
         if (sp) r = " " + r;
     }
     return r;
@@ -74,7 +69,7 @@ String hacc_value_to_string (Hacc* h, uint ind, uint prior_ind) {
             return r;
         }
         case STRING: return "\"" + escape_string(static_cast<Hacc::String*>(h)->s) + "\"";
-        case REF: return escape_id(static_cast<Hacc::Ref*>(h)->r.id);
+        case REF: return "$" + escape_ident(static_cast<Hacc::Ref*>(h)->r.id);
         case ATTRREF: {
             auto arh = static_cast<Hacc::AttrRef*>(h);
             return hacc_to_string(arh->ar.subject) + "." + escape_ident(arh->ar.name);
@@ -390,33 +385,34 @@ struct Parser {
         }
         return r;
     }
-    Hacc* parse_id_or_ref (String type) {
-        String gotid;
-        if (look() == '&') {
-            gotid = parse_id();
-        }
-        else {
-            gotid = parse_ident("An ID of some sort (this shouldn't happen)");
-            if (gotid == "null")
-                return new_hacc(null);
-            else if (gotid == "false")
-                return new_hacc(false);
-            else if (gotid == "true")
-                return new_hacc(true);
-            else if (gotid == "nan" || gotid == "inf") {
-                p -= 3;
-                return parse_floating();
-            }
-            else if (look() == '(') {
-                return new_hacc(hacc::MacroCall(gotid, parse_parens()));
-            }
-        }
+    Hacc* parse_var (String type) {
+        p++;  // for the $
+        String gotid = parse_ident("An variable name after $");
         parse_ws();
         if (look() == '=') {
             p++;
             return parse_thing(type, gotid);
         }
         else return new_hacc(Ref(gotid));
+    }
+    Hacc* parse_bareword () {
+        String word = parse_ident("An ID of some sort (this shouldn't happen)");
+        if (word == "null")
+            return new_hacc(null);
+        else if (word == "false")
+            return new_hacc(false);
+        else if (word == "true")
+            return new_hacc(true);
+        else if (word == "nan" || word == "inf") {
+            p -= 3;
+            return parse_floating();
+        }
+        else if (look() == '(') {
+            return new_hacc(hacc::MacroCall(word, parse_parens()));
+        }
+        else {
+            return new_hacc(word);
+        }
     }
     Hacc* parse_derefs (Hacc* subject, String type, String id) {
         if (look() == '.') {
@@ -480,11 +476,12 @@ struct Parser {
             case '[': return parse_derefs(parse_array(), type, id);
             case '{': return parse_derefs(parse_object(), type, id);
             case '(': return parse_derefs(parse_parens(), type, id);
-            case '&': case '_': return parse_derefs(parse_id_or_ref(type), type, id);
+            case '$': return parse_derefs(parse_var(type), type, id);
+            case '_': return parse_derefs(parse_bareword(), type, id);
             case '<': return parse_derefs(parse_heredoc(), type, id);
             default:
                 if (isalnum(next))
-                    return parse_derefs(parse_id_or_ref(type), type, id);
+                    return parse_derefs(parse_bareword(), type, id);
                 else throw Error("Unrecognized character " + String(1, next));
         }
     }

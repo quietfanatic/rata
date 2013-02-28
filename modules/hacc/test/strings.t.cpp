@@ -42,11 +42,12 @@ tap::Tester hacc_strings_tester ("hacc-strings", [](){
     hacc_string_test("~3ff0000000000000", "1~3ff0000000000000");
     hacc_string_test("2.0", "2~4000000000000000");
     hacc_string_test("0.5", "0.5~3fe0000000000000");
-     printf(" # Strings\n");  // 4
+     printf(" # Strings\n");  // 5
     is(hacc::escape_string("\"\\\b\f\n\r\t"), "\\\"\\\\\\b\\f\\n\\r\\t", "hacc::escape_string does its job");
     hacc_string_test("\"asdfasdf\"", "\"asdfasdf\"");
     hacc_string_test("\"\"", "\"\"");
     hacc_string_test("\"\\\"\\\\\\b\\f\\n\\r\\t\"", "\"\\\"\\\\\\b\\f\\n\\r\\t\"");
+    hacc_string_test("asdf", "\"asdf\"");
      printf(" # Arrays\n");  // 8
     hacc_string_test("[]", "[]");
     hacc_string_test("[1]", "[1]");
@@ -67,14 +68,13 @@ tap::Tester hacc_strings_tester ("hacc-strings", [](){
      printf(" # Arrays and Objects\n");  // 2
     hacc_string_test("[{a: 1, b: []} [4, {c: {d: []}}]]", "[{ a:1 b:[] } [4 { c:{ d:[] } }]]");
     hacc_string_test("{a: []}", "{ a:[] }");
-     printf(" # Refs\n");  // 3
-    hacc_string_test("bareword_3432", "bareword_3432");
-    hacc_string_test("&\"stringish\\nid\"", "&\"stringish\\nid\"");
-    hacc_string_test("&anded_3432", "anded_3432");
+     printf(" # Refs\n");  // 2
+    hacc_string_test("$thing_3432", "$thing_3432");
+    hacc_string_test("$\"stringish\\nid\"", "$\"stringish\\nid\"");
      printf(" # Prefixes\n");  // 3
-    hacc_string_test("one = 1", "one = 1");
-    hacc_string_test("&two=2", "two = 2");
-    hacc_string_test("{ak: ai = \"as\" bk: &\"bi\" = \"bs\"}", "{ ak: ai = \"as\" bk: bi = \"bs\" }");
+    hacc_string_test("$one = 1", "$one = 1");
+    hacc_string_test("$two=2", "$two = 2");
+    hacc_string_test("{ak: $ai = \"as\" bk: $\"bi\" = \"bs\"}", "{ ak: $ai = \"as\" bk: $bi = \"bs\" }");
      printf(" # Misc\n");  // 1
     hacc_string_test("{ things: [ {test_actor: {}} ] }", "{ things:[{ test_actor:{} }] }");
     
