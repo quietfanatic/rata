@@ -120,7 +120,6 @@ struct Ordered {
     static std::vector<C*>& get_all () { return all; }
     O order;
     Ordered (O order) : order(order) {
-        printf("Making Ordered object #%lu\n", all.size()+1);
         for (auto i = all.begin(); i != all.end(); i++) {
             if (order < (*i)->order) {
                 all.insert(i, static_cast<C*>(this));
