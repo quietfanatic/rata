@@ -14,16 +14,18 @@ namespace core {
 
 using namespace core;
 
-HCB_BEGIN(Phase)
-    type_name("core::Phase");
-    get_id([](const Phase& p){ return p.name; });
-    find_by_id([](std::string id){
-        for (Phase* p : all_phases)
-            if (p->name == id)
-                return p;
-        return (Phase*)NULL;
-    });
-HCB_END(Phase)
+HCB_BEGIN(Phase*)
+    type_name("core::Phase*");
+    delegate(value_functions<std::string>(
+        [](Phase* const& p){ return p ? p->name : std::string("null"); },
+        [](Phase*& pr, std::string name){
+            for (Phase* p : all_phases)
+                if (p->name == name)
+                    pr = p;
+            return pr = NULL;
+        }
+    ));
+HCB_END(Phase*)
 
 struct Allow_Command : Command {
     Phase* phase;
@@ -54,16 +56,18 @@ HCB_BEGIN(Disallow_Command)
 HCB_END(Disallow_Command)
 
 
-HCB_BEGIN(Layer)
-    type_name("core::Layer");
-    get_id([](const Layer& p){ return p.name; });
-    find_by_id([](std::string id){
-        for (Layer* l : all_layers)
-            if (l->name == id)
-                return l;
-        return (Layer*)NULL;
-    });
-HCB_END(Layer)
+HCB_BEGIN(Layer*)
+    type_name("core::Layer*");
+    delegate(value_functions<std::string>(
+        [](Layer* const& l){ return l ? l->name : std::string("null"); },
+        [](Layer*& lr, std::string name){
+            for (Layer* l : all_layers)
+                if (l->name == name)
+                    lr = l;
+            return lr = NULL;
+        }
+    ));
+HCB_END(Layer*)
 
 struct Show_Command : Command {
     Layer* layer;
