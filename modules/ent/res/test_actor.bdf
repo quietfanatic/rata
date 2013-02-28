@@ -7,6 +7,6 @@
             ] } }
             friction:0.4
         }
-        coll_b:[ground]
+        coll_b:[$ground]
     }]
 }

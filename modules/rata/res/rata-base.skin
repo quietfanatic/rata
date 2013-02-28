@@ -1,12 +1,12 @@
 #"vis::Skin" {
     apps: local([
-        segs = file("modules/rata/res/rata.skel").segs
-        image = file("modules/rata/res/rata-base.image")
+        $segs = file("modules/rata/res/rata.skel").segs
+        $image = file("modules/rata/res/rata-base.image")
         [
-            [segs.body [image.body]]
-            [segs.head [image.head]]
-            [segs.arm [image.arm]]
-            [segs.forearm [image.forearm]]
+            [$segs.body [$image.body]]
+            [$segs.head [$image.head]]
+            [$segs.arm [$image.arm]]
+            [$segs.forearm [$image.forearm]]
         ]
     ])
 }

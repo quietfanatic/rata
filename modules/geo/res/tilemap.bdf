@@ -1,4 +1,4 @@
 #"phys::BodyDef" {
-    b2: { type:static }
+    b2: { type:$static }
     fixtures: [] // Gonna populate this from the tiles
 }

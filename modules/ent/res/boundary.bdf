@@ -1,9 +1,9 @@
 #"phys::BodyDef" {
-    b2:{ type:static }
+    b2:{ type:$static }
     fixtures:[
-        {b2:{ shape:{ edge:{ v1:[20  0] v2:[ 0  0] } } } coll_b:[ground] }
-        {b2:{ shape:{ edge:{ v1:[20 15] v2:[20  0] } } } coll_b:[ground] }
-        {b2:{ shape:{ edge:{ v1:[ 0 15] v2:[20 15] } } } coll_b:[ground] }
-        {b2:{ shape:{ edge:{ v1:[ 0  0] v2:[ 0 15] } } } coll_b:[ground] }
+        {b2:{ shape:{ edge:{ v1:[20  0] v2:[ 0  0] } } } coll_b:[$ground] }
+        {b2:{ shape:{ edge:{ v1:[20 15] v2:[20  0] } } } coll_b:[$ground] }
+        {b2:{ shape:{ edge:{ v1:[ 0 15] v2:[20 15] } } } coll_b:[$ground] }
+        {b2:{ shape:{ edge:{ v1:[ 0  0] v2:[ 0 15] } } } coll_b:[$ground] }
     ]
 }

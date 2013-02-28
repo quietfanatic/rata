@@ -1,6 +1,6 @@
 #"vis::Program" {
     shaders: [
-        new({ type:"vertex" source:<<END
+        new({ type:vertex source:<<END
             #version 110
 
             uniform vec2 camera_pos;
@@ -19,7 +19,7 @@
             }
             END
         })
-        new({ type:"fragment" source:<<END
+        new({ type:fragment source:<<END
             #version 110
 
             uniform sampler2D tex;

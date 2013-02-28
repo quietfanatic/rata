@@ -1,9 +1,9 @@
 #"vis::Image" {
     filename: "modules/rata/res/rata-base.png"
-    textures: local([ layout_f = file("modules/rata/res/rata.layouts") [
-        {name:"body"    offset:[  0   0] layout:layout_f.body    size:[ 85 43]}
-        {name:"head"    offset:[117   1] layout:layout_f.head    size:[127 88]}
-        {name:"arm"     offset:[  0  95] layout:layout_f.arm     size:[100 16]}
-        {name:"forearm" offset:[  0 112] layout:layout_f.forearm size:[100 16]}
+    textures: local([ $layout_f = file("modules/rata/res/rata.layouts") [
+        {name:body    offset:[  0   0] layout:$layout_f.body    size:[ 85 43]}
+        {name:head    offset:[117   1] layout:$layout_f.head    size:[127 88]}
+        {name:arm     offset:[  0  95] layout:$layout_f.arm     size:[100 16]}
+        {name:forearm offset:[  0 112] layout:$layout_f.forearm size:[100 16]}
     ]])
 }
