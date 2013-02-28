@@ -389,17 +389,17 @@ sub plan_workflow(@) {
 sub run_workflow {
     my (@args) = @_;
     if (not @{$workflow{rules}}) {
-        say "✓ Nothing was done because no rules have been declared.";
+        say "\e[32m✓\e[0m Nothing was done because no rules have been declared.";
         return 1;
     }
     my @program = eval { plan_workflow(@args) };
     if ($@) {
         warn $@ unless $@ eq "\n";
-        say "✗ Nothing was done due to error.";
+        say "\e[31m✗\e[0m Nothing was done due to error.";
         return 0;
     }
     if (not @program) {
-        say "✓ All up to date.";
+        say "\e[32m✓\e[0m All up to date.";
         return 1;
     }
     my $old_cwd = cwd;
@@ -409,12 +409,12 @@ sub run_workflow {
         eval { $rule->{recipe}->($rule->{to}, $rule->{from}) };
         if ($@) {
             warn $@ unless $@ eq "\n";
-            say "✗ Did not finish due to error.";
+            say "\e[31m✗\e[0m Did not finish due to error.";
             Cwd::chdir $old_cwd;
             return 0;
         }
     }
-    say "✓ Done.";
+    say "\e[32m✓\e[0m Done.";
     Cwd::chdir $old_cwd;
     return 1;
 }
