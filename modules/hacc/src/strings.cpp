@@ -298,6 +298,43 @@ struct Parser {
     Hacc* parse_string () {
         return new_hacc(parse_stringly());
     }
+    Hacc* parse_heredoc () {
+        p++;  // for the <
+        if (look() != '<') throw error("< isn't followed by another < for a heredoc");
+        p++;
+        String terminator = parse_ident("heredoc delimiter string after <<");
+        while (look() == ' ' || look() == '\t') p++;
+        if (look() != '\n') throw error("Extra stuff after <<" + terminator + " before end of line");
+        p++;
+        String got = "";
+        while (1) {
+            String ind = "";
+            while (look() == ' ' || look() == '\t') {
+                ind += look(); got += look(); p++;
+            }
+            if (p + terminator.size() > end) throw error("Ran into end of document before + terminator");
+            if (0==strncmp(p, terminator.c_str(), terminator.size())) {
+                String ret;
+                size_t p1 = 0;
+                size_t p2 = got.find('\n');
+                while (p2 != String::npos) {
+                    p2 += 1;
+                    if (0==strncmp(got.c_str() + p1, ind.c_str(), ind.size())) {
+                        p1 += ind.size();
+                    }
+                    ret += got.substr(p1, p2 - p1);
+                    p1 = p2;
+                    p2 = got.find('\n', p2);
+                }
+                p += terminator.size();
+                return new_hacc(ret);
+            }
+            while (look() != '\n') {
+                got += look(); p++;
+            }
+            got += look(); p++;
+        }
+    }
     Hacc* parse_array () {
         Array a;
         p++;  // for the [
@@ -444,6 +481,7 @@ struct Parser {
             case '{': return parse_derefs(parse_object(), type, id);
             case '(': return parse_derefs(parse_parens(), type, id);
             case '&': case '_': return parse_derefs(parse_id_or_ref(type), type, id);
+            case '<': return parse_derefs(parse_heredoc(), type, id);
             default:
                 if (isalnum(next))
                     return parse_derefs(parse_id_or_ref(type), type, id);
