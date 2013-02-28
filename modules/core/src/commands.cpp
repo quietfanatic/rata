@@ -117,20 +117,7 @@ struct Command_Type : Ordered<Command_Type, command_types> {
 
 HCB_BEGIN(Command_Type*)
     type_name("Command_Type*");
-    delegate(value_functions<std::string>(
-        [](Command_Type* const& ct){
-            return ct ? ct->order : std::string("null");
-        },
-        [](Command_Type*& ctr, std::string s){
-            for (auto& ct : command_types) {
-                if (ct->order == s) {
-                    ctr = ct;
-                    return;
-                }
-            }
-            ctr = NULL;
-        }
-    ));
+    hacc::hacc_pointer_by_property((std::string Command_Type::*)&Command_Type::order, command_types);
 HCB_END(Command_Type*)
 
 struct HelpCommand : Command {

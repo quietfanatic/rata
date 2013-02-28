@@ -16,6 +16,7 @@ using namespace core;
 
 HCB_BEGIN(Phase*)
     type_name("core::Phase*");
+    printf("Phase*\n");
     hacc::hacc_pointer_by_property(&Phase::name, all_phases);
 /*    delegate(value_functions<std::string>(
         [](Phase* const& p){ return p ? p->name : std::string("null"); },
@@ -49,7 +50,9 @@ HCB_END(Allow_Command)
 
 struct Disallow_Command : Command {
     Phase* phase;
-    void operator () () { if (phase) phase->on = false; }
+    void operator () () {
+        if (phase) phase->on = false;
+    }
 };
 HCB_BEGIN(Disallow_Command)
     base<Command>("disallow");
@@ -59,15 +62,7 @@ HCB_END(Disallow_Command)
 
 HCB_BEGIN(Layer*)
     type_name("core::Layer*");
-    delegate(value_functions<std::string>(
-        [](Layer* const& l){ return l ? l->name : std::string("null"); },
-        [](Layer*& lr, std::string name){
-            for (Layer* l : all_layers)
-                if (l->name == name)
-                    lr = l;
-            return lr = NULL;
-        }
-    ));
+    hacc::hacc_pointer_by_property(&Layer::name, all_layers);
 HCB_END(Layer*)
 
 struct Show_Command : Command {
