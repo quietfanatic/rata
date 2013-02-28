@@ -27,15 +27,15 @@ namespace core {
             hacc::update_from_string(cmd, "[" + s + "]");
             success = true;
         } catch (hacc::Error& e) {
-            printf("Error parsing command: %s\n", e.what());
+            print_to_console("Error parsing command: " + std::string(e.what()) + "\n");
         } catch (std::exception& e) {
-            printf("Error generating command: %s\n", e.what());
+            print_to_console("Error generating command: " + std::string(e.what()) + "\n");
         }
         if (success) {
             try {
                 (*cmd)();
             } catch (std::exception& e) {
-                printf("Error: The command threw an exception: %s\n", e.what());
+                print_to_console("Error: The command threw an exception: " + std::string(e.what()) + "\n");
             }
         }
         if (cmd) delete cmd;
@@ -81,15 +81,17 @@ struct EchoCommand : Command {
 HCB_BEGIN(EchoCommand)
     base<Command>("echo");
     elem(member(&EchoCommand::s));
+    command_description<EchoCommand>("Print the given string to all console-like places.");
 HCB_END(EchoCommand)
 
-struct QuitImmediatelyCommand : Command {
+struct QuitCommand : Command {
     void operator() () { core::quit_game(); }
 };
-HCB_BEGIN(QuitImmediatelyCommand)
+HCB_BEGIN(QuitCommand)
     base<Command>("quit_immediately");
     empty();
-HCB_END(QuitImmediatelyCommand)
+    command_description<QuitCommand>("Quit the program without saving anything.");
+HCB_END(QuitCommand)
 
 struct SeqCommand : Command {
     std::vector<Command*> seq;
@@ -98,45 +100,38 @@ struct SeqCommand : Command {
 HCB_BEGIN(SeqCommand)
     base<Command>("seq");
     elem(member(&SeqCommand::seq));
+    command_description<SeqCommand>("Perform a sequence of commands.  Usage: seq [[command1 args...] [command2 args...]...]");
 HCB_END(SeqCommand)
 
- // This will be useful in the future
-
-struct Command_Type;
-std::vector<Command_Type*> command_types;
-struct Command_Type : Ordered<Command_Type, command_types> {
-    const std::type_info* cpptype;
-    Command_Type (std::string name) : Ordered(name) {
-        auto& sublist = Haccable<Command>::get_table()->subtypes;
-        auto iter = sublist.find(name);
-        if (iter == sublist.end())
-            throw std::logic_error("Unknown command.\n");
-        cpptype = &iter->second.subtype;
-    }
-};
-
-HCB_BEGIN(Command_Type*)
-    type_name("Command_Type*");
-    hacc::hacc_pointer_by_property((std::string Command_Type::*)&Command_Type::order, command_types);
-HCB_END(Command_Type*)
 
 struct HelpCommand : Command {
-    Command_Type* ct = NULL;
+    std::string type;
     void operator() () {
-        if (ct == NULL) {
-            console_help();
+        if (type.empty()) {
+            print_to_console(console_help());
         }
         else {
-            print_to_console(ct->order);
-            auto& elemlist = HaccTable::require_cpptype(*ct->cpptype)->elems;
-            for (auto& e : elemlist) {
-                print_to_console(" <" + HaccTable::require_cpptype(*e.mtype)->get_type_name() + ">");
-                if (e.def.def) print_to_console("?");
+            auto& sublist = Haccable<Command>::get_table()->subtypes;
+            auto iter = sublist.find(type);
+            if (iter == sublist.end()) {
+                print_to_console("Unknown command " + type + "; available are:");
+                for (auto& sub : sublist) {
+                    print_to_console(" " + sub.first);
+                }
+                print_to_console("\n");
             }
-            auto iter2 = command_descriptions.find(ct->cpptype->hash_code());
-            if (iter2 == command_descriptions.end())
-                print_to_console("\nNo information is available about this command.\n");
-            else print_to_console("\n" + iter2->second + "\n");
+            else {
+                print_to_console(iter->first);
+                auto& elemlist = HaccTable::require_cpptype(iter->second.subtype)->elems;
+                for (auto& e : elemlist) {
+                    print_to_console(" <" + HaccTable::require_cpptype(*e.mtype)->get_type_name() + ">");
+                    if (e.def.def) print_to_console("?");
+                }
+                auto iter2 = command_descriptions.find(iter->second.subtype.hash_code());
+                if (iter2 == command_descriptions.end())
+                    print_to_console("\nNo information is available about this command.\n");
+                else print_to_console("\n" + iter2->second + "\n");
+            }
         }
     }
 };
@@ -144,7 +139,7 @@ struct HelpCommand : Command {
 HCB_BEGIN(HelpCommand)
     base<Command>("help");
     command_description<HelpCommand>("Show information about the in-game console or about a command");
-    elem(member(&HelpCommand::ct)(optional));
+    elem(member(&HelpCommand::type)(optional));
 HCB_END(HelpCommand)
 
 
