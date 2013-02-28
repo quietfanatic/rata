@@ -2,6 +2,7 @@
 #define HAVE_HACC_HACCABLE_STANDARD_H
 
 #include "haccable.h"
+#include "haccable_integration.h"
 
 namespace hacc {
     template <class C>
@@ -132,13 +133,13 @@ HCB_TEMPLATE_END(<class C>, C*)
 
 namespace hacc {
     template <class C, class M>
-    void hacc_pointer_by_property (M C::* p, std::vector<C*>& all) {
+    void hacc_pointer_by_property (M C::* p, std::vector<C*>& all, bool required = false) {
         hacc::Haccability<C*>::to([p](C* const& x){
             return x ? hacc::new_hacc(x->*p) : hacc::new_hacc(hacc::null);
         });
         hacc::Haccability<C*>::delegate(hacc::Haccability<C*>::template value_functions<M>(
             [](C* const& x)-> M { throw Error("Shouldn't happen"); },
-            [p, &all](C*& x, M m){
+            [p, &all, required](C*& x, M m){
                 for (auto c : all) {
                     if (c->*p == m) {
                         x = c;
@@ -146,6 +147,26 @@ namespace hacc {
                     }
                 }
                 x = NULL;
+                if (required) throw Error("No " + hacc::get_type_name<C>() + " with the given property " + hacc::to_string(m) + " was found.");
+            }
+        ));
+    }
+    template <class C, class M>
+    void hacc_pointer_by_method (M (C::* f) () const, std::vector<C*>& all, bool required = false) {
+        hacc::Haccability<C*>::to([f](C* const& x){
+            return x ? hacc::new_hacc((x->*f)()) : hacc::new_hacc(hacc::null);
+        });
+        hacc::Haccability<C*>::delegate(hacc::Haccability<C*>::template value_functions<M>(
+            [](C* const& x)-> M { throw Error("Shouldn't happen"); },
+            [f, &all, required](C*& x, M m){
+                for (auto c : all) {
+                    if ((c->*f)() == m) {
+                        x = c;
+                        return;
+                    }
+                }
+                x = NULL;
+                if (required) throw Error("No " + hacc::get_type_name<C>() + " with the given property " + hacc::to_string(m) + " was found.");
             }
         ));
     }
