@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "../../util/inc/honestly.h"
+#include "../../util/inc/organization.h"
 
 struct Command {
     virtual void operator() () = 0;
@@ -19,6 +20,12 @@ namespace core {
     void console_help ();
 
     void print_to_console (std::string);
+
+    struct Receives_Output;
+    extern Links<Receives_Output> output_receivers;
+    struct Receives_Output : Linked<Receives_Output, output_receivers> {
+        virtual void receive_output (std::string);
+    };
 
 }
 
