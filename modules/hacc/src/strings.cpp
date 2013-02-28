@@ -147,12 +147,12 @@ String string_from_hacc (Hacc* h, uint ind, uint prior_ind) {
 
  // Parsing is simple enough that we don't need a separate lexer step
 struct Parser {
-    const char* file;
+    String file;
     const char* begin;
     const char* p;
     const char* end;
-    Parser (String s) : file(""), begin(s.data()), p(s.data()), end(s.data()+s.length()) { }
-    Parser (const char* s) : file(""), begin(s), p(s), end(s + strlen(s)) { }
+    Parser (String s, String file = "") : file(file), begin(s.data()), p(s.data()), end(s.data()+s.length()) { }
+    Parser (const char* s, String file = "") : file(file), begin(s), p(s), end(s + strlen(s)) { }
 
     int look () { return p == end ? EOF : *p; }
 
@@ -482,7 +482,7 @@ struct Parser {
             default:
                 if (isalnum(next))
                     return parse_derefs(parse_bareword(), type, id);
-                else throw Error("Unrecognized character " + String(1, next));
+                else throw error("Unrecognized character " + String(1, next));
         }
     }
     Hacc* parse_all () {
@@ -501,10 +501,10 @@ struct Parser {
 };
 
  // Finally:
-Hacc* hacc_from_string (const String& s) { return Parser(s).parse(); }
-Hacc* hacc_from_string (const char* s) { return Parser(s).parse(); }
-Hacc* string_to_hacc (const String& s) { return hacc_from_string(s); }
-Hacc* string_to_hacc (const char* s) { return hacc_from_string(s); }
+Hacc* hacc_from_string (const String& s, String filename) { return Parser(s, filename).parse(); }
+Hacc* hacc_from_string (const char* s, String filename) { return Parser(s, filename).parse(); }
+Hacc* string_to_hacc (const String& s, String filename) { return hacc_from_string(s, filename); }
+Hacc* string_to_hacc (const char* s, String filename) { return hacc_from_string(s, filename); }
 
 }
 
