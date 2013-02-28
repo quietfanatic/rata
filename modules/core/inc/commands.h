@@ -22,6 +22,7 @@ namespace core {
 
 }
 
+ // This is for registering information about commands
 extern std::unordered_map<size_t, std::string> command_descriptions;
 
 template <class Cmd>

@@ -9,6 +9,7 @@
 namespace core {
 
     std::vector<Key_Listener*> key_listeners;
+    std::vector<Char_Listener*> char_listeners;
 
     static int GLFWCALL close_cb () {
         quit_game();
@@ -33,12 +34,18 @@ namespace core {
             kl->hear_key(keycode, action);
         }
     }
+    static void GLFWCALL char_cb (int code, int action) {
+        for (auto cl : char_listeners) {
+            cl->hear_char(code, action);
+        }
+    }
 
     struct Input_Phase : core::Phase, core::Stateful {
          // Input phase doesn't have a name to keep you from locking out your controls.
         Input_Phase () : core::Phase("A.M") { }
         void start () {
             glfwSetKeyCallback(key_cb);
+            glfwSetCharCallback(char_cb);
             glfwSetWindowCloseCallback(close_cb);
             glfwDisable(GLFW_AUTO_POLL_EVENTS);
         }

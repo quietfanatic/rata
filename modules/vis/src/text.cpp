@@ -104,6 +104,18 @@ namespace vis {
             glUniform1i(text_program_tex, 0);
         }
         void run () {
+            static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
+            static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
+            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+            glDisable(GL_DEPTH_TEST);
+            glEnable(GL_TEXTURE_2D);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            text_program->use();
+            glBindVertexArray(0);
+            glEnableVertexAttribArray(0);
+            glEnableVertexAttribArray(1);
+            glUniform2f(text_program_camera_pos, 10.0, 7.5);
             for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
                 p->text_draw();
             }

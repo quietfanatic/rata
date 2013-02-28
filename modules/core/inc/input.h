@@ -18,6 +18,17 @@ namespace core {
         void activate ();
         void deactivate ();
     };
+    struct Char_Listener;
+    extern std::vector<Char_Listener*> char_listeners;
+    struct Char_Listener : Ordered<Char_Listener, char_listeners> {
+         // Return true if you've handled the key.
+        virtual bool hear_char (int code, int action) = 0;
+
+        Char_Listener (std::string order = "Z") : Ordered(order) { }
+
+        void activate ();
+        void deactivate ();
+    };
 
 }
 
