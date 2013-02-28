@@ -21,7 +21,6 @@ workflow {
         ../core/tmp/game.o
         ../core/tmp/phases.o
         ../core/tmp/commands.o
-        ../core/tmp/resources.o 
         ../core/tmp/state.o
         ../core/tmp/input.o
         ../ent/tmp/humans.o

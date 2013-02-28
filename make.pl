@@ -51,7 +51,7 @@ workflow {
         $file =~ /\.(?:cpp|h)$/ or return ();
         my @vdf = splitpath($file);
         my $base = catpath($vdf[0], $vdf[1], '');
-        open my $F, '<', $file or die "bleargh! $! $file";
+        open my $F, '<', $file or (warn "Could not open $file: $!\n" and return);
         read $F, my $head, 1000;
         close $F;
         my @r;

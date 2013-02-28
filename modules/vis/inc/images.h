@@ -5,7 +5,6 @@
 
 #include "../../util/inc/Vec.h"
 #include "../../util/inc/Rect.h"
-#include "../../core/inc/resources.h"
 
 #define PX (1/16.0)
 

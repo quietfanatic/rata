@@ -3,7 +3,6 @@
 
 #include <stdexcept>
 #include <GL/glfw.h>
-#include "../../core/inc/resources.h"
 
 namespace vis {
 
