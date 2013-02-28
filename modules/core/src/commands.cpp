@@ -15,25 +15,28 @@ using namespace hacc;
 namespace core {
 
     void command_from_terminal () {
-        canonical_ptr<Command> cmd;
+        Command* cmd = NULL;
+        bool success = false;
         try {
             printf("Command: ");
             std::string cmdline;
             std::getline(std::cin, cmdline);
             if (cmdline.empty()) return;
             hacc::update_from_string(cmd, "[" + cmdline + "]");
+            success = true;
         } catch (hacc::Error& e) {
             printf("Error parsing command: %s\n", e.what());
-            return;
         } catch (std::exception& e) {
             printf("Error generating command: %s\n", e.what());
-            return;
         }
-        try {
-            (*cmd)();
-        } catch (std::exception& e) {
-            printf("Error: The command threw an exception: %s\n", e.what());
+        if (success) {
+            try {
+                (*cmd)();
+            } catch (std::exception& e) {
+                printf("Error: The command threw an exception: %s\n", e.what());
+            }
         }
+        if (cmd) delete cmd;
     }
 
     bool console_is_active = false;
