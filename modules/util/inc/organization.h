@@ -1,6 +1,7 @@
 #ifndef HAVE_UTIL_ORGANIZATION_H
 #define HAVE_UTIL_ORGANIZATION_H
 
+#include <stdexcept>
 #include "../../hacc/inc/haccable.h"
 #include "honestly.h"
 
@@ -114,10 +115,12 @@ struct Linked : Linkable<C> {
 
 
  // Things that are registered in an order
-template <class C, std::vector<C*>& all>
+template <class C, std::vector<C*>& all, class O = std::string>
 struct Ordered {
-    std::string order;
-    Ordered (std::string order) : order(order) {
+    static std::vector<C*>& get_all () { return all; }
+    O order;
+    Ordered (O order) : order(order) {
+        printf("Making Ordered object #%lu\n", all.size()+1);
         for (auto i = all.begin(); i != all.end(); i++) {
             if (order < (*i)->order) {
                 all.insert(i, static_cast<C*>(this));

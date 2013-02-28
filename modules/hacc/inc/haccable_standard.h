@@ -120,11 +120,33 @@ void chain_find_by_id (const Func<C* (Parent*, std::string)>& f, std::string sep
     });
 }
 
+ // This is the default haccability for pointers.
+
 HCB_TEMPLATE_BEGIN(<class C>, C*)
     type_name(hacc::get_type_name<C>() + "*");
     pointer(hacc::Haccability<C*>::template supertype<C*>());
     pointer_policy(hacc::ASK_POINTEE);
 HCB_TEMPLATE_END(<class C>, C*)
 
+ // Alternatively, you can override that and call this.
+
+namespace hacc {
+    template <class C, class M>
+    void hacc_pointer_by_property (M C::* p, std::vector<C*>& all) {
+        hacc::Haccability<C*>::to([p](C* const& x){
+            return x ? hacc::new_hacc(x->*p) : hacc::new_hacc(hacc::null);
+        });
+        hacc::Haccability<C*>::delegate(hacc::Haccability<C*>::template value_functions<M>(
+            [](C* const& x)-> M { throw Error("Shouldn't happen"); },
+            [p, &all](C*& x, M m){
+                for (auto c : all) {
+                    if (c->*p == m)
+                        x = c;
+                }
+                x = NULL;
+            }
+        ));
+    }
+}
 
 #endif

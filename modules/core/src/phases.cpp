@@ -16,7 +16,8 @@ using namespace core;
 
 HCB_BEGIN(Phase*)
     type_name("core::Phase*");
-    delegate(value_functions<std::string>(
+    hacc::hacc_pointer_by_property(&Phase::name, all_phases);
+/*    delegate(value_functions<std::string>(
         [](Phase* const& p){ return p ? p->name : std::string("null"); },
         [](Phase*& pr, std::string name){
             for (Phase* p : all_phases)
@@ -24,7 +25,7 @@ HCB_BEGIN(Phase*)
                     pr = p;
             return pr = NULL;
         }
-    ));
+    ));*/
 HCB_END(Phase*)
 
 struct Allow_Command : Command {
