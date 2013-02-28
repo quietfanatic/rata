@@ -2,10 +2,10 @@
     size:[64 64]
     frames: local([ $thebox = [-16 -16 16 16]
         [
-            {name:"white" offset:[16 48] box:$thebox.^}
-            {name:"red"   offset:[48 48] box:$thebox.^}
-            {name:"green" offset:[48 16] box:$thebox.^}
-            {name:"blue"  offset:[16 16] box:$thebox.^}
+            {name:"white" offset:[16 48] box:$thebox}
+            {name:"red"   offset:[48 48] box:$thebox}
+            {name:"green" offset:[48 16] box:$thebox}
+            {name:"blue"  offset:[16 16] box:$thebox}
         ]
     ])
 }

@@ -57,7 +57,7 @@ namespace hacc {
      // These are used to make sure pointers are updated after the pointed-to data
     struct read_id_info {
         Hacc* read = null;
-        Func<void* ()> get;
+        Func<void* ()> get;  // If it was assigned in a typed context
         read_id_info (Hacc* read, const Func<void* ()>& get) : read(read), get(get) { }
     };
     static std::unordered_map<String, read_id_info> read_ids;
@@ -242,7 +242,7 @@ namespace hacc {
             }
         }
          // For refs, schedule an operation to find the pointee by ID
-        else if (h->form() == REF) {
+        else if (h->form() == REF && pointer) {
             delayed_updates.emplace_back([this, p, h, &gs](){
                 gs.set(p, [this, h](void* mp){
                     update_from_hacc_inner(mp, h);
@@ -386,7 +386,9 @@ namespace hacc {
                     }
                     else throw Error("Unknown variable $" + id + " was encountered");
                 }
-                else throw Error("Type " + get_type_name() + " cannot be represented by a variable Hacc.");
+                else {
+                    update_from_hacc_inner(p, collapse_hacc(h));
+                }
                 break;
             }
             case GENERIC: {
@@ -603,11 +605,10 @@ namespace hacc {
                 }
                 else throw Error("Only a REF hacc can be dereferenced with .^");
             }
-             // This will only happen if this ref is being dereffed or similar
             case REF: {
                 auto iter = read_ids.find(static_cast<hacc::Hacc::Ref*>(h)->r.id);
                 if (iter == read_ids.end())
-                    throw Error("ID " + static_cast<hacc::Hacc::Ref*>(h)->r.id + " not found in this document.");
+                    throw Error("Unknown variable $" + static_cast<hacc::Hacc::Ref*>(h)->r.id);
                 auto& rid = iter->second;
                 if (rid.read) {
                     if (rid.get && !rid.read->type.empty()) {
@@ -615,10 +616,7 @@ namespace hacc {
                         return new_hacc(Generic(t->cpptype, rid.get()));
                     }
                     else {
-                        Hacc* incantation;
-                        rid.read = collapse_hacc(rid.read, &incantation);
-                        if (incantation && return_incantation)
-                            *return_incantation = incantation;
+                        rid.read = collapse_hacc(rid.read);
                         return rid.read;
                     }
                 }
