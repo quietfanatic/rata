@@ -8,6 +8,29 @@
 
 namespace vis {
 
+    struct Layout;
+
+    struct Frame {
+        Layout* parent;
+        std::string name;
+        Vec offset;
+        Rect box;
+        std::vector<Vec> points;
+    };
+
+    struct Layout {
+        Vec size;
+        std::vector<Frame> frames;
+        uint vbo_id;
+        uint vao_id;
+
+        void finish ();
+        ~Layout ();
+
+        Frame* frame_named (std::string);
+    };
+
+
     struct Draws_Sprites : Linkable<Draws_Sprites> {
         virtual void draws_sprites () = 0;
         bool is_active () { return is_linked(); }

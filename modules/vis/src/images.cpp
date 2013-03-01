@@ -74,81 +74,6 @@ namespace vis {
                 return &t;
         return NULL;
     }
-
-    struct Layout_VBO_Data {
-        Vec lbp;
-        Vec lbt;
-        Vec rbp;
-        Vec rbt;
-        Vec rtp;
-        Vec rtt;
-        Vec ltp;
-        Vec ltt;
-    };
-
-    void Layout::finish () {
-        for (Frame& f : frames)
-            f.parent = this;
-        static auto glGenBuffers = glproc<void (GLsizei, GLuint*)>("glGenBuffers");
-        static auto glBindBuffer = glproc<void (GLenum, GLuint)>("glBindBuffer");
-        static auto glBufferData = glproc<void (GLenum, GLsizeiptr, const GLvoid*, GLenum)>("glBufferData");
-        static auto glGenVertexArrays = glproc<void (GLsizei, GLuint*)>("glGenVertexArrays");
-        static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
-        static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
-        static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
-         // Create OpenGL VBO
-        Layout_VBO_Data data [frames.size()];
-        for (uint i = 0; i < frames.size(); i++) {
-            data[i].lbp = frames[i].box.lb() * PX;
-            data[i].lbt = frames[i].offset + frames[i].box.lb();
-            data[i].lbt.x /= size.x;
-            data[i].lbt.y /= size.y;
-            data[i].lbt.y = 1 - data[i].lbt.y;
-            data[i].rbp = frames[i].box.rb() * PX;
-            data[i].rbt = frames[i].offset + frames[i].box.rb();
-            data[i].rbt.x /= size.x;
-            data[i].rbt.y /= size.y;
-            data[i].rbt.y = 1 - data[i].rbt.y;
-            data[i].rtp = frames[i].box.rt() * PX;
-            data[i].rtt = frames[i].offset + frames[i].box.rt();
-            data[i].rtt.x /= size.x;
-            data[i].rtt.y /= size.y;
-            data[i].rtt.y = 1 - data[i].rtt.y;
-            data[i].ltp = frames[i].box.lt() * PX;
-            data[i].ltt = frames[i].offset + frames[i].box.lt();
-            data[i].ltt.x /= size.x;
-            data[i].ltt.y /= size.y;
-            data[i].ltt.y = 1 - data[i].ltt.y;
-        }
-        glGenBuffers(1, &vbo_id);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
-        glBufferData(GL_ARRAY_BUFFER, frames.size() * sizeof(Layout_VBO_Data), data, GL_STATIC_DRAW);
-         // And create the VAO.
-        glGenVertexArrays(1, &vao_id);
-        glBindVertexArray(vao_id);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-         // index, n_elements, type, normalize, stride, offset
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbp));
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbt));
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        diagnose_opengl("after creating a layout vao");
-
-    }
-    Layout::~Layout () {
-        static auto glDeleteBuffers = glproc<void (GLsizei, const GLuint*)>("glDeleteBuffers");
-        static auto glDeleteVertexArrays = glproc<void (GLsizei, const GLuint*)>("glDeleteVertexArrays");
-        glDeleteBuffers(1, &vbo_id);
-        glDeleteVertexArrays(1, &vao_id);
-    }
-
-    Frame* Layout::frame_named (std::string name) {
-        for (Frame& s : frames)
-            if (s.name == name)
-                return &s;
-        return NULL;
-    }
-
 }
 
 using namespace vis;
@@ -158,7 +83,6 @@ HCB_BEGIN(Texture)
     attr("name", member(&Texture::name, def(std::string("ALL"))));
     attr("offset", member(&Texture::offset, def(Vec(0, 0))));
     attr("size", member(&Texture::size, def(Vec())));
-    attr("layout", member(&Texture::layout, def((Layout*)NULL)));
 HCB_END(Texture)
 
 HCB_BEGIN(Image)
@@ -170,27 +94,4 @@ HCB_BEGIN(Image)
     });
     finish([](Image& i){ i.load(); });
 HCB_END(vis::Image)
-
-HCB_BEGIN(Frame)
-    type_name("vis::Frame");
-    attr("name", member(&Frame::name));
-    attr("offset", member(&Frame::offset));
-    attr("box", member(&Frame::box));
-    attr("points", member(&Frame::points)(optional));
-HCB_END(vis::Frame)
-
-HCB_BEGIN(Layout)
-    type_name("vis::Layout");
-    attr("size", member(&Layout::size));
-    attr("frames", member(&Layout::frames));
-    get_attr([](Layout& layout, std::string name){
-        return layout.frame_named(name);
-    });
-    finish([](Layout& layout){
-        layout.finish();
-    });
-HCB_END(Layout)
- // For convenience
-HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA Layout>)
-
 

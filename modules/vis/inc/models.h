@@ -5,6 +5,7 @@
 #include "../../util/inc/Vec.h"
 #include "../../hacc/inc/haccable_standard.h"
 #include "images.h"
+#include "sprites.h"
 
 namespace vis {
      // Static things

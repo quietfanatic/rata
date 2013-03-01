@@ -13,14 +13,11 @@ namespace vis {
      // All positions of these structures are in PX
     struct Texture;
     struct Image;
-    struct Frame;
-    struct Layout;
 
     struct Texture {
         std::string name = "ALL";
         Vec offset = Vec(0, 0);
         Vec size;
-        Layout* layout = NULL;  // Not required
         bool smooth = false;
 
         uint tex = 0;
@@ -41,27 +38,6 @@ namespace vis {
         void unload ();
         Texture* texture_named (std::string);
     };
-
-    struct Frame {
-        Layout* parent;
-        std::string name;
-        Vec offset;
-        Rect box;
-        std::vector<Vec> points;
-    };
-
-    struct Layout {
-        Vec size;
-        std::vector<Frame> frames;
-        uint vbo_id;
-        uint vao_id;
-
-        void finish ();
-        ~Layout ();
-
-        Frame* frame_named (std::string);
-    };
-
 }
 
 #endif
