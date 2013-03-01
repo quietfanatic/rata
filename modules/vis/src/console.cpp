@@ -75,7 +75,7 @@ namespace vis {
                             }
                             break;
                         }
-                        default: return false;
+                        default: break;
                     }
                     return true;
                 }

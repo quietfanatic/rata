@@ -1,4 +1,6 @@
 new(["vis::Font" {
-    texture: file("modules/rata/res/monospace.image").ALL
+    texture:new(["vis::Image" {
+        filename:"modules/rata/res/monospace.png"
+    }]).ALL
     width:6 height:12 line_height:12
 }])
