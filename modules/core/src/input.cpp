@@ -35,10 +35,11 @@ namespace core {
         }
     }
 
-    struct Input_Phase : core::Phase, core::Stateful {
+    struct Input_Phase : core::Phase, core::Game_Object {
          // Input phase doesn't have a name to keep you from locking out your controls.
-        Input_Phase () : core::Phase("A.M") { }
+        Input_Phase () : core::Phase("A.M") { printf("Created input phase.\n"); }
         void start () {
+            printf("Starting input phase.\n");
             glfwSetKeyCallback(key_cb);
             glfwSetCharCallback(char_cb);
             glfwSetWindowCloseCallback(close_cb);
@@ -48,14 +49,9 @@ namespace core {
             glfwPollEvents();
         }
     };
+    core::Celebrity<Input_Phase> input_phase;
 
 }
 
 using namespace core;
-
-HCB_BEGIN(Input_Phase)
-    type_name("core::Input_Phase");
-    base<Stateful>("Input_Phase");
-    empty();
-HCB_END(Input_Phase)
 

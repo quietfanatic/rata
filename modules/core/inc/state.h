@@ -6,10 +6,11 @@
 namespace core {
 
     struct Stateful;
+    struct Game_Object;
 
     struct Game_State {
         Links<Stateful> things;
-        std::vector<void*> pop_culture;
+        std::vector<Game_Object*> pop_culture;
         bool started = false;
 
         Game_State ();
@@ -19,12 +20,13 @@ namespace core {
 
     extern Game_State* current_state;
 
-    struct Stateful : Linkable<Stateful> {
-        Stateful () { }
-
-         // Don't register with layers and physics and such until exist() is called.
+    struct Game_Object {
         virtual void start () = 0;
-        virtual ~Stateful () { }
+        virtual ~Game_Object () { }
+    };
+
+    struct Stateful : Linkable<Stateful>, Game_Object {
+        Stateful () { }
     };
 
     bool load_state (std::string filename);
@@ -34,13 +36,13 @@ namespace core {
      //  but they are instantiated automatically when referenced, so they
      //  don't have to be given in the state file.  They pretend to be
      //  global variables.  They must have a nullary constructor.
-    uint allocate_celebrity (void*(*)(), void(*)(void*));
-    template <class C> C* default_celeb_allocator () { return new C; }
-    template <class C> void default_celeb_deleter (C* p) { delete p; }
-    template <class C, C* (* allocator )() = default_celeb_allocator<C>, void (* deleter )(C*) = default_celeb_deleter<C>>
+
+    uint allocate_celebrity (Game_Object*(*)());
+    template <class C> Game_Object* default_celeb_allocator () { return new C; }
+    template <class C, Game_Object* (* allocator )() = default_celeb_allocator<C>>
     struct Celebrity {
-        uint index = allocate_celebrity((void*(*)())allocator, (void(*)(void*))deleter);
-        C* get () { return (C*)current_state->pop_culture[index]; }
+        uint index = allocate_celebrity(allocator);
+        C* get () { return static_cast<C*>(current_state->pop_culture[index]); }
         operator C* () { return get(); }
         C operator * () { return *get(); }
         C* operator -> () { return get(); }

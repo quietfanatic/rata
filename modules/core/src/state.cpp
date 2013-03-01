@@ -19,17 +19,12 @@ namespace core {
 
     Game_State* current_state = NULL;
 
-    static std::vector<void*(*)()>& celeb_allocators () {
-        static std::vector<void*(*)()> celeb_allocators;
+    static std::vector<Game_Object*(*)()>& celeb_allocators () {
+        static std::vector<Game_Object*(*)()> celeb_allocators;
         return celeb_allocators;
     }
-    static std::vector<void(*)(void*)>& celeb_deleters () {
-        static std::vector<void(*)(void*)> celeb_deleters;
-        return celeb_deleters;
-    }
-    uint allocate_celebrity (void*(* a )(), void(* d )(void*)) {
+    uint allocate_celebrity (Game_Object*(* a )()) {
         celeb_allocators().push_back(a);
-        celeb_deleters().push_back(d);
         return celeb_allocators().size() - 1;
     }
 
@@ -48,11 +43,13 @@ namespace core {
         for (auto p = things.first(); p; p = p->next()) {
             p->start();
         }
+        for (auto p : pop_culture)
+            p->start();
     }
     Game_State::~Game_State () {
         things.destroy_all();
-        for (uint i = 0; i < pop_culture.size(); i++)
-            celeb_deleters()[i](pop_culture[i]);
+        for (auto p : pop_culture)
+            delete p;
     }
 
     bool load_state (std::string filename) {
