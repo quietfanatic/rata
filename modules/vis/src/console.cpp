@@ -11,7 +11,7 @@
 namespace vis {
 
     using namespace core;
-    
+
     struct Console : Stateful, Layer, Key_Listener, Char_Listener, Receives_Output {
         bool is_active = false;
         std::string contents = console_help();

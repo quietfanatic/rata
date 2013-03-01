@@ -28,8 +28,6 @@ namespace vis {
     }
 
 
-    struct Sprite_Layer;
-    Sprite_Layer* sr = NULL;
     struct Sprite_Layer : core::Layer, core::Stateful, Renderer {
         Program* program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
         GLint tex = program->require_uniform("tex");
@@ -39,11 +37,12 @@ namespace vis {
 
         Sprite_Layer () : core::Layer("C.M", "sprites") {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
+            static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
+            glUseProgram(program->glid);
             glUniform1i(tex, 0);  // Texture unit 0
             if (diagnose_opengl("after setting uniforms and stuff")) {
                 throw std::logic_error("sprites init failed due to GL error");
             }
-            sr = this;
         }
          // for Renderer
         void start_rendering () {
@@ -66,6 +65,7 @@ namespace vis {
             }
         }
     };
+    core::Celebrity<Sprite_Layer> sr;
 
     static Logger draw_sprite_logger ("draw_sprite", false);
 
@@ -114,12 +114,6 @@ namespace vis {
 }
 
 using namespace vis;
-
-HCB_BEGIN(Sprite_Layer)
-    type_name("vis::Sprite_Layer");
-    base<core::Stateful>("Sprite_Layer");
-    empty();
-HCB_END(Sprite_Layer)
 
 HCB_BEGIN(Sprite_Test)
     type_name("vis::Sprite_Test");
