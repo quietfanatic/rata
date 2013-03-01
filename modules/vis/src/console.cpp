@@ -75,8 +75,9 @@ namespace vis {
                             }
                             break;
                         }
-                        default: break;
+                        default: return false;
                     }
+                    return true;
                 }
             }
             else {
@@ -85,11 +86,12 @@ namespace vis {
                         if (font) {
                             ignore_a_trigger = true;
                             enter_console();
+                            return true;
                         }
                     }
                 }
             }
-            return true;
+            return false;
         }
         bool hear_char (int code, int action) {
             if (!is_active) return false;
