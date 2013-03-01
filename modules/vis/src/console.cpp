@@ -99,14 +99,32 @@ namespace vis {
                 ignore_a_trigger = false;
                 return false;
             }
-            if (code < 256) {
+            if (glfwGetKey(GLFW_KEY_LCTRL) || glfwGetKey(GLFW_KEY_RCTRL)) {
+                switch (code) {
+                    case 'd': {
+                        exit_console();
+                        break;
+                    }
+                    case 'c': {
+                        cli = "";
+                        cli_pos = 0;
+                        break;
+                    }
+                    case 'u': {
+                        cli = cli.substr(cli_pos);
+                        cli_pos = 0;
+                        break;
+                    }
+                    default: break;
+                }
+            }
+            else if (code < 256) {
                 cli = cli.substr(0, cli_pos)
                     + std::string(1, code)
                     + cli.substr(cli_pos);
                 cli_pos++;
-                return true;
             }
-            return false;
+            return true;
         }
         void enter_console () {
             is_active = true;
