@@ -98,7 +98,7 @@ namespace geo {
         }
     }
 
-    struct Room_Phase : core::Phase, core::Stateful {
+    struct Room_Phase : core::Phase, core::Game_Object {
         Room_Phase () : core::Phase ("T.M") { }
         void start () {
             Resident* nextr;
@@ -114,15 +114,11 @@ namespace geo {
             beholder = NULL;
         }
     };
+    core::Celebrity<Room_Phase> room_phase;
 
 }
 
 using namespace geo;
-HCB_BEGIN(Room_Phase)
-    type_name("geo::Room_Phase");
-    base<core::Stateful>("Room_Phase");
-    empty();
-HCB_END(Room_Phase)
 HCB_BEGIN(Room)
     type_name("geo::Room");
     attr("boundary", member(&Room::boundary));

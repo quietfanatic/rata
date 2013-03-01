@@ -234,7 +234,7 @@ void Tilemap::start () {
 
  // Now for drawing tilemaps.
 
-struct Tilemap_Layer : core::Layer, core::Stateful, vis::Renderer {
+struct Tilemap_Layer : core::Layer, core::Game_Object, vis::Renderer {
     vis::Program* program = hacc::reference_file<vis::Program>("modules/geo/res/tiles.prog");
     int tex = program->require_uniform("tex");
     int camera_pos = program->require_uniform("camera_pos");

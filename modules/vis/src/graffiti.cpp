@@ -8,7 +8,7 @@
 
 namespace vis {
 
-    struct Graffiti_Renderer : Renderer {
+    struct Graffiti_Renderer : Renderer, core::Game_Object {
         Program* program = hacc::reference_file<Program>("modules/vis/res/color.prog");
         int camera_pos = program->require_uniform("camera_pos");
         int model_pos = program->require_uniform("model_pos");

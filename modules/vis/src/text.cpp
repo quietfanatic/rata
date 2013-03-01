@@ -12,7 +12,7 @@ namespace vis {
     void Draws_Text::text_appear () { link(text_drawers); }
     void Draws_Text::text_disappear () { unlink(); }
 
-    struct Text_Layer : core::Layer, core::Stateful, Renderer {
+    struct Text_Layer : core::Layer, core::Game_Object, Renderer {
         Program* program = hacc::reference_file<Program>("modules/vis/res/text.prog");
         GLint tex = program->require_uniform("tex");
         GLint camera_pos = program->require_uniform("camera_pos");
@@ -41,14 +41,13 @@ namespace vis {
             glUseProgram(program->glid);
             glUniform2f(camera_pos, 10.0, 7.5);
         }
-         // for Stateful
+         // for Game_Object
         void start () { }
          // for Layer
         void run () {
             for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
                 p->text_draw();
             }
-
         }
     };
     core::Celebrity<Text_Layer> text_layer;

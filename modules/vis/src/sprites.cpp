@@ -28,7 +28,7 @@ namespace vis {
     }
 
 
-    struct Sprite_Layer : core::Layer, core::Stateful, Renderer {
+    struct Sprite_Layer : core::Layer, core::Game_Object, Renderer {
         Program* program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
         GLint tex = program->require_uniform("tex");
         GLint camera_pos = program->require_uniform("camera_pos");

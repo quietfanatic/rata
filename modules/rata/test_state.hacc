@@ -2,10 +2,8 @@
     things:[
         {Space:{ gravity: [0 -30] }}
         {Phys_Debug_Layer:{}}
-        {Room_Phase:{}}
         {Model_Tester:{}}
         {Sprite_Test:{}}
-        {Input_Phase:{}}
         {Console:{ font:file("modules/rata/res/monospace.font") }}
         {Rata:{
             biped:{
