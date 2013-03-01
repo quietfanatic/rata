@@ -8,14 +8,11 @@
 
 namespace vis {
 
-    struct Graffiti_Renderer;
-    Graffiti_Renderer* gr = NULL;
-    struct Graffiti_Renderer : Renderer, core::Stateful {
+    struct Graffiti_Renderer : Renderer {
         Program* program = hacc::reference_file<Program>("modules/vis/res/color.prog");
         int camera_pos = program->require_uniform("camera_pos");
         int model_pos = program->require_uniform("model_pos");
         int color = program->require_uniform("color");
-        Graffiti_Renderer () { gr = this; }
         void start () { }
         void start_rendering () {
             static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
@@ -34,6 +31,7 @@ namespace vis {
             glUniform2f(camera_pos, 10.0, 7.5);
         }
     };
+    core::Celebrity<Graffiti_Renderer> gr;
 
     void draw_line (Vec a, Vec b, uint32 color, float width) {
         Vec pts [2];
@@ -70,10 +68,4 @@ namespace vis {
     }
 
 }
-
-HCB_BEGIN(vis::Graffiti_Renderer)
-    type_name("vis::Graffiti_Renderer");
-    base<core::Stateful>("Graffiti_Renderer");
-    empty();
-HCB_END(vis::Graffiti_Renderer)
 

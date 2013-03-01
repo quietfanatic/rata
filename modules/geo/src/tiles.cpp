@@ -279,14 +279,9 @@ struct Tilemap_Layer : core::Layer, core::Stateful, vis::Renderer {
         }
     }
 };
+core::Celebrity<Tilemap_Layer> tilemap_layer;
 
 }  // namespace geo
 
-using namespace geo;
-HCB_BEGIN(Tilemap_Layer)
-    type_name("geo::Tilemap_Layer");
-    base<core::Stateful>("Tilemap_Layer");
-    empty();
-HCB_END(Tilemap_Layer)
 
 

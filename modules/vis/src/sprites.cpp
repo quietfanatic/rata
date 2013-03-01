@@ -65,7 +65,7 @@ namespace vis {
             }
         }
     };
-    core::Celebrity<Sprite_Layer> sr;
+    core::Celebrity<Sprite_Layer> sprite_layer;
 
     static Logger draw_sprite_logger ("draw_sprite", false);
 
@@ -82,10 +82,10 @@ namespace vis {
             );
         }
 
-        sr->use();
+        sprite_layer->use();
 
-        glUniform3f(sr->model_pos, p.x, p.y, z);
-        glUniform2f(sr->model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
+        glUniform3f(sprite_layer->model_pos, p.x, p.y, z);
+        glUniform2f(sprite_layer->model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->tex);
         glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);

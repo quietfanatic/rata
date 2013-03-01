@@ -12,8 +12,6 @@ namespace vis {
     void Draws_Text::text_appear () { link(text_drawers); }
     void Draws_Text::text_disappear () { unlink(); }
 
-    struct Text_Layer;
-    Text_Layer* tr = NULL;
     struct Text_Layer : core::Layer, core::Stateful, Renderer {
         Program* program = hacc::reference_file<Program>("modules/vis/res/text.prog");
         GLint tex = program->require_uniform("tex");
@@ -23,8 +21,9 @@ namespace vis {
 
         Text_Layer () : core::Layer("G.M", "text") {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
+            static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
+            glUseProgram(program->glid);
             glUniform1i(tex, 0);
-            tr = this;
         }
          // for Renderer
         void start_rendering () {
@@ -52,6 +51,7 @@ namespace vis {
 
         }
     };
+    core::Celebrity<Text_Layer> text_layer;
 
     struct Text_Vert {
         uint16 px;
@@ -108,9 +108,9 @@ namespace vis {
         static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
         Vec size = Vec(maxx*PX, maxy*PX);
         Vec ul = Vec(pos.x - (1 - align.x) / 2 * size.x, pos.y + (1 - align.y) / 2 * size.y);
-        tr->use();
-        glUniform2f(tr->model_pos, ul.x, ul.y);
-        glUniform4f(tr->color,
+        text_layer->use();
+        glUniform2f(text_layer->model_pos, ul.x, ul.y);
+        glUniform4f(text_layer->color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,
             ((color >> 8) & 255) / 255.0,
@@ -136,10 +136,4 @@ HCB_BEGIN(Font)
     attr("widths", member(&Font::widths, def(std::vector<uint8>())));
 HCB_END(Font)
 HCB_INSTANCE(Font*)
-
-HCB_BEGIN(Text_Layer)
-    type_name("vis::Text_Layer");
-    base<core::Stateful>("Text_Layer");
-    empty();
-HCB_END(Text_Layer)
 

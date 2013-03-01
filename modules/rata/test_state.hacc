@@ -2,12 +2,9 @@
     things:[
         {Space:{ gravity: [0 -30] }}
         {Phys_Debug_Layer:{}}
-        {Tilemap_Layer:{}}
         {Room_Phase:{}}
-        {Graffiti_Renderer:{}}
         {Model_Tester:{}}
         {Sprite_Test:{}}
-        {Text_Layer:{}}
         {Input_Phase:{}}
         {Console:{ font:file("modules/rata/res/monospace.font") }}
         {Rata:{
