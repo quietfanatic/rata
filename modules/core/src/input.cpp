@@ -37,9 +37,8 @@ namespace core {
 
     struct Input_Phase : core::Phase, core::Game_Object {
          // Input phase doesn't have a name to keep you from locking out your controls.
-        Input_Phase () : core::Phase("A.M") { printf("Created input phase.\n"); }
+        Input_Phase () : core::Phase("A.M") { }
         void start () {
-            printf("Starting input phase.\n");
             glfwSetKeyCallback(key_cb);
             glfwSetCharCallback(char_cb);
             glfwSetWindowCloseCallback(close_cb);
