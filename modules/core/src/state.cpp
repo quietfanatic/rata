@@ -19,6 +19,27 @@ namespace core {
 
     Game_State* current_state = NULL;
 
+    static std::vector<void*(*)()>& celeb_allocators () {
+        static std::vector<void*(*)()> celeb_allocators;
+        return celeb_allocators;
+    }
+    static std::vector<void(*)(void*)>& celeb_deleters () {
+        static std::vector<void(*)(void*)> celeb_deleters;
+        return celeb_deleters;
+    }
+    uint allocate_celebrity (void*(* a )(), void(* d )(void*)) {
+        celeb_allocators().push_back(a);
+        celeb_deleters().push_back(d);
+        return celeb_allocators().size() - 1;
+    }
+
+    Game_State::Game_State () {
+        pop_culture.resize(celeb_allocators().size());
+        for (uint i = 0; i < celeb_allocators().size(); i++) {
+            pop_culture[i] = celeb_allocators()[i]();
+        }
+    }
+
     void Game_State::start () {
         if (started) {
             throw std::logic_error("Error: something tried to start the game state a second time.");
@@ -27,6 +48,11 @@ namespace core {
         for (auto p = things.first(); p; p = p->next()) {
             p->start();
         }
+    }
+    Game_State::~Game_State () {
+        things.destroy_all();
+        for (uint i = 0; i < pop_culture.size(); i++)
+            celeb_deleters()[i](pop_culture[i]);
     }
 
     bool load_state (std::string filename) {
