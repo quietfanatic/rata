@@ -45,8 +45,8 @@ tap::Tester haccable_standard_tester ("haccable_standard", [](){
     Hacc* h = new_hacc({new_hacc(3), new_hacc(4), new_hacc(5)});
     is(hacc_to_value<std::vector<int>>(h)[1], 4, "Hacc to std::vector seems to work");
     h2 = new_hacc({
-        new_hacc({new_hacc(4), new_hacc(Ref("thing2"))}, "thing1"),
-        new_hacc({new_hacc(3), new_hacc(Ref("thing1"))}, "thing2")
+        new_hacc({new_hacc(4), new_hacc(Var("thing2"))}, "thing1"),
+        new_hacc({new_hacc(3), new_hacc(Var("thing1"))}, "thing2")
     });
     doesnt_throw([](){ update_from_hacc(v2, h2); }, "ID wrangling within a std::vector doesn't throw");
     is(v2[0].p, &v2[1], "ID wrangling within a std::vector gives the right answer");

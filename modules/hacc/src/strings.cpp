@@ -69,7 +69,7 @@ String hacc_value_to_string (Hacc* h, uint ind, uint prior_ind) {
             return r;
         }
         case STRING: return "\"" + escape_string(static_cast<Hacc::String*>(h)->s) + "\"";
-        case REF: return "$" + escape_ident(static_cast<Hacc::Ref*>(h)->r.id);
+        case VAR: return "$" + escape_ident(static_cast<Hacc::Var*>(h)->v.name);
         case ATTRREF: {
             auto arh = static_cast<Hacc::AttrRef*>(h);
             return hacc_to_string(arh->ar.subject) + "." + escape_ident(arh->ar.name);
@@ -243,10 +243,6 @@ struct Parser {
             }
         }
     }
-    String parse_id () {
-        p++;  // For the &
-        return parse_ident("an identifier after &");
-    }
 
      // Parsing of specific valtypes.
      // This one could return an int, float, or double.
@@ -393,7 +389,7 @@ struct Parser {
             p++;
             return parse_thing(type, gotid);
         }
-        else return new_hacc(Ref(gotid));
+        else return new_hacc(Var(gotid));
     }
     Hacc* parse_bareword () {
         String word = parse_ident("An ID of some sort (this shouldn't happen)");

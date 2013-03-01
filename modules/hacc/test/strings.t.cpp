@@ -68,7 +68,7 @@ tap::Tester hacc_strings_tester ("hacc-strings", [](){
      printf(" # Arrays and Objects\n");  // 2
     hacc_string_test("[{a: 1, b: []} [4, {c: {d: []}}]]", "[{ a:1 b:[] } [4 { c:{ d:[] } }]]");
     hacc_string_test("{a: []}", "{ a:[] }");
-     printf(" # Refs\n");  // 2
+     printf(" # Vars\n");  // 2
     hacc_string_test("$thing_3432", "$thing_3432");
     hacc_string_test("$\"stringish\\nid\"", "$\"stringish\\nid\"");
      printf(" # Prefixes\n");  // 3

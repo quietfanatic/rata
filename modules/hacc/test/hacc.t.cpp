@@ -13,7 +13,7 @@ tap::Tester hacc_tester ("hacc", [](){
     is(Hacc::Float(32.f).f, 32.f, "float roundtrip");
     is(Hacc::Double(32.F).d, 32.F, "double roundtrip");
     is(Hacc::String(String("hello")).s, std::string("hello"), "string roundtrip");
-    is(Hacc::Ref(Ref("id")).r, Ref("id"), "reference roundtrip");
+    is(Hacc::Var(Var("id")).v, Var("id"), "reference roundtrip");
     is(Hacc::Array(Array()).a, Array(), "Empty array roundtrip");
     is(Hacc::Array{}.a, Array(), "Empty array roundtrip w/ initializer_list");
     initializer_list<Hacc*> testlist = {new_hacc(3), new_hacc(4.f)};

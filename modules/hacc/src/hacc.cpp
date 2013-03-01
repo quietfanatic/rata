@@ -28,7 +28,7 @@ const char* form_name (Form form) {
         case FLOAT: return "float";
         case DOUBLE: return "double";
         case STRING: return "string";
-        case REF: return "ref";
+        case VAR: return "var";
         case GENERIC: return "generic";
         case ATTRREF: return "attrref";
         case ELEMREF: return "elemref";
@@ -74,7 +74,7 @@ HACC_AS_IMPL(Integer, integer, INTEGER)
 HACC_AS_IMPL(Float, float, FLOAT)
 HACC_AS_IMPL(Double, double, DOUBLE)
 HACC_AS_IMPL(String, string, STRING)
-HACC_AS_IMPL(Ref, ref, REF)
+HACC_AS_IMPL(Var, var, VAR)
 HACC_AS_IMPL(Generic, generic, GENERIC)
 HACC_AS_IMPL(AttrRef, attrref, ATTRREF)
 HACC_AS_IMPL(ElemRef, elemref, ELEMREF)
@@ -87,7 +87,7 @@ HACC_GETTER_R_IMPL(Null, null, n)
 HACC_GETTER_R_IMPL(Bool, bool, b)
 HACC_GETTER_R_IMPL(Integer, integer, i)
 HACC_GETTER_IMPL(String, string, s)
-HACC_GETTER_IMPL(Ref, ref, r)
+HACC_GETTER_IMPL(Var, var, v)
 HACC_GETTER_IMPL(Generic, generic, g)
 HACC_GETTER_IMPL(AttrRef, attrref, ar)
 HACC_GETTER_IMPL(ElemRef, elemref, er)

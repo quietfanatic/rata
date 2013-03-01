@@ -43,7 +43,7 @@ enum Form {
     FLOAT,
     DOUBLE,
     STRING,
-    REF,
+    VAR,
     GENERIC,
     ATTRREF,
     ELEMREF,
@@ -75,11 +75,11 @@ struct Error : std::exception {
         mess(mess), file(file), line(line), col(col)
     { }
 };
-struct Ref {
-    String id;
-    bool operator== (Ref o) const { return id == o.id; }
-    Ref (String id) : id(id) { }
-    Ref (const char* id) : id(id) { }
+struct Var {
+    String name;
+    bool operator== (Var o) const { return name == o.name; }
+    Var (String name) : name(name) { }
+    Var (const char* name) : name(name) { }
 };
 struct Generic {
     const std::type_info* cpptype;
@@ -126,7 +126,7 @@ struct Hacc : gc {
     struct Float;
     struct Double;
     struct String;
-    struct Ref;
+    struct Var;
     struct Generic;
     struct AttrRef;
     struct ElemRef;
@@ -146,7 +146,7 @@ struct Hacc : gc {
     HACC_GETTER_R_DECL(Float, float, f)
     HACC_GETTER_R_DECL(Double, double, d)
     HACC_GETTER_DECL(String, string, s)
-    HACC_GETTER_DECL(Ref, ref, r)
+    HACC_GETTER_DECL(Var, var, v)
     HACC_GETTER_DECL(Generic, generic, g)
     HACC_GETTER_DECL(AttrRef, attrref, ar)
     HACC_GETTER_DECL(ElemRef, elemref, er)
@@ -170,7 +170,7 @@ HACC_VARIANT_S(Integer, INTEGER, Integer, i)
 HACC_VARIANT_S(Float, FLOAT, Float, f)
 HACC_VARIANT_S(Double, DOUBLE, Double, d)
 HACC_VARIANT_S(String, STRING, String, s)
-HACC_VARIANT_S(Ref, REF, Ref, r)
+HACC_VARIANT_S(Var, VAR, Var, v)
 HACC_VARIANT_S(DeRef, DEREF, DeRef, dr)
 HACC_VARIANT(Generic, GENERIC,
     hacc::Generic g;
@@ -234,7 +234,7 @@ HACC_NEW_DECL(uint64, i, Integer)
 HACC_NEW_DECL(Float, f, Float)
 HACC_NEW_DECL(Double, d, Double)
 HACC_NEW_DECL(String, s, String)
-HACC_NEW_DECL(Ref, r, Ref)
+HACC_NEW_DECL(Var, v, Var)
 HACC_NEW_DECL(Generic, g, Generic)
 HACC_NEW_DECL(AttrRef, ar, AttrRef)
 HACC_NEW_DECL(ElemRef, er, ElemRef)

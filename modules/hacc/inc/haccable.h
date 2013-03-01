@@ -60,7 +60,7 @@ struct HaccTable {
     Func<void (void*)> finish;
     
     Hacc* to_hacc (void*);
-    void update_from_hacc (void*, Hacc*, bool save_id = true);
+    void update_from_hacc (void*, Hacc*, bool save_name = true);
     void* new_from_hacc (Hacc* h);
      // Helpers that I'd like to not have to declare here but C++.
     Hacc* to_hacc_inner (void*);

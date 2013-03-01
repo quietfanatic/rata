@@ -173,7 +173,7 @@ namespace hacc {
                         hist.written->id = hist.id;
                     else hist.table = pointee_t;
                 }
-                return new_hacc(hacc::Ref(hist.id));
+                return new_hacc(hacc::Var(hist.id));
             }
         }
         else if (value_name) {
@@ -242,7 +242,7 @@ namespace hacc {
             }
         }
          // For refs, schedule an operation to find the pointee by ID
-        else if (h->form() == REF && pointer) {
+        else if (h->form() == VAR && pointer) {
             delayed_updates.emplace_back([this, p, h, &gs](){
                 gs.set(p, [this, h](void* mp){
                     update_from_hacc_inner(mp, h);
@@ -262,6 +262,7 @@ namespace hacc {
             switch (h->form()) {
                 case ATTRREF:
                 case ELEMREF:
+                case VAR:
                 case MACROCALL: h = collapse_hacc(h);
                 default: { }
             }
@@ -371,9 +372,9 @@ namespace hacc {
                 else throw Error("Type " + get_type_name() + " cannot be represented by an array Hacc.");
                 break;
             }
-            case REF: {
+            case VAR: {
                 if (pointer) {
-                    String id = h->as_ref()->r.id;
+                    String id = h->as_var()->v.name;
                     auto iter = read_ids.find(id);
                     if (iter != read_ids.end()) {
                         if (iter->second.get) {
@@ -587,10 +588,10 @@ namespace hacc {
             }
             case DEREF: {
                 Hacc* subject = h->as_deref()->dr.subject;
-                if (subject->form() == REF) {
-                    auto iter = read_ids.find(static_cast<hacc::Hacc::Ref*>(subject)->r.id);
+                if (subject->form() == VAR) {
+                    auto iter = read_ids.find(static_cast<hacc::Hacc::Var*>(subject)->v.name);
                     if (iter == read_ids.end())
-                        throw Error("ID " + static_cast<hacc::Hacc::Ref*>(subject)->r.id + " not found in this document.");
+                        throw Error("ID " + static_cast<hacc::Hacc::Var*>(subject)->v.name + " not found in this document.");
                     auto& rid = iter->second;
                     if (rid.read) {
                         if (rid.get && !rid.read->type.empty()) {
@@ -605,10 +606,10 @@ namespace hacc {
                 }
                 else throw Error("Only a REF hacc can be dereferenced with .^");
             }
-            case REF: {
-                auto iter = read_ids.find(static_cast<hacc::Hacc::Ref*>(h)->r.id);
+            case VAR: {
+                auto iter = read_ids.find(static_cast<hacc::Hacc::Var*>(h)->v.name);
                 if (iter == read_ids.end())
-                    throw Error("Unknown variable $" + static_cast<hacc::Hacc::Ref*>(h)->r.id);
+                    throw Error("Unknown variable $" + static_cast<hacc::Hacc::Var*>(h)->v.name);
                 auto& rid = iter->second;
                 if (rid.read) {
                     if (rid.get && !rid.read->type.empty()) {
