@@ -171,14 +171,12 @@ namespace vis {
             graffiti_pos(Vec(0, 0));
             draw_primitive(GL_QUADS, 4, pts, 0x000000cf);
              // Draw console
-            float chars_available = floor(320 / font->width);
-            float cli_lines = 1 + floor(cli.size() / chars_available);
-            draw_text(contents, font, Vec(1, cli_lines * font->line_height)*PX, Vec(1, -1), 0x00ff00ff, 20);
-            draw_text(cli, font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, 20);
+            Vec cli_size = draw_text(cli + " ", font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, 20);
+            Vec cursor_pos = get_glyph_pos(cli, font, cli_pos, Vec(1, -1), 20);
             if (core::frame_number % 40 < 20) {
-                float cursor_pos = fmod(cli_pos, chars_available);
-                draw_text("_", font, Vec(cursor_pos * font->width, -1)*PX, Vec(1, -1), 0xffffffff);
+                draw_text("_", font, Vec(1*PX + cursor_pos.x, cli_size.y - cursor_pos.y - font->line_height*PX - 2*PX), Vec(1, -1), 0xffffffff);
             }
+            draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, 20);
         }
     };
 }
