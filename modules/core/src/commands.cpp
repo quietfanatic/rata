@@ -2,6 +2,7 @@
  // #giveupandusethestl for getline
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <stdexcept>
 
 #include "../../hacc/inc/everything.h"
@@ -19,6 +20,8 @@ HCB_END(Command)
 
 namespace core {
 
+    std::vector<std::string> command_history;
+
     void command_from_string (std::string s) {
         if (s.empty()) return;
         Command* cmd = NULL;
@@ -33,6 +36,8 @@ namespace core {
         }
         if (success) {
             try {
+                if (command_history.empty() || s != command_history.back())
+                    command_history.push_back(s);
                 (*cmd)();
             } catch (std::exception& e) {
                 print_to_console("Error: The command threw an exception: " + std::string(e.what()) + "\n");
@@ -158,3 +163,17 @@ HCB_BEGIN(SubtypesCommand)
     elem(member(&SubtypesCommand::supertype)(required));
 HCB_END(SubtypesCommand)
 
+struct HistoryCommand : Command {
+    void operator () () {
+        for (uint i = 0; i < command_history.size(); i++) {
+            std::ostringstream num; num << i;
+            print_to_console(num.str() + ": " + command_history[i] + "\n");
+        }
+    }
+};
+
+HCB_BEGIN(HistoryCommand)
+    base<Command>("history");
+    command_description<HistoryCommand>("Show previously entered commands");
+    empty();
+HCB_END(HistoryCommand)

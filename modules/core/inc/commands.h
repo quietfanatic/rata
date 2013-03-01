@@ -16,6 +16,7 @@ namespace core {
 
     void command_from_string (std::string s);
     void command_from_terminal ();
+    extern std::vector<std::string> command_history;
 
     std::string console_help ();
 
