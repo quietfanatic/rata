@@ -16,6 +16,9 @@ namespace core {
     }
 
     static void GLFWCALL key_cb (int keycode, int action) {
+        for (auto kl : key_listeners) {
+            if (kl->hear_key(keycode, action)) return;
+        }
         if (action == GLFW_PRESS) {
             switch (keycode) {
                 case GLFW_KEY_ESC: {
@@ -24,9 +27,6 @@ namespace core {
                 }
                 default: break;
             }
-        }
-        for (auto kl : key_listeners) {
-            if (kl->hear_key(keycode, action)) return;
         }
     }
     static void GLFWCALL char_cb (int code, int action) {
