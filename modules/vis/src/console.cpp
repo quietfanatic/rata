@@ -18,6 +18,9 @@ namespace vis {
         std::string cli = "";
         uint cli_pos = 0;
 
+        uint history_index = core::command_history.size();
+        std::string stash_cli;
+
         bool ignore_a_trigger = false;
 
         Font* font = NULL;
@@ -45,6 +48,28 @@ namespace vis {
                             if (cli_pos < contents.size()) cli_pos++;
                             break;
                         }
+                        case GLFW_KEY_UP: {
+                            if (history_index > 0) {
+                                if (history_index == core::command_history.size()) {
+                                    stash_cli = cli;
+                                }
+                                history_index--;
+                                cli = core::command_history[history_index];
+                                cli_pos = cli.size();
+                            }
+                            break;
+                        }
+                        case GLFW_KEY_DOWN: {
+                            if (history_index < core::command_history.size()) {
+                                history_index++;
+                                if (history_index == core::command_history.size())
+                                    cli = stash_cli;
+                                else
+                                    cli = core::command_history[history_index];
+                                cli_pos = cli.size();
+                            }
+                            break;
+                        }
                         case GLFW_KEY_HOME: {
                             cli_pos = 0;
                             break;
@@ -58,6 +83,8 @@ namespace vis {
                             command_from_string(cli);
                             cli = "";
                             cli_pos = 0;
+                            stash_cli = "";
+                            history_index = core::command_history.size();
                             break;
                         }
                         case GLFW_KEY_BACKSPACE: {
