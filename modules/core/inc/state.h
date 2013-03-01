@@ -37,13 +37,13 @@ namespace core {
     uint allocate_celebrity (void*(*)(), void(*)(void*));
     template <class C> C* default_celeb_allocator () { return new C; }
     template <class C> void default_celeb_deleter (C* p) { delete p; }
-    template <class C, C* (* allocator )() = default_celeb_allocator<C>, void (* deleter )() = default_celeb_deleter<C>>
+    template <class C, C* (* allocator )() = default_celeb_allocator<C>, void (* deleter )(C*) = default_celeb_deleter<C>>
     struct Celebrity {
         uint index = allocate_celebrity((void*(*)())allocator, (void(*)(void*))deleter);
         C* get () { return (C*)current_state->pop_culture[index]; }
         operator C* () { return get(); }
         C operator * () { return *get(); }
-        C operator -> () { return *get(); }
+        C* operator -> () { return get(); }
     };
 
      // Define these with, for instance:
