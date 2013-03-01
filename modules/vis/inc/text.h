@@ -24,7 +24,8 @@ namespace vis {
      // align.x: 1 -> left justification, 0 -> center, -1 -> right
      // align.y: 1 -> top of text is at pos, 0 -> center, -1 -> bottom
      //  horizontal alignment affects each line individually.
-    void draw_text (std::string text, Font* font, Vec pos, Vec align = Vec(1, 1), uint32 color = 0xffffffff, float wrap = 0);
+     // Returns the size of the rectangle encompassing the drawn text.
+    Vec draw_text (std::string text, Font* font, Vec pos, Vec align = Vec(1, 1), uint32 color = 0xffffffff, float wrap = 0);
 
     struct Draws_Text : Linkable<Draws_Text> {
         virtual void text_draw () = 0;
@@ -32,6 +33,11 @@ namespace vis {
         void text_appear ();
         void text_disappear ();
     };
+     // Returns the size of the rectangle encompassing the drawn text.
+    Vec text_size (std::string text, Font* font, float wrap = 0);
+     // Gets the position of the upper-left corner of the ith character in text,
+     //  relative to the upper-left corner of the whole text.
+    Vec get_glyph_pos (std::string text, Font* font, uint index, Vec align = Vec(1, 1), float wrap = 0);
 
 }
 

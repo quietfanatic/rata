@@ -62,7 +62,7 @@ namespace vis {
     };
 
      // TODO: Make align.x affect each line individually
-    void draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color, float wrap) {
+    Vec draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color, float wrap) {
          // Coordinates here work with y being down instead of up.
          //  This may be a little confusing.
         auto verts = new Text_Vert [text.length()][4];
@@ -121,6 +121,51 @@ namespace vis {
         glDrawArrays(GL_QUADS, 0, vert_i * 4);
         diagnose_opengl("after drawing some text");
         delete[] verts;
+        return size;
+    }
+    Vec text_size (std::string text, Font* font, float wrap) {
+        uint16 maxx = 0;
+        uint16 maxy = 0;
+        uint16 curx = 0;
+        uint16 cury = 0;
+        for (uint i = 0; i < text.length(); i++) {
+            if (text[i] == '\n') {
+                curx = 0;
+                cury += font->line_height;
+            }
+            else {
+                uint16 nextx = curx + (font->widths.empty() ? font->width : font->widths[text[i]]);
+                if (wrap && nextx > wrap/PX) {
+                    curx = 0;
+                    nextx = curx + font->widths.empty() ? font->width : font->widths[text[i]];
+                    cury += font->line_height;
+                }
+                curx = nextx;
+                if (curx > maxx) maxx = curx;
+                if (cury + font->line_height > maxy) maxy = cury + font->line_height;
+            }
+        }
+        return Vec(maxx*PX, maxy*PX);
+    }
+    Vec get_glyph_pos (std::string text, Font* font, uint index, Vec align, float wrap) {
+        uint curx = 0;
+        uint cury = 0;
+        for (uint i = 0; i < index && i < text.length(); i++) {
+            if (text[i] == '\n') {
+                curx = 0;
+                cury += font->line_height;
+            }
+            else {
+                uint16 nextx = curx + (font->widths.empty() ? font->width : font->widths[text[i]]);
+                if (wrap && nextx > wrap/PX) {
+                    curx = 0;
+                    nextx = curx + font->widths.empty() ? font->width : font->widths[text[i]];
+                    cury += font->line_height;
+                }
+                curx = nextx;
+            }
+        }
+        return Vec(curx*PX, cury*PX);
     }
 
 }
