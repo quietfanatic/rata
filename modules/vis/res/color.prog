@@ -1,4 +1,4 @@
-#"vis::Program" {
+new(["vis::Program" {
     shaders: [
         new({ type:vertex source:<<END
             #version 110
@@ -28,4 +28,4 @@
     attributes: {
         vert_pos: 0
     }
-}
+}])

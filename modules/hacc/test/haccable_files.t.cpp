@@ -14,7 +14,7 @@ tap::Tester tester ("haccable_files", [](){
     using namespace tap;
     using namespace hacc;
     plan(4);
-    doesnt_throw([](){generic_from_file("/home/lewis/stash/git/rata/modules/hacc/test/test.hacc"); }, "Can use generic_from_file()\n");
+    doesnt_throw([](){read_file("/home/lewis/stash/git/rata/modules/hacc/test/test.hacc"); }, "Can use read_file()\n");
     doesnt_throw([](){p = value_from_string<int32*>("file(\"/home/lewis/stash/git/rata/modules/hacc/test/test.hacc\").asdf");}, "file(\"name\").attr doesn't break");
     is(*p, (int32)47, "...and it seems to work.");
     is(string_from(p), string("file(\"/home/lewis/stash/git/rata/modules/hacc/test/test.hacc\").asdf"), "We can remember the incantation required to get something from a file.");

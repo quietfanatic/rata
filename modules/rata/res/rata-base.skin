@@ -1,4 +1,4 @@
-#"vis::Skin" {
+new(["vis::Skin" {
     apps: local([
         $segs = file("modules/rata/res/rata.skel").segs
         $image = file("modules/rata/res/rata-base.image")
@@ -9,4 +9,4 @@
             [$segs.forearm [$image.forearm]]
         ]
     ])
-}
+}])

@@ -1,5 +1,5 @@
  // This is where Residents are put when they go outside of any valid room area.
-#"geo::Room" {
+new(["geo::Room" {
     boundary:[-inf -inf +inf +inf]
     neighbors:[]
-}
+}])

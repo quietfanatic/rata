@@ -533,10 +533,12 @@ namespace hacc {
                 if (mch->mc.name == "file") {
                     mch->mc.arg = collapse_hacc(mch->mc.arg);
                     if (mch->mc.arg->form() == STRING) {
-                        Generic g = generic_from_file(mch->mc.arg->get_string());
-                        record_incantation(g.p, mch);
-                        if (return_incantation) *return_incantation = mch;
-                        return new_hacc(g);
+                        Hacc* r = read_file(mch->mc.arg->get_string());
+                        if (r->form() == GENERIC) {
+                            record_incantation(r->get_generic().p, mch);
+                            if (return_incantation) *return_incantation = mch;
+                        }
+                        return r;
                     }
                     else throw Error("The \"file\" macro can only be called on a string.");
                 }
@@ -550,7 +552,17 @@ namespace hacc {
                         }
                     }
                 }
-                else throw Error("Unrecognized macro \"" + mch->mc.name + "\" (Available: \"file\", \"local\")");
+                if (mch->mc.name == "new") {
+                    if (mch->mc.arg->form() == ARRAY) {
+                        auto ah = mch->mc.arg->as_array();
+                        String type = ah->elem(0)->get_string();
+                        HaccTable* gt = HaccTable::require_type_name(type);
+                        Generic g {gt->cpptype, gt->new_from_hacc(ah->elem(1))};
+                        return new_hacc(g);
+                    }
+                    else throw Error("new() in this context must be given two arguments.\n");
+                }
+                else throw Error("Unrecognized macro \"" + mch->mc.name + "\" (Available: \"new\", \"file\", \"local\")");
             }
             case ATTRREF: {
                 auto arh = static_cast<hacc::Hacc::AttrRef*>(h);
