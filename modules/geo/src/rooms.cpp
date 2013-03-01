@@ -1,7 +1,6 @@
 
 #include "../inc/rooms.h"
 #include "../../core/inc/phases.h"
-#include "../../core/inc/state.h"
 #include "../../util/inc/debug.h"
 #include "../../hacc/inc/everything.h"
 
@@ -9,14 +8,22 @@ namespace geo {
 
     Logger geo_logger ("geo");
 
-    static Room*& tumbolia () {
-        static Room* r = hacc::reference_file<Room>("modules/geo/res/tumbolia.room");
-        return r;
-    }
+    core::Celebrity<Geography> geography;
 
+    Geography::Geography () :
+        current_room(NULL), beholder(NULL),
+        tumbolia(hacc::reference_file<Room>("modules/geo/res/tumbolia.room"))
+    { }
     Links<Resident> housing_office;
-    Room* current_room = NULL;
-    Resident* beholder = NULL;
+    void Geography::start () {
+        Resident* nextr;
+        for (Resident* r = housing_office.first(); r; r = nextr) {
+            nextr = r->next();
+            if (r->room) {
+                r->link(r->room->residents);
+            }
+        }
+    }
 
     void Room::activate () {
         geo_logger.log("Activating room @%lx", (unsigned long)this);
@@ -33,11 +40,15 @@ namespace geo {
             r->reclude();
     }
 
-    void Room::enter () {
+    void Geography::enter (Room* r) {
         geo_logger.log("Entering room @%lx", (unsigned long)this);
+        if (!r) {
+            geo_logger.log("Oops, tried to enter the NULL pointer.\n");
+            r = tumbolia;
+        }
          // Mark activating
-        activating = true;
-        for (auto n : neighbors) {
+        r->activating = true;
+        for (auto n : r->neighbors) {
             n->activating = true;
         }
          // Deactivate
@@ -54,67 +65,55 @@ namespace geo {
             }
         }
          // Activate
-        current_room = this;
-        if (!this->active)
-            this->activate();
-        this->activating = false;
-        for (auto n : neighbors) {
+        current_room = r;
+        if (!r->active)
+            r->activate();
+        r->activating = false;
+        for (auto n : r->neighbors) {
             if (!n->active)
                 n->activate();
             n->activating = false;
         }
     }
 
-    Room::~Room () {
+    void Geography::behold (Resident* res) {
+        beholder = res;
+        enter(res->room);
     }
+
+    Geography::~Geography () { }
+
+    Room::~Room () { }
 
     Resident::Resident () { link(housing_office); }
 
     void Resident::reroom (Vec pos) {
-        if (!room) room = current_room;
-        Room* origin = room == tumbolia()
-            ? current_room : room;
+        if (!room) room = geography->current_room;
+        Room* origin = room == geography->tumbolia
+            ? geography->current_room : room;
         if (!origin->boundary.covers(pos)) {
             for (auto n : origin->neighbors) {
                 if (n->boundary.covers(pos)) {
                     room = n;
                     link(n->residents);
-                    if (beholder == this)
-                        n->enter();
+                    if (geography->beholder == this)
+                        geography->enter(n);
                     else if (!n->active)
                         reclude();
                     return;
                 }
             }
-            if (room != tumbolia()) {
-                if (beholder != this)
+            if (room != geography->tumbolia) {
+                if (geography->beholder != this)
                     geo_logger.log("Resident @%lx ended up in tumbolia.", this);
                 else
                     geo_logger.log("The Beholder has left the building.  Party's over.", this);
-                room = tumbolia();
-                link(tumbolia()->residents);
+                room = geography->tumbolia;
+                link(geography->tumbolia->residents);
                 reclude();
             }
         }
     }
-
-    struct Room_Phase : core::Phase, core::Game_Object {
-        Room_Phase () : core::Phase ("T.M") { }
-        void start () {
-            Resident* nextr;
-            for (Resident* r = housing_office.first(); r; r = nextr) {
-                nextr = r->next();
-                if (r->room) {
-                    r->link(r->room->residents);
-                }
-            }
-        }
-        ~Room_Phase () {
-            current_room = NULL;
-            beholder = NULL;
-        }
-    };
-    core::Celebrity<Room_Phase> room_phase;
 
 }
 

@@ -4,6 +4,7 @@
 #include "../../util/inc/Vec.h"
 #include "../../util/inc/Rect.h"
 #include "../../util/inc/organization.h"
+#include "../../core/inc/state.h"
 
 namespace geo {
 
@@ -27,7 +28,6 @@ namespace geo {
 
         void activate ();
         void deactivate ();
-        void enter ();
         ~Room ();
     };
 
@@ -47,9 +47,19 @@ namespace geo {
         void reroom (Vec pos);
     };
 
-    extern Links<Resident> housing_office;
-    extern Room* current_room;
-    extern Resident* beholder;
+    struct Geography : core::Game_Object {
+        Room* current_room;
+        Resident* beholder;
+        Room* tumbolia;
+
+        void enter (Room*);
+        void behold (Resident*);
+
+        Geography ();
+        void start ();
+        ~Geography ();
+    };
+    extern core::Celebrity<Geography> geography;
 
 }
 

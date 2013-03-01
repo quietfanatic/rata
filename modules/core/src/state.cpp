@@ -39,12 +39,12 @@ namespace core {
         if (started) {
             throw std::logic_error("Error: something tried to start the game state a second time.");
         }
+        started = true;
         for (auto p : pop_culture)
             p->start();
         for (auto p = things.first(); p; p = p->next()) {
             p->start();
         }
-        started = true;
     }
     Game_State::~Game_State () {
         things.destroy_all();
