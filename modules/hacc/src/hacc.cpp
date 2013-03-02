@@ -32,7 +32,7 @@ const char* form_name (Form form) {
         case GENERIC: return "generic";
         case ATTRREF: return "attrref";
         case ELEMREF: return "elemref";
-        case DEREF: return "deref";
+        case ADDRESS: return "address";
         case MACROCALL: return "macrocall";
         case ARRAY: return "array";
         case OBJECT: return "object";
@@ -78,7 +78,7 @@ HACC_AS_IMPL(Var, var, VAR)
 HACC_AS_IMPL(Generic, generic, GENERIC)
 HACC_AS_IMPL(AttrRef, attrref, ATTRREF)
 HACC_AS_IMPL(ElemRef, elemref, ELEMREF)
-HACC_AS_IMPL(DeRef, deref, DEREF)
+HACC_AS_IMPL(Address, address, ADDRESS)
 HACC_AS_IMPL(MacroCall, macrocall, MACROCALL)
 HACC_AS_IMPL(Array, array, ARRAY)
 HACC_AS_IMPL(Object, object, OBJECT)
@@ -91,7 +91,7 @@ HACC_GETTER_IMPL(Var, var, v)
 HACC_GETTER_IMPL(Generic, generic, g)
 HACC_GETTER_IMPL(AttrRef, attrref, ar)
 HACC_GETTER_IMPL(ElemRef, elemref, er)
-HACC_GETTER_IMPL(DeRef, deref, dr)
+HACC_GETTER_IMPL(Address, address, ad)
 HACC_GETTER_IMPL(MacroCall, macrocall, mc)
 HACC_GETTER_IMPL(Array, array, a)
 HACC_GETTER_IMPL(Object, object, o)

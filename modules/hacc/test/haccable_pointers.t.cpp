@@ -104,7 +104,7 @@ tap::Tester haccable_pointers_tester ("haccable_pointers", [](){
     doesnt_throw([](){ update_from_hacc(the_p, new_hacc({new_hacc(String("sub3")), new_hacc(32)})); }, "polymorphic ptr can accept array-type union notation...");
     is(the_p->number(), 32.f, "...which works correctly");
     Reffable* rp = &r1;
-    is(to_hacc(rp)->form(), STRING, "pointers become strings");
+    is(to_hacc(rp)->form(), STRING, "pointers can become strings");
     is(to_hacc(rp)->get_string(), String("r1"), "to_hacc on pointer made a string");
     rp2 = NULL;
     doesnt_throw([](){ update_from_hacc(rp2, new_hacc(String("r2"))); }, "Can update_from_hacc a pointer");

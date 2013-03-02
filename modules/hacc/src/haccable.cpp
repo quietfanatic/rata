@@ -57,8 +57,12 @@ namespace hacc {
      // These are used to make sure pointers are updated after the pointed-to data
     struct read_id_info {
         Hacc* read = null;
-        Func<void* ()> get;  // If it was assigned in a typed context
-        read_id_info (Hacc* read, const Func<void* ()>& get) : read(read), get(get) { }
+         // If it was assigned in a typed context
+        HaccTable* table = null;
+        Func<void* ()> get;
+        read_id_info (Hacc* read, HaccTable* table, const Func<void* ()>& get) :
+            read(read), table(table), get(get)
+        { }
     };
     static std::unordered_map<String, read_id_info> read_ids;
     static uint reading = 0;
@@ -173,7 +177,7 @@ namespace hacc {
                         hist.written->id = hist.id;
                     else hist.table = pointee_t;
                 }
-                return new_hacc(hacc::Var(hist.id));
+                return new_hacc(Address(new_hacc(Var(hist.id))));
             }
         }
         else if (value_name) {
@@ -196,7 +200,7 @@ namespace hacc {
         if (!h) throw Error("update_from_hacc called with NULL pointer for hacc.");
         read_lock rl;
 
-        if (save_id) read_ids.emplace(h->id, read_id_info(h, [p](){ return p; }));
+        if (save_id) read_ids.emplace(h->id, read_id_info(h, this, [p](){ return p; }));
         update_from_hacc_inner(p, h);
 
         if (reading == 1) {
@@ -217,14 +221,14 @@ namespace hacc {
                  // If the get function copies too, all hope is lost.
                  //  ...how did you manage to make a pointer to this in the first place?
                 if (gs.copies_on_get) {
-                    read_ids.emplace(h->id, read_id_info(h, [this, h]()->void*{throw Error("The " + get_type_name() + " with ID '" + h->id + "' could not be referenced due to too much encapsulation.");}));
+                    read_ids.emplace(h->id, read_id_info(h, this, [this, h]()->void*{throw Error("The " + get_type_name() + " with ID '" + h->id + "' could not be referenced due to too much encapsulation.");}));
                     gs.set(p, [&](void* mp){
                         update_from_hacc_inner(mp, h);
                     });
                 }
                 else {
                     const GetSet0::Get& get = gs.get;
-                    read_ids.emplace(h->id, read_id_info(h, [get, p](){
+                    read_ids.emplace(h->id, read_id_info(h, this, [get, p](){
                         void* newmp;
                         get(p, [&newmp](void* mp){ newmp = mp; });
                         return newmp;
@@ -236,13 +240,13 @@ namespace hacc {
             }
             else {
                 gs.set(p, [&](void* mp){
-                    read_ids.emplace(h->id, read_id_info(h, [mp](){ return mp; }));
+                    read_ids.emplace(h->id, read_id_info(h, this, [mp](){ return mp; }));
                     update_from_hacc_inner(mp, h);
                 });
             }
         }
          // For refs, schedule an operation to find the pointee by ID
-        else if (h->form() == VAR && pointer) {
+        else if (h->form() == ADDRESS && static_cast<Hacc::Address*>(h)->ad.subject->form() == VAR) {
             delayed_updates.emplace_back([this, p, h, &gs](){
                 gs.set(p, [this, h](void* mp){
                     update_from_hacc_inner(mp, h);
@@ -263,6 +267,7 @@ namespace hacc {
                 case ATTRREF:
                 case ELEMREF:
                 case VAR:
+                case ADDRESS:
                 case MACROCALL: h = collapse_hacc(h);
                 default: { }
             }
@@ -372,26 +377,6 @@ namespace hacc {
                 else throw Error("Type " + get_type_name() + " cannot be represented by an array Hacc.");
                 break;
             }
-            case VAR: {
-                if (pointer) {
-                    String id = h->as_var()->v.name;
-                    auto iter = read_ids.find(id);
-                    if (iter != read_ids.end()) {
-                        if (iter->second.get) {
-                            void* addr = iter->second.get();
-                            pointer.set(p, [&addr, this](void* mp){
-                                *(void**)mp = addr;
-                            });
-                        }
-                        else throw Error("The variable $" + id + " has no type information.");
-                    }
-                    else throw Error("Unknown variable $" + id + " was encountered");
-                }
-                else {
-                    update_from_hacc_inner(p, collapse_hacc(h));
-                }
-                break;
-            }
             case GENERIC: {
                 if (pointer) {
                     Generic g = h->as_generic()->g;
@@ -431,9 +416,10 @@ namespace hacc {
                 else throw Error("Type " + get_type_name() + " cannot be represented by a null Hacc.");
                 break;
             }
+            case VAR:
             case ATTRREF:
             case ELEMREF:
-            case DEREF: {
+            case ADDRESS: {
                 update_from_hacc_inner(p, collapse_hacc(h));
                 break;
             }
@@ -514,12 +500,12 @@ namespace hacc {
     void just_assign_id (Hacc* h) {
         if (!h->id.empty()) {
             if (h->type.empty()) {
-                read_ids.emplace(h->id, read_id_info{h, null});
+                read_ids.emplace(h->id, read_id_info{h, null, null});
             }
             else {
                 HaccTable* table = HaccTable::require_type_name(h->type);
                 void* p = table->new_from_hacc(h);
-                read_ids.emplace(h->id, read_id_info(h, [p](){ return p; }));
+                read_ids.emplace(h->id, read_id_info(h, table, [p](){ return p; }));
             }
         }
         else throw Error("ID assignment expected in a place where one wasn't");
@@ -598,25 +584,23 @@ namespace hacc {
                 }
                 else throw Error("Elements can only be requested from a \"Generic\" hacc, such as produced by file()");
             }
-            case DEREF: {
-                Hacc* subject = h->as_deref()->dr.subject;
+            case ADDRESS: {
+                Hacc* subject = h->as_address()->ad.subject;
                 if (subject->form() == VAR) {
                     auto iter = read_ids.find(static_cast<hacc::Hacc::Var*>(subject)->v.name);
                     if (iter == read_ids.end())
                         throw Error("ID " + static_cast<hacc::Hacc::Var*>(subject)->v.name + " not found in this document.");
                     auto& rid = iter->second;
                     if (rid.read) {
-                        if (rid.get && !rid.read->type.empty()) {
-                            throw Error("Sorry, derefferencing a typed hacc is NYI");
+                        if (rid.get && rid.table) {
+                            Generic g = Generic(rid.table->cpptype, rid.get());
+                            return new_hacc(g);
                         }
-                        else {
-                            rid.read = collapse_hacc(rid.read);
-                            return rid.read;
-                        }
+                        else throw Error("Cannot take the address of an untyped construct.");
                     }
                     else throw Error("Internal oops: A read_id was created without a .read");
                 }
-                else throw Error("Only a REF hacc can be dereferenced with .^");
+                else throw Error("Currently the address can only be taken of a variable.");
             }
             case VAR: {
                 auto iter = read_ids.find(static_cast<hacc::Hacc::Var*>(h)->v.name);

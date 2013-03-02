@@ -80,8 +80,8 @@ String hacc_value_to_string (Hacc* h, uint ind, uint prior_ind) {
             sprintf(is, "%ld", erh->er.index);
             return hacc_to_string(erh->er.subject) + "." + is;
         }
-        case DEREF: {
-            return hacc_to_string(static_cast<Hacc::DeRef*>(h)->dr.subject) + ".^";
+        case ADDRESS: {
+            return "&" + hacc_to_string(static_cast<Hacc::Address*>(h)->ad.subject);
         }
         case MACROCALL: {
             auto mch = static_cast<Hacc::MacroCall*>(h);
@@ -391,6 +391,12 @@ struct Parser {
         }
         else return new_hacc(Var(gotid));
     }
+    Hacc* parse_address () {
+        p++;  // for the &
+        if (look() == '$')
+            return parse_var("");
+        else throw error("Can only take the address of a variable currently.");
+    }
     Hacc* parse_bareword () {
         String word = parse_ident("An ID of some sort (this shouldn't happen)");
         if (word == "null")
@@ -413,10 +419,6 @@ struct Parser {
     Hacc* parse_derefs (Hacc* subject, String type, String id) {
         if (look() == '.') {
             p++;
-            if (look() == '^') {
-                p++;
-                return parse_derefs(new_hacc(hacc::DeRef(subject)), type, id);
-            }
             if (isdigit(look())) {
                 uint64 index;
                 uint len;
@@ -473,6 +475,7 @@ struct Parser {
             case '{': return parse_derefs(parse_object(), type, id);
             case '(': return parse_derefs(parse_parens(), type, id);
             case '$': return parse_derefs(parse_var(type), type, id);
+            case '&': return parse_derefs(parse_address(), type, id);
             case '_': return parse_derefs(parse_bareword(), type, id);
             case '<': return parse_derefs(parse_heredoc(), type, id);
             default:
