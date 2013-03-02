@@ -17,7 +17,6 @@ HCB_BEGIN(Command)
     pointee_policy(FOLLOW);
 HCB_END(Command)
 
-
 namespace core {
 
     std::vector<std::string> command_history;
@@ -54,7 +53,7 @@ namespace core {
     }
 
     std::string console_help () {
-        std::string r = "This is the in-game console.  List of available commands are:\n\n";
+        std::string r = "This is the in-game console.  Available commands are:\n\n";
         for (auto& sub : Haccable<Command>::get_table()->subtypes) {
             r += sub.first + " ";
         }
