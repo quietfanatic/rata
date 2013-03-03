@@ -1,5 +1,5 @@
  // Skeleton for the main character.
-new(["vis::Skel" {
+new("vis::Skel" {
     segs:[
         $head    = {name:head    branches:[]             layout:file("modules/rata/res/rata.layouts").head    z_offset:-0.02}
         $forearm = {name:forearm branches:[]             layout:file("modules/rata/res/rata.layouts").forearm z_offset:-0.06}
@@ -8,7 +8,7 @@ new(["vis::Skel" {
     ]
     root:&$body
     root_offset:[0 0]
-    poses: local([
+    poses: local(
         $l = file("modules/rata/res/rata.layouts")
         $b = $l.body
         $h = $l.head
@@ -24,5 +24,5 @@ new(["vis::Skel" {
             [hurtbk [[&$body $b.hurtbk] [&$head $h.hurtbk ] [&$arm $a.a23 ] [&$forearm $f.a68 ]]]
             [laybk  [[&$body $b.laybk ] [&$head $h.laybk  ] [&$arm $a.a90 ] [&$forearm $f.a90 ]]]
         ]
-    ])
-}])
+    )
+})

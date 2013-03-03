@@ -85,7 +85,13 @@ String hacc_value_to_string (Hacc* h, uint ind, uint prior_ind) {
         }
         case MACROCALL: {
             auto mch = static_cast<Hacc::MacroCall*>(h);
-            return mch->mc.name + "(" + hacc_to_string(mch->mc.arg) + ")";
+            String r = mch->mc.name + "(";
+            for (auto& arg : mch->mc.args) {
+                r += hacc_to_string(arg);
+                if (&arg != &mch->mc.args.back())
+                    r += " ";
+            };
+            return r + ")";
         }
         case ARRAY: {
             auto& a = static_cast<Hacc::Array*>(h)->a;
@@ -344,6 +350,22 @@ struct Parser {
             }
         }
     }
+    std::vector<Hacc*> parse_arglist () {
+        std::vector<Hacc*> args;
+        p++;  // for the (
+        for (;;) {
+            parse_ws();
+            switch (look()) {
+                case EOF: throw error("Macro argument list not terminated");
+                case ':': throw error("Cannot have : in an argument list");
+                case ',': p++; break;
+                case ')': p++; {
+                    return args;
+                }
+                default: args.push_back(parse_thing()); break;
+            }
+        }
+    }
     Hacc* parse_object () {
         Object o;
         p++;  // for the {
@@ -412,7 +434,7 @@ struct Parser {
             return parse_floating();
         }
         else if (look() == '(') {
-            return new_hacc(hacc::MacroCall(word, parse_parens()));
+            return new_hacc(hacc::MacroCall(word, parse_arglist()));
         }
         else {
             return new_hacc(word);

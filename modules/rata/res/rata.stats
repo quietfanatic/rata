@@ -1,4 +1,4 @@
-new(["ent::Biped::Stats" {
+new("ent::Biped::Stats" {
     walk_friction: 1.0
     walk_speed: 4.0
     run_friction: 0.5
@@ -10,4 +10,4 @@ new(["ent::Biped::Stats" {
     air_force: 0.2
     air_speed: 4.0
     jump_impulse: 10.0
-}])
+})

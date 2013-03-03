@@ -104,8 +104,10 @@ struct Address {
 };
 struct MacroCall {
     String name;
-    Hacc* arg;
-    MacroCall (String name, Hacc* arg) : name(name), arg(arg) { }
+    std::vector<Hacc*> args;
+    MacroCall (String name, const std::vector<Hacc*>& args) : name(name), args(args) { }
+    MacroCall (String name, std::vector<Hacc*>&& args) : name(name), args(args) { }
+    MacroCall (String name, std::initializer_list<Hacc*> args) : name(name), args(args) { }
 };
 template <class T> using VArray = std::vector<T>;
 typedef VArray<Hacc*> Array;

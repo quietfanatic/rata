@@ -148,7 +148,7 @@ namespace hacc {
             }
             if (should_follow) {
                 if (pointee_t->subtypes.empty()) { // Non-polymorphic
-                    return new_hacc(MacroCall("new", pointee_t->to_hacc(pp)));
+                    return new_hacc(MacroCall("new", {pointee_t->to_hacc(pp)}));
                 }
                 else { // Polymorphic, needs casting and tagging
                     const std::type_info* realtype = pointee_realtype(pp);
@@ -428,7 +428,7 @@ namespace hacc {
                 if (mch->mc.name == "new") {
                     if (pointer) {
                         HaccTable* pointee_t = HaccTable::require_cpptype(*pointee_type);
-                        pointer.set(p, [pointee_t, mch](void* mp){ *(void**)mp = pointee_t->new_from_hacc(mch->mc.arg); });
+                        pointer.set(p, [pointee_t, mch](void* mp){ *(void**)mp = pointee_t->new_from_hacc(mch->mc.args[0]); });
                     }
                     else throw Error("Type " + get_type_name() + " cannot be represented with a new() macro.");
                 }
@@ -517,9 +517,10 @@ namespace hacc {
             case MACROCALL: {
                 auto mch = static_cast<hacc::Hacc::MacroCall*>(h);
                 if (mch->mc.name == "file") {
-                    mch->mc.arg = collapse_hacc(mch->mc.arg);
-                    if (mch->mc.arg->form() == STRING) {
-                        Hacc* r = read_file(mch->mc.arg->get_string());
+                    if (mch->mc.args.size() != 1) throw Error("file() can only be given one argument.");
+                    mch->mc.args[0] = collapse_hacc(mch->mc.args[0]);
+                    if (mch->mc.args[0]->form() == STRING) {
+                        Hacc* r = read_file(mch->mc.args[0]->get_string());
                         if (r->form() == GENERIC) {
                             record_incantation(r->get_generic().p, mch);
                             if (return_incantation) *return_incantation = mch;
@@ -529,21 +530,17 @@ namespace hacc {
                     else throw Error("The \"file\" macro can only be called on a string.");
                 }
                 else if (mch->mc.name == "local") {
-                    if (mch->mc.arg->form() == ARRAY) {
-                        auto ah = mch->mc.arg->as_array();
-                        for (auto& subh : ah->a) {
-                            if (&subh == &ah->a.back())
-                                return subh;
-                            else just_assign_id(subh);
-                        }
+                    for (auto& subh : mch->mc.args) {
+                        if (&subh == &mch->mc.args.back())
+                            return subh;
+                        else just_assign_id(subh);
                     }
                 }
-                if (mch->mc.name == "new") {
-                    if (mch->mc.arg->form() == ARRAY) {
-                        auto ah = mch->mc.arg->as_array();
-                        String type = ah->elem(0)->get_string();
+                else if (mch->mc.name == "new") {
+                    if (mch->mc.args.size() == 2) {
+                        String type = mch->mc.args[0]->get_string();
                         HaccTable* gt = HaccTable::require_type_name(type);
-                        Generic g {gt->cpptype, gt->new_from_hacc(ah->elem(1))};
+                        Generic g {gt->cpptype, gt->new_from_hacc(mch->mc.args[1])};
                         return new_hacc(g);
                     }
                     else throw Error("new() in this context must be given two arguments.\n");
@@ -635,7 +632,7 @@ namespace hacc {
         for (auto& i : incantations) {
             if (i.second->form() == MACROCALL) {
                 auto mch = static_cast<Hacc::MacroCall*>(i.second);
-                if (mch->mc.name == "file" && mch->mc.arg->form() == STRING) {
+                if (mch->mc.name == "file" && mch->mc.args[0]->form() == STRING) {
                 }
             }
         }

@@ -1,4 +1,4 @@
-new(["phys::BodyDef" {
+new("phys::BodyDef" {
     b2:{ }
     fixtures:[{
         b2:{
@@ -9,4 +9,4 @@ new(["phys::BodyDef" {
         }
         coll_b:[ground]
     }]
-}])
+})
