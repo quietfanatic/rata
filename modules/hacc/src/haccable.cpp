@@ -591,14 +591,11 @@ namespace hacc {
                     if (iter == read_ids.end())
                         throw Error("ID " + static_cast<hacc::Hacc::Var*>(subject)->v.name + " not found in this document.");
                     auto& rid = iter->second;
-                    if (rid.read) {
-                        if (rid.get && rid.table) {
-                            Generic g = Generic(rid.table->cpptype, rid.get());
-                            return new_hacc(g);
-                        }
-                        else throw Error("Cannot take the address of an untyped construct.");
+                    if (rid.get && rid.table) {
+                        Generic g = Generic(rid.table->cpptype, rid.get());
+                        return new_hacc(g);
                     }
-                    else throw Error("Internal oops: A read_id was created without a .read");
+                    else throw Error("Cannot take the address of an untyped construct.");
                 }
                 else throw Error("Currently the address can only be taken of a variable.");
             }

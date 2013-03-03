@@ -1,9 +1,9 @@
 
-#include "../inc/strings.h"
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <string.h>
-
+#include "../inc/strings.h"
+#include "../inc/haccable.h"
 
 namespace hacc {
 
@@ -132,7 +132,9 @@ String hacc_value_to_string (Hacc* h, uint ind, uint prior_ind) {
             else r += " ";
             return r + "}";
         }
-        case GENERIC: throw Error("Cannot stringify a Generic.  This may be an internal error.");
+        case GENERIC: {
+            return "<" + HaccTable::require_cpptype(*static_cast<Hacc::Generic*>(h)->g.cpptype)->get_type_name() + ">";
+        }
         case ERROR: throw static_cast<Hacc::Error*>(h)->e;
         default: throw Error("Corrupted Hacc tree\n");
     }
@@ -394,7 +396,7 @@ struct Parser {
     Hacc* parse_address () {
         p++;  // for the &
         if (look() == '$')
-            return parse_var("");
+            return new_hacc(Address(parse_var("")));
         else throw error("Can only take the address of a variable currently.");
     }
     Hacc* parse_bareword () {

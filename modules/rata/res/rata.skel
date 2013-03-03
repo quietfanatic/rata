@@ -6,7 +6,7 @@ new(["vis::Skel" {
         $arm     = {name:arm     branches:[&$forearm]    layout:file("modules/rata/res/rata.layouts").arm     z_offset:-0.04}
         $body    = {name:body    branches:[&$head &$arm] layout:file("modules/rata/res/rata.layouts").body    z_offset: 0.00}
     ]
-    root:$body
+    root:&$body
     root_offset:[0 0]
     poses: local([
         $l = file("modules/rata/res/rata.layouts")
@@ -15,14 +15,14 @@ new(["vis::Skel" {
         $a = $l.arm
         $f = $l.forearm
         [
-            [stand  [[$body $b.stand ] [$head $h.stand90] [$arm $a.a0  ] [$forearm $f.a0  ]]]
-            [walk1  [[$body $b.walk  ] [$head $h.walk90 ] [$arm $a.a23 ] [$forearm $f.a23 ]]]
-            [walk2  [[$body $b.walk  ] [$head $h.walk90 ] [$arm $a.a23 true] [$forearm $f.a23 true]]]
-            [crawl1 [[$body $b.crawl1] [$head $h.crawl  ] [$arm $a.a0  ] [$forearm $f.a90 ]]]
-            [crawl2_1 [[$body $b.crawl2] [$head $h.crawl] [$arm $a.a45 ] [$forearm $f.a90 ]]]
-            [crawl2_2 [[$body $b.crawl2] [$head $h.crawl] [$arm $a.a45 true] [$forearm $f.a90]]]
-            [hurtbk [[$body $b.hurtbk] [$head $h.hurtbk ] [$arm $a.a23 ] [$forearm $f.a68 ]]]
-            [laybk  [[$body $b.laybk ] [$head $h.laybk  ] [$arm $a.a90 ] [$forearm $f.a90 ]]]
+            [stand  [[&$body $b.stand ] [&$head $h.stand90] [&$arm $a.a0  ] [&$forearm $f.a0  ]]]
+            [walk1  [[&$body $b.walk  ] [&$head $h.walk90 ] [&$arm $a.a23 ] [&$forearm $f.a23 ]]]
+            [walk2  [[&$body $b.walk  ] [&$head $h.walk90 ] [&$arm $a.a23 true] [&$forearm $f.a23 true]]]
+            [crawl1 [[&$body $b.crawl1] [&$head $h.crawl  ] [&$arm $a.a0  ] [&$forearm $f.a90 ]]]
+            [crawl2_1 [[&$body $b.crawl2] [&$head $h.crawl] [&$arm $a.a45 ] [&$forearm $f.a90 ]]]
+            [crawl2_2 [[&$body $b.crawl2] [&$head $h.crawl] [&$arm $a.a45 true] [&$forearm $f.a90]]]
+            [hurtbk [[&$body $b.hurtbk] [&$head $h.hurtbk ] [&$arm $a.a23 ] [&$forearm $f.a68 ]]]
+            [laybk  [[&$body $b.laybk ] [&$head $h.laybk  ] [&$arm $a.a90 ] [&$forearm $f.a90 ]]]
         ]
     ])
 }])
