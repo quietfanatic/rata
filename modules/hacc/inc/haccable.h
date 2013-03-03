@@ -18,14 +18,15 @@ enum Pointer_Policy {
  // This stores all the info for one type.
 struct HaccTable {
     const std::type_info& cpptype;
+    size_t cppsize;
     bool initialized = false;
 
      // Mostly makes error reporting much nicer.
     String type_name;
-     // How to allocate this type.  Generally set to "new X ()"
-    Func<void* ()> allocate;
-     // Pretty much no reason to override this.  It calls delete by default.
-    Func<void (void*)> deallocate;
+     // These are automatically populated
+    Func<void (void*)> construct;
+    Func<void (void*, void*)> assign;
+    Func<void (void*)> destroy;
      // Leave haccification to something else.
      // If the inner type of this is Hacc*, it defines a direct transition.
     GetSet0 delegate;
@@ -122,10 +123,15 @@ template <class C> struct PolyP {
 
 
  // Select based on whether C has a nullary constructor.
-template <class C, bool has_nc = std::is_constructible<C>::value> struct per_nc;
-template <class C> struct per_nc<C, true> { static void* allocate () { return new C; } };
-template <class C> struct per_nc<C, false> { static void* allocate () { 
-    throw Error("Cannot allocate " + Haccable<C>::get_table()->get_type_name() + " because it has no nullary constructor.");
+template <class C, bool has_nc = std::is_constructible<C>::value> struct constructibility;
+template <class C> struct constructibility<C, true> { static void construct (void* p) { new (p) C; } };
+template <class C> struct constructibility<C, false> { static void construct (void* p) { 
+    throw Error("Cannot construct " + Haccable<C>::get_table()->get_type_name() + " because it has no nullary constructor.");
+} };
+template <class C, bool a = std::is_assignable<C&, const C&>::value> struct assignability;
+template <class C> struct assignability<C, true> { static void assign (void* l, void* r) { *(C*)l = *(C*)r; } };
+template <class C> struct assignability<C, false> { static void assign (void* l, void* r) {
+    throw Error("Cannot assign " + Haccable<C>::get_table()->get_type_name() + " because it is not assignable to itself.");
 } };
 
  // This class provides the DSL for creating HaccTables.
@@ -140,8 +146,10 @@ template <class C> struct Haccability : GetSet_Builders<C> {
         static HaccTable* table = HaccTable::by_cpptype(typeid(C));
         if (!table->initialized) {
             table->initialized = true;
-            table->allocate = per_nc<C>::allocate;
-            table->deallocate = [](void* p){ delete (C*)p; };
+            table->cppsize = sizeof(C);
+            table->construct = constructibility<C>::construct;
+            table->assign = assignability<C>::assign;
+            table->destroy = [](void* p){ ((C*)p)->~C(); };
             Haccable<C>::describe();
         }
         return table;
@@ -153,8 +161,6 @@ template <class C> struct Haccability : GetSet_Builders<C> {
             get_table()->type_name = name;
         get_table()->reg_type_name(name);
      }
-    static void allocate (const Func<C* ()>& f) { get_table()->allocate = *(Func<void* ()>*)&f; }
-    static void deallocate (const Func<void (C*)>& f) { get_table()->deallocate = *(Func<void* ()>*)&f; }
     static void finish (const Func<void (C&)>& f) { get_table()->finish = *(Func<void (void*)>*)&f; }
     static void to (const Func<Hacc* (const C&)>& f) { get_table()->to = *(Func<Hacc* (void*)>*)&f; }
     static void update_from (const Func<void (C&, Hacc*)>& f) { get_table()->update_from = *(Func<void (void*, Hacc*)>*)&f; }
@@ -245,8 +251,6 @@ template <class C> String get_type_name () {
 #define HCB_TEMPLATE_BEGIN(params, type) template params struct Haccable<type> : hacc::Haccability<type> { \
     using hcb = hacc::Haccability<type>; \
     using hcb::type_name; \
-    using hcb::allocate; \
-    using hcb::deallocate; \
     using hcb::finish; \
     using hcb::to; \
     using hcb::update_from; \

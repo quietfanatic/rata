@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <unordered_map>
 #include "../inc/haccable.h"
 #include "../inc/haccable_files.h"
@@ -445,13 +446,13 @@ namespace hacc {
     struct daBomb {
         HaccTable* t;
         void* p;
-        ~daBomb () { if (p) t->deallocate(p); }
+        ~daBomb () { if (p) { t->destroy(p); free(p); } }
         void defuse () { p = null; }
     };
 
     void* HaccTable::new_from_hacc (Hacc* h) {
-        if (!allocate) throw Error("No known way to allocate a " + get_type_name() + "");
-        void* r = allocate();
+        void* r = malloc(cppsize);
+        construct(r);
         daBomb b {this, r};
         update_from_hacc(r, h);
         b.defuse();
