@@ -1,3 +1,0 @@
-new(["core::Image" {
-    filename: "modules/rata/res/monospace.png"
-}])

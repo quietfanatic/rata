@@ -4,7 +4,9 @@ new("geo::Room" {
     furniture:[
         {Tilemap:{
             tileset:file("modules/rata/res/test.tileset")
-            texture:file("modules/rata/res/test-tiles.image").ALL
+            texture:new("core::Image" {
+                filename:"modules/rata/res/test-tiles.png"
+            }).ALL
             pos:[0 0]
             width:20 height:15
             tiles:[
