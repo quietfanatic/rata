@@ -23,6 +23,8 @@ workflow {
         ../core/tmp/commands.o
         ../core/tmp/state.o
         ../core/tmp/input.o
+        ../core/tmp/images.o
+        ../core/tmp/opengl.o
         ../ent/tmp/humans.o
         ../ent/tmp/various.o
         ../geo/tmp/rooms.o
@@ -36,7 +38,6 @@ workflow {
         ../phys/tmp/phys.o
         ../phys/tmp/aux.o
         ../phys/tmp/ground.o
-        ../vis/tmp/images.o
         ../vis/tmp/sprites.o
         ../vis/tmp/shaders.o
         ../vis/tmp/models.o

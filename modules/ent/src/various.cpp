@@ -9,7 +9,7 @@ static phys::BodyDef*& test_bdf () {
     return test_bdf;
 }
 struct Test_Actor : core::Stateful, phys::Object, vis::Draws_Sprites {
-    vis::Texture* texture;
+    core::Texture* texture;
     vis::Frame* frame;
 
     void draws_sprites () {

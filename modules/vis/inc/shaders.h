@@ -6,16 +6,6 @@
 
 namespace vis {
 
-    template <class F> F* glproc (const char* name) {
-        F* r = (F*)glfwGetProcAddress(name);
-        if (!r) {
-            fprintf(stderr, "No GL proc was found named %s\n", name);
-            throw std::logic_error("Missing GL procedure.");
-        }
-        return r;
-    }
-    GLenum diagnose_opengl (std::string when);
-
     struct Shader {
         uint glid = 0;
         GLenum type;

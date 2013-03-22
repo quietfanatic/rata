@@ -84,7 +84,7 @@ namespace vis {
     void Model::draw_seg (Model::Seg* ms, Skel::Seg* ss, Vec pos, bool fh, bool fv, float z) {
         if (!ms->skin) return;
         if (!ms->pose) return;
-        for (Texture* tex : ms->skin->textures) {
+        for (core::Texture* tex : ms->skin->textures) {
             Draws_Sprites::draw_sprite(
                 ms->pose->frame, tex, pos,
                 ms->pose->fliph?!fh:fh, ms->pose->flipv?!fv:fv,

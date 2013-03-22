@@ -2,11 +2,14 @@
 #include "../inc/graffiti.h"
 #include "../inc/shaders.h"
 #include "../../hacc/inc/everything.h"
+#include "../../core/inc/opengl.h"
 #include "../../core/inc/phases.h"
 #include "../../core/inc/state.h"
 #include "../../core/inc/game.h"
 
 namespace vis {
+
+    using namespace core;
 
     static Links<Draws_Text> text_drawers;
     void Draws_Text::text_appear () { link(text_drawers); }

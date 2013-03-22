@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include "../../util/inc/Vec.h"
 #include "../../hacc/inc/haccable_standard.h"
-#include "images.h"
 #include "sprites.h"
 
 namespace vis {
@@ -49,7 +48,7 @@ namespace vis {
     struct Skin {
         struct App {
             Skel::Seg* target;
-            std::vector<Texture*> textures;
+            std::vector<core::Texture*> textures;
         };
         
         std::vector<Skin::App> apps;

@@ -2,11 +2,14 @@
 #include <GL/gl.h>
 #include "../inc/graffiti.h"
 #include "../inc/shaders.h"
+#include "../../core/inc/opengl.h"
 #include "../../core/inc/phases.h"
 #include "../../core/inc/state.h"
 #include "../../hacc/inc/haccable_files.h"
 
 namespace vis {
+
+    using namespace core;
 
     struct Graffiti_Renderer : Renderer, core::Game_Object {
         Program* program = hacc::reference_file<Program>("modules/vis/res/color.prog");

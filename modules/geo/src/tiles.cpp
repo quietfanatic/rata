@@ -3,6 +3,7 @@
 #include "../../hacc/inc/everything.h"
 #include "../../util/inc/math.h"
 #include "../../util/inc/debug.h"
+#include "../../core/inc/opengl.h"
 #include "../../vis/inc/shaders.h"
 #include "../../core/inc/phases.h"
 #include "../inc/tiles.h"
@@ -191,7 +192,7 @@ void Tilemap::start () {
     delete[] es;
     set_pos(pos);
      // Now for the graphics buffers
-    using vis::glproc;
+    using core::glproc;
     static auto glGenBuffers = glproc<void (GLsizei, GLuint*)>("glGenBuffers");
     static auto glBindBuffer = glproc<void (GLenum, GLuint)>("glBindBuffer");
     static auto glBufferData = glproc<void (GLenum, GLsizeiptr, const GLvoid*, GLenum)>("glBufferData");
@@ -242,19 +243,19 @@ struct Tilemap_Layer : core::Layer, core::Game_Object, vis::Renderer {
     int tileset_size = program->require_uniform("tileset_size");
 
     Tilemap_Layer () : core::Layer("E.M", "tilemaps") {
-        static auto glUniform1i = vis::glproc<void (GLint, GLint)>("glUniform1i");
-        static auto glUseProgram = vis::glproc<void (GLuint)>("glUseProgram");
+        static auto glUniform1i = core::glproc<void (GLint, GLint)>("glUniform1i");
+        static auto glUseProgram = core::glproc<void (GLuint)>("glUseProgram");
         glUseProgram(program->glid);
         glUniform1i(tex, 0);  // Texture unit 0
-        if (vis::diagnose_opengl("after creating tilemap renderer")) {
+        if (core::diagnose_opengl("after creating tilemap renderer")) {
             throw std::logic_error("tilemaps layer init failed due to GL error");
         }
     }
 
      // for Renderer
     void start_rendering () {
-        static auto glUseProgram = vis::glproc<void (GLuint)>("glUseProgram");
-        static auto glUniform2f = vis::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+        static auto glUseProgram = core::glproc<void (GLuint)>("glUseProgram");
+        static auto glUniform2f = core::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
         glEnable(GL_TEXTURE_2D);
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
@@ -264,8 +265,8 @@ struct Tilemap_Layer : core::Layer, core::Game_Object, vis::Renderer {
      // for Layer
     void start () { }
     void run () {
-        static auto glUniform2f = vis::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-        static auto glBindVertexArray = vis::glproc<void (GLuint)>("glBindVertexArray");
+        static auto glUniform2f = core::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+        static auto glBindVertexArray = core::glproc<void (GLuint)>("glBindVertexArray");
         use();
         for (Tilemap* map = active_tilemaps.first(); map; map = map->next()) {
             Vec pos = map->Object::pos();
@@ -275,7 +276,7 @@ struct Tilemap_Layer : core::Layer, core::Game_Object, vis::Renderer {
             glBindTexture(GL_TEXTURE_2D, map->texture->tex);
             glBindVertexArray(map->vao_id);
             glDrawArrays(GL_QUADS, 0, map->vao_size);
-            vis::diagnose_opengl("After rendering a tilemap");
+            core::diagnose_opengl("After rendering a tilemap");
         }
     }
 };

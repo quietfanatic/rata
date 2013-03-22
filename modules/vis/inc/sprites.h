@@ -1,7 +1,7 @@
 #ifndef HAVE_VIS_SPRITES_H
 #define HAVE_VIS_SPRITES_H
 
-#include "images.h"
+#include "../../core/inc/images.h"
 #include "../../util/inc/organization.h"
 
 #define PX (1/16.0)
@@ -36,7 +36,7 @@ namespace vis {
         bool is_active () { return is_linked(); }
         void activate ();
         void deactivate ();
-        static void draw_sprite (Frame*, Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
+        static void draw_sprite (Frame*, core::Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
     };
 
 }

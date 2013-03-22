@@ -17,7 +17,6 @@ workflow {
 
     include '../..';
 
-    cppc_rule('tmp/images.o', 'src/images.cpp');
     cppc_rule('tmp/sprites.o', 'src/sprites.cpp');
     cppc_rule('tmp/models.o', 'src/models.cpp');
     cppc_rule('tmp/shaders.o', 'src/shaders.cpp');

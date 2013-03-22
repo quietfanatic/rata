@@ -1,17 +1,12 @@
 #include <GL/gl.h>
 #include <GL/glfw.h>
 #include "../../hacc/inc/everything.h"
+#include "../../core/inc/opengl.h"
 #include "../inc/shaders.h"
 
 namespace vis {
+    using namespace core;
 
-    GLenum diagnose_opengl (std::string s = "") {
-        GLenum err = glGetError();
-        if (err)
-            fprintf(stderr, "OpenGL error %04x %s\n", err, s.c_str());
-        return err;
-    }
-    
     void Shader::finish () {
 
         static auto glCreateShader = glproc<GLuint (GLenum)>("glCreateShader");

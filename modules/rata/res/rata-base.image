@@ -1,4 +1,4 @@
-new("vis::Image" {
+new("core::Image" {
     filename: "modules/rata/res/rata-base.png"
     textures: local( $layout_f = file("modules/rata/res/rata.layouts") [
         {name:body    offset:[  0   0] layout:$layout_f.body    size:[ 85 43]}

@@ -4,13 +4,13 @@
 #include <string>
 #include "../../util/inc/Vec.h"
 #include "../../util/inc/organization.h"
-#include "images.h"
+#include "../../core/inc/images.h"
 
 namespace vis {
 
      // A font's image should be composed of 16x16 tiles.
     struct Font {
-        Texture* texture;
+        core::Texture* texture;
         uint width;
         uint height;
         uint line_height;

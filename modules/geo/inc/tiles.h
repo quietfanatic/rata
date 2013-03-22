@@ -3,7 +3,7 @@
 
 #include "../inc/rooms.h"
 #include "../../phys/inc/phys.h"
-#include "../../vis/inc/images.h"
+#include "../../core/inc/images.h"
 
 namespace geo {
 
@@ -18,7 +18,7 @@ namespace geo {
 
     struct Tilemap : Furniture, phys::Object, Linkable<Tilemap> {
         Tileset* tileset;
-        vis::Texture* texture;
+        core::Texture* texture;
         Vec pos;
         uint32 width;
         uint32 height;

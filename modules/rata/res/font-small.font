@@ -1,5 +1,5 @@
 new("vis::Font" {
-    texture:new("vis::Image" {
+    texture:new("core::Image" {
         filename:"modules/rata/res/font-small.png"
     }).ALL
     width:8 height:8 line_height:8

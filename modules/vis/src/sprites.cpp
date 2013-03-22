@@ -3,13 +3,16 @@
 #include <GL/glfw.h>
 #include <SOIL/SOIL.h>
 #include "../../hacc/inc/everything.h"
-#include "../inc/sprites.h"
 #include "../../core/inc/phases.h"
 #include "../../core/inc/state.h"
+#include "../../core/inc/opengl.h"
 #include "../../util/inc/debug.h"
+#include "../inc/sprites.h"
 #include "../inc/shaders.h"
 
 namespace vis {
+
+    using namespace core;
 
     struct Layout_VBO_Data {
         Vec lbp;
@@ -145,7 +148,7 @@ namespace vis {
 
     static Logger draw_sprite_logger ("draw_sprite", false);
 
-    void Draws_Sprites::draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
+    void Draws_Sprites::draw_sprite (Frame* frame, core::Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
         static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
         static auto glUniform3f = glproc<void (GLint, GLfloat, GLfloat, GLfloat)>("glUniform3f");
