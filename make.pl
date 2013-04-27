@@ -2,13 +2,9 @@
 
 use strict;
 use warnings;
-BEGIN {
-    unless (defined $FindBin::Bin) {
-        require FindBin;
-        require "$FindBin::Bin/tool/make.pm";
-    }
-    make->import(':all');
-}
+use FindBin;
+use lib (FindBin::again, "$FindBin::Bin/tool");
+use make qw(:all);
 use autodie qw(:all);
 use File::Path qw<remove_tree>;
 use File::Spec::Functions qw(:ALL);
