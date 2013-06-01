@@ -4,10 +4,10 @@
 
 namespace hacc {
 
-    std::unordered_map<String, Hacc*> file_cache;
+    std::unordered_map<String, Hacc*> files;
 
     Hacc* read_file (String name) {
-        Hacc*& r = file_cache[name];
+        Hacc*& r = files[name];
         if (r) return r;
         r = collapse_hacc(hacc_from_file(name));
         return r;
