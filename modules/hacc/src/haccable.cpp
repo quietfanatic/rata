@@ -378,9 +378,9 @@ namespace hacc {
                 else throw Error("Type " + get_type_name() + " cannot be represented by an array Hacc.");
                 break;
             }
-            case GENERIC: {
+            case POINTER: {
                 if (pointer) {
-                    Generic g = h->as_generic()->g;
+                    Pointer g = h->as_pointer()->p;
                     if (*g.cpptype == *pointee_type) {
                         pointer.set(p, [&g, this](void* mp){
                             *(void**)mp = g.p;
@@ -443,7 +443,7 @@ namespace hacc {
         }
         if (finish) finish(p);
     }
-    struct daBomb {
+    struct daBomb {  // The 'da' stood for something but I forgot what
         HaccTable* t;
         void* p;
         ~daBomb () { if (p) { t->destroy(p); free(p); } }
@@ -470,27 +470,27 @@ namespace hacc {
         else return type_name;
     }
 
-    Generic HaccTable::get_attr (void* p, String name) {
+    Pointer HaccTable::get_attr (void* p, String name) {
         if (get_attr_p) return get_attr_p(p, name);
         else {
             for (auto& a : attrs) {
                 if (a.first == name) {
                     void* mp;
                     a.second.get(p, [&mp](void* mp2){ mp = mp2; });
-                    return Generic(*a.second.mtype, mp);
+                    return Pointer(*a.second.mtype, mp);
                 }
             }
             throw Error("Instance of " + get_type_name() + " has no attr " + name);
         }
     }
 
-    Generic HaccTable::get_elem (void* p, size_t index) {
+    Pointer HaccTable::get_elem (void* p, size_t index) {
         if (get_elem_p) return get_elem_p(p, index);
         else {
             if (index < elems.size()) {
                 void* mp;
                 elems[index].get(p, [&mp](void* mp2){ mp = mp2; });
-                return Generic(*elems[index].mtype, mp);
+                return Pointer(*elems[index].mtype, mp);
             }
             else {
                 throw Error("Index out of range for instance of " + get_type_name());
@@ -522,8 +522,8 @@ namespace hacc {
                     mch->mc.args[0] = collapse_hacc(mch->mc.args[0]);
                     if (mch->mc.args[0]->form() == STRING) {
                         Hacc* r = read_file(mch->mc.args[0]->get_string());
-                        if (r->form() == GENERIC) {
-                            record_incantation(r->get_generic().p, mch);
+                        if (r->form() == POINTER) {
+                            record_incantation(r->get_pointer().p, mch);
                             if (return_incantation) *return_incantation = mch;
                         }
                         return r;
@@ -541,7 +541,7 @@ namespace hacc {
                     if (mch->mc.args.size() == 2) {
                         String type = mch->mc.args[0]->get_string();
                         HaccTable* gt = HaccTable::require_type_name(type);
-                        Generic g {gt->cpptype, gt->new_from_hacc(mch->mc.args[1])};
+                        Pointer g {gt->cpptype, gt->new_from_hacc(mch->mc.args[1])};
                         return new_hacc(g);
                     }
                     else throw Error("new() in this context must be given two arguments.\n");
@@ -552,10 +552,10 @@ namespace hacc {
                 auto arh = static_cast<hacc::Hacc::AttrRef*>(h);
                 Hacc* incantation;
                 arh->ar.subject = collapse_hacc(arh->ar.subject, &incantation);
-                if (arh->ar.subject->form() == GENERIC) {
-                    auto gh = static_cast<hacc::Hacc::Generic*>(arh->ar.subject);
-                    HaccTable* t = HaccTable::require_cpptype(*gh->g.cpptype);
-                    Generic attr_g = t->get_attr(gh->g.p, arh->ar.name);
+                if (arh->ar.subject->form() == POINTER) {
+                    auto ph = static_cast<hacc::Hacc::Pointer*>(arh->ar.subject);
+                    HaccTable* t = HaccTable::require_cpptype(*ph->p.cpptype);
+                    Pointer attr_g = t->get_attr(ph->p.p, arh->ar.name);
                     if (incantation) {
                         incantation = new_hacc(AttrRef(incantation, arh->ar.name));
                         record_incantation(attr_g.p, incantation);
@@ -569,10 +569,10 @@ namespace hacc {
                 auto erh = static_cast<hacc::Hacc::ElemRef*>(h);
                 Hacc* incantation;
                 erh->er.subject = collapse_hacc(erh->er.subject, &incantation);
-                if (erh->er.subject->form() == GENERIC) {
-                    auto gh = static_cast<hacc::Hacc::Generic*>(erh->er.subject);
-                    HaccTable* t = HaccTable::require_cpptype(*gh->g.cpptype);
-                    Generic elem_g = t->get_elem(gh->g.p, erh->er.index);
+                if (erh->er.subject->form() == POINTER) {
+                    auto ph = static_cast<hacc::Hacc::Pointer*>(erh->er.subject);
+                    HaccTable* t = HaccTable::require_cpptype(*ph->p.cpptype);
+                    Pointer elem_g = t->get_elem(ph->p.p, erh->er.index);
                     if (incantation) {
                         incantation = new_hacc(ElemRef(incantation, erh->er.index));
                         record_incantation(elem_g.p, incantation);
@@ -590,7 +590,7 @@ namespace hacc {
                         throw Error("ID " + static_cast<hacc::Hacc::Var*>(subject)->v.name + " not found in this document.");
                     auto& rid = iter->second;
                     if (rid.get && rid.table) {
-                        Generic g = Generic(rid.table->cpptype, rid.get());
+                        Pointer g = Pointer(rid.table->cpptype, rid.get());
                         return new_hacc(g);
                     }
                     else throw Error("Cannot take the address of an untyped construct.");
@@ -605,7 +605,7 @@ namespace hacc {
                 if (rid.read) {
                     if (rid.get && !rid.read->type.empty()) {
                         HaccTable* t = HaccTable::require_type_name(rid.read->type);
-                        return new_hacc(Generic(t->cpptype, rid.get()));
+                        return new_hacc(Pointer(t->cpptype, rid.get()));
                     }
                     else {
                         rid.read = collapse_hacc(rid.read);

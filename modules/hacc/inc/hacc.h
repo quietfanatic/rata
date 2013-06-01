@@ -44,7 +44,7 @@ enum Form {
     DOUBLE,
     STRING,
     VAR,
-    GENERIC,
+    POINTER,
     ATTRREF,
     ELEMREF,
     ADDRESS,
@@ -81,12 +81,12 @@ struct Var {
     Var (String name) : name(name) { }
     Var (const char* name) : name(name) { }
 };
-struct Generic {
+struct Pointer {
     const std::type_info* cpptype;
     void* p;
-    Generic () : cpptype(NULL), p(NULL) { }
-    Generic (const std::type_info& cpptype, void* p) : cpptype(&cpptype), p(p) { }
-    template <class C> Generic (C* p) : cpptype(&typeid(C)), p(p) { }
+    Pointer () : cpptype(NULL), p(NULL) { }
+    Pointer (const std::type_info& cpptype, void* p) : cpptype(&cpptype), p(p) { }
+    template <class C> Pointer (C* p) : cpptype(&typeid(C)), p(p) { }
 };
 struct AttrRef {
     Hacc* subject;
@@ -129,7 +129,7 @@ struct Hacc : gc {
     struct Double;
     struct String;
     struct Var;
-    struct Generic;
+    struct Pointer;
     struct AttrRef;
     struct ElemRef;
     struct Address;
@@ -149,7 +149,7 @@ struct Hacc : gc {
     HACC_GETTER_R_DECL(Double, double, d)
     HACC_GETTER_DECL(String, string, s)
     HACC_GETTER_DECL(Var, var, v)
-    HACC_GETTER_DECL(Generic, generic, g)
+    HACC_GETTER_DECL(Pointer, pointer, p)
     HACC_GETTER_DECL(AttrRef, attrref, ar)
     HACC_GETTER_DECL(ElemRef, elemref, er)
     HACC_GETTER_DECL(Address, address, ad)
@@ -174,10 +174,10 @@ HACC_VARIANT_S(Double, DOUBLE, Double, d)
 HACC_VARIANT_S(String, STRING, String, s)
 HACC_VARIANT_S(Var, VAR, Var, v)
 HACC_VARIANT_S(Address, ADDRESS, Address, ad)
-HACC_VARIANT(Generic, GENERIC,
-    hacc::Generic g;
-    operator hacc::Generic& () { return g; }
-    Generic (const hacc::Generic& g, hacc::String id = "") : Hacc(id), g(g) { }
+HACC_VARIANT(Pointer, POINTER,
+    hacc::Pointer p;
+    operator hacc::Pointer& () { return p; }
+    Pointer (const hacc::Pointer& p, hacc::String id = "") : Hacc(id), p(p) { }
 )
 HACC_VARIANT(AttrRef, ATTRREF,
     hacc::AttrRef ar;
@@ -237,7 +237,7 @@ HACC_NEW_DECL(Float, f, Float)
 HACC_NEW_DECL(Double, d, Double)
 HACC_NEW_DECL(String, s, String)
 HACC_NEW_DECL(Var, v, Var)
-HACC_NEW_DECL(Generic, g, Generic)
+HACC_NEW_DECL(Pointer, p, Pointer)
 HACC_NEW_DECL(AttrRef, ar, AttrRef)
 HACC_NEW_DECL(ElemRef, er, ElemRef)
 HACC_NEW_DECL(Address, ad, Address)

@@ -32,10 +32,10 @@ struct HaccTable {
     GetSet0 delegate;
      // Defined by attributes with names, defaults are TODO
     Map<GetSet0> attrs;
-    Func<Generic (void*, String)> get_attr_p;
+    Func<Pointer (void*, String)> get_attr_p;
      // Defined by a fixed number of elements
     VArray<GetSet0> elems;
-    Func<Generic (void*, size_t)> get_elem_p;
+    Func<Pointer (void*, size_t)> get_elem_p;
      // Variants with names specific to this interface
      // Note that this will only be used if following a pointer.
     std::unordered_map<String, GetSet0> variants;
@@ -71,9 +71,9 @@ struct HaccTable {
     String get_type_name ();
 
      // Goes through attrs or get_attr_p
-    Generic get_attr (void*, String);
+    Pointer get_attr (void*, String);
      // Goes through elems or get_elem_p
-    Generic get_elem (void*, size_t);
+    Pointer get_elem (void*, size_t);
 
      // This throws an error when not found
     static HaccTable* require_cpptype (const std::type_info&);
@@ -166,9 +166,9 @@ template <class C> struct Haccability : GetSet_Builders<C> {
     static void update_from (const Func<void (C&, Hacc*)>& f) { get_table()->update_from = *(Func<void (void*, Hacc*)>*)&f; }
     static void delegate (const GetSet1<C>& gs) { get_table()->delegate = gs; }
     static void attr (String name, const GetSet1<C>& gs) { get_table()->attrs.emplace_back(name, gs); }
-    static void get_attr (const Func<Generic (C&, String)>& f) { get_table()->get_attr_p = *(Func<Generic (void*, String)>*)&f; }
+    static void get_attr (const Func<Pointer (C&, String)>& f) { get_table()->get_attr_p = *(Func<Pointer (void*, String)>*)&f; }
     static void elem (const GetSet1<C>& gs) { get_table()->elems.push_back(gs); }
-    static void get_elem (const Func<Generic (C&, size_t)>& f) { get_table()->get_elem_p = *(Func<Generic (void*, size_t)>*)&f; }
+    static void get_elem (const Func<Pointer (C&, size_t)>& f) { get_table()->get_elem_p = *(Func<Pointer (void*, size_t)>*)&f; }
     static void variant (String name, const GetSet1<C>& gs) { get_table()->variants.emplace(name, gs); }
     static void select_variant (const Func<String (const C&)>& f) { get_table()->select_variant = *(Func<String (void*)>*)&f; }
     static void value (String name, const C& val) { get_table()->values.emplace(name, GetSet_Builders<C>::def(val)); }

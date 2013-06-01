@@ -138,8 +138,8 @@ String hacc_value_to_string (Hacc* h, uint ind, uint prior_ind) {
             else r += " ";
             return r + "}";
         }
-        case GENERIC: {
-            return "<" + HaccTable::require_cpptype(*static_cast<Hacc::Generic*>(h)->g.cpptype)->get_type_name() + ">";
+        case POINTER: {
+            return "<" + HaccTable::require_cpptype(*static_cast<Hacc::Pointer*>(h)->p.cpptype)->get_type_name() + ">";
         }
         case ERROR: throw static_cast<Hacc::Error*>(h)->e;
         default: throw Error("Corrupted Hacc tree\n");

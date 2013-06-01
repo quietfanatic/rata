@@ -34,15 +34,15 @@ HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
             update_from_hacc(v[i], ah->elem(i));
         }
     });
-    get_elem([](std::vector<C>& v, size_t index){ return Generic(&v[index]); });
+    get_elem([](std::vector<C>& v, size_t index){ return Pointer(&v[index]); });
 HCB_TEMPLATE_END(<class C>, std::vector<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, hacc::named_vector<C>)
     using namespace hacc;
     type_name("hacc::named_vector<" + get_type_name<C>() + ">");
     delegate(hcb::template supertype<std::vector<C>>());
-    get_elem([](named_vector<C>& v, size_t index){ return Generic(&v[index]); });
-    get_attr([](named_vector<C>& v, std::string name){ return Generic(v.named(name)); });
+    get_elem([](named_vector<C>& v, size_t index){ return Pointer(&v[index]); });
+    get_attr([](named_vector<C>& v, std::string name){ return Pointer(v.named(name)); });
 HCB_TEMPLATE_END(<class C>, hacc::named_vector<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, hacc::Map<C>)
