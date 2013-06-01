@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use FindBin;
-use lib (FindBin::again, "$FindBin::Bin/tool");
+use if !%make::, lib => "$FindBin::Bin/tool";
 use make qw(:all);
 use autodie qw(:all);
 use File::Path qw<remove_tree>;
