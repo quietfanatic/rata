@@ -1,267 +1,183 @@
-
- // This header file gives you the tree representation of a HACC document
- // But not any string or file serialization
-
-
 #ifndef HAVE_HACC_HACC_H
 #define HAVE_HACC_HACC_H
 
-#include <gc/gc_cpp.h>
-
-#ifndef HAVE_HACC
-#define HAVE_HACC
-#endif
-
-
 #include <stdint.h>
- // Do we really still have to do this?
-typedef char char8;
-typedef int8_t int8;
-typedef uint8_t uint8;
-typedef int16_t int16;
-typedef uint16_t uint16;
-typedef int32_t int32;
-typedef uint32_t uint32;
-typedef int64_t int64;
-typedef uint64_t uint64;
-#include <functional>
-#include <vector>
 #include <string>
+#include <sstream>
+#include <vector>
+#include <typeinfo>
 
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+typedef decltype(nullptr) Null;
+constexpr Null null = nullptr;
 
 namespace hacc {
 
- // This is the main type for this header.
-struct Hacc;
+    struct Hacc;
 
- // All the types of values.
-enum Form {
-    UNDEFINED,
-    NULLFORM,
-    BOOL,
-    INTEGER,
-    FLOAT,
-    DOUBLE,
-    STRING,
-    VAR,
-    POINTER,
-    ATTRREF,
-    ELEMREF,
-    ADDRESS,
-    MACROCALL,
-    ARRAY,
-    OBJECT,
-    ERROR
-};
+    enum Form {
+        UNDEFINED,
+        NULLFORM,
+        BOOL,
+        INTEGER,
+        FLOAT,
+        DOUBLE,
+        STRING,
+        ARRAY,
+        OBJECT,
+        VAR,
+        ADDRESS,
+        ASSIGNMENT,
+        CONSTRAINT,
+        POINTER,
+        ATTR,
+        ELEM,
+        MACRO,
+        ERROR
+    };
+    std::string form_name (Form);
+    
+    typedef std::string String;
+    typedef std::vector<Hacc*> Array;
+    typedef std::pair<std::string, Hacc*> Pair;
+    typedef std::vector<Pair> Object;
 
-const char* form_name (Form);
+    struct Var {
+        String name;
+        bool operator == (const Var& o) const { return name == o.name; }
+    };
+    struct Address {
+        Hacc* subject;
+    };
+    struct Assignment {
+        Hacc* left;
+        Hacc* right;
+    };
+    struct Constraint {
+        String hacctype;
+        Hacc* value;
+    };
+    struct Pointer {
+        std::type_info* cpptype;
+        void* p;
+    };
+    struct Attr {
+        Hacc* subject;
+        String name;
+    };
+    struct Elem {
+        Hacc* subject;
+        size_t index;
+    };
+    struct Macro {
+        String name;
+        Array args;
+    };
 
- // These are the C++ versions of all the value types
- // TODO: allow the includer to redefine these
-typedef std::nullptr_t Null;
-constexpr Null null = nullptr;
-typedef bool Bool;
-typedef int64 Integer;
-typedef float Float;
-typedef double Double;
-typedef std::string String;
-struct Error : std::exception {
-    String mess;
-    String file;
-    uint line;
-    uint col;
-    const char* what () const noexcept(true);
-    Error (String mess, String file = "", uint line = 0, uint col = 0) :
-        mess(mess), file(file), line(line), col(col)
-    { }
-};
-struct Var {
-    String name;
-    bool operator== (Var o) const { return name == o.name; }
-    Var (String name) : name(name) { }
-    Var (const char* name) : name(name) { }
-};
-struct Pointer {
-    const std::type_info* cpptype;
-    void* p;
-    Pointer () : cpptype(NULL), p(NULL) { }
-    Pointer (const std::type_info& cpptype, void* p) : cpptype(&cpptype), p(p) { }
-    template <class C> Pointer (C* p) : cpptype(&typeid(C)), p(p) { }
-};
-struct AttrRef {
-    Hacc* subject;
-    String name;
-    AttrRef (Hacc* s, String n) : subject(s), name(n) { }
-};
-struct ElemRef {
-    Hacc* subject;
-    size_t index;
-    ElemRef (Hacc* s, size_t i) : subject(s), index(i) { }
-};
-struct Address {
-    Hacc* subject;
-    Address (Hacc* s) : subject(s) { }
-};
-struct MacroCall {
-    String name;
-    std::vector<Hacc*> args;
-    MacroCall (String name, const std::vector<Hacc*>& args) : name(name), args(args) { }
-    MacroCall (String name, std::vector<Hacc*>&& args) : name(name), args(args) { }
-    MacroCall (String name, std::initializer_list<Hacc*> args) : name(name), args(args) { }
-};
-template <class T> using VArray = std::vector<T>;
-typedef VArray<Hacc*> Array;
-template <class T> using Map = std::vector<std::pair<String, T>>;
-typedef Map<Hacc*> Object;
+    struct Error : std::exception {
+        String mess;
+        String filename;
+        uint line;
+        uint col;
+        const char* buf;
+        Error (String mess = "", String filename = "", uint line = 0, uint col = 0) :
+            mess(mess), filename(filename), line(line), col(col), buf(NULL)
+        { }
 
-template <class T> using Func = std::function<T>;
+         // std::exception
+        const char* what () {
+            if (!buf) {
+                std::string s;
+                std::stringstream ss (s);
+                ss << mess;
+                if (!filename.empty()) {
+                    if (line) {
+                        ss << " at " << filename << " " << line << ":" << col;
+                    }
+                    else {
+                        ss << " while processing " << filename;
+                    }
+                }
+                else if (line) {
+                    ss << " at " << line << ":" << col;
+                }
+                buf = s.c_str();
+            }
+            return buf;
+        }
 
- // These are garbage collected, so don't delete them.
-struct Hacc : gc {
-    hacc::String type;
-    hacc::String id;
-    virtual Form form () const = 0;
-    virtual ~Hacc () { }
-    struct Null;
-    struct Bool;
-    struct Integer;
-    struct Float;
-    struct Double;
-    struct String;
-    struct Var;
-    struct Pointer;
-    struct AttrRef;
-    struct ElemRef;
-    struct Address;
-    struct MacroCall;
-    struct Array;
-    struct Object;
-    struct Error;
-    struct Undefined;
-    Hacc (hacc::String id) : id(id) { }
-    hacc::Error form_error (hacc::String expected);
-#define HACC_GETTER_DECL(type, name, letter) type* as_##name (); hacc::type& get_##name ();
-#define HACC_GETTER_R_DECL(type, name, letter) type* as_##name (); hacc::type get_##name ();
-    HACC_GETTER_R_DECL(Null, null, n)
-    HACC_GETTER_R_DECL(Bool, bool, b)
-    HACC_GETTER_R_DECL(Integer, integer, i)
-    HACC_GETTER_R_DECL(Float, float, f)
-    HACC_GETTER_R_DECL(Double, double, d)
-    HACC_GETTER_DECL(String, string, s)
-    HACC_GETTER_DECL(Var, var, v)
-    HACC_GETTER_DECL(Pointer, pointer, p)
-    HACC_GETTER_DECL(AttrRef, attrref, ar)
-    HACC_GETTER_DECL(ElemRef, elemref, er)
-    HACC_GETTER_DECL(Address, address, ad)
-    HACC_GETTER_DECL(MacroCall, macrocall, mc)
-    HACC_GETTER_DECL(Array, array, a)
-    HACC_GETTER_DECL(Object, object, o)
-    HACC_GETTER_DECL(Error, error, e)
-};
-#define HACC_VARIANT(name, theform, ...) struct Hacc::name : Hacc { Form form () const { return theform; } __VA_ARGS__ };
-#define HACC_VARIANT_S(name, theform, type, letter, ...) \
-HACC_VARIANT(name, theform, \
-    hacc::type letter; \
-    operator hacc::type () { return letter; } \
-    name (hacc::type letter, hacc::String id = "") : Hacc(id), letter(letter) { } \
-    __VA_ARGS__ \
-)
-HACC_VARIANT_S(Null, NULLFORM, Null, n, Null (hacc::String id = "") : Hacc(id), n(null) { })
-HACC_VARIANT_S(Bool, BOOL, Bool, b)
-HACC_VARIANT_S(Integer, INTEGER, Integer, i)
-HACC_VARIANT_S(Float, FLOAT, Float, f)
-HACC_VARIANT_S(Double, DOUBLE, Double, d)
-HACC_VARIANT_S(String, STRING, String, s)
-HACC_VARIANT_S(Var, VAR, Var, v)
-HACC_VARIANT_S(Address, ADDRESS, Address, ad)
-HACC_VARIANT(Pointer, POINTER,
-    hacc::Pointer p;
-    operator hacc::Pointer& () { return p; }
-    Pointer (const hacc::Pointer& p, hacc::String id = "") : Hacc(id), p(p) { }
-)
-HACC_VARIANT(AttrRef, ATTRREF,
-    hacc::AttrRef ar;
-    operator hacc::AttrRef& () { return ar; }
-    AttrRef (const hacc::AttrRef& ar, hacc::String id = "") : Hacc(id), ar(ar) { }
-)
-HACC_VARIANT(ElemRef, ELEMREF,
-    hacc::ElemRef er;
-    operator hacc::ElemRef& () { return er; }
-    ElemRef (const hacc::ElemRef& er, hacc::String id = "") : Hacc(id), er(er) { }
-)
-HACC_VARIANT(MacroCall, MACROCALL,
-    hacc::MacroCall mc;
-    operator hacc::MacroCall& () { return mc; }
-    MacroCall (const hacc::MacroCall& mc, hacc::String id = "") : Hacc(id), mc(mc) { }
-)
-HACC_VARIANT(Array, ARRAY,
-    hacc::Array a;
-    operator hacc::Array& () { return a; }
-    Array (const hacc::Array& a, hacc::String id = "") : Hacc(id), a(a) { }
-    Array (hacc::Array&& a, hacc::String id = "") : Hacc(id), a(a) { }
-    Array (std::initializer_list<Hacc*> l, hacc::String id = "") : Hacc(id), a(l) { }
-    size_t n_elems () const { return a.size(); }
-    Hacc* elem (uint i) const { return a.at(i); }
-)
-HACC_VARIANT(Object, OBJECT,
-    hacc::Object o;
-    operator hacc::Object& () { return o; }
-    Object (const hacc::Object& o, hacc::String id = "") : Hacc(id), o(o) { }
-    Object (hacc::Object&& o, hacc::String id = "") : Hacc(id), o(o) { }
-    Object (std::initializer_list<std::pair<hacc::String, Hacc*>> l, hacc::String id = "") : Hacc(id), o(l) { }
-    size_t n_attrs () const { return o.size(); }
-    hacc::String name_at (uint i) const { return o.at(i).first; }
-    Hacc* value_at (uint i) const { return o.at(i).second; }
-    bool has_attr (hacc::String s) const;
-    Hacc* attr (hacc::String s) const;
-)
-HACC_VARIANT_S(Error, ERROR, Error, e)
+    };
 
- // Because ugh
-#define HACC_NEW_DECL(type, letter, name) static inline Hacc* new_hacc (type letter, String id = "") { return new Hacc::name(letter, id); }
-#define HACC_NEW_DECL_COPY(type, letter, name) static inline Hacc* new_hacc (const type& letter, String id = "") { return new Hacc::name(letter, id); }
-#define HACC_NEW_DECL_MOVE(type, letter, name) static inline Hacc* new_hacc (type&& letter, String id = "") { return new Hacc::name(std::forward<type>(letter), id); }
-static inline Hacc* new_hacc () { return new Hacc::Null(); }
-HACC_NEW_DECL(Null, n, Null)
-HACC_NEW_DECL(Bool, b, Bool)
-HACC_NEW_DECL(char, i, Integer)
-HACC_NEW_DECL(int8, i, Integer)
-HACC_NEW_DECL(uint8, i, Integer)
-HACC_NEW_DECL(int16, i, Integer)
-HACC_NEW_DECL(uint16, i, Integer)
-HACC_NEW_DECL(int32, i, Integer)
-HACC_NEW_DECL(uint32, i, Integer)
-HACC_NEW_DECL(int64, i, Integer)
-HACC_NEW_DECL(uint64, i, Integer)
-HACC_NEW_DECL(Float, f, Float)
-HACC_NEW_DECL(Double, d, Double)
-HACC_NEW_DECL(String, s, String)
-HACC_NEW_DECL(Var, v, Var)
-HACC_NEW_DECL(Pointer, p, Pointer)
-HACC_NEW_DECL(AttrRef, ar, AttrRef)
-HACC_NEW_DECL(ElemRef, er, ElemRef)
-HACC_NEW_DECL(Address, ad, Address)
-HACC_NEW_DECL_COPY(MacroCall, mc, MacroCall)
-HACC_NEW_DECL_MOVE(MacroCall, mc, MacroCall)
-HACC_NEW_DECL_COPY(Array, a, Array)
-HACC_NEW_DECL_MOVE(Array, a, Array)
-HACC_NEW_DECL_COPY(Object, o, Object)
-HACC_NEW_DECL_MOVE(Object, o, Object)
-HACC_NEW_DECL(std::initializer_list<Hacc*>, l, Array)
-static inline Hacc* new_hacc (std::initializer_list<std::pair<std::basic_string<char>, Hacc*>> l) { return new Hacc::Object(l); }
+     // Memory management
+    void start ();
+    void finish ();
+     // Semiautomatic
+    struct Lock {
+        Lock ();
+        ~Lock ();
+    };
 
-static inline std::pair<String, Hacc*> hacc_attr (String name, Hacc* val) {
-    return std::pair<String, Hacc*>(name, val);
+     // The type itself
+    struct Hacc {
+        Form form;
+        union {
+            bool b;
+            int64 i;
+            float f;
+            double d;
+            String s;
+            Array* a;
+            Object* o;
+            Var v;
+            Address address;
+            Assignment assignment;
+            Constraint constraint;
+            Pointer p;
+            Attr attr;
+            Elem elem;
+            Macro* macro;
+            Error* error;
+        };
+        Hacc (Null n = null) : form(NULLFORM) { }
+        Hacc (bool b) : form(BOOL), b(b) { }
+        Hacc (int8 i) : form(INTEGER), i(i) { }
+        Hacc (int16 i) : form(INTEGER), i(i) { }
+        Hacc (int32 i) : form(INTEGER), i(i) { }
+        Hacc (int64 i) : form(INTEGER), i(i) { }
+        Hacc (uint8 i) : form(INTEGER), i(i) { }
+        Hacc (uint16 i) : form(INTEGER), i(i) { }
+        Hacc (uint32 i) : form(INTEGER), i(i) { }
+        Hacc (uint64 i) : form(INTEGER), i(i) { }
+        Hacc (float f) : form(FLOAT), f(f) { }
+        Hacc (double d) : form(DOUBLE), d(d) { }
+        Hacc (std::string s) : form(STRING), s(s) { }
+        Hacc (const Array& a) : form(ARRAY), a(new Array (a)) { }
+        Hacc (Array&& a) : form(ARRAY), a(new Array (a)) { }
+        Hacc (const Object& o) : form(OBJECT), o(new Object (o)) { }
+        Hacc (Object&& o) : form(OBJECT), o(new Object (o)) { }
+        Hacc (Var v) : form(VAR), v(v) { }
+        Hacc (Address a) : form(ADDRESS), address(a) { }
+        Hacc (Assignment a) : form(ASSIGNMENT), assignment(a) { }
+        Hacc (Constraint c) : form(CONSTRAINT), constraint(c) { }
+        Hacc (Pointer p) : form(POINTER), p(p) { }
+        Hacc (Attr a) : form(ATTR), attr(a) { }
+        Hacc (Elem e) : form(ELEM), elem(e) { }
+        Hacc (const Macro& m) : form(MACRO), macro(new Macro (m)) { }
+        Hacc (Macro&& m) : form(MACRO), macro(new Macro (m)) { }
+        Hacc (const Error& e) : form(ERROR), error(new Error (e)) { }
+        Hacc (Error&& e) : form(ERROR), error(new Error (e)) { }
+        ~Hacc ();
+        float get_float () const;
+        double get_double () const;
+        static void* operator new (size_t);
+    };
 }
-template <class... Args>
-static inline std::pair<String, Hacc*> new_attr (String name, Args... args) {
-    return std::pair<String, Hacc*>(name, new_hacc(args...));
-}
-
-} // namespace hacc
-
- // I had a class "Bomb" that acted in place of a "finally" clause.
- // But it was buggy and prone to explode very messily.
- // I'm kicking myself for forgetting about libgc until now.
 
 #endif

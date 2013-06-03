@@ -335,6 +335,7 @@ namespace internal {
 
 
 std::unordered_map<std::string, void (*)(void*)> printers = {
+    {typeid(bool).name(), [](void* p){ printf("%lu", (unsigned long)*(bool*)p); } },
     {typeid(char).name(), [](void* p){ printf("'%c'", *(char*)p); } },
     {typeid(signed char).name(), [](void* p){ printf("%hhd", *(signed char*)p); } },
     {typeid(unsigned char).name(), [](void* p){ printf("%hhu", *(unsigned char*)p); } },

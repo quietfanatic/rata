@@ -9,12 +9,11 @@ void hacc_string_test (hacc::String from, hacc::String to) {
     using namespace tap;
     Hacc* tree = hacc_from_string(from);
     const char* name = (escape_string(from) + " -> " + escape_string(to)).c_str();
-    if (tree->form() == ERROR) {
+    if (tree->form == ERROR) {
         fail(name);
-        printf(" # Parse failed: %s\n", static_cast<const Hacc::Error*>(tree)->e.what());
+        printf(" # Parse failed: %s\n", tree->error->what());
     }
     else is(hacc_to_string(tree), to, name);
-    delete(tree);
 }
 
 tap::Tester hacc_strings_tester ("hacc-strings", [](){
@@ -71,10 +70,10 @@ tap::Tester hacc_strings_tester ("hacc-strings", [](){
      printf(" # Vars\n");  // 2
     hacc_string_test("$thing_3432", "$thing_3432");
     hacc_string_test("$\"stringish\\nid\"", "$\"stringish\\nid\"");
-     printf(" # Prefixes\n");  // 3
-    hacc_string_test("$one = 1", "$one = 1");
-    hacc_string_test("$two=2", "$two = 2");
-    hacc_string_test("{ak: $ai = \"as\" bk: $\"bi\" = \"bs\"}", "{ ak: $ai = \"as\" bk: $bi = \"bs\" }");
+     printf(" # Assignments\n");  // 3
+    hacc_string_test("$one=1", "$one=1");
+    hacc_string_test("$two = 2", "$two=2");
+    hacc_string_test("{ak: $ai = \"as\" bk: $\"bi\" = \"bs\"}", "{ ak:$ai=\"as\" bk:$bi=\"bs\" }");
      printf(" # Misc\n");  // 1
     hacc_string_test("{ things: [ {test_actor: {}} ] }", "{ things:[{ test_actor:{} }] }");
     

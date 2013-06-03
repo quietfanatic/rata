@@ -1,119 +1,81 @@
-
 #include "../inc/hacc.h"
 
 namespace hacc {
-
- // Produce error message
-const char* Error::what () const noexcept(true) {
-    char ls [32]; sprintf((char*)ls, "%d", line);
-    char cs [32]; sprintf((char*)cs, "%d", col);
-    String r = line
-        ? file.empty()
-            ? mess + " at line " + (const char*)ls
-                   + " col " + (const char*)cs
-            : mess + " at " + file
-                   + " line " + (const char*)ls
-                   + " col " + (const char*)cs
-        : mess;
-    return r.c_str();
-}
-
- // Get string name of a form
-const char* form_name (Form form) {
-    switch (form) {
-        case UNDEFINED: return "undefined";
-        case NULLFORM: return "null";
-        case BOOL: return "bool";
-        case INTEGER: return "integer";
-        case FLOAT: return "float";
-        case DOUBLE: return "double";
-        case STRING: return "string";
-        case VAR: return "var";
-        case POINTER: return "pointer";
-        case ATTRREF: return "attrref";
-        case ELEMREF: return "elemref";
-        case ADDRESS: return "address";
-        case MACROCALL: return "macrocall";
-        case ARRAY: return "array";
-        case OBJECT: return "object";
-        case ERROR: return "error";
-        default: return "corrupted";
-    }
-}
-
-hacc::Error Hacc::form_error (hacc::String expected) {
-    if (form() == ERROR) return static_cast<Hacc::Error*>(this)->e;
-    else return Error("Expected " + expected + " Hacc, but got " + form_name(form()) + " Hacc.");
-}
-
-
-bool Hacc::Object::has_attr (hacc::String name) const  {
-    for (auto it = o.begin(); it != o.end(); it++) {
-        if (it->first == name) {
-            return true;
+    std::string form_name (Form f) {
+        switch (f) {
+            case UNDEFINED: return "undefined";
+            case NULLFORM: return "null";
+            case BOOL: return "bool";
+            case INTEGER: return "integer";
+            case FLOAT: return "float";
+            case DOUBLE: return "double";
+            case STRING: return "string";
+            case ARRAY: return "array";
+            case OBJECT: return "object";
+            case VAR: return "var";
+            case ADDRESS: return "address";
+            case ASSIGNMENT: return "assignment";
+            case CONSTRAINT: return "constraint";
+            case POINTER: return "pointer";
+            case ATTR: return "attr";
+            case ELEM: return "elem";
+            case MACRO: return "macro";
+            case ERROR: return "error";
+            default: return "corrupted";
         }
     }
-    return false;
-}
+     // Memory management
+    std::vector<Hacc*> pool;
+    uint refs = 0;
+    void start () {
+        refs++;
+    }
+    void finish () {
+        if (--refs) {
+            for (auto p : pool) free(p);
+        }
+        pool.clear();
+    }
+    Lock::Lock () { start(); }
+    Lock::~Lock () { finish(); }
 
-Hacc* Hacc::Object::attr (hacc::String name) const {
-    for (auto it = o.begin(); it != o.end(); it++) {
-        if (it->first == name) {
-            return it->second;
+    Hacc::~Hacc () {
+        switch (form) {
+            case STRING: s.~String(); break;
+            case ARRAY: delete a; break;
+            case OBJECT: delete o; break;
+            case VAR: v.~Var(); break;
+            case ADDRESS: address.~Address(); break;
+            case ASSIGNMENT: assignment.~Assignment(); break;
+            case CONSTRAINT: constraint.~Constraint(); break;
+            case POINTER: p.~Pointer(); break;
+            case ATTR: attr.~Attr(); break;
+            case ELEM: elem.~Elem(); break;
+            case MACRO: delete macro; break;
+            case ERROR: delete error; break;
+            default: break;
         }
     }
-    throw Error("No atttribute '" + name + "'");
-}
-
-#define HACC_AS_IMPL(type, name, theform) Hacc::type* Hacc::as_##name () { if (form() != hacc::theform) throw form_error(#name); return static_cast<Hacc::type*>(this); }
-#define HACC_GETTER_IMPL(type, name, letter) hacc::type& Hacc::get_##name () { return as_##name()->letter; }
-#define HACC_GETTER_R_IMPL(type, name, letter) hacc::type Hacc::get_##name () { return as_##name()->letter; }
-HACC_AS_IMPL(Null, null, NULLFORM)
-HACC_AS_IMPL(Bool, bool, BOOL)
-HACC_AS_IMPL(Integer, integer, INTEGER)
-HACC_AS_IMPL(Float, float, FLOAT)
-HACC_AS_IMPL(Double, double, DOUBLE)
-HACC_AS_IMPL(String, string, STRING)
-HACC_AS_IMPL(Var, var, VAR)
-HACC_AS_IMPL(Pointer, pointer, POINTER)
-HACC_AS_IMPL(AttrRef, attrref, ATTRREF)
-HACC_AS_IMPL(ElemRef, elemref, ELEMREF)
-HACC_AS_IMPL(Address, address, ADDRESS)
-HACC_AS_IMPL(MacroCall, macrocall, MACROCALL)
-HACC_AS_IMPL(Array, array, ARRAY)
-HACC_AS_IMPL(Object, object, OBJECT)
-HACC_AS_IMPL(Error, error, ERROR)
-HACC_GETTER_R_IMPL(Null, null, n)
-HACC_GETTER_R_IMPL(Bool, bool, b)
-HACC_GETTER_R_IMPL(Integer, integer, i)
-HACC_GETTER_IMPL(String, string, s)
-HACC_GETTER_IMPL(Var, var, v)
-HACC_GETTER_IMPL(Pointer, pointer, p)
-HACC_GETTER_IMPL(AttrRef, attrref, ar)
-HACC_GETTER_IMPL(ElemRef, elemref, er)
-HACC_GETTER_IMPL(Address, address, ad)
-HACC_GETTER_IMPL(MacroCall, macrocall, mc)
-HACC_GETTER_IMPL(Array, array, a)
-HACC_GETTER_IMPL(Object, object, o)
-HACC_GETTER_IMPL(Error, error, e)
-hacc::Float Hacc::get_float () {
-    switch (form()) {
-        case INTEGER: return static_cast<Hacc::Integer*>(this)->i;
-        case FLOAT: return static_cast<Hacc::Float*>(this)->f;
-        case DOUBLE: return static_cast<Hacc::Double*>(this)->d;
-        default: throw form_error("numeric");
+    float Hacc::get_float () const {
+        switch (form) {
+            case INTEGER: return i;
+            case FLOAT: return f;
+            case DOUBLE: return d;
+            case ERROR: throw *error;
+            default: throw Error("Cannot get_float from a " + form_name(form) + " hacc.");
+        }
+    }
+    double Hacc::get_double () const {
+        switch (form) {
+            case INTEGER: return i;
+            case FLOAT: return f;
+            case DOUBLE: return d;
+            case ERROR: throw *error;
+            default: throw Error("Cannot get_double from a " + form_name(form) + " hacc.");
+        }
+    }
+    void* Hacc::operator new (size_t size) {
+        pool.push_back((Hacc*)malloc(size));
+        return (void*)pool.back();
     }
 }
-
-hacc::Double Hacc::get_double () {
-    switch (form()) {
-        case INTEGER: return static_cast<Hacc::Integer*>(this)->i;
-        case FLOAT: return static_cast<Hacc::Float*>(this)->f;
-        case DOUBLE: return static_cast<Hacc::Double*>(this)->d;
-        default: throw form_error("numeric");
-    }
-}
-
-
-}
-

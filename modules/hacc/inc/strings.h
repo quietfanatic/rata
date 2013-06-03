@@ -12,8 +12,6 @@ String escape_string (const String&);
  // Does add quotes if necessary
 String escape_ident (const String&);
  // unescape is harder to abstract out, so we'll wait till we need it.
- // Serialize the value part to a string
-String hacc_value_to_string (Hacc*, uint ind = 0, uint prior_ind = 0);
 
  // Write a Hacc to a string
 String hacc_to_string (Hacc*, uint ind = 0, uint prior_ind = 0);
