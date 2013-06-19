@@ -24,21 +24,6 @@ namespace hacc {
             default: return "corrupted";
         }
     }
-     // Memory management
-    std::vector<Hacc*> pool;
-    uint refs = 0;
-    void start () {
-        refs++;
-    }
-    void finish () {
-        if (--refs) {
-            for (auto p : pool) free(p);
-        }
-        pool.clear();
-    }
-    Lock::Lock () { start(); }
-    Lock::~Lock () { finish(); }
-
     Hacc::~Hacc () {
         switch (form) {
             case STRING: s.~String(); break;
@@ -73,9 +58,5 @@ namespace hacc {
             case ERROR: throw *error;
             default: throw Error("Cannot get_double from a " + form_name(form) + " hacc.");
         }
-    }
-    void* Hacc::operator new (size_t size) {
-        pool.push_back((Hacc*)malloc(size));
-        return (void*)pool.back();
     }
 }

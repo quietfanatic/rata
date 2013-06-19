@@ -4,8 +4,7 @@
 tap::Tester hacc_tester ("hacc", [](){
     using namespace hacc;
     using namespace tap;
-    plan(12);
-    start();
+    plan(11);
     is(Hacc().form, NULLFORM, "nullary constructor makes null hacc");
     is(Hacc(true).b, true, "bool roundtrip");
     is(Hacc(false).b, false, "false roundtrip");
@@ -18,7 +17,6 @@ tap::Tester hacc_tester ("hacc", [](){
     is(*Hacc(Array()).a, Array(), "Empty array roundtrip");
     const Array& a = Array{new Hacc (3), new Hacc (4.f)};
     is(*Hacc(a).a, a, "Full array roundtrip");
-    doesnt_throw([](){finish();});
 //    is(Hacc({new Hacc (4)}).elem(0)->form(), INTEGER, "Hacc::Array::elem appears to work");
 //    is(Hacc::Array{new_hacc(4)}.n_elems(), (size_t)1, "Hacc::Array::n_elems appears to work");
 //    is(Hacc::Object{{String("asdf"), new_hacc(4)}}.n_attrs(), (size_t)1, "Hacc::Object::n_attrs appears to work");

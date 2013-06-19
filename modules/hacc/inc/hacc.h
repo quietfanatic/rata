@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <typeinfo>
+#include <gc/gc_cpp.h>
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -115,17 +116,8 @@ namespace hacc {
 
     };
 
-     // Memory management
-    void start ();
-    void finish ();
-     // Semiautomatic
-    struct Lock {
-        Lock ();
-        ~Lock ();
-    };
-
      // The type itself
-    struct Hacc {
+    struct Hacc : gc {
         Form form;
         union {
             bool b;
@@ -176,7 +168,6 @@ namespace hacc {
         ~Hacc ();
         float get_float () const;
         double get_double () const;
-        static void* operator new (size_t);
     };
 }
 
