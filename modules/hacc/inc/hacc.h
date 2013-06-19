@@ -258,10 +258,10 @@ static inline std::pair<String, Hacc*> new_attr (String name, Args... args) {
     return std::pair<String, Hacc*>(name, new_hacc(args...));
 }
 
-} // namespace hacc
-
  // I had a class "Bomb" that acted in place of a "finally" clause.
  // But it was buggy and prone to explode very messily.
  // I'm kicking myself for forgetting about libgc until now.
+
+} // namespace hacc
 
 #endif

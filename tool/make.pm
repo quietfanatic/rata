@@ -200,10 +200,7 @@ sub targetmatch {
 }
 
 sub run (@) {
-    require IPC::System::Simple;
-    eval { IPC::System::Simple::system(@_) };
-    if ($@) {
-        warn $@;
+    system(@_) == 0 or do {
         my @command = @_;
         ref $_[0] eq 'ARRAY' and shift @command;
         for (@command) {
@@ -212,7 +209,18 @@ sub run (@) {
                 $_ = "'$_'";
             }
         }
-        status("☢ Command failed: @command\n");
+         # As per perldoc -f system
+        if ($? == -1) {
+            status(print "☢ Couldn't start command: $!\n");
+        }
+        elsif ($? & 127) {
+            status(sprintf "☢ Command died with signal %d, %s coredump\n",
+               ($? & 127),  ($? & 128) ? 'with' : 'without');
+        }
+        else {
+            status(sprintf "☢ Command exited with value %d\n", $? >> 8);
+        }
+        status("☢ Failed command: @command\n");
         die "\n";
     }
 }

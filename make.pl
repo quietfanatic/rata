@@ -5,7 +5,7 @@ use warnings;
 use FindBin;
 use if !%make::, lib => "$FindBin::Bin/tool";
 use make qw(:all);
-use autodie qw(:all);
+use autodie;
 use File::Path qw<remove_tree>;
 use File::Spec::Functions qw(:ALL);
 
@@ -18,7 +18,7 @@ workflow {
      # we require advanced C++11 features.  All modules' make.pls should include
      # this file.
     sub cppc {
-        run "$here/tool/filter_errors.pl", qw<g++-4.7 -std=c++11 -fmax-errors=10 -c -Wall -Wno-format-security -ggdb>, @_;
+        run "$here/tool/filter_errors.pl", qw<g++-4.7 -std=c++11 -fmax-errors=10 -c -Wall -Wno-format-security -ggdb>, "-I$here/lib", @_;
     }
     sub ld {
         run qw<g++-4.7>, @_;
