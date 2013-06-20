@@ -17,6 +17,19 @@ namespace core {
     }
     GLenum diagnose_opengl (std::string when = "");
 
+    struct Renderer {
+         // Called when the current renderer is switched to this one
+        virtual void start_rendering () { }
+         // Called when the current renderer is switched away from this one
+        virtual void finish_rendering () { }
+         // Does the aforementioned switch
+        void use ();
+         // Keeps track
+        static Renderer* current;
+
+        virtual ~Renderer () { }
+    };
+
 }
 
 #endif

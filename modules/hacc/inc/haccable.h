@@ -250,6 +250,7 @@ template <class C> String get_type_name () {
 #define HCB_PARAMS(...) __VA_ARGS__
 #define HCB_TEMPLATE_BEGIN(params, type) template params struct Haccable<type> : hacc::Haccability<type> { \
     using hcb = hacc::Haccability<type>; \
+    using this_type = type; \
     using hcb::type_name; \
     using hcb::finish; \
     using hcb::to; \

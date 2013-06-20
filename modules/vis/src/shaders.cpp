@@ -114,16 +114,6 @@ namespace vis {
         return r;
     }
 
-    Renderer* Renderer::current = NULL;
-
-    void Renderer::use () {
-        if (current != this) {
-            if (current) current->finish_rendering();
-            start_rendering();
-            current = this;
-        }
-    }
-
 }
 
 using namespace vis;

@@ -26,21 +26,6 @@ namespace vis {
         ~Program ();
     };
 
-     // These should be global singletons.
-    struct Renderer {
-         // Called when the current renderer is switched to this one
-        virtual void start_rendering () = 0;
-         // Called when the current renderer is switched away from this one
-        virtual void finish_rendering () { }
-         // Does the aforementioned switch
-        void use ();
-         // Keeps track
-        static Renderer* current;
-
-        virtual ~Renderer () { }
-    };
-
-
 }
 
 #endif

@@ -9,4 +9,15 @@ namespace core {
         return err;
     }
 
+    Renderer* Renderer::current = NULL;
+
+    void Renderer::use () {
+        if (current != this) {
+            if (current) current->finish_rendering();
+            start_rendering();
+            current = this;
+        }
+    }
+
+
 }
