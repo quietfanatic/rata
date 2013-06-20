@@ -16,10 +16,10 @@ namespace phys {
         b2World* b2world;
         Space ();
 
-        Vec get_gravity () const;
-        void set_gravity (Vec g);
+        Vec get_gravity () const { return b2world->GetGravity(); }
+        void set_gravity (Vec g) { b2world->SetGravity(g); }
 
-        void start ();
+        void start () { };
         void run ();
         ~Space ();
     };
@@ -33,16 +33,12 @@ namespace phys {
         b2FixtureDef b2;
         uint64 coll_a = 0;
         uint64 coll_b = 0;
-
-        b2Fixture* manifest (b2Body*);
     };
     struct BodyDef {
-        b2BodyDef b2;
+        b2BodyType type;
+        float damping;
+        float gravity_scale;
         std::vector<FixtureDef> fixtures;
-
-        BodyDef () { b2.active = false; }
-
-        b2Body* manifest (Object* owner, Space* space, Vec pos = Vec(0, 0), Vec vel = Vec(0, 0));
     };
 
      // The dynamic thing
@@ -56,6 +52,9 @@ namespace phys {
         void set_vel (Vec v) { b2body->SetLinearVelocity(b2Vec2(v.x, v.y)); }
         void impulse (Vec i) { b2body->ApplyLinearImpulse(b2Vec2(i.x, i.y), b2Vec2(0, 0)); }
         void force (Vec f) { b2body->ApplyForceToCenter(b2Vec2(f.x, f.y)); }
+
+        void apply_bdf (BodyDef*);
+        b2Fixture* add_fixture (FixtureDef*);
 
         b2Fixture* fix_no (uint i) {
             b2Fixture* fix = b2body->GetFixtureList();
@@ -83,7 +82,8 @@ namespace phys {
         virtual void while_intangible () { }
         virtual ~Object () { if (b2body) space->b2world->DestroyBody(b2body); }
 
-        Object (BodyDef* body_def) { b2body = body_def->manifest(this, space); }
+        Object ();
+        Object (BodyDef* def);
     };
 
      // Collision handling is done through registered collision rules.

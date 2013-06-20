@@ -62,6 +62,11 @@ namespace vis {
         );
     }
 
+    void Model::apply_skel (Skel* skel_) {
+        skel = skel_;
+        segs.resize(skel->segs.size());
+    }
+
     void Model::apply_pose (Pose* pose) {
         for (auto& app : pose->apps) {
             segs[skel->seg_index(app.target)].pose = &app;

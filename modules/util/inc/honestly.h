@@ -8,7 +8,7 @@
 typedef std::string Str;
 template <class T> using Hash = std::unordered_map<std::string, T>;
 template <class T> using Init_Safe = T& ();
-#define INIT_SAFE(type, name, ...) type& name () { static type r (__VA_ARGS__); return r; }
+#define INIT_SAFE(type, name, ...) type& name () { static type r __VA_ARGS__; return r; }
 #define EXTERN_INIT_SAFE(type, name) type& name ();
 
 #define STRINGIFY(v) #v

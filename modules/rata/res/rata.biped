@@ -1,4 +1,5 @@
 new("ent::BipedDef" {
+    body_def: file("modules/ent/res/small.bdf")
     stats: new({
         walk_friction: 1.0
         walk_speed: 4.0
@@ -12,5 +13,6 @@ new("ent::BipedDef" {
         air_speed: 4.0
         jump_impulse: 10.0
     })
+    skel: file("modules/ent/res/small.skel")
     skin: file("modules/rata/res/rata-base.skin")
 })

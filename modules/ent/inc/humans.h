@@ -16,7 +16,7 @@ namespace ent {
     struct BipedDef;
 
      // TODO: separate soul from body
-    struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Draws_Sprites, core::Key_Listener {
+    struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Draws_Sprites, core::Key_Listener, core::Stateful {
          // Skeletons for bipeds must have these poses in this order.
         enum Pose {
             STAND,
@@ -36,6 +36,10 @@ namespace ent {
         };
 
         BipedDef* def;
+         // Bleh
+        BipedDef* get_def () const { return def; }
+        void set_def (BipedDef*);
+
         Controls controls;
         phys::Ambulator legs;
         vis::Model model;  // Must be a humanlike model
@@ -44,7 +48,10 @@ namespace ent {
         float distance_walked;
         float oldxrel;
 
-        Biped (phys::BodyDef* bdf, vis::Skel* skel);
+        Biped ();
+
+         // Stateful
+        void start ();
 
          // Key_Listener
         bool hear_key (int keycode, int action);
@@ -81,15 +88,10 @@ namespace ent {
     };
 
     struct BipedDef {
+        phys::BodyDef* body_def;
         BipedStats* stats;  // Initial stats only.
+        vis::Skel* skel;
         vis::Skin* skin;
-    };
-
-    struct SmallBiped : Biped, core::Stateful {
-        SmallBiped ();
-
-         // Stateful
-        void start ();
     };
 
 }

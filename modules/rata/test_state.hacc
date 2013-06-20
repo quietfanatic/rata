@@ -5,7 +5,7 @@
         {Model_Tester:{}}
         {Sprite_Test:{}}
         {Console:{ font:file("modules/rata/res/font-small.font") }}
-        {SmallBiped:{
+        {Biped:{
             def:file("modules/rata/res/rata.biped")
             object:{ pos:[10 10.5] }
             resident:{ room:file("modules/rata/res/test.room") }

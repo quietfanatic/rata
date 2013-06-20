@@ -1,5 +1,4 @@
 new("phys::BodyDef" {
-    b2:{ }
     fixtures:[{
         b2:{
             shape:{ polygon:{ verts:[
