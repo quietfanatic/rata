@@ -36,19 +36,4 @@ extern std::unordered_map<size_t, std::string> command_descriptions;
 template <class Cmd>
 void command_description (std::string desc) { command_descriptions.emplace(typeid(Cmd).hash_code(), desc); }
 
-#define DEF_COMMAND_SP(type, name) type name;
-#define DEF_COMMAND_SPD(type, name, def) type name;
-#define DEF_COMMAND_HP(type, name) attr(#name, member(&this_type::name));
-#define DEF_COMMAND_HPD(type, name, def) attr(#name, member(&this_type::name)(def));
-#define DEF_COMMAND(name, desc, params, ...) \
-    struct Command_##name : Command { \
-        params(DEF_COMMAND_SP, DEF_COMMAND_SPD) \
-        void operator () () { __VA_ARGS__ } \
-    }; \
-    HCB_BEGIN(Command_##name) \
-        type_name(STRINGIFY(Command_##name)); \
-        command_description(desc); \
-        params(DEF_COMMAND_HP, DEF_COMMAND_HPD); \
-    HCB_END(Command_##name)
-
 #endif
