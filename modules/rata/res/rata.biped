@@ -1,0 +1,16 @@
+new("ent::BipedDef" {
+    stats: new({
+        walk_friction: 1.0
+        walk_speed: 4.0
+        run_friction: 0.5
+        run_speed: 6.0
+        crawl_friction: 1.0
+        crawl_speed: 2.0
+        stop_friction: 1.0
+        skid_friction: 1.0
+        air_force: 0.2
+        air_speed: 4.0
+        jump_impulse: 10.0
+    })
+    skin: file("modules/rata/res/rata-base.skin")
+})

@@ -91,7 +91,7 @@ namespace vis {
             model.draw(Vec(10, 4), flip, false, 0.5);
         }
         void start () {
-            model = Model(hacc::reference_file<Skel>("modules/rata/res/rata.skel"));
+            model = Model(hacc::reference_file<Skel>("modules/ent/res/small.skel"));
             model.apply_skin(hacc::reference_file<Skin>("modules/rata/res/rata-base.skin"));
             model.apply_pose(model.skel->poses.named("stand"));
         }
