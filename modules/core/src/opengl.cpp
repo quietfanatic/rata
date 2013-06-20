@@ -3,6 +3,15 @@
 
 namespace core {
 
+    void* g_glproc (const char* name) {
+        void* r = glfwGetProcAddress(name);
+        if (!r) {
+            fprintf(stderr, "No GL proc was found named %s\n", name);
+            throw std::logic_error("Missing GL procedure.");
+        }
+        return r;
+    }
+
     GLenum diagnose_opengl (std::string when) {
         GLenum err = glGetError();
         if (err)
@@ -127,9 +136,7 @@ namespace core {
         return r;
     }
 
-} // namespace core
-
-using namespace core;
+} using namespace core;
 
 HCB_BEGIN(Shader)
     type_name("core::Shader");

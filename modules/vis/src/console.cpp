@@ -179,9 +179,8 @@ namespace vis {
             draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, 20);
         }
     };
-}
+} using namespace vis;
 
-using namespace vis;
 HCB_BEGIN(Console)
     type_name("vis::Console");
     base<core::Stateful>("Console");

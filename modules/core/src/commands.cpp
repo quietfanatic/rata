@@ -69,10 +69,7 @@ namespace core {
 
     Links<Receives_Output> output_receivers;
 
-
-}
-
-using namespace core;
+} using namespace core;
 
 std::unordered_map<size_t, std::string> command_descriptions;
 

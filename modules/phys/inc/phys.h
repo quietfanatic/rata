@@ -9,6 +9,7 @@
 #include "../../hacc/inc/haccable_integration.h"
 
 namespace phys {
+
     struct Object;
 
     struct Space : core::Phase, core::Stateful {
@@ -99,6 +100,7 @@ namespace phys {
 
         uint64 bit () { return 1 << index; }
     };
+
 }
 
 #endif

@@ -115,9 +115,8 @@ namespace geo {
         }
     }
 
-}
+} using namespace geo;
 
-using namespace geo;
 HCB_BEGIN(Room)
     type_name("geo::Room");
     attr("boundary", member(&Room::boundary));
@@ -125,10 +124,12 @@ HCB_BEGIN(Room)
     attr("furniture", member(&Room::furniture)(optional));
     finish([](Room& r){ for (auto f : r.furniture) f->start(); });
 HCB_END(Room)
+
 HCB_BEGIN(Furniture)
     type_name("geo::Furniture");
     pointee_policy(hacc::FOLLOW);
 HCB_END(Furniture)
+
 HCB_BEGIN(Resident)
     type_name("geo::Resident");
     attr("room", member(&Resident::room));

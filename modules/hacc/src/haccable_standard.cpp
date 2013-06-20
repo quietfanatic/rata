@@ -10,7 +10,6 @@ HCB_END(cpptype)
 
 using namespace hacc;
 
-
 HCB_LIT(hacc::Null, null)
 HCB_LIT(bool, bool)
 HCB_LIT(char, integer)

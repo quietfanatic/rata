@@ -189,9 +189,7 @@ namespace vis {
         }
     };
 
-}
-
-using namespace vis;
+} using namespace vis;
 
 HCB_BEGIN(Frame)
     type_name("vis::Frame");

@@ -75,4 +75,3 @@ HCB_BEGIN(Rata)
     attr("biped", supertype<Biped>());
 HCB_END(Rata)
 
-

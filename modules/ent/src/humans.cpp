@@ -135,9 +135,8 @@ namespace ent {
         phys::Object(bdf), legs(this), model(skel)
     { }
 
-}
+} using namespace ent;
 
-using namespace ent;
 HCB_BEGIN(Biped)
     type_name("ent::Biped");
     attr("object", supertype<phys::Object>());

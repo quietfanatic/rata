@@ -7,6 +7,7 @@
 #include "sprites.h"
 
 namespace vis {
+
      // Static things
     struct Pose;
     struct Skel;

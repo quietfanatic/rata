@@ -170,9 +170,8 @@ namespace vis {
         return Vec(curx*PX, cury*PX);
     }
 
-}
+} using namespace vis;
 
-using namespace vis;
 HCB_BEGIN(Font)
     type_name("vis::Font");
     attr("texture", member(&Font::texture));

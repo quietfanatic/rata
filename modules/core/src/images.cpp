@@ -74,9 +74,7 @@ namespace core {
                 return &t;
         return NULL;
     }
-}
-
-using namespace core;
+} using namespace core;
 
 HCB_BEGIN(Texture)
     type_name("core::Texture");
