@@ -107,7 +107,6 @@ HCB_BEGIN(SeqCommand)
     command_description<SeqCommand>("Perform a sequence of commands.  Usage: seq [[command1 args...] [command2 args...]...]");
 HCB_END(SeqCommand)
 
-
 struct HelpCommand : Command {
     std::string type;
     void operator() () {
