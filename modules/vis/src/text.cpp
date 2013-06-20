@@ -1,6 +1,5 @@
 #include "../inc/text.h"
 #include "../inc/graffiti.h"
-#include "../inc/shaders.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/opengl.h"
 #include "../../core/inc/phases.h"
@@ -15,14 +14,14 @@ namespace vis {
     void Draws_Text::text_appear () { link(text_drawers); }
     void Draws_Text::text_disappear () { unlink(); }
 
-    struct Text_Layer : core::Layer, core::Game_Object, Renderer {
+    struct Text_Layer : Layer, Game_Object, Renderer {
         Program* program = hacc::reference_file<Program>("modules/vis/res/text.prog");
         GLint tex = program->require_uniform("tex");
         GLint camera_pos = program->require_uniform("camera_pos");
         GLint model_pos = program->require_uniform("model_pos");
         GLint color = program->require_uniform("color");
 
-        Text_Layer () : core::Layer("G.M", "text") {
+        Text_Layer () : Layer("G.M", "text") {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
             static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
             glUseProgram(program->glid);

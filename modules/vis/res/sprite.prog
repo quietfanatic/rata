@@ -1,4 +1,4 @@
-new("vis::Program" {
+new("core::Program" {
     shaders: [
         new({ type:vertex source:<<END
             #version 110

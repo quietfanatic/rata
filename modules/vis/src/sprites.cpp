@@ -8,7 +8,6 @@
 #include "../../core/inc/opengl.h"
 #include "../../util/inc/debug.h"
 #include "../inc/sprites.h"
-#include "../inc/shaders.h"
 
 namespace vis {
 
@@ -107,14 +106,14 @@ namespace vis {
     }
 
 
-    struct Sprite_Layer : core::Layer, core::Game_Object, Renderer {
+    struct Sprite_Layer : Layer, Game_Object, Renderer {
         Program* program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
         GLint tex = program->require_uniform("tex");
         GLint camera_pos = program->require_uniform("camera_pos");
         GLint model_pos = program->require_uniform("model_pos");
         GLint model_scale = program->require_uniform("model_scale");
 
-        Sprite_Layer () : core::Layer("C.M", "sprites") {
+        Sprite_Layer () : Layer("C.M", "sprites") {
             static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
             static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
             glUseProgram(program->glid);
@@ -172,7 +171,7 @@ namespace vis {
         diagnose_opengl("After rendering a sprite");
     }
 
-    struct Sprite_Test : core::Stateful, Draws_Sprites {
+    struct Sprite_Test : Stateful, Draws_Sprites {
         void start () { Draws_Sprites::activate(); }
         void draws_sprites () {
             static Image* image = hacc::reference_file<Image>("modules/vis/res/test.image");

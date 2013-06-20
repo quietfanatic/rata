@@ -4,7 +4,6 @@
 #include "../../util/inc/math.h"
 #include "../../util/inc/debug.h"
 #include "../../core/inc/opengl.h"
-#include "../../vis/inc/shaders.h"
 #include "../../core/inc/phases.h"
 #include "../inc/tiles.h"
 
@@ -236,7 +235,7 @@ void Tilemap::start () {
  // Now for drawing tilemaps.
 
 struct Tilemap_Layer : core::Layer, core::Game_Object, core::Renderer {
-    vis::Program* program = hacc::reference_file<vis::Program>("modules/geo/res/tiles.prog");
+    core::Program* program = hacc::reference_file<core::Program>("modules/geo/res/tiles.prog");
     int tex = program->require_uniform("tex");
     int camera_pos = program->require_uniform("camera_pos");
     int model_pos = program->require_uniform("model_pos");

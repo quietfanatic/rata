@@ -4,7 +4,7 @@
 #include "../../core/inc/input.h"
 #include "../../core/inc/commands.h"
 #include "../../core/inc/game.h"
-#include "../inc/shaders.h"
+#include "../../core/inc/opengl.h"
 #include "../inc/graffiti.h"
 #include "../inc/text.h"
 

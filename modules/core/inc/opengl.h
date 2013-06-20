@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdexcept>
+#include <vector>
 #include <GL/glfw.h>
 
 namespace core {
@@ -28,6 +29,26 @@ namespace core {
         static Renderer* current;
 
         virtual ~Renderer () { }
+    };
+
+    struct Shader {
+        uint glid = 0;
+        GLenum type;
+        std::string source;
+    
+        void finish ();
+        ~Shader ();
+    };
+
+    struct Program {
+        std::string name;
+        uint glid = 0;
+        std::vector<Shader*> shaders;
+        std::vector<std::pair<std::string, uint>> attributes;
+
+        int require_uniform (const char* name);
+        void link ();
+        ~Program ();
     };
 
 }
