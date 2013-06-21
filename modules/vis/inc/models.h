@@ -7,6 +7,7 @@
 #include "sprites.h"
 
 namespace vis {
+
      // Static things
     struct Pose;
     struct Skel;
@@ -68,6 +69,7 @@ namespace vis {
         Model (Skel*);
 
         Vec offset_of (Skel::Seg* seg);
+        void apply_skel (Skel*);
         void apply_pose (Pose*);
         void apply_pose_index (uint);
         void apply_skin (Skin*);

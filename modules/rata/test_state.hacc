@@ -5,13 +5,12 @@
         {Model_Tester:{}}
         {Sprite_Test:{}}
         {Console:{ font:file("modules/rata/res/font-small.font") }}
-        {Rata:{
-            biped:{
-                object:{ pos:[10 10.5] }
-                resident:{ room:file("modules/rata/res/test.room") }
-                grounded:{ ground:null }
-                direction:1
-            }
+        {Biped:{
+            def:file("modules/rata/res/rata.biped")
+            object:{ pos:[10 10.5] }
+            resident:{ room:file("modules/rata/res/test.room") }
+            grounded:{ ground:null }
+            direction:1
         }}
         {Test_Actor:{
             object:{ pos:[10 7.5] }

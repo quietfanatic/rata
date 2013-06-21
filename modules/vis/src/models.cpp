@@ -6,50 +6,6 @@
 #include "../../core/inc/state.h"
 #include "../../core/inc/commands.h"
 
-using namespace vis;
-
-HCB_BEGIN(Skel)
-    type_name("vis::Skel");
-    attr("segs", member(&Skel::segs));
-    attr("root", member(&Skel::root));
-    attr("root_offset", member(&Skel::root_offset));
-    attr("poses", member(&Skel::poses));
-    finish([](Skel& skel) { skel.finish(); });
-HCB_END(Skel)
-
-HCB_BEGIN(Skel::Seg)
-    type_name("vis::Skel::Seg");
-    attr("name", member(&Skel::Seg::name));
-    attr("branches", member(&Skel::Seg::branches)(optional));
-    attr("layout", member(&Skel::Seg::layout));
-    attr("z_offset", member(&Skel::Seg::z_offset, def(0.f)));
-HCB_END(Skel::Seg)
-
-HCB_BEGIN(Pose)
-    type_name("vis::Pose");
-    elem(member(&Pose::name));
-    elem(member(&Pose::apps));
-HCB_END(Pose)
-
-HCB_BEGIN(Pose::App)
-    type_name("vis::Pose");
-    elem(member(&Pose::App::target));
-    elem(member(&Pose::App::frame));
-    elem(member(&Pose::App::fliph, def(false)));
-    elem(member(&Pose::App::flipv, def(false)));
-HCB_END(Pose::App)
-
-HCB_BEGIN(Skin)
-    type_name("vis::Skin");
-    attr("apps", member(&Skin::apps));
-HCB_END(Skin)
-
-HCB_BEGIN(Skin::App)
-    type_name("vis::Skin::App");
-    elem(member(&Skin::App::target));
-    elem(member(&Skin::App::textures));
-HCB_END(Skin::App)
-
 namespace vis {
 
     void Skel::finish () {
@@ -106,6 +62,11 @@ namespace vis {
         );
     }
 
+    void Model::apply_skel (Skel* skel_) {
+        skel = skel_;
+        segs.resize(skel->segs.size());
+    }
+
     void Model::apply_pose (Pose* pose) {
         for (auto& app : pose->apps) {
             segs[skel->seg_index(app.target)].pose = &app;
@@ -135,13 +96,55 @@ namespace vis {
             model.draw(Vec(10, 4), flip, false, 0.5);
         }
         void start () {
-            model = Model(hacc::reference_file<Skel>("modules/rata/res/rata.skel"));
+            model = Model(hacc::reference_file<Skel>("modules/ent/res/small.skel"));
             model.apply_skin(hacc::reference_file<Skin>("modules/rata/res/rata-base.skin"));
             model.apply_pose(model.skel->poses.named("stand"));
         }
     };
 
-}
+} using namespace vis;
+
+HCB_BEGIN(Skel)
+    type_name("vis::Skel");
+    attr("segs", member(&Skel::segs));
+    attr("root", member(&Skel::root));
+    attr("root_offset", member(&Skel::root_offset));
+    attr("poses", member(&Skel::poses));
+    finish([](Skel& skel) { skel.finish(); });
+HCB_END(Skel)
+
+HCB_BEGIN(Skel::Seg)
+    type_name("vis::Skel::Seg");
+    attr("name", member(&Skel::Seg::name));
+    attr("branches", member(&Skel::Seg::branches)(optional));
+    attr("layout", member(&Skel::Seg::layout));
+    attr("z_offset", member(&Skel::Seg::z_offset, def(0.f)));
+HCB_END(Skel::Seg)
+
+HCB_BEGIN(Pose)
+    type_name("vis::Pose");
+    elem(member(&Pose::name));
+    elem(member(&Pose::apps));
+HCB_END(Pose)
+
+HCB_BEGIN(Pose::App)
+    type_name("vis::Pose");
+    elem(member(&Pose::App::target));
+    elem(member(&Pose::App::frame));
+    elem(member(&Pose::App::fliph, def(false)));
+    elem(member(&Pose::App::flipv, def(false)));
+HCB_END(Pose::App)
+
+HCB_BEGIN(Skin)
+    type_name("vis::Skin");
+    attr("apps", member(&Skin::apps));
+HCB_END(Skin)
+
+HCB_BEGIN(Skin::App)
+    type_name("vis::Skin::App");
+    elem(member(&Skin::App::target));
+    elem(member(&Skin::App::textures));
+HCB_END(Skin::App)
 
 struct MT_Load_Command : Command {
     Skel* skel;

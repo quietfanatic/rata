@@ -23,6 +23,7 @@ namespace hacc {
             case ERROR: return "error";
             default: return "corrupted";
         }
+        return false;
     }
     Hacc::~Hacc () {
         switch (form) {
@@ -40,6 +41,7 @@ namespace hacc {
             case ERROR: delete error; break;
             default: break;
         }
+        throw Error("No atttribute '" + name + "'");
     }
     float Hacc::get_float () const {
         switch (form) {
@@ -59,4 +61,11 @@ namespace hacc {
             default: throw Error("Cannot get_double from a " + form_name(form) + " hacc.");
         }
     }
+
+     // On OS X libgc will crash if not initted.
+    struct GC_Initter {
+        GC_Initter () { GC_INIT(); }
+    } gc_initter;
+
 }
+

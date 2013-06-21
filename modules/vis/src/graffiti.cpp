@@ -1,7 +1,6 @@
 
 #include <GL/gl.h>
 #include "../inc/graffiti.h"
-#include "../inc/shaders.h"
 #include "../../core/inc/opengl.h"
 #include "../../core/inc/phases.h"
 #include "../../core/inc/state.h"
@@ -11,7 +10,7 @@ namespace vis {
 
     using namespace core;
 
-    struct Graffiti_Renderer : Renderer, core::Game_Object {
+    struct Graffiti_Renderer : Renderer, Game_Object {
         Program* program = hacc::reference_file<Program>("modules/vis/res/color.prog");
         int camera_pos = program->require_uniform("camera_pos");
         int model_pos = program->require_uniform("model_pos");

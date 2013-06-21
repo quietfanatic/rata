@@ -1,15 +1,15 @@
- // Skeleton for the main character.
+ // Skeleton for small characters.
 new("vis::Skel" {
     segs:[
-        $head    = {name:head    branches:[]             layout:file("modules/rata/res/rata.layouts").head    z_offset:-0.02}
-        $forearm = {name:forearm branches:[]             layout:file("modules/rata/res/rata.layouts").forearm z_offset:-0.06}
-        $arm     = {name:arm     branches:[&$forearm]    layout:file("modules/rata/res/rata.layouts").arm     z_offset:-0.04}
-        $body    = {name:body    branches:[&$head &$arm] layout:file("modules/rata/res/rata.layouts").body    z_offset: 0.00}
+        $head    = {name:head    branches:[]             layout:file("modules/ent/res/small.layouts").head    z_offset:-0.02}
+        $forearm = {name:forearm branches:[]             layout:file("modules/ent/res/small.layouts").forearm z_offset:-0.06}
+        $arm     = {name:arm     branches:[&$forearm]    layout:file("modules/ent/res/small.layouts").arm     z_offset:-0.04}
+        $body    = {name:body    branches:[&$head &$arm] layout:file("modules/ent/res/small.layouts").body    z_offset: 0.00}
     ]
     root:&$body
     root_offset:[0 0]
     poses: local(
-        $l = file("modules/rata/res/rata.layouts")
+        $l = file("modules/ent/res/small.layouts")
         $b = $l.body
         $h = $l.head
         $a = $l.arm

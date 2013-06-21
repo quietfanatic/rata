@@ -69,10 +69,7 @@ namespace core {
 
     Links<Receives_Output> output_receivers;
 
-
-}
-
-using namespace core;
+} using namespace core;
 
 std::unordered_map<size_t, std::string> command_descriptions;
 
@@ -106,7 +103,6 @@ HCB_BEGIN(SeqCommand)
     elem(member(&SeqCommand::seq));
     command_description<SeqCommand>("Perform a sequence of commands.  Usage: seq [[command1 args...] [command2 args...]...]");
 HCB_END(SeqCommand)
-
 
 struct HelpCommand : Command {
     std::string type;

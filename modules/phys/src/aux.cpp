@@ -36,7 +36,5 @@ namespace phys {
     void Ambulator::disable () { friction_body->SetActive(false); }
     Ambulator::~Ambulator () { space->b2world->DestroyBody(friction_body); }  // joint goes with
 
-
 }
-
 

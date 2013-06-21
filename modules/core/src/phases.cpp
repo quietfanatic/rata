@@ -10,14 +10,17 @@ namespace core {
     std::vector<Phase*> all_phases;
     std::vector<Layer*> all_layers;
 
-}
-
-using namespace core;
+} using namespace core;
 
 HCB_BEGIN(Phase*)
     type_name("core::Phase*");
     hacc::hacc_pointer_by_property(&Phase::name, all_phases);
 HCB_END(Phase*)
+
+HCB_BEGIN(Layer*)
+    type_name("core::Layer*");
+    hacc::hacc_pointer_by_property(&Layer::name, all_layers);
+HCB_END(Layer*)
 
 struct Allow_Command : Command {
     Phase* phase;
@@ -48,12 +51,6 @@ HCB_BEGIN(Disallow_Command)
     base<Command>("disallow");
     elem(member(&Disallow_Command::phase));
 HCB_END(Disallow_Command)
-
-
-HCB_BEGIN(Layer*)
-    type_name("core::Layer*");
-    hacc::hacc_pointer_by_property(&Layer::name, all_layers);
-HCB_END(Layer*)
 
 struct Show_Command : Command {
     Layer* layer;

@@ -2,22 +2,14 @@
 
 use strict;
 use warnings;
-BEGIN {
-    unless (defined $FindBin::Bin) {
-        require FindBin;
-        require "$FindBin::Bin/../../tool/make.pm";
-    }
-    make->import(':all');
-}
-use autodie qw<:all>;
-use File::Path qw<remove_tree>;
-
+use FindBin;
+use if !%make::, lib => "$FindBin::Bin/../../tool";
+use make;
 
 workflow {
 
     our @objects = qw<
         tmp/main.o
-        tmp/rata.o
         ../core/tmp/game.o
         ../core/tmp/phases.o
         ../core/tmp/commands.o
@@ -52,7 +44,6 @@ workflow {
     include '../..';
 
     cppc_rule('tmp/main.o', 'src/main.cpp');
-    cppc_rule('tmp/rata.o', 'src/rata.cpp');
 
      # Here's the main program
     ld_rule('../../rata', [@objects], [@libs]);

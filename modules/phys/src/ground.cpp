@@ -1,13 +1,6 @@
 
 #include "../inc/ground.h"
 
-using namespace phys;
-HCB_BEGIN(Grounded)
-    type_name("phys::Grounded");
-    attr("ground", member(&Grounded::ground));
-    attr("ground_fix_index", member(&Grounded::ground_fix_index, def((uint)0)));
-HCB_END(Grounded)
-
 namespace phys {
 
     struct Ground_Rule : Collision_Rule {
@@ -40,5 +33,11 @@ namespace phys {
     } gr;
     Collision_Rule* ground_rule = &gr;
 
-}
+} using namespace phys;
+
+HCB_BEGIN(Grounded)
+    type_name("phys::Grounded");
+    attr("ground", member(&Grounded::ground));
+    attr("ground_fix_index", member(&Grounded::ground_fix_index, def((uint)0)));
+HCB_END(Grounded)
 

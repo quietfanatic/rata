@@ -1,6 +1,6 @@
 new("vis::Skin" {
     apps: local(
-        $segs = file("modules/rata/res/rata.skel").segs
+        $segs = file("modules/ent/res/small.skel").segs
         $image = file("modules/rata/res/rata-base.image")
         [
             [$segs.body [$image.body]]

@@ -22,7 +22,6 @@ namespace phys {
         void enable ();
         void disable ();
         ~Ambulator ();
-        
     };
 
 }

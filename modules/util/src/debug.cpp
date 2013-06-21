@@ -36,7 +36,6 @@ struct Log_Command : Command {
         else core::print_to_console("No such logger found.\n");
     }
 };
-
 HCB_BEGIN(Log_Command)
     base<Command>("log");
     command_description<Log_Command>("Enable or disable a certain kind of logging to the terminal.\n");

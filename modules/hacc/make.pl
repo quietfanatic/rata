@@ -4,10 +4,7 @@ use strict;
 use warnings;
 use FindBin;
 use if !%make::, lib => "$FindBin::Bin/../../tool";
-use make qw<:all>;
-use autodie qw<:all>;
-use File::Path qw<remove_tree>;
-
+use make;
 
 workflow {
 

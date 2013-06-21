@@ -2,15 +2,9 @@
 
 use strict;
 use warnings;
-BEGIN {
-    unless (defined $FindBin::Bin) {
-        require FindBin;
-        require "$FindBin::Bin/../../tool/make.pm";
-    }
-    make->import(':all');
-}
-use autodie qw<:all>;
-
+use FindBin;
+use if !%make::, lib => "$FindBin::Bin/../../tool";
+use make;
 
 workflow {
 

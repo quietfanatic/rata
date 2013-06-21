@@ -4,7 +4,7 @@
 #include "../../core/inc/input.h"
 #include "../../core/inc/commands.h"
 #include "../../core/inc/game.h"
-#include "../inc/shaders.h"
+#include "../../core/inc/opengl.h"
 #include "../inc/graffiti.h"
 #include "../inc/text.h"
 
@@ -179,9 +179,8 @@ namespace vis {
             draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, 20);
         }
     };
-}
+} using namespace vis;
 
-using namespace vis;
 HCB_BEGIN(Console)
     type_name("vis::Console");
     base<core::Stateful>("Console");

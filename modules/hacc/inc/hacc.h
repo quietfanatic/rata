@@ -169,6 +169,7 @@ namespace hacc {
         float get_float () const;
         double get_double () const;
     };
+
 }
 
 #endif

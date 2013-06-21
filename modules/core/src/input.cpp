@@ -50,7 +50,5 @@ namespace core {
     };
     core::Celebrity<Input_Phase> input_phase;
 
-}
-
-using namespace core;
+} using namespace core;
 

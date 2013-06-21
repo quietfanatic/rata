@@ -5,16 +5,6 @@
 #include "../inc/game.h"
 #include "../inc/commands.h"
 
-using namespace core;
-
-HCB_BEGIN(Game_State)
-    attr("things", member(&Game_State::things));
-HCB_END(Game_State)
-
-HCB_BEGIN(Stateful)
-    pointee_policy(hacc::ALWAYS_FOLLOW);
-HCB_END(Stateful)
-
 namespace core {
 
     Game_State* current_state = NULL;
@@ -82,29 +72,35 @@ namespace core {
         }
     }
 
-    struct Load_Command : Command {
-        std::string filename;
-        void operator () () {
-            load(filename);
-        }
-    };
+} using namespace core;
 
-    struct Save_Command : Command {
-        std::string filename;
-        void operator () () {
-            save(filename);
-        }
-    };
+HCB_BEGIN(Game_State)
+    attr("things", member(&Game_State::things));
+HCB_END(Game_State)
 
-}
+HCB_BEGIN(Stateful)
+    pointee_policy(hacc::ALWAYS_FOLLOW);
+HCB_END(Stateful)
 
-HCB_BEGIN(core::Load_Command)
+struct Load_Command : Command {
+    std::string filename;
+    void operator () () {
+        load(filename);
+    }
+};
+HCB_BEGIN(Load_Command)
     base<Command>("load");
-    elem(member(&core::Load_Command::filename));
-HCB_END(core::Load_Command)
+    elem(member(&Load_Command::filename));
+HCB_END(Load_Command)
 
-HCB_BEGIN(core::Save_Command)
+struct Save_Command : Command {
+    std::string filename;
+    void operator () () {
+        save(filename);
+    }
+};
+HCB_BEGIN(Save_Command)
     base<Command>("save");
-    elem(member(&core::Save_Command::filename));
-HCB_END(core::Save_Command)
+    elem(member(&Save_Command::filename));
+HCB_END(Save_Command)
 

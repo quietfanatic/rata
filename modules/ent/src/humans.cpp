@@ -1,10 +1,18 @@
 
 #include "../../hacc/inc/everything.h"
 #include "../inc/humans.h"
+#include "../../core/inc/commands.h"
 
 namespace ent {
 
+    void Biped::set_def (BipedDef* _def) {
+        def = _def;
+        apply_bdf(def->body_def);
+        model.apply_skel(def->skel);
+    }
+
     void Biped::draws_sprites () {
+        model.apply_skin(def->skin);
         if (ground) {
             if (fabs(vel().x) < 0.01) {
                 model.apply_pose_index(Pose::STAND);
@@ -28,7 +36,7 @@ namespace ent {
         model.draw(pos(), direction < 0);
     }
 
-    bool Biped::allow_movement (Biped::Stats* stats, Biped::Controls* controls) {
+    bool Biped::allow_movement (BipedStats* stats, Biped::Controls* controls) {
         if (ground) {
             legs.enable();
             allow_walk(stats, controls);
@@ -52,7 +60,7 @@ namespace ent {
         );
     }
 
-    bool Biped::allow_walk (Biped::Stats* stats, Biped::Controls* controls) {
+    bool Biped::allow_walk (BipedStats* stats, Biped::Controls* controls) {
         if (ground) {
             legs.enable();
             if (controls->left && !controls->right) {
@@ -83,7 +91,7 @@ namespace ent {
         }
         else return false;
     }
-    bool Biped::allow_jump (Biped::Stats* stats, Biped::Controls* controls) {
+    bool Biped::allow_jump (BipedStats* stats, Biped::Controls* controls) {
         if (controls->jump) {
             legs.disable();
              // I'd like to be able to do a mutual push between the ground and
@@ -96,13 +104,13 @@ namespace ent {
         else return false;
     }
 
-    bool Biped::allow_crouch (Biped::Stats* stats, Biped::Controls* controls) {
+    bool Biped::allow_crouch (BipedStats* stats, Biped::Controls* controls) {
         return false;
     }
-    bool Biped::allow_crawl (Biped::Stats* stats, Biped::Controls* controls) {
+    bool Biped::allow_crawl (BipedStats* stats, Biped::Controls* controls) {
         return false;
     }
-    bool Biped::allow_airmove (Biped::Stats* stats, Biped::Controls* controls) {
+    bool Biped::allow_airmove (BipedStats* stats, Biped::Controls* controls) {
         legs.disable();
          // If you were in a 2D platformer, you'd be able to push against the air too.
         if (controls->left && !controls->right) {
@@ -130,36 +138,60 @@ namespace ent {
             distance_walked = 0;
         }
     }
+    void Biped::before_move () {
+        allow_movement(def->stats, &controls);
+    }
 
-    Biped::Biped (phys::BodyDef* bdf, vis::Skel* skel) :
-        phys::Object(bdf), legs(this), model(skel)
-    { }
+    Biped::Biped () : legs(this) { }
 
-}
+    bool Biped::hear_key (int keycode, int action) {
+        bool on = action == GLFW_PRESS;
+        switch (keycode) {
+            case 'A': controls.left = on; return true;
+            case 'D': controls.right = on; return true;
+            case 'W': controls.jump = on; return true;
+            case 'S': controls.crouch = on; return true;
+            default: return false;
+        }
+    }
 
-using namespace ent;
+    void Biped::start () {
+        geo::geography->behold(this); // TODO this doesn't belong here
+    }
+
+} using namespace ent;
+
 HCB_BEGIN(Biped)
     type_name("ent::Biped");
+    base<core::Stateful>("Biped");
+    attr("def", value_methods(&Biped::get_def, &Biped::set_def)(required));
     attr("object", supertype<phys::Object>());
     attr("resident", supertype<geo::Resident>());
     attr("grounded", supertype<phys::Grounded>());
-    attr("direction", member(&Biped::direction, def((int8)1)));
-    attr("distance_walked", member(&Biped::distance_walked, def((float)0)));
-    attr("oldxrel", member(&Biped::oldxrel, def((float)0)));
+    attr("direction", member(&Biped::direction)(1));
+    attr("distance_walked", member(&Biped::distance_walked)(0));
+    attr("oldxrel", member(&Biped::oldxrel)(0));
 HCB_END(Biped)
 
-HCB_BEGIN(Biped::Stats)
-    type_name("ent::Biped::Stats");
-    attr("walk_friction", member(&Biped::Stats::walk_friction, def((float)1)));
-    attr("walk_speed", member(&Biped::Stats::walk_speed, def((float)1)));
-    attr("run_friction", member(&Biped::Stats::run_friction, def((float)1)));
-    attr("run_speed", member(&Biped::Stats::run_speed, def((float)1)));
-    attr("crawl_friction", member(&Biped::Stats::crawl_friction, def((float)1)));
-    attr("crawl_speed", member(&Biped::Stats::crawl_speed, def((float)1)));
-    attr("stop_friction", member(&Biped::Stats::stop_friction, def((float)1)));
-    attr("skid_friction", member(&Biped::Stats::skid_friction, def((float)1)));
-    attr("air_force", member(&Biped::Stats::air_force, def((float)1)));
-    attr("air_speed", member(&Biped::Stats::air_speed, def((float)1)));
-    attr("jump_impulse", member(&Biped::Stats::jump_impulse, def((float)1)));
-HCB_END(Biped::Stats)
+HCB_BEGIN(BipedStats)
+    type_name("ent::BipedStats");
+    attr("walk_friction", member(&BipedStats::walk_friction)(1));
+    attr("walk_speed", member(&BipedStats::walk_speed)(1));
+    attr("run_friction", member(&BipedStats::run_friction)(1));
+    attr("run_speed", member(&BipedStats::run_speed)(1));
+    attr("crawl_friction", member(&BipedStats::crawl_friction)(1));
+    attr("crawl_speed", member(&BipedStats::crawl_speed)(1));
+    attr("stop_friction", member(&BipedStats::stop_friction)(1));
+    attr("skid_friction", member(&BipedStats::skid_friction)(1));
+    attr("air_force", member(&BipedStats::air_force)(1));
+    attr("air_speed", member(&BipedStats::air_speed)(1));
+    attr("jump_impulse", member(&BipedStats::jump_impulse)(1));
+HCB_END(BipedStats)
 
+HCB_BEGIN(BipedDef)
+    type_name("ent::BipedDef");
+    attr("body_def", member(&BipedDef::body_def)(required));
+    attr("stats", member(&BipedDef::stats)(required));
+    attr("skel", member(&BipedDef::skel)(required));
+    attr("skin", member(&BipedDef::skin)(required));
+HCB_END(BipedDef)
