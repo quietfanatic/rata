@@ -13,10 +13,12 @@ namespace hacc {
     template <class C>
     std::string type_name () { return type_name(typeid(C)); }
 
+     // NOTE: These will cause bad breakage if the attr isn't a plain member.
+     // TODO make these not breaky, possibly with a Reference class.
     std::vector<std::string> attr_names (Pointer);
-    Reference attr (Pointer, std::string);
+    Pointer attr (Pointer, std::string);
     size_t n_elems (Pointer);
-    Reference elem (Pointer, size_t);
+    Pointer elem (Pointer, size_t);
 
      // Probably best to keep these to internal usage.
     Hacc* to_hacc (Pointer);
@@ -55,7 +57,7 @@ namespace hacc {
     template <class C>
     struct Get_Attr {
         Get_Attr (const std::function<GetSet1<C> (std::string)>& ga) {
-            util::annotation<C, _Get_Attr>().get_attr = [ga](std::string n)->GetSet0{
+            util::annotation<C, _Get_Attr>().get_attr = [&ga](std::string n)->GetSet0{
                 return ga(n);
             };
         }
@@ -80,6 +82,18 @@ namespace hacc {
         N_Elems (const std::function<size_t (const C&)>& ne) {
             util::annotation<C, _Attr_Names>().n_elems =
                 *(std::function<size_t (void*)>*)ne;
+        }
+    };
+
+    struct _Get_Elem {
+        std::function<GetSet0 (size_t)> get_attr;
+    };
+    template <class C>
+    struct Get_Elem {
+        Get_Elem (const std::function<GetSet1<C> (size_t)>& ga) {
+            util::annotation<C, _Get_Elem>().get_elem = [&ge](size_t i)->GetSet0{
+                return ge(i);
+            };
         }
     };
 
