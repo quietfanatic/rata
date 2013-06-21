@@ -23,7 +23,7 @@ namespace core {
          // Keeps track
         static Renderer* current;
 
-        virtual ~Renderer () { }
+        virtual ~Renderer ();
     };
 
     struct Shader {

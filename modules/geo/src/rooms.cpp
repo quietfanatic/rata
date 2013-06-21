@@ -41,7 +41,7 @@ namespace geo {
     }
 
     void Geography::enter (Room* r) {
-        geo_logger.log("Entering room @%lx", (unsigned long)this);
+        geo_logger.log("Entering room @%lx", (unsigned long)r);
         if (!r) {
             geo_logger.log("Oops, tried to enter the NULL pointer.\n");
             r = tumbolia;
@@ -83,7 +83,10 @@ namespace geo {
 
     Geography::~Geography () { }
 
-    Room::~Room () { }
+    Room::~Room () {
+        if (geography->current_room == this) geography->current_room = NULL;
+        if (geography->tumbolia == this) geography->tumbolia = NULL;
+    }
 
     Resident::Resident () { link(housing_office); }
 

@@ -29,6 +29,12 @@ namespace core {
         }
     }
 
+    Renderer::~Renderer () {
+         // Not good to call finish_rendering on a deleted renderer :)
+        if (current == this) finish_rendering();
+        current = NULL;
+    }
+
     void Shader::finish () {
 
         static auto glCreateShader = glproc<GLuint (GLenum)>("glCreateShader");
