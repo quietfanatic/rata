@@ -87,6 +87,11 @@ namespace hacc {
         Pointer () : cpptype(NULL), p(NULL) { }
         Pointer (const std::type_info& cpptype, void* p) : cpptype(&cpptype), p(p) { }
         template <class C> Pointer (C* p) : cpptype(&typeid(C)), p(p) { }
+        template <class C> operator C* () {
+            if (*cpptype == typeid(C))
+                return (C*)p;
+            else throw Error("Type mismatch when converting from Pointer; expected " + type_name<C>() + " but got " + type_name(cpptype) + ".");
+        }
     };
     struct AttrRef {
         Hacc* subject;
