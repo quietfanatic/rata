@@ -38,6 +38,20 @@ namespace hacc {
         return r;
     }
 
+    String path_to_string (Path* p) {
+        switch (p->type) {
+            case TOP: return "$";
+            case FILE: return "$(\"" + escape_string(p->s) + "\")";
+            case ATTR: return path_to_string(p->target) + "." + escape_ident(p->s);
+            case ELEM: {
+                std::ostringstream s;
+                s << p->i;
+                return path_to_string(p->target) + "[" + s.str() + "]";
+            }
+            default: throw Error("Corrupted Path");
+        }
+    }
+
     String hacc_to_string (Hacc* h, uint ind, uint prior_ind) {
         switch (h->form) {
             case NULLFORM: return "null";
@@ -58,33 +72,6 @@ namespace hacc {
                 return s.str();
             }
             case STRING: return "\"" + escape_string(h->s) + "\"";
-            case VAR: return "$" + escape_ident(h->v.name);
-            case ASSIGNMENT: {
-                return hacc_to_string(h->assignment.left) + "=" + hacc_to_string(h->assignment.right);
-            }
-            case CONSTRAINT: {
-                return "#" + escape_ident(h->constraint.hacctype) + "(" + hacc_to_string(h->constraint.value) + ")";
-            }
-            case ATTR: {
-                return hacc_to_string(h->attr.subject) + "." + escape_ident(h->attr.name);
-            }
-            case ELEM: {
-                String e;
-                std::stringstream(e) << h->elem.index;
-                return hacc_to_string(h->elem.subject) + "." + e;
-            }
-            case ADDRESS: {
-                return "&" + hacc_to_string(h->address.subject);
-            }
-            case MACRO: {
-                String r = h->macro->name + "(";
-                for (auto& arg : h->macro->args) {
-                    r += hacc_to_string(arg);
-                    if (&arg != &h->macro->args.back())
-                        r += " ";
-                };
-                return r + ")";
-            }
             case ARRAY: {
                 if (h->a->size() == 0) return "[]";
                 String r = "[";
@@ -99,9 +86,6 @@ namespace hacc {
                             r += "\n" + indent(prior_ind + 1);
                         else r += " ";
                     }
-                    if (ind && a.size() > 1)
-                        r += "\n" + indent(prior_ind);
-                    return r + "]";
                 }
                 if (ind && h->a->size() > 1)
                     r += "\n" + indent(prior_ind);
@@ -125,19 +109,14 @@ namespace hacc {
                         if (ind) r += "\n" + indent(prior_ind + 1);
                         else r += " ";
                     }
-                    if (ind && o.size() > 1)
-                        r += "\n" + indent(prior_ind);
-                    else r += " ";
-                    return r + "}";
                 }
-    <<<<<<< HEAD
                 if (ind && h->o->size() > 1)
                     r += "\n" + indent(prior_ind);
                 else r += " ";
                 return r + "}";
             }
-            case POINTER: {
-                return "<pointer>";
+            case PATH: {
+                return path_to_string(h->p);
             }
             case ERROR: throw *h->error;
             default: throw Error("Corrupted Hacc tree\n");
@@ -157,95 +136,95 @@ namespace hacc {
         Parser (String s, String file = "") : file(file), begin(s.data()), p(s.data()), end(s.data()+s.length()) { }
         Parser (const char* s, String file = "") : file(file), begin(s), p(s), end(s + strlen(s)) { }
 
-            int look () { return p == end ? EOF : *p; }
+        int look () { return p == end ? EOF : *p; }
 
-             // This allows us to safely use scanf, which is so much more
-             // convenient than parsing numbers by hand.  Speed is not a
-             // big priority here.
-            const char* safebuf_begin = NULL;
-            char safebuf_array [32];
-            char* safebuf () {
-                if (safebuf_begin != p) {
-                    safebuf_begin = p;
-                    uint len = end - p > 31 ? 31 : end - p;
-                    memcpy(safebuf_array, p, len);
-                    safebuf_array[len] = 0;
-                }
-                return safebuf_array;
+         // This allows us to safely use scanf, which is so much more
+         // convenient than parsing numbers by hand.  Speed is not a
+         // big priority here.
+        const char* safebuf_begin = NULL;
+        char safebuf_array [32];
+        char* safebuf () {
+            if (safebuf_begin != p) {
+                safebuf_begin = p;
+                uint len = end - p > 31 ? 31 : end - p;
+                memcpy(safebuf_array, p, len);
+                safebuf_array[len] = 0;
             }
+            return safebuf_array;
+        }
 
-            Error error (String s) {
-                 // Diagnose line and column number
-                 // I'm not sure the col is exactly right
-                uint line = 1;
-                const char* nl = begin - 1;
-                for (const char* p2 = begin; p2 != p; p2++) {
-                    if (*p2 == '\n') {
-                        line++;
-                        nl = p2;
+        Error error (String s) {
+             // Diagnose line and column number
+             // I'm not sure the col is exactly right
+            uint line = 1;
+            const char* nl = begin - 1;
+            for (const char* p2 = begin; p2 != p; p2++) {
+                if (*p2 == '\n') {
+                    line++;
+                    nl = p2;
+                }
+            }
+            uint col = p - nl;
+            return Error(s, file, line, col);
+        }
+
+         // The following are subparsers.
+         // Most parsers assume the first character is already correct.
+         // If a parse fails, just throw an exception, because we've got
+         // datatypes with proper destructors now.
+
+         // Utility parsers for multiple situations.
+
+        void parse_ws () {
+            while (isspace(look())) p++;
+            if (p[0] == '/' && p+1 != end && p[1] == '/') {
+                while (look() != '\n' && look() != EOF) p++;
+                parse_ws();
+            }
+        }
+        String parse_stringly () {
+            p++;  // for the "
+            String r = "";
+            bool escaped = false;
+            for (;;) {
+                if (escaped) {
+                    switch (look()) {
+                        case EOF: throw error("String not terminated by end of input");
+                        case '"': r += '"'; break;
+                        case '\\': r += "\\"; break;
+                        case '/': r += "/"; break;
+                        case 'b': r += "\b"; break;
+                        case 'f': r += "\f"; break;
+                        case 'n': r += "\n"; break;
+                        case 'r': r += "\r"; break;
+                        case 't': r += "\t"; break;
+                        default: throw error("Unrecognized escape sequence \\" + String(p, 1));
+                    }
+                    escaped = false;
+                }
+                else {
+                    switch (look()) {
+                        case EOF: throw error("String not terminated by end of input");
+                        case '"': p++; return r;
+                        case '\\': escaped = true; break;
+                        default: r += String(p, 1);
                     }
                 }
-                uint col = p - nl;
-                return Error(s, file, line, col);
+                p++;
             }
-
-             // The following are subparsers.
-             // Most parsers assume the first character is already correct.
-             // If a parse fails, just throw an exception, because we've got
-             // datatypes with proper destructors now.
-
-             // Utility parsers for multiple situations.
-
-            void parse_ws () {
-                while (isspace(look())) p++;
-                if (p[0] == '/' && p+1 != end && p[1] == '/') {
-                    while (look() != '\n' && look() != EOF) p++;
-                    parse_ws();
+        }
+        String parse_ident (String what) {
+            switch (look()) {
+                case EOF: throw error("Expected " + what + ", but ran into the end of input");
+                case '"': return parse_stringly();
+                default: {
+                    const char* start = p;
+                    while (isalnum(look()) || look() == '_' || look() == '-') p++;
+                    if (p == start) throw error("Expected " + what + ", but saw " + String(1, look()));
+                    return String(start, p - start);
                 }
             }
-            String parse_stringly () {
-                p++;  // for the "
-                String r = "";
-                bool escaped = false;
-                for (;;) {
-                    if (escaped) {
-                        switch (look()) {
-                            case EOF: throw error("String not terminated by end of input");
-                            case '"': r += '"'; break;
-                            case '\\': r += "\\"; break;
-                            case '/': r += "/"; break;
-                            case 'b': r += "\b"; break;
-                            case 'f': r += "\f"; break;
-                            case 'n': r += "\n"; break;
-                            case 'r': r += "\r"; break;
-                            case 't': r += "\t"; break;
-                            default: throw error("Unrecognized escape sequence \\" + String(p, 1));
-                        }
-                        escaped = false;
-                    }
-                    else {
-                        switch (look()) {
-                            case EOF: throw error("String not terminated by end of input");
-                            case '"': p++; return r;
-                            case '\\': escaped = true; break;
-                            default: r += String(p, 1);
-                        }
-                    }
-                    p++;
-                }
-            }
-            String parse_ident (String what) {
-                switch (look()) {
-                    case EOF: throw error("Expected " + what + ", but ran into the end of input");
-                    case '"': return parse_stringly();
-                    default: {
-                        const char* start = p;
-                        while (isalnum(look()) || look() == '_' || look() == '-') p++;
-                        if (p == start) throw error("Expected " + what + ", but saw " + String(1, look()));
-                        return String(start, p - start);
-                    }
-                }
-            }
+        }
 
          // Parsing of specific valtypes.
          // This one could return an int, float, or double.
@@ -317,7 +296,7 @@ namespace hacc {
                             p1 += ind.size();
                         }
                         p += terminator.size();
-                        return new_hacc(ret);
+                        return new Hacc(ret);
                     }
                     while (look() != '\n') {
                         got += look(); p++;
@@ -339,27 +318,8 @@ namespace hacc {
                     case EOF: throw error("Array not terminated");
                     case ':': throw error("Cannot have : in an array");
                     case ',': p++; break;
-                    case ']': p++; {
-                        return new Hacc(std::move(a));
-                    }
+                    case ']': p++; return new Hacc(std::move(a));
                     default: a.push_back(parse_term()); break;
-                }
-            }
-            std::vector<Hacc*> parse_arglist () {
-                std::vector<Hacc*> args;
-                p++;  // for the (
-                for (;;) {
-                    parse_ws();
-                    switch (look()) {
-                        case EOF: throw error("Macro argument list not terminated");
-                        case ':': throw error("Cannot have : in an argument list");
-                        case ',': p++; break;
-                        case ')': p++; {
-                            return args;
-                        }
-                        default: args.push_back(parse_thing()); break;
-                    }
-                    default: args.push_back(parse_term()); break;
                 }
             }
         }
@@ -373,14 +333,9 @@ namespace hacc {
                     case EOF: throw error("Object not terminated");
                     case ':': throw error("Missing name before : in object");
                     case ',': p++; continue;
-                    case '}': p++; {
-                        return new Hacc(std::move(o));
-                    }
+                    case '}': p++; return new Hacc(std::move(o));
+                    default: key = parse_ident("an attribute name or the end of the object"); break;
                 }
-            }
-            Hacc* parse_parens () {
-                p++;  // for the (
-                Hacc* r = parse_thing();
                 parse_ws();
                 if (look() == ':') p++;
                 else throw error("Missing : after name");
@@ -390,9 +345,8 @@ namespace hacc {
                     case ':': throw error("Extra : in object");
                     case ',': throw error("Misplaced comma after : in object");
                     case '}': throw error("Missing value after : in object");
-                    default: o.push_back(Pair(key, parse_term())); break;
+                    default: o.emplace_back(key, parse_term()); break;
                 }
-                return r;
             }
         }
         Hacc* parse_parens () {
@@ -404,24 +358,6 @@ namespace hacc {
                 throw error("Extra stuff in parens");
             }
             return r;
-        }
-         // TODO: separate vars and assignments
-        Hacc* parse_var () {
-            p++;  // for the $
-            String name = parse_ident("An variable name after $");
-            parse_ws();
-            if (look() == '=') {
-                p++;
-                Hacc* value = parse_term();
-                return new Hacc(Assignment{new Hacc(Var{name}), value});
-            }
-            else return new Hacc(Var{name});
-        }
-        Hacc* parse_address () {
-            p++;  // for the &
-            if (look() == '$')
-                return new Hacc(Address{parse_var()});
-            else throw error("Can only take the address of a variable currently.");
         }
         Hacc* parse_bareword () {
              // A previous switch ensures this is a bare word and not a string.
@@ -436,36 +372,56 @@ namespace hacc {
                 p -= 3;
                 return parse_floating();
             }
-            else if (look() == '(') {
-                return new Hacc(Macro{word, parse_arglist()});
-            }
             else {
                 return new Hacc(word);
             }
         }
-        Hacc* parse_chain (Hacc* subject) {
-            if (look() == '.') {
-                p++;
-                if (isdigit(look())) {
-                    size_t index;
-                    uint len;
-                    if (!sscanf(safebuf(), "%lu%n", &index, &len))
-                        throw error("Weird number in element dereference");
-                    p += len;
-                    return parse_chain(new Hacc(Elem{subject, index}));
+        Path* continue_path (Path* left) {
+            switch (look()) {
+                case '.': {
+                    p++;
+                    String key = parse_ident("After the . in a path");
+                    return continue_path(new Path(left, key));
                 }
-                else if (isalpha(look()) || look() == '_' || look() == '"') {
-                    String name = parse_ident("attribute name");
-                    return parse_chain(new Hacc(Attr{subject, name}));
+                case '[': {
+                    p++;
+                    switch(look()) {
+                        case '0': case '1': case '2': case '3': case '4':
+                        case '5': case '6': case '7': case '8': case '9': {
+                            auto pp = p;
+                            while (isdigit(look())) p++;
+                            size_t i;
+                            std::istringstream(String(pp, p - pp)) >> i;
+                            if (look() != ']')
+                                throw error("Expected ] after index, but got " + String(1, look()));
+                            p++;
+                            return continue_path(new Path(left, i));
+                        }
+                        default: {
+                            String k = parse_ident("In the [] in a path");
+                            if (look() != ']')
+                                throw error("Expected ] after key, but got " + String(1, look()));
+                            p++;
+                            return continue_path(new Path(left, k));
+                        }
+                    }
                 }
-                else throw error("dot not followed by an ident or number");
+                default: return left;
             }
-            else return subject;
         }
-
-        Hacc* parse_constraint () {
-            p++;  // for the #
-            return new Hacc(Constraint{parse_ident("type after '#'"), parse_term()});
+        Hacc* parse_path () {
+            p++;  // for the $
+            if (look() == '(') {
+                p++;
+                String f = parse_ident("After the $( in a path");
+                if (look() != ')')
+                    throw error("Expected ) after filename, but got " + String(1, look()));
+                p++;
+                return new Hacc(continue_path(new Path(f)));
+            }
+            else {
+                return new Hacc(continue_path(new Path()));
+            }
         }
 
         Hacc* parse_term () {
@@ -482,20 +438,18 @@ namespace hacc {
                 case '6':
                 case '7':
                 case '8':
-                case '9': return parse_chain(parse_numeric());
-                case '#': return parse_constraint();
-                case '~': return parse_chain(parse_bitrep());
-                case '"': return parse_chain(parse_string());
-                case '[': return parse_chain(parse_array());
-                case '{': return parse_chain(parse_object());
-                case '(': return parse_chain(parse_parens());
-                case '$': return parse_var();
-                case '&': return parse_chain(parse_address());
-                case '_': return parse_chain(parse_bareword());
-                case '<': return parse_chain(parse_heredoc());
+                case '9': return parse_numeric();
+                case '~': return parse_bitrep();
+                case '"': return parse_string();
+                case '[': return parse_array();
+                case '{': return parse_object();
+                case '$': return parse_path();
+                case '(': return parse_parens();
+                case '_': return parse_bareword();
+                case '<': return parse_heredoc();
                 default:
                     if (isalnum(next))
-                        return parse_chain(parse_bareword());
+                        return parse_bareword();
                     else throw error("Unrecognized character " + String(1, next));
             }
         }
@@ -510,7 +464,7 @@ namespace hacc {
         }
         Hacc* parse () {
             try { return parse_all(); }
-            catch (Error e) { return new Hacc(Error(e)); }
+            catch (Error& e) { return new Hacc(e); }
         }
     };
 

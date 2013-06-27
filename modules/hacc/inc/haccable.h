@@ -3,147 +3,186 @@
 
 #include <unordered_map>
 #include "hacc.h"
-#include "haccable_getset.h"
+#include "dynamicism.h"
 #include "../../util/inc/annotations.h"
 
 namespace hacc {
 
      // USAGE API
-    std::string type_name (const std::type_info&);
+    String type_name (const Type&);
     template <class C>
-    std::string type_name () { return type_name(typeid(C)); }
+    String type_name () { return type_name(typeid(C)); }
 
-     // NOTE: These will cause bad breakage if the attr isn't a plain member.
-     // TODO make these not breaky, possibly with a Reference class.
-    std::vector<std::string> attr_names (Pointer);
-    Pointer attr (Pointer, std::string);
-    size_t n_elems (Pointer);
-    Pointer elem (Pointer, size_t);
+    std::vector<String> keys (Reference);
+    Reference attr (Reference, String);
+    size_t length (Reference);
+    Reference elem (Reference, size_t);
 
      // Probably best to keep these to internal usage.
-    Hacc* to_hacc (Pointer);
-    void update_from_hacc (Pointer, Hacc*);
+    Hacc* to_hacc (Reference);
+    void update_from_hacc (Reference, Hacc*);
 
+     // INTERNAL STUFF (type-erased versions of declaration api functions)
+    struct HaccTable;
+    HaccTable* hacctable_by_type (const Type&);
+    HaccTable* hacctable_require_type (const Type&);
+    HaccTable* hacctable_require_type_name (std::string);
+    HaccTable* new_hacctable (const Type&, size_t, void(*)(void*), void(*)(void*));
+    void _name (HaccTable*, const Func<String ()>&);
+    void _keys (HaccTable*, GetSet0*);
+    void _attrs (HaccTable*, const Func<Reference (void*, String)>&);
+    void _attr (HaccTable*, String, GetSet0*);
+    void _length (HaccTable*, GetSet0*);
+    void _elems (HaccTable*, const Func<Reference (void*, size_t)>&);
+    void _elem (HaccTable*, GetSet0*);
+    void _to_hacc (HaccTable*, const Func<Hacc* (void*)>&);
+    void _from_hacc (HaccTable*, const Func<void (void*, Hacc*)>&);
+    void _delegate (HaccTable*, GetSet0*);
+    void _prepare (HaccTable*, const Func<void (void*, Hacc*)>&);
+    void _finish (HaccTable*, const Func<void (void*, Hacc*)>&);
+    void _pointer (HaccTable*, GetSet0*);
 
      // DECLARATION API
 
-    struct _Attrs {
-        std::vector<std::pair<std::string, GetSet0>> attrs;
+     // This is specialized to make a type haccable.
+    template <class C> struct Haccable {
+        static HaccTable* get_table () {
+            static HaccTable* table = hacctable_require_type(typeid(C));
+            return table;
+        }
     };
-    template <class C>
-    struct Attrs {
-        Attrs (std::initializer_list<std::pair<std::string, GetSet1<C>>> as) {
-            for (auto& a : as) {
-                util::annotation<C, _Attrs>().attrs.emplace(a.first, a.second);
+     // This is inherited by every custom-instantiated type.
+    template <class C> struct Haccability {
+        void name (const Func<String ()>& f) { _name(get_table(), f); }
+        void name (String s) { _name(get_table(), [](){ return s; }); }
+        void keys (GetSet2<C, std::vector<std::string>>* gs) {
+            _keys(get_table(), gs);
+        }
+        void attrs (const Func<Reference (C&, String)>) {
+            _attr(get_table(), reinterpret_cast<const Func<Reference (void*, String)>&>(f));
+        }
+        void attr (String name, GetSet1<C>* gs) { _attr(get_table(), name, gs); }
+        void length (GetSet2<C, size_t>* gs) {
+            _length(get_table(), gs);
+        }
+        void elems (const Func<Reference (C&, size_t)>& f) {
+            _elem(get_table(), reinterpret_cast<const Func<Reference (void*, String)>&>(F));
+        }
+        void elem (GetSet1<C>* gs) { _elem(get_table(), gs); }
+        void to_hacc (const Func<Hacc* (const C&)>& f) {
+            _to_hacc(get_table(), reinterpret_cast<const Func<Hacc* (void*)>&>(f));
+        }
+        void from_hacc (const Func<void (C&, Hacc*)>& f) {
+            _from_hacc(get_table(), reinterpret_cast<const Func<void (void*, Hacc*)>&>(f));
+        }
+        void delegate (GetSet1<C>* gs) { _delegate(get_table(), gs); }
+        void prepare (const Func<void (C&, Hacc*)>& f) {
+            _prepare(get_table(), reinterpret_cast<const Func<void (void*, Hacc*)>&>(f));
+        }
+        void finish (const Func<void (C& Hacc*)>& f) {
+            _finish(get_table(), reinterpret_cast<const Func<void (void*, Hacc*)>&>(f));
+        }
+        void pointer (GetSet2<C, Pointer>* gs) { _pointer(get_table(), gs); }
+        template <class M>
+        GetSet2<C, M> member (C::*M mp) { return new GS_Member<C, M>{mp}; }
+        template <class M>
+        GetSet2<C, M> value_funcs (const Func<M (const C&)>& g, const Func<void (C&, M)>& s) {
+            return new GS_ValueFuncs<C, M>{g, s};
+        }
+        template <class M>
+        GetSet2<C, M> ref_funcs (const Func<const M& (const C&)>& g, const Func<void (C&, const M&)>& s) {
+            return new GS_RefFuncs<C, M>{g, s};
+        }
+        template <class M>
+        GetSet2<C, M> ref_func (const Func<M& (C&)>& f) { return new GS_RefFunc<C, M>{f}; }
+        template <class M>
+        GetSet2<C, M> value_methods (M (C::* g )()const, void (C::* s )(M)) {
+            return new GS_ValueMethods<C, M>{g, s};
+        }
+        template <class M>
+        GetSet2<C, M> ref_methods (const M& (C::* g )()const, void (C::* s )(const M&)) {
+            return new GS_RefMethods<C, M>{g, s};
+        }
+        template <class M>
+        GetSet2<C, M> ref_method (M& (C::* m )()) { return new GS_RefMethod<C, M>{m}; }
+        template <class M>
+        GetSet2<C, M> base () { return new GS_Base<C, M>(); }
+        template <class M>
+        GetSet2<C, M> assignable () { return new GS_Assignable<C, M>(); }
+
+        static HaccTable* get_table () {
+            static HaccTable* table = hacctable_by_type(typeid(C));
+            if (!table) {
+                table = new_hacctable(
+                    typeid(C), sizeof(C),
+                    [](void* p){ new (p) C; },
+                    [](void* p){ ((C*)p)->~C(); }
+                );
+                Haccable<C>::describe();
             }
+            return table;
         }
     };
 
-    struct _Elems {
-        std::vector<GetSet0> elems;
-    };
-    template <class C>
-    struct Elems {
-        Elems (std::initializer_list<GetSet1>.elems.emplace(a.first, a.second) {
-            for (auto& e : es) {
-                util::annotation<C, _Attrs>().elems.emplace_back(e);
-            }
-        }
-    };
+     // PATHS AND ADDRESSES
 
-    struct _Get_Attr {
-        std::function<GetSet0 (std::string)> get_attr;
-    };
-    template <class C>
-    struct Get_Attr {
-        Get_Attr (const std::function<GetSet1<C> (std::string)>& ga) {
-            util::annotation<C, _Get_Attr>().get_attr = [&ga](std::string n)->GetSet0{
-                return ga(n);
-            };
-        }
-    };
-    
-    struct _Attr_Names {
-        std::function<std::vector<std::string> (void*)> attr_names;
-    };
-    template <class C>
-    struct Attr_Names {
-        Attr_Names (const std::function<std::vector<std::string> (const C&)>& an) {
-            util::annotation<C, _Attr_Names>().attr_names =
-                *(std::function<std::vector<std::string> (void*)>*)(an);
-        }
-    };
+     // path_to_address does not require any scans.
+     // If a root is provided, the path loookup will start
+     //  from there instead of the file indicated by the path.
+     // Throws if the path doesn't resolve to a location
+    Reference path_to_reference (Path*, Pointer root = null);
 
-    struct _N_Elems {
-        std::function<size_t (void*)> n_elems;
-    };
-    template <class C>
-    struct N_Elems {
-        N_Elems (const std::function<size_t (const C&)>& ne) {
-            util::annotation<C, _Attr_Names>().n_elems =
-                *(std::function<size_t (void*)>*)ne;
-        }
-    };
+     // address_to_path may require all or some file-objects to be scanned.
+     // If a root is provided, only paths starting at that root will be
+     //  considered.  This can save time since it won't have to scan every
+     //  single file-object.  Returns null if the address isn't found.
+    Path* address_to_path (Pointer, Pointer root = null);
 
-    struct _Get_Elem {
-        std::function<GetSet0 (size_t)> get_attr;
-    };
-    template <class C>
-    struct Get_Elem {
-        Get_Elem (const std::function<GetSet1<C> (size_t)>& ga) {
-            util::annotation<C, _Get_Elem>().get_elem = [&ge](size_t i)->GetSet0{
-                return ge(i);
-            };
-        }
-    };
+     // Free any memory associated with the address_to_path operation
+     // You should do this as soon as possible after you're done using
+     //  address_to_path, because there are no checks to make sure the scan
+     //  data isn't stale.
+    void clear_scans ();
 
-    struct _Type_Name {
-        std::function<std::string ()> type_name;
-    };
-    template <class C>
-    struct Type_Name {
-        Type_Name (const std::function<std::string ()>& tn) {
-            util::annotation<C, _Type_Name>().type_name = tn;
-        }
-        Type_Name (std::string tn) {
-            util::annotation<C, _Type_Name>().type_name =
-                [tn](){ return tn; };
-        }
-    };
-
-    struct _Delegate {
-        GetSet0 delegate;
-    };
-    template <class C>
-    struct Delegate {
-        Delegate (GetSet1<C> d) {
-            util::annotation<C, _Delegate>().delegate = d;
-        }
-    };
-
-     // You probably should only use this and From_Hacc with atomic forms.
-    struct _To_Hacc {
-        std::function<Hacc* (void*)> to_hacc;
-    };
-    template <class C>
-    struct To_Hacc {
-        To_Hacc (std::function<Hacc* (const C& c)>) {
-            util::annotation<C, _To_Hacc>().to_hacc =
-                *(std::function<Hacc* (void*)>*)c;
-        }
-    };
-
-    struct _Update_From_Hacc {
-        std::function<void (void*, Hacc*)> update_from_hacc;
-    };
-    template <class C>
-    struct Update_From_Hacc {
-        Update_From_Hacc (std::function<Hacc*
+     // Performs an operation for each pointer found in the given root, or in
+     //  every file-object if root is null.  The callback will be always be
+     //  provided with a Reference to Pointer.
+    void foreach_pointer (const Func<void (Reference)>&, Pointer root = null);
 
 }
 
 #define HACC_APPEND(a, b) a##b
 #define HACC_APPEND_COUNTER(a) HACC_APPEND(a, __COUNTER__)
 #define __ HACC_APPEND_COUNTER(_anon_)
+#define HCB_INSTANCE(type) static bool __ __attribute__ ((unused)) = Haccable<type>::get_table();
+#define HCB_BEGIN(type) namespace hacc { template <> struct Haccable<type> : hacc::Haccability<type> { static void describe () {
+#define HCB_END(type) } }; static bool __ __attribute__ ((unused)) = Haccable<type>::get_table(); }
+#define HCB_PARAMS(...) __VA_ARGS__
+#define HCB_TEMPLATE_BEGIN(params, type) namespace hacc { template params struct Haccable<type> : hacc::Haccability<type> { \
+    using hcb = hacc::Haccability<type>; \
+    using hcb::name; \
+    using hcb::keys; \
+    using hcb::attrs; \
+    using hcb::attr; \
+    using hcb::length; \
+    using hcb::elems; \
+    using hcb::elem; \
+    using hcb::to_hacc; \
+    using hcb::from_hacc; \
+    using hcb::delegate; \
+    using hcb::prepare; \
+    using hcb::finish; \
+    using hcb::pointer; \
+    using hcb::member; \
+    using hcb::value_funcs; \
+    using hcb::ref_funcs; \
+    using hcb::ref_func; \
+    using hcb::value_methods; \
+    using hcb::ref_methods; \
+    using hcb::ref_method; \
+    using hcb::base; \
+    using hcb::assignable; \
+    static void describe () {
+#define HCB_TEMPLATE_END(params, type) } }; }  // Reserved in case we need to do some magic static-var wrangling
 
 #endif

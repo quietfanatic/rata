@@ -33,14 +33,7 @@ namespace hacc {
         STRING,
         ARRAY,
         OBJECT,
-        VAR,
-        ADDRESS,
-        ASSIGNMENT,
-        CONSTRAINT,
-        POINTER,
-        ATTR,
-        ELEM,
-        MACRO,
+        PATH,
         ERROR
     };
     std::string form_name (Form);
@@ -50,53 +43,20 @@ namespace hacc {
     typedef std::pair<std::string, Hacc*> Pair;
     typedef std::vector<Pair> Object;
 
-    struct Var {
-        String name;
-        bool operator == (const Var& o) const { return name == o.name; }
-    };
-    struct Address {
-        Hacc* subject;
-    };
-    struct Assignment {
-        Hacc* left;
-        Hacc* right;
-    };
-    struct Constraint {
-        String hacctype;
-        Hacc* value;
-    };
-    struct Pointer {
-        std::type_info* cpptype;
-        void* p;
-    };
-    struct Attr {
-        Hacc* subject;
-        String name;
-    };
-    struct Elem {
-        Hacc* subject;
-        size_t index;
-    };
-    struct Macro {
-        String name;
-        Array args;
-    };
-
     struct Error : std::exception {
         String mess;
         String filename;
         uint line;
         uint col;
-        const char* buf;
+        mutable std::string longmess;
         Error (String mess = "", String filename = "", uint line = 0, uint col = 0) :
-            mess(mess), filename(filename), line(line), col(col), buf(NULL)
+            mess(mess), filename(filename), line(line), col(col)
         { }
 
          // std::exception
-        const char* what () {
-            if (!buf) {
-                std::string s;
-                std::stringstream ss (s);
+        const char* what () const noexcept {
+            if (longmess.empty()) {
+                std::stringstream ss;
                 ss << mess;
                 if (!filename.empty()) {
                     if (line) {
@@ -109,11 +69,42 @@ namespace hacc {
                 else if (line) {
                     ss << " at " << line << ":" << col;
                 }
-                buf = s.c_str();
+                longmess = ss.str();
             }
-            return buf;
+            return longmess.c_str();
         }
 
+    };
+
+    enum PathType {
+        TOP,
+        FILE,
+        ATTR,
+        ELEM
+    };
+
+    struct Path : gc {
+        PathType type;
+        Path* target;
+        std::string s;
+        size_t i;
+
+        Path() : type(TOP) { }
+        Path(std::string doc) : type(FILE), s(doc) { };
+        Path(Path* target, std::string key) : type(ATTR), target(target), s(key) { };
+        Path(Path* target, size_t index) : type(ELEM), target(target), i(index) { };
+        std::string root ();
+
+        bool operator == (const Path& o) const {
+            if (type != o.type) return false;
+            switch (type) {
+                case TOP: return true;
+                case FILE: return s == o.s;
+                case ATTR: return s == o.s && *target == *o.target;
+                case ELEM: return i == o.i && *target == *o.target;
+                default: throw Error("Corrupted Path");
+            }
+        }
     };
 
      // The type itself
@@ -127,14 +118,7 @@ namespace hacc {
             String s;
             Array* a;
             Object* o;
-            Var v;
-            Address address;
-            Assignment assignment;
-            Constraint constraint;
-            Pointer p;
-            Attr attr;
-            Elem elem;
-            Macro* macro;
+            Path* p;
             Error* error;
         };
         Hacc (Null n = null) : form(NULLFORM) { }
@@ -154,15 +138,7 @@ namespace hacc {
         Hacc (Array&& a) : form(ARRAY), a(new Array (a)) { }
         Hacc (const Object& o) : form(OBJECT), o(new Object (o)) { }
         Hacc (Object&& o) : form(OBJECT), o(new Object (o)) { }
-        Hacc (Var v) : form(VAR), v(v) { }
-        Hacc (Address a) : form(ADDRESS), address(a) { }
-        Hacc (Assignment a) : form(ASSIGNMENT), assignment(a) { }
-        Hacc (Constraint c) : form(CONSTRAINT), constraint(c) { }
-        Hacc (Pointer p) : form(POINTER), p(p) { }
-        Hacc (Attr a) : form(ATTR), attr(a) { }
-        Hacc (Elem e) : form(ELEM), elem(e) { }
-        Hacc (const Macro& m) : form(MACRO), macro(new Macro (m)) { }
-        Hacc (Macro&& m) : form(MACRO), macro(new Macro (m)) { }
+        Hacc (Path* p) : form(PATH), p(p) { }
         Hacc (const Error& e) : form(ERROR), error(new Error (e)) { }
         Hacc (Error&& e) : form(ERROR), error(new Error (e)) { }
         ~Hacc ();

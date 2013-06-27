@@ -10,8 +10,8 @@ use Carp qw(croak);
 use Cwd qw(cwd realpath);
 use File::Spec::Functions qw(:ALL);
 
-our @EXPORT_OK = qw(workflow rule rules phony subdep defaults include chdir targetmatch run);
-our %EXPORT_TAGS = ('all' => \@EXPORT_OK);
+our @EXPORT = qw(workflow rule rules phony subdep defaults include chdir targetmatch run);
+our %EXPORT_TAGS = ('all' => \@EXPORT);
 
  # A "target" is a reference to either a file or a phony.
  # A "rule" has one or more "to" targets and zero or more "from" targets.
@@ -185,6 +185,7 @@ sub include {
         for (keys %{$workflow{subdeps}}) {
             push @{$this_workflow->{subdeps}{$_}}, @{$workflow{subdeps}{$_}};
         }
+        push @{$this_workflow->{auto_subdeps}}, @{$workflow{auto_subdeps}};
     }
 }
 

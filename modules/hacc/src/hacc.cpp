@@ -1,6 +1,7 @@
 #include "../inc/hacc.h"
 
 namespace hacc {
+
     std::string form_name (Form f) {
         switch (f) {
             case UNDEFINED: return "undefined";
@@ -12,36 +13,30 @@ namespace hacc {
             case STRING: return "string";
             case ARRAY: return "array";
             case OBJECT: return "object";
-            case VAR: return "var";
-            case ADDRESS: return "address";
-            case ASSIGNMENT: return "assignment";
-            case CONSTRAINT: return "constraint";
-            case POINTER: return "pointer";
-            case ATTR: return "attr";
-            case ELEM: return "elem";
-            case MACRO: return "macro";
+            case PATH: return "path";
             case ERROR: return "error";
             default: return "corrupted";
         }
-        return false;
     }
+
+    std::string Path::root () {
+        switch (type) {
+            case TOP: return "";
+            case FILE: return s;
+            case ATTR:
+            case ELEM: return target->root();
+            default: return "";
+        }
+    }
+
     Hacc::~Hacc () {
         switch (form) {
             case STRING: s.~String(); break;
             case ARRAY: delete a; break;
             case OBJECT: delete o; break;
-            case VAR: v.~Var(); break;
-            case ADDRESS: address.~Address(); break;
-            case ASSIGNMENT: assignment.~Assignment(); break;
-            case CONSTRAINT: constraint.~Constraint(); break;
-            case POINTER: p.~Pointer(); break;
-            case ATTR: attr.~Attr(); break;
-            case ELEM: elem.~Elem(); break;
-            case MACRO: delete macro; break;
             case ERROR: delete error; break;
             default: break;
         }
-        throw Error("No atttribute '" + name + "'");
     }
     float Hacc::get_float () const {
         switch (form) {

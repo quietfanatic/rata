@@ -18,7 +18,7 @@ void hacc_string_test (hacc::String from, hacc::String to) {
 
 tap::Tester hacc_strings_tester ("hacc-strings", [](){
     using namespace tap;
-    plan(46);
+    plan(45);
      printf(" # Bools\n");  // 2
     hacc_string_test("true", "true");
     hacc_string_test("false", "false");
@@ -33,7 +33,7 @@ tap::Tester hacc_strings_tester ("hacc-strings", [](){
     hacc_string_test("0x7f", "127");
     hacc_string_test("-0x80", "-128");
     hacc_string_test("+0x100", "256");
-     printf(" # Floats\n");  // 6
+     printf(" # Floats\n");  // 7
     hacc_string_test("1~3f800000", "1~3f800000");
     hacc_string_test("1.0~3f800000", "1~3f800000");
     hacc_string_test("1.0", "1~3ff0000000000000");
@@ -67,13 +67,11 @@ tap::Tester hacc_strings_tester ("hacc-strings", [](){
      printf(" # Arrays and Objects\n");  // 2
     hacc_string_test("[{a: 1, b: []} [4, {c: {d: []}}]]", "[{ a:1 b:[] } [4 { c:{ d:[] } }]]");
     hacc_string_test("{a: []}", "{ a:[] }");
-     printf(" # Vars\n");  // 2
-    hacc_string_test("$thing_3432", "$thing_3432");
-    hacc_string_test("$\"stringish\\nid\"", "$\"stringish\\nid\"");
-     printf(" # Assignments\n");  // 3
-    hacc_string_test("$one=1", "$one=1");
-    hacc_string_test("$two = 2", "$two=2");
-    hacc_string_test("{ak: $ai = \"as\" bk: $\"bi\" = \"bs\"}", "{ ak:$ai=\"as\" bk:$bi=\"bs\" }");
+     printf(" # Paths\n");  // 4
+    hacc_string_test("$(\"asdf\")", "$(\"asdf\")");
+    hacc_string_test("$.attr", "$.attr");
+    hacc_string_test("$[4]", "$[4]");
+    hacc_string_test("$(\"asdf\").attr[7].a2", "$(\"asdf\").attr[7].a2");
      printf(" # Misc\n");  // 1
     hacc_string_test("{ things: [ {test_actor: {}} ] }", "{ things:[{ test_actor:{} }] }");
     
