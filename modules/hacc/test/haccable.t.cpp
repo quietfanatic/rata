@@ -130,7 +130,7 @@ MyUnion mu;
 tap::Tester haccable_tester ("hacc/haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(22);
+    plan(23);
     is(to_tree(&i)->i, 4, "to_tree on int32 works");
     doesnt_throw([](){ from_tree(&i, new Tree(35)); }, "from_tree on int32");
     is(i, 35, "...works");
@@ -150,8 +150,8 @@ tap::Tester haccable_tester ("hacc/haccable", [](){
     is(vyp, &vy1, "...works");
     doesnt_throw([](){ from_tree(&mu, new Tree(Object{Pair("i", new Tree(35))})); }, "Union using attrs as variants");
     is(mu.i.i, 35, "...can be read from hacc");
-    doesnt_throw([](){ from_tree(&mu, new Tree(Object{Pair("f", new Tree(31.2))})); }, "Union using attrs as variants");
-    is(mu.f.f, 31.2, "...can be read from hacc");
+    doesnt_throw([](){ from_tree(&mu, new Tree(Object{Pair("f", new Tree(31.2f))})); }, "Union using attrs as variants");
+    is(mu.f.f, 31.2f, "...can be read from hacc");
     mu = MyUnion(71);
     is(to_tree(&mu)->form, OBJECT, "Union is written as object");
     is(to_tree(&mu)->o->at(0).second->i, 71, "Union can be written to hacc");

@@ -231,10 +231,17 @@ namespace hacc {
             }
         }
     }
-
+     // TODO: figure out the proper relationship between delegation
+     //  and cascading calls (prepare and finish)
     void Reference::prepare (Tree* h) {
         if (type().data->prepare) {
             mod([&](void* p){ type().data->prepare(p, h); });
+        }
+        else if (type().data->delegate) {
+            mod([&](void* p){
+                Reference(p, type().data->delegate).prepare(h);
+            });
+            return;
         }
         switch (h->form) {
             case OBJECT: {
@@ -266,6 +273,12 @@ namespace hacc {
         if (type().data->fill) {
             mod([&](void* p){ type().data->fill(p, h); });
         }
+         // TODO: this delegation has too high priority
+        else if (type().data->delegate) {
+            mod([&](void* p){
+                Reference(p, type().data->delegate).fill(h);
+            });
+        }
         else switch (h->form) {
             case OBJECT: {
                 for (auto& a : *h->o) {
@@ -285,24 +298,31 @@ namespace hacc {
     }
 
     void Reference::finish (Tree* h) {
-        switch (h->form) {
-            case OBJECT: {
-                for (auto& a : *h->o) {
-                    attr(a.first).finish(a.second);
-                }
-                break;
-            }
-            case ARRAY: {
-                size_t n = h->a->size();
-                for (size_t i = 0; i < n; i++) {
-                    elem(i).finish((*h->a)[i]);
-                }
-                break;
-            }
-            default: break;
+        if (type().data->delegate && !type().data->finish) {
+            mod([&](void* p){
+                Reference(p, type().data->delegate).finish(h);
+            });
         }
-        if (type().data->finish) {
-            mod([&](void* p){ type().data->finish(p, h); });
+        else {
+            switch (h->form) {
+                case OBJECT: {
+                    for (auto& a : *h->o) {
+                        attr(a.first).finish(a.second);
+                    }
+                    break;
+                }
+                case ARRAY: {
+                    size_t n = h->a->size();
+                    for (size_t i = 0; i < n; i++) {
+                        elem(i).finish((*h->a)[i]);
+                    }
+                    break;
+                }
+                default: break;
+            }
+            if (type().data->finish) {
+                mod([&](void* p){ type().data->finish(p, h); });
+            }
         }
     }
 
