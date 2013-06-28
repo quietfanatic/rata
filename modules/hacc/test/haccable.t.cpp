@@ -130,7 +130,7 @@ MyUnion mu;
 tap::Tester haccable_tester ("hacc/haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(23);
+    plan(25);
     is(to_tree(&i)->i, 4, "to_tree on int32 works");
     doesnt_throw([](){ from_tree(&i, new Tree(35)); }, "from_tree on int32");
     is(i, 35, "...works");
@@ -144,8 +144,12 @@ tap::Tester haccable_tester ("hacc/haccable", [](){
     is(to_tree(&vy)->form, OBJECT, "Vectorly turns into Object by default");
     is(to_tree(&vy)->o->at(1).first, String("y"), "Vectorly Object has atribute 'y'");
     is(to_tree(&vy)->o->at(1).second->get_float(), 4.f, "And its value is correct");
-    is(to_tree(&vy1)->s, String("vy1"), "Custom string <- pointer");
-    is(to_tree(&vy2)->s, String("vy2"), "Custom string <- pointer");
+    vyp = &vy1;
+    is((int)to_tree(&vyp)->form, (int)STRING, "Custom string <- pointer");
+    is(to_tree(&vyp)->s, String("vy1"), "Custom string <- pointer");
+    vyp = &vy2;
+    is((int)to_tree(&vyp)->form, (int)STRING, "Custom string <- pointer");
+    is(to_tree(&vyp)->s, String("vy2"), "Custom string <- pointer");
     doesnt_throw([](){ from_tree(&vyp, new Tree(String("vy1"))); }, "Custom string -> pointer behavior");
     is(vyp, &vy1, "...works");
     doesnt_throw([](){ from_tree(&mu, new Tree(Object{Pair("i", new Tree(35))})); }, "Union using attrs as variants");
