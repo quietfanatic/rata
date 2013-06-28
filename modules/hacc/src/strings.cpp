@@ -2,6 +2,9 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <string.h>
+#include <fstream>
+#include <sstream>
+#include "../inc/files.h"  // for Path
 #include "../inc/strings.h"
 
 namespace hacc {
@@ -48,11 +51,11 @@ namespace hacc {
                 s << p->i;
                 return path_to_string(p->target) + "[" + s.str() + "]";
             }
-            default: throw Error("Corrupted Path");
+            default: throw X::Corrupted_Path(p);
         }
     }
 
-    String hacc_to_string (Hacc* h, uint ind, uint prior_ind) {
+    String tree_to_string (Tree* h, uint ind, uint prior_ind) {
         switch (h->form) {
             case NULLFORM: return "null";
             case BOOL: return h->b ? "true" : "false";
@@ -79,8 +82,8 @@ namespace hacc {
                     r += "\n" + indent(prior_ind + 1);
                 for (auto& e : *h->a) {
                     if (ind)
-                        r += hacc_to_string(e, ind - 1, prior_ind + (h->a->size() > 1));
-                    else r += hacc_to_string(e);
+                        r += tree_to_string(e, ind - 1, prior_ind + (h->a->size() > 1));
+                    else r += tree_to_string(e);
                     if (&e != &h->a->back()) {
                         if (ind && h->a->size() > 1)
                             r += "\n" + indent(prior_ind + 1);
@@ -102,8 +105,8 @@ namespace hacc {
                     r += escape_ident(i->first);
                     r += ":";
                     if (ind)
-                        r += hacc_to_string(i->second, ind - 1, prior_ind + (h->o->size() > 1));
-                    else r += hacc_to_string(i->second, 0, 0);
+                        r += tree_to_string(i->second, ind - 1, prior_ind + (h->o->size() > 1));
+                    else r += tree_to_string(i->second, 0, 0);
                     nexti++;
                     if (nexti != h->o->end()) {
                         if (ind) r += "\n" + indent(prior_ind + 1);
@@ -119,11 +122,8 @@ namespace hacc {
                 return path_to_string(h->p);
             }
             case ERROR: throw *h->error;
-            default: throw Error("Corrupted Hacc tree\n");
+            default: throw X::Corrupted_Tree(h);
         }
-    }
-    String string_from_hacc (Hacc* h, uint ind, uint prior_ind) {
-        return hacc_to_string(h, ind, prior_ind);
     }
 
      // Parsing is simple enough that we don't need a separate lexer step
@@ -153,7 +153,7 @@ namespace hacc {
             return safebuf_array;
         }
 
-        Error error (String s) {
+        X::Parse_Error error (String s) {
              // Diagnose line and column number
              // I'm not sure the col is exactly right
             uint line = 1;
@@ -165,7 +165,7 @@ namespace hacc {
                 }
             }
             uint col = p - nl;
-            return Error(s, file, line, col);
+            return X::Parse_Error(s, file, line, col);
         }
 
          // The following are subparsers.
@@ -228,7 +228,7 @@ namespace hacc {
 
          // Parsing of specific valtypes.
          // This one could return an int, float, or double.
-        Hacc* parse_numeric () {
+        Tree* parse_numeric () {
             int64 val;
             uint len;
             if (!sscanf(safebuf(), "%" SCNi64 "%n", &val, &len))
@@ -241,10 +241,10 @@ namespace hacc {
                 case 'E':
                 case 'p':  // backtrack!
                 case 'P': p -= len; return parse_floating();
-                default: return new Hacc(val);
+                default: return new Tree(val);
             }
         }
-        Hacc* parse_floating () {
+        Tree* parse_floating () {
             double val;
             uint len;
             if (!sscanf(safebuf(), "%lg%n", &val, &len))
@@ -252,10 +252,10 @@ namespace hacc {
             p += len;
             switch (look()) {
                 case '~': return parse_bitrep();
-                default: return new Hacc(val);
+                default: return new Tree(val);
             }
         }
-        Hacc* parse_bitrep () {
+        Tree* parse_bitrep () {
             p++;  // for the ~
             uint64 rep;
             uint len;
@@ -263,15 +263,15 @@ namespace hacc {
                 throw error("Missing precise bitrep after ~");
             p += len;
             switch (len) {
-                case  8: return new Hacc(*(float*)&rep);
-                case 16: return new Hacc(*(double*)&rep);
+                case  8: return new Tree(*(float*)&rep);
+                case 16: return new Tree(*(double*)&rep);
                 default: throw error("Precise bitrep doesn't have 8 or 16 digits");
             }
         }
-        Hacc* parse_string () {
-            return new Hacc(parse_stringly());
+        Tree* parse_string () {
+            return new Tree(parse_stringly());
         }
-        Hacc* parse_heredoc () {
+        Tree* parse_heredoc () {
             p++;  // for the <
             if (look() != '<') throw error("< isn't followed by another < for a heredoc");
             p++;
@@ -296,20 +296,20 @@ namespace hacc {
                             p1 += ind.size();
                         }
                         p += terminator.size();
-                        return new Hacc(ret);
+                        return new Tree(ret);
                     }
                     while (look() != '\n') {
                         got += look(); p++;
                     }
                     p += terminator.size();
-                    return new Hacc(ret);
+                    return new Tree(ret);
                 }
                 while (look() != '\n') {
                     got += look(); p++;
                 }
             }
         }
-        Hacc* parse_array () {
+        Tree* parse_array () {
             Array a;
             p++;  // for the [
             for (;;) {
@@ -318,12 +318,12 @@ namespace hacc {
                     case EOF: throw error("Array not terminated");
                     case ':': throw error("Cannot have : in an array");
                     case ',': p++; break;
-                    case ']': p++; return new Hacc(std::move(a));
+                    case ']': p++; return new Tree(std::move(a));
                     default: a.push_back(parse_term()); break;
                 }
             }
         }
-        Hacc* parse_object () {
+        Tree* parse_object () {
             Object o;
             p++;  // for the {
             String key;
@@ -333,7 +333,7 @@ namespace hacc {
                     case EOF: throw error("Object not terminated");
                     case ':': throw error("Missing name before : in object");
                     case ',': p++; continue;
-                    case '}': p++; return new Hacc(std::move(o));
+                    case '}': p++; return new Tree(std::move(o));
                     default: key = parse_ident("an attribute name or the end of the object"); break;
                 }
                 parse_ws();
@@ -349,9 +349,9 @@ namespace hacc {
                 }
             }
         }
-        Hacc* parse_parens () {
+        Tree* parse_parens () {
             p++;  // for the (
-            Hacc* r = parse_term();
+            Tree* r = parse_term();
             parse_ws();
             if (look() == ')') p++;
             else {
@@ -359,21 +359,21 @@ namespace hacc {
             }
             return r;
         }
-        Hacc* parse_bareword () {
+        Tree* parse_bareword () {
              // A previous switch ensures this is a bare word and not a string.
             String word = parse_ident("An ID of some sort (this shouldn't happen)");
             if (word == "null")
-                return new Hacc(null);
+                return new Tree(null);
             else if (word == "false")
-                return new Hacc(false);
+                return new Tree(false);
             else if (word == "true")
-                return new Hacc(true);
+                return new Tree(true);
             else if (word == "nan" || word == "inf") {
                 p -= 3;
                 return parse_floating();
             }
             else {
-                return new Hacc(word);
+                return new Tree(word);
             }
         }
         Path* continue_path (Path* left) {
@@ -409,7 +409,7 @@ namespace hacc {
                 default: return left;
             }
         }
-        Hacc* parse_path () {
+        Tree* parse_path () {
             p++;  // for the $
             if (look() == '(') {
                 p++;
@@ -417,14 +417,14 @@ namespace hacc {
                 if (look() != ')')
                     throw error("Expected ) after filename, but got " + String(1, look()));
                 p++;
-                return new Hacc(continue_path(new Path(f)));
+                return new Tree(continue_path(new Path(f)));
             }
             else {
-                return new Hacc(continue_path(new Path()));
+                return new Tree(continue_path(new Path()));
             }
         }
 
-        Hacc* parse_term () {
+        Tree* parse_term () {
             parse_ws();
             for (;;) switch (char next = look()) {
                 case '+':
@@ -453,8 +453,8 @@ namespace hacc {
                     else throw error("Unrecognized character " + String(1, next));
             }
         }
-        Hacc* parse_all () {
-            Hacc* r = parse_term();
+        Tree* parse_all () {
+            Tree* r = parse_term();
             parse_ws();
             if (look() == EOF) return r;
             else {
@@ -462,17 +462,22 @@ namespace hacc {
                 throw error("Extra stuff at end of document");
             }
         }
-        Hacc* parse () {
+        Tree* parse () {
             try { return parse_all(); }
-            catch (Error& e) { return new Hacc(e); }
+            catch (X::Error& e) { return new Tree(new X::Error(e)); }
         }
     };
 
      // Finally:
-    Hacc* hacc_from_string (const String& s, String filename) { return Parser(s, filename).parse(); }
-    Hacc* hacc_from_string (const char* s, String filename) { return Parser(s, filename).parse(); }
-    Hacc* string_to_hacc (const String& s, String filename) { return hacc_from_string(s, filename); }
-    Hacc* string_to_hacc (const char* s, String filename) { return hacc_from_string(s, filename); }
+    Tree* tree_from_string (const String& s, String filename) { return Parser(s, filename).parse(); }
+    Tree* tree_from_string (const char* s, String filename) { return Parser(s, filename).parse(); }
+
+    Tree* tree_from_file (String filename) {
+        std::ifstream ifs (filename);
+        std::ostringstream ss;
+        ss << ifs.rdbuf();
+        return tree_from_string(ss.str(), filename);
+    }
 
 }
 

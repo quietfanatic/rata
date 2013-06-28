@@ -2,262 +2,182 @@
 #define HAVE_HACC_DYNAMICISM_H
 
 #include <functional>
+#include <typeinfo>
+#include <typeindex>
 #include <gc/gc_cpp.h>
+#include "tree.h"
 
 namespace hacc {
 
+     // Utilitous declarations
     template <class F> using Func = std::function<F>;
-    typedef Type Type;
     typedef Func<void (void*)> Cont;
 
+     // The main type type
+    struct TypeData;
+    struct Type {
+        TypeData* data;
+
+        String name () const;
+        size_t size () const;
+        void construct (void*) const;
+        void destruct (void*) const;
+
+        Type (TypeData* p) : data(p) { }
+        Type (const std::type_info&);
+        Type (String);
+        bool operator == (const Type& other) const {
+             // TypeDatas are guaranteed to not be duplicated.
+            return data == other.data;
+        }
+    };
+     // For internal use, returns null instead of throwing exception
+    TypeData* typedata_by_cpptype (const std::type_info&);
+
+     // GetSets represent a way of getting and setting a value that
+     //  belongs to another value.  GetSet0, GetSet1, and GetSet2
+     //  all represent the same type, but with different numbers
+     //  of compile-time-known types.
     struct GetSet0 : gc {
-        const Type* type;
+         // All getsets must support these being set
         bool optional = false;
         bool readonly = false;
+        virtual Type type () = 0;
+        virtual Type host_type () = 0;
+        virtual String description () { return "<unknown GetSet>"; }
         virtual void* address (void*) = 0;
         virtual void get (void*, const Cont&) = 0;
         virtual void set (void*, const Cont&) = 0;
         virtual void mod (void*, const Cont&) = 0;
-        GetSet0 (const Type& type) : type(&type) { }
     };
     template <class C>
     struct GetSet1 : GetSet0 {
-        GetSet1 (const Type& type) :
-            GetSet0{type}
-        { }
+        Type host_type () { return typeid(C); }
     };
     template <class C, class M>
-    struct GetSet2<C, M> : GetSet1<C> {
-        GetSet2 () : GetSet1{typeid(M)} { }
+    struct GetSet2 : GetSet1<C> {
+        Type type () { return typeid(M); }
+         // Named-Parameter-Idiom setters
         GetSet2<C, M>& optional () { optional = true; return *this; }
         GetSet2<C, M>& required () { optional = false; return *this; }
         GetSet2<C, M>& readonly () { readonly = true; return *this; }
     };
 
-    template <class C, class M>
-    struct GS_Member : GetSet2<C, M> {
-        C::*M mp;
-        void* address (void* c) { return &((C*)c)->*mp; }
-        void get (void* c, const Cont& f) { f(&((C*)c)->*mp); }
-        void set (void* c, const Cont& f) { f(&((C*)c)->*mp); }
-        void mod (void* c, const Cont& f) { f(&((C*)c)->*mp); }
-    };
+     // A Pointer implements a dynamically-typed pointer.
+    struct Pointer {
+        Type type;
+        void* address;
 
-    template <class C, class M>
-    struct GS_ValueFuncs : GetSet2<C, M> {
-        std::function<M (const C&)> getter;
-        std::function<void (C&, M)> setter;
-        void* address (void* c) { return NULL; }
-        void get (void* c, const Cont& f) {
-            const M& tmp = getter(*(C*)c);
-            f(&tmp);
-        }
-        void set (void* c, const Cont& f) {
-            M tmp;
-            f(&tmp);
-            setter(*(C*)c, tmp);
-        }
-        void mod (void* c, const Cont& f) {
-            const M& tmp = getter(*(C*)c);
-            f(&tmp);
-            setter(*(C*)c, tmp);
-        }
-    };
+        Pointer (Null n = null) : type(null), address(null) { }
+        Pointer (Type type, void* p = null) : type(type), address(p) { }
+        template <class C>
+        Pointer (C* p) : type(typeid(C)), address(p) { }
 
-    template <class C, class M>
-    struct GS_RefFuncs : GetSet2<C, M> {
-        std::function<const M& (const C&)> getter;
-        std::function<void (C&, const M&)> setter;
-        void* address (void* c) { return NULL; }
-        void get (void* c, const Cont& f) {
-            f(&getter(*(C*)c));
-        }
-         // This one is not quite satisfactory, as it requires an extra copy.
-        void set (void* c, const Cont& f) {
-            M tmp;
-            f(&tmp);
-            setter(*(C*)c, tmp);
-        }
-        void mod (void* c, const Cont& f) {
-            M tmp = getter(*(C*)c);
-            f(&tmp);
-            setter(*(C*)c, tmp);
-        }
-    };
-
-    template <class C, class M>
-    struct GS_RefFunc : GetSet2<C, M> {
-        std::function<M& (C&)> getter;
-        void* address (void* c) { return &getter(*(C*)c); }
-        void get (void* c, const Cont& f) { f(&getter(*(C*)c)); }
-        void set (void* c, const Cont& f) { f(&getter(*(C*)c)); }
-        void mod (void* c, const Cont& f) { f(&getter(*(C*)c)); }
-    };
-
-    template <class C, class M>
-    struct GS_ValueMethods : GetSet2<C, M> {
-        M (C::* getter) () const;
-        void (C::* setter) (M);
-        void* address (void* c) { return NULL; }
-        void get (void* c, const Cont& f) {
-            const M& tmp = (((C*)c)->*getter)();
-            f(&tmp);
-        }
-        void set (void* c, const Cont& f) {
-            M tmp;
-            f(&tmp);
-            (((C*)c)->*setter)(tmp);
-        }
-        void mod (void* c, const Cont& f) {
-            M& tmp = (((C*)c)->*getter)();
-            f(&tmp);
-            (((C*)c)->*setter)(tmp);
-        }
-    };
-
-    template <class C, class M>
-    struct GS_RefMethods : GetSet2<C, M> {
-        const M& (C::* getter) () const;
-        void (C::* setter) (const M&);
-        void* address (void* c) { return NULL; }
-        void get (void* c, const Cont& f) {
-            f(&(((C*)c)->*getter)());
-        }
-        void set (void* c, const Cont& f) {
-            M tmp;
-            f(&tmp);
-            (((C*)c)->*setter)(tmp);
-        }
-        void mod (void* c, const Cont& f) {
-            M tmp = (((C*)c)->*getter)();
-            f(&tmp);
-            (((C*)c)->*setter)(tmp);
-        }
+        operator void* () const { return address; }
+        operator bool () const { return address; }
+         // These throw if the types don't exactly match
+        void* address_of_type (Type) const;
+        template <class C>
+        operator C* () const { return address_of_type(typeid(C)); }
     };
     
-    template <class C, class M>
-    struct GS_RefMethod : GetSet2<C, M> {
-        M& (C::* getter) ();
-        void* address (void* c) { return &(((C*)c)->*getter)(); }
-        void get (void* c, const Cont& f) { f(&(((C*)c)->*getter)()); }
-        void set (void* c, const Cont& f) { f(&(((C*)c)->*getter)()); }
-        void mod (void* c, const Cont& f) { f(&(((C*)c)->*getter)()); }
-    };
-
-    template <class C, class M>
-    struct GS_Base : GetSet2<C, M> {
-        void* address (void* c) { return static_cast<M*>((C*)c); }
-        void get (void* c, const Cont& f) { f(static_cast<M*>((C*)c); }
-        void set (void* c, const Cont& f) { f(static_cast<M*>((C*)c); }
-        void mod (void* c, const Cont& f) { f(static_cast<M*>((C*)c); }
-    };
-
-    template <class C, class M>
-    struct GS_Assignable : GetSet2<C, M> {
-        void* address (void* c) { return NULL; }
-        void get (void* c, const Cont& f) {
-            M tmp = *(C*)c;
-            f(&tmp);
-        }
-        void set (void* c, const Cont& f) {
-            M tmp;
-            f(&tmp);
-            *(C*)c = tmp;
-        }
-        void mod (void* c, const Cont& f) {
-            M tmp = *(C*)c;
-            f(&tmp);
-            *(C*)c = tmp;
-        }
-    };
-
-    template <class C>
-    struct GS_ID : GetSet2<C, C> {
-        void* address (void* c) { return c; }
-        void get (void* c, const Cont& f) { f(c); }
-        void set (void* c, const Cont& f) { f(c); }
-        void mod (void* c, const Cont& f) { f(c); }
-    };
-
+     // A Reference implements a dynamically-typed object that
+     //  might not be addressable but can still be got or set.
     struct Reference {
         void* c;
-        const GetSet0* gs;
-        Reference () : c(NULL), gs(NULL) { }
-        Reference (void* c, const GetSet0* gs) : c(c), gs(gs) { }
-        Reference (const Type& type_, void* c) :
-            c(c), gs(new GS_ID<void>)
-        {
-            gs->type = &type_;
-        }
-        template <class C>
-        Reference (C* c) : c(c), gs(new GS_ID<C>) { type = &typeid(C); }
+        GetSet0* gs;
 
-        const Type& type () { return gs->type; }
-        void get (const Cont& f) { gs->get(c, f); }
-        void set (const Cont& f) { gs->set(c, f); }
-        void mod (const Cont& f) { gs->mod(c, f); }
-        void* address () { return gs->address(c); }
+        Reference (Null n = null) : c(null), gs(null) { }
+        Reference (void* c, GetSet0* gs) : c(c), gs(gs) { }
+        Reference (Type type, void* p);
+        Reference (Pointer p) : Reference(p.type, p.address) { }
 
-        template <class C> operator C* () {
-            if (*gs->type == typeid(C)) {
-                return (C*)c;
-            }
-            else throw hacc::Error("A type mismatch occurred when coercing from a Reference.  Sorry, better error message is NYI.");
-        }
-        operator bool () { return c && gs; }
+         // If the data is not addressable, this returns null.
+        void* address () const { return gs->address(c); }
+        Type type () const { return gs->type(); }
+        Type host_type () const { return gs->host_type(); }
+        void get (const Cont& f) const { gs->get(c, f); }
+        void set (const Cont& f) const { gs->set(c, f); }
+        void mod (const Cont& f) const { gs->mod(c, f); }
+
+         // This will throw if the data is not addressable.
+        operator Pointer () const;
+
+         // Hacc-specific
+        std::vector<String> keys ();
+        void set_keys (const std::vector<String>&);
+        size_t length ();
+        void set_length (size_t);
+         // These require that this reference be addressable.
+        Reference attr (String);
+        Reference elem (size_t);
+         // These might require addressability
+        Tree* to_tree ();
+        void prepare (Tree*);
+        void fill (Tree*);
+        void finish (Tree*);
+        void from_tree (Tree*);
     };
 
-    struct Pointer {
-        void* p;
-        const Type* type;
-        Pointer (const Type& type = *(const Type*)NULL, void* p = NULL) : p(p), type(&type) { }
-        template <class C> Pointer (C* p) : p(p), type(&typeid(C)) { }
-        Pointer (Reference r) : p(r.address()), type(r.type()) {
-            if (!r.addressable)
-                throw Error("Tried to convert unaddressable reference of type " + type_name(p.type()) + " into Pointer")
-        }
-        operator void* () const { return p; }
-        operator bool () const { return p; }
-        template <class C> operator C* () const {
-            if (typeid(C) == *type) return (C*)p;
-            else throw Error("Type mismatch: expected " + type_name<C>() + " but got " + type_name(*type));
-        }
-        operator Reference () const { return Reference{p, *type}; }
-        operator std::pair<std::type_index, void*> () const {
-            return std::pair<std::type_index, void*>(*type, p);
-        }
-    };
-
-    struct Dynamic {
-        void* p;
-        HaccTable* ht;
-        Dynamic (HaccTable* ht = NULL, void* p = NULL) : p(p), ht(ht) { }
-        Dynamic (HaccTable* ht = NULL, void* p = NULL) : p(p), ht(ht) { }
-        template <class C> explicit Dynamic (C* p) : p(p), ht(hacctable_by_type(typeid(C))) {
-            if (!ht) {
-                delete p;
-                throw Error("Cannot construct a Dynamic out of non-haccable type " + type_name<C>());
-            }
-        }
-        explicit Dynamic (Pointer p) : p(p.p), ht(hacctable_require_type(p.type)) { }
-        ~Dynamic () {
-            if (p && ht) {
-                ht->destruct(p);
-                delete (char*)p;  // This is kinda icky
-            }
-        }
-        Pointer pointer () const { return Pointer(p, ht ? ht->type : NULL); }
-
-        Dynamic (Dynamic&& o) : {
-            if (p && ht) {
-                ht->destruct(p);
-                delete (char*)p;
-            }
-            p = o.p;
-            o.p = NULL;
-            ht = o.ht;
-        }
-    };
+    namespace X {
+        struct Type_Mismatch : Logic_Error {
+            Type expected;
+            Type got;
+            Type_Mismatch (Type expected, Type got);
+        };
+        struct Unaddressable : Logic_Error {
+            Reference r;
+            String goal;
+            Unaddressable (Reference, String);
+        };
+        struct Missing_Attr : Logic_Error {
+            Type type;
+            String name;
+            Missing_Attr (Type, String);
+        };
+        struct Missing_Elem : Logic_Error {
+            Type type;
+            size_t index;
+            Missing_Elem (Type, size_t);
+        };
+        struct Too_Long : Logic_Error {
+            Type type;
+            size_t wanted;
+            size_t maximum;
+            Too_Long (Type, size_t, size_t);
+        };
+        struct No_Attr : Logic_Error {
+            Type type;
+            String name;
+            No_Attr (Type, String);
+        };
+        struct Out_Of_Range : Logic_Error {
+            Type type;
+            size_t index;
+            size_t length;
+            Out_Of_Range (Type, size_t, size_t);
+        };
+        struct No_Attrs : Logic_Error {
+            Type type;
+            String name;
+            No_Attrs (Type);
+            No_Attrs (Type, String);
+        };
+        struct No_Elems : Logic_Error {
+            Type type;
+            size_t index = 0;
+            No_Elems (Type);
+            No_Elems (Type, size_t);
+        };
+        struct No_Type_For_CppType : Logic_Error {
+            const std::type_info& cpptype;
+            No_Type_For_CppType (const std::type_info&);
+        };
+        struct No_Type_For_Name : Logic_Error {
+            String name;
+            No_Type_For_Name (String);
+        };
+    }
 
 }
 

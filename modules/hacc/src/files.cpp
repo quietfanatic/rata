@@ -1,8 +1,8 @@
-#include "../inc/documents.h"
+#include "../inc/files.h"
 
 namespace hacc {
 
-    std::unordered_map<std::string, File*> files_by_filename;
+    std::unordered_map<std::string, File> files_by_filename;
 
      // File structure's innards.  -ing states are named after
      //  the action that is next scheduled to happen to the file
@@ -21,13 +21,11 @@ namespace hacc {
         UNLOAD_VERIFYING,
         UNLOAD_COMMITTING
     };
-    struct File {
+    struct FileData {
         FileState state;
         std::string filename;
         Dynamic data;  // null if not loaded
         Dynamic new_data;  // For when reloading
-        Func<Pointer (File*)> magic;
-        std::vector<File*> dependencies;
         bool requested = false;
 
         File (std::string n) : filename(n) { }
@@ -35,7 +33,6 @@ namespace hacc {
     std::string filename (File* f) { return f->filename; }
     FileState state (File* f) { return f->state; }
     bool loaded (File* f) { return f->state == LOADED; }
-    bool magic (File* f) { return f->magic; }
     bool requested (File* f) { return f->requested; }
 
      // CREATING AND DECLARING

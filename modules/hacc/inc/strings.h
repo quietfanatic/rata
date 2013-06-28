@@ -1,7 +1,7 @@
 #ifndef HAVE_HACC_STRINGS_H
 #define HAVE_HACC_STRINGS_H
 
-#include "hacc.h"
+#include "tree.h"
 
 namespace hacc {
 
@@ -13,15 +13,21 @@ namespace hacc {
     String escape_ident (const String&);
      // unescape is harder to abstract out, so we'll wait till we need it.
 
-     // Write a Hacc to a string
-    String hacc_to_string (Hacc*, uint ind = 0, uint prior_ind = 0);
-     // Read a Hacc from a string
-    Hacc* hacc_from_string (const String&, String filename = "");
-    Hacc* hacc_from_string (const char*, String filename = "");
+    String tree_to_string (Tree*, uint ind = 0, uint prior_ind = 0);
+    Tree* tree_from_string (const String&, String filename = "");
+    Tree* tree_from_string (const char*, String filename = "");
 
-    void hacc_to_file (Hacc*, const String&, uint in = 0, uint prior_ind = 0);
-    void hacc_from_file (const String&);
+    void tree_to_file (Tree*, const String&, uint in = 0, uint prior_ind = 0);
+    void tree_from_file (const String&);
+
+    namespace X {
+        struct Parse_Error : Error {
+            Parse_Error (String mess = "", String filename = "", uint line = 0, uint col = 0) :
+                Error(mess, filename, line, col)
+            { }
+        };
+    }
+
 }
-
 
 #endif

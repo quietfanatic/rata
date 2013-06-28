@@ -1,4 +1,4 @@
-#include "../inc/hacc.h"
+#include "../inc/tree.h"
 
 namespace hacc {
 
@@ -19,41 +19,30 @@ namespace hacc {
         }
     }
 
-    std::string Path::root () {
-        switch (type) {
-            case TOP: return "";
-            case FILE: return s;
-            case ATTR:
-            case ELEM: return target->root();
-            default: return "";
-        }
-    }
-
-    Hacc::~Hacc () {
+    Tree::~Tree () {
         switch (form) {
             case STRING: s.~String(); break;
             case ARRAY: delete a; break;
             case OBJECT: delete o; break;
-            case ERROR: delete error; break;
             default: break;
         }
     }
-    float Hacc::get_float () const {
+    float Tree::get_float () const {
         switch (form) {
             case INTEGER: return i;
             case FLOAT: return f;
             case DOUBLE: return d;
             case ERROR: throw *error;
-            default: throw Error("Cannot get_float from a " + form_name(form) + " hacc.");
+            default: throw X::Logic_Error("Cannot get_float from a " + form_name(form) + " hacc.");
         }
     }
-    double Hacc::get_double () const {
+    double Tree::get_double () const {
         switch (form) {
             case INTEGER: return i;
             case FLOAT: return f;
             case DOUBLE: return d;
             case ERROR: throw *error;
-            default: throw Error("Cannot get_double from a " + form_name(form) + " hacc.");
+            default: throw X::Logic_Error("Cannot get_double from a " + form_name(form) + " hacc.");
         }
     }
 
@@ -61,6 +50,33 @@ namespace hacc {
     struct GC_Initter {
         GC_Initter () { GC_INIT(); }
     } gc_initter;
+
+    namespace X {
+        const char* Error::what () const noexcept {
+            if (longmess.empty()) {
+                std::stringstream ss;
+                ss << mess;
+                if (!filename.empty()) {
+                    if (line) {
+                        ss << " at " << filename << " " << line << ":" << col;
+                    }
+                    else {
+                        ss << " while processing " << filename;
+                    }
+                }
+                else if (line) {
+                    ss << " at " << line << ":" << col;
+                }
+                longmess = ss.str();
+            }
+            return longmess.c_str();
+        }
+
+        Corrupted_Tree::Corrupted_Tree (Tree* tree) :
+            Corrupted("Corrupted tree: nonsensical form number " + tree->form),
+            tree(tree)
+        { }
+    }
 
 }
 
