@@ -9,7 +9,7 @@
 namespace hacc {
 
      // INTERNAL STUFF (type-erased versions of declaration api functions)
-    Type _new_type (const std::type_info&, size_t, void(*)(void*), void(*)(void*));
+    Type _new_type (const std::type_info&, size_t, void(*)(void*), void(*)(void*), void(*)(void*,void*));
     void _name (Type, String);
     void _keys (Type, GetSet0*);
     void _attrs (Type, const Func<Reference (void*, String)>&);
@@ -42,7 +42,7 @@ namespace hacc {
             _keys(get_type(), gs);
         }
         static void attrs (const Func<Reference (C&, String)>& f) {
-            _attr(get_type(), reinterpret_cast<const Func<Reference (void*, String)>&>(f));
+            _attrs(get_type(), reinterpret_cast<const Func<Reference (void*, String)>&>(f));
         }
         static void attr (String name, GetSet1<C>* gs) {
             _attr(get_type(), name, gs);
@@ -51,7 +51,7 @@ namespace hacc {
             _length(get_type(), gs);
         }
         static void elems (const Func<Reference (C&, size_t)>& f) {
-            _elem(get_type(), reinterpret_cast<const Func<Reference (void*, String)>&>(f));
+            _elems(get_type(), reinterpret_cast<const Func<Reference (void*, size_t)>&>(f));
         }
         static void elem (GetSet1<C>* gs) {
             _elem(get_type(), gs);
@@ -81,7 +81,8 @@ namespace hacc {
                 type = _new_type(
                     typeid(C), sizeof(C),
                     [](void* p){ new (p) C; },
-                    [](void* p){ ((C*)p)->~C(); }
+                    [](void* p){ ((C*)p)->~C(); },
+                    [](void* l, void* r){ new (l) C (*(C*)r); }
                 );
                 Haccable<C>::describe();
             }

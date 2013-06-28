@@ -7,18 +7,18 @@ namespace hacc {
 
      // Escape string according to HACC rules
      // Does not add quotes
-    String escape_string (const String&);
+    String escape_string (String);
      // Escape ident according to HACC rules
      // Does add quotes if necessary
-    String escape_ident (const String&);
+    String escape_ident (String);
      // unescape is harder to abstract out, so we'll wait till we need it.
 
     String tree_to_string (Tree*, uint ind = 0, uint prior_ind = 0);
-    Tree* tree_from_string (const String&, String filename = "");
+    Tree* tree_from_string (String, String filename = "");
     Tree* tree_from_string (const char*, String filename = "");
 
-    void tree_to_file (Tree*, const String&, uint in = 0, uint prior_ind = 0);
-    void tree_from_file (const String&);
+    void tree_to_file (Tree*, String);
+    Tree* tree_from_file (String);
 
     namespace X {
         struct Parse_Error : Error {

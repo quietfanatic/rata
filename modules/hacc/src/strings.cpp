@@ -9,7 +9,7 @@
 
 namespace hacc {
 
-    String escape_string (const String& unesc) {
+    String escape_string (String unesc) {
         String r = "";
         for (auto p = unesc.begin(); p != unesc.end(); p++) {
             switch (*p) {
@@ -26,7 +26,7 @@ namespace hacc {
         return r;
     }
 
-    String escape_ident (const String& unesc) {
+    String escape_ident (String unesc) {
         if (unesc.empty()) return "\"\"";
         for (auto p = unesc.begin(); p != unesc.end(); p++) {
             if (!isalnum(*p) && *p != '_' && *p != '-')
@@ -469,8 +469,13 @@ namespace hacc {
     };
 
      // Finally:
-    Tree* tree_from_string (const String& s, String filename) { return Parser(s, filename).parse(); }
+    Tree* tree_from_string (String s, String filename) { return Parser(s, filename).parse(); }
     Tree* tree_from_string (const char* s, String filename) { return Parser(s, filename).parse(); }
+
+    void tree_to_file (Tree* tree, String filename) {
+        std::ofstream ofs (filename);
+        ofs << tree_to_string(tree, 0, 0);
+    }
 
     Tree* tree_from_file (String filename) {
         std::ifstream ifs (filename);

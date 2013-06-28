@@ -97,13 +97,17 @@ namespace hacc {
              // std::exception
             const char* what () const noexcept;
         };
+         // Things like incorrect attribute names, type mismatches
+        struct Logic_Error : Error {
+            Logic_Error (String mess) : Error(mess) { }
+        };
          // A particularly bad kind of error indicating memory corruption
         struct Corrupted : Error {
             Corrupted (String mess) : Error(mess) { }
         };
-         // Things like incorrect attribute names, type mismatches
-        struct Logic_Error : Error {
-            Logic_Error (String mess) : Error(mess) { }
+         // Indicates an error in the hacc library
+        struct Internal_Error : Error {
+            Internal_Error (String mess) : Error(mess) { }
         };
 
          // Tree-related errors

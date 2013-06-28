@@ -1,5 +1,6 @@
 #include "../inc/tree.h"
 #include "../inc/getsets.h"
+#include "../inc/haccable.h"
 #include "types_internal.h"
 
 namespace hacc {
@@ -29,6 +30,7 @@ namespace hacc {
     size_t Type::size () const { return data->size; }
     void Type::construct (void* p) const { data->construct(p); }
     void Type::destruct (void* p) const { data->destruct(p); }
+    void Type::copy_construct (void* l, void* r) const { data->copy_construct(l, r); }
     TypeData* typedata_by_cpptype (const std::type_info& cpptype) {
         auto iter = types_by_cpptype().find(cpptype);
         if (iter != types_by_cpptype().end())
@@ -422,4 +424,35 @@ namespace hacc {
     }
 
 }
+
+HCB_BEGIN(hacc::Unknown)
+    name("hacc::Unknown");
+HCB_END(hacc::Unknown)
+
+HCB_BEGIN(hacc::Dynamic)
+    name("hacc::Dynamic");
+    keys(value_funcs<std::vector<String>>(
+        [](const hacc::Dynamic& dyn){
+            return std::vector<String>(1, dyn.type.name());
+        },
+        [](hacc::Dynamic& dyn, std::vector<String> keys){
+            if (keys.size() != 1) {
+                throw X::Logic_Error("A Dynamic must have one key representing its type");
+            }
+            Type type (keys[0]);
+            dyn.destroy();
+            dyn.type = type;
+            dyn.addr = malloc(type.size());
+            type.construct(dyn.addr); 
+        }
+    ));
+    attrs([](Dynamic& dyn, String name)->Reference{
+        if (name == dyn.type.name())
+            return dyn.address();
+        else return Reference(dyn.address()).attr(name);
+    });
+    elems([](Dynamic& dyn, size_t index)->Reference{
+        return Reference(dyn.address()).elem(index);
+    });
+HCB_END(hacc::Dynamic)
 

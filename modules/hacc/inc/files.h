@@ -2,6 +2,7 @@
 #define HAVE_HACC_FILES_H
 
 #include "tree.h"
+#include "dynamicism.h"
 
  // Most if not all of the important objects in this program should be
  //  loaded from files through this module.
@@ -23,8 +24,6 @@
 
 namespace hacc {
 
-/* TODO
-
      // FILES
     struct FileData;
     struct File {
@@ -32,8 +31,8 @@ namespace hacc {
 
          // Get the underlying object, loading it from disk if necessary.
          //  If so, it won't be marked as requested.
-        Pointer data (File*);
-
+        Pointer data ();
+        String filename ();
         bool loaded ();  // if it's fully and completely loaded
         bool requested ();  // if it was manually loaded
 
@@ -42,7 +41,7 @@ namespace hacc {
          //  an error until you try to use it.
         File (std::string filename);
          // Create a new file with the given data.
-        File (std::string filename, Pointer data);
+        File (std::string filename, Dynamic&& data);
     };
 
      // Show all loaded files.
@@ -70,7 +69,6 @@ namespace hacc {
      //  that have no more references to them.
     void trim ();
     
-*/
      // PATHS
 
     enum PathType {
@@ -79,9 +77,6 @@ namespace hacc {
         ATTR,
         ELEM
     };
-
-    struct Path;
-    static bool path_eq (const Path&, const Path&);
 
     struct Path : gc {
         PathType type;
@@ -94,10 +89,8 @@ namespace hacc {
         Path(Path* target, std::string key) : type(ATTR), target(target), s(key) { };
         Path(Path* target, size_t index) : type(ELEM), target(target), i(index) { };
 
-        bool operator == (const Path& o) const { return path_eq(*this, o); }
     };
-
-/*
+    bool operator == (const Path& a, const Path& b);
 
      // path_to_reference does not require any scans.
      // If a root is provided, the path loookup will start
@@ -125,27 +118,26 @@ namespace hacc {
      //  provided with a Reference to Pointer.
     void foreach_pointer (const Func<void (Reference)>&, Pointer root = null);
 
-*/
     namespace X {
         struct Corrupted_Path : Corrupted {
             Path* path;
-            Corrupted_Path (Path* path) :
-                Corrupted("Corrupted path: nonsensical path type number " + path->type),
-                path(path)
-            { }
+            Corrupted_Path (Path*);
+        };
+        struct File_Already_Loaded : Logic_Error {
+            String filename;
+            File_Already_Loaded(String);
+        };
+        struct Double_Transaction : Internal_Error {
+            Double_Transaction ();
+        };
+        struct Reload_NYI : Internal_Error {
+            Reload_NYI ();
+        };
+        struct Unload_NYI : Internal_Error {
+            Unload_NYI ();
         };
     }
      // TODO: move this to .cpp
-    static bool path_eq (const Path& a, const Path& b) {
-        if (a.type != b.type) return false;
-        switch (a.type) {
-            case TOP: return true;
-            case FILE: return a.s == b.s;
-            case ATTR: return a.s == b.s && *a.target == *b.target;
-            case ELEM: return a.i == b.i && *a.target == *b.target;
-            default: throw X::Corrupted_Path(const_cast<Path*>(&a));
-        }
-    }
 
 }
 

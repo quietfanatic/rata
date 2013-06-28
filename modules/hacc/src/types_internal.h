@@ -17,6 +17,7 @@ namespace hacc {
         size_t size = -1;
         void (* construct )(void*) = null;
         void (* destruct )(void*) = null;
+        void (* copy_construct )(void*, void*) = null;
         String name;
          // Hacc-specific
         GetSet0* keys = null;
@@ -32,8 +33,14 @@ namespace hacc {
         GetSet0* delegate = null;
         Func<Type (void*)> pointer;
 
-        TypeData (const std::type_info& cpptype, size_t size, void(* construct )(void*), void(* destruct )(void*)) :
-            cpptype(&cpptype), size(size), construct(construct), destruct(destruct)
+        TypeData (
+            const std::type_info& cpptype,
+            size_t size,
+            void (* construct )(void*),
+            void (* destruct )(void*),
+            void (* copy_construct )(void*, void*)
+        ) :
+            cpptype(&cpptype), size(size), construct(construct), destruct(destruct), copy_construct(copy_construct)
         {
             types_by_cpptype().emplace(cpptype, this);
         }

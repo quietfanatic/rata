@@ -22,6 +22,7 @@ namespace hacc {
         size_t size () const;
         void construct (void*) const;
         void destruct (void*) const;
+        void copy_construct (void*, void*) const;
 
         Type (TypeData* p) : data(p) { }
         Type (const std::type_info&);
@@ -33,6 +34,9 @@ namespace hacc {
     };
      // For internal use, returns null instead of throwing exception
     TypeData* typedata_by_cpptype (const std::type_info&);
+
+     // For typeless null pointers and such
+    struct Unknown { };
 
      // GetSets represent a way of getting and setting a value that
      //  belongs to another value.  GetSet0, GetSet1, and GetSet2
@@ -68,7 +72,7 @@ namespace hacc {
         Type type;
         void* address;
 
-        Pointer (Null n = null) : type(null), address(null) { }
+        Pointer (Null n = null) : type(typeid(Unknown)), address(null) { }
         Pointer (Type type, void* p = null) : type(type), address(p) { }
         template <class C>
         Pointer (C* p) : type(typeid(C)), address(p) { }
@@ -117,6 +121,61 @@ namespace hacc {
         void fill (Tree*);
         void finish (Tree*);
         void from_tree (Tree*);
+    };
+
+     // This is a dynamically typed object with value-semantics.
+     // Or, if you prefer, a dynamically type auto_ptr
+    struct Dynamic {
+        Type type;
+        void* addr;
+
+        Pointer address () const { return Pointer(type, addr); }
+
+        Dynamic (Null n = null) : type(typeid(Unknown)), addr(null) { }
+        Dynamic (const Dynamic& o) :
+            type(o.type),
+            addr(malloc(type.size()))
+        {
+            type.copy_construct(addr, o.addr);
+        }
+        Dynamic (Dynamic&& o) :
+            type(o.type),
+            addr(o.addr)
+        {
+            o.addr = null;
+        }
+        Dynamic (Type type, void* addr) : type(type), addr(addr) { }
+
+        template <class C, class... Args>
+        static Dynamic New (Args&&... args) {
+            void* p = malloc(sizeof(C));
+            new (p) C (std::forward<Args>(args)...);
+            return Dynamic(typeid(C), p);
+        }
+
+        void destroy () {
+            if (addr) {
+                type.destruct(addr);
+                free(addr);
+                addr = null;
+            }
+        }
+        ~Dynamic () { destroy(); }
+
+        Dynamic& operator = (const Dynamic& o) {
+            destroy();
+            type = o.type;
+            addr = malloc(type.size());
+            type.copy_construct(addr, o.addr);
+            return *this;
+        }
+        Dynamic& operator = (Dynamic&& o) {
+            destroy();
+            type = o.type;
+            addr = o.addr;
+            o.addr = null;
+            return *this;
+        }
     };
 
     namespace X {

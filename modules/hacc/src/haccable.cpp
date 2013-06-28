@@ -3,8 +3,14 @@
 
 namespace hacc {
 
-    Type _new_type (const std::type_info& cpptype, size_t size, void(* construct )(void*), void(* destruct )(void*)) {
-        return new TypeData (cpptype, size, construct, destruct);
+    Type _new_type (
+        const std::type_info& cpptype,
+        size_t size,
+        void (* construct )(void*),
+        void (* destruct )(void*),
+        void (* copy_construct )(void*, void*)
+    ) {
+        return new TypeData (cpptype, size, construct, destruct, copy_construct);
     }
     void _name (Type t, String name) {
         t.data->name = name;
@@ -45,3 +51,4 @@ namespace hacc {
     }
 
 }
+
