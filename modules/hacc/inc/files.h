@@ -73,7 +73,7 @@ namespace hacc {
 
     enum PathType {
         TOP,
-        FILE,
+        ROOT,
         ATTR,
         ELEM
     };
@@ -85,7 +85,7 @@ namespace hacc {
         size_t i;
 
         Path() : type(TOP) { }
-        Path(std::string doc) : type(FILE), s(doc) { };
+        Path(std::string doc) : type(ROOT), s(doc) { };
         Path(Path* target, std::string key) : type(ATTR), target(target), s(key) { };
         Path(Path* target, size_t index) : type(ELEM), target(target), i(index) { };
 

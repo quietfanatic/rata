@@ -4,6 +4,7 @@
 #include <string.h>
 #include <fstream>
 #include <sstream>
+#include <stdio.h>
 #include "../inc/files.h"  // for Path
 #include "../inc/strings.h"
 
@@ -44,7 +45,7 @@ namespace hacc {
     String path_to_string (Path* p) {
         switch (p->type) {
             case TOP: return "$";
-            case FILE: return "$(\"" + escape_string(p->s) + "\")";
+            case ROOT: return "$(\"" + escape_string(p->s) + "\")";
             case ATTR: return path_to_string(p->target) + "." + escape_ident(p->s);
             case ELEM: {
                 std::ostringstream s;
@@ -121,7 +122,6 @@ namespace hacc {
             case PATH: {
                 return path_to_string(h->p);
             }
-            case ERROR: throw *h->error;
             default: throw X::Corrupted_Tree(h);
         }
     }
@@ -463,8 +463,7 @@ namespace hacc {
             }
         }
         Tree* parse () {
-            try { return parse_all(); }
-            catch (X::Error& e) { return new Tree(new X::Error(e)); }
+            return parse_all();
         }
     };
 
@@ -478,10 +477,22 @@ namespace hacc {
     }
 
     Tree* tree_from_file (String filename) {
-        std::ifstream ifs (filename);
-        std::ostringstream ss;
-        ss << ifs.rdbuf();
-        return tree_from_string(ss.str(), filename);
+         // Forget C++ IO and its crummy diagnostics
+        FILE* f = fopen(filename.c_str(), "r");
+        if (!f) {
+            throw X::Error("Couldn't open " + filename + ": " + String(strerror(errno)));
+        }
+        fseek(f, 0, SEEK_END);
+        size_t size = ftell(f);
+        rewind(f);
+        char* cs = (char*)malloc(size);
+        fread(cs, 1, size, f);
+        String s (cs, size);
+        free(cs);
+        if (fclose(f) != 0) {
+            throw X::Error("Couldn't close " + filename + ": " + String(strerror(errno)));
+        }
+        return tree_from_string(s, filename);
     }
 
 }

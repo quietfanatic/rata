@@ -245,6 +245,7 @@ namespace hacc {
                 next = a->next;
                 delete a;
             }
+            Action::first = null;
             clear_address_scans();
             GC_gcollect();
             current = null;
@@ -288,17 +289,30 @@ namespace hacc {
             for (auto f : files) tr->request_unload(f);
         });
     }
-    Reference path_to_reference (Path*, Pointer root) {
+    Reference path_to_reference (Path* path, Pointer root) {
+        switch (path->type) {
+            case TOP: throw X::Internal_Error("Paths are kinda screwed up ATM");
+            case ROOT: {
+                if (root) return root;
+                else return File(path->s).data();
+            }
+            case ATTR: {
+                Reference l = path_to_reference(path->target, root);
+                return attr(l, path->s);
+            }
+            case ELEM: {
+                Reference l = path_to_reference(path->target, root);
+                return attr(l, path->s);
+            }
+        }
         throw X::Internal_Error("Paths NYI, sorry");
     }
     Path* address_to_path (Pointer, Path* prefix) {
         throw X::Internal_Error("Paths NYI, sorry");
     }
     void start_address_scans () {
-        throw X::Internal_Error("Paths NYI, sorry");
     }
     void clear_address_scans () {
-        throw X::Internal_Error("Paths NYI, sorry");
     }
     void foreach_pointer (const Func<void (Reference)>&, Pointer root) {
         throw X::Internal_Error("Paths NYI, sorry");
@@ -308,7 +322,7 @@ namespace hacc {
         if (a.type != b.type) return false;
         switch (a.type) {
             case TOP: return true;
-            case FILE: return a.s == b.s;
+            case ROOT: return a.s == b.s;
             case ATTR: return a.s == b.s && *a.target == *b.target;
             case ELEM: return a.i == b.i && *a.target == *b.target;
             default: throw X::Corrupted_Path(const_cast<Path*>(&a));

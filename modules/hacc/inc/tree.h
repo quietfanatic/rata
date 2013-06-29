@@ -33,8 +33,7 @@ namespace hacc {
         STRING,
         ARRAY,
         OBJECT,
-        PATH,
-        ERROR
+        PATH
     };
     std::string form_name (Form);
     
@@ -43,7 +42,6 @@ namespace hacc {
     typedef std::pair<std::string, Tree*> Pair;
     typedef std::vector<Pair> Object;
     
-    namespace X { struct Error; }
     struct Path;
 
     struct Tree : gc {
@@ -57,7 +55,6 @@ namespace hacc {
             Array* a;
             Object* o;
             Path* p;
-            X::Error* error;
         };
         Tree (Null n = null) : form(NULLFORM) { }
         Tree (bool b) : form(BOOL), b(b) { }
@@ -77,7 +74,6 @@ namespace hacc {
         Tree (const Object& o) : form(OBJECT), o(new Object (o)) { }
         Tree (Object&& o) : form(OBJECT), o(new Object (o)) { }
         Tree (Path* p) : form(PATH), p(p) { }
-        Tree (X::Error* e) : form(ERROR), error(e) { }
         ~Tree ();
         float get_float () const;
         double get_double () const;

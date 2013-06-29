@@ -14,7 +14,6 @@ namespace hacc {
             case ARRAY: return "array";
             case OBJECT: return "object";
             case PATH: return "path";
-            case ERROR: return "error";
             default: return "corrupted";
         }
     }
@@ -32,7 +31,6 @@ namespace hacc {
             case INTEGER: return i;
             case FLOAT: return f;
             case DOUBLE: return d;
-            case ERROR: throw *error;
             default: throw X::Logic_Error("Cannot get_float from a " + form_name(form) + " hacc.");
         }
     }
@@ -41,7 +39,6 @@ namespace hacc {
             case INTEGER: return i;
             case FLOAT: return f;
             case DOUBLE: return d;
-            case ERROR: throw *error;
             default: throw X::Logic_Error("Cannot get_double from a " + form_name(form) + " hacc.");
         }
     }

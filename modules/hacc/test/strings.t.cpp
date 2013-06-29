@@ -7,13 +7,15 @@
 void tst (hacc::String from, hacc::String to) {
     using namespace hacc;
     using namespace tap;
-    Tree* tree = tree_from_string(from);
     String name = escape_string(from) + " -> " + escape_string(to);
-    if (tree->form == ERROR) {
-        fail(name.c_str());
-        printf(" # Parse failed: %s\n", tree->error->what());
+    try {
+        Tree* tree = tree_from_string(from);
+        is(tree_to_string(tree), to, name.c_str());
     }
-    else is(tree_to_string(tree), to, name.c_str());
+    catch (std::exception& e) {
+        fail(name.c_str());
+        printf(" # Parse failed: %s\n", e.what());
+    }
 }
 
 tap::Tester tree_strings_tester ("hacc/strings", [](){
