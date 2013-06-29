@@ -501,15 +501,17 @@ namespace hacc {
     }
 
     void tree_to_file (Tree* tree, String filename) {
-        with_file(filename, "w", [&](FILE* f){
+        with_file(filename, "wb", [&](FILE* f){
             String s = tree_to_string(tree, filename);
             fwrite(s.data(), 1, s.size(), f);
+            if (s[s.size()-1] != '\n')
+                fputc('\n', f);
         });
     }
 
     Tree* tree_from_file (String filename) {
         String r;
-        with_file(filename, "r", [&](FILE* f){
+        with_file(filename, "rb", [&](FILE* f){
             fseek(f, 0, SEEK_END);
             size_t size = ftell(f);
             rewind(f);
