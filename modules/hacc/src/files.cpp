@@ -74,6 +74,13 @@ namespace hacc {
         }
 
         std::vector<std::exception_ptr> delayed_errors;
+        void throw_delayed_errors () {
+            switch (delayed_errors.size()) {
+                case 0: return;
+                case 1: std::rethrow_exception(delayed_errors[0]);
+                default: throw X::Combo_Error(std::move(delayed_errors));
+            }
+        }
 
          // A transaction consists of a priority queue of actions.
         enum Priority {
@@ -81,6 +88,7 @@ namespace hacc {
             FILL,
             FINISH,
             VERIFY,
+            SAVE_COMMIT,
             COMMIT  // These actions are irreversible and hopefully won't fail
         };
 
@@ -135,7 +143,7 @@ namespace hacc {
         }
         void save_prepare (File f) {
             Tree* t = Reference(&f.p->data).to_tree();
-            new Action(COMMIT, [=](){ save_commit(f, t); });
+            new Action(SAVE_COMMIT, [=](){ save_commit(f, t); });
         }
         void save_commit (File f, Tree* t) {
             try {
@@ -209,19 +217,18 @@ namespace hacc {
          // EXECUTION
         bool success = false;
         void run () {
+            Priority last_pri = PREPARE;
             while (Action* now = Action::first) {
                 Action::first = now->next;
+                if (now->pri == COMMIT && last_pri != COMMIT) {
+                    throw_delayed_errors();
+                }
                 now->run();
+                last_pri = now->pri;
+                delete now;
             }
-            if (delayed_errors.empty()) {
-                success = true;
-            }
-            else if (delayed_errors.size() == 1) {
-                std::rethrow_exception(delayed_errors[0]);
-            }
-            else {
-                throw X::Combo_Error(std::move(delayed_errors));
-            }
+            throw_delayed_errors();
+            success = true;
         }
 
         ~Transaction () {
