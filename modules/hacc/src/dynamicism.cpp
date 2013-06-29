@@ -1,6 +1,7 @@
 #include "../inc/tree.h"
 #include "../inc/getsets.h"
 #include "../inc/haccable.h"
+#include "../inc/files.h"
 #include "types_internal.h"
 
 namespace hacc {
@@ -27,6 +28,7 @@ namespace hacc {
         else throw X::No_Type_For_Name(name);
     }
     String Type::name () const { return data->name; }
+    const std::type_info& Type::cpptype () const { return *data->cpptype; }
     size_t Type::size () const { return data->size; }
     void Type::construct (void* p) const { data->construct(p); }
     void Type::destruct (void* p) const { data->destruct(p); }
@@ -334,19 +336,19 @@ namespace hacc {
         finish(h);
     }
 
-    void Reference::foreach_address (const Func<void (Pointer)>& cb) {
+    void Reference::foreach_address (const Func<void (Pointer, Path*)>& cb, Path* path) {
         if (void* addr = address()) {
-            cb(Pointer(type(), addr));
+            cb(Pointer(type(), addr), path);
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
                 for (auto& k : ks) {
-                    attr(k).foreach_address(cb);
+                    attr(k).foreach_address(cb, new Path(path, k));
                 }
             }
             else {
                 size_t n = length();
                 for (size_t i = 0; i < n; i++) {
-                    elem(i).foreach_pointer(cb);
+                    elem(i).foreach_address(cb, new Path(path, i));
                 }
             }
         }
@@ -355,7 +357,7 @@ namespace hacc {
     void Reference::foreach_pointer (const Func<void (Reference)>& cb) {
         if (type().data->pointee_type.data)
             cb(*this);
-        else if (void* addr = address()) {
+        else if (address()) {
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
                 for (auto& k : ks) {

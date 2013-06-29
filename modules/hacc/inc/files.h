@@ -102,16 +102,9 @@ namespace hacc {
      // If a prefix is provided, only paths starting with it will be
      //  considered.  This can save time since it won't have to scan every
      //  single file-object.  Returns null if the address isn't found.
+     // If you run address_to_path inside a file_transaction, the address
+     //  scan results will be cached between calls.
     Path* address_to_path (Pointer, Path* prefix = null);
-
-     // address_to_path can be very expensive since it has to scan pretty much
-     //  the entire memory graph to find the right object.  If you're doing
-     //  multple calls to address_to_path in one batch, wrap them in these,
-     //  and the scan data will be shared between them.  Make sure to clear
-     //  the scans after you're done, because if you don't and the object data
-     //  is modified, the scans will become stale and may cause crashiness.
-    void start_address_scans ();
-    void clear_address_scans ();
 
      // Performs an operation for each pointer found in the given root, or in
      //  every file-object if root is null.  The callback will be always be

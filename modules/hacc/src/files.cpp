@@ -267,10 +267,11 @@ namespace hacc {
                 delete a;
             }
             Action::first = null;
-            clear_address_scans();
-            GC_gcollect();
             current = null;
         }
+
+         // Transaction provides some caches for path operations
+        std::unordered_map<Pointer, Path*> address_cache;
     };
     Transaction* Transaction::current = null;
     Transaction::Action* Transaction::Action::first = null;
@@ -280,9 +281,12 @@ namespace hacc {
             f();
         }
         else {
-            Transaction tr;
-            f();
-            tr.run();
+            {
+                Transaction tr;
+                f();
+                tr.run();
+            }
+            GC_gcollect();
         }
     }
 
@@ -334,6 +338,10 @@ namespace hacc {
         }
         throw X::Internal_Error("Paths NYI, sorry");
     }
+    struct Address_Scanner {
+        static Address_Scanner* current;
+    };
+    Address_Scanner* Address_Scanner::current = null;
     Path* address_to_path (Pointer, Path* prefix) {
         throw X::Internal_Error("Paths NYI, sorry");
     }

@@ -19,6 +19,7 @@ namespace hacc {
         TypeData* data;
 
         String name () const;
+        const std::type_info& cpptype () const;
         size_t size () const;
         void construct (void*) const;
         void destruct (void*) const;
@@ -124,7 +125,7 @@ namespace hacc {
         void finish (Tree*);
         void from_tree (Tree*);
          // These are primarily for use by files.cpp
-        void foreach_address (const Func<void (Pointer)>&);
+        void foreach_address (const Func<void (Pointer, Path*)>&, Path*);
          // The callback will be given a Reference to a raw pointer.
         void foreach_pointer (const Func<void (Reference)>&);
     };
@@ -244,6 +245,19 @@ namespace hacc {
         };
     }
 
+}
+
+ // This is so we can use Pointers as the key in an unordered_map
+namespace std {
+    template <>
+    struct hash<hacc::Pointer> {
+        typedef hacc::Pointer argument_type;
+        typedef size_t result_type;
+        result_type operator () (argument_type p) {
+            return std::hash<type_index>()(p.type.cpptype())
+                 ^ std::hash<void*>()(p.address);
+        }
+    };
 }
 
 #endif
