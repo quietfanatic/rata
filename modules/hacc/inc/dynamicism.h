@@ -85,8 +85,11 @@ namespace hacc {
          // These throw if the types don't exactly match
         void* address_of_type (Type) const;
         template <class C>
-        operator C* () const { return address_of_type(typeid(C)); }
+        operator C* () const { return (C*)address_of_type(typeid(C)); }
     };
+    static bool operator == (const Pointer& a, const Pointer& b) {
+        return a.type == b.type && a.address == b.address;
+    }
     
      // A Reference implements a dynamically-typed object that
      //  might not be addressable but can still be got or set.
@@ -254,7 +257,7 @@ namespace std {
     struct hash<hacc::Pointer> {
         typedef hacc::Pointer argument_type;
         typedef size_t result_type;
-        result_type operator () (argument_type p) {
+        result_type operator () (argument_type p) const {
             return std::hash<type_index>()(p.type.cpptype())
                  ^ std::hash<void*>()(p.address);
         }

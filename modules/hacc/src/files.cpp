@@ -29,6 +29,7 @@ namespace hacc {
         Dynamic data = null;  // null if not loaded
         Dynamic new_data = null;  // For when reloading
         bool requested = false;
+        bool addresses_scanned = false;
 
         FileData (String n) : filename(n) { }
     };
@@ -260,6 +261,8 @@ namespace hacc {
                     }
                     default: break;
                 }
+                if (f.p->addresses_scanned)
+                    f.p->addresses_scanned = false;
             }
             Action* next;
             for (Action* a = Action::first; a; a = next) {
@@ -338,10 +341,44 @@ namespace hacc {
         }
         throw X::Internal_Error("Paths NYI, sorry");
     }
-    Path* address_to_path (Pointer, Path* prefix) {
-        if (Transaction::current) {
+    Path* address_to_path (Pointer ptr, Path* prefix) {
+        if (prefix != null) {
+            Path* found = null;
+            Reference start = path_to_reference(prefix);
+            start.foreach_address([&](Pointer p, Path* path){
+                if (p == ptr) {
+                    found = path;
+                    return true;
+                }
+                return false;
+            }, prefix);
+            return found;
+        }
+        else if (Transaction::current) {
+            std::vector<File> scannable_files;
+            for (auto& p : files_by_filename) {
+                if (p.second->state != UNLOADED
+                 && p.second->state != UNLOAD_COMMITTING) {
+                    scannable_files.push_back(p.second);
+                }
+            }
+            Path* found = null;
+            for (auto f : scannable_files) {
+                Reference(f.data()).foreach_address(
+                    [&](Pointer p, Path* path){
+                        Transaction::current->address_cache.emplace(p, path);
+                        if (p == ptr) found = ptr;
+                        return false;
+                    },
+                    prefix
+                );
+                f.p->addresses_scanned = true;
+                if (found) return found;
+            }
+            return null;
         }
         else {
+            throw X::Internal_Error("Unimplemented path blargh");
         }
     }
     void foreach_pointer (const Func<void (Reference)>&, Pointer root) {

@@ -40,6 +40,13 @@ namespace hacc {
         else return null;
     }
 
+    void* Pointer::address_of_type (Type t) const {
+        if (t == Type(type)) {
+            return address;
+        }
+        else throw X::Type_Mismatch(type, t);
+    }
+
     Reference::Reference (Type type, void* p) : c(p), gs(new GS_ID0(type)) { }
     Reference::operator Pointer () const {
         void* p = address();
