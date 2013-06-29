@@ -490,7 +490,7 @@ namespace hacc {
 
      // Forget C++ IO and its crummy diagnostics
     void with_file (String filename, const char* mode, const Func<void (FILE*)>& func) {
-        FILE* f = fopen(filename.c_str(), "r");
+        FILE* f = fopen(filename.c_str(), mode);
         if (!f) {
             throw X::Open_Error(filename, errno);
         }
