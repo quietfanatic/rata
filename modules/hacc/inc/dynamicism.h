@@ -125,9 +125,10 @@ namespace hacc {
         void finish (Tree*);
         void from_tree (Tree*);
          // These are primarily for use by files.cpp
-        void foreach_address (const Func<void (Pointer, Path*)>&, Path*);
+         // If the callback returns true, the foreach will be terminated.
+        bool foreach_address (const Func<bool (Pointer, Path*)>&, Path*);
          // The callback will be given a Reference to a raw pointer.
-        void foreach_pointer (const Func<void (Reference)>&);
+        bool foreach_pointer (const Func<bool (Reference)>&);
     };
 
      // This is a dynamically typed object with value-semantics.

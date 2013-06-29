@@ -338,16 +338,11 @@ namespace hacc {
         }
         throw X::Internal_Error("Paths NYI, sorry");
     }
-    struct Address_Scanner {
-        static Address_Scanner* current;
-    };
-    Address_Scanner* Address_Scanner::current = null;
     Path* address_to_path (Pointer, Path* prefix) {
-        throw X::Internal_Error("Paths NYI, sorry");
-    }
-    void start_address_scans () {
-    }
-    void clear_address_scans () {
+        if (Transaction::current) {
+        }
+        else {
+        }
     }
     void foreach_pointer (const Func<void (Reference)>&, Pointer root) {
         throw X::Internal_Error("Paths NYI, sorry");

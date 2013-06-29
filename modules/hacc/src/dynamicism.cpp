@@ -336,41 +336,50 @@ namespace hacc {
         finish(h);
     }
 
-    void Reference::foreach_address (const Func<void (Pointer, Path*)>& cb, Path* path) {
+    bool Reference::foreach_address (const Func<bool (Pointer, Path*)>& cb, Path* path) {
         if (void* addr = address()) {
-            cb(Pointer(type(), addr), path);
+            if (cb(Pointer(type(), addr), path))
+                return true;
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
                 for (auto& k : ks) {
-                    attr(k).foreach_address(cb, new Path(path, k));
+                    if (attr(k).foreach_address(cb, new Path(path, k)))
+                        return true;
                 }
             }
             else {
                 size_t n = length();
                 for (size_t i = 0; i < n; i++) {
-                    elem(i).foreach_address(cb, new Path(path, i));
+                    if (elem(i).foreach_address(cb, new Path(path, i)))
+                        return true;
                 }
             }
         }
+        return false;
     }
 
-    void Reference::foreach_pointer (const Func<void (Reference)>& cb) {
-        if (type().data->pointee_type.data)
-            cb(*this);
+    bool Reference::foreach_pointer (const Func<bool (Reference)>& cb) {
+        if (type().data->pointee_type.data) {
+            if (cb(*this))
+                return true;
+        }
         else if (address()) {
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
                 for (auto& k : ks) {
-                    attr(k).foreach_pointer(cb);
+                    if (attr(k).foreach_pointer(cb))
+                        return true;
                 }
             }
             else {
                 size_t n = length();
                 for (size_t i = 0; i < n; i++) {
-                    elem(i).foreach_pointer(cb);
+                    if (elem(i).foreach_pointer(cb))
+                        return true;
                 }
             }
         }
+        return false;
     }
 
     namespace X {
