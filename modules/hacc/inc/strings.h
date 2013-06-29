@@ -13,7 +13,9 @@ namespace hacc {
     String escape_ident (String);
      // unescape is harder to abstract out, so we'll wait till we need it.
 
-    String tree_to_string (Tree*, uint ind = 0, uint prior_ind = 0);
+     // The filename parameter is used for error reporting and for serializing
+     //  paths; the path's filename will be skipped if it's the current file.
+    String tree_to_string (Tree*, String filename = "", uint ind = 0, uint prior_ind = 0);
     Tree* tree_from_string (String, String filename = "");
     Tree* tree_from_string (const char*, String filename = "");
 

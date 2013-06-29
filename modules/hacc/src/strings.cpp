@@ -42,21 +42,26 @@ namespace hacc {
         return r;
     }
 
-    String path_to_string (Path* p) {
+    String path_to_string (Path* p, String filename) {
         switch (p->type) {
-            case TOP: return "$";
-            case ROOT: return "$(\"" + escape_string(p->s) + "\")";
-            case ATTR: return path_to_string(p->target) + "." + escape_ident(p->s);
+            case ROOT: {
+                if (p->s == filename) return "$";
+                else return "$(\"" + escape_string(p->s) + "\")";
+            }
+            case ATTR: {
+                return path_to_string(p->target, filename)
+                     + "." + escape_ident(p->s);
+            }
             case ELEM: {
                 std::ostringstream s;
                 s << p->i;
-                return path_to_string(p->target) + "[" + s.str() + "]";
+                return path_to_string(p->target, filename) + "[" + s.str() + "]";
             }
             default: throw X::Corrupted_Path(p);
         }
     }
 
-    String tree_to_string (Tree* h, uint ind, uint prior_ind) {
+    String tree_to_string (Tree* h, String filename, uint ind, uint prior_ind) {
         switch (h->form) {
             case NULLFORM: return "null";
             case BOOL: return h->b ? "true" : "false";
@@ -83,8 +88,12 @@ namespace hacc {
                     r += "\n" + indent(prior_ind + 1);
                 for (auto& e : *h->a) {
                     if (ind)
-                        r += tree_to_string(e, ind - 1, prior_ind + (h->a->size() > 1));
-                    else r += tree_to_string(e);
+                        r += tree_to_string(
+                            e, filename,
+                            ind - 1, prior_ind + (h->a->size() > 1)
+                        );
+                    else
+                        r += tree_to_string(e, filename);
                     if (&e != &h->a->back()) {
                         if (ind && h->a->size() > 1)
                             r += "\n" + indent(prior_ind + 1);
@@ -100,14 +109,19 @@ namespace hacc {
                 String r = "{";
                 if (ind && h->o->size() > 1)
                     r += "\n" + indent(prior_ind + 1);
-                else r += " ";
+                else
+                    r += " ";
                 auto nexti = h->o->begin();
                 for (auto i = nexti; i != h->o->end(); i = nexti) {
                     r += escape_ident(i->first);
                     r += ":";
                     if (ind)
-                        r += tree_to_string(i->second, ind - 1, prior_ind + (h->o->size() > 1));
-                    else r += tree_to_string(i->second, 0, 0);
+                        r += tree_to_string(
+                            i->second, filename,
+                            ind - 1, prior_ind + (h->o->size() > 1)
+                        );
+                    else
+                        r += tree_to_string(i->second, filename, 0, 0);
                     nexti++;
                     if (nexti != h->o->end()) {
                         if (ind) r += "\n" + indent(prior_ind + 1);
@@ -116,11 +130,12 @@ namespace hacc {
                 }
                 if (ind && h->o->size() > 1)
                     r += "\n" + indent(prior_ind);
-                else r += " ";
+                else
+                    r += " ";
                 return r + "}";
             }
             case PATH: {
-                return path_to_string(h->p);
+                return path_to_string(h->p, filename);
             }
             default: throw X::Corrupted_Tree(h);
         }
@@ -420,7 +435,10 @@ namespace hacc {
                 return new Tree(continue_path(new Path(f)));
             }
             else {
-                return new Tree(continue_path(new Path()));
+                if (!file.empty())
+                    return new Tree(continue_path(new Path(file)));
+                else
+                    throw error("Path must contain a filename because the current filename is unknown");
             }
         }
 

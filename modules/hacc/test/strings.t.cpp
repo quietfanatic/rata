@@ -9,8 +9,8 @@ void tst (hacc::String from, hacc::String to) {
     using namespace tap;
     String name = escape_string(from) + " -> " + escape_string(to);
     try {
-        Tree* tree = tree_from_string(from);
-        is(tree_to_string(tree), to, name.c_str());
+        Tree* tree = tree_from_string(from, "current file");
+        is(tree_to_string(tree, "current file"), to, name.c_str());
     }
     catch (std::exception& e) {
         fail(name.c_str());

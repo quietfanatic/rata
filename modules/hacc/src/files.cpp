@@ -291,18 +291,17 @@ namespace hacc {
     }
     Reference path_to_reference (Path* path, Pointer root) {
         switch (path->type) {
-            case TOP: throw X::Internal_Error("Paths are kinda screwed up ATM");
             case ROOT: {
                 if (root) return root;
                 else return File(path->s).data();
             }
             case ATTR: {
                 Reference l = path_to_reference(path->target, root);
-                return attr(l, path->s);
+                return l.attr(path->s);
             }
             case ELEM: {
                 Reference l = path_to_reference(path->target, root);
-                return attr(l, path->s);
+                return l.elem(path->i);
             }
         }
         throw X::Internal_Error("Paths NYI, sorry");
@@ -321,7 +320,6 @@ namespace hacc {
     bool operator == (const Path& a, const Path& b) {
         if (a.type != b.type) return false;
         switch (a.type) {
-            case TOP: return true;
             case ROOT: return a.s == b.s;
             case ATTR: return a.s == b.s && *a.target == *b.target;
             case ELEM: return a.i == b.i && *a.target == *b.target;
