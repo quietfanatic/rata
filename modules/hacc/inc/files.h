@@ -65,10 +65,12 @@ namespace hacc {
     void save (File);
     void save (const std::vector<File>&);
 
-     // Scan all loaded file-objects and unload any non-requested files
-     //  that have no more references to them.
-    void trim ();
-    
+     // If you're doing a lot of file API calls, wrap them in this and the
+     //  module will do its best to provide transactional semantics; that is,
+     //  either all of the operations succeed or none of them will.
+    void file_transaction (const Func<void ()>&);
+
+
      // PATHS
 
     enum PathType {

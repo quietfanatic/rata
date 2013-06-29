@@ -275,41 +275,48 @@ namespace hacc {
     Transaction* Transaction::current = null;
     Transaction::Action* Transaction::Action::first = null;
 
-    void with_transaction (const Func<void (Transaction*)>& f) {
+    void file_transaction (const Func<void ()>& f) {
         if (Transaction::current) {
-            f(Transaction::current);
+            f();
         }
         else {
             Transaction tr;
-            f(&tr);
+            f();
             tr.run();
         }
     }
 
     void load (File f) { load(std::vector<File>(1, f)); }
     void load (const std::vector<File>& files) {
-        with_transaction([&](Transaction* tr){
-            for (auto f : files) tr->request_load(f);
+        file_transaction([&](){
+            for (auto f : files)
+                Transaction::current->request_load(f);
         });
     }
     void save (File f) { save(std::vector<File>(1, f)); }
     void save (const std::vector<File>& files) {
-        with_transaction([&](Transaction* tr){
-            for (auto f : files) tr->request_save(f);
+        file_transaction([&](){
+            for (auto f : files)
+                Transaction::current->request_save(f);
         });
     }
     void reload (File f) { reload(std::vector<File>(1, f)); }
     void reload (const std::vector<File>& files) {
-        with_transaction([&](Transaction* tr){
-            for (auto f : files) tr->request_reload(f);
+        file_transaction([&](){
+            for (auto f : files)
+                Transaction::current->request_reload(f);
         });
     }
     void unload (File f) { unload(std::vector<File>(1, f)); }
     void unload (const std::vector<File>& files) {
-        with_transaction([&](Transaction* tr){
-            for (auto f : files) tr->request_unload(f);
+        file_transaction([&](){
+            for (auto f : files)
+                Transaction::current->request_unload(f);
         });
     }
+
+     // PATHS STUFF
+
     Reference path_to_reference (Path* path, Pointer root) {
         switch (path->type) {
             case ROOT: {
