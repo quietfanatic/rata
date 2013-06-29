@@ -2,9 +2,8 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <string.h>
-#include <fstream>
-#include <sstream>
 #include <stdio.h>
+#include <sstream>
 #include "../inc/files.h"  // for Path
 #include "../inc/strings.h"
 
@@ -489,28 +488,37 @@ namespace hacc {
     Tree* tree_from_string (String s, String filename) { return Parser(s, filename).parse(); }
     Tree* tree_from_string (const char* s, String filename) { return Parser(s, filename).parse(); }
 
-    void tree_to_file (Tree* tree, String filename) {
-        std::ofstream ofs (filename);
-        ofs << tree_to_string(tree, 0, 0);
-    }
-
-    Tree* tree_from_file (String filename) {
-         // Forget C++ IO and its crummy diagnostics
+     // Forget C++ IO and its crummy diagnostics
+    void with_file (String filename, const char* mode, const Func<void (FILE*)>& func) {
         FILE* f = fopen(filename.c_str(), "r");
         if (!f) {
             throw X::Error("Couldn't open " + filename + ": " + String(strerror(errno)));
         }
-        fseek(f, 0, SEEK_END);
-        size_t size = ftell(f);
-        rewind(f);
-        char* cs = (char*)malloc(size);
-        fread(cs, 1, size, f);
-        String s (cs, size);
-        free(cs);
+        func(f);
         if (fclose(f) != 0) {
             throw X::Error("Couldn't close " + filename + ": " + String(strerror(errno)));
         }
-        return tree_from_string(s, filename);
+    }
+
+    void tree_to_file (Tree* tree, String filename) {
+        with_file(filename, "w", [&](FILE* f){
+            String s = tree_to_string(tree, filename);
+            fwrite(s.data(), 1, s.size(), f);
+        });
+    }
+
+    Tree* tree_from_file (String filename) {
+        String r;
+        with_file(filename, "r", [&](FILE* f){
+            fseek(f, 0, SEEK_END);
+            size_t size = ftell(f);
+            rewind(f);
+            char* cs = (char*)malloc(size);
+            fread(cs, 1, size, f);
+            r = String(cs, size);
+            free(cs);
+        });
+        return tree_from_string(r, filename);
     }
 
 }
