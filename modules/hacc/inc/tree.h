@@ -111,6 +111,13 @@ namespace hacc {
             Tree* tree;
             Corrupted_Tree (Tree*);
         };
+
+         // If multiple errors need to be thrown at once
+        struct Combo_Error : Error {
+            std::vector<std::exception_ptr> errs;
+            Combo_Error (const std::vector<std::exception_ptr>& errs);
+            Combo_Error (std::vector<std::exception_ptr>&& errs);
+        };
     }
 
 }

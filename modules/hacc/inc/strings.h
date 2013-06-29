@@ -28,6 +28,18 @@ namespace hacc {
                 Error(mess, filename, line, col)
             { }
         };
+        struct IO_Error : Error {
+            int no;
+            IO_Error (String mess, String filename, int no) :
+                Error(mess, filename), no(no)
+            { }
+        };
+        struct Open_Error : IO_Error {
+            Open_Error (String filename, int no);
+        };
+        struct Close_Error : IO_Error {
+            Close_Error (String filename, int no);
+        };
     }
 
 }

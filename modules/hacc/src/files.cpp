@@ -73,6 +73,8 @@ namespace hacc {
             current = this;
         }
 
+        std::vector<std::exception_ptr> delayed_errors;
+
          // A transaction consists of a priority queue of actions.
         enum Priority {
             PREPARE,  // Actually, this should be done ASAP and not be queued
@@ -136,8 +138,12 @@ namespace hacc {
             new Action(COMMIT, [=](){ save_commit(f, t); });
         }
         void save_commit (File f, Tree* t) {
-             // TODO catch exceptions
-            tree_to_file(t, f.p->filename);
+            try {
+                tree_to_file(t, f.p->filename);
+            }
+            catch (...) {
+                delayed_errors.push_back(std::current_exception());
+            }
         }
 
          // RELOADING
@@ -207,7 +213,15 @@ namespace hacc {
                 Action::first = now->next;
                 now->run();
             }
-            success = true;
+            if (delayed_errors.empty()) {
+                success = true;
+            }
+            else if (delayed_errors.size() == 1) {
+                std::rethrow_exception(delayed_errors[0]);
+            }
+            else {
+                throw X::Combo_Error(std::move(delayed_errors));
+            }
         }
 
         ~Transaction () {

@@ -492,11 +492,11 @@ namespace hacc {
     void with_file (String filename, const char* mode, const Func<void (FILE*)>& func) {
         FILE* f = fopen(filename.c_str(), "r");
         if (!f) {
-            throw X::Error("Couldn't open " + filename + ": " + String(strerror(errno)));
+            throw X::Open_Error(filename, errno);
         }
         func(f);
         if (fclose(f) != 0) {
-            throw X::Error("Couldn't close " + filename + ": " + String(strerror(errno)));
+            throw X::Close_Error(filename, errno);
         }
     }
 
@@ -519,6 +519,21 @@ namespace hacc {
             free(cs);
         });
         return tree_from_string(r, filename);
+    }
+
+    namespace X {
+        Open_Error::Open_Error (String filename, int no) :
+            IO_Error(
+                "Couldn't open file \"" + filename + "\": " + strerror(no),
+                filename, no
+            )
+        { }
+        Close_Error::Close_Error (String filename, int no) :
+            IO_Error(
+                "Couldn't open file \"" + filename + "\": " + strerror(no),
+                filename, no
+            )
+        { }
     }
 
 }
