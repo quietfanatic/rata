@@ -334,6 +334,43 @@ namespace hacc {
         finish(h);
     }
 
+    void Reference::foreach_address (const Func<void (Pointer)>& cb) {
+        if (void* addr = address()) {
+            cb(Pointer(type(), addr));
+            const std::vector<String>& ks = keys();
+            if (!ks.empty()) {
+                for (auto& k : ks) {
+                    attr(k).foreach_address(cb);
+                }
+            }
+            else {
+                size_t n = length();
+                for (size_t i = 0; i < n; i++) {
+                    elem(i).foreach_pointer(cb);
+                }
+            }
+        }
+    }
+
+    void Reference::foreach_pointer (const Func<void (Reference)>& cb) {
+        if (type().data->pointee_type.data)
+            cb(*this);
+        else if (void* addr = address()) {
+            const std::vector<String>& ks = keys();
+            if (!ks.empty()) {
+                for (auto& k : ks) {
+                    attr(k).foreach_pointer(cb);
+                }
+            }
+            else {
+                size_t n = length();
+                for (size_t i = 0; i < n; i++) {
+                    elem(i).foreach_pointer(cb);
+                }
+            }
+        }
+    }
+
     namespace X {
         static String stos (size_t s) {
             std::stringstream ss;

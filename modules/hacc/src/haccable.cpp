@@ -49,6 +49,9 @@ namespace hacc {
     void _delegate (Type t, GetSet0* gs) {
         t.data->delegate = gs;
     }
+    void _is_raw_pointer (Type t, Type pt) {
+        t.data->pointee_type = pt;
+    }
 
 }
 

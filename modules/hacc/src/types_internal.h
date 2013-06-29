@@ -31,7 +31,7 @@ namespace hacc {
         Func<void (void*, Tree*)> fill;
         Func<void (void*, Tree*)> finish;
         GetSet0* delegate = null;
-        Func<Type (void*)> pointer;
+        Type pointee_type = null;  // Type aren't officially nullable but...
 
         TypeData (
             const std::type_info& cpptype,

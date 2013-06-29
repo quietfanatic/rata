@@ -22,7 +22,7 @@ namespace hacc {
     void _prepare (Type, const Func<void (void*, Tree*)>&);
     void _fill (Type, const Func<void (void*, Tree*)>&);
     void _finish (Type, const Func<void (void*, Tree*)>&);
-    void _pointer (Type, const Func<Type (void*)>&);
+    void _is_raw_pointer (Type, Type);
 
      // DECLARATION API
 
@@ -71,8 +71,8 @@ namespace hacc {
         static void finish (const Func<void (C&, Tree*)>& f) {
             _finish(get_type(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
         }
-        static void pointer (const Func<Type (C&)>& f) {
-            _pointer(get_type(), reinterpret_cast<const Func<Type (void*)>&>(f));
+        static void is_raw_pointer (Type t) {
+            _pointer(get_type(), t);
         }
 
         static Type get_type () {
@@ -113,7 +113,7 @@ namespace hacc {
     using hcb::prepare; \
     using hcb::fill; \
     using hcb::finish; \
-    using hcb::pointer; \
+    using hcb::is_raw_pointer; \
     using hcb::member; \
     using hcb::value_funcs; \
     using hcb::ref_funcs; \

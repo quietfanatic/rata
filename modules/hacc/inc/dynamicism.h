@@ -23,6 +23,8 @@ namespace hacc {
         void construct (void*) const;
         void destruct (void*) const;
         void copy_construct (void*, void*) const;
+         // If this type is a raw pointer, returns the type it points to
+        Type pointee_type () const;
 
         Type (TypeData* p) : data(p) { }
         Type (const std::type_info&);
@@ -121,6 +123,10 @@ namespace hacc {
         void fill (Tree*);
         void finish (Tree*);
         void from_tree (Tree*);
+         // These are primarily for use by files.cpp
+        void foreach_address (const Func<void (Pointer)>&);
+         // The callback will be given a Reference to a raw pointer.
+        void foreach_pointer (const Func<void (Reference)>&);
     };
 
      // This is a dynamically typed object with value-semantics.
