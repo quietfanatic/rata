@@ -354,7 +354,9 @@ namespace hacc {
             }, prefix);
             return found;
         }
-        else if (Transaction::current) {
+        else {
+             // We can't iterate over the main files hash, because
+             //  if a new file is inserted it'll invalidate the iterators
             std::vector<File> scannable_files;
             for (auto& p : files_by_filename) {
                 if (p.second->state != UNLOADED
@@ -363,22 +365,36 @@ namespace hacc {
                 }
             }
             Path* found = null;
-            for (auto f : scannable_files) {
-                Reference(f.data()).foreach_address(
-                    [&](Pointer p, Path* path){
-                        Transaction::current->address_cache.emplace(p, path);
-                        if (p == ptr) found = ptr;
-                        return false;
-                    },
-                    prefix
-                );
-                f.p->addresses_scanned = true;
-                if (found) return found;
+            if (Transaction::current) {
+                for (auto f : scannable_files) {
+                    Reference(f.data()).foreach_address(
+                        [&](Pointer p, Path* path){
+                            Transaction::current->address_cache.emplace(p, path);
+                            if (p == ptr) found = ptr;
+                            return false;
+                        },
+                        new Path (f.filename())
+                    );
+                    f.p->addresses_scanned = true;
+                    if (found) return found;
+                }
+                return null;
             }
-            return null;
-        }
-        else {
-            throw X::Internal_Error("Unimplemented path blargh");
+            else {
+                 // With no transaction and no prefix, we just gotta scan
+                 //  the whole haystack every time.
+                for (auto f : scannable_files) {
+                    Reference(f.data()).foreach_address(
+                        [&](Pointer p, Path* path){
+                            if (p == ptr) found = ptr;
+                            return true;
+                        },
+                        new Path (f.filename())
+                    );
+                    if (found) return found;
+                }
+                return null;
+            }
         }
     }
     void foreach_pointer (const Func<void (Reference)>&, Pointer root) {
