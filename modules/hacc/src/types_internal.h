@@ -8,8 +8,8 @@
 namespace hacc {
 
      // These are in dynamicism.cpp
-    std::unordered_map<std::type_index, Type>& types_by_cpptype ();
-    std::unordered_map<String, Type>& types_by_name ();
+    std::unordered_map<std::type_index, TypeData*>& types_by_cpptype ();
+    std::unordered_map<String, TypeData*>& types_by_name ();
 
     struct TypeData {
          // General
@@ -32,18 +32,9 @@ namespace hacc {
         Func<void (void*, Tree*)> finish;
         GetSet0* delegate = null;
         Type pointee_type = null;  // Type aren't officially nullable but...
+        bool initialized = false;
 
-        TypeData (
-            const std::type_info& cpptype,
-            size_t size,
-            void (* construct )(void*),
-            void (* destruct )(void*),
-            void (* copy_construct )(void*, void*)
-        ) :
-            cpptype(&cpptype), size(size), construct(construct), destruct(destruct), copy_construct(copy_construct)
-        {
-            types_by_cpptype().emplace(cpptype, this);
-        }
+        TypeData () { };
     };
 
 }

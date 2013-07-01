@@ -75,8 +75,11 @@ namespace hacc {
         Tree (Object&& o) : form(OBJECT), o(new Object (o)) { }
         Tree (Path* p) : form(PATH), p(p) { }
         ~Tree ();
+        bool get_bool () const;
+        int64 get_integer () const;
         float get_float () const;
         double get_double () const;
+        String get_string () const;
     };
 
     namespace X {

@@ -2,9 +2,6 @@
 #include <stdlib.h>
 #include "../inc/files.h"
 
- // TODO: right now we're being naughty and relying on
- //  haccable.t.cpp having been linked in with this file
-
 using namespace hacc;
 
 #include "../../tap/inc/tap.h"

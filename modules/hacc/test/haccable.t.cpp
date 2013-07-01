@@ -2,22 +2,6 @@
 #include "../inc/haccable.h"
 using namespace hacc;
 
-HCB_BEGIN(int32)
-    name("int32");
-    to_tree([](const int32& x){ return new Tree(x); });
-    fill([](int32& x, Tree* h){
-        if (h->form == INTEGER)
-            x = h->i;
-        else throw X::Error("Expected integer hacc but got " + form_name(h->form) + " hacc");
-    });
-HCB_END(int32)
-
-HCB_BEGIN(float)
-    name("float");
-    to_tree([](const float& x){ return new Tree(x); });
-    fill([](float& x, Tree* h){ x = h->get_float(); });
-HCB_END(float)
-
 struct Vectorly {
     float x;
     float y;

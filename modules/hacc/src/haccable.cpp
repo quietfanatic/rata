@@ -3,18 +3,24 @@
 
 namespace hacc {
 
-    Type _new_type (
+    void _init_type (
+        Type t,
         const std::type_info& cpptype,
         size_t size,
         void (* construct )(void*),
         void (* destruct )(void*),
         void (* copy_construct )(void*, void*)
     ) {
-        return new TypeData (cpptype, size, construct, destruct, copy_construct);
+        t.data->cpptype = &cpptype;
+        t.data->size = size;
+        t.data->construct = construct;
+        t.data->destruct = destruct;
+        t.data->copy_construct = copy_construct;
+        t.data->initialized = true;
     }
     void _name (Type t, String name) {
         t.data->name = name;
-        types_by_name().emplace(name, t);
+        types_by_name().emplace(name, t.data);
     }
     void _keys (Type t, GetSet0* gs) {
         t.data->keys = gs;

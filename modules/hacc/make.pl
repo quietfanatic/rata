@@ -10,7 +10,7 @@ workflow {
 
     include '../..';
 
-    objects(qw(tree strings dynamicism haccable files));
+    objects(qw(tree strings dynamicism haccable files haccable_standard));
 
     cppc_rule('tmp/tree.t.o', 'test/tree.t.cpp');
     cppc_rule('tmp/strings.t.o', 'test/strings.t.cpp');
@@ -22,6 +22,7 @@ workflow {
         tmp/strings.o tmp/strings.t.o
         tmp/dynamicism.o
         tmp/haccable.o tmp/haccable.t.o
+        tmp/haccable_standard.o
         tmp/files.o tmp/files.t.o
         ../tap/tmp/tap.o ../tap/tmp/tap_make_test_main.o
     ]]);

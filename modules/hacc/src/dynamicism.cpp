@@ -6,21 +6,22 @@
 
 namespace hacc {
 
-    std::unordered_map<std::type_index, Type>& types_by_cpptype () {
-        static std::unordered_map<std::type_index, Type> r;
+    std::unordered_map<std::type_index, TypeData*>& types_by_cpptype () {
+        static std::unordered_map<std::type_index, TypeData*> r;
         return r;
     }
-    std::unordered_map<String, Type>& types_by_name () {
-        static std::unordered_map<String, Type> r;
+    std::unordered_map<String, TypeData*>& types_by_name () {
+        static std::unordered_map<String, TypeData*> r;
         return r;
     }
 
     Type::Type (String name) {
         auto iter = types_by_name().find(name);
         if (iter != types_by_name().end())
-            data = iter->second.data;
+            data = iter->second;
         else throw X::No_Type_For_Name(name);
     }
+    bool Type::initialized () const { return data->initialized; }
     String Type::name () const { return data->name; }
     const std::type_info& Type::cpptype () const { return *data->cpptype; }
     size_t Type::size () const { return data->size; }
@@ -28,10 +29,9 @@ namespace hacc {
     void Type::destruct (void* p) const { data->destruct(p); }
     void Type::copy_construct (void* l, void* r) const { data->copy_construct(l, r); }
     TypeData* typedata_by_cpptype (const std::type_info& cpptype) {
-        auto iter = types_by_cpptype().find(cpptype);
-        if (iter != types_by_cpptype().end())
-            return iter->second.data;
-        else return null;
+        auto& p = types_by_cpptype()[cpptype];
+        if (!p) p = new TypeData;
+        return p;
     }
 
     void* Pointer::address_of_type (Type t) const {

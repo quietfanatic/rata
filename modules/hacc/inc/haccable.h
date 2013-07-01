@@ -9,7 +9,7 @@
 namespace hacc {
 
      // INTERNAL STUFF (type-erased versions of declaration api functions)
-    Type _new_type (const std::type_info&, size_t, void(*)(void*), void(*)(void*), void(*)(void*,void*));
+    void _init_type (Type, const std::type_info&, size_t, void(*)(void*), void(*)(void*), void(*)(void*,void*));
     void _name (Type, String);
     void _keys (Type, GetSet0*);
     void _attrs (Type, const Func<Reference (void*, String)>&);
@@ -70,8 +70,8 @@ namespace hacc {
 
         static Type get_type () {
             static Type type = typedata_by_cpptype(typeid(C));
-            if (!type.data) {
-                type = _new_type(
+            if (!type.initialized()) {
+                _init_type(type,
                     typeid(C), sizeof(C),
                     [](void* p){ new (p) C; },
                     [](void* p){ ((C*)p)->~C(); },
@@ -92,6 +92,7 @@ namespace hacc {
 #define HCB_BEGIN(type) namespace hacc { template <> struct Haccable<type> : hacc::Haccability<type> { static void describe () {
 #define HCB_END(type) } }; static Type __ __attribute__ ((unused)) = Haccable<type>::get_type(); }
 #define HCB_PARAMS(...) __VA_ARGS__
+#define HCB_COMMA ,
 #define HCB_TEMPLATE_BEGIN(params, type) namespace hacc { template params struct Haccable<type> : hacc::Haccability<type> { \
     using hcb = hacc::Haccability<type>; \
     using hcb::name; \

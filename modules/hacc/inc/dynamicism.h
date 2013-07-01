@@ -18,6 +18,7 @@ namespace hacc {
     struct Type {
         TypeData* data;
 
+        bool initialized () const;
         String name () const;
         const std::type_info& cpptype () const;
         size_t size () const;
@@ -34,7 +35,7 @@ namespace hacc {
             return data == other.data;
         }
     };
-     // For internal use, returns null instead of throwing exception
+     // For internal use.  This autovivifies instead of throwing exception
     TypeData* typedata_by_cpptype (const std::type_info&);
      // This is specialized to make a type haccable.  The mechanisms for
      //  defining haccabilities are in haccable.h

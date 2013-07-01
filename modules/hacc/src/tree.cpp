@@ -26,12 +26,20 @@ namespace hacc {
             default: break;
         }
     }
+    bool Tree::get_bool () const {
+        if (form == BOOL) return b;
+        else throw X::Logic_Error("Cannot get_bool from a " + form_name(form) + " tree.");
+    }
+    int64 Tree::get_integer () const {
+        if (form == INTEGER) return i;
+        else throw X::Logic_Error("Cannot get_integer from a " + form_name(form) + " tree.");
+    }
     float Tree::get_float () const {
         switch (form) {
             case INTEGER: return i;
             case FLOAT: return f;
             case DOUBLE: return d;
-            default: throw X::Logic_Error("Cannot get_float from a " + form_name(form) + " hacc.");
+            default: throw X::Logic_Error("Cannot get_float from a " + form_name(form) + " tree.");
         }
     }
     double Tree::get_double () const {
@@ -39,8 +47,12 @@ namespace hacc {
             case INTEGER: return i;
             case FLOAT: return f;
             case DOUBLE: return d;
-            default: throw X::Logic_Error("Cannot get_double from a " + form_name(form) + " hacc.");
+            default: throw X::Logic_Error("Cannot get_double from a " + form_name(form) + " tree.");
         }
+    }
+    String Tree::get_string () const {
+        if (form == STRING) return s;
+        else throw X::Logic_Error("Cannot get_string from a " + form_name(form) + " tree.");
     }
 
      // On OS X libgc will crash if not initted.
