@@ -19,7 +19,7 @@ tap::Tester files_tester ("hacc/files", [](){
     ok(!File("../test/seven.hacc").loaded(), "File is not loaded before load() is called on it");
     doesnt_throw([](){ load(File("../test/seven.hacc")); }, "We can call load()");
     ok(File("../test/seven.hacc").loaded(), "File is loaded when load() is called on it");
-    if (is(File("../test/seven.hacc").data().type, Type(typeid(int32)), "Loaded file preserves type")) {
+    if (is(File("../test/seven.hacc").data().type, Type(type_by_cpptype<int32>()), "Loaded file preserves type")) {
         is(*(int32*)File("../test/seven.hacc").data().address, 7, "Loaded file preserves value");
     }
     else {

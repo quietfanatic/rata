@@ -28,7 +28,6 @@ namespace hacc {
         Type pointee_type () const;
 
         Type (TypeData* p) : data(p) { }
-        Type (const std::type_info&);
         Type (String);
         bool operator == (const Type& other) const {
              // TypeDatas are guaranteed to not be duplicated.
@@ -37,6 +36,16 @@ namespace hacc {
     };
      // For internal use, returns null instead of throwing exception
     TypeData* typedata_by_cpptype (const std::type_info&);
+     // This is specialized to make a type haccable.  The mechanisms for
+     //  defining haccabilities are in haccable.h
+    template <class C> struct Haccable {
+        static Type get_type ();
+    };
+     // Whenever possible, use this to get types from cpptypes, because
+     //  it will try to auto-instantiate template haccabilities.
+    template <class C> Type type_by_cpptype () {
+        return Haccable<C>::get_type();
+    }
 
      // For typeless null pointers and such
     struct Unknown { };
@@ -59,11 +68,11 @@ namespace hacc {
     };
     template <class C>
     struct GetSet1 : GetSet0 {
-        Type host_type () { return typeid(C); }
+        Type host_type () { return type_by_cpptype<C>(); }
     };
     template <class C, class M>
     struct GetSet2 : GetSet1<C> {
-        Type type () { return typeid(M); }
+        Type type () { return type_by_cpptype<M>(); }
          // Named-Parameter-Idiom setters
         GetSet2<C, M>& optional () { optional = true; return *this; }
         GetSet2<C, M>& required () { optional = false; return *this; }
@@ -75,17 +84,17 @@ namespace hacc {
         Type type;
         void* address;
 
-        Pointer (Null n = null) : type(typeid(Unknown)), address(null) { }
+        Pointer (Null n = null) : type(type_by_cpptype<Unknown>()), address(null) { }
         Pointer (Type type, void* p = null) : type(type), address(p) { }
         template <class C>
-        Pointer (C* p) : type(typeid(C)), address(p) { }
+        Pointer (C* p) : type(type_by_cpptype<C>()), address(p) { }
 
         operator void* () const { return address; }
         operator bool () const { return address; }
          // These throw if the types don't exactly match
         void* address_of_type (Type) const;
         template <class C>
-        operator C* () const { return (C*)address_of_type(typeid(C)); }
+        operator C* () const { return (C*)address_of_type(type_by_cpptype<C>()); }
     };
     static bool operator == (const Pointer& a, const Pointer& b) {
         return a.type == b.type && a.address == b.address;
@@ -142,7 +151,7 @@ namespace hacc {
 
         Pointer address () const { return Pointer(type, addr); }
 
-        Dynamic (Null n = null) : type(typeid(Unknown)), addr(null) { }
+        Dynamic (Null n = null) : type(type_by_cpptype<Unknown>()), addr(null) { }
         Dynamic (const Dynamic& o) :
             type(o.type),
             addr(malloc(type.size()))
@@ -161,7 +170,7 @@ namespace hacc {
         static Dynamic New (Args&&... args) {
             void* p = malloc(sizeof(C));
             new (p) C (std::forward<Args>(args)...);
-            return Dynamic(typeid(C), p);
+            return Dynamic(type_by_cpptype<C>(), p);
         }
 
         void destroy () {
@@ -247,6 +256,13 @@ namespace hacc {
             String name;
             No_Type_For_Name (String);
         };
+    }
+
+    template <class C>
+    Type Haccable<C>::get_type () {
+        TypeData* td = typedata_by_cpptype(typeid(C));
+        if (!td) throw X::No_Type_For_CppType(typeid(C));
+        return Type(td);
     }
 
 }

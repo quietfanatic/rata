@@ -72,7 +72,6 @@ bool operator == (MyWrapper<C> a, MyWrapper<C> b) { return a.val==b.val; }
 HCB_TEMPLATE_BEGIN(<class C>, MyWrapper<C>)
     delegate(member(&MyWrapper<C>::val));
 HCB_TEMPLATE_END(<class C>, MyWrapper<C>)
-HCB_INSTANCE(MyWrapper<int>)
 
 MyWrapper<int32> wi {0};
 
@@ -167,7 +166,7 @@ tap::Tester haccable_tester ("hacc/haccable", [](){
     is(to_tree(&dyn)->o->at(0).first, String("int32"), "Dynamic has type as key");
     is(to_tree(&dyn)->o->at(0).second->i, 3, "Dynamic has value as value");
     doesnt_throw([](){ from_tree(&dyn, new Tree(Object{Pair("float", new Tree(99.7f))})); }, "from_tree on Dynamic");
-    is(dyn.type, Type(typeid(float)), "...sets the right type");
+    is(dyn.type, Type(type_by_cpptype<float>()), "...sets the right type");
     is(*(float*)dyn.addr, 99.7f, "...and sets the right value");
 });
 

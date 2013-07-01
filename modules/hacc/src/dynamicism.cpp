@@ -15,12 +15,6 @@ namespace hacc {
         return r;
     }
 
-    Type::Type (const std::type_info& cpptype) {
-        auto iter = types_by_cpptype().find(cpptype);
-        if (iter != types_by_cpptype().end())
-            data = iter->second.data;
-        else throw X::No_Type_For_CppType(cpptype);
-    }
     Type::Type (String name) {
         auto iter = types_by_name().find(name);
         if (iter != types_by_name().end())

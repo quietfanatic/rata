@@ -26,13 +26,6 @@ namespace hacc {
 
      // DECLARATION API
 
-     // This is specialized to make a type haccable.
-    template <class C> struct Haccable {
-        static Type get_type () {
-            static Type type (typeid(C));
-            return type;
-        }
-    };
      // This is inherited by every custom-instantiated type.
     template <class C> struct Haccability : Inheritable_GetSets<C> {
         static void name (String s) {
