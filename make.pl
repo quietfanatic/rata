@@ -40,6 +40,12 @@ workflow {
         my @tmps = @_;
         phony 'clean', [], sub { no autodie; remove_tree @tmps; }
     }
+    sub objects {
+        my @objs = @_;
+        for (@objs) {
+            cppc_rule("tmp/$_.o", "src/$_.cpp");
+        }
+    }
 
      # Automatically gleam subdeps from #includes
     subdep sub {

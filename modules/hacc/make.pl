@@ -10,11 +10,8 @@ workflow {
 
     include '../..';
 
-    cppc_rule('tmp/tree.o', 'src/tree.cpp');
-    cppc_rule('tmp/strings.o', 'src/strings.cpp');
-    cppc_rule('tmp/dynamicism.o', 'src/dynamicism.cpp');
-    cppc_rule('tmp/haccable.o', 'src/haccable.cpp');
-    cppc_rule('tmp/files.o', 'src/files.cpp');
+    objects(qw(tree strings dynamicism haccable files));
+
     cppc_rule('tmp/tree.t.o', 'test/tree.t.cpp');
     cppc_rule('tmp/strings.t.o', 'test/strings.t.cpp');
     cppc_rule('tmp/haccable.t.o', 'test/haccable.t.cpp');
