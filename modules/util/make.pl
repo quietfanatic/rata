@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 use FindBin;
-use if !%make::, lib => "$FindBin::Bin/../../tool";
-use make;
+use if !$^S, lib => "$FindBin::Bin/../../tool";
+use Make_pl;
 
 workflow {
 

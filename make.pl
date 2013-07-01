@@ -3,14 +3,13 @@
 use strict;
 use warnings;
 use FindBin;
-use if !%make::, lib => "$FindBin::Bin/tool";
-use make qw(:all);
+use if !$^S, lib => "$FindBin::Bin/tool";
+use Make_pl;
 use autodie;
 use File::Path qw<remove_tree>;
 use File::Spec::Functions qw(:ALL);
 
 my $here;
-
 
 workflow {
     $here = Cwd::cwd;
