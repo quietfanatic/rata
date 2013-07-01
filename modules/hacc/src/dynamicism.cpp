@@ -1,6 +1,7 @@
 #include "../inc/tree.h"
 #include "../inc/getsets.h"
 #include "../inc/haccable.h"
+#include "../inc/strings.h"  // for path_to_string for diagnostics
 #include "../inc/files.h"
 #include "types_internal.h"
 
@@ -214,6 +215,22 @@ namespace hacc {
             });
             return r;
         }
+        else if (type().data->delegate) {
+            Tree* t;
+            get([&](void* p){
+                t = Reference(p, type().data->delegate).to_tree();
+            });
+            return t;
+        }
+        else if (type().data->pointee_type.data) {
+            Tree* t;
+            get([&](void* p){
+                Pointer pp (type().data->pointee_type, p);
+                Path* path = address_to_path(pp);
+                t = new Tree(path);
+            });
+            return t;
+        }
         else {
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
@@ -270,6 +287,14 @@ namespace hacc {
                 }
                 break;
             }
+            case PATH: {
+                if (type().data->pointee_type.data) {
+                    String filename = h->p->root();
+                    load(File(filename));
+                }
+                else throw X::Form_Mismatch(type(), PATH);
+                break;
+            }
             default: break;
         }
     }
@@ -278,7 +303,6 @@ namespace hacc {
         if (type().data->fill) {
             mod([&](void* p){ type().data->fill(p, h); });
         }
-         // TODO: this delegation has too high priority
         else if (type().data->delegate) {
             mod([&](void* p){
                 Reference(p, type().data->delegate).fill(h);
@@ -298,7 +322,23 @@ namespace hacc {
                 }
                 break;
             }
-            default: break;
+            case PATH: {
+                Reference ref = path_to_reference(h->p);
+                if (void* addr = ref.address()) {
+                    if (ref.type() == type().data->pointee_type) {
+                        set([&](void* pp){
+                            *(void**)pp = addr;
+                        });
+                    }
+                    else throw X::Type_Mismatch(type().data->pointee_type, ref.type());
+                }
+                else throw X::Unaddressable(*this,
+                    "generate pointer through path "
+                  + path_to_string(h->p)
+                  + " from"
+                );
+            }
+            default: throw X::Form_Mismatch(type(), h->form);
         }
     }
 
@@ -395,6 +435,12 @@ namespace hacc {
                 "Type mismatch: expected "
               + e.name() + " but got " + got.name()
             ), expected(e), got(g)
+        { }
+        Form_Mismatch::Form_Mismatch (Type t, Form f) :
+            Logic_Error(
+                "Form mismatch: type " + t.name()
+              + " cannot be represented by a " + form_name(f) + " tree"
+            ), type(t), form(f)
         { }
         Unaddressable::Unaddressable (Reference r, String goal) :
             Logic_Error(

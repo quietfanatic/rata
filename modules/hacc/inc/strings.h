@@ -13,6 +13,9 @@ namespace hacc {
     String escape_ident (String);
      // unescape is harder to abstract out, so we'll wait till we need it.
 
+     // Paths rooted at given filename will look like $.attr and such
+    String path_to_string (Path*, String filename = "");
+
      // The filename parameter is used for error reporting and for serializing
      //  paths; the path's filename will be skipped if it's the current file.
     String tree_to_string (Tree*, String filename = "", uint ind = 0, uint prior_ind = 0);

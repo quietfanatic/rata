@@ -89,6 +89,8 @@ namespace hacc {
         Path(Path* target, std::string key) : type(ATTR), target(target), s(key) { };
         Path(Path* target, size_t index) : type(ELEM), target(target), i(index) { };
 
+        String root () const;
+
     };
     bool operator == (const Path& a, const Path& b);
 

@@ -324,6 +324,15 @@ namespace hacc {
 
      // PATHS STUFF
 
+    String Path::root () const {
+        switch (type) {
+            case ROOT: return s;
+            case ATTR: return target->root();
+            case ELEM: return target->root();
+            default: throw X::Corrupted_Path(const_cast<Path*>(this));
+        }
+    }
+
     Reference path_to_reference (Path* path, Pointer root) {
         switch (path->type) {
             case ROOT: {
@@ -338,8 +347,8 @@ namespace hacc {
                 Reference l = path_to_reference(path->target, root);
                 return l.elem(path->i);
             }
+            default: throw X::Corrupted_Path(path);
         }
-        throw X::Internal_Error("Paths NYI, sorry");
     }
     Path* address_to_path (Pointer ptr, Path* prefix) {
         if (prefix != null) {

@@ -205,6 +205,11 @@ namespace hacc {
             Type got;
             Type_Mismatch (Type expected, Type got);
         };
+        struct Form_Mismatch : Logic_Error {
+            Type type;
+            Form form;
+            Form_Mismatch (Type, Form);
+        };
         struct Unaddressable : Logic_Error {
             Reference r;
             String goal;
