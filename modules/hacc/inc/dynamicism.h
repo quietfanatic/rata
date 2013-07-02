@@ -1,17 +1,14 @@
 #ifndef HAVE_HACC_DYNAMICISM_H
 #define HAVE_HACC_DYNAMICISM_H
 
-#include <functional>
 #include <typeinfo>
 #include <typeindex>
-#include <gc/gc_cpp.h>
+#include "common.h"
 #include "tree.h"
 
 namespace hacc {
 
      // Utilitous declarations
-    template <class F> using Func = std::function<F>;
-    typedef Func<void (void*)> Cont;
 
      // The main type type
     struct TypeData;

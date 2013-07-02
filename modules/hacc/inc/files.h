@@ -1,7 +1,7 @@
 #ifndef HAVE_HACC_FILES_H
 #define HAVE_HACC_FILES_H
 
-#include "tree.h"
+#include "common.h"
 #include "dynamicism.h"
 
  // Most if not all of the important objects in this program should be

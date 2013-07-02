@@ -1,3 +1,4 @@
+#include <sstream>
 #include "../inc/tree.h"
 #include "../inc/getsets.h"
 #include "../inc/haccable.h"
