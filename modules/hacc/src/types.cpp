@@ -2,6 +2,11 @@
 
 namespace hacc {
 
+    std::vector<TypeData*>& types_to_init () {
+        static std::vector<TypeData*> r;
+        return r;
+    }
+
     std::unordered_map<std::type_index, TypeData*>& types_by_cpptype () {
         static std::unordered_map<std::type_index, TypeData*> r;
         return r;
@@ -12,6 +17,7 @@ namespace hacc {
     }
 
     Type::Type (String name) {
+        init();
         auto iter = types_by_name().find(name);
         if (iter != types_by_name().end())
             data = iter->second;
@@ -26,8 +32,8 @@ namespace hacc {
 
     bool Type::initialized () const { return data->initialized; }
     String Type::name () const {
-        if (!data->name.empty())
-            return data->name;
+        if (data->name)
+            return data->name();
         else
             return "{" + String(data->cpptype->name()) + "}";
     }
@@ -37,12 +43,27 @@ namespace hacc {
     void Type::destruct (void* p) const { data->destruct(p); }
     void Type::copy_construct (void* l, void* r) const { data->copy_construct(l, r); }
 
+    void init () {
+        for (size_t i = 0; i < types_to_init().size(); i++) {
+            TypeData* td = types_to_init()[i];
+            if (td->describe) {
+                td->initialized = true;
+                td->describe();
+                if (td->name) {
+                    types_by_name().emplace(td->name(), td);
+                }
+            }
+        }
+        types_to_init().clear();
+    }
+
     Type _get_type (
         const std::type_info& cpptype,
         size_t size,
         void (* construct )(void*),
         void (* destruct )(void*),
-        void (* copy_construct )(void*, void*)
+        void (* copy_construct )(void*, void*),
+        void (* describe )()
     ) {
         auto& td = types_by_cpptype()[cpptype];
         if (!td) {
@@ -52,6 +73,8 @@ namespace hacc {
                 copy_construct
             );
         }
+        if (describe && !td->initialized)
+            td->describe = describe;
         return td;
     }
     void _init_type (Type t, void(* describe )()) {

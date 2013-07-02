@@ -10,7 +10,7 @@ namespace hacc {
      //  belongs to another value.  GetSet0, GetSet1, and GetSet2
      //  all represent the same type, but with different numbers
      //  of compile-time-known types.
-    struct GetSet0 : gc {
+    struct GetSet0 {
          // All getsets must support these being set
         bool optional = false;
         bool readonly = false;

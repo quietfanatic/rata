@@ -1,13 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../inc/files.h"
+#include "../inc/haccable_standard.h"
 
 using namespace hacc;
+
+HCB_INSTANCE(int32*)
 
 #include "../../tap/inc/tap.h"
 tap::Tester files_tester ("hacc/files", [](){
     using namespace tap;
-    plan(8);
+    plan(11);
     FILE* f = fopen("../test/eight.hacc", "w");
     if (fclose(f) != 0) {
         BAIL_OUT("Failed to clobber ../test/eight.hacc");
@@ -39,4 +42,10 @@ tap::Tester files_tester ("hacc/files", [](){
     is((const char*)cs, "{ float:8~41000000 }\n", "File was saved with the correct contents");
     free(cs);
     fclose(f);
+    doesnt_throw([](){ load(File("../test/pointer.hacc")); }, "We can load a file with a pointer");
+    is(File("../test/pointer.hacc").data().type, Type::CppType<int32*>(), "Pointer is loaded with right type");
+    is( *(void**)File("../test/pointer.hacc").data().address,
+        File("../test/seven.hacc").data().address,
+        "Pointer is loaded with right address"
+    );
 });

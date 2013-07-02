@@ -23,6 +23,7 @@ namespace hacc {
     }
 
     std::vector<String> Reference::keys () {
+        init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->keys) {
             std::vector<String> r;
@@ -51,6 +52,7 @@ namespace hacc {
         else return std::vector<String>();
     }
     void Reference::set_keys (const std::vector<String>& keys) {
+        init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->keys) {
             mod([&](void* p){
@@ -82,6 +84,7 @@ namespace hacc {
     }
 
     Reference Reference::attr (std::string name) {
+        init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->attrs_f) {
             Reference r;
@@ -109,6 +112,7 @@ namespace hacc {
     }
 
     size_t Reference::length () {
+        init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->length) {
             size_t r;
@@ -133,6 +137,7 @@ namespace hacc {
     }
 
     void Reference::set_length (size_t size) {
+        init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->length) {
             mod([&](void* p){
@@ -163,6 +168,7 @@ namespace hacc {
     }
 
     Reference Reference::elem (size_t i) {
+        init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->elems_f) {
             Reference r;
@@ -187,6 +193,7 @@ namespace hacc {
     }
 
     Tree* Reference::to_tree () {
+        init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->to_tree) {
             Tree* r;
@@ -236,6 +243,7 @@ namespace hacc {
      // TODO: figure out the proper relationship between delegation
      //  and cascading calls (prepare and finish)
     void Reference::prepare (Tree* h) {
+        init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->prepare) {
             mod([&](void* p){ type().data->prepare(p, h); });
@@ -359,6 +367,7 @@ namespace hacc {
     }
 
     bool Reference::foreach_address (const Func<bool (Pointer, Path*)>& cb, Path* path) {
+        init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (void* addr = address()) {
             if (cb(Pointer(type(), addr), path))
@@ -382,6 +391,7 @@ namespace hacc {
     }
 
     bool Reference::foreach_pointer (const Func<bool (Reference)>& cb) {
+        init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->pointee_type) {
             if (cb(*this))

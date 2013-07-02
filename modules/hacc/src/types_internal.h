@@ -9,6 +9,7 @@
 namespace hacc {
 
      // These are in dynamicism.cpp
+    std::vector<TypeData*>& types_to_init ();
     std::unordered_map<std::type_index, TypeData*>& types_by_cpptype ();
     std::unordered_map<String, TypeData*>& types_by_name ();
 
@@ -19,7 +20,8 @@ namespace hacc {
         void (* construct )(void*) = null;
         void (* destruct )(void*) = null;
         void (* copy_construct )(void*, void*) = null;
-        String name;
+        Func<String ()> name = null;
+        void (* describe )() = null;
          // Hacc-specific
         GetSet0* keys = null;
         Func<Reference (void*, String)> attrs_f = null;
@@ -45,7 +47,9 @@ namespace hacc {
             cpptype(&cpptype), size(size),
             construct(construct), destruct(destruct),
             copy_construct(copy_construct)
-        { }
+        {
+            types_to_init().push_back(this);
+        }
     };
 
 }

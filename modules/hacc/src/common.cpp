@@ -3,7 +3,6 @@
 
 namespace hacc {
 
-     // On OS X libgc will crash if not initted.
     struct GC_Initter {
         GC_Initter () { GC_INIT(); }
     } gc_initter;

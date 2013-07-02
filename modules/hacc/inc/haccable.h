@@ -9,7 +9,7 @@
 namespace hacc {
 
      // INTERNAL STUFF (type-erased versions of declaration api functions)
-    void _name (Type, String);
+    void _name (Type, const Func<String ()>&);
     void _keys (Type, GetSet0*);
     void _attrs (Type, const Func<Reference (void*, String)>&);
     void _attr (Type, String, GetSet0*);
@@ -28,7 +28,13 @@ namespace hacc {
      // This is inherited by every custom-instantiated type.
     template <class C> struct Haccability : Inheritable_GetSets<C> {
         static void name (String s) {
-            _name(Type::CppType<C>(), s);
+            _name(Type::CppType<C>(), [s](){ return s; });
+        }
+        static void name (const char* s) {
+            _name(Type::CppType<C>(), [s](){ return String(s); });
+        }
+        static void name (const Func<String ()>& f) {
+            _name(Type::CppType<C>(), f);
         }
         static void keys (GetSet2<C, std::vector<std::string>>* gs) {
             _keys(Type::CppType<C>(), gs);
@@ -64,18 +70,17 @@ namespace hacc {
             _finish(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
         }
         static void is_raw_pointer (Type t) {
-            _pointer(Type::CppType<C>(), t);
+            _is_raw_pointer(Type::CppType<C>(), t);
         }
         static Type get_type () {
-            static Type t = _get_type(
+            static Type dt = _get_type(
                 typeid(C), sizeof(C),
                 [](void* p){ new (p) C; },
                 [](void* p){ ((C*)p)->~C(); },
-                [](void* to, void* from){ new (to) C (*(C*)from); }
+                [](void* to, void* from){ new (to) C (*(const C*)from); },
+                TypeDecl<C>::describe
             );
-            if (!t.initialized())
-                _init_type(t, TypeDecl<C>::describe);
-            return t;
+            return dt;
         }
     };
 

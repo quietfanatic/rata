@@ -211,6 +211,10 @@ namespace hacc {
         static GetSet2<C, M>* assignable () {
             return new GS_Assignable<C, M>();
         }
+        static constexpr void* member = null;
+        static constexpr void* value_methods = null;
+        static constexpr void* ref_methods = null;
+        static constexpr void* ref_method = null;
     };
     template <class C>
     struct Inheritable_GetSets<C, true> : Inheritable_GetSets<C, false> {

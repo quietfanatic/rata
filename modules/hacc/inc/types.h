@@ -34,13 +34,16 @@ namespace hacc {
         }
     };
 
+    void init ();
+
      // Internal wrapper for declaring and getting types
     Type _get_type (
         const std::type_info&,
         size_t,
         void (* construct )(void*),
         void (* destruct )(void*),
-        void (* copy_construct )(void*, void*)
+        void (* copy_construct )(void*, void*),
+        void (* describe )()
     );
     void _init_type (Type, void (*)());
      // This is specialized to make a type haccable.  The mechanisms for
@@ -51,7 +54,8 @@ namespace hacc {
                 typeid(C), sizeof(C),
                 [](void* p){ new (p) C; },
                 [](void* p){ ((C*)p)->~C(); },
-                [](void* to, void* from){ new (to) C (*(const C*)from); }
+                [](void* to, void* from){ new (to) C (*(const C*)from); },
+                null
             );
             return t;
         }

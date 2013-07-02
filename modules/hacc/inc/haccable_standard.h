@@ -17,7 +17,9 @@ namespace hacc {
 
 HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
     using namespace hacc;
-    name("std::vector<" + Type::CppType<C>().name() + ">");
+    name([](){
+        return "std::vector<" + Type::CppType<C>().name() + ">";
+    });
     length(hcb::template value_funcs<size_t>(
         [](const std::vector<C>& v){
             return v.size();
@@ -33,7 +35,9 @@ HCB_TEMPLATE_END(<class C>, std::vector<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, hacc::named_vector<C>)
     using namespace hacc;
-    type_name("hacc::named_vector<" + Type::CppType<C>().name() + ">");
+    name([](){
+        return "hacc::named_vector<" + Type::CppType<C>().name() + ">";
+    });
     delegate(hcb::template supertype<std::vector<C>>());
     attrs([](named_vector<C>& v, std::string name){
         return Reference(v.named(name));
@@ -42,7 +46,9 @@ HCB_TEMPLATE_END(<class C>, hacc::named_vector<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
     using namespace hacc;
-    type_name("std::unordered_map<std::string, " + Type::CppType<C>().name() + ">");
+    name([](){
+        return "std::unordered_map<std::string, " + Type::CppType<C>().name() + ">";
+    });
     keys(hcb::template value_funcs<std::vector<std::string>>(
         [](const std::unordered_map<std::string, C>& m){
             std::vector<std::string> r;
@@ -63,7 +69,9 @@ HCB_TEMPLATE_END(<class C>, std::unordered_map<std::string HCB_COMMA C>)
 
 HCB_TEMPLATE_BEGIN(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
     using namespace hacc;
-    name("std::pair<" + Type::CppType<A>().name() + ", " + Type::CppType<B>().name() + ">");
+    name([](){
+        return "std::pair<" + Type::CppType<A>().name() + ", " + Type::CppType<B>().name() + ">";
+    });
     elem(member(&std::pair<A, B>::first));
     elem(member(&std::pair<A, B>::second));
 HCB_TEMPLATE_END(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
@@ -72,7 +80,9 @@ HCB_TEMPLATE_END(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
  // This is the default haccability for pointers.
 HCB_TEMPLATE_BEGIN(<class C>, C*)
     using namespace hacc;
-    type_name(Type::CppType<C>().name() + "*");
+    name([](){
+        return Type::CppType<C>().name() + "*";
+    });
     is_raw_pointer(Type::CppType<C>());
 HCB_TEMPLATE_END(<class C>, C*)
 

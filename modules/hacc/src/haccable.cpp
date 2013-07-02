@@ -3,9 +3,8 @@
 
 namespace hacc {
 
-    void _name (Type t, String name) {
+    void _name (Type t, const Func<String ()>& name) {
         t.data->name = name;
-        types_by_name().emplace(name, t.data);
     }
     void _keys (Type t, GetSet0* gs) {
         t.data->keys = gs;
