@@ -252,7 +252,6 @@ namespace hacc {
             mod([&](void* p){
                 Reference(p, type().data->delegate).prepare(h);
             });
-            return;
         }
         switch (h->form) {
             case OBJECT: {
@@ -326,6 +325,7 @@ namespace hacc {
                   + path_to_string(h->p)
                   + " from"
                 );
+                break;
             }
             default: throw X::Form_Mismatch(type(), h->form);
         }
