@@ -208,6 +208,10 @@ namespace hacc {
             No_Elems (Type);
             No_Elems (Type, size_t);
         };
+        struct Address_Not_Found : Logic_Error {
+            Pointer pointer;
+            Address_Not_Found (Pointer);
+        };
     }
 
 }

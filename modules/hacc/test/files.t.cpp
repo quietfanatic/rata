@@ -6,11 +6,12 @@
 using namespace hacc;
 
 HCB_INSTANCE(int32*)
+HCB_INSTANCE(float*)
 
 #include "../../tap/inc/tap.h"
 tap::Tester files_tester ("hacc/files", [](){
     using namespace tap;
-    plan(11);
+    plan(15);
     FILE* f = fopen("../test/eight.hacc", "w");
     if (fclose(f) != 0) {
         BAIL_OUT("Failed to clobber ../test/eight.hacc");
@@ -48,4 +49,33 @@ tap::Tester files_tester ("hacc/files", [](){
         File("../test/seven.hacc").data().address,
         "Pointer is loaded with right address"
     );
+    diag("The float is at %lu", (unsigned long)File("../test/eight.hacc").data().address);
+    doesnt_throw([](){
+        File("../test/pointer2.hacc", Dynamic::New<float*>(
+            (float*)File("../test/eight.hacc").data().address
+        ));
+    }, "Creating file with pointer");
+    is(
+        *(void**)File("../test/pointer2.hacc").data().address,
+        File("../test/eight.hacc").data().address,
+        "Pointer address was not changed during save"
+    );
+    diag("The float is at %lu", (unsigned long)File("../test/eight.hacc").data().address);
+    doesnt_throw([](){ save(File("../test/pointer2.hacc")); }, "Can save a file with a pointer");
+    diag("The float is at %lu", (unsigned long)File("../test/eight.hacc").data().address);
+    f = fopen("../test/pointer2.hacc", "r");
+    if (!f) {
+        BAIL_OUT("Failed to open a file we just ostensibly wrote to");
+        exit(1);
+    }
+    fseek(f, 0, SEEK_END);
+    size = ftell(f);
+    rewind(f);
+    cs = (char*)malloc(size + 1);
+    fread(cs, 1, size, f);
+    cs[size] = 0;
+    is((const char*)cs, "{ \"float*\":$(\"../test/eight.hacc\") }\n", "File was saved with the correct contents");
+    free(cs);
+    fclose(f);
+
 });

@@ -212,8 +212,9 @@ namespace hacc {
         else if (type().data->pointee_type) {
             Tree* t;
             get([&](void* p){
-                Pointer pp (type().data->pointee_type, p);
+                Pointer pp (type().data->pointee_type, *(void**)p);
                 Path* path = address_to_path(pp);
+                if (!path) throw X::Address_Not_Found(pp);
                 t = new Tree(path);
             });
             return t;
@@ -498,6 +499,12 @@ namespace hacc {
               + " from instance of type " + type.name()
               + " because it has no elements"
             ), type(type), index(i)
+        { }
+        Address_Not_Found::Address_Not_Found (Pointer p) :
+            Logic_Error(
+                "Could not find the path of " + p.type.name()
+              + " at " + stos((size_t)p.address)
+            ), pointer(p)
         { }
     }
 
