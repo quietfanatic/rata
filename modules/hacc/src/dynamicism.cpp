@@ -376,14 +376,16 @@ namespace hacc {
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
                 for (auto& k : ks) {
-                    if (attr(k).foreach_address(cb, new Path(path, k)))
+                    Path* newpath = path ? new Path(path, k) : null;
+                    if (attr(k).foreach_address(cb, newpath))
                         return true;
                 }
             }
             else {
                 size_t n = length();
                 for (size_t i = 0; i < n; i++) {
-                    if (elem(i).foreach_address(cb, new Path(path, i)))
+                    Path* newpath = path ? new Path(path, i) : null;
+                    if (elem(i).foreach_address(cb, newpath))
                         return true;
                 }
             }
@@ -391,25 +393,27 @@ namespace hacc {
         return false;
     }
 
-    bool Reference::foreach_pointer (const Func<bool (Reference)>& cb) {
+    bool Reference::foreach_pointer (const Func<bool (Reference, Path*)>& cb, Path* path) {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->pointee_type) {
-            if (cb(*this))
+            if (cb(*this, path))
                 return true;
         }
         else if (address()) {
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
                 for (auto& k : ks) {
-                    if (attr(k).foreach_pointer(cb))
+                    Path* newpath = path ? new Path(path, k) : null;
+                    if (attr(k).foreach_pointer(cb, newpath))
                         return true;
                 }
             }
             else {
                 size_t n = length();
                 for (size_t i = 0; i < n; i++) {
-                    if (elem(i).foreach_pointer(cb))
+                    Path* newpath = path ? new Path(path, i) : null;
+                    if (elem(i).foreach_pointer(cb, newpath))
                         return true;
                 }
             }

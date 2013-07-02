@@ -96,7 +96,7 @@ namespace hacc {
          // If the callback returns true, the foreach will be terminated.
         bool foreach_address (const Func<bool (Pointer, Path*)>&, Path*);
          // The callback will be given a Reference to a raw pointer.
-        bool foreach_pointer (const Func<bool (Reference)>&);
+        bool foreach_pointer (const Func<bool (Reference, Path*)>&, Path*);
     };
 
      // This is a dynamically typed object with value-semantics.
@@ -141,8 +141,13 @@ namespace hacc {
         Dynamic& operator = (const Dynamic& o) {
             destroy();
             type = o.type;
-            addr = malloc(type.size());
-            type.copy_construct(addr, o.addr);
+            if (o.addr) {
+                addr = malloc(type.size());
+                type.copy_construct(addr, o.addr);
+            }
+            else {
+                addr = null;
+            }
             return *this;
         }
         Dynamic& operator = (Dynamic&& o) {

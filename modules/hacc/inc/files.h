@@ -128,8 +128,11 @@ namespace hacc {
         struct Reload_NYI : Internal_Error {
             Reload_NYI ();
         };
-        struct Unload_NYI : Internal_Error {
-            Unload_NYI ();
+        struct Unload_Would_Break : Logic_Error {
+            String filename;
+            Path* ref;
+            Path* target;
+            Unload_Would_Break (String, Path*, Path*);
         };
     }
      // TODO: move this to .cpp

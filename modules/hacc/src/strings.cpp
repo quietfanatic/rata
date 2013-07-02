@@ -42,6 +42,7 @@ namespace hacc {
     }
 
     String path_to_string (Path* p, String filename) {
+        if (!p) return "null";
         switch (p->type) {
             case ROOT: {
                 if (p->s == filename) return "$";

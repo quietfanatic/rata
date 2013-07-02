@@ -1,6 +1,7 @@
 #include <unordered_map>
 #include "../inc/files.h"
 #include "../inc/strings.h"
+#include "types_internal.h"
 
 namespace hacc {
 
@@ -192,7 +193,6 @@ namespace hacc {
          // UNLOADING
         bool unload_verify_scheduled = false;
         void request_unload (File f) {
-             // TODO: dependency analysis
             if (f.p->state != LOADED) return;
             f.p->state = UNLOAD_VERIFYING;
             if (!unload_verify_scheduled) {
@@ -202,7 +202,29 @@ namespace hacc {
         }
         void unload_verify () {
             unload_verify_scheduled = false;
-            throw X::Unload_NYI();
+            for (auto& p : files_by_filename) {
+                File f = p.second;
+                if (f.p->state != UNLOAD_VERIFYING) {
+                    Reference(f.data()).foreach_pointer([&](Reference rp, Path* path){
+                        rp.get([&](void* pp){
+                            Path* target = address_to_path(
+                                Pointer(rp.type().data->pointee_type, *(void**)pp)
+                            );
+                            if (target && File(target->root()).p->state == UNLOAD_VERIFYING) {
+                                try { throw X::Unload_Would_Break(f.p->filename, path, target); }
+                                catch (...) { delayed_errors.push_back(std::current_exception()); }
+                            }
+                        });
+                        return false;
+                    }, new Path(f.p->filename));
+                }
+            }
+            for (auto& p : files_by_filename) {
+                File f = p.second;
+                if (f.p->state == UNLOAD_VERIFYING) {
+                    f.p->state = UNLOAD_COMMITTING;
+                }
+            }
             new Action(COMMIT, [=](){ unload_commit(); });
         }
         void unload_commit () {
@@ -432,8 +454,14 @@ namespace hacc {
             Logic_Error("Cannot create file \"" + filename + "\" because that filename is already loaded."),
             filename(filename)
         { }
+        Unload_Would_Break::Unload_Would_Break (String filename, Path* ref, Path* target) :
+            Logic_Error(
+                "Cannot unload file \"" + filename
+              + "\" because it would break the pointer at " + path_to_string(ref)
+              + " pointing to " + path_to_string(target)
+            ), filename(filename), ref(ref), target(target)
+        { }
         Reload_NYI::Reload_NYI () : Internal_Error("Reload NYI, sorry") { }
-        Unload_NYI::Unload_NYI () : Internal_Error("Unload NYI, sorry") { }
     }
 
 }

@@ -11,7 +11,7 @@ HCB_INSTANCE(float*)
 #include "../../tap/inc/tap.h"
 tap::Tester files_tester ("hacc/files", [](){
     using namespace tap;
-    plan(15);
+    plan(20);
     FILE* f = fopen("../test/eight.hacc", "w");
     if (fclose(f) != 0) {
         BAIL_OUT("Failed to clobber ../test/eight.hacc");
@@ -77,5 +77,16 @@ tap::Tester files_tester ("hacc/files", [](){
     is((const char*)cs, "{ \"float*\":$(\"../test/eight.hacc\") }\n", "File was saved with the correct contents");
     free(cs);
     fclose(f);
+    throws<X::Unload_Would_Break>([](){
+        unload(File("../test/seven.hacc"));
+    }, "Can't unload a file if there are references to it");
+    doesnt_throw([](){
+        unload(std::vector<File>({File("../test/seven.hacc"), File("../test/pointer.hacc")}));
+    }, "Can unload a file and the file that references it simultaneously");
+    ok(!File("../test/seven.hacc").loaded(), "File is marked as unloaded");
+    doesnt_throw([](){
+        load(File("../test/pointer.hacc"));
+    }, "Can load a file that was unloaded");
+    ok(File("../test/seven.hacc").loaded(), "Depended-upon files are automatically loaded");
 
 });
