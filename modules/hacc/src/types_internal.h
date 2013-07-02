@@ -3,6 +3,7 @@
 
 #include <typeindex>
 #include <unordered_map>
+#include "../inc/types.h"
 #include "../inc/dynamicism.h"
 
 namespace hacc {
@@ -21,20 +22,30 @@ namespace hacc {
         String name;
          // Hacc-specific
         GetSet0* keys = null;
-        Func<Reference (void*, String)> attrs_f;
+        Func<Reference (void*, String)> attrs_f = null;
         std::vector<std::pair<String, GetSet0*>> attr_list;
         GetSet0* length = null;
-        Func<Reference (void*, size_t)> elems_f;
+        Func<Reference (void*, size_t)> elems_f = null;
         std::vector<GetSet0*> elem_list;
-        Func<Tree* (void*)> to_tree;
-        Func<void (void*, Tree*)> prepare;
-        Func<void (void*, Tree*)> fill;
-        Func<void (void*, Tree*)> finish;
+        Func<Tree* (void*)> to_tree = null;
+        Func<void (void*, Tree*)> prepare = null;
+        Func<void (void*, Tree*)> fill = null;
+        Func<void (void*, Tree*)> finish = null;
         GetSet0* delegate = null;
-        Type pointee_type = null;  // Type aren't officially nullable but...
+        TypeData* pointee_type = null;
         bool initialized = false;
 
-        TypeData () { };
+        TypeData (
+            const std::type_info& cpptype,
+            size_t size,
+            void (* construct )(void*),
+            void (* destruct )(void*),
+            void (* copy_construct )(void*, void*)
+        ) :
+            cpptype(&cpptype), size(size),
+            construct(construct), destruct(destruct),
+            copy_construct(copy_construct)
+        { }
     };
 
 }

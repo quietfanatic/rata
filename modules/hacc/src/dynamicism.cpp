@@ -8,34 +8,6 @@
 
 namespace hacc {
 
-    std::unordered_map<std::type_index, TypeData*>& types_by_cpptype () {
-        static std::unordered_map<std::type_index, TypeData*> r;
-        return r;
-    }
-    std::unordered_map<String, TypeData*>& types_by_name () {
-        static std::unordered_map<String, TypeData*> r;
-        return r;
-    }
-
-    Type::Type (String name) {
-        auto iter = types_by_name().find(name);
-        if (iter != types_by_name().end())
-            data = iter->second;
-        else throw X::No_Type_For_Name(name);
-    }
-    bool Type::initialized () const { return data->initialized; }
-    String Type::name () const { return data->name; }
-    const std::type_info& Type::cpptype () const { return *data->cpptype; }
-    size_t Type::size () const { return data->size; }
-    void Type::construct (void* p) const { data->construct(p); }
-    void Type::destruct (void* p) const { data->destruct(p); }
-    void Type::copy_construct (void* l, void* r) const { data->copy_construct(l, r); }
-    TypeData* typedata_by_cpptype (const std::type_info& cpptype) {
-        auto& p = types_by_cpptype()[cpptype];
-        if (!p) p = new TypeData;
-        return p;
-    }
-
     void* Pointer::address_of_type (Type t) const {
         if (t == Type(type)) {
             return address;
@@ -51,6 +23,7 @@ namespace hacc {
     }
 
     std::vector<String> Reference::keys () {
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->keys) {
             std::vector<String> r;
             get([&](void* p){
@@ -78,6 +51,7 @@ namespace hacc {
         else return std::vector<String>();
     }
     void Reference::set_keys (const std::vector<String>& keys) {
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->keys) {
             mod([&](void* p){
                 type().data->keys->set(p, [&](void* vp){
@@ -108,6 +82,7 @@ namespace hacc {
     }
 
     Reference Reference::attr (std::string name) {
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->attrs_f) {
             Reference r;
             get([&](void* p){ r = type().data->attrs_f(p, name); });
@@ -134,6 +109,7 @@ namespace hacc {
     }
 
     size_t Reference::length () {
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->length) {
             size_t r;
             get([&](void* p){
@@ -157,6 +133,7 @@ namespace hacc {
     }
 
     void Reference::set_length (size_t size) {
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->length) {
             mod([&](void* p){
                 type().data->length->set(p, [&](void* sp){
@@ -186,6 +163,7 @@ namespace hacc {
     }
 
     Reference Reference::elem (size_t i) {
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->elems_f) {
             Reference r;
             get([&](void* p){ r = type().data->elems_f(p, i); });
@@ -209,6 +187,7 @@ namespace hacc {
     }
 
     Tree* Reference::to_tree () {
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->to_tree) {
             Tree* r;
             get([&](void* p){
@@ -223,7 +202,7 @@ namespace hacc {
             });
             return t;
         }
-        else if (type().data->pointee_type.data) {
+        else if (type().data->pointee_type) {
             Tree* t;
             get([&](void* p){
                 Pointer pp (type().data->pointee_type, p);
@@ -257,6 +236,7 @@ namespace hacc {
      // TODO: figure out the proper relationship between delegation
      //  and cascading calls (prepare and finish)
     void Reference::prepare (Tree* h) {
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->prepare) {
             mod([&](void* p){ type().data->prepare(p, h); });
         }
@@ -289,7 +269,7 @@ namespace hacc {
                 break;
             }
             case PATH: {
-                if (type().data->pointee_type.data) {
+                if (type().data->pointee_type) {
                     String filename = h->p->root();
                     load(File(filename));
                 }
@@ -379,6 +359,7 @@ namespace hacc {
     }
 
     bool Reference::foreach_address (const Func<bool (Pointer, Path*)>& cb, Path* path) {
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (void* addr = address()) {
             if (cb(Pointer(type(), addr), path))
                 return true;
@@ -401,7 +382,8 @@ namespace hacc {
     }
 
     bool Reference::foreach_pointer (const Func<bool (Reference)>& cb) {
-        if (type().data->pointee_type.data) {
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (type().data->pointee_type) {
             if (cb(*this))
                 return true;
         }
@@ -431,12 +413,12 @@ namespace hacc {
             return ss.str();
         }
 
-        Type_Mismatch::Type_Mismatch (Type e, Type g) :
+        Unhaccable_Type::Unhaccable_Type (Type t) :
             Logic_Error(
-                "Type mismatch: expected "
-              + e.name() + " but got " + got.name()
-            ), expected(e), got(g)
+                "Unhaccable type: " + t.name()
+            ), type(t)
         { }
+
         Form_Mismatch::Form_Mismatch (Type t, Form f) :
             Logic_Error(
                 "Form mismatch: type " + t.name()
@@ -507,23 +489,9 @@ namespace hacc {
               + " because it has no elements"
             ), type(type), index(i)
         { }
-        No_Type_For_CppType::No_Type_For_CppType (const std::type_info& t) :
-            Logic_Error(
-                "No haccable type was declared for C++ type {" + String(t.name()) + "}"
-            ), cpptype(t)
-        { }
-        No_Type_For_Name::No_Type_For_Name (String n) :
-            Logic_Error(
-                "No haccable type was declared with the name " + n
-            ), name(n)
-        { }
     }
 
 }
-
-HCB_BEGIN(hacc::Unknown)
-    name("hacc::Unknown");
-HCB_END(hacc::Unknown)
 
 HCB_BEGIN(hacc::Dynamic)
     name("hacc::Dynamic");

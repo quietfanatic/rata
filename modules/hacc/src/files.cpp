@@ -379,7 +379,7 @@ namespace hacc {
                     Reference(f.data()).foreach_address(
                         [&](Pointer p, Path* path){
                             Transaction::current->address_cache.emplace(p, path);
-                            if (p == ptr) found = ptr;
+                            if (p == ptr) found = path;
                             return false;
                         },
                         new Path (f.filename())
@@ -395,7 +395,7 @@ namespace hacc {
                 for (auto f : scannable_files) {
                     Reference(f.data()).foreach_address(
                         [&](Pointer p, Path* path){
-                            if (p == ptr) found = ptr;
+                            if (p == ptr) found = path;
                             return true;
                         },
                         new Path (f.filename())

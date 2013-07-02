@@ -1,52 +1,10 @@
 #ifndef HAVE_HACC_DYNAMICISM_H
 #define HAVE_HACC_DYNAMICISM_H
 
-#include <typeinfo>
-#include <typeindex>
-#include "common.h"
 #include "tree.h"
+#include "types.h"
 
 namespace hacc {
-
-     // Utilitous declarations
-
-     // The main type type
-    struct TypeData;
-    struct Type {
-        TypeData* data;
-
-        bool initialized () const;
-        String name () const;
-        const std::type_info& cpptype () const;
-        size_t size () const;
-        void construct (void*) const;
-        void destruct (void*) const;
-        void copy_construct (void*, void*) const;
-         // If this type is a raw pointer, returns the type it points to
-        Type pointee_type () const;
-
-        Type (TypeData* p) : data(p) { }
-        Type (String);
-        bool operator == (const Type& other) const {
-             // TypeDatas are guaranteed to not be duplicated.
-            return data == other.data;
-        }
-    };
-     // For internal use.  This autovivifies instead of throwing exception
-    TypeData* typedata_by_cpptype (const std::type_info&);
-     // This is specialized to make a type haccable.  The mechanisms for
-     //  defining haccabilities are in haccable.h
-    template <class C> struct Haccable {
-        static Type get_type ();
-    };
-     // Whenever possible, use this to get types from cpptypes, because
-     //  it will try to auto-instantiate template haccabilities.
-    template <class C> Type type_by_cpptype () {
-        return Haccable<C>::get_type();
-    }
-
-     // For typeless null pointers and such
-    struct Unknown { };
 
      // GetSets represent a way of getting and setting a value that
      //  belongs to another value.  GetSet0, GetSet1, and GetSet2
@@ -66,11 +24,11 @@ namespace hacc {
     };
     template <class C>
     struct GetSet1 : GetSet0 {
-        Type host_type () { return type_by_cpptype<C>(); }
+        Type host_type () { return Type::CppType<C>(); }
     };
     template <class C, class M>
     struct GetSet2 : GetSet1<C> {
-        Type type () { return type_by_cpptype<M>(); }
+        Type type () { return Type::CppType<M>(); }
          // Named-Parameter-Idiom setters
         GetSet2<C, M>& optional () { optional = true; return *this; }
         GetSet2<C, M>& required () { optional = false; return *this; }
@@ -82,17 +40,17 @@ namespace hacc {
         Type type;
         void* address;
 
-        Pointer (Null n = null) : type(type_by_cpptype<Unknown>()), address(null) { }
+        Pointer (Null n = null) : type(Type::CppType<Unknown>()), address(null) { }
         Pointer (Type type, void* p = null) : type(type), address(p) { }
         template <class C>
-        Pointer (C* p) : type(type_by_cpptype<C>()), address(p) { }
+        Pointer (C* p) : type(Type::CppType<C>()), address(p) { }
 
         operator void* () const { return address; }
         operator bool () const { return address; }
          // These throw if the types don't exactly match
         void* address_of_type (Type) const;
         template <class C>
-        operator C* () const { return (C*)address_of_type(type_by_cpptype<C>()); }
+        operator C* () const { return (C*)address_of_type(Type::CppType<C>()); }
     };
     static bool operator == (const Pointer& a, const Pointer& b) {
         return a.type == b.type && a.address == b.address;
@@ -149,7 +107,7 @@ namespace hacc {
 
         Pointer address () const { return Pointer(type, addr); }
 
-        Dynamic (Null n = null) : type(type_by_cpptype<Unknown>()), addr(null) { }
+        Dynamic (Null n = null) : type(Type::CppType<Unknown>()), addr(null) { }
         Dynamic (const Dynamic& o) :
             type(o.type),
             addr(malloc(type.size()))
@@ -168,7 +126,7 @@ namespace hacc {
         static Dynamic New (Args&&... args) {
             void* p = malloc(sizeof(C));
             new (p) C (std::forward<Args>(args)...);
-            return Dynamic(type_by_cpptype<C>(), p);
+            return Dynamic(Type::CppType<C>(), p);
         }
 
         void destroy () {
@@ -197,10 +155,9 @@ namespace hacc {
     };
 
     namespace X {
-        struct Type_Mismatch : Logic_Error {
-            Type expected;
-            Type got;
-            Type_Mismatch (Type expected, Type got);
+        struct Unhaccable_Type : Logic_Error {
+            Type type;
+            Unhaccable_Type (Type);
         };
         struct Form_Mismatch : Logic_Error {
             Type type;
@@ -251,21 +208,6 @@ namespace hacc {
             No_Elems (Type);
             No_Elems (Type, size_t);
         };
-        struct No_Type_For_CppType : Logic_Error {
-            const std::type_info& cpptype;
-            No_Type_For_CppType (const std::type_info&);
-        };
-        struct No_Type_For_Name : Logic_Error {
-            String name;
-            No_Type_For_Name (String);
-        };
-    }
-
-    template <class C>
-    Type Haccable<C>::get_type () {
-        TypeData* td = typedata_by_cpptype(typeid(C));
-        if (!td) throw X::No_Type_For_CppType(typeid(C));
-        return Type(td);
     }
 
 }

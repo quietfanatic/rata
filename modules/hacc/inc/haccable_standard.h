@@ -17,7 +17,7 @@ namespace hacc {
 
 HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
     using namespace hacc;
-    name("std::vector<" + type_by_cpptype<C>().name() + ">");
+    name("std::vector<" + Type::CppType<C>().name() + ">");
     length(hcb::template value_funcs<size_t>(
         [](const std::vector<C>& v){
             return v.size();
@@ -33,7 +33,7 @@ HCB_TEMPLATE_END(<class C>, std::vector<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, hacc::named_vector<C>)
     using namespace hacc;
-    type_name("hacc::named_vector<" + type_by_cpptype<C>().name() + ">");
+    type_name("hacc::named_vector<" + Type::CppType<C>().name() + ">");
     delegate(hcb::template supertype<std::vector<C>>());
     attrs([](named_vector<C>& v, std::string name){
         return Reference(v.named(name));
@@ -42,7 +42,7 @@ HCB_TEMPLATE_END(<class C>, hacc::named_vector<C>)
 
 HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
     using namespace hacc;
-    type_name("std::unordered_map<std::string, " + type_by_cpptype<C>().name() + ">");
+    type_name("std::unordered_map<std::string, " + Type::CppType<C>().name() + ">");
     keys(hcb::template value_funcs<std::vector<std::string>>(
         [](const std::unordered_map<std::string, C>& m){
             std::vector<std::string> r;
@@ -63,7 +63,7 @@ HCB_TEMPLATE_END(<class C>, std::unordered_map<std::string HCB_COMMA C>)
 
 HCB_TEMPLATE_BEGIN(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
     using namespace hacc;
-    name("std::pair<" + type_by_cpptype<A>().name() + ", " + type_by_cpptype<B>().name() + ">");
+    name("std::pair<" + Type::CppType<A>().name() + ", " + Type::CppType<B>().name() + ">");
     elem(member(&std::pair<A, B>::first));
     elem(member(&std::pair<A, B>::second));
 HCB_TEMPLATE_END(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
@@ -72,8 +72,8 @@ HCB_TEMPLATE_END(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
  // This is the default haccability for pointers.
 HCB_TEMPLATE_BEGIN(<class C>, C*)
     using namespace hacc;
-    type_name(type_by_cpptype<C>().name() + "*");
-    is_raw_pointer(type_by_cpptype<C>());
+    type_name(Type::CppType<C>().name() + "*");
+    is_raw_pointer(Type::CppType<C>());
 HCB_TEMPLATE_END(<class C>, C*)
 
  // Alternatively, you can override that and call this.
@@ -94,7 +94,7 @@ namespace hacc {
                     }
                 }
                 x = NULL;
-                if (required) throw Error("No " + type_by_cpptype<C>().name() + " with the given id was found.");
+                if (required) throw Error("No " + Type::CppType<C>().name() + " with the given id was found.");
             }
         ));
     }
@@ -113,7 +113,7 @@ namespace hacc {
                     }
                 }
                 x = NULL;
-                if (required) throw Error("No " + type_by_cpptype<C>().name() + " with the given id was found.");
+                if (required) throw Error("No " + Type::CppType<C>().name() + " with the given id was found.");
             }
         ));
     }

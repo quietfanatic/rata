@@ -3,21 +3,6 @@
 
 namespace hacc {
 
-    void _init_type (
-        Type t,
-        const std::type_info& cpptype,
-        size_t size,
-        void (* construct )(void*),
-        void (* destruct )(void*),
-        void (* copy_construct )(void*, void*)
-    ) {
-        t.data->cpptype = &cpptype;
-        t.data->size = size;
-        t.data->construct = construct;
-        t.data->destruct = destruct;
-        t.data->copy_construct = copy_construct;
-        t.data->initialized = true;
-    }
     void _name (Type t, String name) {
         t.data->name = name;
         types_by_name().emplace(name, t.data);
@@ -56,7 +41,7 @@ namespace hacc {
         t.data->delegate = gs;
     }
     void _is_raw_pointer (Type t, Type pt) {
-        t.data->pointee_type = pt;
+        t.data->pointee_type = pt.data;
     }
 
 }

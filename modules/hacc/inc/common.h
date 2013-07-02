@@ -1,5 +1,5 @@
-#ifndef HAVE_HACC_HACC_H
-#define HAVE_HACC_HACC_H
+#ifndef HAVE_HACC_COMMON_H
+#define HAVE_HACC_COMMON_H
 
 #include <stdint.h>
 #include <string>
@@ -23,6 +23,7 @@ namespace hacc {
     template <class F> using Func = std::function<F>;
     typedef Func<void (void*)> Cont;
 
+    struct Unknown { };
     struct Tree;
 
     typedef std::string String;

@@ -1,5 +1,5 @@
-#ifndef HAVE_HACC_TYPES_H
-#define HAVE_HACC_TYPES_H
+#ifndef HAVE_HACC_HACCABLE_H
+#define HAVE_HACC_HACCABLE_H
 
 #include <unordered_map>
 #include "dynamicism.h"
@@ -9,7 +9,6 @@
 namespace hacc {
 
      // INTERNAL STUFF (type-erased versions of declaration api functions)
-    void _init_type (Type, const std::type_info&, size_t, void(*)(void*), void(*)(void*), void(*)(void*,void*));
     void _name (Type, String);
     void _keys (Type, GetSet0*);
     void _attrs (Type, const Func<Reference (void*, String)>&);
@@ -29,57 +28,54 @@ namespace hacc {
      // This is inherited by every custom-instantiated type.
     template <class C> struct Haccability : Inheritable_GetSets<C> {
         static void name (String s) {
-            _name(get_type(), s);
+            _name(Type::CppType<C>(), s);
         }
         static void keys (GetSet2<C, std::vector<std::string>>* gs) {
-            _keys(get_type(), gs);
+            _keys(Type::CppType<C>(), gs);
         }
         static void attrs (const Func<Reference (C&, String)>& f) {
-            _attrs(get_type(), reinterpret_cast<const Func<Reference (void*, String)>&>(f));
+            _attrs(Type::CppType<C>(), reinterpret_cast<const Func<Reference (void*, String)>&>(f));
         }
         static void attr (String name, GetSet1<C>* gs) {
-            _attr(get_type(), name, gs);
+            _attr(Type::CppType<C>(), name, gs);
         }
         static void length (GetSet2<C, size_t>* gs) {
-            _length(get_type(), gs);
+            _length(Type::CppType<C>(), gs);
         }
         static void elems (const Func<Reference (C&, size_t)>& f) {
-            _elems(get_type(), reinterpret_cast<const Func<Reference (void*, size_t)>&>(f));
+            _elems(Type::CppType<C>(), reinterpret_cast<const Func<Reference (void*, size_t)>&>(f));
         }
         static void elem (GetSet1<C>* gs) {
-            _elem(get_type(), gs);
+            _elem(Type::CppType<C>(), gs);
         }
         static void delegate (GetSet1<C>* gs) {
-            _delegate(get_type(), gs);
+            _delegate(Type::CppType<C>(), gs);
         }
         static void to_tree (const Func<Tree* (const C&)>& f) {
-            _to_tree(get_type(), reinterpret_cast<const Func<Tree* (void*)>&>(f));
+            _to_tree(Type::CppType<C>(), reinterpret_cast<const Func<Tree* (void*)>&>(f));
         }
         static void prepare (const Func<void (C&, Tree*)>& f) {
-            _prepare(get_type(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
+            _prepare(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
         }
         static void fill (const Func<void (C&, Tree*)>& f) {
-            _fill(get_type(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
+            _fill(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
         }
         static void finish (const Func<void (C&, Tree*)>& f) {
-            _finish(get_type(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
+            _finish(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
         }
         static void is_raw_pointer (Type t) {
-            _pointer(get_type(), t);
+            _pointer(Type::CppType<C>(), t);
         }
-
         static Type get_type () {
-            static Type type = typedata_by_cpptype(typeid(C));
-            if (!type.initialized()) {
-                _init_type(type,
-                    typeid(C), sizeof(C),
-                    [](void* p){ new (p) C; },
-                    [](void* p){ ((C*)p)->~C(); },
-                    [](void* l, void* r){ new (l) C (*(C*)r); }
-                );
-                Haccable<C>::describe();
-            }
-            return type;
+            static Type t = _get_type(
+                typeid(C), sizeof(C),
+                [](void* p){ new (p) C; },
+                [](void* p){ ((C*)p)->~C(); },
+                [](void* to, void* from){ new (to) C (*(C*)from); }
+            );
+            if (!t.initialized())
+                _init_type(t, TypeDecl<C>::describe);
+            return t;
         }
     };
 
@@ -88,12 +84,12 @@ namespace hacc {
 #define HACC_APPEND(a, b) a##b
 #define HACC_APPEND2(a, b) HACC_APPEND(a, b)
 #define __ HACC_APPEND2(_anon_, __COUNTER__)
-#define HCB_INSTANCE(type) static Type __ __attribute__ ((unused)) = Haccable<type>::get_type();
-#define HCB_BEGIN(type) namespace hacc { template <> struct Haccable<type> : hacc::Haccability<type> { static void describe () {
-#define HCB_END(type) } }; static Type __ __attribute__ ((unused)) = Haccable<type>::get_type(); }
+#define HCB_INSTANCE(type) static Type __ __attribute__ ((unused)) = TypeDecl<type>::get_type();
+#define HCB_BEGIN(type) namespace hacc { template <> struct TypeDecl<type> : hacc::Haccability<type> { static void describe () {
+#define HCB_END(type) } }; static Type __ __attribute__ ((unused)) = TypeDecl<type>::get_type(); }
 #define HCB_PARAMS(...) __VA_ARGS__
 #define HCB_COMMA ,
-#define HCB_TEMPLATE_BEGIN(params, type) namespace hacc { template params struct Haccable<type> : hacc::Haccability<type> { \
+#define HCB_TEMPLATE_BEGIN(params, type) namespace hacc { template params struct TypeDecl<type> : hacc::Haccability<type> { \
     using hcb = hacc::Haccability<type>; \
     using hcb::name; \
     using hcb::keys; \
