@@ -36,8 +36,8 @@ namespace phys {
 } using namespace phys;
 
 HCB_BEGIN(Grounded)
-    type_name("phys::Grounded");
+    name("phys::Grounded");
     attr("ground", member(&Grounded::ground));
-    attr("ground_fix_index", member(&Grounded::ground_fix_index, def((uint)0)));
+    attr("ground_fix_index", member(&Grounded::ground_fix_index).optional());
 HCB_END(Grounded)
 

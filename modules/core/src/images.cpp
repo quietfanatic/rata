@@ -77,17 +77,17 @@ namespace core {
 } using namespace core;
 
 HCB_BEGIN(Texture)
-    type_name("core::Texture");
-    attr("name", member(&Texture::name, def(std::string("ALL"))));
-    attr("offset", member(&Texture::offset, def(Vec(0, 0))));
-    attr("size", member(&Texture::size, def(Vec())));
+    name("core::Texture");
+    attr("name", member(&Texture::name).optional());
+    attr("offset", member(&Texture::offset).optional());
+    attr("size", member(&Texture::size).optional());
 HCB_END(Texture)
 
 HCB_BEGIN(Image)
-    type_name("core::Image");
+    name("core::Image");
     attr("filename", member(&Image::filename));
-    attr("textures", member(&Image::textures, def(std::vector<Texture>(1, Texture()))));
-    get_attr([](Image& image, std::string name){
+    attr("textures", member(&Image::textures).optional());
+    attrs([](Image& image, std::string name){
         return image.texture_named(name);
     });
     finish([](Image& i){ i.load(); });

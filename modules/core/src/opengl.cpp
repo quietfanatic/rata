@@ -145,7 +145,7 @@ namespace core {
 } using namespace core;
 
 HCB_BEGIN(Shader)
-    type_name("core::Shader");
+    name("core::Shader");
     attr("type", value_functions<std::string>(
         [](const Shader& s)->std::string{ return s.type == GL_FRAGMENT_SHADER ? "fragment" : "vertex"; },
         [](Shader& s, std::string t){
@@ -153,17 +153,16 @@ HCB_BEGIN(Shader)
             else if (t == "vertex") s.type = GL_VERTEX_SHADER;
             else throw std::logic_error("Unknown shader type\n");
         }
-    )(required));
-    attr("source", member(&Shader::source)(required));
+    ));
+    attr("source", member(&Shader::source));
     finish([](Shader& s){ s.finish(); });
-    pointee_policy(hacc::FOLLOW);
 HCB_END(Shader)
 
 HCB_BEGIN(Program)
-    type_name("core::Program");
-    attr("name", member(&Program::name, def(std::string("anonymous program"))));
+    name("core::Program");
+    attr("name", member(&Program::name).optional());
     attr("shaders", member(&Program::shaders));
-    attr("attributes", member(&Program::attributes)(optional));
+    attr("attributes", member(&Program::attributes).optional());
     finish([](Program& p){ p.link(); });
 HCB_END(Program)
 

@@ -162,36 +162,35 @@ namespace ent {
 } using namespace ent;
 
 HCB_BEGIN(Biped)
-    type_name("ent::Biped");
-    base<core::Stateful>("Biped");
-    attr("def", value_methods(&Biped::get_def, &Biped::set_def)(required));
-    attr("object", supertype<phys::Object>());
-    attr("resident", supertype<geo::Resident>());
-    attr("grounded", supertype<phys::Grounded>());
-    attr("direction", member(&Biped::direction)(1));
-    attr("distance_walked", member(&Biped::distance_walked)(0));
-    attr("oldxrel", member(&Biped::oldxrel)(0));
+    name("ent::Biped");
+    attr("def", value_methods(&Biped::get_def, &Biped::set_def));
+    attr("Object", base<phys::Object>());
+    attr("Resident", base<geo::Resident>());
+    attr("Grounded", base<phys::Grounded>().optional());
+    attr("direction", member(&Biped::direction).optional());
+    attr("distance_walked", member(&Biped::distance_walked).optional());
+    attr("oldxrel", member(&Biped::oldxrel).optional());
 HCB_END(Biped)
 
 HCB_BEGIN(BipedStats)
-    type_name("ent::BipedStats");
-    attr("walk_friction", member(&BipedStats::walk_friction)(1));
-    attr("walk_speed", member(&BipedStats::walk_speed)(1));
-    attr("run_friction", member(&BipedStats::run_friction)(1));
-    attr("run_speed", member(&BipedStats::run_speed)(1));
-    attr("crawl_friction", member(&BipedStats::crawl_friction)(1));
-    attr("crawl_speed", member(&BipedStats::crawl_speed)(1));
-    attr("stop_friction", member(&BipedStats::stop_friction)(1));
-    attr("skid_friction", member(&BipedStats::skid_friction)(1));
-    attr("air_force", member(&BipedStats::air_force)(1));
-    attr("air_speed", member(&BipedStats::air_speed)(1));
-    attr("jump_impulse", member(&BipedStats::jump_impulse)(1));
+    name("ent::BipedStats");
+    attr("walk_friction", member(&BipedStats::walk_friction).optional());
+    attr("walk_speed", member(&BipedStats::walk_speed).optional());
+    attr("run_friction", member(&BipedStats::run_friction).optional());
+    attr("run_speed", member(&BipedStats::run_speed).optional());
+    attr("crawl_friction", member(&BipedStats::crawl_friction).optional());
+    attr("crawl_speed", member(&BipedStats::crawl_speed).optional());
+    attr("stop_friction", member(&BipedStats::stop_friction).optional());
+    attr("skid_friction", member(&BipedStats::skid_friction).optional());
+    attr("air_force", member(&BipedStats::air_force).optional());
+    attr("air_speed", member(&BipedStats::air_speed).optional());
+    attr("jump_impulse", member(&BipedStats::jump_impulse).optional());
 HCB_END(BipedStats)
 
 HCB_BEGIN(BipedDef)
-    type_name("ent::BipedDef");
-    attr("body_def", member(&BipedDef::body_def)(required));
-    attr("stats", member(&BipedDef::stats)(required));
-    attr("skel", member(&BipedDef::skel)(required));
-    attr("skin", member(&BipedDef::skin)(required));
+    name("ent::BipedDef");
+    attr("body_def", member(&BipedDef::body_def));
+    attr("stats", member(&BipedDef::stats));
+    attr("skel", member(&BipedDef::skel));
+    attr("skin", member(&BipedDef::skin));
 HCB_END(BipedDef)

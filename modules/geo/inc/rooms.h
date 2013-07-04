@@ -8,14 +8,7 @@
 
 namespace geo {
 
-     // Furniture:
-     //     Cannot move from its original room
-     //     Is not Stateful
-     // Residents:
-     //     Can move between rooms
-     //     Are Stateful
-
-    struct Furniture;
+     // A resident is something that belongs to a room.
     struct Resident;
 
     struct Room {
@@ -23,19 +16,11 @@ namespace geo {
         bool active = false;
         bool activating = false;
         std::vector<Room*> neighbors;
-        std::vector<Furniture*> furniture;
         Links<Resident> residents;
 
         void activate ();
         void deactivate ();
         ~Room ();
-    };
-
-    struct Furniture {
-        virtual void emerge () = 0;
-        virtual void reclude () = 0;
-        virtual void start () { }
-        virtual ~Furniture () { }
     };
 
     struct Resident : Linkable<Resident> {

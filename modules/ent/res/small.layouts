@@ -1,4 +1,4 @@
-new("std::unordered_map<std::string, vis::Layout>" {
+{"std::unordered_map<std::string, vis::Layout>":{
     body: {
         size: [85 43]
         frames: [
@@ -60,4 +60,4 @@ new("std::unordered_map<std::string, vis::Layout>" {
             {name: a180 offset: [92 8] box: [-3 -7 7 7]}
         ]
     }
-})
+}}

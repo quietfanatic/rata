@@ -1,28 +1,29 @@
  // Skeleton for small characters.
-new("vis::Skel" {
+ // This is a mess and we need to reimplement simple variables.
+{"vis::Skel":{
     segs:[
-        $head    = {name:head    branches:[]             layout:file("modules/ent/res/small.layouts").head    z_offset:-0.02}
-        $forearm = {name:forearm branches:[]             layout:file("modules/ent/res/small.layouts").forearm z_offset:-0.06}
-        $arm     = {name:arm     branches:[&$forearm]    layout:file("modules/ent/res/small.layouts").arm     z_offset:-0.04}
-        $body    = {name:body    branches:[&$head &$arm] layout:file("modules/ent/res/small.layouts").body    z_offset: 0.00}
+        {name:head    branches:[]             layout:file("modules/ent/res/small.layouts").head    z_offset:-0.02}
+        {name:forearm branches:[]             layout:file("modules/ent/res/small.layouts").forearm z_offset:-0.06}
+        {name:arm     branches:[$.segs.forearm]    layout:file("modules/ent/res/small.layouts").arm     z_offset:-0.04}
+        {name:body    branches:[$.segs.head $.segs.arm] layout:file("modules/ent/res/small.layouts").body    z_offset: 0.00}
     ]
-    root:&$body
+    root:$.segs.body
     root_offset:[0 0]
     poses: local(
         $l = file("modules/ent/res/small.layouts")
-        $b = $l.body
-        $h = $l.head
-        $a = $l.arm
-        $f = $l.forearm
+        file("modules/ent/res/small.layouts").body = $l.body
+        file("modules/ent/res/small.layouts").head = $l.head
+        file("modules/ent/res/small.layouts").arm = $l.arm
+        file("modules/ent/res/small.layouts").forearm = $l.forearm
         [
-            [stand  [[&$body $b.stand ] [&$head $h.stand90] [&$arm $a.a0  ] [&$forearm $f.a0  ]]]
-            [walk1  [[&$body $b.walk  ] [&$head $h.walk90 ] [&$arm $a.a23 ] [&$forearm $f.a23 ]]]
-            [walk2  [[&$body $b.walk  ] [&$head $h.walk90 ] [&$arm $a.a23 true] [&$forearm $f.a23 true]]]
-            [crawl1 [[&$body $b.crawl1] [&$head $h.crawl  ] [&$arm $a.a0  ] [&$forearm $f.a90 ]]]
-            [crawl2_1 [[&$body $b.crawl2] [&$head $h.crawl] [&$arm $a.a45 ] [&$forearm $f.a90 ]]]
-            [crawl2_2 [[&$body $b.crawl2] [&$head $h.crawl] [&$arm $a.a45 true] [&$forearm $f.a90]]]
-            [hurtbk [[&$body $b.hurtbk] [&$head $h.hurtbk ] [&$arm $a.a23 ] [&$forearm $f.a68 ]]]
-            [laybk  [[&$body $b.laybk ] [&$head $h.laybk  ] [&$arm $a.a90 ] [&$forearm $f.a90 ]]]
+            [stand  [[$.segs.body file("modules/ent/res/small.layouts").body.stand ] [$.segs.head file("modules/ent/res/small.layouts").head.stand90] [$.segs.arm file("modules/ent/res/small.layouts").arm.a0  ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a0  ]]]
+            [walk1  [[$.segs.body file("modules/ent/res/small.layouts").body.walk  ] [$.segs.head file("modules/ent/res/small.layouts").head.walk90 ] [$.segs.arm file("modules/ent/res/small.layouts").arm.a23 ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a23 ]]]
+            [walk2  [[$.segs.body file("modules/ent/res/small.layouts").body.walk  ] [$.segs.head file("modules/ent/res/small.layouts").head.walk90 ] [$.segs.arm file("modules/ent/res/small.layouts").arm.a23 true] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a23 true]]]
+            [crawl1 [[$.segs.body file("modules/ent/res/small.layouts").body.crawl1] [$.segs.head file("modules/ent/res/small.layouts").head.crawl  ] [$.segs.arm file("modules/ent/res/small.layouts").arm.a0  ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a90 ]]]
+            [crawl2_1 [[$.segs.body file("modules/ent/res/small.layouts").body.crawl2] [$.segs.head file("modules/ent/res/small.layouts").head.crawl] [$.segs.arm file("modules/ent/res/small.layouts").arm.a45 ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a90 ]]]
+            [crawl2_2 [[$.segs.body file("modules/ent/res/small.layouts").body.crawl2] [$.segs.head file("modules/ent/res/small.layouts").head.crawl] [$.segs.arm file("modules/ent/res/small.layouts").arm.a45 true] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a90]]]
+            [hurtbk [[$.segs.body file("modules/ent/res/small.layouts").body.hurtbk] [$.segs.head file("modules/ent/res/small.layouts").head.hurtbk ] [$.segs.arm file("modules/ent/res/small.layouts").arm.a23 ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a68 ]]]
+            [laybk  [[$.segs.body file("modules/ent/res/small.layouts").body.laybk ] [$.segs.head file("modules/ent/res/small.layouts").head.laybk  ] [$.segs.arm file("modules/ent/res/small.layouts").arm.a90 ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a90 ]]]
         ]
     )
-})
+}}

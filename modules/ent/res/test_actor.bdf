@@ -1,4 +1,4 @@
-new("phys::BodyDef" {
+{"phys::BodyDef""{
     fixtures:[{
         b2:{
             shape:{ polygon:{ verts:[
@@ -8,4 +8,4 @@ new("phys::BodyDef" {
         }
         coll_b:[ground]
     }]
-})
+}}

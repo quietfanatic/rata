@@ -36,7 +36,7 @@ namespace core {
     };
 
     struct Program {
-        std::string name;
+        std::string name = "<Anonymous Program>";
         uint glid = 0;
         std::vector<Shader*> shaders;
         std::vector<std::pair<std::string, uint>> attributes;

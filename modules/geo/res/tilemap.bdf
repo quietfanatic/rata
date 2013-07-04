@@ -1,4 +1,4 @@
-new("phys::BodyDef" {
+{"phys::BodyDef""{
     type: static
     fixtures: [] // Gonna populate this from the tiles
-})
+}}

@@ -9,7 +9,6 @@ namespace core {
     struct Game_Object;
 
     struct Game_State {
-        Links<Stateful> things;
         std::vector<Game_Object*> pop_culture;
         bool started = false;
 
@@ -25,9 +24,6 @@ namespace core {
         virtual ~Game_Object () { }
     };
 
-    struct Stateful : Linkable<Stateful>, Game_Object {
-        Stateful () { }
-    };
 
     bool load_state (std::string filename);
     bool save_state (std::string filename);
@@ -50,6 +46,13 @@ namespace core {
 
      // Define these with, for instance:
      //  Celebrity<Camera> camera;
+
+    extern Celebrity<Links<Stateful>> things;
+
+    struct Stateful : Linkable<Stateful>, Game_Object {
+        Stateful () { link(things); }
+        ~Stateful () { unlink(); }
+    };
 
 }
 

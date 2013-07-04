@@ -220,6 +220,20 @@ namespace hacc {
             });
             return t;
         }
+        else if (type().data->polymorphic_pointer) {
+            Tree* t;
+            get([&](void* p){
+                Type realtype = type().data->polymorphic_pointer(*(void**)p);
+                for (auto& sub : type().data->subtypes) {
+                    if (realtype == sub.type) {
+                        Tree* val = Reference(sub.type, sub.down(*(void**)p)).to_tree();
+                        t = new Tree(Object(1, Pair(sub.type.name(),val)));
+                    }
+                }
+                throw X::Not_Subtype(realtype, type());
+            });
+            return t;
+        }
         else if (type().data->pointee_type) {
             Tree* t;
             get([&](void* p){
@@ -264,6 +278,22 @@ namespace hacc {
             mod([&](void* p){
                 Reference(p, type().data->delegate).prepare(h);
             });
+        }
+        else if (type().data->polymorphic_pointer) {
+            if (h->form != OBJECT)
+                throw X::Form_Mismatch(type(), h->form);
+            if (h->o.size() != 1)
+                throw X::Not_Single_Attr(type(), h->o.size());
+            Type subtype = Type(h->o[0].first);
+            for (auto& sub : type().data->subtypes) {
+                if (subtype == sub.type) {
+                    set([&](void* pp){
+                        void* subp = operator new (subtype.size());
+                        *(void**)pp = sub.up(subp);
+                    });
+                }
+            }
+            throw X::Not_Subtype(subtype, type());
         }
         switch (h->form) {
             case OBJECT: {
@@ -487,6 +517,11 @@ namespace hacc {
               + " with maximum size " + stos(max)
             ), type(type), wanted(wanted), maximum(max)
         { }
+        Not_Single_Attr (Type type, size_t wanted) :
+            Logic_Error(
+                type.name() + " must be given one attribute, but was given " + stos(wanted)
+            ), wanted(wanted)
+        { }
         No_Attr::No_Attr (Type type, String n) :
             Logic_Error(
                 "Attribute \"" + n + "\" does not exist in instance of type " + type.name()
@@ -529,6 +564,11 @@ namespace hacc {
                 "Could not find the path of " + p.type.name()
               + " at " + stos((size_t)p.address)
             ), pointer(p)
+        { }
+        Not_Subtype::Not_Subtype (Type sub, Type super) :
+            Logic_Error(
+                sub.name() + " is not a subtype of " + super.name()
+            ), sub(sub), super(super)
         { }
     }
 

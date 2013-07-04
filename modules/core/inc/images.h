@@ -27,7 +27,7 @@ namespace core {
 
     struct Image {
         std::string filename;
-        std::vector<Texture> textures;
+        std::vector<Texture> textures {Texture()};
 
         Vec size;  // Set on load
         uint8* data;  // NULL when data is not in memory

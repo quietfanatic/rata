@@ -21,8 +21,8 @@ struct Test_Actor : core::Stateful, phys::Object, vis::Draws_Sprites {
 };
 
 HCB_BEGIN(Test_Actor)
-    base<core::Stateful>("Test_Actor");
-    attr("object", supertype<phys::Object>());
+    name("ent::Test_Actor");
+    attr("Object", base<phys::Object>());
     attr("texture", member(&Test_Actor::texture));
     attr("frame", member(&Test_Actor::frame));
 HCB_END(Test_Actor)
@@ -37,7 +37,7 @@ struct Boundary : core::Stateful, phys::Object {
 };
 
 HCB_BEGIN(Boundary)
-    base<core::Stateful>("Boundary");
-    attr("object", supertype<phys::Object>());
+    name("ent::Boundary");
+    attr("Object", base<phys::Object>());
 HCB_END(Boundary)
 

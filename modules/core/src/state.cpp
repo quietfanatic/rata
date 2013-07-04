@@ -47,7 +47,7 @@ namespace core {
             if (current_state) delete current_state;
             hacc::clear_incantations();  // important to deallocate rooms!
             if (!initialized) init();
-            current_state = hacc::new_from_file<Game_State>(filename);
+            current_state = File(filename).data().attr("state");
             current_state->start();
             return true;
         } catch (hacc::Error& e) {
@@ -61,7 +61,9 @@ namespace core {
 
     bool save_state (std::string filename) {
         try {
-            hacc::file_from(filename, *current_state, 4);
+             // TODO: this is wrong; it only works if the filename
+             //  has not been changed.
+            save(File(filename));
             return true;
         } catch (hacc::Error& e) {
             printf("Failed to save state due to hacc error: %s\n", e.what());
@@ -72,35 +74,10 @@ namespace core {
         }
     }
 
+    Celebrity<Linkable<Stateful>> things;
+
 } using namespace core;
 
 HCB_BEGIN(Game_State)
-    attr("things", member(&Game_State::things));
 HCB_END(Game_State)
-
-HCB_BEGIN(Stateful)
-    pointee_policy(hacc::ALWAYS_FOLLOW);
-HCB_END(Stateful)
-
-struct Load_Command : Command {
-    std::string filename;
-    void operator () () {
-        load(filename);
-    }
-};
-HCB_BEGIN(Load_Command)
-    base<Command>("load");
-    elem(member(&Load_Command::filename));
-HCB_END(Load_Command)
-
-struct Save_Command : Command {
-    std::string filename;
-    void operator () () {
-        save(filename);
-    }
-};
-HCB_BEGIN(Save_Command)
-    base<Command>("save");
-    elem(member(&Save_Command::filename));
-HCB_END(Save_Command)
 

@@ -185,32 +185,35 @@ namespace phys {
  // This is so satisfying
 
 HCB_BEGIN(Space)
-    type_name("phys::Space");
-    base<core::Stateful>("Space");
+    name("phys::Space");
     attr("gravity", value_methods(&Space::get_gravity, &Space::set_gravity));
 HCB_END(Space)
 
 HCB_BEGIN(Collision_Rule*)
-    type_name("phys::Collision_Rule*");
+    name("phys::Collision_Rule*");
     hacc::hacc_pointer_by_method(&Collision_Rule::name, coll_rules, true);
 HCB_END(Collision_Rule*)
 
 HCB_BEGIN(b2Vec2)
-    type_name("b2Vec2");
+    name("b2Vec2");
     elem(member(&b2Vec2::x));
     elem(member(&b2Vec2::y));
 HCB_END(b2Vec2)
 
+HCB_BEGIN(b2Shape*)
+    name("b2Shape*");
+    polymorphic_pointer();
+HCB_END(b2Shape*)
+
 HCB_BEGIN(b2CircleShape)
-    type_name("b2CircleShape");
-    base<b2Shape>("circle");
+    name("b2CircleShape");
+    subtype_of<b2Shape>();
     attr("c", member(&b2CircleShape::m_p));
     attr("r", member((float b2CircleShape::*)&b2CircleShape::m_radius));
 HCB_END(b2CircleShape)
 
 HCB_BEGIN(b2PolygonShape)
-    type_name("b2PolygonShape");
-    base<b2Shape>("polygon");
+    name("b2PolygonShape");
     attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius)(b2_polygonRadius));
     attr("verts", value_functions<std::vector<b2Vec2>>(
         [](const b2PolygonShape& ps){
@@ -223,8 +226,7 @@ HCB_BEGIN(b2PolygonShape)
 HCB_END(b2PolygonShape)
 
 HCB_BEGIN(b2EdgeShape)
-    type_name("b2EdgeShape");
-    base<b2Shape>("edge");
+    name("b2EdgeShape");
     attr("v1", member(&b2EdgeShape::m_vertex1));
     attr("v2", member(&b2EdgeShape::m_vertex2));
     elem(member(&b2EdgeShape::m_vertex1));

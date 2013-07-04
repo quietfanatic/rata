@@ -43,10 +43,10 @@ namespace ent {
         Controls controls;
         phys::Ambulator legs;
         vis::Model model;  // Must be a humanlike model
-        int8 direction;  // 1 = right, -1 = left
+        int8 direction = 1;  // 1 = right, -1 = left
          // For animation purposes
-        float distance_walked;
-        float oldxrel;
+        float distance_walked = 0;
+        float oldxrel = 0;
 
         Biped ();
 
