@@ -73,6 +73,9 @@ namespace hacc {
         static void finish (const Func<void (C&, Tree*)>& f) {
             _finish(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
         }
+        static void finish (const Func<void (C&)>& f) {
+            _finish(Type::CppType<C>(), [f](void* p, Tree*){ f(*(C*)p); });
+        }
         static void is_raw_pointer (Type t) {
             _is_raw_pointer(Type::CppType<C>(), t);
         }
