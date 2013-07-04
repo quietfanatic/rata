@@ -161,22 +161,6 @@ namespace hacc {
         }
     };
 
-     // For reifying subtype relationships.
-    struct Caster0 {
-        Type subtype;
-        void* (* up ) (void*);
-        void* (* down ) (void*);
-    };
-    template <class Base, class Sub>
-    struct Caster2 {
-        operator Caster0 () { return Caster0{
-            Type(typeid(Sub)),
-            [](void* p){ return (void*)static_cast<Base*>((Sub*)p); },
-            [](void* p){ return (void*)static_cast<Sub*>((Base*)p); }
-        }; }
-    };
-
-
     namespace X {
         struct Unhaccable_Type : Logic_Error {
             Type type;
@@ -208,11 +192,6 @@ namespace hacc {
             size_t maximum;
             Too_Long (Type, size_t, size_t);
         };
-        struct Not_Single_Attr : Logic_Error {
-            Type type;
-            size_t wanted;
-            Not_Single_Attr (Type, size_t);
-        };
         struct No_Attr : Logic_Error {
             Type type;
             String name;
@@ -239,11 +218,6 @@ namespace hacc {
         struct Address_Not_Found : Logic_Error {
             Pointer pointer;
             Address_Not_Found (Pointer);
-        };
-        struct Not_Subtype : Logic_Error {
-            Type sub;
-            Type super;
-            Not_Subtype (Type, Type);
         };
     }
 

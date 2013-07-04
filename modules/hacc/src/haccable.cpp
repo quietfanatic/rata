@@ -28,18 +28,6 @@ namespace hacc {
         t.data->value_list.emplace_back(name, std::forward<Dynamic>(v));
         t.data->eq = eq;
     }
-    void _polymorphic_pointer (Type t, Type(* f )(void*)) {
-        t.data->polymorphic_pointer = f;
-    }
-    void _isa (Type t, Caster0&& caster) {
-        t.data->subtypes.emplace_back(std::forward<Caster0>(caster));
-    }
-    void _is_raw_pointer (Type t, Type pt) {
-        t.data->pointee_type = pt.data;
-    }
-    void _delegate (Type t, GetSet0* gs) {
-        t.data->delegate = gs;
-    }
     void _to_tree (Type t, const Func<Tree* (void*)>& f) {
         t.data->to_tree = f;
     }
@@ -51,6 +39,12 @@ namespace hacc {
     }
     void _finish (Type t, const Func<void (void*, Tree*)>& f) {
         t.data->finish = f;
+    }
+    void _delegate (Type t, GetSet0* gs) {
+        t.data->delegate = gs;
+    }
+    void _is_raw_pointer (Type t, Type pt) {
+        t.data->pointee_type = pt.data;
     }
 
 }
