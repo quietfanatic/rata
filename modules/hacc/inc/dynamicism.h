@@ -128,6 +128,8 @@ namespace hacc {
             new (p) C (std::forward<Args>(args)...);
             return Dynamic(Type::CppType<C>(), p);
         }
+        template <class C>
+        Dynamic (C&& v) : type(Type::CppType<C>()), addr(new C (v)) { }
 
         void destroy () {
             if (addr) {

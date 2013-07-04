@@ -202,7 +202,18 @@ namespace hacc {
             });
             return r;
         }
-        else if (type().data->delegate) {
+        if (type().data->eq) {
+            for (auto& p : type().data->value_list) {
+                bool equal;
+                get([&](void* addr){
+                    equal = type().data->eq(p.second.addr, addr);
+                });
+                if (equal) {
+                    return new Tree(p.first);
+                }
+            }
+        }
+        if (type().data->delegate) {
             Tree* t;
             get([&](void* p){
                 t = Reference(p, type().data->delegate).to_tree();
@@ -291,8 +302,17 @@ namespace hacc {
     void Reference::fill (Tree* h) {
         if (type().data->fill) {
             mod([&](void* p){ type().data->fill(p, h); });
+            return;
         }
-        else if (type().data->delegate) {
+        if (h->form == STRING) {
+            for (auto& pair : type().data->value_list) {
+                if (h->s == pair.first) {
+                    set([&](void* p){ type().copy_construct(p, pair.second.addr); });
+                    return;
+                }
+            }
+        }
+        if (type().data->delegate) {
             mod([&](void* p){
                 Reference(p, type().data->delegate).fill(h);
             });

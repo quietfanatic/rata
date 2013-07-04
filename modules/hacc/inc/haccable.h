@@ -16,6 +16,7 @@ namespace hacc {
     void _length (Type, GetSet0*);
     void _elems (Type, const Func<Reference (void*, size_t)>&);
     void _elem (Type, GetSet0*);
+    void _value (Type, String, Dynamic&&, bool(*)(void*, void*));
     void _to_tree (Type, const Func<Tree* (void*)>&);
     void _delegate (Type, GetSet0*);
     void _prepare (Type, const Func<void (void*, Tree*)>&);
@@ -53,6 +54,9 @@ namespace hacc {
         }
         static void elem (GetSet1<C>* gs) {
             _elem(Type::CppType<C>(), gs);
+        }
+        static void value (String s, C&& v) {
+            _value(Type::CppType<C>(), s, std::forward<C>(v), [](void* l, void* r){ return *(C*)l == *(C*)r; });
         }
         static void delegate (GetSet1<C>* gs) {
             _delegate(Type::CppType<C>(), gs);

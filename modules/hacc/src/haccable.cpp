@@ -24,6 +24,10 @@ namespace hacc {
     void _elem (Type t, GetSet0* gs) {
         t.data->elem_list.push_back(gs);
     }
+    void _value (Type t, String name, Dynamic&& v, bool(* eq )(void*, void*)) {
+        t.data->value_list.emplace_back(name, std::forward<Dynamic>(v));
+        t.data->eq = eq;
+    }
     void _to_tree (Type t, const Func<Tree* (void*)>& f) {
         t.data->to_tree = f;
     }

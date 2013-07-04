@@ -46,6 +46,7 @@ namespace hacc {
         Tree (float f) : form(FLOAT), f(f) { }
         Tree (double d) : form(DOUBLE), d(d) { }
         Tree (std::string s) : form(STRING), s(s) { }
+        Tree (const char* s) : form(STRING), s(s) { }
         Tree (const Array& a) : form(ARRAY), a(new Array (a)) { }
         Tree (Array&& a) : form(ARRAY), a(new Array (a)) { }
         Tree (const Object& o) : form(OBJECT), o(new Object (o)) { }

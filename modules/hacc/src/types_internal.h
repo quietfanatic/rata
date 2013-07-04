@@ -22,6 +22,7 @@ namespace hacc {
         void (* copy_construct )(void*, void*) = null;
         Func<String ()> name = null;
         void (* describe )() = null;
+        bool (* eq )(void*, void*) = null;
          // Hacc-specific
         GetSet0* keys = null;
         Func<Reference (void*, String)> attrs_f = null;
@@ -29,6 +30,7 @@ namespace hacc {
         GetSet0* length = null;
         Func<Reference (void*, size_t)> elems_f = null;
         std::vector<GetSet0*> elem_list;
+        std::vector<std::pair<String, Dynamic>> value_list;
         Func<Tree* (void*)> to_tree = null;
         Func<void (void*, Tree*)> prepare = null;
         Func<void (void*, Tree*)> fill = null;

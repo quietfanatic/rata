@@ -100,6 +100,18 @@ HCB_BEGIN(MyUnion)
     attr("f", value_methods(&MyUnion::get_f, &MyUnion::set_f));
 HCB_END(MyUnion)
 
+enum MyEnum {
+    VALUE1,
+    VALUE2,
+    VALUE3
+};
+HCB_BEGIN(MyEnum)
+    name("MyEnum");
+    value("value1", VALUE1);
+    value("value2", VALUE2);
+    value("value3", VALUE3);
+HCB_END(MyEnum)
+
 template <class C>
 Tree* to_tree (C* p) { return Reference(p).to_tree(); }
 template <class C>
@@ -109,13 +121,14 @@ int32 i = 4;
 Vectorly vy;
 Vectorly* vyp;
 MyUnion mu;
+MyEnum me = VALUE2;
 Dynamic dyn = Dynamic::New<int32>(3);
 
 #include "../../tap/inc/tap.h"
 tap::Tester haccable_tester ("hacc/haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(31);
+    plan(35);
     is(to_tree(&i)->i, 4, "to_tree on int32 works");
     doesnt_throw([](){ from_tree(&i, new Tree(35)); }, "from_tree on int32");
     is(i, 35, "...works");
@@ -152,5 +165,9 @@ tap::Tester haccable_tester ("hacc/haccable", [](){
     doesnt_throw([](){ from_tree(&dyn, new Tree(Object{Pair("float", new Tree(99.7f))})); }, "from_tree on Dynamic");
     is(dyn.type, Type(Type::CppType<float>()), "...sets the right type");
     is(*(float*)dyn.addr, 99.7f, "...and sets the right value");
+    is(to_tree(&me)->form, STRING, "Enumish types written as string");
+    is(to_tree(&me)->s, String("value2"), "Enumish types use correct value when writing");
+    doesnt_throw([](){ from_tree(&me, new Tree("value3")); }, "from_tree on enumish type");
+    is(me, VALUE3, "...sets the right type");
 });
 
