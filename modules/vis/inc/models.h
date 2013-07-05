@@ -3,7 +3,6 @@
 
 #include <stdexcept>
 #include "../../util/inc/Vec.h"
-#include "../../hacc/inc/haccable_standard.h"
 #include "sprites.h"
 
 namespace vis {

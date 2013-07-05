@@ -1,25 +1,22 @@
-{
-    things:[
-        {Space:{ gravity: [0 -30] }}
-        {Phys_Debug_Layer:{}}
-        {Model_Tester:{}}
-        {Sprite_Test:{}}
-        {Console:{ font:file("modules/rata/res/font-small.font") }}
-        {Biped:{
-            def:file("modules/rata/res/rata.biped")
-            object:{ pos:[10 10.5] }
-            resident:{ room:file("modules/rata/res/test.room") }
-            grounded:{ ground:null }
-            direction:1
-        }}
-        {Test_Actor:{
-            object:{ pos:[10 7.5] }
-            texture:file("modules/vis/res/test.image").ALL
-            frame:file("modules/vis/res/test.layout").green
-        }}
-        {Boundary:{
-            object:{ pos:[0 0] }
-        }}
-    ]
-}
-
+{"std::unordered_map<std::string, Dynamic>":{
+    {state:{"core::Game_State":{ }}}
+    {space:{"phys::Space":{
+        gravity: [0 -30]
+    }}}
+    {pdl:{"phys::Phys_Debug_Layer":{ }}}
+    {rata:{"ent::Biped":{
+        def:$("modules/rata/res/rata.biped").def
+        Object:{ pos:[10 10.5] }
+        Resident:{ room:$("modules/rata/res/test.room").room }
+        Grounded:{ ground:null }
+        direction:1
+    }}}
+    {test:{"ent::Test_Actor":{
+        Object:{ pos:[10 7.5] }
+        texture:$("modules/vis/res/test.image").ALL
+        frame:$("modules/vis/res/test.layout").green
+    }}}
+    {boundary:{"ent::Boundary":{
+        Object:{ pos:[0 0] }
+    }}}
+}}

@@ -1,12 +1,8 @@
-new("vis::Skin" {
-    apps: local(
-        $segs = file("modules/ent/res/small.skel").segs
-        $image = file("modules/rata/res/rata-base.image")
-        [
-            [$segs.body [$image.body]]
-            [$segs.head [$image.head]]
-            [$segs.arm [$image.arm]]
-            [$segs.forearm [$image.forearm]]
-        ]
-    )
+{"vis::Skin":{
+    apps: [
+        [$("modules/ent/res/small.skel").body [$("modules/ent/rata/rata-base.image").body]]
+        [$("modules/ent/res/small.skel").head [$("modules/ent/rata/rata-base.image").head]]
+        [$("modules/ent/res/small.skel").arm [$("modules/ent/rata/rata-base.image").arm]]
+        [$("modules/ent/res/small.skel").forearm [$("modules/ent/rata/rata-base.image").forearm]]
+    ]
 })

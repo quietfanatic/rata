@@ -47,10 +47,15 @@ namespace core {
      // Define these with, for instance:
      //  Celebrity<Camera> camera;
 
-    extern Celebrity<Links<Stateful>> things;
+    struct Things : Game_Object {
+        Links<Stateful> things;
+        void start ();
+        ~Things() { things.destroy_all(); }
+    };
+    extern Celebrity<Things> things;
 
     struct Stateful : Linkable<Stateful>, Game_Object {
-        Stateful () { link(things); }
+        Stateful () { link(things->things); }
         ~Stateful () { unlink(); }
     };
 

@@ -4,7 +4,6 @@
 #include "../../core/inc/opengl.h"
 #include "../../core/inc/phases.h"
 #include "../../core/inc/state.h"
-#include "../../hacc/inc/haccable_files.h"
 
 namespace vis {
 

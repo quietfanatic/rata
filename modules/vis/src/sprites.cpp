@@ -192,7 +192,7 @@ namespace vis {
 } using namespace vis;
 
 HCB_BEGIN(Frame)
-    type_name("vis::Frame");
+    name("vis::Frame");
     attr("name", member(&Frame::name));
     attr("offset", member(&Frame::offset));
     attr("box", member(&Frame::box));
@@ -200,10 +200,10 @@ HCB_BEGIN(Frame)
 HCB_END(vis::Frame)
 
 HCB_BEGIN(Layout)
-    type_name("vis::Layout");
+    name("vis::Layout");
     attr("size", member(&Layout::size));
     attr("frames", member(&Layout::frames));
-    get_attr([](Layout& layout, std::string name){
+    attrs([](Layout& layout, std::string name){
         return layout.frame_named(name);
     });
     finish([](Layout& layout){
@@ -214,7 +214,5 @@ HCB_END(Layout)
 HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA Layout>)
 
 HCB_BEGIN(Sprite_Test)
-    type_name("vis::Sprite_Test");
-    base<core::Stateful>("Sprite_Test");
-    empty();
+    name("vis::Sprite_Test");
 HCB_END(Sprite_Test)

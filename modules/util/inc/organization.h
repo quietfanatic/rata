@@ -47,26 +47,6 @@ struct Links {
 };
 // for (C* x = list.first(); x; x = x->next()) ...
 
-HCB_TEMPLATE_BEGIN(<class C>, Links<C>)
-    using namespace hacc;
-    to([](const Links<C>& v){
-        VArray<Hacc*> a;
-        for (C* p = v.first(); p; p = p->next()) {
-            a.push_back(hacc_from(p));
-        }
-        return new_hacc(std::move(a));
-    });
-    update_from([](Links<C>& v, Hacc* h){
-        auto ah = h->as_array();
-        v.destroy_all();
-        for (uint i = 0; i < ah->n_elems(); i++) {
-            C* n = value_from_hacc<C*>(ah->elem(i));
-            if (!n) printf("BLARGH!\n");
-            n->link(v);
-        }
-    });
-HCB_TEMPLATE_END(<class C>, Links<C>)
-
 template <class C, uint which = 0>
 struct Linkable : Linkable_Link<C, which> {
     using Linkable_Link<C, which>::_next;

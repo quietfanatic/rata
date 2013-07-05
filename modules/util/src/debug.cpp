@@ -12,8 +12,8 @@ std::unordered_map<std::string, Logger*>& Logger::all () {
 }
 
 HCB_BEGIN(Logger*)
-    type_name("Logger*");
-    to([](Logger* const& l){ return hacc::new_hacc(l->name); });
+    name("Logger*");
+    to_tree([](Logger* const& l){ return new hacc::Tree(l->name); });
     delegate(value_functions<std::string>(
         [](Logger* const& l){ return l->name; },
         [](Logger*& l, std::string name){
@@ -26,19 +26,3 @@ HCB_BEGIN(Logger*)
         }
     ));
 HCB_END(Logger*)
-
-struct Log_Command : Command {
-    Logger* logger;
-    bool on;
-    void operator () () {
-        if (logger)
-            logger->on = on;
-        else core::print_to_console("No such logger found.\n");
-    }
-};
-HCB_BEGIN(Log_Command)
-    base<Command>("log");
-    command_description<Log_Command>("Enable or disable a certain kind of logging to the terminal.\n");
-    elem(member(&Log_Command::logger));
-    elem(member(&Log_Command::on));
-HCB_END(Log_Command)

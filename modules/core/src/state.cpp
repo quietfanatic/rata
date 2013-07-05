@@ -32,12 +32,13 @@ namespace core {
         started = true;
         for (auto p : pop_culture)
             p->start();
+    }
+    void Things::start () {
         for (auto p = things.first(); p; p = p->next()) {
             p->start();
         }
     }
     Game_State::~Game_State () {
-        things.destroy_all();
         for (auto p : pop_culture)
             delete p;
     }
@@ -45,12 +46,11 @@ namespace core {
     bool load_state (std::string filename) {
         try {
             if (current_state) delete current_state;
-            hacc::clear_incantations();  // important to deallocate rooms!
             if (!initialized) init();
-            current_state = File(filename).data().attr("state");
+            current_state = hacc::File(filename).data().attr("state");
             current_state->start();
             return true;
-        } catch (hacc::Error& e) {
+        } catch (hacc::X::Error& e) {
             printf("Failed to load state due to hacc error: %s\n", e.what());
             return false;
         } catch (std::exception& e) {
@@ -63,9 +63,9 @@ namespace core {
         try {
              // TODO: this is wrong; it only works if the filename
              //  has not been changed.
-            save(File(filename));
+            save(hacc::File(filename));
             return true;
-        } catch (hacc::Error& e) {
+        } catch (hacc::X::Error& e) {
             printf("Failed to save state due to hacc error: %s\n", e.what());
             return false;
         } catch (std::exception& e) {
@@ -74,7 +74,7 @@ namespace core {
         }
     }
 
-    Celebrity<Linkable<Stateful>> things;
+    Celebrity<Things> things;
 
 } using namespace core;
 

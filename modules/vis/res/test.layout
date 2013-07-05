@@ -1,4 +1,4 @@
-new("vis::Layout" {
+{"vis::Layout":{
     size:[64 64]
     frames: local( $thebox = [-16 -16 16 16]
         [
@@ -8,4 +8,4 @@ new("vis::Layout" {
             {name:"blue"  offset:[16 16] box:$thebox}
         ]
     )
-})
+}}

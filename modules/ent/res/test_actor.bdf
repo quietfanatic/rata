@@ -1,11 +1,14 @@
-{"phys::BodyDef""{
-    fixtures:[{
-        b2:{
-            shape:{ polygon:{ verts:[
-                [-1 -1] [1 -1] [1 1] [-1 1]
-            ] } }
-            friction:0.4
-        }
-        coll_b:[ground]
-    }]
+{"std::unordered_map<std::string, Dynamic>":{
+    {bdf:{"phys::BodyDef""{
+        fixtures:[{
+            b2:{
+                shape:$.shape.b2Shape
+                friction:0.4
+            }
+            coll_b:[ground]
+        }]
+    }}}
+    {shape:{b2PolygonShape:{
+        verts:[[-1 -1] [1 -1] [1 1] [-1 1]]
+    }}}
 }}

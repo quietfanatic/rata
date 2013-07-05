@@ -1,3 +1,3 @@
-new("core::Image" {
+{"core::Image":{
     filename: "modules/vis/res/test.png"
-})
+}}

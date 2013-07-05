@@ -5,7 +5,7 @@
 #include "../../vis/inc/sprites.h"
 
 static phys::BodyDef*& test_bdf () {
-    static auto test_bdf = hacc::reference_file<phys::BodyDef>("modules/ent/res/test_actor.bdf");
+    static phys::BodyDef* test_bdf = hacc::File("modules/ent/res/test_actor.bdf").data().attr("bdf");
     return test_bdf;
 }
 struct Test_Actor : core::Stateful, phys::Object, vis::Draws_Sprites {
@@ -28,7 +28,7 @@ HCB_BEGIN(Test_Actor)
 HCB_END(Test_Actor)
 
 static phys::BodyDef*& boundary_bdf () {
-    static auto boundary_bdf = hacc::reference_file<phys::BodyDef>("modules/ent/res/boundary.bdf");
+    static phys::BodyDef* boundary_bdf = hacc::File("modules/ent/res/boundary.bdf").data().attr("bdf");
     return boundary_bdf;
 }
 struct Boundary : core::Stateful, phys::Object {

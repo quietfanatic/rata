@@ -20,6 +20,8 @@ namespace core {
         Phase (std::string order, std::string name = "", bool on = true) :
             Ordered(order), name(name), on(on)
         { }
+         // TODO make this not necessary
+        Phase () : Ordered("ZZZ"), name(""), on(false) { }
 
         void run_if_on () { if (on) run(); }
     };
@@ -36,6 +38,8 @@ namespace core {
         Layer (std::string order, std::string name = "", bool on = true) :
             Ordered(order), name(name), on(on)
         { }
+         // TODO make this not necessary
+        Layer () : Ordered("ZZZ"), name(""), on(false) { }
 
         void run_if_on () { if (on) run(); }
     };

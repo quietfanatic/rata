@@ -6,7 +6,6 @@
 #include "../../core/inc/state.h"
 #include "../../util/inc/Vec.h"
 #include "../../util/inc/organization.h"
-#include "../../hacc/inc/haccable_integration.h"
 
 namespace phys {
 
@@ -35,9 +34,9 @@ namespace phys {
         uint64 coll_b = 0;
     };
     struct BodyDef {
-        b2BodyType type;
-        float damping;
-        float gravity_scale;
+        b2BodyType type = b2_dynamicBody;
+        float damping = 0;
+        float gravity_scale = 1;
         std::vector<FixtureDef> fixtures;
     };
 

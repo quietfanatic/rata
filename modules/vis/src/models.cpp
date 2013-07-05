@@ -105,7 +105,7 @@ namespace vis {
 } using namespace vis;
 
 HCB_BEGIN(Skel)
-    type_name("vis::Skel");
+    name("vis::Skel");
     attr("segs", member(&Skel::segs));
     attr("root", member(&Skel::root));
     attr("root_offset", member(&Skel::root_offset));
@@ -114,7 +114,7 @@ HCB_BEGIN(Skel)
 HCB_END(Skel)
 
 HCB_BEGIN(Skel::Seg)
-    type_name("vis::Skel::Seg");
+    name("vis::Skel::Seg");
     attr("name", member(&Skel::Seg::name));
     attr("branches", member(&Skel::Seg::branches)(optional));
     attr("layout", member(&Skel::Seg::layout));
@@ -122,13 +122,13 @@ HCB_BEGIN(Skel::Seg)
 HCB_END(Skel::Seg)
 
 HCB_BEGIN(Pose)
-    type_name("vis::Pose");
+    name("vis::Pose");
     elem(member(&Pose::name));
     elem(member(&Pose::apps));
 HCB_END(Pose)
 
 HCB_BEGIN(Pose::App)
-    type_name("vis::Pose");
+    name("vis::Pose");
     elem(member(&Pose::App::target));
     elem(member(&Pose::App::frame));
     elem(member(&Pose::App::fliph, def(false)));
@@ -136,66 +136,12 @@ HCB_BEGIN(Pose::App)
 HCB_END(Pose::App)
 
 HCB_BEGIN(Skin)
-    type_name("vis::Skin");
+    name("vis::Skin");
     attr("apps", member(&Skin::apps));
 HCB_END(Skin)
 
 HCB_BEGIN(Skin::App)
-    type_name("vis::Skin::App");
+    name("vis::Skin::App");
     elem(member(&Skin::App::target));
     elem(member(&Skin::App::textures));
 HCB_END(Skin::App)
-
-struct MT_Load_Command : Command {
-    Skel* skel;
-    void operator() () {
-        model_tester->model = Model(skel);
-    }
-};
-HCB_BEGIN(MT_Load_Command)
-    base<Command>("mt_load");
-    command_description<MT_Load_Command>("Load a skeleton into the model_test layer.\nUnload with 'mt_load null'");
-    elem(member(&MT_Load_Command::skel));
-HCB_END(MT_Load_Command)
-
-struct MT_Skin_Command : Command {
-    Skin* skin;
-    void operator() () {
-        model_tester->model.apply_skin(skin);
-    }
-};
-HCB_BEGIN(MT_Skin_Command)
-    base<Command>("mt_skin");
-    command_description<MT_Skin_Command>("Apply a skin to the model_test layer");
-    elem(member(&MT_Skin_Command::skin));
-HCB_END(MT_Skin_Command)
-
-struct MT_Pose_Command : Command {
-    std::string name;
-    void operator() () {
-        model_tester->model.apply_pose(model_tester->model.skel->poses.named(name));
-    }
-};
-
-HCB_BEGIN(MT_Pose_Command)
-    base<Command>("mt_pose");
-    command_description<MT_Pose_Command>("Apply a pose to the model_test layer by name");
-    elem(member(&MT_Pose_Command::name));
-HCB_END(MT_Pose_Command)
-
-struct MT_Flip_Command : Command {
-    void operator() () {
-        model_tester->flip = !model_tester->flip;
-    }
-};
-HCB_BEGIN(MT_Flip_Command)
-    base<Command>("mt_flip");
-    command_description<MT_Pose_Command>("Flip the model tester horizontally");
-    empty();
-HCB_END(MT_Flip_Command)
-
-HCB_BEGIN(Model_Tester)
-    type_name("vis::Model_Tester");
-    base<core::Stateful>("Model_Tester");
-    empty();
-HCB_END(Model_Tester)

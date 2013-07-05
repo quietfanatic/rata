@@ -1,6 +1,11 @@
-new("ent::BipedDef" {
-    body_def: file("modules/ent/res/small.bdf")
-    stats: new({
+{"std::unordered_map<std::string, Dynamic>":{
+    {def:{"ent::BipedDef":{
+        body_def: $("modules/ent/res/small.bdf").bdf
+        stats: $.stats
+        skel: $("modules/ent/res/small.skel")
+        skin: $("modules/rata/res/rata-base.skin")
+    }}}
+    {stats:{"ent::BipedStats":{
         walk_friction: 0.8
         walk_speed: 4.0
         run_friction: 0.2
@@ -12,7 +17,5 @@ new("ent::BipedDef" {
         air_force: 0.2
         air_speed: 4.0
         jump_impulse: 8.0
-    })
-    skel: file("modules/ent/res/small.skel")
-    skin: file("modules/rata/res/rata-base.skin")
+    }}}
 })

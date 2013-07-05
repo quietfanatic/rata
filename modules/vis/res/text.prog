@@ -1,6 +1,14 @@
-new("core::Program" {
-    shaders: [
-        new({ type:vertex source:<<END
+{"std::unordered_map<std::string, Dynamic>":{
+    {prog:{"core::Program":{
+        shaders:[$.vert $.frag]
+        attributes:{
+            vert_pos:0
+            vert_tex:1
+        }
+    }}}
+    {vert:{"core::Shader":{
+        type:vertex
+        source:<<END
             #version 110
 
             uniform vec2 camera_pos;
@@ -17,8 +25,10 @@ new("core::Program" {
                 tex_coords = vert_tex / 16.0;
             }
             END
-        })
-        new({ type:fragment source:<<END
+    }}}
+    {frag:{"core::Shader":{
+        type:fragment
+        source:<<END
             #version 110
 
             uniform sampler2D tex;
@@ -29,10 +39,5 @@ new("core::Program" {
                 gl_FragColor = texture2D(tex, tex_coords) * color;
             }
             END
-        })
-    ]
-    attributes: {
-        vert_pos: 0
-        vert_tex: 1
-    }
+    }}}
 })

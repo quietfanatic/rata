@@ -292,7 +292,7 @@ sub plan_target {
     my $rel = abs2rel($target, $original_base);
     unless ($workflow{targets}{$target} or fexists($target)) {
         my $mess = "☢ Cannot find or make $rel" . (@{$plan->{stack}} ? ", required by\n" : "\n");
-        for my $rule (@{$plan->{stack}}) {
+        for my $rule (reverse @{$plan->{stack}}) {
             $mess .= "\t" . debug_rule($rule) . "\n";
         }
         die_status $mess;
