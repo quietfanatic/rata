@@ -20,11 +20,11 @@ tap::Tester files_tester ("hacc/files", [](){
     ok(!File("../test/seven.hacc").loaded(), "File is not loaded before load() is called on it");
     doesnt_throw([](){ load(File("../test/seven.hacc")); }, "We can call load()");
     ok(File("../test/seven.hacc").loaded(), "File is loaded when load() is called on it");
-    if (is(File("../test/seven.hacc").data().type, Type::CppType<int32>(), "Loaded file preserves type")) {
-        is(*(int32*)File("../test/seven.hacc").data().address, 7, "Loaded file preserves value");
+    if (is(File("../test/seven.hacc").data().type(), Type::CppType<int32>(), "Loaded file preserves type")) {
+        is(*(int32*)File("../test/seven.hacc").data().address(), 7, "Loaded file preserves value");
     }
     else {
-        diag(File("../test/seven.hacc").data().type.name().c_str());
+        diag(File("../test/seven.hacc").data().type().name().c_str());
         fail("Loaded file preserves value - failed because the type part failed");
     }
     ok(File("../test/eight.hacc", Dynamic::New<float>(8.0)).loaded(), "Creating new file works");
@@ -44,25 +44,25 @@ tap::Tester files_tester ("hacc/files", [](){
     free(cs);
     fclose(f);
     doesnt_throw([](){ load(File("../test/pointer.hacc")); }, "We can load a file with a pointer");
-    is(File("../test/pointer.hacc").data().type, Type::CppType<int32*>(), "Pointer is loaded with right type");
-    is( *(void**)File("../test/pointer.hacc").data().address,
-        File("../test/seven.hacc").data().address,
+    is(File("../test/pointer.hacc").data().type(), Type::CppType<int32*>(), "Pointer is loaded with right type");
+    is( *(void**)File("../test/pointer.hacc").data().address(),
+        File("../test/seven.hacc").data().address(),
         "Pointer is loaded with right address"
     );
-    diag("The float is at %lu", (unsigned long)File("../test/eight.hacc").data().address);
+    diag("The float is at %lu", (unsigned long)File("../test/eight.hacc").data().address());
     doesnt_throw([](){
         File("../test/pointer2.hacc", Dynamic::New<float*>(
-            (float*)File("../test/eight.hacc").data().address
+            (float*)File("../test/eight.hacc").data().address()
         ));
     }, "Creating file with pointer");
     is(
-        *(void**)File("../test/pointer2.hacc").data().address,
-        File("../test/eight.hacc").data().address,
+        *(void**)File("../test/pointer2.hacc").data().address(),
+        File("../test/eight.hacc").data().address(),
         "Pointer address was not changed during save"
     );
-    diag("The float is at %lu", (unsigned long)File("../test/eight.hacc").data().address);
+    diag("The float is at %lu", (unsigned long)File("../test/eight.hacc").data().address());
     doesnt_throw([](){ save(File("../test/pointer2.hacc")); }, "Can save a file with a pointer");
-    diag("The float is at %lu", (unsigned long)File("../test/eight.hacc").data().address);
+    diag("The float is at %lu", (unsigned long)File("../test/eight.hacc").data().address());
     f = fopen("../test/pointer2.hacc", "r");
     if (!f) {
         BAIL_OUT("Failed to open a file we just ostensibly wrote to");

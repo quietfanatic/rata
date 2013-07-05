@@ -77,6 +77,8 @@ namespace hacc {
 
          // This will throw if the data is not addressable.
         operator Pointer () const;
+        template <class C>
+        operator C* () const { return Pointer(*this); }
 
          // Hacc-specific
         std::vector<String> keys ();

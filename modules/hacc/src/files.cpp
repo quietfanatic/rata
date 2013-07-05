@@ -50,7 +50,7 @@ namespace hacc {
         p->state = LOADED;
         p->requested = true;
     }
-    Pointer File::data () {
+    Reference File::data () {
         if (p->state == UNLOADED)
             load(*this);
         return p->data.address();

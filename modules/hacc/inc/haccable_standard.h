@@ -104,7 +104,7 @@ namespace hacc {
                     }
                 }
                 x = NULL;
-                if (required) throw Error("No " + Type::CppType<C>().name() + " with the given id was found.");
+                if (required) throw X::Logic_Error("No " + Type::CppType<C>().name() + " with the given id was found.");
             }
         ));
     }
@@ -123,7 +123,7 @@ namespace hacc {
                     }
                 }
                 x = NULL;
-                if (required) throw Error("No " + Type::CppType<C>().name() + " with the given id was found.");
+                if (required) throw X::Logic_Error("No " + Type::CppType<C>().name() + " with the given id was found.");
             }
         ));
     }

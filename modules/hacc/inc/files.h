@@ -31,7 +31,7 @@ namespace hacc {
 
          // Get the underlying object, loading it from disk if necessary.
          //  If so, it won't be marked as requested.
-        Pointer data ();
+        Reference data ();
         String filename ();
         bool loaded ();  // if it's fully and completely loaded
         bool requested ();  // if it was manually loaded
