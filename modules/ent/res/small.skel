@@ -2,28 +2,21 @@
  // This is a mess and we need to reimplement simple variables.
 {"vis::Skel":{
     segs:[
-        {name:head    branches:[]             layout:file("modules/ent/res/small.layouts").head    z_offset:-0.02}
-        {name:forearm branches:[]             layout:file("modules/ent/res/small.layouts").forearm z_offset:-0.06}
-        {name:arm     branches:[$.segs.forearm]    layout:file("modules/ent/res/small.layouts").arm     z_offset:-0.04}
-        {name:body    branches:[$.segs.head $.segs.arm] layout:file("modules/ent/res/small.layouts").body    z_offset: 0.00}
+        {name:head    branches:[]             layout:$("modules/ent/res/small.layouts").head    z_offset:-0.02}
+        {name:forearm branches:[]             layout:$("modules/ent/res/small.layouts").forearm z_offset:-0.06}
+        {name:arm     branches:[$.segs.forearm]    layout:$("modules/ent/res/small.layouts").arm     z_offset:-0.04}
+        {name:body    branches:[$.segs.head $.segs.arm] layout:$("modules/ent/res/small.layouts").body    z_offset: 0.00}
     ]
     root:$.segs.body
     root_offset:[0 0]
-    poses: local(
-        $l = file("modules/ent/res/small.layouts")
-        file("modules/ent/res/small.layouts").body = $l.body
-        file("modules/ent/res/small.layouts").head = $l.head
-        file("modules/ent/res/small.layouts").arm = $l.arm
-        file("modules/ent/res/small.layouts").forearm = $l.forearm
-        [
-            [stand  [[$.segs.body file("modules/ent/res/small.layouts").body.stand ] [$.segs.head file("modules/ent/res/small.layouts").head.stand90] [$.segs.arm file("modules/ent/res/small.layouts").arm.a0  ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a0  ]]]
-            [walk1  [[$.segs.body file("modules/ent/res/small.layouts").body.walk  ] [$.segs.head file("modules/ent/res/small.layouts").head.walk90 ] [$.segs.arm file("modules/ent/res/small.layouts").arm.a23 ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a23 ]]]
-            [walk2  [[$.segs.body file("modules/ent/res/small.layouts").body.walk  ] [$.segs.head file("modules/ent/res/small.layouts").head.walk90 ] [$.segs.arm file("modules/ent/res/small.layouts").arm.a23 true] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a23 true]]]
-            [crawl1 [[$.segs.body file("modules/ent/res/small.layouts").body.crawl1] [$.segs.head file("modules/ent/res/small.layouts").head.crawl  ] [$.segs.arm file("modules/ent/res/small.layouts").arm.a0  ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a90 ]]]
-            [crawl2_1 [[$.segs.body file("modules/ent/res/small.layouts").body.crawl2] [$.segs.head file("modules/ent/res/small.layouts").head.crawl] [$.segs.arm file("modules/ent/res/small.layouts").arm.a45 ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a90 ]]]
-            [crawl2_2 [[$.segs.body file("modules/ent/res/small.layouts").body.crawl2] [$.segs.head file("modules/ent/res/small.layouts").head.crawl] [$.segs.arm file("modules/ent/res/small.layouts").arm.a45 true] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a90]]]
-            [hurtbk [[$.segs.body file("modules/ent/res/small.layouts").body.hurtbk] [$.segs.head file("modules/ent/res/small.layouts").head.hurtbk ] [$.segs.arm file("modules/ent/res/small.layouts").arm.a23 ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a68 ]]]
-            [laybk  [[$.segs.body file("modules/ent/res/small.layouts").body.laybk ] [$.segs.head file("modules/ent/res/small.layouts").head.laybk  ] [$.segs.arm file("modules/ent/res/small.layouts").arm.a90 ] [$.segs.forearm file("modules/ent/res/small.layouts").forearm.a90 ]]]
-        ]
-    )
+    poses:[
+        [stand  [[$.segs.body $("modules/ent/res/small.layouts").body.stand ] [$.segs.head $("modules/ent/res/small.layouts").head.stand90] [$.segs.arm $("modules/ent/res/small.layouts").arm.a0  ] [$.segs.forearm $("modules/ent/res/small.layouts").forearm.a0  ]]]
+        [walk1  [[$.segs.body $("modules/ent/res/small.layouts").body.walk  ] [$.segs.head $("modules/ent/res/small.layouts").head.walk90 ] [$.segs.arm $("modules/ent/res/small.layouts").arm.a23 ] [$.segs.forearm $("modules/ent/res/small.layouts").forearm.a23 ]]]
+        [walk2  [[$.segs.body $("modules/ent/res/small.layouts").body.walk  ] [$.segs.head $("modules/ent/res/small.layouts").head.walk90 ] [$.segs.arm $("modules/ent/res/small.layouts").arm.a23 true] [$.segs.forearm $("modules/ent/res/small.layouts").forearm.a23 true]]]
+        [crawl1 [[$.segs.body $("modules/ent/res/small.layouts").body.crawl1] [$.segs.head $("modules/ent/res/small.layouts").head.crawl  ] [$.segs.arm $("modules/ent/res/small.layouts").arm.a0  ] [$.segs.forearm $("modules/ent/res/small.layouts").forearm.a90 ]]]
+        [crawl2_1 [[$.segs.body $("modules/ent/res/small.layouts").body.crawl2] [$.segs.head $("modules/ent/res/small.layouts").head.crawl] [$.segs.arm $("modules/ent/res/small.layouts").arm.a45 ] [$.segs.forearm $("modules/ent/res/small.layouts").forearm.a90 ]]]
+        [crawl2_2 [[$.segs.body $("modules/ent/res/small.layouts").body.crawl2] [$.segs.head $("modules/ent/res/small.layouts").head.crawl] [$.segs.arm $("modules/ent/res/small.layouts").arm.a45 true] [$.segs.forearm $("modules/ent/res/small.layouts").forearm.a90]]]
+        [hurtbk [[$.segs.body $("modules/ent/res/small.layouts").body.hurtbk] [$.segs.head $("modules/ent/res/small.layouts").head.hurtbk ] [$.segs.arm $("modules/ent/res/small.layouts").arm.a23 ] [$.segs.forearm $("modules/ent/res/small.layouts").forearm.a68 ]]]
+        [laybk  [[$.segs.body $("modules/ent/res/small.layouts").body.laybk ] [$.segs.head $("modules/ent/res/small.layouts").head.laybk  ] [$.segs.arm $("modules/ent/res/small.layouts").arm.a90 ] [$.segs.forearm $("modules/ent/res/small.layouts").forearm.a90 ]]]
+    ]
 }}

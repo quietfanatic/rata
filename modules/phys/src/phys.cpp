@@ -228,7 +228,7 @@ HCB_BEGIN(b2PolygonShape)
         [](b2PolygonShape& ps, const std::vector<b2Vec2>& v){
             ps.Set(v.data(), v.size());
         }
-    ));
+    ).narrow());
 HCB_END(b2PolygonShape)
 
 HCB_BEGIN(b2EdgeShape)
@@ -274,13 +274,13 @@ HCB_BEGIN(FixtureDef)
         [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
             fdf.coll_a = coll_v2b(rules);
         }
-    ).optional());
+    ).optional().narrow());
     attr("coll_b", value_funcs<std::vector<Collision_Rule*>>(
         [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_b); },
         [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
             fdf.coll_b = coll_v2b(rules);
         }
-    ).optional());
+    ).optional().narrow());
 HCB_END(FixtureDef)
 
 HCB_BEGIN(b2BodyType)
