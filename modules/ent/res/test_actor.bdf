@@ -1,5 +1,5 @@
 {"std::unordered_map<std::string, Dynamic>":{
-    {bdf:{"phys::BodyDef""{
+    bdf:{"phys::BodyDef""{
         fixtures:[{
             b2:{
                 shape:$.shape.b2Shape
@@ -7,8 +7,8 @@
             }
             coll_b:[ground]
         }]
-    }}}
+    }}
     {shape:{b2PolygonShape:{
         verts:[[-1 -1] [1 -1] [1 1] [-1 1]]
-    }}}
+    }}
 }}

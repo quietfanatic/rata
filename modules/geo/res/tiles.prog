@@ -1,12 +1,12 @@
 {"std::unordered_map<std::string, hacc::Dynamic>":{
-    {prog:{"core::Program":{
+    prog:{"core::Program":{
         shaders:[$.vert $.frag]
         attributes:{
             vert_pos:0
             vert_tex:1
         }
-    }}}
-    {vert:{"core::Shader":{
+    }}
+    vert:{"core::Shader":{
         type:vertex
         source:<<END
             #version 110
@@ -26,8 +26,8 @@
                 tex_coords = vert_tex / tileset_size;
             }
             END
-    }}}
-    {frag:{"core::Shader":{
+    }}
+    frag:{"core::Shader":{
         type:fragment
         source:<<END
             #version 110
@@ -40,6 +40,6 @@
                 gl_FragDepth = 1.0 - gl_FragColor.a;
             }
             END
-    }}}
+    }}
 }}
 

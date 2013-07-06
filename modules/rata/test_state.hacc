@@ -1,22 +1,22 @@
 {"std::unordered_map<std::string, Dynamic>":{
-    {state:{"core::Game_State":{ }}}
-    {space:{"phys::Space":{
+    state:{"core::Game_State":{ }}
+    space:{"phys::Space":{
         gravity: [0 -30]
-    }}}
-    {pdl:{"phys::Phys_Debug_Layer":{ }}}
-    {rata:{"ent::Biped":{
+    }}
+    pdl:{"phys::Phys_Debug_Layer":{ }}
+    rata:{"ent::Biped":{
         def:$("modules/rata/res/rata.biped").def
         Object:{ pos:[10 10.5] }
         Resident:{ room:$("modules/rata/res/test.room").room }
         Grounded:{ ground:null }
         direction:1
-    }}}
-    {test:{"ent::Test_Actor":{
+    }}
+    test:{"ent::Test_Actor":{
         Object:{ pos:[10 7.5] }
         texture:$("modules/vis/res/test.image").ALL
         frame:$("modules/vis/res/test.layout").green
-    }}}
-    {boundary:{"ent::Boundary":{
+    }}
+    boundary:{"ent::Boundary":{
         Object:{ pos:[0 0] }
-    }}}
+    }}
 }}

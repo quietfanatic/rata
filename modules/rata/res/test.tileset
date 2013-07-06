@@ -1,9 +1,9 @@
 {"std::unordered_map<std::string, Dynamic>":{
-    {tileset:{"geo::Tileset":{
+    tileset:{"geo::Tileset":{
         tiles: [null $.solid]
-    }}}
-    {solid:{"geo::TileDef":{
+    }}
+    solid:{"geo::TileDef":{
         nature:{ b2:{ friction:0.4 } coll_b:[ground] }
         vertices:[[0 0] [1 0] [1 1] [0 1]]
-    }}}
-})
+    }}
+}}

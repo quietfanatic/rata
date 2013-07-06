@@ -5,4 +5,4 @@
         [$("modules/ent/res/small.skel").arm [$("modules/ent/rata/rata-base.image").arm]]
         [$("modules/ent/res/small.skel").forearm [$("modules/ent/rata/rata-base.image").forearm]]
     ]
-})
+}}
