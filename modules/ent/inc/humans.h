@@ -16,7 +16,7 @@ namespace ent {
     struct BipedDef;
 
      // TODO: separate soul from body
-    struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Draws_Sprites, core::Key_Listener, core::Stateful {
+    struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Draws_Sprites, core::Key_Listener {
          // Skeletons for bipeds must have these poses in this order.
         enum Pose {
             STAND,
@@ -50,8 +50,8 @@ namespace ent {
 
         Biped ();
 
-         // Stateful
-        void start ();
+         // Do this after loading
+        void finish ();
 
          // Key_Listener
         bool hear_key (int keycode, int action);

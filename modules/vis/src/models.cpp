@@ -88,17 +88,17 @@ namespace vis {
 
     struct Model_Tester;
     static Model_Tester* model_tester;
-    struct Model_Tester : core::Layer, core::Stateful {
-        Model_Tester () : core::Layer("D.M", "model_tester", false) { model_tester = this; }
+    struct Model_Tester : core::Layer {
+        Model_Tester () : core::Layer("D.M", "model_tester", false) {
+            model_tester = this;
+            model = Model(hacc::File("modules/ent/res/small.skel").data());
+            model.apply_skin(hacc::File("modules/rata/res/rata-base.skin").data());
+            model.apply_pose(model.skel->poses.named("stand"));
+        }
         bool flip = false;
         Model model;
         void run () {
             model.draw(Vec(10, 4), flip, false, 0.5);
-        }
-        void start () {
-            model = Model(hacc::File("modules/ent/res/small.skel").data());
-            model.apply_skin(hacc::File("modules/rata/res/rata-base.skin").data());
-            model.apply_pose(model.skel->poses.named("stand"));
         }
     };
 

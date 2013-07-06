@@ -28,11 +28,11 @@ namespace geo {
         virtual void emerge () = 0;
         virtual void reclude () = 0;
         virtual ~Resident () { }
-        Resident ();
+        void finish ();
         void reroom (Vec pos);
     };
 
-    struct Geography : core::Game_Object {
+    struct Geography {
         Room* current_room;
         Resident* beholder;
         Room* tumbolia;
@@ -41,10 +41,10 @@ namespace geo {
         void behold (Resident*);
 
         Geography ();
-        void start ();
+        void finish ();
         ~Geography ();
     };
-    extern core::Celebrity<Geography> geography;
+    extern Geography& geography ();
 
 }
 

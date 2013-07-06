@@ -11,7 +11,7 @@ namespace phys {
 
     struct Object;
 
-    struct Space : core::Phase, core::Stateful {
+    struct Space : core::Phase {
         b2World* b2world;
         Space ();
 

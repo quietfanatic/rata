@@ -14,7 +14,7 @@ namespace vis {
     void Draws_Text::text_appear () { link(text_drawers); }
     void Draws_Text::text_disappear () { unlink(); }
 
-    struct Text_Layer : Layer, Game_Object, Renderer {
+    struct Text_Layer : Layer, Renderer {
         Program* program = hacc::File("modules/vis/res/text.prog").data();
         GLint tex = program->require_uniform("tex");
         GLint camera_pos = program->require_uniform("camera_pos");
@@ -52,7 +52,10 @@ namespace vis {
             }
         }
     };
-    core::Celebrity<Text_Layer> text_layer;
+    Text_Layer& text_layer () {
+        static Text_Layer r;
+        return r;
+    }
 
     struct Text_Vert {
         uint16 px;
@@ -109,9 +112,9 @@ namespace vis {
         static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
         Vec size = Vec(maxx*PX, maxy*PX);
         Vec ul = Vec(pos.x - (1 - align.x) / 2 * size.x, pos.y + (1 - align.y) / 2 * size.y);
-        text_layer->use();
-        glUniform2f(text_layer->model_pos, ul.x, ul.y);
-        glUniform4f(text_layer->color,
+        text_layer().use();
+        glUniform2f(text_layer().model_pos, ul.x, ul.y);
+        glUniform4f(text_layer().color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,
             ((color >> 8) & 255) / 255.0,

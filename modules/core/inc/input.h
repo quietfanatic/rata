@@ -18,6 +18,7 @@ namespace core {
         void activate ();
         void deactivate ();
     };
+
     struct Char_Listener;
     extern std::vector<Char_Listener*> char_listeners;
     struct Char_Listener : Ordered<Char_Listener, char_listeners> {

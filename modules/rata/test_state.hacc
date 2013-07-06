@@ -1,5 +1,4 @@
 {"std::unordered_map<std::string, hacc::Dynamic>":{
-    state:{"core::Game_State":{ }}
     space:{"phys::Space":{
         gravity: [0 -30]
     }}

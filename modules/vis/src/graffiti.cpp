@@ -10,7 +10,7 @@ namespace vis {
 
     using namespace core;
 
-    struct Graffiti_Renderer : Renderer, Game_Object {
+    struct Graffiti_Renderer : Renderer {
         Program* program = hacc::File("modules/vis/res/color.prog").data();
         int camera_pos = program->require_uniform("camera_pos");
         int model_pos = program->require_uniform("model_pos");
@@ -33,7 +33,10 @@ namespace vis {
             glUniform2f(camera_pos, 10.0, 7.5);
         }
     };
-    core::Celebrity<Graffiti_Renderer> gr;
+    Graffiti_Renderer& gr () {
+        static Graffiti_Renderer r;
+        return r;
+    }
 
     void draw_line (Vec a, Vec b, uint32 color, float width) {
         Vec pts [2];
@@ -52,8 +55,8 @@ namespace vis {
     void draw_primitive (uint type, uint n_pts, Vec* pts, uint32 color) {
         static auto glUniform4f = glproc<void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)>("glUniform4f");
         static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
-        gr->use();
-        glUniform4f(gr->color,
+        gr().use();
+        glUniform4f(gr().color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,
             ((color >> 8) & 255) / 255.0,
@@ -65,8 +68,8 @@ namespace vis {
     }
     void graffiti_pos (Vec pos) {
         static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-        gr->use();
-        glUniform2f(gr->model_pos, pos.x, pos.y);
+        gr().use();
+        glUniform2f(gr().model_pos, pos.x, pos.y);
     }
 
 }

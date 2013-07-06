@@ -155,9 +155,7 @@ namespace ent {
         }
     }
 
-    void Biped::start () {
-        geo::geography->behold(this); // TODO this doesn't belong here
-    }
+    void Biped::finish () { }
 
 } using namespace ent;
 
@@ -170,6 +168,7 @@ HCB_BEGIN(Biped)
     attr("direction", member(&Biped::direction).optional());
     attr("distance_walked", member(&Biped::distance_walked).optional());
     attr("oldxrel", member(&Biped::oldxrel).optional());
+    finish([](Biped& b, hacc::Tree*){ b.finish(); });
 HCB_END(Biped)
 
 HCB_BEGIN(BipedStats)

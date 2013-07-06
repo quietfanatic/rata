@@ -16,7 +16,7 @@ namespace geo {
         std::vector<TileDef*> tiles;  // TileDefs can be provided with local()
     };
 
-    struct Tilemap : Resident, phys::Object, Linkable<Tilemap>, core::Stateful {
+    struct Tilemap : Resident, phys::Object, Linkable<Tilemap> {
         Tileset* tileset;
         core::Texture* texture;
         Vec pos;
@@ -29,9 +29,9 @@ namespace geo {
 
         void emerge ();
         void reclude ();
-        void start ();
 
         Tilemap ();
+        void finish ();
     };
 
     extern Links<Tilemap> active_tilemaps;

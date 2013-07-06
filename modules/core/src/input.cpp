@@ -35,7 +35,7 @@ namespace core {
         }
     }
 
-    struct Input_Phase : core::Phase, core::Game_Object {
+    struct Input_Phase : core::Phase {
          // Input phase doesn't have a name to keep you from locking out your controls.
         Input_Phase () : core::Phase("A.M") { }
         void start () {
@@ -48,7 +48,7 @@ namespace core {
             glfwPollEvents();
         }
     };
-    core::Celebrity<Input_Phase> input_phase;
+    Input_Phase input_phase;
 
 } using namespace core;
 

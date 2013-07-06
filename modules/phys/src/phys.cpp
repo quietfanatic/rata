@@ -86,6 +86,7 @@ namespace phys {
     Space::~Space () { 
         space_logger.log("Destroying space.");
         delete b2world;
+        space = NULL;
     }
 
      // Objects
@@ -124,7 +125,7 @@ namespace phys {
 
      // Debug fixture drawing
     
-    struct Phys_Debug_Layer : core::Layer, core::Stateful {
+    struct Phys_Debug_Layer : core::Layer {
         Phys_Debug_Layer () : core::Layer("G.M", "phys_debug", false) { }
         void start () { }
         void run () {

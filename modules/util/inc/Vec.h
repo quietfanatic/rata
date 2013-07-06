@@ -49,6 +49,7 @@ CE inline Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
 
  // Let's just have vecs be array-like, I think.
 HCB_BEGIN(Vec)
+    name("Vec");
     elem(member(&Vec::x));
     elem(member(&Vec::y));
 HCB_END(Vec)

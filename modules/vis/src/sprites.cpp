@@ -106,7 +106,7 @@ namespace vis {
     }
 
 
-    struct Sprite_Layer : Layer, Game_Object, Renderer {
+    struct Sprite_Layer : Layer, Renderer {
         Program* program = hacc::File("modules/vis/res/sprite.prog").data();
         GLint tex = program->require_uniform("tex");
         GLint camera_pos = program->require_uniform("camera_pos");
@@ -143,7 +143,10 @@ namespace vis {
             }
         }
     };
-    core::Celebrity<Sprite_Layer> sprite_layer;
+    Sprite_Layer& sprite_layer () {
+        static Sprite_Layer r;
+        return r;
+    }
 
     static Logger draw_sprite_logger ("draw_sprite", false);
 
@@ -160,10 +163,10 @@ namespace vis {
             );
         }
 
-        sprite_layer->use();
+        sprite_layer().use();
 
-        glUniform3f(sprite_layer->model_pos, p.x, p.y, z);
-        glUniform2f(sprite_layer->model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
+        glUniform3f(sprite_layer().model_pos, p.x, p.y, z);
+        glUniform2f(sprite_layer().model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->tex);
         glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
@@ -171,8 +174,8 @@ namespace vis {
         diagnose_opengl("After rendering a sprite");
     }
 
-    struct Sprite_Test : Stateful, Draws_Sprites {
-        void start () { Draws_Sprites::activate(); }
+    struct Sprite_Test : Draws_Sprites {
+        void finish () { Draws_Sprites::activate(); }
         void draws_sprites () {
             static Image* image = hacc::File("modules/vis/res/test.image").data();
             static Texture* texture = image->texture_named("ALL");
@@ -215,4 +218,5 @@ HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA Layout>)
 
 HCB_BEGIN(Sprite_Test)
     name("vis::Sprite_Test");
+    finish([](Sprite_Test& st, hacc::Tree*){ st.finish(); });
 HCB_END(Sprite_Test)

@@ -111,7 +111,7 @@ namespace geo {
         Tilemap_Vertex () { }
     };
 
-    void Tilemap::start () {
+    void Tilemap::finish () {
          // Build up all the edges
         auto es = new TileEdge [height][width][MAX_EDGES];
         uint initial = 0;
@@ -211,7 +211,7 @@ namespace geo {
 
      // Now for drawing tilemaps.
 
-    struct Tilemap_Layer : core::Layer, core::Game_Object, core::Renderer {
+    struct Tilemap_Layer : core::Layer, core::Renderer {
         core::Program* program = hacc::File("modules/geo/res/tiles.prog").data();
         int tex = program->require_uniform("tex");
         int camera_pos = program->require_uniform("camera_pos");
@@ -256,7 +256,10 @@ namespace geo {
             }
         }
     };
-    core::Celebrity<Tilemap_Layer> tilemap_layer;
+    Tilemap_Layer& tilemap_layer () {
+        static Tilemap_Layer r;
+        return r;
+    }
 
 } using namespace geo;
 
@@ -280,6 +283,7 @@ HCB_BEGIN(Tilemap)
     attr("width", member(&Tilemap::width));
     attr("height", member(&Tilemap::height));
     attr("tiles", member(&Tilemap::tiles));
+    finish([](Tilemap& t, hacc::Tree*){ t.finish(); });
 HCB_END(Tilemap)
 
 
