@@ -8,7 +8,7 @@
 
 namespace hacc {
 
-    struct GetSetData {
+    struct GetSetData : DPtee {
         bool optional = false;
         bool readonly = false;
         Type t;
@@ -19,18 +19,15 @@ namespace hacc {
         virtual void* ro_address (void*) const = 0;
         virtual void get (void*, void*) const = 0;
         virtual void set (void*, void*) const = 0;
-        virtual GetSetData* clone () const = 0;
-        virtual ~GetSetData () { }
     };
 
-    struct GS_ID : GetSetData {
-        GS_ID (Type t) : GetSetData(t, t) { }
+    struct GS_Ptr : GetSetData {
+        GS_Ptr (Type t) : GetSetData(t, t) { }
         String description () const { return "<Converted from Pointer>"; }
         void* address (void* c) const { return c; }
         void* ro_address (void* c) const { return c; }
         void get (void* c, void* m) const { t.copy_assign(m, c); }
         void set (void* c, void* m) const { t.copy_assign(c, m); }
-        GetSetData* clone () const { return new GS_ID(*this); }
     };
 
     std::vector<TypeData*>& types_to_init ();
@@ -77,7 +74,7 @@ namespace hacc {
             construct(construct), destruct(destruct),
             copy_assign(copy_assign),
             stalloc(stalloc),
-            gs_id(new GS_ID(this))
+            gs_id(new GS_Ptr(this))
         {
             types_to_init().push_back(this);
         }

@@ -11,17 +11,9 @@ namespace hacc {
      //  all represent the same type, but with different numbers
      //  of compile-time-known types.
     struct GetSetData;
-    struct GetSet0 {
-         // Uniquely owned
-        GetSetData* inner;
-        GetSet0 (GetSetData* inner = null) : inner(inner) { }
-        GetSet0 (GetSet0&& o) : inner(o.inner) { o.inner = null; }
-        GetSet0 (const GetSet0&);
-        GetSet0& operator = (GetSet0&&);
-        GetSet0& operator = (const GetSet0&);
-        ~GetSet0 () noexcept;
-        operator bool () { return inner; }
-
+    struct GetSet0 : DPtr<GetSetData> {
+        GetSet0 (Null n = null) : DPtr(n) { }
+        explicit GetSet0 (GetSetData* p) : DPtr(p) { }
         Type type () const;  // The type of the data
         Type host_type () const;  // The type of the reference the data came from
         String description () const;  // Says what kind of getset this is (value_funcs, etc.)
@@ -69,20 +61,20 @@ namespace hacc {
      //  might not be addressable but can still be got or set.
     struct Reference {
         void* c;
-        GetSet0* gs;
+        GetSet0 gs;
 
         Reference (Null n = null) : c(null), gs(null) { }
-        Reference (void* c, GetSet0& gs) : c(c), gs(&gs) { }
+        Reference (void* c, const GetSet0& gs) : c(c), gs(gs) { }
         Reference (Type type, void* p);
         Reference (Pointer p) : Reference(p.type, p.address) { }
 
          // If the data is not addressable, this returns null.
-        void* address () const { return gs->address(c); }
-        void* ro_address () const { return gs->ro_address(c); }
-        Type type () const { return gs->type(); }
-        Type host_type () const { return gs->host_type(); }
-        void get (void* m) const { gs->get(c, m); }
-        void set (void* m) const { gs->set(c, m); }
+        void* address () const { return gs.address(c); }
+        void* ro_address () const { return gs.ro_address(c); }
+        Type type () const { return gs.type(); }
+        Type host_type () const { return gs.host_type(); }
+        void get (void* m) const { gs.get(c, m); }
+        void set (void* m) const { gs.set(c, m); }
          // Use ro_address or get, whichever is appropriate
         void read (const Func<void (void*)>& f) const;
          // Use address or set

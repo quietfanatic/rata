@@ -31,6 +31,35 @@ namespace hacc {
     typedef std::pair<std::string, Tree*> Pair;
     typedef std::vector<Pair> Object;
 
+    struct DPtee {
+        virtual ~DPtee () { }  // necessary for easy opacity
+        size_t ref_count = 0;
+    };
+    template <class C>
+    struct DPtr {
+      private:
+        C* p;
+        void inc () { if (p) ((DPtee*)p)->ref_count++; }
+        void dec () {
+            if (p && !--((DPtee*)p)->ref_count)
+                delete ((DPtee*)p);
+        }
+      public:
+        DPtr () : p(null) { }
+        explicit DPtr (C* p) : p(p) { inc(); }
+        DPtr (const DPtr<C>& o) : p(o.p) { inc(); }
+        DPtr (DPtr<C>&& o) : p(o.p) { o.p = null; }
+        ~DPtr () noexcept { dec(); }
+        DPtr& operator = (Null n) { dec(); p = n; }
+        DPtr& operator = (const DPtr<C>& o) { dec(); p = o.p; inc(); return *this; }
+        DPtr& operator = (DPtr<C>&& o) { dec(); p = o.p; o.p = null; return *this; }
+        C& operator * () { return *p; }
+        const C& operator * () const { return *const_cast<const C*>(p); }
+        C* operator -> () { return p; }
+        const C* operator -> () const { return const_cast<const C*>(p); }
+        operator bool () const { return p; }
+    };
+
     namespace X {
         struct Error : std::exception, gc {
             String mess;

@@ -7,31 +7,16 @@
 
 namespace hacc {
 
-    Type GetSet0::type () const { return inner->t; }
-    Type GetSet0::host_type () const { return inner->ht; }
-    String GetSet0::description () const { return inner->description(); }
-    void* GetSet0::address (void* c) const { return inner->address(c); }
-    void* GetSet0::ro_address (void* c) const { return inner->ro_address(c); }
-    void GetSet0::get (void* c, void* m) const { return inner->get(c, m); }
-    void GetSet0::set (void* c, void* m) const { return inner->set(c, m); }
-    GetSet0::GetSet0 (const GetSet0& o) :
-        inner(o.inner->clone())
-    { }
-    GetSet0& GetSet0::operator = (GetSet0&& o) {
-        if (inner) delete inner;
-        inner = o.inner;
-        o.inner = null;
-        return *this;
-    }
-    GetSet0& GetSet0::operator = (const GetSet0& o) {
-        if (inner) delete inner;
-        inner = o.inner->clone();
-        return *this;
-    }
-    GetSet0::~GetSet0 () noexcept { delete inner; }
-    GetSet0& GetSet0::optional () { inner->optional = true; return *this; }
-    GetSet0& GetSet0::required () { inner->optional = false; return *this; }
-    GetSet0& GetSet0::readonly () { inner->readonly = true; return *this; }
+    Type GetSet0::type () const { return (*this)->t; }
+    Type GetSet0::host_type () const { return (*this)->ht; }
+    String GetSet0::description () const { return (*this)->description(); }
+    void* GetSet0::address (void* c) const { return (*this)->address(c); }
+    void* GetSet0::ro_address (void* c) const { return (*this)->ro_address(c); }
+    void GetSet0::get (void* c, void* m) const { return (*this)->get(c, m); }
+    void GetSet0::set (void* c, void* m) const { return (*this)->set(c, m); }
+    GetSet0& GetSet0::optional () { (*this)->optional = true; return *this; }
+    GetSet0& GetSet0::required () { (*this)->optional = false; return *this; }
+    GetSet0& GetSet0::readonly () { (*this)->readonly = true; return *this; }
 
     void* Pointer::address_of_type (Type t) const {
         if (t == Type(type)) {
@@ -41,7 +26,7 @@ namespace hacc {
     }
 
     Reference::Reference (Type type, void* p) :
-        c(p), gs(&type.data->gs_id)
+        c(p), gs(type.data->gs_id)
     { }
     Reference::operator Pointer () const {
         void* p = address();
@@ -105,7 +90,7 @@ namespace hacc {
                 std::vector<std::string> r;
                 r.reserve(type().data->attr_list.size());
                 for (auto& a : type().data->attr_list) {
-                    if (!a.second.inner->readonly)
+                    if (!a.second->readonly)
                         r.push_back(a.first);
                 }
                 return r;
@@ -135,7 +120,7 @@ namespace hacc {
                         if (a.first == k)
                             goto next;
                     }
-                    if (!a.second.inner->optional) {
+                    if (!a.second->optional) {
                         throw X::Missing_Attr(type(), a.first);
                     }
                     next: { }
@@ -216,7 +201,7 @@ namespace hacc {
                     throw X::Too_Long(type(), length, n);
                 }
                 else for (size_t i = length; i < n; i++) {
-                    if (!type().data->elem_list[i].inner->optional) {
+                    if (!type().data->elem_list[i]->optional) {
                         throw X::Missing_Elem(type(), i);
                     }
                 }

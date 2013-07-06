@@ -60,10 +60,9 @@ namespace hacc {
         void* ro_address (void* c) const { return null; }
         void get (void* c, void* m) const { g(c, m); }
         void set (void* c, void* m) const { s(c, m); }
-        GetSetData* clone () const { return new Value_Funcs(*this); }
     };
     GetSet0 _value_funcs (Type t, Type ht, const UnknownF2& g, const UnknownF2& s) {
-        return new Value_Funcs(t, ht, g, s);
+        return GetSet0(new Value_Funcs(t, ht, g, s));
     }
 
     struct Mixed_Funcs : GetSetData {
@@ -77,10 +76,9 @@ namespace hacc {
         void* ro_address (void* c) const { return null; }
         void get (void* c, void* m) const { g(c, m); }
         void set (void* c, void* m) const { s(c, m); }
-        GetSetData* clone () const { return new Mixed_Funcs(*this); }
     };
     GetSet0 _mixed_funcs (Type t, Type ht, const UnknownF2& g, const UnknownF2& s) {
-        return new Mixed_Funcs(t, ht, g, s);
+        return GetSet0(new Mixed_Funcs(t, ht, g, s));
     }
 
     struct Ref_Funcs : GetSetData {
@@ -94,10 +92,9 @@ namespace hacc {
         void* ro_address (void* c) const { return g(c); }
         void get (void* c, void* m) const { t.copy_assign(m, g(c)); }
         void set (void* c, void* m) const { s(c, m); }
-        GetSetData* clone () const { return new Ref_Funcs(*this); }
     };
     GetSet0 _ref_funcs (Type t, Type ht, const UnknownF1& g, const UnknownF2& s) {
-        return new Ref_Funcs(t, ht, g, s);
+        return GetSet0(new Ref_Funcs(t, ht, g, s));
     }
 
     struct Ref_Func : GetSetData {
@@ -110,10 +107,9 @@ namespace hacc {
         void* ro_address (void* c) const { return f(c); }
         void get (void* c, void* m) const { t.copy_assign(m, f(c)); }
         void set (void* c, void* m) const { t.copy_assign(f(c), m); }
-        GetSetData* clone () const { return new Ref_Func(*this); }
     };
     GetSet0 _ref_func (Type t, Type ht, const UnknownF1& f) {
-        return new Ref_Func(t, ht, f);
+        return GetSet0(new Ref_Func(t, ht, f));
     }
 
     struct Base : GetSetData {
@@ -126,10 +122,9 @@ namespace hacc {
         void* ro_address (void* c) const { return f(c); }
         void get (void* c, void* m) const { t.copy_assign(m, f(c)); }
         void set (void* c, void* m) const { t.copy_assign(f(c), m); }
-        GetSetData* clone () const { return new Base(*this); }
     };
     GetSet0 _base (Type t, Type ht, void*(* f )(void*)) {
-        return new Base(t, ht, f);
+        return GetSet0(new Base(t, ht, f));
     }
 
     struct Assignable : GetSetData {
@@ -143,10 +138,9 @@ namespace hacc {
         void* ro_address (void* c) const { return null; }
         void get (void* c, void* m) const { g(c, m); }
         void set (void* c, void* m) const { s(c, m); }
-        GetSetData* clone () const { return new Assignable(*this); }
     };
     GetSet0 _assignable (Type t, Type ht, void(* g )(void*,void*), void(* s )(void*,void*)) {
-        return new Assignable(t, ht, g, s);
+        return GetSet0(new Assignable(t, ht, g, s));
     }
 
     struct Member : GetSetData {
@@ -159,10 +153,9 @@ namespace hacc {
         void* ro_address (void* c) const { return &(((Unknown*)c)->*mp); }
         void get (void* c, void* m) const { t.copy_assign(m, &(((Unknown*)c)->*mp)); }
         void set (void* c, void* m) const { t.copy_assign(&(((Unknown*)c)->*mp), m); }
-        GetSetData* clone () const { return new Member(*this); }
     };
     GetSet0 _member (Type t, Type ht, UnknownMP mp) {
-        return new Member(t, ht, mp);
+        return GetSet0(new Member(t, ht, mp));
     }
 
     struct Value_Methods : GetSetData {
@@ -176,10 +169,9 @@ namespace hacc {
         void* ro_address (void* c) const { return null; }
         void get (void* c, void* m) const { g(c, m); }
         void set (void* c, void* m) const { s(c, m); }
-        GetSetData* clone () const { return new Value_Methods(*this); }
     };
     GetSet0 _value_methods (Type t, Type ht, const UnknownF2& g, const UnknownF2& s) {
-        return new Value_Methods(t, ht, g, s);
+        return GetSet0(new Value_Methods(t, ht, g, s));
     }
 
     struct Mixed_Methods : GetSetData {
@@ -193,10 +185,9 @@ namespace hacc {
         void* ro_address (void* c) const { return null; }
         void get (void* c, void* m) const { g(c, m); }
         void set (void* c, void* m) const { (((Unknown*)c)->*s)(m); }
-        GetSetData* clone () const { return new Mixed_Methods(*this); }
     };
     GetSet0 _mixed_methods (Type t, Type ht, const UnknownF2& g, UnknownSP s) {
-        return new Mixed_Methods(t, ht, g, s);
+        return GetSet0(new Mixed_Methods(t, ht, g, s));
     }
 
     struct Ref_Methods : GetSetData {
@@ -210,10 +201,9 @@ namespace hacc {
         void* ro_address (void* c) const { return (((Unknown*)c)->*g)(); }
         void get (void* c, void* m) const { t.copy_assign(m, (((Unknown*)c)->*g)()); }
         void set (void* c, void* m) const { (((Unknown*)c)->*s)(m); }
-        GetSetData* clone () const { return new Ref_Methods(*this); }
     };
     GetSet0 _ref_methods (Type t, Type ht, UnknownGP g, UnknownSP s) {
-        return new Ref_Methods(t, ht, g, s);
+        return GetSet0(new Ref_Methods(t, ht, g, s));
     }
 
     struct Ref_Method : GetSetData {
@@ -226,10 +216,9 @@ namespace hacc {
         void* ro_address (void* c) const { return (((Unknown*)c)->*f)(); }
         void get (void* c, void* m) const { t.copy_assign(m, (((Unknown*)c)->*f)()); }
         void set (void* c, void* m) const { t.copy_assign((((Unknown*)c)->*f)(), m); }
-        GetSetData* clone () const { return new Ref_Method(*this); }
     };
     GetSet0 _ref_method (Type t, Type ht, UnknownGP f) {
-        return new Ref_Method(t, ht, f);
+        return GetSet0(new Ref_Method(t, ht, f));
     }
 
     namespace X {
