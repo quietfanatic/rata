@@ -69,169 +69,145 @@ namespace hacc {
         }
     }
 
+     // Apply a getset to a reference
+    Reference chain (const Reference& ref, const GetSet0& gs) {
+        if (void* addr = ref.address())
+            return Reference(addr, gs);
+        else
+            return Reference(ref.c, GetSet0(new GS_Chain(ref.gs, gs)));
+    }
+
     std::vector<String> Reference::keys () const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (void* addr = ro_address()) {
-            if (auto& gs = type().data->keys) {
-                if (void* keys_addr = gs.ro_address(addr)) {
-                    return *(std::vector<String>*) keys_addr;
-                }
-                else {
-                    std::vector<String> r;
-                    gs.get(addr, &r);
-                    return r;
-                }
-            }
-            else if (auto& gs = type().data->delegate) {
-                return Reference(addr, gs).keys();
-            }
-            else {
-                std::vector<std::string> r;
-                r.reserve(type().data->attr_list.size());
-                for (auto& a : type().data->attr_list) {
-                    if (!a.second->readonly)
-                        r.push_back(a.first);
-                }
-                return r;
-            }
+        if (auto& gs = type().data->keys) {
+            std::vector<String> r;
+            chain(*this, gs).get(&r);
+            return r;
         }
-        else throw X::Unaddressable(*this, "get keys from");
+        else if (auto& gs = type().data->delegate) {
+            return chain(*this, gs).keys();
+        }
+        else {
+            std::vector<std::string> r;
+            r.reserve(type().data->attr_list.size());
+            for (auto& a : type().data->attr_list) {
+                if (!a.second->readonly)
+                    r.push_back(a.first);
+            }
+            return r;
+        }
     }
 
     void Reference::set_keys (const std::vector<String>& keys) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (void* addr = address()) {
-            if (auto& gs = type().data->keys) {
-                if (void* keys_addr = gs.address(addr)) {
-                    *(std::vector<String>*)keys_addr = keys;
+        if (auto& gs = type().data->keys) {
+            chain(*this, gs).set((void*)&keys);
+        }
+        else if (auto& gs = type().data->delegate) {
+            chain(*this, gs).set_keys(keys);
+        }
+        else if (!type().data->attr_list.empty()) {
+            for (auto& a : type().data->attr_list) {
+                for (auto& k : keys) {
+                    if (a.first == k)
+                        goto next;
                 }
-                else {
-                    gs.set(addr, (void*)&keys);
+                if (!a.second->optional) {
+                    throw X::Missing_Attr(type(), a.first);
                 }
-            }
-            else if (auto& gs = type().data->delegate) {
-                Reference(addr, gs).set_keys(keys);
-            }
-            else if (!type().data->attr_list.empty()) {
-                for (auto& a : type().data->attr_list) {
-                    for (auto& k : keys) {
-                        if (a.first == k)
-                            goto next;
-                    }
-                    if (!a.second->optional) {
-                        throw X::Missing_Attr(type(), a.first);
-                    }
-                    next: { }
-                }
-            }
-            else if (!keys.empty()) {
-                throw X::No_Attrs(type());
+                next: { }
             }
         }
-        else throw X::Unaddressable(*this, "set_keys on");
+        else if (!keys.empty()) {
+            throw X::No_Attrs(type());
+        }
     }
 
     Reference Reference::attr (std::string name) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (void* addr = address()) {
-            if (auto& f = type().data->attrs_f) {
+        if (auto& f = type().data->attrs_f) {
+            if (void* addr = address()) {
                 return f(addr, name);
             }
-            else if (auto& gs = type().data->delegate) {
-                return Reference(addr, gs).attr(name);
-            }
-            else if (!type().data->attr_list.empty()) {
-                for (auto& a : type().data->attr_list) {
-                    if (a.first == name) {
-                        return Reference(addr, a.second);
-                    }
-                }
-                throw X::No_Attr(type(), name);
-            }
-            else throw X::No_Attrs(type(), name);
+            else throw X::Unaddressable(*this, "get custom attrs from");
         }
-        else throw X::Unaddressable(*this, "get attr from");
+        else if (auto& gs = type().data->delegate) {
+            return chain(*this, gs).attr(name);
+        }
+        else if (!type().data->attr_list.empty()) {
+            for (auto& a : type().data->attr_list) {
+                if (a.first == name) {
+                    return chain(*this, a.second);
+                }
+            }
+            throw X::No_Attr(type(), name);
+        }
+        else throw X::No_Attrs(type(), name);
     }
 
     size_t Reference::length () const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (void* addr = ro_address()) {
-            if (auto& gs = type().data->length) {
-                if (void* length_addr = gs.ro_address(addr)) {
-                    return *(size_t*) length_addr;
-                }
-                else {
-                    size_t r;
-                    gs.get(addr, &r);
-                    return r;
-                }
-            }
-            else if (auto& gs = type().data->delegate) {
-                return Reference(addr, gs).length();
-            }
-            else {
-                return type().data->elem_list.size();
-            }
+        if (auto& gs = type().data->length) {
+            size_t r;
+            chain(*this, gs).get(&r);
+            return r;
         }
-        else throw X::Unaddressable(*this, "get length from");
+        else if (auto& gs = type().data->delegate) {
+            return chain(*this, gs).length();
+        }
+        else {
+            return type().data->elem_list.size();
+        }
     }
 
     void Reference::set_length (size_t length) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (void* addr = address()) {
-            if (auto& gs = type().data->length) {
-                if (void* length_addr = gs.address(addr)) {
-                    *(size_t*)length_addr = length;
-                }
-                else {
-                    gs.set(addr, &length);
-                }
+        if (auto& gs = type().data->length) {
+            chain(*this, gs).set((void*)&length);
+        }
+        else if (auto& gs = type().data->delegate) {
+            chain(*this, gs).set_length(length);
+        }
+        else if (!type().data->elem_list.empty()) {
+            size_t n = type().data->elem_list.size();
+            if (length > n) {
+                throw X::Too_Long(type(), length, n);
             }
-            else if (auto& gs = type().data->delegate) {
-                Reference(addr, gs).set_length(length);
-            }
-            else if (!type().data->elem_list.empty()) {
-                size_t n = type().data->elem_list.size();
-                if (length > n) {
-                    throw X::Too_Long(type(), length, n);
+            else for (size_t i = length; i < n; i++) {
+                if (!type().data->elem_list[i]->optional) {
+                    throw X::Missing_Elem(type(), i);
                 }
-                else for (size_t i = length; i < n; i++) {
-                    if (!type().data->elem_list[i]->optional) {
-                        throw X::Missing_Elem(type(), i);
-                    }
-                }
-            }
-            else if (length != 0) {
-                throw X::No_Attrs(type());
             }
         }
-        else throw X::Unaddressable(*this, "set_keys on");
+        else if (length != 0) {
+            throw X::No_Attrs(type());
+        }
     }
 
     Reference Reference::elem (size_t index) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (void* addr = address()) {
-            if (auto& f = type().data->elems_f) {
+        if (auto& f = type().data->elems_f) {
+            if (void* addr = address()) {
                 return f(addr, index);
             }
-            else if (auto& gs = type().data->delegate) {
-                return Reference(addr, gs).elem(index);
-            }
-            else if (!type().data->elem_list.empty()) {
-                if (index <= type().data->elem_list.size())
-                    return Reference(addr, type().data->elem_list[index]);
-                else
-                    throw X::Out_Of_Range(type(), index, type().data->elem_list.size());
-            }
-            else throw X::No_Elems(type(), index);
+            else throw X::Unaddressable(*this, "get custom attrs from");
         }
-        else throw X::Unaddressable(*this, "get attr from");
+        else if (auto& gs = type().data->delegate) {
+            return chain(*this, gs).elem(index);
+        }
+        else if (!type().data->elem_list.empty()) {
+            if (index <= type().data->elem_list.size())
+                return chain(*this, type().data->elem_list[index]);
+            else
+                throw X::Out_Of_Range(type(), index, type().data->elem_list.size());
+        }
+        else throw X::No_Elems(type(), index);
     }
 
     Tree* Reference::to_tree () const {
