@@ -87,7 +87,7 @@ namespace phys {
 
      // Collision handling is done through registered collision rules.
      // A maximum of 64 collision rules can be registered.
-    
+
     struct Collision_Rule {
         uint index;
         virtual std::string name () const = 0;

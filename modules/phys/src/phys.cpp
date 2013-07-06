@@ -9,13 +9,18 @@
 namespace phys {
 
      // Collision rules
+
+    static Logger cr_logger ("collision_rules");
+
     std::vector<Collision_Rule*> coll_rules;
     INIT_SAFE(uint, n_coll_rules, = 0);
 
     Collision_Rule::Collision_Rule () : index(n_coll_rules()++) {
-        if (index < 64)
+        if (index < 64) {
             coll_rules.push_back(this);
-        else throw std::logic_error("Too many Collision_Rules were created (> 64)");
+            cr_logger.log("Declared collision rule: %u", index);
+        }
+        else throw hacc::X::Logic_Error("Too many Collision_Rules were created (> 64)");
     }
 
      // Box2D callbacks
@@ -254,7 +259,7 @@ static std::vector<Collision_Rule*> coll_b2v (uint64 b) {
 static uint64 coll_v2b (const std::vector<Collision_Rule*>& v) {
     uint64 b = 0;
     for (auto rule : v) {
-        if (!rule) throw std::logic_error("Somehow a null pointer got into a collision rule list.\n");
+        if (!rule) throw hacc::X::Logic_Error("Somehow a null pointer got into a collision rule list");
         b |= rule->bit();
     }
     return b;
