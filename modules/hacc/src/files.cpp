@@ -118,18 +118,37 @@ namespace hacc {
             load_prepare(f);
         }
         void load_prepare (File f) {
-            Tree* t = tree_from_file(f.p->filename);
-            Reference(&f.p->data).prepare(t);
+            Tree* t;
+            try {
+                t = tree_from_file(f.p->filename);
+                Reference(&f.p->data).prepare(t);
+            }
+            catch (X::Error& e) {
+                if (e.filename.empty()) e.filename = f.filename();
+                throw e;
+            }
             f.p->state = LOAD_FILLING;
             new Action(FILL, [=](){ load_fill(f, t); });
         }
         void load_fill (File f, Tree* t) {
-            Reference(&f.p->data).fill(t);
+            try {
+                Reference(&f.p->data).fill(t);
+            }
+            catch (X::Error& e) {
+                if (e.filename.empty()) e.filename = f.filename();
+                throw e;
+            }
             f.p->state = LOAD_FINISHING;
             new Action(FINISH, [=](){ load_finish(f, t); });
         }
         void load_finish (File f, Tree* t) {
-            Reference(&f.p->data).finish(t);
+            try {
+                Reference(&f.p->data).finish(t);
+            }
+            catch (X::Error& e) {
+                if (e.filename.empty()) e.filename = f.filename();
+                throw e;
+            }
             f.p->state = LOAD_COMMITTING;
             new Action(COMMIT, [=](){ load_commit(f); });
         }
@@ -144,12 +163,23 @@ namespace hacc {
             new Action(VERIFY, [=](){ save_prepare(f); });
         }
         void save_prepare (File f) {
-            Tree* t = Reference(&f.p->data).to_tree();
+            Tree* t;
+            try {
+                t = Reference(&f.p->data).to_tree();
+            }
+            catch (X::Error& e) {
+                if (e.filename.empty()) e.filename = f.filename();
+                throw e;
+            }
             new Action(SAVE_COMMIT, [=](){ save_commit(f, t); });
         }
         void save_commit (File f, Tree* t) {
             try {
                 tree_to_file(t, f.p->filename);
+            }
+            catch (X::Error& e) {
+                if (e.filename.empty()) e.filename = f.filename();
+                delayed_errors.push_back(std::current_exception());
             }
             catch (...) {
                 delayed_errors.push_back(std::current_exception());
@@ -163,19 +193,38 @@ namespace hacc {
             reload_prepare(f);
         }
         void reload_prepare (File f) {
-            Tree* t = tree_from_file(f.p->filename);
-            Reference(&f.p->new_data).prepare(t);
+            Tree* t;
+            try {
+                t = tree_from_file(f.p->filename);
+                Reference(&f.p->new_data).prepare(t);
+            }
+            catch (X::Error& e) {
+                if (e.filename.empty()) e.filename = f.filename();
+                throw e;
+            }
             f.p->state = RELOAD_FILLING;
             new Action(FILL, [=](){ reload_fill(f, t); });
         }
         void reload_fill (File f, Tree* t) {
-            Reference(&f.p->new_data).fill(t);
+            try {
+                Reference(&f.p->new_data).fill(t);
+            }
+            catch (X::Error& e) {
+                if (e.filename.empty()) e.filename = f.filename();
+                throw e;
+            }
             f.p->state = RELOAD_FINISHING;
             new Action(FINISH, [=](){ reload_finish(f, t); });
         }
         bool reload_verify_scheduled = false;
         void reload_finish (File f, Tree* t) {
-            Reference(&f.p->new_data).fill(t);
+            try {
+                Reference(&f.p->new_data).finish(t);
+            }
+            catch (X::Error& e) {
+                if (e.filename.empty()) e.filename = f.filename();
+                throw e;
+            }
             f.p->state = RELOAD_VERIFYING;
             if (!reload_verify_scheduled) {
                 reload_verify_scheduled = true;
@@ -204,19 +253,25 @@ namespace hacc {
             unload_verify_scheduled = false;
             for (auto& p : files_by_filename) {
                 File f = p.second;
-                if (f.p->state != UNLOAD_VERIFYING) {
-                    Reference(f.data()).foreach_pointer([&](Reference rp, Path* path){
-                        rp.read([&](void* pp){
-                            Path* target = address_to_path(
-                                Pointer(rp.type().data->pointee_type, *(void**)pp)
-                            );
-                            if (target && File(target->root()).p->state == UNLOAD_VERIFYING) {
-                                try { throw X::Unload_Would_Break(f.p->filename, path, target); }
-                                catch (...) { delayed_errors.push_back(std::current_exception()); }
-                            }
-                        });
-                        return false;
-                    }, new Path(f.p->filename));
+                try {
+                    if (f.p->state != UNLOAD_VERIFYING) {
+                        Reference(f.data()).foreach_pointer([&](Reference rp, Path* path){
+                            rp.read([&](void* pp){
+                                Path* target = address_to_path(
+                                    Pointer(rp.type().data->pointee_type, *(void**)pp)
+                                );
+                                if (target && File(target->root()).p->state == UNLOAD_VERIFYING) {
+                                    try { throw X::Unload_Would_Break(f.p->filename, path, target); }
+                                    catch (...) { delayed_errors.push_back(std::current_exception()); }
+                                }
+                            });
+                            return false;
+                        }, new Path(f.p->filename));
+                    }
+                }
+                catch (X::Error& e) {
+                    if (e.filename.empty()) e.filename = f.filename();
+                    throw e;
                 }
             }
             for (auto& p : files_by_filename) {
