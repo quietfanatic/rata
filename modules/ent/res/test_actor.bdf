@@ -1,4 +1,4 @@
-{"std::unordered_map<std::string, Dynamic>":{
+{"std::unordered_map<std::string, hacc::Dynamic>":{
     bdf:{"phys::BodyDef""{
         fixtures:[{
             b2:{

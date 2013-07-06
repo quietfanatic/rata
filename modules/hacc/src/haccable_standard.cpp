@@ -30,3 +30,4 @@ HCB_LIT(float, float)
 HCB_LIT(double, double)
 HCB_LIT(std::string, string)
 
+HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA Dynamic>)

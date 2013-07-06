@@ -1,4 +1,4 @@
-{"std::unordered_map<std::string, Dynamic>":{
+{"std::unordered_map<std::string, hacc::Dynamic>":{
     room:{"geo::Room":{
         boundary:[0 0 20 15]
         neighbors:[]
