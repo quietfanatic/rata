@@ -206,7 +206,7 @@ namespace hacc {
                 File f = p.second;
                 if (f.p->state != UNLOAD_VERIFYING) {
                     Reference(f.data()).foreach_pointer([&](Reference rp, Path* path){
-                        rp.get([&](void* pp){
+                        rp.read([&](void* pp){
                             Path* target = address_to_path(
                                 Pointer(rp.type().data->pointee_type, *(void**)pp)
                             );

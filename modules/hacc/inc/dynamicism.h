@@ -10,29 +10,38 @@ namespace hacc {
      //  belongs to another value.  GetSet0, GetSet1, and GetSet2
      //  all represent the same type, but with different numbers
      //  of compile-time-known types.
+    struct GetSetData;
     struct GetSet0 {
-         // All getsets must support these being set
-        bool optional = false;
-        bool readonly = false;
-        virtual Type type () = 0;
-        virtual Type host_type () = 0;
-        virtual String description () { return "<unknown GetSet>"; }
-        virtual void* address (void*) = 0;
-        virtual void get (void*, const Cont&) = 0;
-        virtual void set (void*, const Cont&) = 0;
-        virtual void mod (void*, const Cont&) = 0;
+         // Uniquely owned
+        GetSetData* inner;
+        GetSet0 (GetSetData* inner = null) : inner(inner) { }
+        GetSet0 (GetSet0&& o) : inner(o.inner) { o.inner = null; }
+        GetSet0 (const GetSet0&);
+        GetSet0& operator = (GetSet0&&);
+        GetSet0& operator = (const GetSet0&);
+        ~GetSet0 () noexcept;
+        operator bool () { return inner; }
+
+        Type type () const;  // The type of the data
+        Type host_type () const;  // The type of the reference the data came from
+        String description () const;  // Says what kind of getset this is (value_funcs, etc.)
+        void* address (void*) const;  // This returns null if the data is not addressable
+        void* ro_address (void*) const;
+        void get (void*, void*) const;  // Performs a copy
+        void set (void*, void*) const;  // ''
+         // Named-Parameter-Idiom setters
+        GetSet0& optional ();
+        GetSet0& required ();
+        GetSet0& readonly ();
     };
     template <class C>
-    struct GetSet1 : GetSet0 {
-        Type host_type () { return Type::CppType<C>(); }
-    };
+    struct GetSet1 : GetSet0 { };
+
     template <class C, class M>
     struct GetSet2 : GetSet1<C> {
-        Type type () { return Type::CppType<M>(); }
-         // Named-Parameter-Idiom setters
-        GetSet2<C, M>& optional () { optional = true; return *this; }
-        GetSet2<C, M>& required () { optional = false; return *this; }
-        GetSet2<C, M>& readonly () { readonly = true; return *this; }
+        GetSet2<C, M>& optional () { return static_cast<GetSet2<C, M>&>(this->GetSet0::optional()); }
+        GetSet2<C, M>& required () { return static_cast<GetSet2<C, M>&>(this->GetSet0::required()); }
+        GetSet2<C, M>& readonly () { return static_cast<GetSet2<C, M>&>(this->GetSet0::readonly()); }
     };
 
      // A Pointer implements a dynamically-typed pointer.
@@ -63,17 +72,23 @@ namespace hacc {
         GetSet0* gs;
 
         Reference (Null n = null) : c(null), gs(null) { }
-        Reference (void* c, GetSet0* gs) : c(c), gs(gs) { }
+        Reference (void* c, GetSet0& gs) : c(c), gs(&gs) { }
         Reference (Type type, void* p);
         Reference (Pointer p) : Reference(p.type, p.address) { }
 
          // If the data is not addressable, this returns null.
         void* address () const { return gs->address(c); }
+        void* ro_address () const { return gs->ro_address(c); }
         Type type () const { return gs->type(); }
         Type host_type () const { return gs->host_type(); }
-        void get (const Cont& f) const { gs->get(c, f); }
-        void set (const Cont& f) const { gs->set(c, f); }
-        void mod (const Cont& f) const { gs->mod(c, f); }
+        void get (void* m) const { gs->get(c, m); }
+        void set (void* m) const { gs->set(c, m); }
+         // Use ro_address or get, whichever is appropriate
+        void read (const Func<void (void*)>& f) const;
+         // Use address or set
+        void write (const Func<void (void*)>& f) const;
+         // Use address or get and set
+        void mod (const Func<void (void*)>& f) const;
 
          // This will throw if the data is not addressable.
         operator Pointer () const;
@@ -81,24 +96,24 @@ namespace hacc {
         operator C* () const { return Pointer(*this); }
 
          // Hacc-specific
-        std::vector<String> keys ();
-        void set_keys (const std::vector<String>&);
-        size_t length ();
-        void set_length (size_t);
+        std::vector<String> keys () const;
+        void set_keys (const std::vector<String>&) const;
+        size_t length () const;
+        void set_length (size_t) const;
          // These require that this reference be addressable.
-        Reference attr (String);
-        Reference elem (size_t);
+        Reference attr (String) const;
+        Reference elem (size_t) const;
          // These might require addressability
-        Tree* to_tree ();
-        void prepare (Tree*);
-        void fill (Tree*);
-        void finish (Tree*);
-        void from_tree (Tree*);
+        Tree* to_tree () const;
+        void prepare (Tree*) const;
+        void fill (Tree*) const;
+        void finish (Tree*) const;
+        void from_tree (Tree*) const;
          // These are primarily for use by files.cpp
          // If the callback returns true, the foreach will be terminated.
-        bool foreach_address (const Func<bool (Pointer, Path*)>&, Path*);
+        bool foreach_address (const Func<bool (Pointer, Path*)>&, Path*) const;
          // The callback will be given a Reference to a raw pointer.
-        bool foreach_pointer (const Func<bool (Reference, Path*)>&, Path*);
+        bool foreach_pointer (const Func<bool (Reference, Path*)>&, Path*) const;
     };
 
      // This is a dynamically typed object with value-semantics.
@@ -112,9 +127,10 @@ namespace hacc {
         Dynamic (Null n = null) : type(Type::CppType<Unknown>()), addr(null) { }
         Dynamic (const Dynamic& o) :
             type(o.type),
-            addr(malloc(type.size()))
+            addr(operator new(type.size()))
         {
-            type.copy_construct(addr, o.addr);
+            type.construct(addr);
+            type.copy_assign(addr, o.addr);
         }
         Dynamic (Dynamic&& o) :
             type(o.type),
@@ -126,7 +142,7 @@ namespace hacc {
 
         template <class C, class... Args>
         static Dynamic New (Args&&... args) {
-            void* p = malloc(sizeof(C));
+            void* p = operator new(sizeof(C));
             new (p) C (std::forward<Args>(args)...);
             return Dynamic(Type::CppType<C>(), p);
         }
@@ -136,7 +152,7 @@ namespace hacc {
         void destroy () {
             if (addr) {
                 type.destruct(addr);
-                free(addr);
+                operator delete(addr);
                 addr = null;
             }
         }
@@ -146,8 +162,9 @@ namespace hacc {
             destroy();
             type = o.type;
             if (o.addr) {
-                addr = malloc(type.size());
-                type.copy_construct(addr, o.addr);
+                addr = operator new(type.size());
+                type.construct(addr);
+                type.copy_assign(addr, o.addr);
             }
             else {
                 addr = null;

@@ -41,7 +41,8 @@ namespace hacc {
     size_t Type::size () const { return data->size; }
     void Type::construct (void* p) const { data->construct(p); }
     void Type::destruct (void* p) const { data->destruct(p); }
-    void Type::copy_construct (void* l, void* r) const { data->copy_construct(l, r); }
+    void Type::copy_assign (void* l, void* r) const { data->copy_assign(l, r); }
+    void Type::stalloc (const Func<void (void*)>& f) const { data->stalloc(f); }
 
     void init () {
         for (size_t i = 0; i < types_to_init().size(); i++) {
@@ -62,7 +63,8 @@ namespace hacc {
         size_t size,
         void (* construct )(void*),
         void (* destruct )(void*),
-        void (* copy_construct )(void*, void*),
+        void (* copy_assign )(void*, void*),
+        void (* stalloc )(const Func<void (void*)>&),
         void (* describe )()
     ) {
         auto& td = types_by_cpptype()[cpptype];
@@ -70,7 +72,8 @@ namespace hacc {
             td = new TypeData(
                 cpptype, size,
                 construct, destruct,
-                copy_construct
+                copy_assign,
+                stalloc
             );
         }
         if (describe && !td->initialized)

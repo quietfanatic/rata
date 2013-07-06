@@ -49,14 +49,14 @@ HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
     name([](){
         return "std::unordered_map<std::string, " + Type::CppType<C>().name() + ">";
     });
-    keys(hcb::template value_funcs<std::vector<std::string>>(
+    keys(hcb::template mixed_funcs<std::vector<std::string>>(
         [](const std::unordered_map<std::string, C>& m){
             std::vector<std::string> r;
             for (auto& p : m)
                 r.push_back(p.first);
             return r;
         },
-        [](std::unordered_map<std::string, C>& m, std::vector<std::string> ks){
+        [](std::unordered_map<std::string, C>& m, const std::vector<std::string>& ks){
             m.clear();
             for (auto k : ks)
                 m[k];  // autovivifies

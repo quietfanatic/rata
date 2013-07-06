@@ -3,28 +3,140 @@
 
 #include <unordered_map>
 #include "dynamicism.h"
-#include "getsets.h"
 #include "../../util/inc/annotations.h"
 
 namespace hacc {
 
+    using UnknownMP = Unknown Unknown::*;
+    using UnknownGP = void* (Unknown::*) ();
+    using UnknownSP = void (Unknown::*) (void*);
+    using UnknownF1 = Func<void* (void*)>;
+    using UnknownF2 = Func<void (void*,void*)>;
+
      // INTERNAL STUFF (type-erased versions of declaration api functions)
     void _name (Type, const Func<String ()>&);
-    void _keys (Type, GetSet0*);
+    void _keys (Type, const GetSet0&);
     void _attrs (Type, const Func<Reference (void*, String)>&);
-    void _attr (Type, String, GetSet0*);
-    void _length (Type, GetSet0*);
+    void _attr (Type, String, const GetSet0&);
+    void _length (Type, const GetSet0&);
     void _elems (Type, const Func<Reference (void*, size_t)>&);
-    void _elem (Type, GetSet0*);
+    void _elem (Type, const GetSet0&);
     void _value (Type, String, Dynamic&&, bool(*)(void*, void*));
     void _to_tree (Type, const Func<Tree* (void*)>&);
-    void _delegate (Type, GetSet0*);
+    void _delegate (Type, const GetSet0&);
     void _prepare (Type, const Func<void (void*, Tree*)>&);
     void _fill (Type, const Func<void (void*, Tree*)>&);
     void _finish (Type, const Func<void (void*, Tree*)>&);
     void _is_raw_pointer (Type, Type);
+    GetSet0 _value_funcs (Type, Type, const UnknownF2&, const UnknownF2&);
+    GetSet0 _mixed_funcs (Type, Type, const UnknownF2&, const UnknownF2&);
+    GetSet0 _ref_funcs (Type, Type, const UnknownF1&, const UnknownF2&);
+    GetSet0 _ref_func (Type, Type, const UnknownF1&);
+    GetSet0 _base (Type, Type, void*(*)(void*));
+    GetSet0 _assignable (Type, Type, void(*)(void*,void*), void(*)(void*,void*));
+    GetSet0 _member (Type, Type, UnknownMP);
+    GetSet0 _value_methods (Type, Type, const UnknownF2&, const UnknownF2&);
+    GetSet0 _mixed_methods (Type, Type, const UnknownF2&, UnknownSP);
+    GetSet0 _ref_methods (Type, Type, UnknownGP, UnknownSP);
+    GetSet0 _ref_method (Type, Type, UnknownGP);
 
      // DECLARATION API
+    template <class C, bool has_members = std::is_class<C>::value || std::is_union<C>::value>
+    struct Inheritable_GetSets;
+    template <class C>
+    struct Inheritable_GetSets<C, false> {
+        template <class M>
+        static GetSet2<C, M> value_funcs (const Func<M (const C&)>& g, const Func<void (C&, M)>& s) {
+            return static_cast<GetSet2<C, M>&&>(_value_funcs(
+                Type::CppType<M>(), Type::CppType<C>(),
+                [g](void* c, void* m){ *(M*)m = g(*(C*)c); },
+                [s](void* c, void* m){ s(*(C*)c, *(M*)m); }
+            ));
+        }
+        template <class M>
+        static GetSet2<C, M> ref_funcs (const Func<const M& (const C&)>& g, const Func<void (C&, const M&)>& s) {
+            return static_cast<GetSet2<C, M>&&>(_ref_funcs(
+                Type::CppType<M>(), Type::CppType<C>(),
+                reinterpret_cast<const UnknownF1&>(g),
+                reinterpret_cast<const UnknownF2&>(s)
+            ));
+        }
+        template <class M>
+        static GetSet2<C, M> mixed_funcs (const Func<M (const C&)>& g, const Func<void (C&, const M&)>& s) {
+            return static_cast<GetSet2<C, M>&&>(_mixed_funcs(
+                Type::CppType<M>(), Type::CppType<C>(),
+                [g](void* c, void* m){ *(M*)m = g(*(C*)c); },
+                reinterpret_cast<const UnknownF2&>(s)
+            ));
+        }
+        template <class M>
+        static GetSet2<C, M> ref_func (const Func<M& (C&)>& f) {
+            return static_cast<GetSet2<C, M>&&>(_ref_func(
+                Type::CppType<M>(), Type::CppType<C>(),
+                reinterpret_cast<const UnknownF1&>(f)
+            ));
+        }
+        template <class M>
+        static GetSet2<C, M> base () {
+            return static_cast<GetSet2<C, M>&&>(_base(
+                Type::CppType<M>(), Type::CppType<C>(),
+                [](void* c){ return static_cast<M*>((C*)c); }
+            ));
+        }
+        template <class M>
+        static GetSet2<C, M> assignable () {
+            return static_cast<GetSet2<C, M>&&>(_assignable(
+                Type::CppType<M>(), Type::CppType<C>(),
+                [](void* c, void* m){ *(M*)m = *(C*)c; },
+                [](void* c, void* m){ *(C*)c = *(M*)m; }
+            ));
+        }
+        static constexpr void* member = null;
+        static constexpr void* value_methods = null;
+        static constexpr void* ref_methods = null;
+        static constexpr void* ref_method = null;
+    };
+    template <class C>
+    struct Inheritable_GetSets<C, true> : Inheritable_GetSets<C, false> {
+        template <class M>
+        static GetSet2<C, M> member (M C::* mp) {
+            return static_cast<GetSet2<C, M>&&>(_member(
+                Type::CppType<M>(), Type::CppType<C>(),
+                reinterpret_cast<UnknownMP&>(mp)
+            ));
+        }
+        template <class M>
+        static GetSet2<C, M> value_methods (M (C::* g )()const, void (C::* s )(M)) {
+            return static_cast<GetSet2<C, M>&&>(_value_methods(
+                Type::CppType<M>(), Type::CppType<C>(),
+                [g](void* c, void* m){ *(M*)m = (((C*)c)->*g)(); },
+                [s](void* c, void* m){ (((C*)c)->*s)(*(M*)m); }
+            ));
+        }
+        template <class M>
+        static GetSet2<C, M> ref_methods (const M& (C::* g )()const, void (C::* s )(const M&)) {
+            return static_cast<GetSet2<C, M>&&>(_ref_methods(
+                Type::CppType<M>(), Type::CppType<C>(),
+                reinterpret_cast<UnknownGP&>(g),
+                reinterpret_cast<UnknownSP&>(s)
+            ));
+        }
+        template <class M>
+        static GetSet2<C, M> mixed_methods (M (C::* g )()const, void (C::* s )(const M&)) {
+            return static_cast<GetSet2<C, M>&&>(_mixed_methods(
+                Type::CppType<M>(), Type::CppType<C>(),
+                [g](void* c, void* m){ *(M*)m = (((C*)c)->*g)(); },
+                reinterpret_cast<UnknownSP&>(s)
+            ));
+        }
+        template <class M>
+        static GetSet2<C, M> ref_method (M& (C::* m )()) {
+            return static_cast<GetSet2<C, M>&&>(_ref_method(
+                Type::CppType<M>(), Type::CppType<C>(),
+                reinterpret_cast<UnknownGP&>(m)
+            ));
+        }
+    };
 
      // This is inherited by every custom-instantiated type.
     template <class C> struct Haccability : Inheritable_GetSets<C> {
@@ -37,28 +149,28 @@ namespace hacc {
         static void name (const Func<String ()>& f) {
             _name(Type::CppType<C>(), f);
         }
-        static void keys (GetSet2<C, std::vector<std::string>>* gs) {
+        static void keys (const GetSet2<C, std::vector<std::string>>& gs) {
             _keys(Type::CppType<C>(), gs);
         }
         static void attrs (const Func<Reference (C&, String)>& f) {
             _attrs(Type::CppType<C>(), reinterpret_cast<const Func<Reference (void*, String)>&>(f));
         }
-        static void attr (String name, GetSet1<C>* gs) {
+        static void attr (String name, const GetSet1<C>& gs) {
             _attr(Type::CppType<C>(), name, gs);
         }
-        static void length (GetSet2<C, size_t>* gs) {
+        static void length (const GetSet2<C, size_t>& gs) {
             _length(Type::CppType<C>(), gs);
         }
         static void elems (const Func<Reference (C&, size_t)>& f) {
             _elems(Type::CppType<C>(), reinterpret_cast<const Func<Reference (void*, size_t)>&>(f));
         }
-        static void elem (GetSet1<C>* gs) {
+        static void elem (const GetSet1<C>& gs) {
             _elem(Type::CppType<C>(), gs);
         }
         static void value (String s, C&& v) {
             _value(Type::CppType<C>(), s, std::forward<C>(v), [](void* l, void* r){ return *(C*)l == *(C*)r; });
         }
-        static void delegate (GetSet1<C>* gs) {
+        static void delegate (const GetSet1<C>& gs) {
             _delegate(Type::CppType<C>(), gs);
         }
         static void to_tree (const Func<Tree* (const C&)>& f) {
@@ -84,11 +196,20 @@ namespace hacc {
                 typeid(C), sizeof(C),
                 [](void* p){ new (p) C; },
                 [](void* p){ ((C*)p)->~C(); },
-                [](void* to, void* from){ new (to) C (*(const C*)from); },
+                [](void* to, void* from){ *(C*)to = *(const C*)from; },
+                [](const Func<void (void*)>& f){ C c; f(&c); },
                 TypeDecl<C>::describe
             );
             return dt;
         }
+    };
+
+    namespace X {
+        struct Recursive_Delegate : Logic_Error {
+            Type type;
+            GetSet0 gs;
+            Recursive_Delegate (Type, const GetSet0&);
+        };
     };
 
 }

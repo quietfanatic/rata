@@ -1,12 +1,37 @@
 #include <sstream>
 #include "../inc/tree.h"
-#include "../inc/getsets.h"
-#include "../inc/haccable.h"
 #include "../inc/strings.h"  // for path_to_string for diagnostics
 #include "../inc/files.h"
+#include "../inc/haccable.h"  // We're defining haccability on Dynamic
 #include "types_internal.h"
 
 namespace hacc {
+
+    Type GetSet0::type () const { return inner->t; }
+    Type GetSet0::host_type () const { return inner->ht; }
+    String GetSet0::description () const { return inner->description(); }
+    void* GetSet0::address (void* c) const { return inner->address(c); }
+    void* GetSet0::ro_address (void* c) const { return inner->ro_address(c); }
+    void GetSet0::get (void* c, void* m) const { return inner->get(c, m); }
+    void GetSet0::set (void* c, void* m) const { return inner->set(c, m); }
+    GetSet0::GetSet0 (const GetSet0& o) :
+        inner(o.inner->clone())
+    { }
+    GetSet0& GetSet0::operator = (GetSet0&& o) {
+        if (inner) delete inner;
+        inner = o.inner;
+        o.inner = null;
+        return *this;
+    }
+    GetSet0& GetSet0::operator = (const GetSet0& o) {
+        if (inner) delete inner;
+        inner = o.inner->clone();
+        return *this;
+    }
+    GetSet0::~GetSet0 () noexcept { delete inner; }
+    GetSet0& GetSet0::optional () { inner->optional = true; return *this; }
+    GetSet0& GetSet0::required () { inner->optional = false; return *this; }
+    GetSet0& GetSet0::readonly () { inner->readonly = true; return *this; }
 
     void* Pointer::address_of_type (Type t) const {
         if (t == Type(type)) {
@@ -15,84 +40,125 @@ namespace hacc {
         else throw X::Type_Mismatch(type, t);
     }
 
-    Reference::Reference (Type type, void* p) : c(p), gs(new GS_ID0(type)) { }
+    Reference::Reference (Type type, void* p) :
+        c(p), gs(&type.data->gs_id)
+    { }
     Reference::operator Pointer () const {
         void* p = address();
         if (p) return Pointer(type(), p);
         else throw X::Unaddressable(*this, "convert to Pointer");
     }
 
-    std::vector<String> Reference::keys () {
-        init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (type().data->keys) {
-            std::vector<String> r;
-            get([&](void* p){
-                type().data->keys->get(p, [&](void* vp){
-                    r = *(std::vector<String>*)vp;
-                });
+    void Reference::read (const Func<void (void*)>& f) const {
+        if (void* addr = ro_address()) {
+            f(addr);
+        }
+        else {
+            type().data->stalloc([&](void* p){
+                get(p);
+                f(p);
             });
-            return r;
         }
-        else if (!type().data->attr_list.empty()) {
-            std::vector<std::string> r;
-            r.reserve(type().data->attr_list.size());
-            for (auto& a : type().data->attr_list) {
-                r.push_back(a.first);
-            }
-            return r;
-        }
-        else if (type().data->delegate) {
-            std::vector<std::string> r;
-            get([&](void* p){
-                r = Reference(p, type().data->delegate).keys();
-            });
-            return r;
-        }
-        else return std::vector<String>();
     }
-    void Reference::set_keys (const std::vector<String>& keys) {
-        init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (type().data->keys) {
-            mod([&](void* p){
-                type().data->keys->set(p, [&](void* vp){
-                    *(std::vector<String>*)vp = keys;
-                });
+    void Reference::write (const Func<void (void*)>& f) const {
+        if (void* addr = address()) {
+            f(addr);
+        }
+        else {
+            type().data->stalloc([&](void* p){
+                f(p);
+                set(p);
             });
         }
-        else if (!type().data->attr_list.empty()) {
-            for (auto& a : type().data->attr_list) {
-                for (auto& k : keys) {
-                    if (a.first == k)
-                        goto next;
-                }
-                if (!a.second->optional) {
-                    throw X::Missing_Attr(type(), a.first);
-                }
-                next: { }
-            }
+    }
+    void Reference::mod (const Func<void (void*)>& f) const {
+        if (void* addr = address()) {
+            f(addr);
         }
-        else if (type().data->delegate) {
-            mod([&](void* p){
-                Reference(p, type().data->delegate).set_keys(keys);
+        else {
+            type().data->stalloc([&](void* p){
+                get(p);
+                f(p);
+                set(p);
             });
-        }
-        else if (!keys.empty()) {
-            throw X::No_Attrs(type());
         }
     }
 
-    Reference Reference::attr (std::string name) {
+    std::vector<String> Reference::keys () const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (type().data->attrs_f) {
-            Reference r;
-            get([&](void* p){ r = type().data->attrs_f(p, name); });
-            return r;
+        if (void* addr = ro_address()) {
+            if (auto& gs = type().data->keys) {
+                if (void* keys_addr = gs.ro_address(addr)) {
+                    return *(std::vector<String>*) keys_addr;
+                }
+                else {
+                    std::vector<String> r;
+                    gs.get(addr, &r);
+                    return r;
+                }
+            }
+            else if (auto& gs = type().data->delegate) {
+                return Reference(addr, gs).keys();
+            }
+            else {
+                std::vector<std::string> r;
+                r.reserve(type().data->attr_list.size());
+                for (auto& a : type().data->attr_list) {
+                    if (!a.second.inner->readonly)
+                        r.push_back(a.first);
+                }
+                return r;
+            }
         }
-        else if (!type().data->attr_list.empty()) {
-            if (void* addr = address()) {
+        else throw X::Unaddressable(*this, "get keys from");
+    }
+
+    void Reference::set_keys (const std::vector<String>& keys) const {
+        init();
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (void* addr = address()) {
+            if (auto& gs = type().data->keys) {
+                if (void* keys_addr = gs.address(addr)) {
+                    *(std::vector<String>*)keys_addr = keys;
+                }
+                else {
+                    gs.set(addr, (void*)&keys);
+                }
+            }
+            else if (auto& gs = type().data->delegate) {
+                Reference(addr, gs).set_keys(keys);
+            }
+            else if (!type().data->attr_list.empty()) {
+                for (auto& a : type().data->attr_list) {
+                    for (auto& k : keys) {
+                        if (a.first == k)
+                            goto next;
+                    }
+                    if (!a.second.inner->optional) {
+                        throw X::Missing_Attr(type(), a.first);
+                    }
+                    next: { }
+                }
+            }
+            else if (!keys.empty()) {
+                throw X::No_Attrs(type());
+            }
+        }
+        else throw X::Unaddressable(*this, "set_keys on");
+    }
+
+    Reference Reference::attr (std::string name) const {
+        init();
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (void* addr = address()) {
+            if (auto& f = type().data->attrs_f) {
+                return f(addr, name);
+            }
+            else if (auto& gs = type().data->delegate) {
+                return Reference(addr, gs).attr(name);
+            }
+            else if (!type().data->attr_list.empty()) {
                 for (auto& a : type().data->attr_list) {
                     if (a.first == name) {
                         return Reference(addr, a.second);
@@ -100,136 +166,133 @@ namespace hacc {
                 }
                 throw X::No_Attr(type(), name);
             }
-            else throw X::Unaddressable(*this, "get attr from");
+            else throw X::No_Attrs(type(), name);
         }
-        else if (type().data->delegate) {
-            if (void* addr = address()) {
-                return Reference(addr, type().data->delegate).attr(name);
-            }
-            else throw X::Unaddressable(*this, "get delegated attr from");
-        }
-        else throw X::No_Attrs(type(), name);
+        else throw X::Unaddressable(*this, "get attr from");
     }
 
-    size_t Reference::length () {
+    size_t Reference::length () const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (type().data->length) {
-            size_t r;
-            get([&](void* p){
-                type().data->length->get(p, [&](void* sp){
-                    r = *(size_t*)sp;
-                });
-            });
-            return r;
-        }
-        else if (!type().data->elem_list.empty()) {
-            return type().data->elem_list.size();
-        }
-        else if (type().data->delegate) {
-            size_t r;
-            get([&](void* p){
-                r = Reference(p, type().data->delegate).length();
-            });
-            return r;
-        }
-        else return 0;
-    }
-
-    void Reference::set_length (size_t size) {
-        init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (type().data->length) {
-            mod([&](void* p){
-                type().data->length->set(p, [&](void* sp){
-                    *(size_t*)sp = size;
-                });
-            });
-        }
-        else if (!type().data->elem_list.empty()) {
-            size_t n = type().data->elem_list.size();
-            if (size > n) {
-                throw X::Too_Long(type(), size, n);
-            }
-            else for (size_t i = size; i < n; i++) {
-                if (!type().data->elem_list[i]->optional) {
-                    throw X::Missing_Elem(type(), i);
+        if (void* addr = ro_address()) {
+            if (auto& gs = type().data->length) {
+                if (void* length_addr = gs.ro_address(addr)) {
+                    return *(size_t*) length_addr;
+                }
+                else {
+                    size_t r;
+                    gs.get(addr, &r);
+                    return r;
                 }
             }
+            else if (auto& gs = type().data->delegate) {
+                return Reference(addr, gs).length();
+            }
+            else {
+                return type().data->elem_list.size();
+            }
         }
-        else if (type().data->delegate) {
-            mod([&](void* p){
-                Reference(p, type().data->delegate).set_length(size);
+        else throw X::Unaddressable(*this, "get length from");
+    }
+
+    void Reference::set_length (size_t length) const {
+        init();
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (void* addr = address()) {
+            if (auto& gs = type().data->length) {
+                if (void* length_addr = gs.address(addr)) {
+                    *(size_t*)length_addr = length;
+                }
+                else {
+                    gs.set(addr, &length);
+                }
+            }
+            else if (auto& gs = type().data->delegate) {
+                Reference(addr, gs).set_length(length);
+            }
+            else if (!type().data->elem_list.empty()) {
+                size_t n = type().data->elem_list.size();
+                if (length > n) {
+                    throw X::Too_Long(type(), length, n);
+                }
+                else for (size_t i = length; i < n; i++) {
+                    if (!type().data->elem_list[i].inner->optional) {
+                        throw X::Missing_Elem(type(), i);
+                    }
+                }
+            }
+            else if (length != 0) {
+                throw X::No_Attrs(type());
+            }
+        }
+        else throw X::Unaddressable(*this, "set_keys on");
+    }
+
+    Reference Reference::elem (size_t index) const {
+        init();
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (void* addr = address()) {
+            if (auto& f = type().data->elems_f) {
+                return f(addr, index);
+            }
+            else if (auto& gs = type().data->delegate) {
+                return Reference(addr, gs).elem(index);
+            }
+            else if (!type().data->elem_list.empty()) {
+                if (index <= type().data->elem_list.size())
+                    return Reference(addr, type().data->elem_list[index]);
+                else
+                    throw X::Out_Of_Range(type(), index, type().data->elem_list.size());
+            }
+            else throw X::No_Elems(type(), index);
+        }
+        else throw X::Unaddressable(*this, "get attr from");
+    }
+
+    Tree* Reference::to_tree () const {
+        init();
+        if (!type().initialized()) throw X::Unhaccable_Type(type());
+         // First check individual special values.
+        if (auto& eq = type().data->eq) {
+            Tree* r = null;
+            read([&](void* addr){
+                for (auto& p : type().data->value_list) {
+                    if (eq(addr, p.second.addr)) {
+                        r = new Tree(p.first);
+                        return;
+                    }
+                }
             });
+            if (r) return r;
         }
-        else if (size != 0) {
-            throw X::No_Elems(type());
-        }
-    }
-
-    Reference Reference::elem (size_t i) {
-        init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (type().data->elems_f) {
-            Reference r;
-            get([&](void* p){ r = type().data->elems_f(p, i); });
-            return r;
-        }
-        else if (!type().data->elem_list.empty()) {
-            if (void* addr = address()) {
-                if (i <= type().data->elem_list.size())
-                    return Reference(addr, type().data->elem_list[i]);
-                else throw X::Out_Of_Range(type(), i, type().data->elem_list.size());
-            }
-            else throw X::Unaddressable(*this, "get elem from");
-        }
-        else if (type().data->delegate) {
-            if (void* addr = address()) {
-                return Reference(addr, type().data->delegate).elem(i);
-            }
-            else throw X::Unaddressable(*this, "get elem from");
-        }
-        else throw X::No_Elems(type(), i);
-    }
-
-    Tree* Reference::to_tree () {
-        init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
+         // Then custom to_tree
         if (type().data->to_tree) {
             Tree* r;
-            get([&](void* p){
+            read([&](void* p){
                 r = type().data->to_tree(p);
             });
             return r;
         }
-        if (type().data->eq) {
-            for (auto& p : type().data->value_list) {
-                bool equal;
-                get([&](void* addr){
-                    equal = type().data->eq(p.second.addr, addr);
-                });
-                if (equal) {
-                    return new Tree(p.first);
-                }
-            }
-        }
-        if (type().data->delegate) {
-            Tree* t;
-            get([&](void* p){
-                t = Reference(p, type().data->delegate).to_tree();
+         // Then delegation
+        else if (auto& gs = type().data->delegate) {
+            Tree* r;
+            read([&](void* addr){
+                r = Reference(addr, gs).to_tree();
             });
-            return t;
+            return r;
         }
+         // Then raw pointers
         else if (type().data->pointee_type) {
-            Tree* t;
-            get([&](void* p){
-                Pointer pp (type().data->pointee_type, *(void**)p);
+            Tree* r;
+            read([&](void* addr){
+                Pointer pp (type().data->pointee_type, *(void**)addr);
                 Path* path = address_to_path(pp);
                 if (!path) throw X::Address_Not_Found(pp);
-                t = new Tree(path);
+                r = new Tree(path);
             });
-            return t;
+            return r;
         }
+         // Then as an object or an array
         else {
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
@@ -254,7 +317,7 @@ namespace hacc {
     }
      // TODO: figure out the proper relationship between delegation
      //  and cascading calls (prepare and finish)
-    void Reference::prepare (Tree* h) {
+    void Reference::prepare (Tree* h) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->prepare) {
@@ -299,24 +362,29 @@ namespace hacc {
         }
     }
 
-    void Reference::fill (Tree* h) {
-        if (type().data->fill) {
-            mod([&](void* p){ type().data->fill(p, h); });
-            return;
-        }
+    void Reference::fill (Tree* h) const {
+         // First check for special values
         if (h->form == STRING) {
             for (auto& pair : type().data->value_list) {
                 if (h->s == pair.first) {
-                    set([&](void* p){ type().copy_construct(p, pair.second.addr); });
+                    set(pair.second.addr);
                     return;
                 }
             }
         }
-        if (type().data->delegate) {
+         // Then custom fill function
+        if (type().data->fill) {
+            mod([&](void* p){
+                type().data->fill(p, h);
+            });
+        }
+         // then delegation
+        else if (type().data->delegate) {
             mod([&](void* p){
                 Reference(p, type().data->delegate).fill(h);
             });
         }
+         // Then use attrs, elems, and paths
         else switch (h->form) {
             case OBJECT: {
                 for (auto& a : *h->o) {
@@ -332,33 +400,33 @@ namespace hacc {
                 break;
             }
             case PATH: {
-                Reference ref = path_to_reference(h->p);
-                if (void* addr = ref.address()) {
-                    if (ref.type() == type().data->pointee_type) {
-                        set([&](void* pp){
-                            *(void**)pp = addr;
-                        });
+                Reference pointee = path_to_reference(h->p);
+                if (pointee.type() == type().data->pointee_type) {
+                    if (void* pointee_addr = pointee.address()) {
+                        set(&pointee_addr);
                     }
-                    else throw X::Type_Mismatch(type().data->pointee_type, ref.type());
+                    else throw X::Unaddressable(pointee,
+                        "generate pointer through path "
+                      + path_to_string(h->p)
+                      + " from"
+                    );
                 }
-                else throw X::Unaddressable(*this,
-                    "generate pointer through path "
-                  + path_to_string(h->p)
-                  + " from"
-                );
+                else throw X::Type_Mismatch(type().data->pointee_type, pointee.type());
                 break;
             }
             default: throw X::Form_Mismatch(type(), h->form);
         }
     }
 
-    void Reference::finish (Tree* h) {
+    void Reference::finish (Tree* h) const {
+         // Do delegation only if there's no custom finish function
         if (type().data->delegate && !type().data->finish) {
             mod([&](void* p){
                 Reference(p, type().data->delegate).finish(h);
             });
         }
         else {
+             // Do attrs and elems before main item
             switch (h->form) {
                 case OBJECT: {
                     for (auto& a : *h->o) {
@@ -381,13 +449,13 @@ namespace hacc {
         }
     }
 
-    void Reference::from_tree (Tree* h) {
+    void Reference::from_tree (Tree* h) const {
         prepare(h);
         fill(h);
         finish(h);
     }
 
-    bool Reference::foreach_address (const Func<bool (Pointer, Path*)>& cb, Path* path) {
+    bool Reference::foreach_address (const Func<bool (Pointer, Path*)>& cb, Path* path) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (void* addr = address()) {
@@ -413,7 +481,7 @@ namespace hacc {
         return false;
     }
 
-    bool Reference::foreach_pointer (const Func<bool (Reference, Path*)>& cb, Path* path) {
+    bool Reference::foreach_pointer (const Func<bool (Reference, Path*)>& cb, Path* path) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
         if (type().data->pointee_type) {
@@ -536,11 +604,11 @@ namespace hacc {
 
 HCB_BEGIN(hacc::Dynamic)
     name("hacc::Dynamic");
-    keys(value_funcs<std::vector<String>>(
+    keys(mixed_funcs<std::vector<String>>(
         [](const hacc::Dynamic& dyn){
             return std::vector<String>(1, dyn.type.name());
         },
-        [](hacc::Dynamic& dyn, std::vector<String> keys){
+        [](hacc::Dynamic& dyn, const std::vector<String>& keys){
             if (keys.size() != 1) {
                 throw X::Logic_Error("A Dynamic must have one key representing its type");
             }
@@ -548,7 +616,7 @@ HCB_BEGIN(hacc::Dynamic)
             dyn.destroy();
             dyn.type = type;
             dyn.addr = malloc(type.size());
-            type.construct(dyn.addr); 
+            type.construct(dyn.addr);
         }
     ));
     attrs([](Dynamic& dyn, String name)->Reference{

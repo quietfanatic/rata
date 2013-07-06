@@ -8,7 +8,31 @@
 
 namespace hacc {
 
-     // These are in dynamicism.cpp
+    struct GetSetData {
+        bool optional = false;
+        bool readonly = false;
+        Type t;
+        Type ht;
+        GetSetData (Type t, Type ht) : t(t), ht(ht) { }
+        virtual String description () const = 0;
+        virtual void* address (void*) const = 0;
+        virtual void* ro_address (void*) const = 0;
+        virtual void get (void*, void*) const = 0;
+        virtual void set (void*, void*) const = 0;
+        virtual GetSetData* clone () const = 0;
+        virtual ~GetSetData () { }
+    };
+
+    struct GS_ID : GetSetData {
+        GS_ID (Type t) : GetSetData(t, t) { }
+        String description () const { return "<Converted from Pointer>"; }
+        void* address (void* c) const { return c; }
+        void* ro_address (void* c) const { return c; }
+        void get (void* c, void* m) const { t.copy_assign(m, c); }
+        void set (void* c, void* m) const { t.copy_assign(c, m); }
+        GetSetData* clone () const { return new GS_ID(*this); }
+    };
+
     std::vector<TypeData*>& types_to_init ();
     std::unordered_map<std::type_index, TypeData*>& types_by_cpptype ();
     std::unordered_map<String, TypeData*>& types_by_name ();
@@ -19,23 +43,25 @@ namespace hacc {
         size_t size = -1;
         void (* construct )(void*) = null;
         void (* destruct )(void*) = null;
-        void (* copy_construct )(void*, void*) = null;
+        void (* copy_assign )(void*, void*) = null;
+        void (* stalloc )(const Func<void (void*)>&) = null;
         Func<String ()> name = null;
         void (* describe )() = null;
         bool (* eq )(void*, void*) = null;
+        GetSet0 gs_id = null;
          // Hacc-specific
-        GetSet0* keys = null;
+        GetSet0 keys = null;
         Func<Reference (void*, String)> attrs_f = null;
-        std::vector<std::pair<String, GetSet0*>> attr_list;
-        GetSet0* length = null;
+        std::vector<std::pair<String, GetSet0>> attr_list;
+        GetSet0 length = null;
         Func<Reference (void*, size_t)> elems_f = null;
-        std::vector<GetSet0*> elem_list;
+        std::vector<GetSet0> elem_list;
         std::vector<std::pair<String, Dynamic>> value_list;
         Func<Tree* (void*)> to_tree = null;
         Func<void (void*, Tree*)> prepare = null;
         Func<void (void*, Tree*)> fill = null;
         Func<void (void*, Tree*)> finish = null;
-        GetSet0* delegate = null;
+        GetSet0 delegate = null;
         TypeData* pointee_type = null;
         bool initialized = false;
 
@@ -44,11 +70,14 @@ namespace hacc {
             size_t size,
             void (* construct )(void*),
             void (* destruct )(void*),
-            void (* copy_construct )(void*, void*)
+            void (* copy_assign )(void*, void*),
+            void (* stalloc )(const Func<void (void*)>&)
         ) :
             cpptype(&cpptype), size(size),
             construct(construct), destruct(destruct),
-            copy_construct(copy_construct)
+            copy_assign(copy_assign),
+            stalloc(stalloc),
+            gs_id(new GS_ID(this))
         {
             types_to_init().push_back(this);
         }

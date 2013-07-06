@@ -17,7 +17,8 @@ namespace hacc {
         size_t size () const;
         void construct (void*) const;
         void destruct (void*) const;
-        void copy_construct (void*, void*) const;
+        void copy_assign (void*, void*) const;
+        void stalloc (const Func<void (void*)>&) const;
 
         Type (TypeData* p) : data(p) { }
          // Find type by name; throws if none found
@@ -42,7 +43,8 @@ namespace hacc {
         size_t,
         void (* construct )(void*),
         void (* destruct )(void*),
-        void (* copy_construct )(void*, void*),
+        void (* copy_assign )(void*, void*),
+        void (* alloca )(const Func<void (void*)>&),
         void (* describe )()
     );
     void _init_type (Type, void (*)());
@@ -55,6 +57,7 @@ namespace hacc {
                 [](void* p){ new (p) C; },
                 [](void* p){ ((C*)p)->~C(); },
                 [](void* to, void* from){ new (to) C (*(const C*)from); },
+                [](const Func<void (void*)>& f){ C c; f(&c); },
                 null
             );
             return t;
