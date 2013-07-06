@@ -30,6 +30,36 @@ namespace hacc {
         void set (void* c, void* m) const { t.copy_assign(c, m); }
     };
 
+    struct GS_Chain : GetSetData {
+        GetSet0 l;
+        GetSet0 r;
+        GS_Chain (GetSet0 l, GetSet0 r) :
+            GetSetData(l.host_type(), r.type()), l(l), r(r)
+        { }
+        String description () const { return "(" + l.description() + " => " + r.description() + ")"; }
+        void* address (void* c) const {
+            void* mid = r.address(c);
+            return mid ? l.address(mid) : mid;
+        }
+        void* ro_address (void* c) const {
+            void* mid = r.ro_address(c);
+            return mid ? l.ro_address(mid) : mid;
+        }
+        void get (void* c, void* m) const {
+            l.type().stalloc([&](void* mid){
+                l.get(c, mid);
+                r.get(mid, m);
+            });
+        }
+        void set (void* c, void* m) const {
+            l.type().stalloc([&](void* mid){
+                l.get(c, mid);
+                r.set(mid, m);
+                l.set(c, mid);
+            });
+        }
+    };
+
     std::vector<TypeData*>& types_to_init ();
     std::unordered_map<std::type_index, TypeData*>& types_by_cpptype ();
     std::unordered_map<String, TypeData*>& types_by_name ();
