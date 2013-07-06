@@ -94,38 +94,36 @@ namespace hacc {
         Haccability<C*>::to_tree([p](C* const& x){
             return x ? new Tree(x->*p) : new Tree(null);
         });
-        hacc::Haccability<C*>::delegate(hacc::Haccability<C*>::template value_funcs<M>(
-            [](C* const& x)-> M { throw X::Internal_Error("Cannot do a get operation on hacc_pointer_by_member type"); },
-            [p, &all, required](C*& x, M m){
-                for (auto c : all) {
-                    if (c->*p == m) {
-                        x = c;
-                        return;
-                    }
+        Haccability<C*>::fill([p, &all, required](C*& x, Tree* t){
+            M m;
+            from_tree(&m, t);
+            for (auto c : all) {
+                if (c->*p == m) {
+                    x = c;
+                    return;
                 }
-                x = NULL;
-                if (required) throw X::Logic_Error("No " + Type::CppType<C>().name() + " with the given id was found.");
             }
-        ));
+            x = NULL;
+            if (required) throw X::Logic_Error("No " + Type::CppType<C>().name() + " with the given id was found.");
+        });
     }
     template <class C, class M>
     void hacc_pointer_by_method (M (C::* f) () const, std::vector<C*>& all, bool required = false) {
         Haccability<C*>::to_tree([f](C* const& x){
             return x ? new Tree((x->*f)()) : new Tree(null);
         });
-        hacc::Haccability<C*>::delegate(hacc::Haccability<C*>::template value_funcs<M>(
-            [](C* const& x)-> M { throw X::Internal_Error("Cannot do a get operation on hacc_pointer_by_method type"); },
-            [f, &all, required](C*& x, M m){
-                for (auto c : all) {
-                    if ((c->*f)() == m) {
-                        x = c;
-                        return;
-                    }
+        Haccability<C*>::fill([f, &all, required](C*& x, Tree* t){
+            M m;
+            from_tree(&m, t);
+            for (auto c : all) {
+                if ((c->*f)() == m) {
+                    x = c;
+                    return;
                 }
-                x = NULL;
-                if (required) throw X::Logic_Error("No " + Type::CppType<C>().name() + " with the given id was found.");
             }
-        ));
+            x = NULL;
+            if (required) throw X::Logic_Error("No " + Type::CppType<C>().name() + " with the given id was found.");
+        });
     }
 }
 

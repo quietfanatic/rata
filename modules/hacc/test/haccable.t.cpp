@@ -1,5 +1,6 @@
 
 #include "../inc/haccable.h"
+#include "../inc/haccable_standard.h"
 using namespace hacc;
 
 struct Vectorly {
@@ -112,6 +113,20 @@ HCB_BEGIN(MyEnum)
     value("value3", VALUE3);
 HCB_END(MyEnum)
 
+struct MyNamed {
+    std::string name;
+    MyNamed (std::string name) : name(name) { }
+};
+MyNamed mn1 ("asdf");
+MyNamed mn2 ("fdsa");
+
+std::vector<MyNamed*> mns {&mn1, &mn2};
+
+HCB_BEGIN(MyNamed*)
+    name("MyNamed*");
+    hacc_pointer_by_member(&MyNamed::name, mns, true);
+HCB_END(MyNamed*)
+
 template <class C>
 Tree* to_tree (C* p) { return Reference(p).to_tree(); }
 template <class C>
@@ -123,12 +138,13 @@ Vectorly* vyp;
 MyUnion mu;
 MyEnum me = VALUE2;
 Dynamic dyn = Dynamic::New<int32>(3);
+MyNamed* mnp = mns[0];
 
 #include "../../tap/inc/tap.h"
 tap::Tester haccable_tester ("hacc/haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(35);
+    plan(39);
     is(to_tree(&i)->i, 4, "to_tree on int32 works");
     doesnt_throw([](){ from_tree(&i, new Tree(35)); }, "from_tree on int32");
     is(i, 35, "...works");
@@ -169,5 +185,9 @@ tap::Tester haccable_tester ("hacc/haccable", [](){
     is(to_tree(&me)->s, String("value2"), "Enumish types use correct value when writing");
     doesnt_throw([](){ from_tree(&me, new Tree("value3")); }, "from_tree on enumish type");
     is(me, VALUE3, "...sets the right type");
+    is(to_tree(&mnp)->form, STRING, "hacc_pointer_by_member writes as right type");
+    is(to_tree(&mnp)->s, String("asdf"), "hacc_pointer_by_member writes correct value");
+    doesnt_throw([](){ from_tree(&mnp, new Tree("fdsa")); }, "hacc_pointer_by_member can do from_tree");
+    is(mnp, mns[1], "hacc_pointer_by_member sets correct value");
 });
 
