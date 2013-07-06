@@ -17,6 +17,7 @@ namespace hacc {
     GetSet0& GetSet0::optional () { (*this)->optional = true; return *this; }
     GetSet0& GetSet0::required () { (*this)->optional = false; return *this; }
     GetSet0& GetSet0::readonly () { (*this)->readonly = true; return *this; }
+    GetSet0& GetSet0::narrow () { (*this)->narrow = true; return *this; }
 
     void* Pointer::address_of_type (Type t) const {
         if (t == Type(type)) {
@@ -281,6 +282,7 @@ namespace hacc {
     void Reference::prepare (Tree* h) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (gs->narrow) return;
         if (type().data->prepare) {
             mod([&](void* p){ type().data->prepare(p, h); });
         }
@@ -324,6 +326,12 @@ namespace hacc {
     }
 
     void Reference::fill (Tree* h) const {
+        if (gs->narrow) {
+            mod([&](void* p){
+                Reference(type(), p).from_tree(h);
+            });
+            return;
+        }
          // First check for special values
         if (h->form == STRING) {
             for (auto& pair : type().data->value_list) {
@@ -380,6 +388,7 @@ namespace hacc {
     }
 
     void Reference::finish (Tree* h) const {
+        if (gs->narrow) return;
          // Do delegation only if there's no custom finish function
         if (type().data->delegate && !type().data->finish) {
             mod([&](void* p){

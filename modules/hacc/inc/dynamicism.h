@@ -25,6 +25,7 @@ namespace hacc {
         GetSet0& optional ();
         GetSet0& required ();
         GetSet0& readonly ();
+        GetSet0& narrow ();
     };
     template <class C>
     struct GetSet1 : GetSet0 { };
@@ -34,6 +35,7 @@ namespace hacc {
         GetSet2<C, M>& optional () { return static_cast<GetSet2<C, M>&>(this->GetSet0::optional()); }
         GetSet2<C, M>& required () { return static_cast<GetSet2<C, M>&>(this->GetSet0::required()); }
         GetSet2<C, M>& readonly () { return static_cast<GetSet2<C, M>&>(this->GetSet0::readonly()); }
+        GetSet2<C, M>& narrow () { return static_cast<GetSet2<C, M>&>(this->GetSet0::narrow()); }
     };
 
      // A Pointer implements a dynamically-typed pointer.

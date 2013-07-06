@@ -96,7 +96,7 @@ namespace hacc {
         });
         Haccability<C*>::fill([p, &all, required](C*& x, Tree* t){
             M m;
-            from_tree(&m, t);
+            Reference(&m).from_tree(t);
             for (auto c : all) {
                 if (c->*p == m) {
                     x = c;
@@ -114,7 +114,7 @@ namespace hacc {
         });
         Haccability<C*>::fill([f, &all, required](C*& x, Tree* t){
             M m;
-            from_tree(&m, t);
+            Reference(&m).from_tree(t);
             for (auto c : all) {
                 if ((c->*f)() == m) {
                     x = c;

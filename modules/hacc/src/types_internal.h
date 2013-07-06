@@ -11,6 +11,7 @@ namespace hacc {
     struct GetSetData : DPtee {
         bool optional = false;
         bool readonly = false;
+        bool narrow = false;
         Type t;
         Type ht;
         GetSetData (Type t, Type ht) : t(t), ht(ht) { }
