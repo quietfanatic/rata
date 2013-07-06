@@ -80,7 +80,7 @@ namespace hacc {
         static GetSet2<C, M> base () {
             return static_cast<GetSet2<C, M>&&>(_base(
                 Type::CppType<M>(), Type::CppType<C>(),
-                [](void* c){ return static_cast<M*>((C*)c); }
+                [](void* c){ return (void*)static_cast<M*>((C*)c); }
             ));
         }
         template <class M>
@@ -185,20 +185,17 @@ namespace hacc {
         static void finish (const Func<void (C&, Tree*)>& f) {
             _finish(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
         }
-        static void finish (const Func<void (C&)>& f) {
-            _finish(Type::CppType<C>(), [f](void* p, Tree*){ f(*(C*)p); });
-        }
         static void is_raw_pointer (Type t) {
             _is_raw_pointer(Type::CppType<C>(), t);
         }
         static Type get_type () {
             static Type dt = _get_type(
                 typeid(C), sizeof(C),
-                [](void* p){ new (p) C; },
+                Constructibility<C>::construct,
                 [](void* p){ ((C*)p)->~C(); },
-                [](void* to, void* from){ *(C*)to = *(const C*)from; },
-                [](const Func<void (void*)>& f){ C c; f(&c); },
-                TypeDecl<C>::describe
+                Assignability<C>::assign,
+                Constructibility<C>::stalloc,
+                Hacc_TypeDecl<C>::describe
             );
             return dt;
         }
@@ -216,13 +213,13 @@ namespace hacc {
 
 #define HACC_APPEND(a, b) a##b
 #define HACC_APPEND2(a, b) HACC_APPEND(a, b)
-#define __ HACC_APPEND2(_anon_, __COUNTER__)
-#define HCB_INSTANCE(type) static Type __ __attribute__ ((unused)) = TypeDecl<type>::get_type();
-#define HCB_BEGIN(type) namespace hacc { template <> struct TypeDecl<type> : hacc::Haccability<type> { static void describe () {
-#define HCB_END(type) } }; static Type __ __attribute__ ((unused)) = TypeDecl<type>::get_type(); }
+#define HACC_ANON HACC_APPEND2(_anon_, __COUNTER__)
+#define HCB_INSTANCE(type) static hacc::Type HACC_ANON __attribute__ ((unused)) = Hacc_TypeDecl<type>::get_type();
+#define HCB_BEGIN(type) template <> struct Hacc_TypeDecl<type> : hacc::Haccability<type> { static void describe () {
+#define HCB_END(type) } }; static hacc::Type HACC_ANON __attribute__ ((unused)) = Hacc_TypeDecl<type>::get_type();
 #define HCB_PARAMS(...) __VA_ARGS__
 #define HCB_COMMA ,
-#define HCB_TEMPLATE_BEGIN(params, type) namespace hacc { template params struct TypeDecl<type> : hacc::Haccability<type> { \
+#define HCB_TEMPLATE_BEGIN(params, type) template params struct Hacc_TypeDecl<type> : hacc::Haccability<type> { \
     using hcb = hacc::Haccability<type>; \
     using hcb::name; \
     using hcb::keys; \
@@ -247,6 +244,6 @@ namespace hacc {
     using hcb::base; \
     using hcb::assignable; \
     static void describe () {
-#define HCB_TEMPLATE_END(params, type) } }; }  // Reserved in case we need to do some magic static-var wrangling
+#define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
 
 #endif

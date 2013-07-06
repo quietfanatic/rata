@@ -37,6 +37,12 @@ namespace hacc {
 
     void init ();
 
+     // Conditional operations
+    template <class C, bool cons = std::is_default_constructible<C>::value>
+    struct Constructibility;
+    template <class C, bool assgn = std::is_copy_assignable<C>::value>
+    struct Assignability;
+
      // Internal wrapper for declaring and getting types
     Type _get_type (
         const std::type_info&,
@@ -44,25 +50,10 @@ namespace hacc {
         void (* construct )(void*),
         void (* destruct )(void*),
         void (* copy_assign )(void*, void*),
-        void (* alloca )(const Func<void (void*)>&),
+        void (* stalloc )(const Func<void (void*)>&),
         void (* describe )()
     );
     void _init_type (Type, void (*)());
-     // This is specialized to make a type haccable.  The mechanisms for
-     //  defining haccabilities are in haccable.h
-    template <class C> struct TypeDecl {
-        static Type get_type () {
-            static Type t = _get_type(
-                typeid(C), sizeof(C),
-                [](void* p){ new (p) C; },
-                [](void* p){ ((C*)p)->~C(); },
-                [](void* to, void* from){ new (to) C (*(const C*)from); },
-                [](const Func<void (void*)>& f){ C c; f(&c); },
-                null
-            );
-            return t;
-        }
-    };
 
     namespace X {
         struct No_Type_For_CppType : Logic_Error {
@@ -78,14 +69,67 @@ namespace hacc {
             Type got;
             Type_Mismatch (Type expected, Type got);
         };
+        struct Not_Constructible : Logic_Error {
+            Type type;
+            Not_Constructible (Type);
+        };
+        struct Not_Assignable : Logic_Error {
+            Type type;
+            Not_Assignable (Type);
+        };
     }
 
+    template <class C>
+    struct Constructibility<C, true> {
+        static void construct (void* p) {
+            new (p) C;
+        }
+        static void stalloc (const Func<void (void*)>& f) {
+            C c;
+            f(&c);
+        }
+    };
+    template <class C>
+    struct Constructibility<C, false> {
+        static void construct (void* p) {
+            throw X::Not_Constructible(Type::CppType<C>());
+        }
+        static void stalloc (const Func<void (void*)>& f) {
+            throw X::Not_Constructible(Type::CppType<C>());
+        }
+    };
+    template <class C>
+    struct Assignability<C, true> {
+        static void assign (void* to, void* from) { *(C*)to = *(C*)from; }
+    };
+    template <class C>
+    struct Assignability<C, false> {
+        static void assign (void* to, void* from) { throw X::Not_Assignable(Type::CppType<C>()); }
+    };
+
+}
+
+ // This is specialized to make a type haccable.  The mechanisms for
+ //  defining haccabilities are in haccable.h.
+template <class C> struct Hacc_TypeDecl {
+    static hacc::Type get_type () {
+        static hacc::Type t = hacc::_get_type(
+            typeid(C), sizeof(C),
+            hacc::Constructibility<C>::construct,
+            [](void* p){ ((C*)p)->~C(); },
+            hacc::Assignability<C>::assign,
+            hacc::Constructibility<C>::stalloc,
+            hacc::null
+        );
+        return t;
+    }
+};
+namespace hacc {
      // Implementation of Type::CPPType
     template <class C>
     Type Type::CppType () {
-        return TypeDecl<C>::get_type();
+        return Hacc_TypeDecl<C>::get_type();
     }
-
 }
 
 #endif

@@ -107,7 +107,7 @@ namespace vis {
 
 
     struct Sprite_Layer : Layer, Game_Object, Renderer {
-        Program* program = hacc::reference_file<Program>("modules/vis/res/sprite.prog");
+        Program* program = hacc::File("modules/vis/res/sprite.prog").data();
         GLint tex = program->require_uniform("tex");
         GLint camera_pos = program->require_uniform("camera_pos");
         GLint model_pos = program->require_uniform("model_pos");
@@ -174,9 +174,9 @@ namespace vis {
     struct Sprite_Test : Stateful, Draws_Sprites {
         void start () { Draws_Sprites::activate(); }
         void draws_sprites () {
-            static Image* image = hacc::reference_file<Image>("modules/vis/res/test.image");
+            static Image* image = hacc::File("modules/vis/res/test.image").data();
             static Texture* texture = image->texture_named("ALL");
-            static Layout* layout = hacc::reference_file<Layout>("modules/vis/res/test.layout");
+            static Layout* layout = hacc::File("modules/vis/res/test.layout").data();
             static Frame* white = layout->frame_named("white");
             static Frame* red = layout->frame_named("red");
             static Frame* green = layout->frame_named("green");
@@ -196,7 +196,7 @@ HCB_BEGIN(Frame)
     attr("name", member(&Frame::name));
     attr("offset", member(&Frame::offset));
     attr("box", member(&Frame::box));
-    attr("points", member(&Frame::points)(optional));
+    attr("points", member(&Frame::points).optional());
 HCB_END(vis::Frame)
 
 HCB_BEGIN(Layout)
@@ -204,9 +204,9 @@ HCB_BEGIN(Layout)
     attr("size", member(&Layout::size));
     attr("frames", member(&Layout::frames));
     attrs([](Layout& layout, std::string name){
-        return layout.frame_named(name);
+        return hacc::Reference(layout.frame_named(name));
     });
-    finish([](Layout& layout){
+    finish([](Layout& layout, hacc::Tree*){
         layout.finish();
     });
 HCB_END(Layout)

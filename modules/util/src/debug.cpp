@@ -13,8 +13,7 @@ std::unordered_map<std::string, Logger*>& Logger::all () {
 
 HCB_BEGIN(Logger*)
     name("Logger*");
-    to_tree([](Logger* const& l){ return new hacc::Tree(l->name); });
-    delegate(value_functions<std::string>(
+    delegate(value_funcs<std::string>(
         [](Logger* const& l){ return l->name; },
         [](Logger*& l, std::string name){
             printf("Searchin for logger %s\n", name.c_str());

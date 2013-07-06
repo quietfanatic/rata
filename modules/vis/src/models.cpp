@@ -96,8 +96,8 @@ namespace vis {
             model.draw(Vec(10, 4), flip, false, 0.5);
         }
         void start () {
-            model = Model(hacc::reference_file<Skel>("modules/ent/res/small.skel"));
-            model.apply_skin(hacc::reference_file<Skin>("modules/rata/res/rata-base.skin"));
+            model = Model(hacc::File("modules/ent/res/small.skel").data());
+            model.apply_skin(hacc::File("modules/rata/res/rata-base.skin").data());
             model.apply_pose(model.skel->poses.named("stand"));
         }
     };
@@ -110,15 +110,15 @@ HCB_BEGIN(Skel)
     attr("root", member(&Skel::root));
     attr("root_offset", member(&Skel::root_offset));
     attr("poses", member(&Skel::poses));
-    finish([](Skel& skel) { skel.finish(); });
+    finish([](Skel& skel, hacc::Tree*) { skel.finish(); });
 HCB_END(Skel)
 
 HCB_BEGIN(Skel::Seg)
     name("vis::Skel::Seg");
     attr("name", member(&Skel::Seg::name));
-    attr("branches", member(&Skel::Seg::branches)(optional));
+    attr("branches", member(&Skel::Seg::branches).optional());
     attr("layout", member(&Skel::Seg::layout));
-    attr("z_offset", member(&Skel::Seg::z_offset, def(0.f)));
+    attr("z_offset", member(&Skel::Seg::z_offset).optional());
 HCB_END(Skel::Seg)
 
 HCB_BEGIN(Pose)
@@ -131,8 +131,8 @@ HCB_BEGIN(Pose::App)
     name("vis::Pose");
     elem(member(&Pose::App::target));
     elem(member(&Pose::App::frame));
-    elem(member(&Pose::App::fliph, def(false)));
-    elem(member(&Pose::App::flipv, def(false)));
+    elem(member(&Pose::App::fliph).optional());
+    elem(member(&Pose::App::flipv).optional());
 HCB_END(Pose::App)
 
 HCB_BEGIN(Skin)

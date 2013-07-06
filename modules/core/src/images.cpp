@@ -88,8 +88,8 @@ HCB_BEGIN(Image)
     attr("filename", member(&Image::filename));
     attr("textures", member(&Image::textures).optional());
     attrs([](Image& image, std::string name){
-        return image.texture_named(name);
+        return hacc::Reference(image.texture_named(name));
     });
-    finish([](Image& i){ i.load(); });
+    finish([](Image& i, hacc::Tree*){ i.load(); });
 HCB_END(core::Image)
 

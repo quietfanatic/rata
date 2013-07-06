@@ -600,7 +600,7 @@ namespace hacc {
         { }
     }
 
-}
+} using namespace hacc;
 
 HCB_BEGIN(hacc::Dynamic)
     name("hacc::Dynamic");

@@ -206,20 +206,20 @@ HCB_END(b2Shape)
 
 HCB_BEGIN(b2CircleShape)
     name("b2CircleShape");
-    attr("b2Shape", base<b2Shape>()->optional());
+    attr("b2Shape", base<b2Shape>().optional());
     attr("c", member(&b2CircleShape::m_p));
     attr("r", member((float b2CircleShape::*)&b2CircleShape::m_radius));
 HCB_END(b2CircleShape)
 
 HCB_BEGIN(b2PolygonShape)
     name("b2PolygonShape");
-    attr("b2Shape", base<b2Shape>()->optional());
-    attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius)(b2_polygonRadius));
-    attr("verts", value_functions<std::vector<b2Vec2>>(
+    attr("b2Shape", base<b2Shape>().optional());
+    attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius).optional());
+    attr("verts", mixed_funcs<std::vector<b2Vec2>>(
         [](const b2PolygonShape& ps){
             return std::vector<b2Vec2>(ps.m_vertices, ps.m_vertices + ps.m_vertexCount);
         },
-        [](b2PolygonShape& ps, std::vector<b2Vec2> v){
+        [](b2PolygonShape& ps, const std::vector<b2Vec2>& v){
             ps.Set(v.data(), v.size());
         }
     ));
@@ -227,7 +227,7 @@ HCB_END(b2PolygonShape)
 
 HCB_BEGIN(b2EdgeShape)
     name("b2EdgeShape");
-    attr("b2Shape", base<b2Shape>()->optional());
+    attr("b2Shape", base<b2Shape>().optional());
     attr("v1", member(&b2EdgeShape::m_vertex1));
     attr("v2", member(&b2EdgeShape::m_vertex2));
     elem(member(&b2EdgeShape::m_vertex1));
@@ -236,11 +236,11 @@ HCB_END(b2EdgeShape)
 
 HCB_BEGIN(b2FixtureDef)
     name("b2FixtureDef");
-    attr("shape", member(&b2FixtureDef::shape)->optional());
-    attr("friction", member(&b2FixtureDef::friction)->optional());
-    attr("restitution", member(&b2FixtureDef::restitution)->optional());
-    attr("density", member(&b2FixtureDef::density)->optional());
-    attr("is_sensor", member(&b2FixtureDef::isSensor)->optional());
+    attr("shape", member(&b2FixtureDef::shape).optional());
+    attr("friction", member(&b2FixtureDef::friction).optional());
+    attr("restitution", member(&b2FixtureDef::restitution).optional());
+    attr("density", member(&b2FixtureDef::density).optional());
+    attr("is_sensor", member(&b2FixtureDef::isSensor).optional());
 HCB_END(b2FixtureDef)
 
 static std::vector<Collision_Rule*> coll_b2v (uint64 b) {
@@ -261,20 +261,20 @@ static uint64 coll_v2b (const std::vector<Collision_Rule*>& v) {
 
 HCB_BEGIN(FixtureDef)
     name("phys::FixtureDef");
-    attr("name", member(&FixtureDef::name)->optional());
+    attr("name", member(&FixtureDef::name).optional());
     attr("b2", member(&FixtureDef::b2));
     attr("coll_a", value_funcs<std::vector<Collision_Rule*>>(
         [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_a); },
         [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
             fdf.coll_a = coll_v2b(rules);
         }
-    )->optional());
+    ).optional());
     attr("coll_b", value_funcs<std::vector<Collision_Rule*>>(
         [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_b); },
         [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
             fdf.coll_b = coll_v2b(rules);
         }
-    )->optional());
+    ).optional());
 HCB_END(FixtureDef)
 
 HCB_BEGIN(b2BodyType)
@@ -286,16 +286,16 @@ HCB_END(b2BodyType)
 
 HCB_BEGIN(BodyDef)
     name("phys::BodyDef");
-    attr("type", member(&BodyDef::type)->optional());
-    attr("damping", member(&BodyDef::damping)->optional());
-    attr("gravity_scale", member(&BodyDef::gravity_scale)->optional());
+    attr("type", member(&BodyDef::type).optional());
+    attr("damping", member(&BodyDef::damping).optional());
+    attr("gravity_scale", member(&BodyDef::gravity_scale).optional());
     attr("fixtures", member(&BodyDef::fixtures));
 HCB_END(BodyDef)
 
 HCB_BEGIN(Object)
     name("phys::Object");
     attr("pos", value_methods(&Object::pos, &Object::set_pos));
-    attr("vel", value_methods(&Object::vel, &Object::set_vel)->optional());
+    attr("vel", value_methods(&Object::vel, &Object::set_vel).optional());
 HCB_END(Object)
 
 HCB_BEGIN(Phys_Debug_Layer)

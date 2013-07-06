@@ -128,7 +128,7 @@ namespace hacc {
         void set (void* c, void* m) const { t.copy_assign(f(c), m); }
         GetSetData* clone () const { return new Base(*this); }
     };
-    GetSet0 base (Type t, Type ht, void*(* f )(void*)) {
+    GetSet0 _base (Type t, Type ht, void*(* f )(void*)) {
         return new Base(t, ht, f);
     }
 

@@ -2,6 +2,7 @@
 #define HAVE_VIS_MODELS_H
 
 #include <stdexcept>
+#include "../../hacc/inc/haccable_standard.h"
 #include "../../util/inc/Vec.h"
 #include "sprites.h"
 

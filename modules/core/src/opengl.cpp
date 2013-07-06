@@ -146,7 +146,7 @@ namespace core {
 
 HCB_BEGIN(Shader)
     name("core::Shader");
-    attr("type", value_functions<std::string>(
+    attr("type", value_funcs<std::string>(
         [](const Shader& s)->std::string{ return s.type == GL_FRAGMENT_SHADER ? "fragment" : "vertex"; },
         [](Shader& s, std::string t){
             if (t == "fragment") s.type = GL_FRAGMENT_SHADER;
@@ -155,7 +155,7 @@ HCB_BEGIN(Shader)
         }
     ));
     attr("source", member(&Shader::source));
-    finish([](Shader& s){ s.finish(); });
+    finish([](Shader& s, hacc::Tree*){ s.finish(); });
 HCB_END(Shader)
 
 HCB_BEGIN(Program)
@@ -163,6 +163,6 @@ HCB_BEGIN(Program)
     attr("name", member(&Program::name).optional());
     attr("shaders", member(&Program::shaders));
     attr("attributes", member(&Program::attributes).optional());
-    finish([](Program& p){ p.link(); });
+    finish([](Program& p, hacc::Tree*){ p.link(); });
 HCB_END(Program)
 

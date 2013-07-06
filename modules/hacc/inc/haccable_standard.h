@@ -38,7 +38,7 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::named_vector<C>)
     name([](){
         return "hacc::named_vector<" + Type::CppType<C>().name() + ">";
     });
-    delegate(hcb::template supertype<std::vector<C>>());
+    delegate(hcb::template base<std::vector<C>>());
     attrs([](named_vector<C>& v, std::string name){
         return Reference(v.named(name));
     });

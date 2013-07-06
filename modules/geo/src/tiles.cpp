@@ -10,7 +10,7 @@
 namespace geo {
 
     static phys::BodyDef*& tilemap_bdf () {
-        static phys::BodyDef* r = hacc::reference_file<phys::BodyDef>("modules/geo/res/tilemap.bdf");
+        static phys::BodyDef* r = hacc::File("modules/geo/res/tilemap.bdf").data();
         return r;
     }
 
@@ -19,8 +19,8 @@ namespace geo {
     Links<Tilemap> active_tilemaps;
 
     Tilemap::Tilemap () : phys::Object(tilemap_bdf()) { }
-    void Tilemap::emerge () { materialize(); link(active_tilemaps); }
-    void Tilemap::reclude () { dematerialize(); unlink(); }
+    void Tilemap::emerge () { materialize(); Linkable<Tilemap>::link(active_tilemaps); }
+    void Tilemap::reclude () { dematerialize(); Linkable<Tilemap>::unlink(); }
 
 
      // What follows is an algorithm to optimize tile geometry.
@@ -212,7 +212,7 @@ namespace geo {
      // Now for drawing tilemaps.
 
     struct Tilemap_Layer : core::Layer, core::Game_Object, core::Renderer {
-        core::Program* program = hacc::reference_file<core::Program>("modules/geo/res/tiles.prog");
+        core::Program* program = hacc::File("modules/geo/res/tiles.prog").data();
         int tex = program->require_uniform("tex");
         int camera_pos = program->require_uniform("camera_pos");
         int model_pos = program->require_uniform("model_pos");
@@ -244,7 +244,7 @@ namespace geo {
             static auto glUniform2f = core::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             static auto glBindVertexArray = core::glproc<void (GLuint)>("glBindVertexArray");
             use();
-            for (Tilemap* map = active_tilemaps.first(); map; map = map->next()) {
+            for (Tilemap* map = active_tilemaps.first(); map; map = map->Linkable<Tilemap>::next()) {
                 Vec pos = map->Object::pos();
                 glUniform2f(model_pos, pos.x, pos.y);
                 Vec ts = map->texture->size;

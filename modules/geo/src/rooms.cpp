@@ -12,7 +12,7 @@ namespace geo {
 
     Geography::Geography () :
         current_room(NULL), beholder(NULL),
-        tumbolia(hacc::reference_file<Room>("modules/geo/res/tumbolia.room"))
+        tumbolia(hacc::File("modules/geo/res/tumbolia.room").data())
     { }
     Links<Resident> housing_office;
     void Geography::start () {
@@ -27,15 +27,11 @@ namespace geo {
 
     void Room::activate () {
         geo_logger.log("Activating room @%lx", (unsigned long)this);
-        for (auto f : furniture)
-            f->emerge();
         for (Resident* r = residents.first(); r; r = r->next())
             r->emerge();
     }
     void Room::deactivate () {
         geo_logger.log("Deactivating room @%lx", (unsigned long)this);
-        for (auto f : furniture)
-            f->reclude();
         for (Resident* r = residents.first(); r; r = r->next())
             r->reclude();
     }
@@ -124,7 +120,6 @@ HCB_BEGIN(Room)
     name("geo::Room");
     attr("boundary", member(&Room::boundary));
     attr("neighbors", member(&Room::neighbors));
-    attr("furniture", member(&Room::furniture).optional());
 HCB_END(Room)
 
 

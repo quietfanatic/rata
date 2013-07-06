@@ -104,5 +104,17 @@ namespace hacc {
                 "No haccable type was declared with the name " + n
             ), name(n)
         { }
+        Not_Constructible::Not_Constructible (Type t) :
+            Logic_Error(
+                "Cannot construct an object of type " + t.name()
+              + " because it has no nullary constructor (AKA default constructor)"
+            ), type(t)
+        { }
+        Not_Assignable::Not_Assignable (Type t) :
+            Logic_Error(
+                "Cannot assign objects of type " + t.name()
+              + " because it has no copy assignment operator"
+            ), type(t)
+        { }
     }
 }

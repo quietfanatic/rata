@@ -15,7 +15,7 @@ namespace vis {
     void Draws_Text::text_disappear () { unlink(); }
 
     struct Text_Layer : Layer, Game_Object, Renderer {
-        Program* program = hacc::reference_file<Program>("modules/vis/res/text.prog");
+        Program* program = hacc::File("modules/vis/res/text.prog").data();
         GLint tex = program->require_uniform("tex");
         GLint camera_pos = program->require_uniform("camera_pos");
         GLint model_pos = program->require_uniform("model_pos");
@@ -173,12 +173,12 @@ namespace vis {
 } using namespace vis;
 
 HCB_BEGIN(Font)
-    type_name("vis::Font");
+    name("vis::Font");
     attr("texture", member(&Font::texture));
     attr("width", member(&Font::width));
     attr("height", member(&Font::height));
     attr("line_height", member(&Font::line_height));
-    attr("widths", member(&Font::widths, def(std::vector<uint8>())));
+    attr("widths", member(&Font::widths).optional());
 HCB_END(Font)
 HCB_INSTANCE(Font*)
 
