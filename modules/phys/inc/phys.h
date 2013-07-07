@@ -79,7 +79,6 @@ namespace phys {
         virtual ~Object () { if (b2body) space.b2world->DestroyBody(b2body); }
 
         Object ();
-        Object (BodyDef* def);
     };
 
      // Collision handling is done through registered collision rules.

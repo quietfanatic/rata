@@ -2,10 +2,10 @@
     bdf:{"phys::BodyDef":{
         type:static
         fixtures:[
-            {b2:{ shape:$.e0.b2Shape coll_b:[ground] }
-            {b2:{ shape:$.e1.b2Shape coll_b:[ground] }
-            {b2:{ shape:$.e2.b2Shape coll_b:[ground] }
-            {b2:{ shape:$.e3.b2Shape coll_b:[ground] }
+            { b2:{ shape:$.e0.b2Shape } coll_b:[ground] }
+            { b2:{ shape:$.e1.b2Shape } coll_b:[ground] }
+            { b2:{ shape:$.e2.b2Shape } coll_b:[ground] }
+            { b2:{ shape:$.e3.b2Shape } coll_b:[ground] }
         ]
     }}
     e0:{b2EdgeShape:{ v1:[20  0] v2:[ 0  0] }}

@@ -15,8 +15,12 @@ struct Test_Actor : phys::Object, vis::Draws_Sprites {
         draw_sprite(frame, texture, pos());
     }
 
-    Test_Actor () : Object(test_bdf()) { }
-    void finish () { materialize(); vis::Draws_Sprites::activate(); }
+    Test_Actor () : Object() { test_bdf(); }
+    void finish () {
+        apply_bdf(test_bdf());
+        materialize();
+        vis::Draws_Sprites::activate();
+    }
 };
 
 HCB_BEGIN(Test_Actor)
@@ -32,8 +36,11 @@ static phys::BodyDef*& boundary_bdf () {
     return boundary_bdf;
 }
 struct Boundary : phys::Object {
-    Boundary () : Object(boundary_bdf()) { }
-    void finish () { materialize(); }
+    Boundary () : Object() { boundary_bdf(); }
+    void finish () {
+        apply_bdf(boundary_bdf());
+        materialize();
+    }
 };
 
 HCB_BEGIN(Boundary)

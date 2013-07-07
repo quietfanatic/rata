@@ -1,7 +1,7 @@
 {"std::unordered_map<std::string, hacc::Dynamic>":{
     bdf:{"phys::BodyDef":{
         fixtures:[
-            { b2:{ shape:$.shape.b2Shape } coll_a:[ground asdf] coll_b:[ground asdf] }
+            { b2:{ shape:$.shape.b2Shape } coll_a:[ground] coll_b:[ground] }
         ]
     }}
     shape:{b2PolygonShape:{

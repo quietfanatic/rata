@@ -18,7 +18,7 @@ namespace geo {
 
     Links<Tilemap> active_tilemaps;
 
-    Tilemap::Tilemap () : phys::Object(tilemap_bdf()) { }
+    Tilemap::Tilemap () : phys::Object() { tilemap_bdf(); }
     void Tilemap::emerge () { materialize(); Linkable<Tilemap>::link(active_tilemaps); }
     void Tilemap::reclude () { dematerialize(); Linkable<Tilemap>::unlink(); }
 
@@ -112,6 +112,7 @@ namespace geo {
     };
 
     void Tilemap::finish () {
+        apply_bdf(tilemap_bdf());
          // Build up all the edges
         auto es = new TileEdge [height][width][MAX_EDGES];
         uint initial = 0;

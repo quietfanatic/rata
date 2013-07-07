@@ -120,10 +120,6 @@ namespace phys {
     }
 
     Object::Object () { create_b2body(this); }
-    Object::Object (BodyDef* bdf) {
-        create_b2body(this);
-        apply_bdf(bdf);
-    }
     void Object::materialize () { b2body->SetActive(true); }
     void Object::dematerialize () { b2body->SetActive(false); }
 
