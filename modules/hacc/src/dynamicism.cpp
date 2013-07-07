@@ -143,24 +143,27 @@ namespace hacc {
     Reference Reference::attr (std::string name) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
+         // First try specific attrs
+        for (auto& a : type().data->attr_list) {
+            if (a.first == name) {
+                return chain(*this, a.second);
+            }
+        }
+         // Then custom attrs function
         if (auto& f = type().data->attrs_f) {
             if (void* addr = address()) {
                 return f(addr, name);
             }
             else throw X::Unaddressable(*this, "get custom attrs from");
         }
+         // Then delegation
         else if (auto& gs = type().data->delegate) {
             return chain(*this, gs).attr(name);
         }
-        else if (!type().data->attr_list.empty()) {
-            for (auto& a : type().data->attr_list) {
-                if (a.first == name) {
-                    return chain(*this, a.second);
-                }
-            }
+        else if (!type().data->attr_list.empty())
             throw X::No_Attr(type(), name);
-        }
-        else throw X::No_Attrs(type(), name);
+        else
+            throw X::No_Attrs(type(), name);
     }
 
     size_t Reference::length () const {
@@ -200,29 +203,32 @@ namespace hacc {
             }
         }
         else if (length != 0) {
-            throw X::No_Attrs(type());
+            throw X::No_Elems(type());
         }
     }
 
     Reference Reference::elem (size_t index) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
-        if (auto& f = type().data->elems_f) {
+         // First try individual elems
+        if (index <= type().data->elem_list.size()) {
+            return chain(*this, type().data->elem_list[index]);
+        }
+         // Then custom elems function
+        else if (auto& f = type().data->elems_f) {
             if (void* addr = address()) {
                 return f(addr, index);
             }
             else throw X::Unaddressable(*this, "get custom attrs from");
         }
+         // Then delegation
         else if (auto& gs = type().data->delegate) {
             return chain(*this, gs).elem(index);
         }
-        else if (!type().data->elem_list.empty()) {
-            if (index <= type().data->elem_list.size())
-                return chain(*this, type().data->elem_list[index]);
-            else
-                throw X::Out_Of_Range(type(), index, type().data->elem_list.size());
-        }
-        else throw X::No_Elems(type(), index);
+        else if (!type().data->elem_list.empty())
+            throw X::Out_Of_Range(type(), index, type().data->elem_list.size());
+        else
+            throw X::No_Elems(type(), index);
     }
 
     Tree* Reference::to_tree () const {
