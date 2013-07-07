@@ -179,6 +179,11 @@ namespace hacc {
             Type type;
             Unhaccable_Type (Type);
         };
+        struct Unhaccable_Reference : Logic_Error {
+            Reference r;
+            String goal;
+            Unhaccable_Reference (Reference, String);
+        };
         struct Form_Mismatch : Logic_Error {
             Type type;
             Form form;

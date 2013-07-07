@@ -94,7 +94,7 @@ namespace hacc {
 
     std::vector<String> Reference::keys () const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get keys from");
         if (auto& gs = type().data->keys) {
             std::vector<String> r;
             chain(*this, gs).get(&r);
@@ -116,7 +116,7 @@ namespace hacc {
 
     void Reference::set_keys (const std::vector<String>& keys) const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "set keys on");
         if (auto& gs = type().data->keys) {
             chain(*this, gs).set((void*)&keys);
         }
@@ -142,7 +142,7 @@ namespace hacc {
 
     Reference Reference::attr (std::string name) const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get attr " + name + " from");
          // First try specific attrs
         for (auto& a : type().data->attr_list) {
             if (a.first == name) {
@@ -168,7 +168,7 @@ namespace hacc {
 
     size_t Reference::length () const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get length from");
         if (auto& gs = type().data->length) {
             size_t r;
             chain(*this, gs).get(&r);
@@ -184,7 +184,7 @@ namespace hacc {
 
     void Reference::set_length (size_t length) const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "set length on");
         if (auto& gs = type().data->length) {
             chain(*this, gs).set((void*)&length);
         }
@@ -209,7 +209,7 @@ namespace hacc {
 
     Reference Reference::elem (size_t index) const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get elem from");
          // First try individual elems
         if (index < type().data->elem_list.size()) {
             return chain(*this, type().data->elem_list[index]);
@@ -233,7 +233,7 @@ namespace hacc {
 
     Tree* Reference::to_tree () const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "call to_tree on");
          // First check individual special values.
         if (auto& eq = type().data->eq) {
             Tree* r = null;
@@ -301,7 +301,7 @@ namespace hacc {
      //  and cascading calls (prepare and finish)
     void Reference::prepare (Tree* h) const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "call from_tree on");
         if (gs->narrow) return;
         if (type().data->prepare) {
             mod([&](void* p){ type().data->prepare(p, h); });
@@ -452,7 +452,7 @@ namespace hacc {
 
     bool Reference::foreach_address (const Func<bool (Pointer, Path*)>& cb, Path* path) const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get addresses in");
         if (void* addr = address()) {
             if (cb(Pointer(type(), addr), path))
                 return true;
@@ -478,7 +478,7 @@ namespace hacc {
 
     bool Reference::foreach_pointer (const Func<bool (Reference, Path*)>& cb, Path* path) const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Type(type());
+        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get pointers in");
         if (type().data->pointee_type) {
             if (cb(*this, path))
                 return true;
@@ -516,7 +516,15 @@ namespace hacc {
                 "Unhaccable type: " + t.name()
             ), type(t)
         { }
-
+        Unhaccable_Reference::Unhaccable_Reference (Reference r, String goal) :
+            Logic_Error(
+                "Cannot " + goal + " a Reference of unhaccable type "
+              + r.type().name()
+              + " hosted by object of type "
+              + r.host_type().name()
+              + " through " + r.gs->description()
+            ), r(r), goal(goal)
+        { }
         Form_Mismatch::Form_Mismatch (Type t, Form f) :
             Logic_Error(
                 "Form mismatch: type " + t.name()
