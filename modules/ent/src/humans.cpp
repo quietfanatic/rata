@@ -55,7 +55,7 @@ namespace ent {
     void set_ambulate_friction (Biped* b, float fric) {
         b->legs.ambulate_force(
             b->b2body->GetMass()
-          * -phys::space->get_gravity().y
+          * -phys::space.get_gravity().y
           * sqrt(fric * b->get_ground_fix()->GetFriction())
         );
     }
@@ -155,7 +155,9 @@ namespace ent {
         }
     }
 
-    void Biped::finish () { }
+    void Biped::finish () {
+        geo::behold(this);
+    }
 
 } using namespace ent;
 

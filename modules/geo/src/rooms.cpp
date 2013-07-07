@@ -7,17 +7,9 @@
 namespace geo {
 
     Logger geo_logger ("geo");
-
-    Geography& geography () {
-        static Geography r;
-        return r;
-    }
-
-    Geography::Geography () :
-        current_room(NULL), beholder(NULL),
-        tumbolia(hacc::File("modules/geo/res/tumbolia.room").data())
-    { }
-    Links<Resident> housing_office;
+    Room* current_room = NULL;
+    Resident* beholder = NULL;
+    Room tumbolia;
 
     void Room::activate () {
         geo_logger.log("Activating room @%lx", (unsigned long)this);
@@ -30,11 +22,11 @@ namespace geo {
             r->reclude();
     }
 
-    void Geography::enter (Room* r) {
+    void enter (Room* r) {
         geo_logger.log("Entering room @%lx", (unsigned long)r);
         if (!r) {
             geo_logger.log("Oops, tried to enter the NULL pointer.\n");
-            r = tumbolia;
+            r = &tumbolia;
         }
          // Mark activating
         r->activating = true;
@@ -66,43 +58,41 @@ namespace geo {
         }
     }
 
-    void Geography::behold (Resident* res) {
+    void behold (Resident* res) {
         beholder = res;
         enter(res->room);
     }
 
-    Geography::~Geography () { }
-
     Room::~Room () {
-        if (geography().current_room == this) geography().current_room = NULL;
-        if (geography().tumbolia == this) geography().tumbolia = NULL;
+        if (current_room == this) current_room = NULL;
     }
 
     void Resident::finish () { if (room) link(room->residents); }
 
     void Resident::reroom (Vec pos) {
-        if (!room) room = geography().current_room;
-        Room* origin = room == geography().tumbolia
-            ? geography().current_room : room;
+        if (!room) room = current_room;
+        Room* origin =
+            room == &tumbolia
+                ? current_room : room;
         if (!origin->boundary.covers(pos)) {
             for (auto n : origin->neighbors) {
                 if (n->boundary.covers(pos)) {
                     room = n;
                     link(n->residents);
-                    if (geography().beholder == this)
-                        geography().enter(n);
+                    if (beholder == this)
+                        enter(n);
                     else if (!n->active)
                         reclude();
                     return;
                 }
             }
-            if (room != geography().tumbolia) {
-                if (geography().beholder != this)
+            if (room != &tumbolia) {
+                if (beholder != this)
                     geo_logger.log("Resident @%lx ended up in tumbolia.", this);
                 else
                     geo_logger.log("The Beholder has left the building.  Party's over.", this);
-                room = geography().tumbolia;
-                link(geography().tumbolia->residents);
+                room = &tumbolia;
+                link(tumbolia.residents);
                 reclude();
             }
         }

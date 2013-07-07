@@ -4,7 +4,6 @@
 #include "../../util/inc/Vec.h"
 #include "../../util/inc/Rect.h"
 #include "../../util/inc/organization.h"
-#include "../../core/inc/state.h"
 
 namespace geo {
 
@@ -12,7 +11,7 @@ namespace geo {
     struct Resident;
 
     struct Room {
-        Rect boundary;
+        Rect boundary = Rect(-INF, -INF, INF, INF);
         bool active = false;
         bool activating = false;
         std::vector<Room*> neighbors;
@@ -32,19 +31,12 @@ namespace geo {
         void reroom (Vec pos);
     };
 
-    struct Geography {
-        Room* current_room;
-        Resident* beholder;
-        Room* tumbolia;
+    extern Room* current_room;
+    extern Resident* beholder;
+    extern Room tumbolia;
 
-        void enter (Room*);
-        void behold (Resident*);
-
-        Geography ();
-        void finish ();
-        ~Geography ();
-    };
-    extern Geography& geography ();
+    void enter (Room*);
+    void behold (Resident*);
 
 }
 

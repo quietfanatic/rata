@@ -212,15 +212,28 @@ namespace geo {
      // Now for drawing tilemaps.
 
     struct Tilemap_Layer : core::Layer, core::Renderer {
-        core::Program* program = hacc::File("modules/geo/res/tiles.prog").data();
-        int tex = program->require_uniform("tex");
-        int camera_pos = program->require_uniform("camera_pos");
-        int model_pos = program->require_uniform("model_pos");
-        int tileset_size = program->require_uniform("tileset_size");
+        void (* glUseProgram )(GLuint);
+        void (* glUniform1i )(GLint, GLint);
+        void (* glUniform2f )(GLint, GLfloat, GLfloat);
+        void (* glBindVertexArray )(GLuint);
+        core::Program* program;
+        int tex;
+        int camera_pos;
+        int model_pos;
+        int tileset_size;
 
-        Tilemap_Layer () : core::Layer("E.M", "tilemaps") {
-            static auto glUniform1i = core::glproc<void (GLint, GLint)>("glUniform1i");
-            static auto glUseProgram = core::glproc<void (GLuint)>("glUseProgram");
+        Tilemap_Layer () : core::Layer("E.M", "tilemaps") { }
+         // Layer
+        void start () {
+            glUseProgram = core::glproc<void (GLuint)>("glUseProgram");
+            glUniform1i = core::glproc<void (GLint, GLint)>("glUniform1i");
+            glUniform2f = core::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+            glBindVertexArray = core::glproc<void (GLuint)>("glBindVertexArray");
+            program = hacc::File("modules/geo/res/tiles.prog").data();
+            tex = program->require_uniform("tex");
+            camera_pos = program->require_uniform("camera_pos");
+            model_pos = program->require_uniform("model_pos");
+            tileset_size = program->require_uniform("tileset_size");
             glUseProgram(program->glid);
             glUniform1i(tex, 0);  // Texture unit 0
             if (core::diagnose_opengl("after creating tilemap renderer")) {
@@ -228,21 +241,16 @@ namespace geo {
             }
         }
 
-         // for Renderer
+         // Renderer
         void start_rendering () {
-            static auto glUseProgram = core::glproc<void (GLuint)>("glUseProgram");
-            static auto glUniform2f = core::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
             glUseProgram(program->glid);
             glUniform2f(camera_pos, 10, 7.5);  // TODO make this dynamic
         }
-         // for Layer
-        void start () { }
+         // Layer
         void run () {
-            static auto glUniform2f = core::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-            static auto glBindVertexArray = core::glproc<void (GLuint)>("glBindVertexArray");
             use();
             for (Tilemap* map = active_tilemaps.first(); map; map = map->Linkable<Tilemap>::next()) {
                 Vec pos = map->Object::pos();
@@ -255,11 +263,7 @@ namespace geo {
                 core::diagnose_opengl("After rendering a tilemap");
             }
         }
-    };
-    Tilemap_Layer& tilemap_layer () {
-        static Tilemap_Layer r;
-        return r;
-    }
+    } tilemap_layer;
 
 } using namespace geo;
 

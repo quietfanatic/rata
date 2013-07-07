@@ -1,6 +1,8 @@
 #ifndef HAVE_UTIL_RECT_H
 #define HAVE_UTIL_RECT_H
 
+#include "Vec.h"
+
 // RECTANGLES
 struct Rect {
     float l;

@@ -8,14 +8,14 @@ namespace phys {
         b2bdf.type = b2_kinematicBody;
         b2bdf.gravityScale = 0;
         b2bdf.fixedRotation = true;
-        friction_body = space->b2world->CreateBody(&b2bdf);
+        friction_body = space.b2world->CreateBody(&b2bdf);
 
         b2FrictionJointDef b2jdf;
         b2jdf.bodyA = obj->b2body;
         b2jdf.bodyB = friction_body;
         b2jdf.maxForce = 0;
         b2jdf.maxTorque = 0;
-        friction_joint = (b2FrictionJoint*)space->b2world->CreateJoint(&b2jdf);
+        friction_joint = (b2FrictionJoint*)space.b2world->CreateJoint(&b2jdf);
     }
     void Ambulator::ambulate_x (Object* obj, float x) {
         friction_body->SetTransform(obj->pos(), 0);
@@ -34,7 +34,7 @@ namespace phys {
     }
     void Ambulator::enable () { friction_body->SetActive(true); }
     void Ambulator::disable () { friction_body->SetActive(false); }
-    Ambulator::~Ambulator () { space->b2world->DestroyBody(friction_body); }  // joint goes with
+    Ambulator::~Ambulator () { space.b2world->DestroyBody(friction_body); }  // joint goes with
 
 }
 

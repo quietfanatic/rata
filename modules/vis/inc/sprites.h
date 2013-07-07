@@ -1,6 +1,7 @@
 #ifndef HAVE_VIS_SPRITES_H
 #define HAVE_VIS_SPRITES_H
 
+#include "../../util/inc/Rect.h"
 #include "../../core/inc/images.h"
 #include "../../util/inc/organization.h"
 

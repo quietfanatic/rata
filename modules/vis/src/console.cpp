@@ -1,6 +1,5 @@
 
 #include "../../core/inc/phases.h"
-#include "../../core/inc/state.h"
 #include "../../core/inc/input.h"
 #include "../../core/inc/commands.h"
 #include "../../core/inc/game.h"

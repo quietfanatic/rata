@@ -4,7 +4,6 @@
 #include <SOIL/SOIL.h>
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/phases.h"
-#include "../../core/inc/state.h"
 #include "../../core/inc/opengl.h"
 #include "../../util/inc/debug.h"
 #include "../inc/sprites.h"
@@ -88,14 +87,6 @@ namespace vis {
         return NULL;
     }
 
-
-    static GLenum diagnose_opengl (const char* when = "") {
-        GLenum err = glGetError();
-        if (err)
-            fprintf(stderr, "OpenGL error: %04x %s\n", err, when);
-        return err;
-    }
-
     static Links<Draws_Sprites> sprite_drawers;
 
     void Draws_Sprites::activate () {
@@ -105,35 +96,46 @@ namespace vis {
         unlink();
     }
 
-
     struct Sprite_Layer : Layer, Renderer {
-        Program* program = hacc::File("modules/vis/res/sprite.prog").data();
-        GLint tex = program->require_uniform("tex");
-        GLint camera_pos = program->require_uniform("camera_pos");
-        GLint model_pos = program->require_uniform("model_pos");
-        GLint model_scale = program->require_uniform("model_scale");
+        Program* program;
+        GLint tex;
+        GLint camera_pos;
+        GLint model_pos;
+        GLint model_scale;
+        void (* glUseProgram )(GLuint);
+        void (* glUniform1i )(GLint, GLint);
+        void (* glUniform2f )(GLint, GLfloat, GLfloat);
+        void (* glUniform3f )(GLint, GLfloat, GLfloat, GLfloat);
+        void (* glBindVertexArray )(GLuint);
 
-        Sprite_Layer () : Layer("C.M", "sprites") {
-            static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
-            static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
+        Sprite_Layer () : Layer("C.M", "sprites") { }
+         // Layer
+        void start () {
+            glUseProgram = glproc<void (GLuint)>("glUseProgram");
+            glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
+            glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+            glUniform3f = glproc<void (GLint, GLfloat, GLfloat, GLfloat)>("glUniform3f");
+            glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
+            program = hacc::File("modules/vis/res/sprite.prog").data();
+            tex = program->require_uniform("tex");
+            camera_pos = program->require_uniform("camera_pos");
+            model_pos = program->require_uniform("model_pos");
+            model_scale = program->require_uniform("model_scale");
             glUseProgram(program->glid);
             glUniform1i(tex, 0);  // Texture unit 0
             if (diagnose_opengl("after setting uniforms and stuff")) {
                 throw std::logic_error("sprites init failed due to GL error");
             }
         }
-         // for Renderer
+         // Renderer
         void start_rendering () {
-            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-            static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
             glDisable(GL_BLEND);
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
             glUseProgram(program->glid);
             glUniform2f(camera_pos, 10, 7.5);  // TODO: Control the camera with this
         }
-         // for Layer
-        void start () { }
+         // Layer
         void run () {
             glClearColor(0.5, 0.5, 0.5, 0);
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -142,19 +144,11 @@ namespace vis {
                 p->draws_sprites();
             }
         }
-    };
-    Sprite_Layer& sprite_layer () {
-        static Sprite_Layer r;
-        return r;
-    }
+    } sprite_layer;
 
     static Logger draw_sprite_logger ("draw_sprite", false);
 
     void Draws_Sprites::draw_sprite (Frame* frame, core::Texture* tex, Vec p, bool fliph, bool flipv, float z) {
-        static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
-        static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-        static auto glUniform3f = glproc<void (GLint, GLfloat, GLfloat, GLfloat)>("glUniform3f");
-
         if (draw_sprite_logger.on) {
             draw_sprite_logger.log("tex: %s frame: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
                 tex ? tex->name.c_str() : "NULL", frame ? frame->offset.x : 0/0.0, frame ? frame->offset.y : 0/0.0,
@@ -163,12 +157,12 @@ namespace vis {
             );
         }
 
-        sprite_layer().use();
+        sprite_layer.use();
 
-        glUniform3f(sprite_layer().model_pos, p.x, p.y, z);
-        glUniform2f(sprite_layer().model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
+        sprite_layer.glUniform3f(sprite_layer.model_pos, p.x, p.y, z);
+        sprite_layer.glUniform2f(sprite_layer.model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->tex);
-        glBindVertexArray(frame->parent->vao_id);
+        sprite_layer.glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
 
         diagnose_opengl("After rendering a sprite");

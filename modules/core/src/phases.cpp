@@ -1,8 +1,6 @@
 
 #include <stdlib.h>
 #include "../inc/phases.h"
-#include "../inc/input.h"
-#include "../inc/commands.h"
 #include "../../hacc/inc/everything.h"
 
 namespace core {

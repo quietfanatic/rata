@@ -12,7 +12,7 @@ template <class T> using Init_Safe = T& ();
 #define EXTERN_INIT_SAFE(type, name) type& name ();
 
 #define STRINGIFY(v) #v
-#define _COMMA
+#define _COMMA ,
 #define CE constexpr
 typedef const char* CStr;
 typedef uint8_t uint8;
@@ -27,14 +27,19 @@ typedef uint32 uint;
 
 #define WARN(...) fprintf(stderr, __VA_ARGS__)
 #define ANON_HELPER_1(a, b) a##b
-#define ANON_HELPER_2(a, b) UNIQUE_HELPER_1(a, b)
+#define ANON_HELPER_2(a, b) ANON_HELPER_1(a, b)
 #define ANON ANON_HELPER_2(_anon_, __COUNTER__)
 
  // Constants
-const float FPS = 10.0;
-const float FR = 1/10.0;
-const float PX = 1/16.0;
-const float PI = M_PI;
-
+CE float FPS = 60.0;
+CE float FR = 1/60.0;
+CE float PX = 1/16.0;
+CE float PI = M_PI;
+#ifndef INF
+static const float INF = 1.f/0.f;
+#endif
+#ifndef NAN
+static const float NAN = 0.f/0.f;
+#endif
 
 #endif

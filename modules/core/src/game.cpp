@@ -1,16 +1,41 @@
 #include <GL/glfw.h>
 #include "../inc/game.h"
-#include "../inc/state.h"
 #include "../inc/phases.h"
+#include "../../hacc/inc/files.h"
 
 namespace core {
 
-    uint64 frame_number = 0;
+     // Game data
+    uint64 frames_simulated = 0;
+    uint64 frames_drawn = 0;
+     // Scheduled operations
+    static std::vector<std::function<void ()>> ops;
+    static bool to_stop = false;
 
-    void quit_game () {
+    void init () {
+        static bool initialized = false;
+        if (initialized) return;
+        initialized = true;
+        glfwInit();
+        set_video(3);
+    }
+
+    void load (std::string filename) {
+        ops.emplace_back([&](){ hacc::load(filename); });
+    }
+    void unload (std::string filename) {
+        ops.emplace_back([&](){ hacc::unload(filename); });
+    }
+    void save (std::string filename) {
+        ops.emplace_back([&](){ hacc::save(filename); });
+    }
+    void stop () { to_stop = true; }
+
+    void quick_exit () {
         glfwTerminate();
         exit(0);
     }
+
     void set_video (uint scale) {
         glfwOpenWindow(
             320*scale, 240*scale,
@@ -20,41 +45,44 @@ namespace core {
         );
     }
     
-    bool initialized = false;
-
-    void init () {
-        if (initialized) return;
-        initialized = true;
-        glfwInit();
-        set_video(3);
-    }
-
-    static std::string to_load;
-    static std::string to_save;
-    void load (std::string filename) { to_load = filename; }
-    void save (std::string filename) { to_save = filename; }
-
     void start () {
+        init();
+        for (Phase* p : all_phases) p->start();
+        for (Layer* l : all_layers) l->start();
         try {
-            init();
             for (;;) {
-                if (!to_save.empty()) {
-                    save_state(to_save);
-                    to_save = "";
+                 // Run queued operations
+                if (!ops.empty()) {
+                    try {
+                        hacc::file_transaction([](){
+                            for (auto& o : ops) o();
+                        });
+                    } catch (std::exception& e) {
+                        fprintf(stderr, "Exception: %s\n", e.what());
+                    }
+                    ops.clear();
                 }
-                if (!to_load.empty()) {
-                    bool success = load_state(to_load);
-                    to_load = "";
-                    if (!success) return;
+                 // Then check for stop
+                if (to_stop) {
+                    to_stop = false;
+                    break;
                 }
-                frame_number++;
+                 // Run all_phases and all_layers
+                 // TODO: real timing and allow frame-skipping the all_layers
                 for (Phase* p : all_phases) p->run_if_on();
+                frames_simulated++;
                 for (Layer* l : all_layers) l->run_if_on();
+                frames_drawn++;
                 glfwSwapBuffers();
                 glfwSleep(1/60.0);
             }
-        } catch (std::exception& e) {
-            fprintf(stderr, "Game was aborted due to an exception: %s\n", e.what());
+            for (Phase* p : all_phases) p->stop();
+            for (Layer* l : all_layers) l->stop();
+        }
+        catch (std::exception& e) {
+            for (Phase* p : all_phases) p->stop();
+            for (Layer* l : all_layers) l->stop();
+            throw e;
         }
     }
 

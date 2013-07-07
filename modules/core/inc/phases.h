@@ -14,8 +14,10 @@ namespace core {
         std::string name;
         bool on;
 
+        virtual void start () { }
         virtual void run () { }
-        virtual ~Phase () { }  // This won't happen
+        virtual void stop () { }
+        virtual ~Phase () { }
 
         Phase (std::string order, std::string name = "", bool on = true) :
             Ordered(order), name(name), on(on)
@@ -32,8 +34,10 @@ namespace core {
         std::string name;
         bool on;
 
+        virtual void start () { }
         virtual void run () { }
-        virtual ~Layer () { }  // This won't happen
+        virtual void stop () { }
+        virtual ~Layer () { }
 
         Layer (std::string order, std::string name = "", bool on = true) :
             Ordered(order), name(name), on(on)

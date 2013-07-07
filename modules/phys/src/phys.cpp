@@ -63,15 +63,15 @@ namespace phys {
 
     static Logger space_logger ("space");
 
-    Space* space = NULL;
+    Space space;
 
-    Space::Space () : core::Phase("D.M", "space") {
+    Space::Space () : core::Phase("D.M", "space") { }
+    void Space::start () {
         space_logger.log("Creating the spacetime continuum.  Well, the space part anyway.");
         b2world = new b2World(
-            b2Vec2(0, 0)
+            b2Vec2(0, -30)
         );
         b2world->SetContactListener(&mycl);
-        space = this;
     }
     void Space::run () {
         for (b2Body* b2b = b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
@@ -88,10 +88,9 @@ namespace phys {
             }
         }
     }
-    Space::~Space () { 
+    Space::~Space () {
         space_logger.log("Destroying space.");
         delete b2world;
-        space = NULL;
     }
 
      // Objects
@@ -116,8 +115,8 @@ namespace phys {
         b2bd.fixedRotation = true;
         b2bd.type = b2_dynamicBody;
         b2bd.userData = o;
-        o->b2body = space->b2world->CreateBody(&b2bd);
-        space_logger.log("%d objects in space.", space->b2world->GetBodyCount());
+        o->b2body = space.b2world->CreateBody(&b2bd);
+        space_logger.log("%d objects in space.", space.b2world->GetBodyCount());
     }
 
     Object::Object () { create_b2body(this); }
@@ -134,7 +133,7 @@ namespace phys {
         Phys_Debug_Layer () : core::Layer("G.M", "phys_debug", false) { }
         void start () { }
         void run () {
-            for (b2Body* b2b = space->b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
+            for (b2Body* b2b = space.b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
                 if (b2b->IsActive()) {
                     uint32 color = 0xffffff7f;
                     switch (b2b->GetType()) {
@@ -189,11 +188,6 @@ namespace phys {
 } using namespace phys;
 
  // This is so satisfying
-
-HCB_BEGIN(Space)
-    name("phys::Space");
-    attr("gravity", value_methods(&Space::get_gravity, &Space::set_gravity));
-HCB_END(Space)
 
 HCB_BEGIN(Collision_Rule*)
     name("phys::Collision_Rule*");

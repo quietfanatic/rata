@@ -2,9 +2,7 @@
 #define HAVE_CORE_IMAGES_H
 
 #include <string>
-
 #include "../../util/inc/Vec.h"
-#include "../../util/inc/Rect.h"
 
 namespace core {
 

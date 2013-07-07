@@ -12,7 +12,6 @@ workflow {
         tmp/main.o
         ../core/tmp/game.o
         ../core/tmp/phases.o
-        ../core/tmp/state.o
         ../core/tmp/input.o
         ../core/tmp/images.o
         ../core/tmp/opengl.o

@@ -1,6 +1,5 @@
 
 #include "../../hacc/inc/everything.h"
-#include "../../core/inc/state.h"
 #include "../../phys/inc/phys.h"
 #include "../../vis/inc/sprites.h"
 

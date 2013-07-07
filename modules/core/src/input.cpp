@@ -3,7 +3,6 @@
 #include "../inc/input.h"
 #include "../inc/game.h"
 #include "../inc/phases.h"
-#include "../inc/state.h"
 
 namespace core {
 
@@ -11,7 +10,7 @@ namespace core {
     std::vector<Char_Listener*> char_listeners;
 
     static int GLFWCALL close_cb () {
-        quit_game();
+        quick_exit();
         return true;  // not gonna happen
     }
 
@@ -22,7 +21,7 @@ namespace core {
         if (action == GLFW_PRESS) {
             switch (keycode) {
                 case GLFW_KEY_ESC: {
-                    quit_game();
+                    quick_exit();
                     break;
                 }
                 default: break;
@@ -47,8 +46,7 @@ namespace core {
         void run () {
             glfwPollEvents();
         }
-    };
-    Input_Phase input_phase;
+    } input_phase;
 
 } using namespace core;
 

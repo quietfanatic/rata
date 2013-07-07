@@ -3,7 +3,6 @@
 
 #include <Box2D/Box2D.h>
 #include "../../core/inc/phases.h"
-#include "../../core/inc/state.h"
 #include "../../util/inc/Vec.h"
 #include "../../util/inc/organization.h"
 
@@ -18,12 +17,11 @@ namespace phys {
         Vec get_gravity () const { return b2world->GetGravity(); }
         void set_gravity (Vec g) { b2world->SetGravity(g); }
 
-        void start () { };
+        void start ();
         void run ();
         ~Space ();
     };
-    extern Space* space;
-
+    extern Space space;
 
      // Static things, probably stored in files
 
@@ -79,7 +77,7 @@ namespace phys {
         virtual void before_move () { }
         virtual void after_move () { }
         virtual void while_intangible () { }
-        virtual ~Object () { if (b2body) space->b2world->DestroyBody(b2body); }
+        virtual ~Object () { if (b2body) space.b2world->DestroyBody(b2body); }
 
         Object ();
         Object (BodyDef* def);

@@ -1,8 +1,4 @@
 {"std::unordered_map<std::string, hacc::Dynamic>":{
-    space:{"phys::Space":{
-        gravity: [0 -30]
-    }}
-    pdl:{"phys::Phys_Debug_Layer":{ }}
     rata:{"ent::Biped":{
         def:$("modules/rata/res/rata.biped").def
         Object:{ pos:[10 10.5] }

@@ -3,7 +3,6 @@
 #include "../inc/sprites.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/phases.h"
-#include "../../core/inc/state.h"
 #include "../../core/inc/commands.h"
 
 namespace vis {
@@ -86,21 +85,19 @@ namespace vis {
     Model::Model (Skel* skel) : skel(skel), segs(skel ? skel->segs.size() : 0) { }
 
 
-    struct Model_Tester;
-    static Model_Tester* model_tester;
     struct Model_Tester : core::Layer {
-        Model_Tester () : core::Layer("D.M", "model_tester", false) {
-            model_tester = this;
+        Model_Tester () : core::Layer("D.M", "model_tester", false) { }
+        bool flip = false;
+        Model model;
+        void start () {
             model = Model(hacc::File("modules/ent/res/small.skel").data());
             model.apply_skin(hacc::File("modules/rata/res/rata-base.skin").data());
             model.apply_pose(model.skel->poses.named("stand"));
         }
-        bool flip = false;
-        Model model;
         void run () {
             model.draw(Vec(10, 4), flip, false, 0.5);
         }
-    };
+    } model_tester;
 
 } using namespace vis;
 

@@ -4,24 +4,37 @@
 #include "../../hacc/inc/files.h"
 #include "../../core/inc/opengl.h"
 #include "../../core/inc/phases.h"
-#include "../../core/inc/state.h"
 
 namespace vis {
 
     using namespace core;
 
     struct Graffiti_Renderer : Renderer {
-        Program* program = hacc::File("modules/vis/res/color.prog").data();
-        int camera_pos = program->require_uniform("camera_pos");
-        int model_pos = program->require_uniform("model_pos");
-        int color = program->require_uniform("color");
-        void start () { }
+        Program* program = NULL;
+        int camera_pos;
+        int model_pos;
+        int color;
+        void (* glUseProgram )(GLuint);
+        void (* glUniform2f )(GLint, GLfloat, GLfloat);
+        void (* glUniform4f )(GLint, GLfloat, GLfloat, GLfloat, GLfloat);
+        void (* glBindVertexArray )(GLuint);
+        void (* glEnableVertexAttribArray )(GLuint);
+        void (* glDisableVertexAttribArray )(GLuint);
+        void (* glVertexAttribPointer )(GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*);
         void start_rendering () {
-            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-            static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
-            static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
-            static auto glDisableVertexAttribArray = glproc<void (GLuint)>("glDisableVertexAttribArray");
-            static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
+            if (!program) {
+                program = hacc::File("modules/vis/res/color.prog").data();
+                camera_pos = program->require_uniform("camera_pos");
+                model_pos = program->require_uniform("model_pos");
+                color = program->require_uniform("color");
+                glUseProgram = glproc<void (GLuint)>("glUseProgram");
+                glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
+                glUniform4f = glproc<void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)>("glUniform4f");
+                glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
+                glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
+                glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
+                glDisableVertexAttribArray = glproc<void (GLuint)>("glDisableVertexAttribArray");
+            }
             glDisable(GL_TEXTURE_2D);
             glDisable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
@@ -32,11 +45,7 @@ namespace vis {
             glUseProgram(program->glid);
             glUniform2f(camera_pos, 10.0, 7.5);
         }
-    };
-    Graffiti_Renderer& gr () {
-        static Graffiti_Renderer r;
-        return r;
-    }
+    } gr;
 
     void draw_line (Vec a, Vec b, uint32 color, float width) {
         Vec pts [2];
@@ -53,23 +62,20 @@ namespace vis {
         draw_primitive(GL_LINE_LOOP, n_pts, pts, color);
     }
     void draw_primitive (uint type, uint n_pts, Vec* pts, uint32 color) {
-        static auto glUniform4f = glproc<void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)>("glUniform4f");
-        static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
-        gr().use();
-        glUniform4f(gr().color,
+        gr.use();
+        gr.glUniform4f(gr.color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,
             ((color >> 8) & 255) / 255.0,
             (color & 255) / 255.0
         );
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, pts);
+        gr.glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, pts);
         glDrawArrays(type, 0, n_pts);
         diagnose_opengl("after drawing some graffiti");
     }
     void graffiti_pos (Vec pos) {
-        static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-        gr().use();
-        glUniform2f(gr().model_pos, pos.x, pos.y);
+        gr.use();
+        gr.glUniform2f(gr.model_pos, pos.x, pos.y);
     }
 
 }
