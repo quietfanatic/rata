@@ -412,6 +412,7 @@ namespace hacc {
                 );
                 break;
             }
+            case NULLFORM: break;
             default: throw X::Form_Mismatch(type(), h->form);
         }
     }
