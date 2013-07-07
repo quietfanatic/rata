@@ -25,7 +25,8 @@ namespace hacc {
         GetSet0& optional ();
         GetSet0& required ();
         GetSet0& readonly ();
-        GetSet0& narrow ();
+        GetSet0& narrow ();  // Do prepare and finish steps at fill time
+        GetSet0& prepare ();  // Do fill and finish steps at prepare time
     };
     template <class C>
     struct GetSet1 : GetSet0 { };
@@ -36,6 +37,7 @@ namespace hacc {
         GetSet2<C, M>& required () { return static_cast<GetSet2<C, M>&>(this->GetSet0::required()); }
         GetSet2<C, M>& readonly () { return static_cast<GetSet2<C, M>&>(this->GetSet0::readonly()); }
         GetSet2<C, M>& narrow () { return static_cast<GetSet2<C, M>&>(this->GetSet0::narrow()); }
+        GetSet2<C, M>& prepare () { return static_cast<GetSet2<C, M>&>(this->GetSet0::prepare()); }
     };
 
      // A Pointer implements a dynamically-typed pointer.
@@ -141,36 +143,22 @@ namespace hacc {
             return Dynamic(Type::CppType<C>(), p);
         }
         template <class C>
-        Dynamic (C&& v) : type(Type::CppType<C>()), addr(new C (v)) { }
+        explicit Dynamic (C&& v) : type(Type::CppType<C>()), addr(new C (v)) { }
 
-        void destroy () {
+        ~Dynamic () {
             if (addr) {
                 type.destruct(addr);
                 operator delete(addr);
-                addr = null;
             }
         }
-        ~Dynamic () { destroy(); }
 
         Dynamic& operator = (const Dynamic& o) {
-            destroy();
-            type = o.type;
-            if (o.addr) {
-                addr = operator new(type.size());
-                type.construct(addr);
-                type.copy_assign(addr, o.addr);
-            }
-            else {
-                addr = null;
-            }
-            return *this;
+            this->~Dynamic();
+            return *new (this) Dynamic (o);
         }
         Dynamic& operator = (Dynamic&& o) {
-            destroy();
-            type = o.type;
-            addr = o.addr;
-            o.addr = null;
-            return *this;
+            this->~Dynamic();
+            return *new (this) Dynamic (std::forward<Dynamic>(o));
         }
     };
 
@@ -236,6 +224,10 @@ namespace hacc {
         struct Address_Not_Found : Logic_Error {
             Pointer pointer;
             Address_Not_Found (Pointer);
+        };
+        struct Null_Pointer : Logic_Error {
+            Pointer pointer;
+            Null_Pointer (Pointer);
         };
     }
 

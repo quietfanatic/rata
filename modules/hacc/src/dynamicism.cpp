@@ -18,6 +18,7 @@ namespace hacc {
     GetSet0& GetSet0::required () { (*this)->optional = false; return *this; }
     GetSet0& GetSet0::readonly () { (*this)->readonly = true; return *this; }
     GetSet0& GetSet0::narrow () { (*this)->narrow = true; return *this; }
+    GetSet0& GetSet0::prepare () { (*this)->prepare = true; return *this; }
 
     void* address_of_type_internal (Pointer p, Type t) {
         while (p.type == Type::CppType<Dynamic>()) {
@@ -38,7 +39,9 @@ namespace hacc {
 
     Reference::Reference (Type type, void* p) :
         c(p), gs(type.data->gs_id)
-    { }
+    {
+        if (!p) throw X::Null_Pointer(Pointer(type, p));
+    }
     Reference::operator Pointer () const {
         void* p = address();
         if (p) {
@@ -343,6 +346,7 @@ namespace hacc {
             }
             default: break;
         }
+        if (gs->prepare) fill(h);
     }
 
     void Reference::fill (Tree* h) const {
@@ -601,6 +605,12 @@ namespace hacc {
               + " at " + stos((size_t)p.address)
             ), pointer(p)
         { }
+        Null_Pointer::Null_Pointer (Pointer p) :
+            Logic_Error(
+                "Cannot convert to Reference null pointer of type "
+              + p.type.name()
+            ), pointer(p)
+        { }
     }
 
 } using namespace hacc;
@@ -616,10 +626,9 @@ HCB_BEGIN(hacc::Dynamic)
                 throw X::Logic_Error("A Dynamic must have one key representing its type");
             }
             Type type (keys[0]);
-            dyn.destroy();
-            dyn.type = type;
-            dyn.addr = malloc(type.size());
-            type.construct(dyn.addr);
+            void* p = operator new (type.size());
+            type.construct(p);
+            dyn = Dynamic(type, p);
         }
     ));
     attrs([](Dynamic& dyn, String name)->Reference{

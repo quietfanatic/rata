@@ -40,7 +40,9 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::named_vector<C>)
     });
     delegate(hcb::template base<std::vector<C>>());
     attrs([](named_vector<C>& v, std::string name){
-        return Reference(v.named(name));
+        C* r = v.named(name);
+        if (r) return Reference(r);
+        else throw X::No_Attr(Type::CppType<hacc::named_vector<C>>(), name);
     });
 HCB_TEMPLATE_END(<class C>, hacc::named_vector<C>)
 

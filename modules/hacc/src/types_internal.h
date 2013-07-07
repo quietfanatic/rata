@@ -12,6 +12,7 @@ namespace hacc {
         bool optional = false;
         bool readonly = false;
         bool narrow = false;
+        bool prepare = false;
         Type t;
         Type ht;
         GetSetData (Type t, Type ht) : t(t), ht(ht) { }

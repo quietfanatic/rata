@@ -168,7 +168,7 @@ namespace hacc {
             _elem(Type::CppType<C>(), gs);
         }
         static void value (String s, C&& v) {
-            _value(Type::CppType<C>(), s, std::forward<C>(v), [](void* l, void* r){ return *(C*)l == *(C*)r; });
+            _value(Type::CppType<C>(), s, Dynamic(std::forward<C>(v)), [](void* l, void* r){ return *(C*)l == *(C*)r; });
         }
         static void delegate (const GetSet1<C>& gs) {
             _delegate(Type::CppType<C>(), gs);
