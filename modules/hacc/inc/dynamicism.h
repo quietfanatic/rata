@@ -180,8 +180,8 @@ namespace hacc {
         };
         struct Form_Mismatch : Logic_Error {
             Type type;
-            Form form;
-            Form_Mismatch (Type, Form);
+            Tree* tree;
+            Form_Mismatch (Type, Tree*);
         };
         struct Unaddressable : Logic_Error {
             Reference r;

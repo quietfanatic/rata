@@ -341,7 +341,7 @@ namespace hacc {
                     String filename = h->p->root();
                     load(File(filename));
                 }
-                else throw X::Form_Mismatch(type(), PATH);
+                else throw X::Form_Mismatch(type(), h);
                 break;
             }
             default: break;
@@ -413,7 +413,7 @@ namespace hacc {
                 break;
             }
             case NULLFORM: break;
-            default: throw X::Form_Mismatch(type(), h->form);
+            default: throw X::Form_Mismatch(type(), h);
         }
     }
 
@@ -530,11 +530,12 @@ namespace hacc {
               + " through " + r.gs->description()
             ), r(r), goal(goal)
         { }
-        Form_Mismatch::Form_Mismatch (Type t, Form f) :
+        Form_Mismatch::Form_Mismatch (Type t, Tree* tree) :
             Logic_Error(
                 "Form mismatch: type " + t.name()
-              + " cannot be represented by a " + form_name(f) + " tree"
-            ), type(t), form(f)
+              + " cannot be represented by " + form_name(tree->form) + " tree "
+              + tree_to_string(tree)
+            ), type(t), tree(tree)
         { }
         Unaddressable::Unaddressable (Reference r, String goal) :
             Logic_Error(

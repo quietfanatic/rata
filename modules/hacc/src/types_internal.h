@@ -36,7 +36,7 @@ namespace hacc {
         GetSet0 l;
         GetSet0 r;
         GS_Chain (GetSet0 l, GetSet0 r) :
-            GetSetData(l.host_type(), r.type()), l(l), r(r)
+            GetSetData(r.type(), l.host_type()), l(l), r(r)
         { }
         String description () const { return "(" + l.description() + " => " + r.description() + ")"; }
         void* address (void* c) const {
