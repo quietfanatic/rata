@@ -91,10 +91,10 @@ namespace core {
             for (Phase* p : all_phases) p->stop();
             for (Layer* l : all_layers) l->stop();
         }
-        catch (std::exception& e) {
+        catch (...) {
             for (Phase* p : all_phases) p->stop();
             for (Layer* l : all_layers) l->stop();
-            throw e;
+            throw;
         }
     }
 

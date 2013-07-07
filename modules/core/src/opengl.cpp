@@ -70,8 +70,9 @@ namespace core {
             if (glid) glDeleteShader(glid);
             glid = newid;
             source = "";
-        } catch (std::exception& e) {
+        } catch (...) {
             glDeleteShader(newid);
+            throw;
         }
     }
 
@@ -122,8 +123,9 @@ namespace core {
              // Everything is successful.
             if (glid) glDeleteProgram(glid);
             glid = newid;
-        } catch (std::exception& e) {
+        } catch (...) {
             glDeleteProgram(newid);
+            throw;
         }
     }
 

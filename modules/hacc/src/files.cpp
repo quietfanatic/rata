@@ -129,7 +129,7 @@ namespace hacc {
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
-                throw e;
+                throw;
             }
             f.p->state = LOAD_FILLING;
             new Action(FILL, [=](){ load_fill(f, t); });
@@ -140,7 +140,7 @@ namespace hacc {
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
-                throw e;
+                throw;
             }
             f.p->state = LOAD_FINISHING;
             new Action(FINISH, [=](){ load_finish(f, t); });
@@ -151,7 +151,7 @@ namespace hacc {
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
-                throw e;
+                throw;
             }
             f.p->state = LOAD_COMMITTING;
             new Action(COMMIT, [=](){ load_commit(f); });
@@ -174,7 +174,7 @@ namespace hacc {
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
-                throw e;
+                throw;
             }
             new Action(SAVE_COMMIT, [=](){ save_commit(f, t); });
         }
@@ -206,7 +206,7 @@ namespace hacc {
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
-                throw e;
+                throw;
             }
             f.p->state = RELOAD_FILLING;
             new Action(FILL, [=](){ reload_fill(f, t); });
@@ -217,7 +217,7 @@ namespace hacc {
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
-                throw e;
+                throw;
             }
             f.p->state = RELOAD_FINISHING;
             new Action(FINISH, [=](){ reload_finish(f, t); });
@@ -229,7 +229,7 @@ namespace hacc {
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
-                throw e;
+                throw;
             }
             f.p->state = RELOAD_VERIFYING;
             if (!reload_verify_scheduled) {
@@ -277,7 +277,7 @@ namespace hacc {
                 }
                 catch (X::Error& e) {
                     if (e.filename.empty()) e.filename = f.filename();
-                    throw e;
+                    throw;
                 }
             }
             for (auto& p : files_by_filename) {
