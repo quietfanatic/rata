@@ -23,7 +23,7 @@ namespace vis {
         void (* glVertexAttribPointer )(GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*);
         void start_rendering () {
             if (!program) {
-                program = hacc::File("modules/vis/res/color.prog").data();
+                program = hacc::File("modules/vis/res/color.prog").data().attr("prog");
                 camera_pos = program->require_uniform("camera_pos");
                 model_pos = program->require_uniform("model_pos");
                 color = program->require_uniform("color");

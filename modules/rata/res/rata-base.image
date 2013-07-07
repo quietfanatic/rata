@@ -1,9 +1,9 @@
 {"core::Image":{
     filename: "modules/rata/res/rata-base.png"
     textures: [
-        {name:body    offset:[  0   0] layout:$("modules/ent/res/small.layouts").body    size:[ 85 43]}
-        {name:head    offset:[117   1] layout:$("modules/ent/res/small.layouts").head    size:[127 88]}
-        {name:arm     offset:[  0  95] layout:$("modules/ent/res/small.layouts").arm     size:[100 16]}
-        {name:forearm offset:[  0 112] layout:$("modules/ent/res/small.layouts").forearm size:[100 16]}
+        {name:body    offset:[  0   0] size:[ 85 43]}
+        {name:head    offset:[117   1] size:[127 88]}
+        {name:arm     offset:[  0  95] size:[100 16]}
+        {name:forearm offset:[  0 112] size:[100 16]}
     ]
 }}

@@ -14,7 +14,7 @@ namespace vis {
     void Draws_Text::text_disappear () { unlink(); }
 
     struct Text_Layer : Layer, Renderer {
-        Program* program = hacc::File("modules/vis/res/text.prog").data();
+        Program* program = hacc::File("modules/vis/res/text.prog").data().attr("prog");
         GLint tex = program->require_uniform("tex");
         GLint camera_pos = program->require_uniform("camera_pos");
         GLint model_pos = program->require_uniform("model_pos");
