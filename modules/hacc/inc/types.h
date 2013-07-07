@@ -67,7 +67,8 @@ namespace hacc {
         struct Type_Mismatch : Logic_Error {
             Type expected;
             Type got;
-            Type_Mismatch (Type expected, Type got);
+            String when;
+            Type_Mismatch (Type expected, Type got, String when = "");
         };
         struct Not_Constructible : Logic_Error {
             Type type;

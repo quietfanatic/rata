@@ -32,7 +32,9 @@ namespace hacc {
 
     bool Type::initialized () const { return data->initialized; }
     String Type::name () const {
-        if (data->name)
+        if (!data)
+            return "<No type>";
+        else if (data->name)
             return data->name();
         else
             return "{" + String(data->cpptype->name()) + "}";
@@ -88,10 +90,12 @@ namespace hacc {
     }
 
     namespace X {
-        Type_Mismatch::Type_Mismatch (Type e, Type g) :
+        Type_Mismatch::Type_Mismatch (Type e, Type g, String when) :
             Logic_Error(
-                "Type mismatch: expected "
-              + e.name() + " but got " + got.name()
+                (when.empty()
+                    ? "Type mismatch: expected "
+                    : "Type mismatch " + when + ": expected ")
+              + e.name() + " but got " + g.name()
             ), expected(e), got(g)
         { }
         No_Type_For_CppType::No_Type_For_CppType (const std::type_info& t) :

@@ -19,11 +19,21 @@ namespace hacc {
     GetSet0& GetSet0::readonly () { (*this)->readonly = true; return *this; }
     GetSet0& GetSet0::narrow () { (*this)->narrow = true; return *this; }
 
-    void* Pointer::address_of_type (Type t) const {
-        if (t == Type(type)) {
-            return address;
+    void* address_of_type_internal (Pointer p, Type t) {
+        while (p.type == Type::CppType<Dynamic>()) {
+            p = ((Dynamic*)p.address)->address();
         }
-        else throw X::Type_Mismatch(type, t);
+        if (t == p.type)
+            return p.address;
+        else
+            return null;
+    }
+
+    void* Pointer::address_of_type (Type t) const {
+        if (void* r = address_of_type_internal(*this, t)) {
+            return r;
+        }
+        else throw X::Type_Mismatch(type, t, "when converting Pointer to " + t.name() + "*");
     }
 
     Reference::Reference (Type type, void* p) :
@@ -31,7 +41,11 @@ namespace hacc {
     { }
     Reference::operator Pointer () const {
         void* p = address();
-        if (p) return Pointer(type(), p);
+        if (p) {
+            if (!type().data)
+                throw X::Unaddressable(*this, "<Internal error: this Reference had no type>");
+            return Pointer(type(), p);
+        }
         else throw X::Unaddressable(*this, "convert to Pointer");
     }
 
@@ -370,17 +384,22 @@ namespace hacc {
             }
             case PATH: {
                 Reference pointee = path_to_reference(h->p);
-                if (pointee.type() == type().data->pointee_type) {
-                    if (void* pointee_addr = pointee.address()) {
-                        set(&pointee_addr);
+                if (void* pointee_addr = pointee.address()) {
+                    Pointer p (pointee.type(), pointee_addr);
+                    if (void* addr = address_of_type_internal(p, type().data->pointee_type)) {
+                        set(&addr);
                     }
-                    else throw X::Unaddressable(pointee,
-                        "generate pointer through path "
-                      + path_to_string(h->p)
-                      + " from"
+                    else throw X::Type_Mismatch(
+                        type().data->pointee_type,
+                        pointee.type(),
+                        "when reading from path " + path_to_string(h->p)
                     );
                 }
-                else throw X::Type_Mismatch(type().data->pointee_type, pointee.type());
+                else throw X::Unaddressable(pointee,
+                    "generate pointer through path "
+                  + path_to_string(h->p)
+                  + " from"
+                );
                 break;
             }
             default: throw X::Form_Mismatch(type(), h->form);

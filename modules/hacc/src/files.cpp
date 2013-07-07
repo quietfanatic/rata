@@ -1,4 +1,5 @@
 #include <unordered_map>
+#include <sstream>
 #include "../inc/files.h"
 #include "../inc/strings.h"
 #include "types_internal.h"
@@ -54,6 +55,8 @@ namespace hacc {
     Reference File::data () {
         if (p->state == UNLOADED)
             load(*this);
+        if (!p->data.address())
+            throw X::Internal_Error("Something went wrong when autoloading \"" + filename() + "\"; No exception happened but it wasn't loaded.");
         return p->data.address();
     }
 
