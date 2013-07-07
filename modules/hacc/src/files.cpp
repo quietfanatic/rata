@@ -90,7 +90,7 @@ namespace hacc {
 
          // A transaction consists of a priority queue of actions.
         enum Priority {
-            PREPARE,  // Actually, this should be done ASAP and not be queued
+            PREPARE,
             FILL,
             FINISH,
             VERIFY,
@@ -119,7 +119,7 @@ namespace hacc {
         void request_load (File f) {
             if (f.p->state != UNLOADED) return;
             f.p->state = LOAD_PREPARING;
-            load_prepare(f);
+            new Action(PREPARE, [=](){ load_prepare(f); });
         }
         void load_prepare (File f) {
             Tree* t;
@@ -196,7 +196,7 @@ namespace hacc {
         void request_reload (File f) {
             if (f.p->state != LOADED) return;
             f.p->state = RELOAD_PREPARING;
-            reload_prepare(f);
+            new Action(PREPARE, [=](){ reload_prepare(f); });
         }
         void reload_prepare (File f) {
             Tree* t;
