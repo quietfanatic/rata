@@ -35,7 +35,7 @@ namespace core {
         current = NULL;
     }
 
-    void Shader::finish () {
+    void Shader::compile () {
 
         static auto glCreateShader = glproc<GLuint (GLenum)>("glCreateShader");
         static auto glShaderSource = glproc<void (GLuint, GLsizei, const GLchar**, const GLint*)>("glShaderSource");
@@ -91,6 +91,11 @@ namespace core {
         static auto glGetProgramInfoLog = glproc<void (GLuint, GLsizei, GLsizei*, GLchar*)>("glGetProgramInfoLog");
         //static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
         static auto glDeleteProgram = glproc<void (GLuint)>("glDeleteProgram");
+
+        for (Shader* s : shaders) {
+            if (s->glid == 0)
+                s->compile();
+        }
 
         GLuint newid = glCreateProgram();
         if (!newid) {
@@ -157,7 +162,6 @@ HCB_BEGIN(Shader)
         }
     ));
     attr("source", member(&Shader::source));
-    finish([](Shader& s, hacc::Tree*){ s.finish(); });
 HCB_END(Shader)
 
 HCB_BEGIN(Program)

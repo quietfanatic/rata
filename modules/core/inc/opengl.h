@@ -32,7 +32,7 @@ namespace core {
         GLenum type;
         std::string source;
     
-        void finish ();
+        void compile ();
         ~Shader ();
     };
 
