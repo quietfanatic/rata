@@ -190,7 +190,7 @@ namespace vis {
 
 HCB_BEGIN(Frame)
     name("vis::Frame");
-    attr("name", member(&Frame::name));
+    attr("name", member(&Frame::name).prepare());
     attr("offset", member(&Frame::offset));
     attr("box", member(&Frame::box));
     attr("points", member(&Frame::points).optional());
@@ -201,7 +201,9 @@ HCB_BEGIN(Layout)
     attr("size", member(&Layout::size));
     attr("frames", member(&Layout::frames));
     attrs([](Layout& layout, std::string name){
-        return hacc::Reference(layout.frame_named(name));
+        Frame* r = layout.frame_named(name);
+        if (r) return hacc::Reference(r);
+        else throw hacc::X::No_Attr(hacc::Type::CppType<Layout>(), name);
     });
     finish([](Layout& layout, hacc::Tree*){
         layout.finish();

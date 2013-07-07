@@ -78,7 +78,7 @@ namespace core {
 
 HCB_BEGIN(Texture)
     name("core::Texture");
-    attr("name", member(&Texture::name).optional());
+    attr("name", member(&Texture::name).optional().prepare());
     attr("offset", member(&Texture::offset).optional());
     attr("size", member(&Texture::size).optional());
 HCB_END(Texture)
@@ -88,7 +88,9 @@ HCB_BEGIN(Image)
     attr("filename", member(&Image::filename));
     attr("textures", member(&Image::textures).optional());
     attrs([](Image& image, std::string name){
-        return hacc::Reference(image.texture_named(name));
+        Texture* r = image.texture_named(name);
+        if (r) return hacc::Reference(r);
+        else throw hacc::X::No_Attr(hacc::Type::CppType<Image>(), name);
     });
     finish([](Image& i, hacc::Tree*){ i.load(); });
 HCB_END(core::Image)
