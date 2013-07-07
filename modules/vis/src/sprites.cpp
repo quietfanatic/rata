@@ -111,21 +111,26 @@ namespace vis {
         Sprite_Layer () : Layer("C.M", "sprites") { }
          // Layer
         void start () {
+            WARN("0\n");
             glUseProgram = glproc<void (GLuint)>("glUseProgram");
             glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
             glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             glUniform3f = glproc<void (GLint, GLfloat, GLfloat, GLfloat)>("glUniform3f");
             glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
-            program = hacc::File("modules/vis/res/sprite.prog").data();
+            WARN("1\n");
+            program = hacc::File("modules/vis/res/sprite.prog").data().attr("prog");
+            WARN("2\n");
             tex = program->require_uniform("tex");
             camera_pos = program->require_uniform("camera_pos");
             model_pos = program->require_uniform("model_pos");
             model_scale = program->require_uniform("model_scale");
             glUseProgram(program->glid);
             glUniform1i(tex, 0);  // Texture unit 0
+            WARN("3\n");
             if (diagnose_opengl("after setting uniforms and stuff")) {
                 throw std::logic_error("sprites init failed due to GL error");
             }
+            WARN("4\n");
         }
          // Renderer
         void start_rendering () {

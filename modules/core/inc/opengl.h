@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdexcept>
 #include <vector>
+#include <unordered_map>
 #include <GL/glfw.h>
 
 namespace core {
@@ -39,7 +40,7 @@ namespace core {
         std::string name = "<Anonymous Program>";
         uint glid = 0;
         std::vector<Shader*> shaders;
-        std::vector<std::pair<std::string, uint>> attributes;
+        std::unordered_map<std::string, uint> attributes;
 
         int require_uniform (const char* name);
         void link ();

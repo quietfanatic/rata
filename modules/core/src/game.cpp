@@ -7,6 +7,7 @@
 namespace core {
 
     Logger file_logger ("files");
+    Logger game_logger ("game");
 
      // Game data
     uint64 frames_simulated = 0;
@@ -25,13 +26,13 @@ namespace core {
     }
 
     void load (std::string filename) {
-        ops.emplace_back([&](){ hacc::load(filename); });
+        ops.emplace_back([=](){ hacc::load(filename); });
     }
     void unload (std::string filename) {
-        ops.emplace_back([&](){ hacc::unload(filename); });
+        ops.emplace_back([=](){ hacc::unload(filename); });
     }
     void save (std::string filename) {
-        ops.emplace_back([&](){ hacc::save(filename); });
+        ops.emplace_back([=](){ hacc::save(filename); });
     }
     void stop () { to_stop = true; }
 
@@ -51,8 +52,15 @@ namespace core {
     
     void start () {
         init();
-        for (Phase* p : all_phases) p->start();
-        for (Layer* l : all_layers) l->start();
+        game_logger.log("We have %lu phases and %lu layers", all_phases.size(), all_layers.size());
+        for (Phase* p : all_phases) {
+            game_logger.log("Starting phase: " + p->name);
+            p->start();
+        }
+        for (Layer* l : all_layers) {
+            game_logger.log("Starting layer: " + l->name);
+            l->start();
+        }
         try {
             for (;;) {
                  // Run queued operations
