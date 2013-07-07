@@ -33,7 +33,7 @@ namespace hacc {
         if (void* r = address_of_type_internal(*this, t)) {
             return r;
         }
-        else throw X::Type_Mismatch(type, t, "when converting Pointer to " + t.name() + "*");
+        else throw X::Type_Mismatch(t, type, "when converting Pointer to " + t.name() + "*");
     }
 
     Reference::Reference (Type type, void* p) :
