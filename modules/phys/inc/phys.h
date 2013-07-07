@@ -4,7 +4,6 @@
 #include <Box2D/Box2D.h>
 #include "../../core/inc/phases.h"
 #include "../../util/inc/Vec.h"
-#include "../../util/inc/organization.h"
 
 namespace phys {
 
