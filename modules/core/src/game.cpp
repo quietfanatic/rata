@@ -1,9 +1,12 @@
 #include <GL/glfw.h>
 #include "../inc/game.h"
 #include "../inc/phases.h"
+#include "../../util/inc/debug.h"
 #include "../../hacc/inc/files.h"
 
 namespace core {
+
+    Logger file_logger ("files");
 
      // Game data
     uint64 frames_simulated = 0;
@@ -16,6 +19,7 @@ namespace core {
         static bool initialized = false;
         if (initialized) return;
         initialized = true;
+        hacc::set_file_logger([](std::string s){ file_logger.log(s); });
         glfwInit();
         set_video(3);
     }
