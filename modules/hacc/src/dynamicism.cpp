@@ -626,9 +626,7 @@ HCB_BEGIN(hacc::Dynamic)
                 throw X::Logic_Error("A Dynamic must have one key representing its type");
             }
             Type type (keys[0]);
-            void* p = operator new (type.size());
-            type.construct(p);
-            dyn = Dynamic(type, p);
+            dyn = Dynamic(type);
         }
     ));
     attrs([](Dynamic& dyn, String name)->Reference{

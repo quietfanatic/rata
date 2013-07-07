@@ -135,6 +135,12 @@ namespace hacc {
             o.addr = null;
         }
         Dynamic (Type type, void* addr) : type(type), addr(addr) { }
+        explicit Dynamic (Type type) :
+            type(type), addr(operator new (type.size()))
+        {
+            type.construct(addr);
+        }
+
 
         template <class C, class... Args>
         static Dynamic New (Args&&... args) {
@@ -143,7 +149,7 @@ namespace hacc {
             return Dynamic(Type::CppType<C>(), p);
         }
         template <class C>
-        explicit Dynamic (C&& v) : type(Type::CppType<C>()), addr(new C (v)) { }
+        explicit Dynamic (C&& v) : type(Type::CppType<C>()), addr(new C (std::forward<C>(v))) { }
 
         ~Dynamic () {
             if (addr) {

@@ -55,8 +55,11 @@ namespace hacc {
     Reference File::data () {
         if (p->state == UNLOADED)
             load(*this);
-        if (!p->data.address())
-            throw X::Internal_Error("Something went wrong when autoloading \"" + filename() + "\"; No exception happened but it wasn't loaded.");
+        if (!p->data.address()) {
+            std::ostringstream ss;
+            ss << p->state;
+            throw X::Internal_Error("Something went wrong when autoloading \"" + filename() + "\"; No exception happened but it wasn't loaded.  It's state was " + ss.str());
+        }
         return p->data.address();
     }
 
@@ -119,7 +122,7 @@ namespace hacc {
         void request_load (File f) {
             if (f.p->state != UNLOADED) return;
             f.p->state = LOAD_PREPARING;
-            new Action(PREPARE, [=](){ load_prepare(f); });
+            load_prepare(f);
         }
         void load_prepare (File f) {
             Tree* t;
@@ -196,7 +199,7 @@ namespace hacc {
         void request_reload (File f) {
             if (f.p->state != LOADED) return;
             f.p->state = RELOAD_PREPARING;
-            new Action(PREPARE, [=](){ reload_prepare(f); });
+            reload_prepare(f);
         }
         void reload_prepare (File f) {
             Tree* t;
