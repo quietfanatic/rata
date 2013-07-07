@@ -211,7 +211,7 @@ namespace hacc {
         init();
         if (!type().initialized()) throw X::Unhaccable_Type(type());
          // First try individual elems
-        if (index <= type().data->elem_list.size()) {
+        if (index < type().data->elem_list.size()) {
             return chain(*this, type().data->elem_list[index]);
         }
          // Then custom elems function
