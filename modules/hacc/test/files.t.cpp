@@ -11,7 +11,8 @@ HCB_INSTANCE(float*)
 #include "../../tap/inc/tap.h"
 tap::Tester files_tester ("hacc/files", [](){
     using namespace tap;
-    plan(20);
+    plan(21);
+    doesnt_throw([](){ set_file_logger([](String s){ diag(s.c_str()); }); }, "Can set a custom logger");
     FILE* f = fopen("../test/eight.hacc", "w");
     if (fclose(f) != 0) {
         BAIL_OUT("Failed to clobber ../test/eight.hacc");

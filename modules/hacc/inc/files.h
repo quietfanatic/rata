@@ -70,6 +70,7 @@ namespace hacc {
      //  either all of the operations succeed or none of them will.
     void file_transaction (const Func<void ()>&);
 
+    void set_file_logger (const Func<void (String)>&);
 
      // PATHS
 

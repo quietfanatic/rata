@@ -6,6 +6,7 @@
 namespace hacc {
 
     std::unordered_map<std::string, FileData*> files_by_filename;
+    Func<void (String)> logger;
 
      // File structure's innards.  -ing states are named after
      //  the action that is next scheduled to happen to the file
@@ -154,6 +155,7 @@ namespace hacc {
         }
         void load_commit (File f) {
             f.p->state = LOADED;
+            if (logger) logger("Loaded \"" + f.filename() + "\"");
         }
 
          // SAVING
@@ -176,6 +178,7 @@ namespace hacc {
         void save_commit (File f, Tree* t) {
             try {
                 tree_to_file(t, f.p->filename);
+                if (logger) logger("Saved \"" + f.filename() + "\"");
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
@@ -288,6 +291,7 @@ namespace hacc {
                 if (f.p->state == UNLOAD_COMMITTING) {
                     f.p->data = null;
                     f.p->state = UNLOADED;
+                    if (logger) logger("Unloaded \"" + f.filename() + "\"");
                 }
             }
         }
@@ -397,6 +401,10 @@ namespace hacc {
             for (auto f : files)
                 Transaction::current->request_unload(f);
         });
+    }
+
+    void set_file_logger (const Func<void (String)>& f) {
+        logger = f;
     }
 
      // PATHS STUFF
