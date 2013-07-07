@@ -300,7 +300,7 @@ namespace hacc {
                 while (look() == ' ' || look() == '\t') {
                     ind += look(); got += look(); p++;
                 }
-                if (p + terminator.size() > end) throw error("Ran into end of document before + terminator");
+                if (p + terminator.size() > end) throw error("Ran into end of document before " + terminator);
                 if (0==strncmp(p, terminator.c_str(), terminator.size())) {
                     String ret;
                     size_t p1 = 0;
@@ -310,11 +310,9 @@ namespace hacc {
                         if (0==strncmp(got.c_str() + p1, ind.c_str(), ind.size())) {
                             p1 += ind.size();
                         }
-                        p += terminator.size();
-                        return new Tree(ret);
-                    }
-                    while (look() != '\n') {
-                        got += look(); p++;
+                        ret += got.substr(p1, p2 - p1);
+                        p1 = p2;
+                        p2 = got.find('\n', p2);
                     }
                     p += terminator.size();
                     return new Tree(ret);
@@ -322,6 +320,7 @@ namespace hacc {
                 while (look() != '\n') {
                     got += look(); p++;
                 }
+                got += look(); p++;
             }
         }
         Tree* parse_array () {
