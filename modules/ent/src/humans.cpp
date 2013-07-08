@@ -184,7 +184,7 @@ HCB_BEGIN(Biped)
     attr("direction", member(&Biped::direction).optional());
     attr("distance_walked", member(&Biped::distance_walked).optional());
     attr("oldxrel", member(&Biped::oldxrel).optional());
-    finish([](Biped& b){ b.finish(); });
+    finish(&Biped::finish);
 HCB_END(Biped)
 
 HCB_BEGIN(BipedStats)
