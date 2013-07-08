@@ -6,7 +6,7 @@
 
 namespace ent {
 
-    Logger biped_logger ("bipeds");
+    Logger biped_logger ("bipeds", false);
 
     void Biped::set_def (BipedDef* _def) {
         def = _def;

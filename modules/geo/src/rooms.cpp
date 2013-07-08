@@ -73,7 +73,6 @@ namespace geo {
     }
 
     void Resident::finish () {
-        geo_logger.log("Resident::finish");
         if (room) {
             link(room->residents);
             if (room->active)
@@ -122,4 +121,5 @@ HCB_END(Room)
 HCB_BEGIN(Resident)
     name("geo::Resident");
     attr("room", member(&Resident::room));
+    finish(&Resident::finish);
 HCB_END(Resident)
