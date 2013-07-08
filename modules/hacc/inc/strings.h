@@ -14,7 +14,7 @@ namespace hacc {
      // unescape is harder to abstract out, so we'll wait till we need it.
 
      // Paths rooted at given filename will look like $.attr and such
-    String path_to_string (Path*, String filename = "");
+    String path_to_string (Path, String filename = "");
 
      // The filename parameter is used for error reporting and for serializing
      //  paths; the path's filename will be skipped if it's the current file.

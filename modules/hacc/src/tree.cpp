@@ -1,5 +1,6 @@
 #include "../inc/tree.h"
 #include "../inc/haccable.h"
+#include "paths_internal.h"
 
 namespace hacc {
 
@@ -34,7 +35,7 @@ namespace hacc {
     template <> Form form_of_type<String>() { return STRING; }
     template <> Form form_of_type<Array>() { return ARRAY; }
     template <> Form form_of_type<Object>() { return OBJECT; }
-    template <> Form form_of_type<Path*>() { return PATH; }
+    template <> Form form_of_type<Path>() { return PATH; }
 
     template <class C>
     struct TreeDataT : TreeData {
@@ -62,7 +63,7 @@ namespace hacc {
     Tree::Tree (Array&& a) : DPtr(new TreeDataT<Array>(a)) { }
     Tree::Tree (const Object& o) : DPtr(new TreeDataT<Object>(o)) { }
     Tree::Tree (Object&& o) : DPtr(new TreeDataT<Object>(o)) { }
-    Tree::Tree (Path* p) : DPtr(new TreeDataT<Path*>(p)) { }
+    Tree::Tree (Path p) : DPtr(new TreeDataT<Path>(p)) { }
     Tree::operator Null () const { return (**this).as<Null>(); }
     Tree::operator bool () const { return (**this).as<bool>(); }
     Tree::operator int64 () const { return (**this).as<int64>(); }
@@ -85,7 +86,7 @@ namespace hacc {
     Tree::operator String () const { return (**this).as<String>(); }
     Tree::operator const Array& () const { return (**this).as<Array>(); }
     Tree::operator const Object& () const { return (**this).as<Object>(); }
-    Tree::operator Path* () const { return (**this).as<Path*>(); }
+    Tree::operator Path () const { return (**this).as<Path>(); }
 
     Tree Tree::elem (size_t index) const {
         const Array& a = this->as<const Array&>();
@@ -110,10 +111,39 @@ namespace hacc {
             case STRING: return String(a) == String(b);
             case ARRAY: return a.as<const Array&>() == b.as<const Array&>();
             case OBJECT: return a.as<const Object&>() == b.as<const Object&>();
-            case PATH: return a.as<Path*>() == b.as<Path*>();
+            case PATH: return a.as<Path>() == b.as<Path>();
             default: throw X::Corrupted_Tree(a);
         }
     }
+
+    String Path::root () const { return (*this)->root(); }
+    bool operator == (const PathRoot& a, const PathRoot& b) {
+        return a.filename == b.filename;
+    }
+    bool operator == (const PathAttr& a, const PathAttr& b) {
+        return a.left == b.left && a.name == b.name;
+    }
+    bool operator == (const PathElem& a, const PathElem& b) {
+        return a.left == b.left && a.index == b.index;
+    }
+    bool operator == (const Path& a, const Path& b) {
+        if (&*a == &*b) return true;
+        if (!a || !b) return false;
+        if (a->type() != b->type()) return false;
+        switch (a->type()) {
+            case ROOT: return static_cast<const PathRoot&>(*a)
+                           == static_cast<const PathRoot&>(*b);
+            case ATTR: return static_cast<const PathAttr&>(*a)
+                           == static_cast<const PathAttr&>(*b);
+            case ELEM: return static_cast<const PathElem&>(*a)
+                           == static_cast<const PathElem&>(*b);
+            default: throw X::Corrupted_Path(a);
+        }
+    }
+
+    Path::Path (String filename) : DPtr(new PathRoot(filename)) { }
+    Path::Path (Path left, String name) : DPtr(new PathAttr(left, name)) { }
+    Path::Path (Path left, size_t index) : DPtr(new PathElem(left, index)) { }
 
 
     namespace X {
@@ -127,7 +157,10 @@ namespace hacc {
               + " as " + form_name(form)
             ), form(form), tree(tree)
         { }
+        Corrupted_Path::Corrupted_Path (Path path) :
+            Corrupted("Corrupted path: nonsensical path type number " + path->type()),
+            path(path)
+        { }
     }
 
 }
-

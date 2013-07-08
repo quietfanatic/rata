@@ -6,6 +6,7 @@
 #include <sstream>
 #include "../inc/files.h"  // for Path
 #include "../inc/strings.h"
+#include "paths_internal.h"
 
 namespace hacc {
 
@@ -41,21 +42,24 @@ namespace hacc {
         return r;
     }
 
-    String path_to_string (Path* p, String filename) {
+    String path_to_string (Path p, String filename) {
         if (!p) return "null";
-        switch (p->type) {
+        switch (p->type()) {
             case ROOT: {
-                if (p->s == filename) return "$";
-                else return "$(\"" + escape_string(p->s) + "\")";
+                auto& pr = static_cast<const PathRoot&>(*p);
+                if (pr.filename == filename) return "$";
+                else return "$(\"" + escape_string(pr.filename) + "\")";
             }
             case ATTR: {
-                return path_to_string(p->target, filename)
-                     + "." + escape_ident(p->s);
+                auto& pa = static_cast<const PathAttr&>(*p);
+                return path_to_string(pa.left, filename)
+                     + "." + escape_ident(pa.name);
             }
             case ELEM: {
+                auto& pe = static_cast<const PathElem&>(*p);
                 std::ostringstream s;
-                s << p->i;
-                return path_to_string(p->target, filename) + "[" + s.str() + "]";
+                s << pe.index;
+                return path_to_string(pe.left, filename) + "[" + s.str() + "]";
             }
             default: throw X::Corrupted_Path(p);
         }
@@ -139,7 +143,7 @@ namespace hacc {
                 return r + "}";
             }
             case PATH: {
-                return path_to_string(t.as<Path*>(), filename);
+                return path_to_string(t.as<Path>(), filename);
             }
             default: throw X::Corrupted_Tree(t);
         }
@@ -389,12 +393,12 @@ namespace hacc {
             }
             else return Tree(word);
         }
-        Path* continue_path (Path* left) {
+        Path continue_path (Path left) {
             switch (look()) {
                 case '.': {
                     p++;
                     String key = parse_ident("After the . in a path");
-                    return continue_path(new Path(left, key));
+                    return continue_path(Path(left, key));
                 }
                 case '[': {
                     p++;
@@ -408,14 +412,14 @@ namespace hacc {
                             if (look() != ']')
                                 throw error("Expected ] after index, but got " + String(1, look()));
                             p++;
-                            return continue_path(new Path(left, i));
+                            return continue_path(Path(left, i));
                         }
                         default: {
                             String k = parse_ident("In the [] in a path");
                             if (look() != ']')
                                 throw error("Expected ] after key, but got " + String(1, look()));
                             p++;
-                            return continue_path(new Path(left, k));
+                            return continue_path(Path(left, k));
                         }
                     }
                 }
@@ -430,11 +434,11 @@ namespace hacc {
                 if (look() != ')')
                     throw error("Expected ) after filename, but got " + String(1, look()));
                 p++;
-                return Tree(continue_path(new Path(f)));
+                return Tree(continue_path(Path(f)));
             }
             else {
                 if (!file.empty())
-                    return Tree(continue_path(new Path(file)));
+                    return Tree(continue_path(Path(file)));
                 else
                     throw error("Path must contain a filename because the current filename is unknown");
             }

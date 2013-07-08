@@ -271,7 +271,7 @@ namespace hacc {
             Tree r;
             read([&](void* addr){
                 Pointer pp (type().data->pointee_type, *(void**)addr);
-                Path* path = address_to_path(pp);
+                Path path = address_to_path(pp);
                 if (!path) throw X::Address_Not_Found(pp);
                 r = Tree(path);
             });
@@ -339,9 +339,9 @@ namespace hacc {
                 break;
             }
             case PATH: {
-                Path* p = t.as<Path*>();
+                Path p = t.as<Path>();
                 if (type().data->pointee_type) {
-                    String filename = p->root();
+                    String filename = p.root();
                     load(File(filename));
                 }
                 else throw X::Form_Mismatch(type(), t);
@@ -399,7 +399,7 @@ namespace hacc {
                 break;
             }
             case PATH: {
-                Path* path = t.as<Path*>();
+                Path path = t.as<Path>();
                 Reference pointee = path_to_reference(path);
                 if (void* pointee_addr = pointee.address()) {
                     Pointer p (pointee.type(), pointee_addr);
@@ -458,7 +458,7 @@ namespace hacc {
         finish();
     }
 
-    bool Reference::foreach_address (const Func<bool (Pointer, Path*)>& cb, Path* path) const {
+    bool Reference::foreach_address (const Func<bool (Pointer, Path)>& cb, Path path) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get addresses in");
         if (void* addr = address()) {
@@ -467,7 +467,7 @@ namespace hacc {
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
                 for (auto& k : ks) {
-                    Path* newpath = path ? new Path(path, k) : null;
+                    Path newpath = path ? Path(path, k) : path;
                     if (attr(k).foreach_address(cb, newpath))
                         return true;
                 }
@@ -475,7 +475,7 @@ namespace hacc {
             else {
                 size_t n = length();
                 for (size_t i = 0; i < n; i++) {
-                    Path* newpath = path ? new Path(path, i) : null;
+                    Path newpath = path ? Path(path, i) : path;
                     if (elem(i).foreach_address(cb, newpath))
                         return true;
                 }
@@ -484,7 +484,7 @@ namespace hacc {
         return false;
     }
 
-    bool Reference::foreach_pointer (const Func<bool (Reference, Path*)>& cb, Path* path) const {
+    bool Reference::foreach_pointer (const Func<bool (Reference, Path)>& cb, Path path) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get pointers in");
         if (type().data->pointee_type) {
@@ -495,7 +495,7 @@ namespace hacc {
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
                 for (auto& k : ks) {
-                    Path* newpath = path ? new Path(path, k) : null;
+                    Path newpath = path ? Path(path, k) : Path(null);
                     if (attr(k).foreach_pointer(cb, newpath))
                         return true;
                 }
@@ -503,7 +503,7 @@ namespace hacc {
             else {
                 size_t n = length();
                 for (size_t i = 0; i < n; i++) {
-                    Path* newpath = path ? new Path(path, i) : null;
+                    Path newpath = path ? Path(path, i) : Path(null);
                     if (elem(i).foreach_pointer(cb, newpath))
                         return true;
                 }

@@ -74,32 +74,11 @@ namespace hacc {
 
      // PATHS
 
-    enum PathType {
-        ROOT,
-        ATTR,
-        ELEM
-    };
-
-    struct Path : gc {
-        PathType type;
-        Path* target;
-        std::string s;
-        size_t i;
-
-        Path(std::string doc) : type(ROOT), s(doc) { };
-        Path(Path* target, std::string key) : type(ATTR), target(target), s(key) { };
-        Path(Path* target, size_t index) : type(ELEM), target(target), i(index) { };
-
-        String root () const;
-
-    };
-    bool operator == (const Path& a, const Path& b);
-
      // path_to_reference does not require any scans.
      // If a root is provided, the path loookup will start
      //  from there instead of the file indicated by the path.
      // Throws if the path doesn't resolve to a location.
-    Reference path_to_reference (Path*, Pointer root = null);
+    Reference path_to_reference (Path, Pointer root = null);
 
      // address_to_path may require all or some file-objects to be scanned.
      // If a prefix is provided, only paths starting with it will be
@@ -107,7 +86,7 @@ namespace hacc {
      //  single file-object.  Returns null if the address isn't found.
      // If you run address_to_path inside a file_transaction, the address
      //  scan results will be cached between calls.
-    Path* address_to_path (Pointer, Path* prefix = null);
+    Path address_to_path (Pointer, Path prefix = Path(null));
 
      // Performs an operation for each pointer found in the given root, or in
      //  every file-object if root is null.  The callback will be always be
@@ -115,10 +94,6 @@ namespace hacc {
     void foreach_pointer (const Func<void (Reference)>&, Pointer root = null);
 
     namespace X {
-        struct Corrupted_Path : Corrupted {
-            Path* path;
-            Corrupted_Path (Path*);
-        };
         struct File_Already_Loaded : Logic_Error {
             String filename;
             File_Already_Loaded(String);
@@ -131,9 +106,9 @@ namespace hacc {
         };
         struct Unload_Would_Break : Logic_Error {
             String filename;
-            Path* ref;
-            Path* target;
-            Unload_Would_Break (String, Path*, Path*);
+            Path ref;
+            Path target;
+            Unload_Would_Break (String, Path, Path);
         };
     }
      // TODO: move this to .cpp

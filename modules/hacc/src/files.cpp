@@ -3,6 +3,7 @@
 #include "../inc/files.h"
 #include "../inc/strings.h"
 #include "types_internal.h"
+#include "paths_internal.h"
 
 namespace hacc {
 
@@ -264,9 +265,9 @@ namespace hacc {
                 File f = p.second;
                 try {
                     if (f.p->state != UNLOAD_VERIFYING) {
-                        Reference(f.data()).foreach_pointer([&](Reference rp, Path* path){
+                        Reference(f.data()).foreach_pointer([&](Reference rp, Path path){
                             rp.read([&](void* pp){
-                                Path* target = address_to_path(
+                                Path target = address_to_path(
                                     Pointer(rp.type().data->pointee_type, *(void**)pp)
                                 );
                                 if (target && File(target->root()).p->state == UNLOAD_VERIFYING) {
@@ -275,7 +276,7 @@ namespace hacc {
                                 }
                             });
                             return false;
-                        }, new Path(f.p->filename));
+                        }, Path(f.p->filename));
                     }
                 }
                 catch (X::Error& e) {
@@ -361,7 +362,7 @@ namespace hacc {
         }
 
          // Transaction provides some caches for path operations
-        std::unordered_map<Pointer, Path*> address_cache;
+        std::unordered_map<Pointer, Path> address_cache;
     };
     Transaction* Transaction::current = null;
     Transaction::Action* Transaction::Action::first = null;
@@ -415,37 +416,14 @@ namespace hacc {
 
      // PATHS STUFF
 
-    String Path::root () const {
-        switch (type) {
-            case ROOT: return s;
-            case ATTR: return target->root();
-            case ELEM: return target->root();
-            default: throw X::Corrupted_Path(const_cast<Path*>(this));
-        }
+    Reference path_to_reference (Path path, Pointer root) {
+        return path->to_reference(root);
     }
-
-    Reference path_to_reference (Path* path, Pointer root) {
-        switch (path->type) {
-            case ROOT: {
-                if (root) return root;
-                else return File(path->s).data();
-            }
-            case ATTR: {
-                Reference l = path_to_reference(path->target, root);
-                return l.attr(path->s);
-            }
-            case ELEM: {
-                Reference l = path_to_reference(path->target, root);
-                return l.elem(path->i);
-            }
-            default: throw X::Corrupted_Path(path);
-        }
-    }
-    Path* address_to_path (Pointer ptr, Path* prefix) {
-        if (prefix != null) {
-            Path* found = null;
+    Path address_to_path (Pointer ptr, Path prefix) {
+        if (prefix != Path(null)) {
+            Path found = Path(null);
             Reference start = path_to_reference(prefix);
-            start.foreach_address([&](Pointer p, Path* path){
+            start.foreach_address([&](Pointer p, Path path){
                 if (p == ptr) {
                     found = path;
                     return true;
@@ -464,36 +442,36 @@ namespace hacc {
                     scannable_files.push_back(p.second);
                 }
             }
-            Path* found = null;
+            Path found = Path(null);
             if (Transaction::current) {
                 for (auto f : scannable_files) {
                     Reference(f.data()).foreach_address(
-                        [&](Pointer p, Path* path){
+                        [&](Pointer p, Path path){
                             Transaction::current->address_cache.emplace(p, path);
                             if (p == ptr) found = path;
                             return false;
                         },
-                        new Path (f.filename())
+                        Path(f.filename())
                     );
                     f.p->addresses_scanned = true;
                     if (found) return found;
                 }
-                return null;
+                return Path(null);
             }
             else {
                  // With no transaction and no prefix, we just gotta scan
                  //  the whole haystack every time.
                 for (auto f : scannable_files) {
                     Reference(f.data()).foreach_address(
-                        [&](Pointer p, Path* path){
+                        [&](Pointer p, Path path){
                             if (p == ptr) found = path;
                             return true;
                         },
-                        new Path (f.filename())
+                        Path(f.filename())
                     );
                     if (found) return found;
                 }
-                return null;
+                return Path(null);
             }
         }
     }
@@ -501,29 +479,15 @@ namespace hacc {
         throw X::Internal_Error("Paths NYI, sorry");
     }
 
-    bool operator == (const Path& a, const Path& b) {
-        if (a.type != b.type) return false;
-        switch (a.type) {
-            case ROOT: return a.s == b.s;
-            case ATTR: return a.s == b.s && *a.target == *b.target;
-            case ELEM: return a.i == b.i && *a.target == *b.target;
-            default: throw X::Corrupted_Path(const_cast<Path*>(&a));
-        }
-    }
-
     namespace X {
         Double_Transaction::Double_Transaction () :
             Internal_Error("Internal error: Tried two start a second transaction")
-        { }
-        Corrupted_Path::Corrupted_Path (Path* path) :
-            Corrupted("Corrupted path: nonsensical path type number " + path->type),
-            path(path)
         { }
         File_Already_Loaded::File_Already_Loaded (String filename) :
             Logic_Error("Cannot create file \"" + filename + "\" because that filename is already loaded."),
             filename(filename)
         { }
-        Unload_Would_Break::Unload_Would_Break (String filename, Path* ref, Path* target) :
+        Unload_Would_Break::Unload_Would_Break (String filename, Path ref, Path target) :
             Logic_Error(
                 "Cannot unload file \"" + filename
               + "\" because it would break the pointer at " + path_to_string(ref)

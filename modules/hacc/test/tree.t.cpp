@@ -14,7 +14,7 @@ tap::Tester hacc_tester ("hacc/tree", [](){
     is(Tree(32.f).as<float>(), 32.f, "float roundtrip");
     is(Tree(32.0).as<double>(), 32.0, "double roundtrip");
     is(Tree("hello").as<String>(), String("hello"), "string roundtrip");
-    is(*Tree(new Path("asdf")).as<Path*>(), Path("asdf"), "reference roundtrip");
+    is(Tree(Path("asdf")).as<Path>(), Path("asdf"), "reference roundtrip");
     is(Tree(Array()).as<const Array&>(), Array(), "Empty array roundtrip");
     const Array& a = Array{Tree(3), Tree(4.f)};
     is(Tree(a).as<const Array&>(), a, "Full array roundtrip");

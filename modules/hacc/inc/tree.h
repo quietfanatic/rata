@@ -19,7 +19,15 @@ namespace hacc {
     };
     std::string form_name (Form);
     
-    struct Path;
+    struct PathData;
+    struct Path : DPtr<const PathData> {
+        explicit Path (const PathData* d) : DPtr(d) { }
+        explicit Path (String filename);
+        explicit Path (Path left, String name);
+        explicit Path (Path left, size_t index);
+        String root () const;
+    };
+    bool operator == (const Path& a, const Path& b);
 
     struct TreeData;
     struct Tree : DPtr<const TreeData> {
@@ -44,7 +52,7 @@ namespace hacc {
         explicit Tree (Array&& a);
         explicit Tree (const Object& o);
         explicit Tree (Object&& o);
-        explicit Tree (Path* p);
+        explicit Tree (Path p);
         explicit operator Null () const;
         explicit operator bool () const;
         explicit operator int64 () const;
@@ -61,7 +69,7 @@ namespace hacc {
         explicit operator String () const;
         explicit operator const Array& () const;
         explicit operator const Object& () const;
-        explicit operator Path* () const;
+        explicit operator Path () const;
         Tree elem (size_t index) const;
         Tree attr (String name) const;
          // Implicit conversions can be troublesome, so use this
@@ -80,6 +88,10 @@ namespace hacc {
             Form form;
             Tree tree;
             Wrong_Form (Form, Tree);
+        };
+        struct Corrupted_Path : Corrupted {
+            Path path;
+            Corrupted_Path (Path);
         };
     }
 

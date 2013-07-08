@@ -53,6 +53,8 @@ namespace hacc {
         DPtr& operator = (Null n) { dec(); p = n; }
         DPtr& operator = (const DPtr<C>& o) { dec(); p = o.p; inc(); return *this; }
         DPtr& operator = (DPtr<C>&& o) { dec(); p = o.p; o.p = null; return *this; }
+        explicit operator C* () { return p; }
+        explicit operator const C* () const { return p; }
         C& operator * () { return *p; }
         const C& operator * () const { return *const_cast<const C*>(p); }
         C* operator -> () { return p; }
