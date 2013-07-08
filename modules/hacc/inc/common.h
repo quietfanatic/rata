@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include <gc/gc_cpp.h>
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -63,7 +62,7 @@ namespace hacc {
     };
 
     namespace X {
-        struct Error : std::exception, gc {
+        struct Error : std::exception {
             String mess;
             String filename;
             uint line;

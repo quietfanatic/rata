@@ -31,7 +31,7 @@ workflow {
     }
     sub ld_rule {
         my @libs = defined $_[2] ? ref($_[2]) eq 'ARRAY' ? @{$_[2]} : $_[2] : ();
-        rule $_[0], $_[1], sub { ld @{$_[1]}, '-lgc', @libs, output($_[0][0]); }
+        rule $_[0], $_[1], sub { ld @{$_[1]}, @libs, output($_[0][0]); }
     }
     sub test_rule {
         phony 'test', $_[0], sub { run "./$_[1][0] --test | prove -e '' -"; };

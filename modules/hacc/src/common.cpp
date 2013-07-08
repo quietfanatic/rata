@@ -4,10 +4,6 @@
 
 namespace hacc {
 
-    struct GC_Initter {
-        GC_Initter () { GC_INIT(); }
-    } gc_initter;
-
     namespace X {
         const char* Error::what () const noexcept {
             if (longmess.empty()) {

@@ -377,7 +377,6 @@ namespace hacc {
                 f();
                 tr.run();
             }
-            GC_gcollect();
         }
     }
 
