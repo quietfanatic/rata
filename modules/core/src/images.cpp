@@ -92,6 +92,6 @@ HCB_BEGIN(Image)
         if (r) return hacc::Reference(r);
         else throw hacc::X::No_Attr(hacc::Type::CppType<Image>(), name);
     });
-    finish([](Image& i, hacc::Tree*){ i.load(); });
+    finish([](Image& i){ i.load(); });
 HCB_END(core::Image)
 

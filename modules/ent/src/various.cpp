@@ -28,7 +28,7 @@ HCB_BEGIN(Test_Actor)
     attr("Object", base<phys::Object>());
     attr("texture", member(&Test_Actor::texture));
     attr("frame", member(&Test_Actor::frame));
-    finish([](Test_Actor& ta, hacc::Tree*){ ta.finish(); });
+    finish([](Test_Actor& ta){ ta.finish(); });
 HCB_END(Test_Actor)
 
 static phys::BodyDef*& boundary_bdf () {
@@ -46,6 +46,6 @@ struct Boundary : phys::Object {
 HCB_BEGIN(Boundary)
     name("ent::Boundary");
     attr("Object", base<phys::Object>());
-    finish([](Boundary& b, hacc::Tree*){ b.finish(); });
+    finish([](Boundary& b){ b.finish(); });
 HCB_END(Boundary)
 

@@ -205,14 +205,12 @@ HCB_BEGIN(Layout)
         if (r) return hacc::Reference(r);
         else throw hacc::X::No_Attr(hacc::Type::CppType<Layout>(), name);
     });
-    finish([](Layout& layout, hacc::Tree*){
-        layout.finish();
-    });
+    finish([](Layout& layout){ layout.finish(); });
 HCB_END(Layout)
  // For convenience
 HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA Layout>)
 
 HCB_BEGIN(Sprite_Test)
     name("vis::Sprite_Test");
-    finish([](Sprite_Test& st, hacc::Tree*){ st.finish(); });
+    finish([](Sprite_Test& st){ st.finish(); });
 HCB_END(Sprite_Test)

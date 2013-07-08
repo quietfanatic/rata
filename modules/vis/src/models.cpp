@@ -115,7 +115,7 @@ HCB_BEGIN(Skel)
     attr("root", member(&Skel::root));
     attr("root_offset", member(&Skel::root_offset));
     attr("poses", member(&Skel::poses));
-    finish([](Skel& skel, hacc::Tree*) { skel.finish(); });
+    finish([](Skel& skel){ skel.finish(); });
 HCB_END(Skel)
 
 HCB_BEGIN(Skel::Seg)
@@ -153,5 +153,5 @@ HCB_END(Skin::App)
 
 HCB_BEGIN(Model_Tester)
     name("vis::Model_Tester");
-    finish([](Model_Tester& mt, hacc::Tree*){ mt.finish(); });
+    finish([](Model_Tester& mt){ mt.finish(); });
 HCB_END(Model_Tester)

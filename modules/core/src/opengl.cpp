@@ -169,6 +169,6 @@ HCB_BEGIN(Program)
     attr("name", member(&Program::name).optional());
     attr("shaders", member(&Program::shaders));
     attr("attributes", member(&Program::attributes).optional());
-    finish([](Program& p, hacc::Tree*){ p.link(); });
+    finish([](Program& p){ p.link(); });
 HCB_END(Program)
 
