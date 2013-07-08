@@ -12,9 +12,56 @@
 
 using namespace hacc;
 
+struct CommandData : hacc::DPtee {
+    virtual void operator () () = 0;
+};
+
 HCB_BEGIN(Command)
-    type_name("Command");
-    pointee_policy(FOLLOW);
+    name("Command");
+    to_tree([](const Command& cmd){
+        Tree* less = Reference(typeid(*cmd), *cmd).to_tree();
+        if (less->form != ARRAY)
+            throw hacc::X::Logic_Error("The CommandData subtype " + hacc::Type(typeid(*cmd)).name() + " didn't produce an array tree");
+        Array more (less->a->size() + 1);
+        auto iter = commands_by_type.find(hacc::Type(typeid(*cmd)));
+        if (iter != commands_by_type.end()) {
+            more[0] = iter->second.
+        }
+    }
+    prepare([](Command& cmd, hacc::Tree* tree){
+        if (tree->form != ARRAY)
+            throw hacc::X::Form_Mismatch(hacc::Type::CppType<Command>(), tree);
+        else if (tree->a->size() == 0)
+            throw hacc::X::Logic_Error("A command cannot be represented by an empty array");
+        else if ((*tree->a)[0]->form != STRING)
+            throw hacc::X::Logic_Error("A command must have a string as its first element");
+        std::string name = (*tree->a)[0]->s;
+        auto iter = commands.find(name);
+        if (iter != commands.end()) {
+            auto& desc = iter->second;
+            void* dat = operator new (desc.type.size());
+            desc.type.construct(dat);
+            cmd = (CommandData*)dat;
+            hacc::Array less (tree->a->size() - 1);
+            for (auto t : *tree->a)
+                less.push_back(t);
+            Reference(desc.type, dat).prepare(new Tree (std::move(less)));
+        }
+        else throw hacc::X::Logic_Error("No command found named " + name);
+    });
+    fill([](Command& cmd, hacc::Tree* tree){
+        if (tree->form != ARRAY)
+            throw hacc::X::Form_Mismatch(hacc::Type::CppType<Command>(), tree);
+        else if (tree->a->size() == 0)
+            throw hacc::X::Logic_Error("A command cannot be represented by an empty array");
+        hacc::Array less (tree->a->size() - 1);
+        for (auto t : *tree->a)
+            less.push_back(t);
+        Reference(typeid(*cmd), *cmd).fill(new Tree (std::move(less)));
+    });
+    finish([](Command& cmd){
+        Reference(typeid(*cmd), *cmd).finish();
+    });
 HCB_END(Command)
 
 namespace core {

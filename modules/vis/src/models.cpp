@@ -3,7 +3,6 @@
 #include "../inc/sprites.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/phases.h"
-#include "../../core/inc/commands.h"
 #include "../../util/inc/debug.h"
 
 namespace vis {

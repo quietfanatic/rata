@@ -7,9 +7,9 @@
 #include "../../util/inc/honestly.h"
 #include "../../util/inc/organization.h"
 
-struct Command {
-    virtual void operator() () = 0;
-    virtual ~Command () { }
+struct CommandData;
+struct Command : hacc::DPtr<CommandData> {
+    void operator () ();
 };
 
 namespace core {
@@ -30,10 +30,15 @@ namespace core {
 
 }
 
- // This is for registering information about commands
-extern std::unordered_map<size_t, std::string> command_descriptions;
+struct Command_Description {
+    std::string description;
+    Type type;
+}
+extern std::unordered_map<std::string, Command_Description> commands;
 
 template <class Cmd>
-void command_description (std::string desc) { command_descriptions.emplace(typeid(Cmd).hash_code(), desc); }
+void command_description (std::string name, std::string desc) {
+    commands.emplace(name, Command_Description{desc, hacc::Type::CppType<Cmd>());
+}
 
 #endif
