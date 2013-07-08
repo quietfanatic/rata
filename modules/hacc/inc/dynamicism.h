@@ -103,7 +103,7 @@ namespace hacc {
         Tree* to_tree () const;
         void prepare (Tree*) const;
         void fill (Tree*) const;
-        void finish (Tree*) const;
+        void finish () const;
         void from_tree (Tree*) const;
          // These are primarily for use by files.cpp
          // If the callback returns true, the foreach will be terminated.

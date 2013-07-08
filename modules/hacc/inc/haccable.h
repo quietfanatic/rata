@@ -26,7 +26,7 @@ namespace hacc {
     void _delegate (Type, const GetSet0&);
     void _prepare (Type, const Func<void (void*, Tree*)>&);
     void _fill (Type, const Func<void (void*, Tree*)>&);
-    void _finish (Type, const Func<void (void*, Tree*)>&);
+    void _finish (Type, const Func<void (void*)>&);
     void _is_raw_pointer (Type, Type);
     GetSet0 _value_funcs (Type, Type, const UnknownF2&, const UnknownF2&);
     GetSet0 _mixed_funcs (Type, Type, const UnknownF2&, const UnknownF2&);
@@ -182,8 +182,8 @@ namespace hacc {
         static void fill (const Func<void (C&, Tree*)>& f) {
             _fill(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
         }
-        static void finish (const Func<void (C&, Tree*)>& f) {
-            _finish(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
+        static void finish (const Func<void (C&)>& f) {
+            _finish(Type::CppType<C>(), reinterpret_cast<const Func<void (void*)>&>(f));
         }
         static void is_raw_pointer (Type t) {
             _is_raw_pointer(Type::CppType<C>(), t);

@@ -417,34 +417,30 @@ namespace hacc {
         }
     }
 
-    void Reference::finish (Tree* h) const {
+    void Reference::finish () const {
         if (gs->narrow) return;
          // Do delegation only if there's no custom finish function
         if (type().data->delegate && !type().data->finish) {
             mod([&](void* p){
-                Reference(p, type().data->delegate).finish(h);
+                Reference(p, type().data->delegate).finish();
             });
         }
         else {
              // Do attrs and elems before main item
-            switch (h->form) {
-                case OBJECT: {
-                    for (auto& a : *h->o) {
-                        attr(a.first).finish(a.second);
-                    }
-                    break;
+            std::vector<String> ks = keys();
+            if (!ks.empty()) {
+                for (auto k : ks) {
+                    attr(k).finish();
                 }
-                case ARRAY: {
-                    size_t n = h->a->size();
-                    for (size_t i = 0; i < n; i++) {
-                        elem(i).finish((*h->a)[i]);
-                    }
-                    break;
+            }
+            else {
+                size_t n = length();
+                for (size_t i = 0; i < n; i++) {
+                    elem(i).finish();
                 }
-                default: break;
             }
             if (type().data->finish) {
-                mod([&](void* p){ type().data->finish(p, h); });
+                mod([&](void* p){ type().data->finish(p); });
             }
         }
     }
@@ -452,7 +448,7 @@ namespace hacc {
     void Reference::from_tree (Tree* h) const {
         prepare(h);
         fill(h);
-        finish(h);
+        finish();
     }
 
     bool Reference::foreach_address (const Func<bool (Pointer, Path*)>& cb, Path* path) const {

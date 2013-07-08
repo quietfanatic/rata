@@ -146,11 +146,11 @@ namespace hacc {
                 throw;
             }
             f.p->state = LOAD_FINISHING;
-            new Action(FINISH, [=](){ load_finish(f, t); });
+            new Action(FINISH, [=](){ load_finish(f); });
         }
-        void load_finish (File f, Tree* t) {
+        void load_finish (File f) {
             try {
-                Reference(&f.p->data).finish(t);
+                Reference(&f.p->data).finish();
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
@@ -223,12 +223,12 @@ namespace hacc {
                 throw;
             }
             f.p->state = RELOAD_FINISHING;
-            new Action(FINISH, [=](){ reload_finish(f, t); });
+            new Action(FINISH, [=](){ reload_finish(f); });
         }
         bool reload_verify_scheduled = false;
-        void reload_finish (File f, Tree* t) {
+        void reload_finish (File f) {
             try {
-                Reference(&f.p->new_data).finish(t);
+                Reference(&f.p->new_data).finish();
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();

@@ -37,7 +37,7 @@ namespace hacc {
     void _fill (Type t, const Func<void (void*, Tree*)>& f) {
         t.data->fill = f;
     }
-    void _finish (Type t, const Func<void (void*, Tree*)>& f) {
+    void _finish (Type t, const Func<void (void*)>& f) {
         t.data->finish = f;
     }
     void _delegate (Type t, const GetSet0& gs) {
