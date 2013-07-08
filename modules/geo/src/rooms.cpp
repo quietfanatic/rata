@@ -12,11 +12,17 @@ namespace geo {
     Room tumbolia;
 
     void Room::activate () {
+        active = true;
         geo_logger.log("Activating room @%lx", (unsigned long)this);
-        for (Resident* r = residents.first(); r; r = r->next())
+        size_t i = 0;
+        for (Resident* r = residents.first(); r; r = r->next()) {
             r->emerge();
+            i++;
+        }
+        geo_logger.log("...and its %lu residents", i);
     }
     void Room::deactivate () {
+        active = false;
         geo_logger.log("Deactivating room @%lx", (unsigned long)this);
         for (Resident* r = residents.first(); r; r = r->next())
             r->reclude();
@@ -37,12 +43,10 @@ namespace geo {
         if (current_room) {
             for (auto crn : current_room->neighbors) {
                 if (!crn->activating) {
-                    crn->active = false;
                     crn->deactivate();
                 }
             }
             if (!current_room->activating) {
-                current_room->active = false;
                 current_room->deactivate();
             }
         }
@@ -59,6 +63,7 @@ namespace geo {
     }
 
     void behold (Resident* res) {
+        geo_logger.log("behold: @%lx", (unsigned long)res);
         beholder = res;
         enter(res->room);
     }
@@ -67,7 +72,14 @@ namespace geo {
         if (current_room == this) current_room = NULL;
     }
 
-    void Resident::finish () { if (room) link(room->residents); }
+    void Resident::finish () {
+        geo_logger.log("Resident::finish");
+        if (room) {
+            link(room->residents);
+            if (room->active)
+                emerge();
+        }
+    }
 
     void Resident::reroom (Vec pos) {
         if (!room) room = current_room;

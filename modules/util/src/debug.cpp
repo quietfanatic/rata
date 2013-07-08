@@ -1,6 +1,5 @@
 
 #include "../inc/debug.h"
-#include "../../core/inc/commands.h"
 #include "../../hacc/inc/haccable.h"
 
 int logging_frame = -1;

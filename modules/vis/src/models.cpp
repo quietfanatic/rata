@@ -4,8 +4,11 @@
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/phases.h"
 #include "../../core/inc/commands.h"
+#include "../../util/inc/debug.h"
 
 namespace vis {
+
+    Logger model_logger ("models", false);
 
     void Skel::finish () {
         for (auto& seg : segs) {
@@ -54,7 +57,11 @@ namespace vis {
         }
     }
     void Model::draw (Vec pos, bool fliph, bool flipv, float z) {
-        if (!skel) return;
+        if (!skel) {
+            model_logger.log("Model has no associated skeleton");
+            return;
+        }
+        model_logger.log("Drawing a model with %lu segs", segs.size());
         draw_seg(
             &segs[skel->seg_index(skel->root)], skel->root,
             pos + skel->root_offset, fliph, flipv, z
@@ -85,19 +92,20 @@ namespace vis {
     Model::Model (Skel* skel) : skel(skel), segs(skel ? skel->segs.size() : 0) { }
 
 
-    struct Model_Tester : core::Layer {
-        Model_Tester () : core::Layer("D.M", "model_tester", false) { }
+    struct Model_Tester : vis::Draws_Sprites {
         bool flip = false;
-        Model model;
-        void start () {
-            model = Model(hacc::File("modules/ent/res/small.skel").data());
+        Model model = Model(hacc::File("modules/ent/res/small.skel").data());
+
+        Model_Tester () { }
+        void finish () {
             model.apply_skin(hacc::File("modules/rata/res/rata-base.skin").data());
             model.apply_pose(model.skel->poses.named("stand"));
+            Draws_Sprites::activate();
         }
-        void run () {
+        void draws_sprites () {
             model.draw(Vec(10, 4), flip, false, 0.5);
         }
-    } model_tester;
+    };
 
 } using namespace vis;
 
@@ -142,3 +150,8 @@ HCB_BEGIN(Skin::App)
     elem(member(&Skin::App::target));
     elem(member(&Skin::App::textures));
 HCB_END(Skin::App)
+
+HCB_BEGIN(Model_Tester)
+    name("vis::Model_Tester");
+    finish([](Model_Tester& mt, hacc::Tree*){ mt.finish(); });
+HCB_END(Model_Tester)

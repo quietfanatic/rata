@@ -1,9 +1,12 @@
 
-#include "../../hacc/inc/everything.h"
 #include "../inc/humans.h"
+#include "../../hacc/inc/everything.h"
 #include "../../core/inc/commands.h"
+#include "../../util/inc/debug.h"
 
 namespace ent {
+
+    Logger biped_logger ("bipeds");
 
     void Biped::set_def (BipedDef* _def) {
         def = _def;
@@ -12,6 +15,7 @@ namespace ent {
     }
 
     void Biped::draws_sprites () {
+        biped_logger.log("Drawing biped model");
         model.apply_skin(def->skin);
         if (ground) {
             if (fabs(vel().x) < 0.01) {
@@ -36,6 +40,26 @@ namespace ent {
         model.draw(pos(), direction < 0);
     }
 
+    void Biped::emerge () {
+        biped_logger.log("Biped::emerge");
+        materialize();
+        legs.enable();
+        Draws_Sprites::activate();
+    }
+    void Biped::reclude () {
+        dematerialize();
+        legs.disable();
+        Draws_Sprites::deactivate();
+    }
+
+    void set_ambulate_friction (Biped* b, float fric) {
+        b->legs.ambulate_force(
+            b->b2body->GetMass()
+          * -phys::space.get_gravity().y
+          * sqrt(fric * b->get_ground_fix()->GetFriction())
+        );
+    }
+
     bool Biped::allow_movement (BipedStats* stats, Biped::Controls* controls) {
         if (ground) {
             legs.enable();
@@ -49,17 +73,6 @@ namespace ent {
             oldxrel = pos().x - ground->pos().x;
         return true;
     }
-    void Biped::emerge () { materialize(); legs.enable(); Draws_Sprites::activate(); }
-    void Biped::reclude () { dematerialize(); legs.disable(); Draws_Sprites::deactivate(); }
-
-    void set_ambulate_friction (Biped* b, float fric) {
-        b->legs.ambulate_force(
-            b->b2body->GetMass()
-          * -phys::space.get_gravity().y
-          * sqrt(fric * b->get_ground_fix()->GetFriction())
-        );
-    }
-
     bool Biped::allow_walk (BipedStats* stats, Biped::Controls* controls) {
         if (ground) {
             legs.enable();
@@ -156,6 +169,7 @@ namespace ent {
     }
 
     void Biped::finish () {
+        biped_logger.log("Biped::finish");
         geo::behold(this);
     }
 
