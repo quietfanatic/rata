@@ -136,6 +136,10 @@ namespace hacc {
                 reinterpret_cast<UnknownGP&>(m)
             ));
         }
+         // It's not a getset but it still depends on C being a class
+        static void finish (void (C::* m )()) {
+            _finish(Type::CppType<C>(), [m](C& x){ (x.*m)(); });
+        }
     };
 
      // This is inherited by every custom-instantiated type.
