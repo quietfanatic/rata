@@ -1,5 +1,6 @@
 #include <sstream>
 #include "../inc/common.h"
+#include "../inc/haccable.h"
 
 namespace hacc {
 
@@ -48,3 +49,7 @@ namespace hacc {
     }
 
 }
+
+HCB_BEGIN(hacc::Unknown)
+    name("hacc::Unknown");
+HCB_END(hacc::Unknown)

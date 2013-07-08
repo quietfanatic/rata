@@ -100,11 +100,11 @@ namespace hacc {
         Reference attr (String) const;
         Reference elem (size_t) const;
          // These might require addressability
-        Tree* to_tree () const;
-        void prepare (Tree*) const;
-        void fill (Tree*) const;
+        Tree to_tree () const;
+        void prepare (Tree) const;
+        void fill (Tree) const;
         void finish () const;
-        void from_tree (Tree*) const;
+        void from_tree (Tree) const;
          // These are primarily for use by files.cpp
          // If the callback returns true, the foreach will be terminated.
         bool foreach_address (const Func<bool (Pointer, Path*)>&, Path*) const;
@@ -180,8 +180,8 @@ namespace hacc {
         };
         struct Form_Mismatch : Logic_Error {
             Type type;
-            Tree* tree;
-            Form_Mismatch (Type, Tree*);
+            Tree tree;
+            Form_Mismatch (Type, Tree);
         };
         struct Unaddressable : Logic_Error {
             Reference r;

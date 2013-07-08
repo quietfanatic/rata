@@ -22,10 +22,10 @@ namespace hacc {
     void _elems (Type, const Func<Reference (void*, size_t)>&);
     void _elem (Type, const GetSet0&);
     void _value (Type, String, Dynamic&&, bool(*)(void*, void*));
-    void _to_tree (Type, const Func<Tree* (void*)>&);
+    void _to_tree (Type, const Func<Tree (void*)>&);
     void _delegate (Type, const GetSet0&);
-    void _prepare (Type, const Func<void (void*, Tree*)>&);
-    void _fill (Type, const Func<void (void*, Tree*)>&);
+    void _prepare (Type, const Func<void (void*, Tree)>&);
+    void _fill (Type, const Func<void (void*, Tree)>&);
     void _finish (Type, const Func<void (void*)>&);
     void _is_raw_pointer (Type, Type);
     GetSet0 _value_funcs (Type, Type, const UnknownF2&, const UnknownF2&);
@@ -177,14 +177,14 @@ namespace hacc {
         static void delegate (const GetSet1<C>& gs) {
             _delegate(Type::CppType<C>(), gs);
         }
-        static void to_tree (const Func<Tree* (const C&)>& f) {
-            _to_tree(Type::CppType<C>(), reinterpret_cast<const Func<Tree* (void*)>&>(f));
+        static void to_tree (const Func<Tree (const C&)>& f) {
+            _to_tree(Type::CppType<C>(), reinterpret_cast<const Func<Tree (void*)>&>(f));
         }
-        static void prepare (const Func<void (C&, Tree*)>& f) {
-            _prepare(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
+        static void prepare (const Func<void (C&, Tree)>& f) {
+            _prepare(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree)>&>(f));
         }
-        static void fill (const Func<void (C&, Tree*)>& f) {
-            _fill(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree*)>&>(f));
+        static void fill (const Func<void (C&, Tree)>& f) {
+            _fill(Type::CppType<C>(), reinterpret_cast<const Func<void (void*, Tree)>&>(f));
         }
         static void finish (const Func<void (C&)>& f) {
             _finish(Type::CppType<C>(), reinterpret_cast<const Func<void (void*)>&>(f));

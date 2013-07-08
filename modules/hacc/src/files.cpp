@@ -125,7 +125,7 @@ namespace hacc {
             load_prepare(f);
         }
         void load_prepare (File f) {
-            Tree* t;
+            Tree t;
             try {
                 t = tree_from_file(f.p->filename);
                 Reference(&f.p->data).prepare(t);
@@ -137,7 +137,7 @@ namespace hacc {
             f.p->state = LOAD_FILLING;
             new Action(FILL, [=](){ load_fill(f, t); });
         }
-        void load_fill (File f, Tree* t) {
+        void load_fill (File f, Tree t) {
             try {
                 Reference(&f.p->data).fill(t);
             }
@@ -171,7 +171,7 @@ namespace hacc {
             new Action(VERIFY, [=](){ save_prepare(f); });
         }
         void save_prepare (File f) {
-            Tree* t;
+            Tree t;
             try {
                 t = Reference(&f.p->data).to_tree();
             }
@@ -181,7 +181,7 @@ namespace hacc {
             }
             new Action(SAVE_COMMIT, [=](){ save_commit(f, t); });
         }
-        void save_commit (File f, Tree* t) {
+        void save_commit (File f, Tree t) {
             try {
                 tree_to_file(t, f.p->filename);
                 if (logger) logger("Saved \"" + f.filename() + "\"");
@@ -202,7 +202,7 @@ namespace hacc {
             reload_prepare(f);
         }
         void reload_prepare (File f) {
-            Tree* t;
+            Tree t;
             try {
                 t = tree_from_file(f.p->filename);
                 Reference(&f.p->new_data).prepare(t);
@@ -214,7 +214,7 @@ namespace hacc {
             f.p->state = RELOAD_FILLING;
             new Action(FILL, [=](){ reload_fill(f, t); });
         }
-        void reload_fill (File f, Tree* t) {
+        void reload_fill (File f, Tree t) {
             try {
                 Reference(&f.p->new_data).fill(t);
             }

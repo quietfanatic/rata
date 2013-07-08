@@ -14,18 +14,18 @@ Vectorly vy2 { 3, 4 };
 
 HCB_BEGIN(Vectorly*)
     to_tree([](Vectorly* const& vy){
-        if (vy == &vy1) return new Tree(String("vy1"));
-        else if (vy == &vy2) return new Tree(String("vy2"));
-        else return new Tree(null);
+        if (vy == &vy1) return Tree("vy1");
+        else if (vy == &vy2) return Tree("vy2");
+        else return Tree(null);
     });
-    fill([](Vectorly*& vy, Tree* h){
-        if (h->form == STRING) {
-            std::string id = h->s;
+    fill([](Vectorly*& vy, Tree t){
+        if (t.form() == STRING) {
+            std::string id = t.as<String>();
             if (id == "vy1") vy = &vy1;
             else if (id == "vy2") vy = &vy2;
             else vy = null;
         }
-        else throw X::Error("Expected string hacc but got " + form_name(h->form) + " hacc");
+        else throw X::Error("Expected string hacc but got " + form_name(t.form()) + " hacc");
     });
 HCB_END(Vectorly*)
 HCB_BEGIN(Vectorly)
@@ -128,9 +128,9 @@ HCB_BEGIN(MyNamed*)
 HCB_END(MyNamed*)
 
 template <class C>
-Tree* to_tree (C* p) { return Reference(p).to_tree(); }
+Tree to_tree (C* p) { return Reference(p).to_tree(); }
 template <class C>
-void from_tree (C* p, Tree* t) { Reference(p).from_tree(t); }
+void from_tree (C* p, Tree t) { Reference(p).from_tree(t); }
 
 int32 i = 4;
 Vectorly vy;
@@ -145,49 +145,49 @@ tap::Tester haccable_tester ("hacc/haccable", [](){
     using namespace hacc;
     using namespace tap;
     plan(39);
-    is(to_tree(&i)->i, 4, "to_tree on int32 works");
-    doesnt_throw([](){ from_tree(&i, new Tree(35)); }, "from_tree on int32");
+    is(to_tree(&i).as<int>(), 4, "to_tree on int32 works");
+    doesnt_throw([](){ from_tree(&i, Tree(35)); }, "from_tree on int32");
     is(i, 35, "...works");
-    doesnt_throw([](){ from_tree(&wi, new Tree(34)); }, "from_tree on a template haccable");
+    doesnt_throw([](){ from_tree(&wi, Tree(34)); }, "from_tree on a template haccable");
     is(wi.val, 34, "...works");
-    doesnt_throw([](){ from_tree(&vy, new Tree(Array{new Tree(34.0), new Tree(52.0)})); }, "from_tree using elems");
+    doesnt_throw([](){ from_tree(&vy, Tree(Array{Tree(34.0), Tree(52.0)})); }, "from_tree using elems");
     is(vy, Vectorly{34.0, 52.0}, "...works");
-    doesnt_throw([](){ from_tree(&vy, new Tree(Object{Pair("x", new Tree(32.0)), Pair("y", new Tree(54.0))})); }, "from_tree using attrs");
+    doesnt_throw([](){ from_tree(&vy, Tree(Object{Pair("x", Tree(32.0)), Pair("y", Tree(54.0))})); }, "from_tree using attrs");
     is(vy, Vectorly{32.0, 54.0}, "...works");
     vy = Vectorly{2.0, 4.0};
-    is(to_tree(&vy)->form, OBJECT, "Vectorly turns into Object by default");
-    is(to_tree(&vy)->o->at(1).first, String("y"), "Vectorly Object has atribute 'y'");
-    is(to_tree(&vy)->o->at(1).second->get_float(), 4.f, "And its value is correct");
+    is(to_tree(&vy).form(), OBJECT, "Vectorly turns into Object by default");
+    is(to_tree(&vy).as<const Object&>().at(1).first, String("y"), "Vectorly Object has atribute 'y'");
+    is(to_tree(&vy).attr("y").as<float>(), 4.f, "And its value is correct");
     vyp = &vy1;
-    is((int)to_tree(&vyp)->form, (int)STRING, "Custom string <- pointer");
-    is(to_tree(&vyp)->s, String("vy1"), "Custom string <- pointer");
+    is(to_tree(&vyp).form(), STRING, "Custom string <- pointer");
+    is(to_tree(&vyp).as<String>(), String("vy1"), "Custom string <- pointer");
     vyp = &vy2;
-    is((int)to_tree(&vyp)->form, (int)STRING, "Custom string <- pointer");
-    is(to_tree(&vyp)->s, String("vy2"), "Custom string <- pointer");
-    doesnt_throw([](){ from_tree(&vyp, new Tree(String("vy1"))); }, "Custom string -> pointer behavior");
+    is(to_tree(&vyp).form(), STRING, "Custom string <- pointer");
+    is(to_tree(&vyp).as<String>(), String("vy2"), "Custom string <- pointer");
+    doesnt_throw([](){ from_tree(&vyp, Tree("vy1")); }, "Custom string -> pointer behavior");
     is(vyp, &vy1, "...works");
-    doesnt_throw([](){ from_tree(&mu, new Tree(Object{Pair("i", new Tree(35))})); }, "Union using attrs as variants");
+    doesnt_throw([](){ from_tree(&mu, Tree(Object{Pair("i", Tree(35))})); }, "Union using attrs as variants");
     is(mu.i.i, 35, "...can be read from hacc");
-    doesnt_throw([](){ from_tree(&mu, new Tree(Object{Pair("f", new Tree(31.2f))})); }, "Union using attrs as variants");
+    doesnt_throw([](){ from_tree(&mu, Tree(Object{Pair("f", Tree(31.2f))})); }, "Union using attrs as variants");
     is(mu.f.f, 31.2f, "...can be read from hacc");
     mu = MyUnion(71);
-    is(to_tree(&mu)->form, OBJECT, "Union is written as object");
-    is(to_tree(&mu)->o->at(0).second->i, 71, "Union can be written to hacc");
+    is(to_tree(&mu).form(), OBJECT, "Union is written as object");
+    is(to_tree(&mu).attr("i").as<int>(), 71, "Union can be written to hacc");
     mu = MyUnion(4.f);
-    is(to_tree(&mu)->o->at(0).second->f, 4.f, "Union can be written to hacc");
-    is(to_tree(&dyn)->form, OBJECT, "Dynamic is written as object");
-    is(to_tree(&dyn)->o->at(0).first, String("int32"), "Dynamic has type as key");
-    is(to_tree(&dyn)->o->at(0).second->i, 3, "Dynamic has value as value");
-    doesnt_throw([](){ from_tree(&dyn, new Tree(Object{Pair("float", new Tree(99.7f))})); }, "from_tree on Dynamic");
+    is(to_tree(&mu).attr("f").as<float>(), 4.f, "Union can be written to hacc");
+    is(to_tree(&dyn).form(), OBJECT, "Dynamic is written as object");
+    is(to_tree(&dyn).as<const Object&>().at(0).first, String("int32"), "Dynamic has type as key");
+    is(to_tree(&dyn).attr("int32").as<int>(), 3, "Dynamic has value as value");
+    doesnt_throw([](){ from_tree(&dyn, Tree(Object{Pair("float", Tree(99.7f))})); }, "from_tree on Dynamic");
     is(dyn.type, Type(Type::CppType<float>()), "...sets the right type");
     is(*(float*)dyn.addr, 99.7f, "...and sets the right value");
-    is(to_tree(&me)->form, STRING, "Enumish types written as string");
-    is(to_tree(&me)->s, String("value2"), "Enumish types use correct value when writing");
-    doesnt_throw([](){ from_tree(&me, new Tree("value3")); }, "from_tree on enumish type");
+    is(to_tree(&me).form(), STRING, "Enumish types written as string");
+    is(to_tree(&me).as<String>(), String("value2"), "Enumish types use correct value when writing");
+    doesnt_throw([](){ from_tree(&me, Tree("value3")); }, "from_tree on enumish type");
     is(me, VALUE3, "...sets the right type");
-    is(to_tree(&mnp)->form, STRING, "hacc_pointer_by_member writes as right type");
-    is(to_tree(&mnp)->s, String("asdf"), "hacc_pointer_by_member writes correct value");
-    doesnt_throw([](){ from_tree(&mnp, new Tree("fdsa")); }, "hacc_pointer_by_member can do from_tree");
+    is(to_tree(&mnp).form(), STRING, "hacc_pointer_by_member writes as right type");
+    is(to_tree(&mnp).as<String>(), String("asdf"), "hacc_pointer_by_member writes correct value");
+    doesnt_throw([](){ from_tree(&mnp, Tree("fdsa")); }, "hacc_pointer_by_member can do from_tree");
     is(mnp, mns[1], "hacc_pointer_by_member sets correct value");
 });
 

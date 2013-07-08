@@ -21,49 +21,65 @@ namespace hacc {
     
     struct Path;
 
-    struct Tree : gc {
-        Form form;
-        union {
-            bool b;
-            int64 i;
-            float f;
-            double d;
-            String s;
-            Array* a;
-            Object* o;
-            Path* p;
-        };
-        Tree (Null n = null) : form(NULLFORM) { }
-        Tree (bool b) : form(BOOL), b(b) { }
-        Tree (int8 i) : form(INTEGER), i(i) { }
-        Tree (int16 i) : form(INTEGER), i(i) { }
-        Tree (int32 i) : form(INTEGER), i(i) { }
-        Tree (int64 i) : form(INTEGER), i(i) { }
-        Tree (uint8 i) : form(INTEGER), i(i) { }
-        Tree (uint16 i) : form(INTEGER), i(i) { }
-        Tree (uint32 i) : form(INTEGER), i(i) { }
-        Tree (uint64 i) : form(INTEGER), i(i) { }
-        Tree (float f) : form(FLOAT), f(f) { }
-        Tree (double d) : form(DOUBLE), d(d) { }
-        Tree (std::string s) : form(STRING), s(s) { }
-        Tree (const char* s) : form(STRING), s(s) { }
-        Tree (const Array& a) : form(ARRAY), a(new Array (a)) { }
-        Tree (Array&& a) : form(ARRAY), a(new Array (a)) { }
-        Tree (const Object& o) : form(OBJECT), o(new Object (o)) { }
-        Tree (Object&& o) : form(OBJECT), o(new Object (o)) { }
-        Tree (Path* p) : form(PATH), p(p) { }
-        ~Tree ();
-        bool get_bool () const;
-        int64 get_integer () const;
-        float get_float () const;
-        double get_double () const;
-        String get_string () const;
+    struct TreeData;
+    struct Tree : DPtr<const TreeData> {
+        Form form () const;
+        explicit Tree (const TreeData* d) : DPtr(d) { }
+        explicit Tree (Null n = null);
+        explicit Tree (bool b);
+        explicit Tree (int64 i);
+        explicit Tree (int32 i) : Tree((int64)i) { }
+        explicit Tree (int16 i) : Tree((int64)i) { }
+        explicit Tree (int8 i) : Tree((int64)i) { }
+        explicit Tree (uint64 i) : Tree((int64)i) { }
+        explicit Tree (uint32 i) : Tree((int64)i) { }
+        explicit Tree (uint16 i) : Tree((int64)i) { }
+        explicit Tree (uint8 i) : Tree((int64)i) { }
+        explicit Tree (char i) : Tree((int64)i) { }
+        explicit Tree (float f);
+        explicit Tree (double d);
+        explicit Tree (String s);
+        explicit Tree (const char* s) : Tree(String(s)) { }
+        explicit Tree (const Array& a);
+        explicit Tree (Array&& a);
+        explicit Tree (const Object& o);
+        explicit Tree (Object&& o);
+        explicit Tree (Path* p);
+        explicit operator Null () const;
+        explicit operator bool () const;
+        explicit operator int64 () const;
+        explicit operator int32 () const { return int64(*this); }
+        explicit operator int16 () const { return int64(*this); }
+        explicit operator int8 () const { return int64(*this); }
+        explicit operator uint64 () const { return int64(*this); }
+        explicit operator uint32 () const { return int64(*this); }
+        explicit operator uint16 () const { return int64(*this); }
+        explicit operator uint8 () const { return int64(*this); }
+        explicit operator char () const { return int64(*this); }
+        explicit operator float () const;
+        explicit operator double () const;
+        explicit operator String () const;
+        explicit operator const Array& () const;
+        explicit operator const Object& () const;
+        explicit operator Path* () const;
+        Tree elem (size_t index) const;
+        Tree attr (String name) const;
+         // Implicit conversions can be troublesome, so use this
+        template <class C>
+        C as () const { return C(*this); }
     };
+
+    bool operator == (const Tree& a, const Tree& b);
 
     namespace X {
         struct Corrupted_Tree : Corrupted {
-            Tree* tree;
-            Corrupted_Tree (Tree*);
+            Tree tree;
+            Corrupted_Tree (Tree);
+        };
+        struct Wrong_Form : Logic_Error {
+            Form form;
+            Tree tree;
+            Wrong_Form (Form, Tree);
         };
     }
 

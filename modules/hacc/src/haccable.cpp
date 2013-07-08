@@ -28,13 +28,13 @@ namespace hacc {
         t.data->value_list.emplace_back(name, std::forward<Dynamic>(v));
         t.data->eq = eq;
     }
-    void _to_tree (Type t, const Func<Tree* (void*)>& f) {
+    void _to_tree (Type t, const Func<Tree (void*)>& f) {
         t.data->to_tree = f;
     }
-    void _prepare (Type t, const Func<void (void*, Tree*)>& f) {
+    void _prepare (Type t, const Func<void (void*, Tree)>& f) {
         t.data->prepare = f;
     }
-    void _fill (Type t, const Func<void (void*, Tree*)>& f) {
+    void _fill (Type t, const Func<void (void*, Tree)>& f) {
         t.data->fill = f;
     }
     void _finish (Type t, const Func<void (void*)>& f) {

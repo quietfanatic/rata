@@ -61,83 +61,87 @@ namespace hacc {
         }
     }
 
-    String tree_to_string (Tree* h, String filename, uint ind, uint prior_ind) {
-        switch (h->form) {
+    String tree_to_string (Tree t, String filename, uint ind, uint prior_ind) {
+        switch (t.form()) {
             case NULLFORM: return "null";
-            case BOOL: return h->b ? "true" : "false";
+            case BOOL: return bool(t) ? "true" : "false";
             case INTEGER: {
                 std::ostringstream s;
-                s << h->i;
+                s << int64(t);
                 return s.str();
             }
             case FLOAT: {
+                float f = t.as<float>();
                 std::ostringstream s;
-                s << h->f << "~" << std::hex << *(uint32*)&h->f;
+                s << f << "~" << std::hex << *(uint32*)&f;
                 return s.str();
             }
             case DOUBLE: {
+                double d = t.as<double>();
                 std::ostringstream s;
-                s << h->d << "~" << std::hex << *(uint64*)&h->d;
+                s << d << "~" << std::hex << *(uint64*)&d;
                 return s.str();
             }
-            case STRING: return "\"" + escape_string(h->s) + "\"";
+            case STRING: return "\"" + escape_string(t.as<String>()) + "\"";
             case ARRAY: {
-                if (h->a->size() == 0) return "[]";
+                const Array& a = t.as<const Array&>();
+                if (a.size() == 0) return "[]";
                 String r = "[";
-                if (ind && h->a->size() > 1)
+                if (ind && a.size() > 1)
                     r += "\n" + indent(prior_ind + 1);
-                for (auto& e : *h->a) {
+                for (auto& e : a) {
                     if (ind)
                         r += tree_to_string(
                             e, filename,
-                            ind - 1, prior_ind + (h->a->size() > 1)
+                            ind - 1, prior_ind + (a.size() > 1)
                         );
                     else
                         r += tree_to_string(e, filename);
-                    if (&e != &h->a->back()) {
-                        if (ind && h->a->size() > 1)
+                    if (&e != &a.back()) {
+                        if (ind && a.size() > 1)
                             r += "\n" + indent(prior_ind + 1);
                         else r += " ";
                     }
                 }
-                if (ind && h->a->size() > 1)
+                if (ind && a.size() > 1)
                     r += "\n" + indent(prior_ind);
                 return r + "]";
             }
             case OBJECT: {
-                if (h->o->size() == 0) return "{}";
+                const Object& o = t.as<const Object&>();
+                if (o.size() == 0) return "{}";
                 String r = "{";
-                if (ind && h->o->size() > 1)
+                if (ind && o.size() > 1)
                     r += "\n" + indent(prior_ind + 1);
                 else
                     r += " ";
-                auto nexti = h->o->begin();
-                for (auto i = nexti; i != h->o->end(); i = nexti) {
+                auto nexti = o.begin();
+                for (auto i = nexti; i != o.end(); i = nexti) {
                     r += escape_ident(i->first);
                     r += ":";
                     if (ind)
                         r += tree_to_string(
                             i->second, filename,
-                            ind - 1, prior_ind + (h->o->size() > 1)
+                            ind - 1, prior_ind + (o.size() > 1)
                         );
                     else
                         r += tree_to_string(i->second, filename, 0, 0);
                     nexti++;
-                    if (nexti != h->o->end()) {
+                    if (nexti != o.end()) {
                         if (ind) r += "\n" + indent(prior_ind + 1);
                         else r += " ";
                     }
                 }
-                if (ind && h->o->size() > 1)
+                if (ind && o.size() > 1)
                     r += "\n" + indent(prior_ind);
                 else
                     r += " ";
                 return r + "}";
             }
             case PATH: {
-                return path_to_string(h->p, filename);
+                return path_to_string(t.as<Path*>(), filename);
             }
-            default: throw X::Corrupted_Tree(h);
+            default: throw X::Corrupted_Tree(t);
         }
     }
 
@@ -243,7 +247,7 @@ namespace hacc {
 
          // Parsing of specific valtypes.
          // This one could return an int, float, or double.
-        Tree* parse_numeric () {
+        Tree parse_numeric () {
             int64 val;
             uint len;
             if (!sscanf(safebuf(), "%" SCNi64 "%n", &val, &len))
@@ -256,10 +260,10 @@ namespace hacc {
                 case 'E':
                 case 'p':  // backtrack!
                 case 'P': p -= len; return parse_floating();
-                default: return new Tree(val);
+                default: return Tree(val);
             }
         }
-        Tree* parse_floating () {
+        Tree parse_floating () {
             double val;
             uint len;
             if (!sscanf(safebuf(), "%lg%n", &val, &len))
@@ -267,10 +271,10 @@ namespace hacc {
             p += len;
             switch (look()) {
                 case '~': return parse_bitrep();
-                default: return new Tree(val);
+                default: return Tree(val);
             }
         }
-        Tree* parse_bitrep () {
+        Tree parse_bitrep () {
             p++;  // for the ~
             uint64 rep;
             uint len;
@@ -278,15 +282,15 @@ namespace hacc {
                 throw error("Missing precise bitrep after ~");
             p += len;
             switch (len) {
-                case  8: return new Tree(*(float*)&rep);
-                case 16: return new Tree(*(double*)&rep);
+                case  8: return Tree(*(float*)&rep);
+                case 16: return Tree(*(double*)&rep);
                 default: throw error("Precise bitrep doesn't have 8 or 16 digits");
             }
         }
-        Tree* parse_string () {
-            return new Tree(parse_stringly());
+        Tree parse_string () {
+            return Tree(parse_stringly());
         }
-        Tree* parse_heredoc () {
+        Tree parse_heredoc () {
             p++;  // for the <
             if (look() != '<') throw error("< isn't followed by another < for a heredoc");
             p++;
@@ -315,7 +319,7 @@ namespace hacc {
                         p2 = got.find('\n', p2);
                     }
                     p += terminator.size();
-                    return new Tree(ret);
+                    return Tree(ret);
                 }
                 while (look() != '\n') {
                     got += look(); p++;
@@ -323,7 +327,7 @@ namespace hacc {
                 got += look(); p++;
             }
         }
-        Tree* parse_array () {
+        Tree parse_array () {
             Array a;
             p++;  // for the [
             for (;;) {
@@ -332,12 +336,12 @@ namespace hacc {
                     case EOF: throw error("Array not terminated");
                     case ':': throw error("Cannot have : in an array");
                     case ',': p++; break;
-                    case ']': p++; return new Tree(std::move(a));
+                    case ']': p++; return Tree(std::move(a));
                     default: a.push_back(parse_term()); break;
                 }
             }
         }
-        Tree* parse_object () {
+        Tree parse_object () {
             Object o;
             p++;  // for the {
             String key;
@@ -347,7 +351,7 @@ namespace hacc {
                     case EOF: throw error("Object not terminated");
                     case ':': throw error("Missing name before : in object");
                     case ',': p++; continue;
-                    case '}': p++; return new Tree(std::move(o));
+                    case '}': p++; return Tree(std::move(o));
                     default: key = parse_ident("an attribute name or the end of the object"); break;
                 }
                 parse_ws();
@@ -363,9 +367,9 @@ namespace hacc {
                 }
             }
         }
-        Tree* parse_parens () {
+        Tree parse_parens () {
             p++;  // for the (
-            Tree* r = parse_term();
+            Tree r = parse_term();
             parse_ws();
             if (look() == ')') p++;
             else {
@@ -373,22 +377,17 @@ namespace hacc {
             }
             return r;
         }
-        Tree* parse_bareword () {
+        Tree parse_bareword () {
              // A previous switch ensures this is a bare word and not a string.
             String word = parse_ident("An ID of some sort (this shouldn't happen)");
-            if (word == "null")
-                return new Tree(null);
-            else if (word == "false")
-                return new Tree(false);
-            else if (word == "true")
-                return new Tree(true);
+            if (word == "null") return Tree(null);
+            else if (word == "false") return Tree(false);
+            else if (word == "true") return Tree(true);
             else if (word == "nan" || word == "inf") {
                 p -= 3;
                 return parse_floating();
             }
-            else {
-                return new Tree(word);
-            }
+            else return Tree(word);
         }
         Path* continue_path (Path* left) {
             switch (look()) {
@@ -423,7 +422,7 @@ namespace hacc {
                 default: return left;
             }
         }
-        Tree* parse_path () {
+        Tree parse_path () {
             p++;  // for the $
             if (look() == '(') {
                 p++;
@@ -431,17 +430,17 @@ namespace hacc {
                 if (look() != ')')
                     throw error("Expected ) after filename, but got " + String(1, look()));
                 p++;
-                return new Tree(continue_path(new Path(f)));
+                return Tree(continue_path(new Path(f)));
             }
             else {
                 if (!file.empty())
-                    return new Tree(continue_path(new Path(file)));
+                    return Tree(continue_path(new Path(file)));
                 else
                     throw error("Path must contain a filename because the current filename is unknown");
             }
         }
 
-        Tree* parse_term () {
+        Tree parse_term () {
             parse_ws();
             for (;;) switch (char next = look()) {
                 case '+':
@@ -470,23 +469,20 @@ namespace hacc {
                     else throw error("Unrecognized character " + String(1, next));
             }
         }
-        Tree* parse_all () {
-            Tree* r = parse_term();
+        Tree parse_all () {
+            Tree r = parse_term();
             parse_ws();
             if (look() == EOF) return r;
-            else {
-                delete r;
-                throw error("Extra stuff at end of document");
-            }
+            else throw error("Extra stuff at end of document");
         }
-        Tree* parse () {
+        Tree parse () {
             return parse_all();
         }
     };
 
      // Finally:
-    Tree* tree_from_string (String s, String filename) { return Parser(s, filename).parse(); }
-    Tree* tree_from_string (const char* s, String filename) { return Parser(s, filename).parse(); }
+    Tree tree_from_string (String s, String filename) { return Parser(s, filename).parse(); }
+    Tree tree_from_string (const char* s, String filename) { return Parser(s, filename).parse(); }
 
      // Forget C++ IO and its crummy diagnostics
     void with_file (String filename, const char* mode, const Func<void (FILE*)>& func) {
@@ -500,7 +496,7 @@ namespace hacc {
         }
     }
 
-    void tree_to_file (Tree* tree, String filename) {
+    void tree_to_file (Tree tree, String filename) {
         with_file(filename, "wb", [&](FILE* f){
             String s = tree_to_string(tree, filename);
             fwrite(s.data(), 1, s.size(), f);
@@ -509,7 +505,7 @@ namespace hacc {
         });
     }
 
-    Tree* tree_from_file (String filename) {
+    Tree tree_from_file (String filename) {
         String r;
         with_file(filename, "rb", [&](FILE* f){
             fseek(f, 0, SEEK_END);

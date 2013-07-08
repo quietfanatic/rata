@@ -234,25 +234,25 @@ namespace hacc {
             throw X::No_Elems(type(), index);
     }
 
-    Tree* Reference::to_tree () const {
+    Tree Reference::to_tree () const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Reference(*this, "call to_tree on");
          // First check individual special values.
         if (auto& eq = type().data->eq) {
-            Tree* r = null;
+            Tree r;
             read([&](void* addr){
                 for (auto& p : type().data->value_list) {
                     if (eq(addr, p.second.addr)) {
-                        r = new Tree(p.first);
+                        r = Tree(p.first);
                         return;
                     }
                 }
             });
-            if (r) return r;
+            if (r.operator->()) return r;
         }
          // Then custom to_tree
         if (type().data->to_tree) {
-            Tree* r;
+            Tree r;
             read([&](void* p){
                 r = type().data->to_tree(p);
             });
@@ -260,7 +260,7 @@ namespace hacc {
         }
          // Then delegation
         else if (auto& gs = type().data->delegate) {
-            Tree* r;
+            Tree r;
             read([&](void* addr){
                 r = Reference(addr, gs).to_tree();
             });
@@ -268,12 +268,12 @@ namespace hacc {
         }
          // Then raw pointers
         else if (type().data->pointee_type) {
-            Tree* r;
+            Tree r;
             read([&](void* addr){
                 Pointer pp (type().data->pointee_type, *(void**)addr);
                 Path* path = address_to_path(pp);
                 if (!path) throw X::Address_Not_Found(pp);
-                r = new Tree(path);
+                r = Tree(path);
             });
             return r;
         }
@@ -285,7 +285,7 @@ namespace hacc {
                 for (auto& k : ks) {
                     o.emplace_back(k, attr(k).to_tree());
                 }
-                return new Tree(std::move(o));
+                return Tree(std::move(o));
             }
             else {
                 size_t n = length();
@@ -294,72 +294,77 @@ namespace hacc {
                     for (size_t i = 0; i < n; i++) {
                         a[i] = elem(i).to_tree();
                     }
-                    return new Tree(std::move(a));
+                    return Tree(std::move(a));
                 }
-                else return new Tree(Object());
+                else return Tree(Object());
             }
         }
     }
      // TODO: figure out the proper relationship between delegation
      //  and cascading calls (prepare and finish)
-    void Reference::prepare (Tree* h) const {
+    void Reference::prepare (Tree t) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Reference(*this, "call from_tree on");
         if (gs->narrow) return;
         if (type().data->prepare) {
-            mod([&](void* p){ type().data->prepare(p, h); });
+            mod([&](void* p){ type().data->prepare(p, t); });
         }
         else if (type().data->delegate) {
             mod([&](void* p){
-                Reference(p, type().data->delegate).prepare(h);
+                Reference(p, type().data->delegate).prepare(t);
             });
         }
-        switch (h->form) {
+        switch (t.form()) {
             case OBJECT: {
-                size_t n = h->o->size();
+                const Object& o = t.as<const Object&>();
+                size_t n = o.size();
                 std::vector<String> ks;
                 ks.reserve(n);
                 for (size_t i = 0; i < n; i++) {
-                    ks.push_back((*h->o)[i].first);
+                    ks.push_back(o[i].first);
                 }
                 set_keys(ks);
                 for (size_t i = 0; i < n; i++) {
-                    attr(ks[i]).prepare((*h->o)[i].second);
+                    attr(ks[i]).prepare(o[i].second);
                 }
                 break;
             }
             case ARRAY: {
-                size_t n = h->a->size();
+                const Array& a = t.as<const Array&>();
+                size_t n = a.size();
                 set_length(n);
                 for (size_t i = 0; i < n; i++) {
-                    elem(i).prepare((*h->a)[i]);
+                    elem(i).prepare(a[i]);
                 }
                 break;
             }
             case PATH: {
+                Path* p = t.as<Path*>();
                 if (type().data->pointee_type) {
-                    String filename = h->p->root();
+                    String filename = p->root();
                     load(File(filename));
                 }
-                else throw X::Form_Mismatch(type(), h);
+                else throw X::Form_Mismatch(type(), t);
                 break;
             }
             default: break;
         }
-        if (gs->prepare) fill(h);
+        if (gs->prepare) fill(t);
     }
 
-    void Reference::fill (Tree* h) const {
+    void Reference::fill (Tree t) const {
+         // TODO: Skip if gs->prepare
         if (gs->narrow) {
             mod([&](void* p){
-                Reference(type(), p).from_tree(h);
+                Reference(type(), p).from_tree(t);
             });
             return;
         }
          // First check for special values
-        if (h->form == STRING) {
+        if (t.form() == STRING) {
+            String s = t.as<String>();
             for (auto& pair : type().data->value_list) {
-                if (h->s == pair.first) {
+                if (s == pair.first) {
                     set(pair.second.addr);
                     return;
                 }
@@ -368,32 +373,34 @@ namespace hacc {
          // Then custom fill function
         if (type().data->fill) {
             mod([&](void* p){
-                type().data->fill(p, h);
+                type().data->fill(p, t);
             });
         }
          // then delegation
         else if (type().data->delegate) {
             mod([&](void* p){
-                Reference(p, type().data->delegate).fill(h);
+                Reference(p, type().data->delegate).fill(t);
             });
         }
          // Then use attrs, elems, and paths
-        else switch (h->form) {
+        else switch (t.form()) {
             case OBJECT: {
-                for (auto& a : *h->o) {
+                for (auto& a : t.as<const Object&>()) {
                     attr(a.first).fill(a.second);
                 }
                 break;
             }
             case ARRAY: {
-                size_t n = h->a->size();
+                const Array& a = t.as<const Array&>();
+                size_t n = a.size();
                 for (size_t i = 0; i < n; i++) {
-                    elem(i).fill((*h->a)[i]);
+                    elem(i).fill(a[i]);
                 }
                 break;
             }
             case PATH: {
-                Reference pointee = path_to_reference(h->p);
+                Path* path = t.as<Path*>();
+                Reference pointee = path_to_reference(path);
                 if (void* pointee_addr = pointee.address()) {
                     Pointer p (pointee.type(), pointee_addr);
                     if (void* addr = address_of_type_internal(p, type().data->pointee_type)) {
@@ -402,18 +409,18 @@ namespace hacc {
                     else throw X::Type_Mismatch(
                         type().data->pointee_type,
                         pointee.type(),
-                        "when reading from path " + path_to_string(h->p)
+                        "when reading from path " + path_to_string(path)
                     );
                 }
                 else throw X::Unaddressable(pointee,
                     "generate pointer through path "
-                  + path_to_string(h->p)
+                  + path_to_string(path)
                   + " from"
                 );
                 break;
             }
-            case NULLFORM: break;
-            default: throw X::Form_Mismatch(type(), h);
+            case NULLFORM: break;  // This isn't quite proper but whatever
+            default: throw X::Form_Mismatch(type(), t);
         }
     }
 
@@ -445,9 +452,9 @@ namespace hacc {
         }
     }
 
-    void Reference::from_tree (Tree* h) const {
-        prepare(h);
-        fill(h);
+    void Reference::from_tree (Tree t) const {
+        prepare(t);
+        fill(t);
         finish();
     }
 
@@ -526,10 +533,10 @@ namespace hacc {
               + " through " + r.gs->description()
             ), r(r), goal(goal)
         { }
-        Form_Mismatch::Form_Mismatch (Type t, Tree* tree) :
+        Form_Mismatch::Form_Mismatch (Type t, Tree tree) :
             Logic_Error(
                 "Form mismatch: type " + t.name()
-              + " cannot be represented by " + form_name(tree->form) + " tree "
+              + " cannot be represented by " + form_name(tree.form()) + " tree "
               + tree_to_string(tree)
             ), type(t), tree(tree)
         { }

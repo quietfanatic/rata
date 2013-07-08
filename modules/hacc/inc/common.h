@@ -27,13 +27,13 @@ namespace hacc {
     struct Tree;
 
     typedef std::string String;
-    typedef std::vector<Tree*> Array;
-    typedef std::pair<std::string, Tree*> Pair;
+    typedef std::vector<Tree> Array;
+    typedef std::pair<std::string, Tree> Pair;
     typedef std::vector<Pair> Object;
 
     struct DPtee {
         virtual ~DPtee () { }  // necessary for easy opacity
-        size_t ref_count = 0;
+        mutable size_t ref_count = 0;
     };
     template <class C>
     struct DPtr {

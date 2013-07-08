@@ -86,9 +86,9 @@ namespace hacc {
         Func<Reference (void*, size_t)> elems_f = null;
         std::vector<GetSet0> elem_list;
         std::vector<std::pair<String, Dynamic>> value_list;
-        Func<Tree* (void*)> to_tree = null;
-        Func<void (void*, Tree*)> prepare = null;
-        Func<void (void*, Tree*)> fill = null;
+        Func<Tree (void*)> to_tree = null;
+        Func<void (void*, Tree)> prepare = null;
+        Func<void (void*, Tree)> fill = null;
         Func<void (void*)> finish = null;
         GetSet0 delegate = null;
         TypeData* pointee_type = null;

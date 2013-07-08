@@ -94,9 +94,9 @@ namespace hacc {
     template <class C, class M>
     void hacc_pointer_by_member (M C::* p, std::vector<C*>& all, bool required = false) {
         Haccability<C*>::to_tree([p](C* const& x){
-            return x ? new Tree(x->*p) : new Tree(null);
+            return x ? Tree(x->*p) : Tree(null);
         });
-        Haccability<C*>::fill([p, &all, required](C*& x, Tree* t){
+        Haccability<C*>::fill([p, &all, required](C*& x, Tree t){
             M m;
             Reference(&m).from_tree(t);
             for (auto c : all) {
@@ -112,9 +112,9 @@ namespace hacc {
     template <class C, class M>
     void hacc_pointer_by_method (M (C::* f) () const, std::vector<C*>& all, bool required = false) {
         Haccability<C*>::to_tree([f](C* const& x){
-            return x ? new Tree((x->*f)()) : new Tree(null);
+            return x ? Tree((x->*f)()) : Tree(null);
         });
-        Haccability<C*>::fill([f, &all, required](C*& x, Tree* t){
+        Haccability<C*>::fill([f, &all, required](C*& x, Tree t){
             M m;
             Reference(&m).from_tree(t);
             for (auto c : all) {
