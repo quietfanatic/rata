@@ -5,9 +5,9 @@
     }}
     tilemap:{"geo::Tilemap":{
         Resident:{ room:$.room }
+        Object:{ pos:[0 0] }
         tileset:$("modules/rata/res/test.tileset").tileset
         texture:$.img.ALL
-        pos:[0 0]
         width:40 height:30
         tiles:[
             1 1 1 1 1  1 1 1 1 1  1 1 1 1 1  1 1 1 1 1  1 1 1 1 1  1 1 1 1 1  1 1 1 1 1  1 1 1 1 1

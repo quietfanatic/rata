@@ -17,9 +17,9 @@ namespace geo {
     };
 
     struct Tilemap : Resident, phys::Object, Linkable<Tilemap> {
+         // Using Object::pos for position
         Tileset* tileset;
         core::Texture* texture;
-        Vec pos;
         uint32 width;
         uint32 height;
         std::vector<uint16> tiles;

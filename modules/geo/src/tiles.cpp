@@ -167,7 +167,6 @@ namespace geo {
         );
          // And...we're done with the edges.
         delete[] es;
-        set_pos(pos);
          // Now for the graphics buffers
         using core::glproc;
         static auto glGenBuffers = glproc<void (GLsizei, GLuint*)>("glGenBuffers");
@@ -282,9 +281,9 @@ HCB_END(Tileset)
 HCB_BEGIN(Tilemap)
     name("geo::Tilemap");
     attr("Resident", base<Resident>());
+    attr("Object", base<phys::Object>().optional());
     attr("tileset", member(&Tilemap::tileset));
     attr("texture", member(&Tilemap::texture));
-    attr("pos", member(&Tilemap::pos));
     attr("width", member(&Tilemap::width));
     attr("height", member(&Tilemap::height));
     attr("tiles", member(&Tilemap::tiles));
