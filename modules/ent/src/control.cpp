@@ -12,7 +12,7 @@ namespace ent {
     void Player::think () {
         if (!character) return;
         size_t buttons = 0;
-        size_t bit = 0;
+        size_t bit = 1;
         for (size_t i = 0; i < N_BUTTONS; i++) {
             for (auto& k : mappings[i])
                 if (core::key_pressed(k))
@@ -31,6 +31,7 @@ namespace ent {
         mappings[CROUCH].push_back('S');
         mappings[JUMP].push_back(GLFW_KEY_SPACE);
         mappings[ACTION].push_back('E');  // TODO: mouse control
+        mappings[EXAMINE].push_back('R');
         mappings[AIM].push_back(GLFW_KEY_LSHIFT);
         mappings[ATTACK].push_back('Q');
     }
@@ -45,14 +46,14 @@ namespace ent {
     Mind::Mind () { activate(); }
     Mind::~Mind () { }
 
-    struct Mind_Layer : core::Phase {
-        Mind_Layer () : core::Phase("B.M", "minds", true) { }
+    struct Mind_Phase : core::Phase {
+        Mind_Phase () : core::Phase("B.M", "minds") { }
         void run () {
             for (Mind* m = minds().first(); m; m = m->next()) {
                 m->think();
             }
         }
-    };
+    } mind_phase;
 
 } using namespace ent;
 
