@@ -111,7 +111,7 @@ namespace vis {
         void (* glBindVertexArray )(GLuint);
 
         Sprite_Layer () : Layer("C.M", "sprites") { }
-        void Layer_start () {
+        void Layer_start () override {
             glUseProgram = glproc<void (GLuint)>("glUseProgram");
             glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
             glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
@@ -129,7 +129,7 @@ namespace vis {
             }
         }
          // Renderer
-        void start_rendering () {
+        void start_rendering () override {
             glDisable(GL_BLEND);
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
@@ -137,7 +137,7 @@ namespace vis {
             glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
         }
          // Layer
-        void Layer_run () {
+        void Layer_run () override {
             glClearColor(0.5, 0.5, 0.5, 0);
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
@@ -171,7 +171,7 @@ namespace vis {
 
     struct Sprite_Test : Draws_Sprites {
         void finish () { Draws_Sprites::activate(); }
-        void draws_sprites () {
+        void draws_sprites () override {
             static Image* image = hacc::File("modules/vis/res/test.hacc").data().attr("img");
             static Texture* texture = image->texture_named("ALL");
             static Layout* layout = hacc::File("modules/vis/res/test.hacc").data().attr("layout");

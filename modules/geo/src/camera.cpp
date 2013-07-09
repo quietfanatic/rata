@@ -12,8 +12,8 @@ namespace geo {
         Camera () : core::Layer("A.M", "camera", true) { }
         Vec pos = Vec(10, 7.5);
 
-        void Layer_start () { }
-        void Layer_run () {
+        void Layer_start () override { }
+        void Layer_run () override {
             if (Resident* r = beholding()) {
                 pos = r->Resident_pos();
             }

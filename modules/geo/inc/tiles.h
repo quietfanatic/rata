@@ -27,8 +27,8 @@ namespace geo {
         uint vao_id;
         size_t vao_size;
 
-        void Resident_emerge ();
-        void Resident_reclude ();
+        void Resident_emerge () override;
+        void Resident_reclude () override;
 
         Tilemap ();
         void finish ();

@@ -39,23 +39,23 @@ namespace ent {
         BipedStats stats;
         int8 direction = 1;  // 1 = right, -1 = left
          // Object
-        void before_move ();
-        void after_move ();
+        void before_move () override;
+        void after_move () override;
 
          // For animation
         vis::Model model;  // Must be a humanlike model
         float distance_walked = 0;
         float oldxrel = 0;
          // Draws_Sprites
-        void draws_sprites ();
+        void draws_sprites () override;
 
         ButtonBits buttons;
          // Controllable
-        void control_buttons (ButtonBits);
+        void control_buttons (ButtonBits) override;
 
-        Vec Resident_pos ();
-        void Resident_emerge ();
-        void Resident_reclude ();
+        Vec Resident_pos () override;
+        void Resident_emerge () override;
+        void Resident_reclude () override;
 
          // Primarily for internal use.
         bool allow_movement ();

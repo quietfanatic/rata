@@ -28,7 +28,7 @@ namespace vis {
             glUniform1i(tex, 0);
         }
          // for Renderer
-        void start_rendering () {
+        void start_rendering () override {
             static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
             static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
             static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
@@ -43,7 +43,7 @@ namespace vis {
             glUseProgram(program->glid);
             glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
         }
-        void Layer_run () {
+        void Layer_run () override {
             for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
                 p->text_draw();
             }

@@ -97,7 +97,7 @@ namespace vis {
             model.apply_pose(hacc::File("modules/ent/res/small.hacc").data().attr("poses").attr("stand"));
             Draws_Sprites::activate();
         }
-        void draws_sprites () {
+        void draws_sprites () override {
             model.draw(Vec(10, 4), flip, false, 0.5);
         }
     };

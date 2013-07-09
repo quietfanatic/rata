@@ -39,13 +39,13 @@ namespace core {
     struct Input_Phase : core::Phase {
          // Input phase doesn't have a name to keep you from locking out your controls.
         Input_Phase () : core::Phase("A.M") { }
-        void Phase_start () {
+        void Phase_start () override {
             glfwSetKeyCallback(key_cb);
             glfwSetCharCallback(char_cb);
             glfwSetWindowCloseCallback(close_cb);
             glfwDisable(GLFW_AUTO_POLL_EVENTS);
         }
-        void Phase_run () {
+        void Phase_run () override {
             glfwPollEvents();
         }
     } input_phase;

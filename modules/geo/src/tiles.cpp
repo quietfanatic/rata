@@ -231,7 +231,7 @@ namespace geo {
         int tileset_size;
 
         Tilemap_Layer () : core::Layer("E.M", "tilemaps") { }
-        void Layer_start () {
+        void Layer_start () override {
             glUseProgram = core::glproc<void (GLuint)>("glUseProgram");
             glUniform1i = core::glproc<void (GLint, GLint)>("glUniform1i");
             glUniform2f = core::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
@@ -249,14 +249,14 @@ namespace geo {
         }
 
          // Renderer
-        void start_rendering () {
+        void start_rendering () override {
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
             glUseProgram(program->glid);
             glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
         }
-        void Layer_run () {
+        void Layer_run () override {
             use();
             for (Tilemap* map = active_tilemaps.first(); map; map = map->Linkable<Tilemap>::next()) {
                 Vec pos = map->Object::pos();
