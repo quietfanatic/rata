@@ -16,10 +16,11 @@ workflow {
         ../core/tmp/phases.o
         ../core/tmp/opengl.o
         ../ent/tmp/bipeds.o
+        ../ent/tmp/control.o
+        ../ent/tmp/various.o
         ../geo/tmp/camera.o
         ../geo/tmp/rooms.o
         ../geo/tmp/tiles.o
-        ../ent/tmp/various.o
         ../hacc/tmp/common.o
         ../hacc/tmp/documents.o
         ../hacc/tmp/dynamicism.o

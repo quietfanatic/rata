@@ -8,4 +8,7 @@
     beholder:{"geo::Beholder":{
         target:$.rata.Resident
     }}
+    player:{"ent::Player":{
+        character:$.rata.Controllable
+    }}
 }}

@@ -10,7 +10,7 @@ workflow {
 
     include '../..';
 
-    objects(qw(various bipeds));
+    objects(qw(various bipeds control));
     
     clean_rule(glob 'tmp/*');
 

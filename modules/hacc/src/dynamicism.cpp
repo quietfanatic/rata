@@ -132,7 +132,7 @@ namespace hacc {
                     if (a.first == k)
                         goto next;
                 }
-                if (!a.second->optional) {
+                if (!a.second->optional && !a.second->readonly) {
                     throw X::Missing_Attr(type(), a.first);
                 }
                 next: { }

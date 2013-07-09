@@ -5,16 +5,15 @@
 
 namespace ent {
 
-    Logger biped_logger ("bipeds", false);
-
+     // Definitions
     void Biped::set_def (BipedDef* _def) {
         def = _def;
         apply_bdf(def->body_def);
         model.apply_skel(def->skel);
     }
 
+     // Draws_Sprites
     void Biped::draws_sprites () {
-        biped_logger.log("Drawing biped model");
         model.apply_skin(def->skin);
         if (ground) {
             if (fabs(vel().x) < 0.01) {
@@ -22,15 +21,12 @@ namespace ent {
             }
             else {
                 float stepdist = fmod(distance_walked, 2.0);
-                if (stepdist < 0.5) {
+                if (stepdist < 0.5)
                     model.apply_pose(&def->poses->walk1);
-                }
-                else if (stepdist >= 1 && stepdist < 1.5) {
+                else if (stepdist >= 1 && stepdist < 1.5)
                     model.apply_pose(&def->poses->walk2);
-                }
-                else {
+                else
                     model.apply_pose(&def->poses->stand);
-                }
             }
         }
         else {
@@ -39,8 +35,11 @@ namespace ent {
         model.draw(pos(), direction < 0);
     }
 
+     // Resident
+    Vec Biped::resident_pos () {
+        return pos();
+    }
     void Biped::emerge () {
-        biped_logger.log("Biped::emerge");
         materialize();
         legs.enable();
         Draws_Sprites::activate();
@@ -59,78 +58,78 @@ namespace ent {
         );
     }
 
-    bool Biped::allow_movement (BipedStats* stats, Biped::Controls* controls) {
+    bool Biped::allow_movement () {
         if (ground) {
             legs.enable();
-            allow_walk(stats, controls);
-            allow_jump(stats, controls);
+            allow_walk();
+            allow_jump();
         }
         else {
-            allow_airmove(stats, controls);
+            legs.disable();
+            allow_airmove();
         }
         if (ground)
             oldxrel = pos().x - ground->pos().x;
         return true;
     }
-    bool Biped::allow_walk (BipedStats* stats, Biped::Controls* controls) {
+    bool Biped::allow_walk () {
         if (ground) {
-            legs.enable();
-            if (controls->left && !controls->right) {
-                legs.ambulate_x(this, -stats->walk_speed);
+            if (buttons & LEFT_BIT && !(buttons & RIGHT_BIT)) {
+                legs.ambulate_x(this, -stats.walk_speed);
                 if (vel().x <= 0) {
                     direction = -1;
-                    set_ambulate_friction(this, stats->walk_friction);
+                    set_ambulate_friction(this, stats.walk_friction);
                 }
                 else {
-                    set_ambulate_friction(this, stats->skid_friction);
+                    set_ambulate_friction(this, stats.skid_friction);
                 }
             }
-            else if (controls->right) {
-                legs.ambulate_x(this, stats->walk_speed);
+            else if (buttons & RIGHT_BIT) {
+                legs.ambulate_x(this, stats.walk_speed);
                 if (vel().x >= 0) {
                     direction = 1;
-                    set_ambulate_friction(this, stats->walk_friction);
+                    set_ambulate_friction(this, stats.walk_friction);
                 }
                 else {
-                    set_ambulate_friction(this, stats->skid_friction);
+                    set_ambulate_friction(this, stats.skid_friction);
                 }
             }
             else {
-                set_ambulate_friction(this, stats->stop_friction);
+                set_ambulate_friction(this, stats.stop_friction);
                 legs.ambulate_x(this, 0);
             }
             return fabs(vel().x) >= 0.01;
         }
         else return false;
     }
-    bool Biped::allow_jump (BipedStats* stats, Biped::Controls* controls) {
-        if (controls->jump) {
+    bool Biped::allow_jump () {
+        if (buttons & JUMP_BIT) {
             legs.disable();
              // I'd like to be able to do a mutual push between the ground and
              //  the character, but Box2D isn't well-equipped for that, because
              //  it doesn't do shock propagation.
-            impulse(Vec(0, stats->jump_impulse));
+            impulse(Vec(0, stats.jump_impulse));
             ground = NULL;
             return true;
         }
         else return false;
     }
 
-    bool Biped::allow_crouch (BipedStats* stats, Biped::Controls* controls) {
+    bool Biped::allow_crouch () {
         return false;
     }
-    bool Biped::allow_crawl (BipedStats* stats, Biped::Controls* controls) {
+    bool Biped::allow_crawl () {
         return false;
     }
-    bool Biped::allow_airmove (BipedStats* stats, Biped::Controls* controls) {
+    bool Biped::allow_airmove () {
         legs.disable();
          // If you were in a 2D platformer, you'd be able to push against the air too.
-        if (controls->left && !controls->right) {
-            force(Vec(-stats->air_force, 0));
+        if (buttons & LEFT_BIT && !(buttons & RIGHT_BIT)) {
+            force(Vec(-stats.air_force, 0));
             return true;
         }
-        else if (controls->right) {
-            force(Vec(stats->air_force, 0));
+        else if (buttons & RIGHT_BIT) {
+            force(Vec(stats.air_force, 0));
             return true;
         }
         else return false;
@@ -151,29 +150,18 @@ namespace ent {
         }
     }
     void Biped::before_move () {
-        allow_movement(def->stats, &controls);
+        allow_movement();
+        buttons = ButtonBits(0);
+    }
+
+     // Controllable
+    void Biped::control_buttons (ButtonBits bits) {
+        buttons = bits;
     }
 
     Biped::Biped () : legs(this) { }
 
-    bool Biped::hear_key (int keycode, int action) {
-        bool on = action == GLFW_PRESS;
-        switch (keycode) {
-            case 'A': controls.left = on; return true;
-            case 'D': controls.right = on; return true;
-            case 'W': controls.jump = on; return true;
-            case 'S': controls.crouch = on; return true;
-            default: return false;
-        }
-    }
-
-    Vec Biped::resident_pos () {
-        return pos();
-    }
-
-    void Biped::finish () {
-        biped_logger.log("Biped::finish");
-    }
+    void Biped::finish () { }
 
 } using namespace ent;
 
@@ -183,6 +171,7 @@ HCB_BEGIN(Biped)
     attr("Object", base<phys::Object>());
     attr("Resident", base<geo::Resident>());
     attr("Grounded", base<phys::Grounded>().optional());
+    attr("Controllable", base<ent::Controllable>().optional());
     attr("direction", member(&Biped::direction).optional());
     attr("distance_walked", member(&Biped::distance_walked).optional());
     attr("oldxrel", member(&Biped::oldxrel).optional());

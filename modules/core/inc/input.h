@@ -7,6 +7,8 @@
 
 namespace core {
 
+    bool key_pressed (int keycode);
+
     struct Key_Listener;
     EXTERN_INIT_SAFE(std::vector<Key_Listener*>, key_listeners)
     struct Key_Listener : Ordered<Key_Listener, key_listeners> {

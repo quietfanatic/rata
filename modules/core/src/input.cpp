@@ -9,6 +9,8 @@ namespace core {
     INIT_SAFE(std::vector<Key_Listener*>, key_listeners);
     INIT_SAFE(std::vector<Char_Listener*>, char_listeners);
 
+    bool key_pressed (int code) { return glfwGetKey(code); }
+
     static int GLFWCALL close_cb () {
         quick_exit();
         return true;  // not gonna happen
