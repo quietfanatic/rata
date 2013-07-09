@@ -471,24 +471,25 @@ namespace hacc {
 
     bool Reference::foreach_address (const Func<bool (Pointer, Path)>& cb, Path path) const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get addresses in");
         if (void* addr = address()) {
             if (cb(Pointer(type(), addr), path))
                 return true;
-            const std::vector<String>& ks = keys();
-            if (!ks.empty()) {
-                for (auto& k : ks) {
-                    Path newpath = path ? Path(path, k) : path;
-                    if (attr(k).foreach_address(cb, newpath))
-                        return true;
+            if (type().initialized()) {
+                const std::vector<String>& ks = keys();
+                if (!ks.empty()) {
+                    for (auto& k : ks) {
+                        Path newpath = path ? Path(path, k) : path;
+                        if (attr(k).foreach_address(cb, newpath))
+                            return true;
+                    }
                 }
-            }
-            else {
-                size_t n = length();
-                for (size_t i = 0; i < n; i++) {
-                    Path newpath = path ? Path(path, i) : path;
-                    if (elem(i).foreach_address(cb, newpath))
-                        return true;
+                else {
+                    size_t n = length();
+                    for (size_t i = 0; i < n; i++) {
+                        Path newpath = path ? Path(path, i) : path;
+                        if (elem(i).foreach_address(cb, newpath))
+                            return true;
+                    }
                 }
             }
         }
@@ -497,7 +498,7 @@ namespace hacc {
 
     bool Reference::foreach_pointer (const Func<bool (Reference, Path)>& cb, Path path) const {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get pointers in");
+        if (!type().initialized()) return false;
         if (type().data->pointee_type) {
             if (cb(*this, path))
                 return true;
