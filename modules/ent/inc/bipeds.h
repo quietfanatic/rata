@@ -53,10 +53,9 @@ namespace ent {
          // Controllable
         void control_buttons (ButtonBits);
 
-         // Resident
-        Vec resident_pos ();
-        void emerge ();
-        void reclude ();
+        Vec Resident_pos ();
+        void Resident_emerge ();
+        void Resident_reclude ();
 
          // Primarily for internal use.
         bool allow_movement ();

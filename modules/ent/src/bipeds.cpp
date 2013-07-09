@@ -36,15 +36,14 @@ namespace ent {
         model.draw(pos(), direction < 0);
     }
 
-     // Resident
-    Vec Biped::resident_pos () {
+    Vec Biped::Resident_pos () {
         return pos();
     }
-    void Biped::emerge () {
+    void Biped::Resident_emerge () {
         materialize();
         Draws_Sprites::activate();
     }
-    void Biped::reclude () {
+    void Biped::Resident_reclude () {
         dematerialize();
         Draws_Sprites::deactivate();
     }

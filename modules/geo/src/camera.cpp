@@ -16,7 +16,7 @@ namespace geo {
         void start () { }
         void run () {
             if (Resident* r = beholding()) {
-                pos = r->resident_pos();
+                pos = r->Resident_pos();
             }
             if (!pos.is_defined())
                 pos = Vec(10, 7.5);

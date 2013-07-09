@@ -15,8 +15,8 @@ namespace geo {
         active = true;
         geo_logger.log("Activating room @%lx", (unsigned long)this);
         size_t i = 0;
-        for (Resident* r = residents.first(); r; r = r->next()) {
-            r->emerge();
+        for (auto r = residents.first(); r; r = r->next()) {
+            r->Resident_emerge();
             i++;
         }
         geo_logger.log("...and its %lu residents", i);
@@ -24,8 +24,8 @@ namespace geo {
     void Room::deactivate () {
         active = false;
         geo_logger.log("Deactivating room @%lx", (unsigned long)this);
-        for (Resident* r = residents.first(); r; r = r->next())
-            r->reclude();
+        for (auto r = residents.first(); r; r = r->next())
+            r->Resident_reclude();
     }
 
     void enter (Room* r) {
@@ -70,13 +70,13 @@ namespace geo {
         if (room) {
             link(room->residents);
             if (room->active)
-                emerge();
+                Resident_emerge();
         }
     }
 
     void Resident::reroom () {
         if (!room) room = current_room;
-        Vec pos = resident_pos();
+        Vec pos = Resident_pos();
         Room* origin =
             room == &tumbolia
                 ? current_room : room;
@@ -88,7 +88,7 @@ namespace geo {
                     if (beholding() == this)
                         enter(n);
                     else if (!n->active)
-                        reclude();
+                        Resident_reclude();
                     return;
                 }
             }
@@ -99,12 +99,12 @@ namespace geo {
                     geo_logger.log("The Beholder has left the building.  Party's over.", this);
                 room = &tumbolia;
                 link(tumbolia.residents);
-                reclude();
+                Resident_reclude();
             }
         }
     }
 
-    Vec Resident::resident_pos () {
+    Vec Resident::Resident_pos () {
         if (room)
             return room->boundary.center();
         else

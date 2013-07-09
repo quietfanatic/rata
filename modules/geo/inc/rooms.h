@@ -24,9 +24,9 @@ namespace geo {
 
     struct Resident : Linkable<Resident> {
         Room* room = NULL;
-        virtual void emerge () = 0;
-        virtual void reclude () = 0;
-        virtual Vec resident_pos ();  // Default: center of room
+        virtual void Resident_emerge () = 0;
+        virtual void Resident_reclude () = 0;
+        virtual Vec Resident_pos ();  // Default: center of room
         virtual ~Resident () { }
         void finish ();
         void reroom ();

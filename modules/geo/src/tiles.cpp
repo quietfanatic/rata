@@ -20,8 +20,15 @@ namespace geo {
     Links<Tilemap> active_tilemaps;
 
     Tilemap::Tilemap () : phys::Object() { tilemap_bdf(); }
-    void Tilemap::emerge () { materialize(); Linkable<Tilemap>::link(active_tilemaps); }
-    void Tilemap::reclude () { dematerialize(); Linkable<Tilemap>::unlink(); }
+
+    void Tilemap::Resident_emerge () {
+        materialize();
+        Linkable<Tilemap>::link(active_tilemaps);
+    }
+    void Tilemap::Resident_reclude () {
+        dematerialize();
+        Linkable<Tilemap>::unlink();
+    }
 
 
      // What follows is an algorithm to optimize tile geometry.
