@@ -167,6 +167,10 @@ namespace ent {
         }
     }
 
+    Vec Biped::resident_pos () {
+        return pos();
+    }
+
     void Biped::finish () {
         biped_logger.log("Biped::finish");
     }

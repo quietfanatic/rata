@@ -53,6 +53,9 @@ namespace ent {
         void before_move ();
         void after_move ();
 
+         // Resident
+        Vec resident_pos ();
+
          // Primarily for internal use.
         bool allow_movement (BipedStats* stats, Controls* controls);
         bool allow_walk (BipedStats* stats, Controls* controls);
