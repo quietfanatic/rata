@@ -12,12 +12,12 @@ namespace phys {
 
     static Logger cr_logger ("collision_rules");
 
-    std::vector<Collision_Rule*> coll_rules;
+    INIT_SAFE(std::vector<Collision_Rule*>, coll_rules);
     INIT_SAFE(uint, n_coll_rules, = 0);
 
     Collision_Rule::Collision_Rule () : index(n_coll_rules()++) {
         if (index < 64) {
-            coll_rules.push_back(this);
+            coll_rules().push_back(this);
             cr_logger.log("Declared collision rule: %u", index);
         }
         else throw hacc::X::Logic_Error("Too many Collision_Rules were created (> 64)");
@@ -32,12 +32,12 @@ namespace phys {
             FixtureDef* bfdf = (FixtureDef*)b->GetUserData();
             uint64 coll_ab = afdf->coll_a & bfdf->coll_b;
             for (uint i = 0; coll_ab; i++) {
-                if (coll_ab & 1) coll_rules[i]->post(contact, a, b);
+                if (coll_ab & 1) coll_rules()[i]->post(contact, a, b);
                 coll_ab >>= 1;
             }
             uint64 coll_ba = afdf->coll_b & bfdf->coll_a;
             for (uint i = 0; coll_ba; i++) {
-                if (coll_ba & 1) coll_rules[i]->post(contact, b, a);
+                if (coll_ba & 1) coll_rules()[i]->post(contact, b, a);
                 coll_ba >>= 1;
             }
         }
@@ -48,12 +48,12 @@ namespace phys {
             FixtureDef* bfdf = (FixtureDef*)b->GetUserData();
             uint64 coll_ab = afdf->coll_a & bfdf->coll_b;
             for (uint i = 0; coll_ab; i++) {
-                if (coll_ab & 1) coll_rules[i]->end(contact, a, b);
+                if (coll_ab & 1) coll_rules()[i]->end(contact, a, b);
                 coll_ab >>= 1;
             }
             uint64 coll_ba = afdf->coll_b & bfdf->coll_a;
             for (uint i = 0; coll_ba; i++) {
-                if (coll_ba & 1) coll_rules[i]->end(contact, b, a);
+                if (coll_ba & 1) coll_rules()[i]->end(contact, b, a);
                 coll_ba >>= 1;
             }
         }
@@ -187,7 +187,7 @@ namespace phys {
 
 HCB_BEGIN(Collision_Rule*)
     name("phys::Collision_Rule*");
-    hacc::hacc_pointer_by_method(&Collision_Rule::name, coll_rules, true);
+    hacc::hacc_pointer_by_method(&Collision_Rule::name, coll_rules(), true);
 HCB_END(Collision_Rule*)
 
 HCB_BEGIN(b2Vec2)
@@ -242,7 +242,7 @@ HCB_END(b2FixtureDef)
 static std::vector<Collision_Rule*> coll_b2v (uint64 b) {
     std::vector<Collision_Rule*> v;
     for (uint i = 0; b; i++, b >>= 1) {
-        if (b & 1) v.push_back(coll_rules[i]);
+        if (b & 1) v.push_back(coll_rules()[i]);
     }
     return v;
 }

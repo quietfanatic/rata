@@ -95,23 +95,23 @@ struct Linked : Linkable<C> {
 
 
  // Things that are registered in an order
-template <class C, std::vector<C*>& all, class O = std::string>
+template <class C, std::vector<C*>& (* all )(), class O = std::string>
 struct Ordered {
-    static std::vector<C*>& get_all () { return all; }
+    static std::vector<C*>& get_all () { return all(); }
     O order;
     Ordered (O order) : order(order) {
-        for (auto i = all.begin(); i != all.end(); i++) {
+        for (auto i = all().begin(); i != all().end(); i++) {
             if (order < (*i)->order) {
-                all.insert(i, static_cast<C*>(this));
+                all().insert(i, static_cast<C*>(this));
                 return;
             }
         }
-        all.push_back(static_cast<C*>(this));
+        all().push_back(static_cast<C*>(this));
     }
     ~Ordered () {
-        for (auto i = all.begin(); i != all.end(); i++) {
+        for (auto i = all().begin(); i != all().end(); i++) {
             if (*i == static_cast<C*>(this)) {
-                all.erase(i);
+                all().erase(i);
                 return;
             }
         }

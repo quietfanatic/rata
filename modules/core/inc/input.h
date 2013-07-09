@@ -8,7 +8,7 @@
 namespace core {
 
     struct Key_Listener;
-    extern std::vector<Key_Listener*> key_listeners;
+    EXTERN_INIT_SAFE(std::vector<Key_Listener*>, key_listeners)
     struct Key_Listener : Ordered<Key_Listener, key_listeners> {
          // Return true if you've handled the key.
         virtual bool hear_key (int keycode, int action) = 0;
@@ -20,7 +20,7 @@ namespace core {
     };
 
     struct Char_Listener;
-    extern std::vector<Char_Listener*> char_listeners;
+    EXTERN_INIT_SAFE(std::vector<Char_Listener*>, char_listeners)
     struct Char_Listener : Ordered<Char_Listener, char_listeners> {
          // Return true if you've handled the key.
         virtual bool hear_char (int code, int action) = 0;

@@ -6,8 +6,8 @@
 
 namespace core {
 
-    std::vector<Key_Listener*> key_listeners;
-    std::vector<Char_Listener*> char_listeners;
+    INIT_SAFE(std::vector<Key_Listener*>, key_listeners);
+    INIT_SAFE(std::vector<Char_Listener*>, char_listeners);
 
     static int GLFWCALL close_cb () {
         quick_exit();
@@ -15,7 +15,7 @@ namespace core {
     }
 
     static void GLFWCALL key_cb (int keycode, int action) {
-        for (auto kl : key_listeners) {
+        for (auto kl : key_listeners()) {
             if (kl->hear_key(keycode, action)) return;
         }
         if (action == GLFW_PRESS) {
@@ -29,7 +29,7 @@ namespace core {
         }
     }
     static void GLFWCALL char_cb (int code, int action) {
-        for (auto cl : char_listeners) {
+        for (auto cl : char_listeners()) {
             if (cl->hear_char(code, action)) return;
         }
     }

@@ -9,7 +9,7 @@
 namespace core {
 
     struct Phase;
-    extern std::vector<Phase*> all_phases;
+    EXTERN_INIT_SAFE(std::vector<Phase*>, all_phases)
     struct Phase : Ordered<Phase, all_phases> {
         std::string name;
         bool on;
@@ -29,7 +29,7 @@ namespace core {
     };
 
     struct Layer;
-    extern std::vector<Layer*> all_layers;
+    EXTERN_INIT_SAFE(std::vector<Layer*>, all_layers)
     struct Layer : Ordered<Layer, all_layers> {
         std::string name;
         bool on;

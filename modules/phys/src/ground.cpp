@@ -31,8 +31,7 @@ namespace phys {
                 grd->ground_fix_index = 0;
             }
         }
-    } gr;
-    Collision_Rule* ground_rule = &gr;
+    } ground_rule;
 
 } using namespace phys;
 

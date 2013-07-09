@@ -20,8 +20,6 @@ namespace phys {
     };
       // There's no required behavior for an object to be ground.
 
-    extern Collision_Rule* ground_rule;
-
 }
 
 #endif
