@@ -45,8 +45,8 @@ static void clobber (const char* filename) {
 tap::Tester files_tester ("hacc/files", [](){
     plan(21);
 
-    clobber("../test/eight.hacc");
-    clobber("../test/pointer2.hacc");
+    remove("../test/eight.hacc");
+    remove("../test/pointer2.hacc");
 
     doesnt_throw([](){ set_file_logger([](String s){ diag(s.c_str()); }); }, "Can set a custom logger");
     ok(!File("../test/seven.hacc").loaded(), "File is not loaded before load() is called on it");
@@ -99,7 +99,7 @@ tap::Tester files_tester ("hacc/files", [](){
     }, "Can load a file that was unloaded");
     ok(File("../test/seven.hacc").loaded(), "Depended-upon files are automatically loaded");
 
-    clobber("../test/eight.hacc");
-    clobber("../test/pointer2.hacc");
+    remove("../test/eight.hacc");
+    remove("../test/pointer2.hacc");
 
 });
