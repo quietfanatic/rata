@@ -174,6 +174,7 @@ HCB_BEGIN(DocumentData)
             DocObj* obj = d.alloc(pair.first, type);
             type.construct(obj + 1);
             d.by_id.at(pair.first) = obj;
+            Reference(type, obj + 1).prepare(oo[0].second);
         }
     });
     keys(mixed_funcs<std::vector<String>>(
@@ -191,7 +192,13 @@ HCB_BEGIN(DocumentData)
         if (p) return p;
         else throw X::No_Attr(Type::CppType<Document>(), name);
     });
-    finish([](DocumentData& d){ d.by_id.clear(); });
+    finish([](DocumentData& d){
+        for (DocLink* link = d.next; link != &d; link = link->next) {
+            DocObj* obj = static_cast<DocObj*>(link);
+            Reference(obj->type, obj + 1).finish();
+        }
+        d.by_id.clear();
+    });
     to_tree([](const DocumentData& d){
         Object o;
         o.emplace_back("_next_id", Tree(d.next_id));

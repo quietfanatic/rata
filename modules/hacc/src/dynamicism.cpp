@@ -314,7 +314,7 @@ namespace hacc {
                 Reference(p, type().data->delegate).prepare(t);
             });
         }
-        switch (t.form()) {
+        else switch (t.form()) {
             case OBJECT: {
                 const Object& o = t.as<const Object&>();
                 size_t n = o.size();
@@ -323,8 +323,7 @@ namespace hacc {
                 for (size_t i = 0; i < n; i++) {
                     ks.push_back(o[i].first);
                 }
-                if (!type().data->prepare)
-                    set_keys(ks);
+                set_keys(ks);
                 for (size_t i = 0; i < n; i++) {
                     attr(ks[i]).prepare(o[i].second);
                 }
@@ -333,8 +332,7 @@ namespace hacc {
             case ARRAY: {
                 const Array& a = t.as<const Array&>();
                 size_t n = a.size();
-                if (!type().data->prepare)
-                    set_length(n);
+                set_length(n);
                 for (size_t i = 0; i < n; i++) {
                     elem(i).prepare(a[i]);
                 }
@@ -430,8 +428,10 @@ namespace hacc {
 
     void Reference::finish () const {
         if (gs->narrow) return;
-         // Do delegation only if there's no custom finish function
-        if (type().data->delegate && !type().data->finish) {
+        if (type().data->finish) {
+            mod([&](void* p){ type().data->finish(p); });
+        }
+        else if (type().data->delegate) {
             mod([&](void* p){
                 Reference(p, type().data->delegate).finish();
             });
@@ -449,9 +449,6 @@ namespace hacc {
                 for (size_t i = 0; i < n; i++) {
                     elem(i).finish();
                 }
-            }
-            if (type().data->finish) {
-                mod([&](void* p){ type().data->finish(p); });
             }
         }
     }
