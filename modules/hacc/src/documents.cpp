@@ -1,0 +1,205 @@
+#include <unordered_map>
+#include <sstream>
+#include "../inc/documents.h"
+#include "../inc/haccable.h"
+
+namespace hacc {
+
+    struct DocObj;
+
+    struct DocLink {
+        DocLink* prev;
+        DocLink* next;
+        DocLink () : prev(this), next(this) { }
+        DocLink (DocLink* list) : prev(list), next(list->next) {
+            list->next->prev = this;
+            list->next = this;
+        }
+        ~DocLink () {
+            prev->next = prev;
+            next->prev = next;
+        }
+    };
+
+    struct DocObj : DocLink {
+        String id;
+        Type type;
+        DocObj (DocLink* list, String id, Type type) :
+            DocLink(list), id(id), type(type)
+        { }
+    };
+
+    struct DocumentData : DocLink {
+        size_t next_id = 1;
+         // Will usually be non-resident
+        std::unordered_map<String, DocObj*> by_id;
+
+        DocObj* alloc (String id, Type type) {
+            void* p = operator new(type.size() + sizeof(DocObj));
+            return new (p) DocObj{this, id, type};
+        }
+        void dealloc (DocObj* obj) {
+             // Doubly-linked list magic
+            delete obj;
+        }
+        void destroy (DocObj* obj) {
+            obj->type.destruct(obj + 1);
+            dealloc(obj);
+        }
+        ~DocumentData () {
+            while (prev != this) destroy(static_cast<DocObj*>(prev));
+        }
+    };
+
+    Document::Document () : data(new DocumentData) { }
+    Document::~Document () { delete data; }
+    void* Document::alloc (Type type) {
+        return data->alloc("", type) + 1;
+    }
+    void* Document::alloc_id (String id, Type type) {
+        if (id[0] == '_') throw X::Logic_Error("Cannot create an object in a hacc::Document with an ID starting with _: " + id);
+        return data->alloc(id, type) + 1;
+    }
+    void Document::dealloc (void* p) {
+        data->dealloc((DocObj*)p - 1);
+    }
+    void Document::change_id (void* p, String id) {
+        ((DocObj*)p - 1)->id = id;
+    }
+
+    static Pointer _get (DocumentData* data, String s) {
+        if (!data->by_id.empty()) {
+            auto iter = data->by_id.find(s);
+            if (iter != data->by_id.end())
+                return Pointer(iter->second->type, iter->second + 1);
+            else return null;
+        }
+        else {
+            for (DocLink* link = data->next; link != data; link = link->next) {
+                auto obj = static_cast<DocObj*>(link);
+                if (obj->id.empty()) {
+                    std::ostringstream ss ("_");
+                    ss << data->next_id++;
+                    obj->id = ss.str();
+                }
+                if (obj->id == s)
+                    return Pointer(obj->type, obj + 1);
+            }
+            return null;
+        }
+    }
+    Pointer Document::get (String s) { return _get(data, s); }
+
+    static std::vector<String> _all_ids (DocumentData* data) {
+        std::vector<String> r;
+        for (DocLink* link = data->next; link != data; link = link->next) {
+            auto obj = static_cast<DocObj*>(link);
+            if (obj->id.empty()) {
+                std::ostringstream ss ("_");
+                ss << data->next_id++;
+                obj->id = ss.str();
+            }
+            r.push_back(obj->id);
+        }
+        return std::move(r);
+    }
+    std::vector<String> Document::all_ids () {
+        return _all_ids(data);
+    }
+
+    namespace X {
+        static String stos (size_t s) {
+            std::ostringstream ss;
+            ss << s;
+            return ss.str();
+        }
+        Document_Bad_ID::Document_Bad_ID (size_t got, size_t next) :
+            Logic_Error(
+                "Invalid hacc::Document special ID: " + stos(got)
+              + " >= _next_id " + stos(next)
+            ), got(got), next(next)
+        { }
+    }
+
+} using namespace hacc;
+
+HCB_BEGIN(Document)
+    name("hacc::Document");
+    delegate(ref_func<DocumentData>([](Document& d)->DocumentData&{ return *d.data; }));
+HCB_END(Document)
+
+HCB_BEGIN(DocumentData)
+    name("hacc::DocumentData");
+    prepare([](DocumentData& d, Tree t){
+        if (t.form() != OBJECT)
+            throw X::Form_Mismatch(Type::CppType<DocumentData>(), t);
+        const Object& o = t.as<const Object&>();
+         // Verify format
+        size_t next_id = 1;
+        size_t largest_id = 0;
+        for (auto& pair : o) {
+            if (pair.first[0] == '_') {
+                if (pair.first == "_next_id") {
+                    if (pair.second.form() != INTEGER)
+                        throw X::Logic_Error("The _next_id attribute of a hacc::Document must be an integer");
+                }
+                else {
+                    std::istringstream ss (pair.first);
+                    char _;
+                    size_t id;
+                    ss >> _ >> id;
+                    if (!ss.eof()) throw X::Logic_Error("Invalid hacc::Document special id " + pair.first);
+                    if (id > largest_id) largest_id = id;
+                }
+            }
+            else {
+                if (pair.second.form() != OBJECT)
+                    throw X::Logic_Error("Each object in a hacc::Document must be a {type:value} pair");
+                const Object& oo = pair.second.as<const Object&>();
+                if (oo.size() != 1)
+                    throw X::Logic_Error("Each object in a hacc::Document must have a single type:value pair");
+                Type(oo[0].first);  // Validate type name
+                if (!d.by_id.emplace(pair.first, null).second)
+                    throw X::Logic_Error("Duplicate ID in hacc::Document: " + pair.first);
+            }
+        }
+        if (largest_id >= next_id) {
+            throw X::Document_Bad_ID(largest_id, next_id);
+        }
+         // Allocate and prepare
+        for (auto& pair : o) {
+            if (pair.first == "_next_id") continue;
+            const Object& oo = pair.second.as<const Object&>();
+            Type type = Type(oo[0].first);
+            DocObj* obj = d.alloc(pair.first, type);
+            type.construct(obj + 1);
+            d.by_id.at(pair.first) = obj;
+        }
+    });
+    keys(mixed_funcs<std::vector<String>>(
+        [](const DocumentData& d){
+            std::vector<String> r = _all_ids(&const_cast<DocumentData&>(d));
+            r.push_back("_next_id");
+            return std::move(r);
+        }, [](DocumentData&, const std::vector<String>&){
+            throw X::Logic_Error("Cannot set_keys on hacc::Document");
+        }
+    ));
+    attr("_next_id", member(&DocumentData::next_id).optional());
+    attrs([](DocumentData& d, String name){
+        Pointer p = _get(&d, name);
+        if (p) return p;
+        else throw X::No_Attr(Type::CppType<Document>(), name);
+    });
+    finish([](DocumentData& d){ d.by_id.clear(); });
+    to_tree([](const DocumentData& d){
+        Object o;
+        o.emplace_back("_next_id", Tree(d.next_id));
+        for (DocLink* link = d.prev; link != &d; link = link->next) {
+            auto obj = static_cast<DocObj*>(link);
+            Tree val = Reference(obj->type, obj + 1).to_tree();
+            o.emplace_back(obj->id, Tree(Object{Pair{obj->type.name(), val}}));
+        }
+        return Tree(std::move(o));
+    });
+HCB_END(DocumentData)

@@ -323,7 +323,8 @@ namespace hacc {
                 for (size_t i = 0; i < n; i++) {
                     ks.push_back(o[i].first);
                 }
-                set_keys(ks);
+                if (!type().data->prepare)
+                    set_keys(ks);
                 for (size_t i = 0; i < n; i++) {
                     attr(ks[i]).prepare(o[i].second);
                 }
@@ -332,19 +333,22 @@ namespace hacc {
             case ARRAY: {
                 const Array& a = t.as<const Array&>();
                 size_t n = a.size();
-                set_length(n);
+                if (!type().data->prepare)
+                    set_length(n);
                 for (size_t i = 0; i < n; i++) {
                     elem(i).prepare(a[i]);
                 }
                 break;
             }
             case PATH: {
-                Path p = t.as<Path>();
-                if (type().data->pointee_type) {
-                    String filename = p.root();
-                    load(File(filename));
+                if (!type().data->prepare) {
+                    Path p = t.as<Path>();
+                    if (type().data->pointee_type) {
+                        String filename = p.root();
+                        load(File(filename));
+                    }
+                    else throw X::Form_Mismatch(type(), t);
                 }
-                else throw X::Form_Mismatch(type(), t);
                 break;
             }
             default: break;
