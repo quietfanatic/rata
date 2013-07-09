@@ -21,7 +21,7 @@ namespace core {
         if (action == GLFW_PRESS) {
             switch (keycode) {
                 case GLFW_KEY_ESC: {
-                    quick_exit();
+                    stop();
                     break;
                 }
                 default: break;
