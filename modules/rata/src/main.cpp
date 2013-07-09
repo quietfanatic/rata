@@ -3,9 +3,9 @@
 #include "../../hacc/inc/files.h"
 
 int main () {
-    core::load("modules/rata/test_state_out.hacc");
+    core::load("modules/rata/test_state.hacc");
     core::start();
-    hacc::File("modules/rata/test_state_out.hacc").rename("modules/rata/test_state_out.hacc");
+    hacc::File("modules/rata/test_state.hacc").rename("modules/rata/test_state_out.hacc");
     hacc::save(hacc::File("modules/rata/test_state_out.hacc"));
     fprintf(stderr, "Quit successfully\n");
 }

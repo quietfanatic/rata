@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sstream>
+#include <iomanip>
 #include "../inc/files.h"  // for Path
 #include "../inc/strings.h"
 #include "paths_internal.h"
@@ -77,13 +78,13 @@ namespace hacc {
             case FLOAT: {
                 float f = t.as<float>();
                 std::ostringstream s;
-                s << f << "~" << std::hex << *(uint32*)&f;
+                s << f << "~" << std::setfill('0') << std::setw(8) << std::hex << *(uint32*)&f;
                 return s.str();
             }
             case DOUBLE: {
                 double d = t.as<double>();
                 std::ostringstream s;
-                s << d << "~" << std::hex << *(uint64*)&d;
+                s << d << "~" << std::setfill('0') << std::setw(16) << std::hex << *(uint64*)&d;
                 return s.str();
             }
             case STRING: return "\"" + escape_string(t.as<String>()) + "\"";
