@@ -37,8 +37,15 @@ static void clobber (const char* filename) {
 }
 
 tap::Tester documents_tester ("hacc/documents", [](){
-    plan(3);
+    plan(6);
     doesnt_throw([](){ load(File("../test/document.hacc")); }, "Can load a document");
     is(File("../test/document.hacc").data().attr("asdf").type(), Type::CppType<int32>(), "Document object has right type");
     is(*(int32*)File("../test/document.hacc").data().attr("asdf").address(), (int32)50, "Document object has right value");
+    doesnt_throw([](){ File("../test/document.hacc").rename("../test/document2.hacc"); }, "Can rename a File object");
+    doesnt_throw([](){ save(File("../test/document2.hacc")); }, "Can save a Document");
+    is(
+        slurp("../test/document2.hacc"),
+        String("{ \"hacc::Document\":{ _next_id:1 asdf:{ int32:50 } } }\n"),
+        "Saved document has the right data"
+    );
 });
