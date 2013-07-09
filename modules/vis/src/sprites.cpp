@@ -10,6 +10,8 @@
 
 namespace vis {
 
+    Vec camera_pos = Vec(10, 7.5);
+
     using namespace core;
 
     struct Layout_VBO_Data {
@@ -133,7 +135,7 @@ namespace vis {
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
             glUseProgram(program->glid);
-            glUniform2f(camera_pos, 10, 7.5);  // TODO: Control the camera with this
+            glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
         }
          // Layer
         void run () {

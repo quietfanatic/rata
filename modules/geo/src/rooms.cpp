@@ -77,7 +77,6 @@ namespace geo {
     void Resident::reroom () {
         if (!room) room = current_room;
         Vec pos = resident_pos();
-        if (!pos.is_defined()) pos = room->boundary.center();
         Room* origin =
             room == &tumbolia
                 ? current_room : room;
@@ -103,6 +102,13 @@ namespace geo {
                 reclude();
             }
         }
+    }
+
+    Vec Resident::resident_pos () {
+        if (room)
+            return room->boundary.center();
+        else
+            return Vec(NAN, NAN);
     }
 
     void Beholder::activate () {

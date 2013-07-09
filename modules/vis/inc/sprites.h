@@ -40,6 +40,9 @@ namespace vis {
         static void draw_sprite (Frame*, core::Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
     };
 
+     // We're stuffing rendering camera control here for lack of a better place
+    extern Vec camera_pos;
+
 }
 
 #endif

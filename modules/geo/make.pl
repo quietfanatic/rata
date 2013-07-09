@@ -10,8 +10,7 @@ workflow {
 
     include '../..';
 
-    cppc_rule('tmp/rooms.o', 'src/rooms.cpp');
-    cppc_rule('tmp/tiles.o', 'src/tiles.cpp');
+    objects(qw(rooms tiles camera));
 
     clean_rule(glob 'tmp/*');
 

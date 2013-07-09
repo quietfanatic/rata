@@ -1,6 +1,7 @@
 
 #include <GL/gl.h>
 #include "../inc/graffiti.h"
+#include "../inc/sprites.h"
 #include "../../hacc/inc/files.h"
 #include "../../core/inc/opengl.h"
 #include "../../core/inc/phases.h"
@@ -43,7 +44,7 @@ namespace vis {
             glEnableVertexAttribArray(0);
             glDisableVertexAttribArray(1);
             glUseProgram(program->glid);
-            glUniform2f(camera_pos, 10.0, 7.5);
+            glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
         }
     } gr;
 
