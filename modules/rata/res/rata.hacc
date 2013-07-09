@@ -1,8 +1,8 @@
 {"hacc::Document":{
     def:{"ent::BipedDef":{
-        body_def: $("modules/ent/res/small.bdf").bdf
+        body_def: $("modules/ent/res/small.hacc").bdf
         stats: $.stats
-        skel: $("modules/ent/res/small.skel")
+        skel: $("modules/ent/res/small.hacc").skel
         skin: $("modules/rata/res/rata-base.hacc").skin
     }}
     stats:{"ent::BipedStats":{

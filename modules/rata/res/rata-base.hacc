@@ -1,0 +1,19 @@
+{"hacc::Document":{
+    img:{"core::Image":{
+        filename: "modules/rata/res/rata-base.png"
+        textures: [
+            {name:body    offset:[  0   0] size:[ 85 43]}
+            {name:head    offset:[117   1] size:[127 88]}
+            {name:arm     offset:[  0  95] size:[100 16]}
+            {name:forearm offset:[  0 112] size:[100 16]}
+        ]
+    }}
+    skin:{"vis::Skin":{
+        apps: [
+            [$("modules/ent/res/small.hacc").skel.segs.body [$.img.body]]
+            [$("modules/ent/res/small.hacc").skel.segs.head [$.img.head]]
+            [$("modules/ent/res/small.hacc").skel.segs.arm [$.img.arm]]
+            [$("modules/ent/res/small.hacc").skel.segs.forearm [$.img.forearm]]
+        ]
+    }}
+}}
