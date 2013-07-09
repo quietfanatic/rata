@@ -9,10 +9,9 @@ use Make_pl;
 workflow {
 
     include '../..';
-    
-    cppc_rule('tmp/various.o', 'src/various.cpp');
-    cppc_rule('tmp/humans.o', 'src/humans.cpp');
 
+    objects(qw(various bipeds));
+    
     clean_rule(glob 'tmp/*');
 
 };

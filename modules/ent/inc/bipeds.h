@@ -1,5 +1,5 @@
-#ifndef HAVE_ENT_HUMANS_H
-#define HAVE_ENT_HUMANS_H
+#ifndef HAVE_ENT_BIPEDS_H
+#define HAVE_ENT_BIPEDS_H
 
 #include "../../phys/inc/phys.h"
 #include "../../phys/inc/aux.h"

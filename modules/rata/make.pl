@@ -11,15 +11,15 @@ workflow {
     our @objects = qw<
         tmp/main.o
         ../core/tmp/game.o
-        ../core/tmp/phases.o
-        ../core/tmp/input.o
         ../core/tmp/images.o
+        ../core/tmp/input.o
+        ../core/tmp/phases.o
         ../core/tmp/opengl.o
-        ../ent/tmp/humans.o
-        ../ent/tmp/various.o
+        ../ent/tmp/bipeds.o
         ../geo/tmp/camera.o
         ../geo/tmp/rooms.o
         ../geo/tmp/tiles.o
+        ../ent/tmp/various.o
         ../hacc/tmp/common.o
         ../hacc/tmp/documents.o
         ../hacc/tmp/dynamicism.o
@@ -29,12 +29,12 @@ workflow {
         ../hacc/tmp/strings.o
         ../hacc/tmp/tree.o
         ../hacc/tmp/types.o
-        ../phys/tmp/phys.o
         ../phys/tmp/aux.o
         ../phys/tmp/ground.o
-        ../vis/tmp/sprites.o
-        ../vis/tmp/models.o
+        ../phys/tmp/phys.o
         ../vis/tmp/graffiti.o
+        ../vis/tmp/models.o
+        ../vis/tmp/sprites.o
         ../vis/tmp/text.o
         ../util/tmp/debug.o
         ../util/tmp/math.o

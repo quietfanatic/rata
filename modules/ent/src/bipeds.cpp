@@ -1,5 +1,5 @@
 
-#include "../inc/humans.h"
+#include "../inc/bipeds.h"
 #include "../../hacc/inc/everything.h"
 #include "../../util/inc/debug.h"
 
