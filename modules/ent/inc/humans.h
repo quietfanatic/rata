@@ -13,21 +13,11 @@ namespace ent {
 
     struct Biped;
     struct BipedStats;
+    struct BipedPoses;
     struct BipedDef;
 
      // TODO: separate soul from body
     struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Draws_Sprites, core::Key_Listener {
-         // Skeletons for bipeds must have these poses in this order.
-        enum Pose {
-            STAND,
-            WALK1,
-            WALK2,
-            CRAWL1,
-            CRAWL2_1,
-            CRAWL2_2,
-            HURTBK,
-            LAYBK
-        };
         struct Controls {
             bool left = false;
             bool right = false;
@@ -87,9 +77,21 @@ namespace ent {
         float jump_impulse;
     };
 
+    struct BipedPoses {
+        vis::Pose stand;
+        vis::Pose walk1;
+        vis::Pose walk2;
+        vis::Pose crawl1;
+        vis::Pose crawl2_1;
+        vis::Pose crawl2_2;
+        vis::Pose hurtbk;
+        vis::Pose laybk;
+    };
+
     struct BipedDef {
         phys::BodyDef* body_def;
         BipedStats* stats;  // Initial stats only.
+        BipedPoses* poses;
         vis::Skel* skel;
         vis::Skin* skin;
     };

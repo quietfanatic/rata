@@ -17,55 +17,55 @@
         ]
         root:$.skel.segs.body
         root_offset:[0 0]
-        poses:[
-            [stand [
-                [$.skel.segs.body    $("modules/ent/res/small.layouts").body.stand  ]
-                [$.skel.segs.head    $("modules/ent/res/small.layouts").head.stand90]
-                [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a0      ]
-                [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a0  ]
-            ]]
-            [walk1 [
-                [$.skel.segs.body    $("modules/ent/res/small.layouts").body.walk  ]
-                [$.skel.segs.head    $("modules/ent/res/small.layouts").head.walk90]
-                [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a23    ]
-                [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a23]
-            ]]
-            [walk2 [
-                [$.skel.segs.body    $("modules/ent/res/small.layouts").body.walk  ]
-                [$.skel.segs.head    $("modules/ent/res/small.layouts").head.walk90]
-                [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a23     true]
-                [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a23 true]
-            ]]
-            [crawl1 [
-                [$.skel.segs.body    $("modules/ent/res/small.layouts").body.crawl1]
-                [$.skel.segs.head    $("modules/ent/res/small.layouts").head.crawl ]
-                [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a0     ]
-                [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a90]
-            ]]
-            [crawl2_1 [
-                [$.skel.segs.body    $("modules/ent/res/small.layouts").body.crawl2]
-                [$.skel.segs.head    $("modules/ent/res/small.layouts").head.crawl ]
-                [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a45    ]
-                [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a90]
-            ]]
-            [crawl2_2 [
-                [$.skel.segs.body    $("modules/ent/res/small.layouts").body.crawl2]
-                [$.skel.segs.head    $("modules/ent/res/small.layouts").head.crawl ]
-                [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a45 true]
-                [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a90]
-            ]]
-            [hurtbk [
-                [$.skel.segs.body    $("modules/ent/res/small.layouts").body.hurtbk]
-                [$.skel.segs.head    $("modules/ent/res/small.layouts").head.hurtbk]
-                [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a23    ]
-                [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a68]
-            ]]
-            [laybk [
-                [$.skel.segs.body    $("modules/ent/res/small.layouts").body.laybk ]
-                [$.skel.segs.head    $("modules/ent/res/small.layouts").head.laybk ]
-                [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a90    ]
-                [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a90]
-            ]]
+    }}
+    poses:{"ent::BipedPoses":{
+        stand:[
+            [$.skel.segs.body    $("modules/ent/res/small.layouts").body.stand  ]
+            [$.skel.segs.head    $("modules/ent/res/small.layouts").head.stand90]
+            [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a0      ]
+            [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a0  ]
+        ]
+        walk1:[
+            [$.skel.segs.body    $("modules/ent/res/small.layouts").body.walk  ]
+            [$.skel.segs.head    $("modules/ent/res/small.layouts").head.walk90]
+            [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a23    ]
+            [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a23]
+        ]
+        walk2:[
+            [$.skel.segs.body    $("modules/ent/res/small.layouts").body.walk  ]
+            [$.skel.segs.head    $("modules/ent/res/small.layouts").head.walk90]
+            [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a23     true]
+            [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a23 true]
+        ]
+        crawl1:[
+            [$.skel.segs.body    $("modules/ent/res/small.layouts").body.crawl1]
+            [$.skel.segs.head    $("modules/ent/res/small.layouts").head.crawl ]
+            [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a0     ]
+            [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a90]
+        ]
+        crawl2_1:[
+            [$.skel.segs.body    $("modules/ent/res/small.layouts").body.crawl2]
+            [$.skel.segs.head    $("modules/ent/res/small.layouts").head.crawl ]
+            [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a45    ]
+            [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a90]
+        ]
+        crawl2_2:[
+            [$.skel.segs.body    $("modules/ent/res/small.layouts").body.crawl2]
+            [$.skel.segs.head    $("modules/ent/res/small.layouts").head.crawl ]
+            [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a45 true]
+            [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a90]
+        ]
+        hurtbk:[
+            [$.skel.segs.body    $("modules/ent/res/small.layouts").body.hurtbk]
+            [$.skel.segs.head    $("modules/ent/res/small.layouts").head.hurtbk]
+            [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a23    ]
+            [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a68]
+        ]
+        laybk:[
+            [$.skel.segs.body    $("modules/ent/res/small.layouts").body.laybk ]
+            [$.skel.segs.head    $("modules/ent/res/small.layouts").head.laybk ]
+            [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a90    ]
+            [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a90]
         ]
     }}
 }}

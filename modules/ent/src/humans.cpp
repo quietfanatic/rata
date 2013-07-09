@@ -18,23 +18,23 @@ namespace ent {
         model.apply_skin(def->skin);
         if (ground) {
             if (fabs(vel().x) < 0.01) {
-                model.apply_pose_index(Pose::STAND);
+                model.apply_pose(&def->poses->stand);
             }
             else {
                 float stepdist = fmod(distance_walked, 2.0);
                 if (stepdist < 0.5) {
-                    model.apply_pose_index(Pose::WALK1);
+                    model.apply_pose(&def->poses->walk1);
                 }
                 else if (stepdist >= 1 && stepdist < 1.5) {
-                    model.apply_pose_index(Pose::WALK2);
+                    model.apply_pose(&def->poses->walk2);
                 }
                 else {
-                    model.apply_pose_index(Pose::STAND);
+                    model.apply_pose(&def->poses->stand);
                 }
             }
         }
         else {
-            model.apply_pose_index(Pose::WALK1);
+            model.apply_pose(&def->poses->walk1);
         }
         model.draw(pos(), direction < 0);
     }
@@ -208,5 +208,18 @@ HCB_BEGIN(BipedDef)
     attr("body_def", member(&BipedDef::body_def));
     attr("stats", member(&BipedDef::stats));
     attr("skel", member(&BipedDef::skel));
+    attr("poses", member(&BipedDef::poses));
     attr("skin", member(&BipedDef::skin));
 HCB_END(BipedDef)
+
+HCB_BEGIN(BipedPoses)
+    name("ent::BipedPoses");
+    attr("stand", member(&BipedPoses::stand));
+    attr("walk1", member(&BipedPoses::walk1));
+    attr("walk2", member(&BipedPoses::walk2));
+    attr("crawl1", member(&BipedPoses::crawl1));
+    attr("crawl2_1", member(&BipedPoses::crawl2_1));
+    attr("crawl2_2", member(&BipedPoses::crawl2_2));
+    attr("hurtbk", member(&BipedPoses::hurtbk));
+    attr("laybk", member(&BipedPoses::laybk));
+HCB_END(BipedPoses)

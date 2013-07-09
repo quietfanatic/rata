@@ -27,7 +27,6 @@ namespace vis {
         hacc::named_vector<Skel::Seg> segs;
         Skel::Seg* root;
         Vec root_offset;
-        hacc::named_vector<Pose> poses;
 
         uint seg_index (Skel::Seg* p);
 
@@ -42,7 +41,6 @@ namespace vis {
             bool flipv;
         };
 
-        std::string name;
         std::vector<App> apps;
     };
 
@@ -71,7 +69,6 @@ namespace vis {
         Vec offset_of (Skel::Seg* seg);
         void apply_skel (Skel*);
         void apply_pose (Pose*);
-        void apply_pose_index (uint);
         void apply_skin (Skin*);
 
         void draw_seg (Model::Seg* ms, Skel::Seg* ss, Vec pos, bool fh, bool fv, float z);

@@ -77,10 +77,6 @@ namespace vis {
             segs[skel->seg_index(app.target)].pose = &app;
         }
     }
-    void Model::apply_pose_index (uint i) {
-        if (!skel) return;
-        apply_pose(&skel->poses.at(i));
-    }
     void Model::apply_skin (Skin* skin) {
         for (auto& app : skin->apps) {
             segs[skel->seg_index(app.target)].skin = &app;
@@ -98,7 +94,7 @@ namespace vis {
         Model_Tester () { }
         void finish () {
             model.apply_skin(hacc::File("modules/rata/res/rata-base.hacc").data().attr("skin"));
-            model.apply_pose(model.skel->poses.named("stand"));
+            model.apply_pose(hacc::File("modules/ent/res/small.hacc").data().attr("poses").attr("stand"));
             Draws_Sprites::activate();
         }
         void draws_sprites () {
@@ -113,7 +109,6 @@ HCB_BEGIN(Skel)
     attr("segs", member(&Skel::segs));
     attr("root", member(&Skel::root));
     attr("root_offset", member(&Skel::root_offset));
-    attr("poses", member(&Skel::poses));
     finish([](Skel& skel){ skel.finish(); });
 HCB_END(Skel)
 
@@ -127,8 +122,7 @@ HCB_END(Skel::Seg)
 
 HCB_BEGIN(Pose)
     name("vis::Pose");
-    elem(member(&Pose::name));
-    elem(member(&Pose::apps));
+    delegate(member(&Pose::apps));
 HCB_END(Pose)
 
 HCB_BEGIN(Pose::App)
