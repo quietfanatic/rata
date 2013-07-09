@@ -35,6 +35,14 @@ namespace hacc {
         String filename ();
         bool loaded ();  // if it's fully and completely loaded
         bool requested ();  // if it was manually loaded
+         // Rename:
+         //   Fails if new filename is already loaded.
+         //   Does not affect disk.
+         //   Does not duplicate data.
+         //   Old filename will be marked as unloaded.
+         //   Other File objects referring to this data will stay referring
+         //    to the same data under the new name.
+        void rename (String);
 
         File (FileData* p) : p(p) { }
          // Get a file by name.  If it doesn't exist, you won't get
