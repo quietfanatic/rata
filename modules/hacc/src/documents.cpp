@@ -212,7 +212,7 @@ HCB_BEGIN(DocumentData)
     to_tree([](const DocumentData& d){
         Object o;
         o.emplace_back("_next_id", Tree(d.next_id));
-        for (DocLink* link = d.prev; link != &d; link = link->next) {
+        for (DocLink* link = d.next; link != &d; link = link->next) {
             auto obj = static_cast<DocObj*>(link);
             Tree val = Reference(obj->type, obj + 1).to_tree();
             o.emplace_back(obj->id, Tree(Object{Pair{obj->type.name(), val}}));
