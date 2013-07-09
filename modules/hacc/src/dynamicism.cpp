@@ -424,7 +424,14 @@ namespace hacc {
                 );
                 break;
             }
-            case NULLFORM: break;  // This isn't quite proper but whatever
+            case NULLFORM: {
+                if (type().data->pointee_type) {
+                    void* p = null;
+                    set(&p);
+                }
+                else throw X::Form_Mismatch(type(), t);
+                break;
+            }
             default: throw X::Form_Mismatch(type(), t);
         }
     }
