@@ -47,12 +47,12 @@ namespace ent {
 
      // Between input and simulation, these run to do player interaction and AI
     struct Mind : Linkable<Mind> {
-        virtual void think () = 0;
+        virtual void Mind_think () = 0;
         Mind ();
         ~Mind ();
          // These start out active
-        void activate ();
-        void deactivate ();
+        void wake ();
+        void sleep ();
     };
 
      // We're querying key state instead of going through Key_Listener
@@ -60,8 +60,7 @@ namespace ent {
         std::vector<int> mappings [N_BUTTONS];  // TODO: mouse buttons
         Controllable* character = NULL;
         void Sprite_draw () override;  // Draws the cursor
-         // Mind
-        void think ();  // Read input and send control to character
+        void Mind_think () override;  // Read input and send control to character
 
         Player ();
         void finish ();

@@ -9,7 +9,7 @@ namespace ent {
     void Player::Sprite_draw () {
          // TODO: draw cursor
     }
-    void Player::think () {
+    void Player::Mind_think () {
         if (!character) return;
         size_t buttons = 0;
         size_t bit = 1;
@@ -41,16 +41,16 @@ namespace ent {
     }
 
     INIT_SAFE(Links<Mind>, minds);
-    void Mind::activate () { link(minds()); }
-    void Mind::deactivate () { unlink(); }
-    Mind::Mind () { activate(); }
+    void Mind::wake () { link(minds()); }
+    void Mind::sleep () { unlink(); }
+    Mind::Mind () { wake(); }
     Mind::~Mind () { }
 
     struct Mind_Phase : core::Phase {
         Mind_Phase () : core::Phase("B.M", "minds") { }
         void Phase_run () {
-            for (Mind* m = minds().first(); m; m = m->next()) {
-                m->think();
+            for (auto m = minds().first(); m; m = m->next()) {
+                m->Mind_think();
             }
         }
     } mind_phase;
