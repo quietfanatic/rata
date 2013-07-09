@@ -177,6 +177,16 @@ HCB_BEGIN(DocumentData)
             Reference(type, obj + 1).prepare(oo[0].second);
         }
     });
+    fill([](DocumentData& d, Tree t){
+        for (auto& pair : t.as<const Object&>()) {
+            if (pair.first == "_next_id") {
+                Reference(&d.next_id).fill(pair.second);
+            }
+            else Reference(_get(&d, pair.first)).fill(
+                pair.second.as<const Object&>()[0].second
+            );
+        }
+    });
     keys(mixed_funcs<std::vector<String>>(
         [](const DocumentData& d){
             std::vector<String> r = _all_ids(&const_cast<DocumentData&>(d));
