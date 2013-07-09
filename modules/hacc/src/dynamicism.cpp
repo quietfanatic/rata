@@ -271,9 +271,12 @@ namespace hacc {
             Tree r;
             read([&](void* addr){
                 Pointer pp (type().data->pointee_type, *(void**)addr);
-                Path path = address_to_path(pp);
-                if (!path) throw X::Address_Not_Found(pp);
-                r = Tree(path);
+                if (pp) {
+                    Path path = address_to_path(pp);
+                    if (!path) throw X::Address_Not_Found(pp);
+                    r = Tree(path);
+                }
+                else r = Tree(null);
             });
             return r;
         }
