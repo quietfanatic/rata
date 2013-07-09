@@ -28,6 +28,9 @@ namespace hacc {
         t.data->value_list.emplace_back(name, std::forward<Dynamic>(v));
         t.data->eq = eq;
     }
+    void _array (Type t) {
+        t.data->array = true;
+    }
     void _to_tree (Type t, const Func<Tree (void*)>& f) {
         t.data->to_tree = f;
     }

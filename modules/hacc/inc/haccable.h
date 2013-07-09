@@ -22,11 +22,12 @@ namespace hacc {
     void _elems (Type, const Func<Reference (void*, size_t)>&);
     void _elem (Type, const GetSet0&);
     void _value (Type, String, Dynamic&&, bool(*)(void*, void*));
+    void _array (Type);
     void _to_tree (Type, const Func<Tree (void*)>&);
-    void _delegate (Type, const GetSet0&);
     void _prepare (Type, const Func<void (void*, Tree)>&);
     void _fill (Type, const Func<void (void*, Tree)>&);
     void _finish (Type, const Func<void (void*)>&);
+    void _delegate (Type, const GetSet0&);
     void _is_raw_pointer (Type, Type);
     GetSet0 _value_funcs (Type, Type, const UnknownF2&, const UnknownF2&);
     GetSet0 _mixed_funcs (Type, Type, const UnknownF2&, const UnknownF2&);
@@ -174,8 +175,8 @@ namespace hacc {
         static void value (String s, C&& v) {
             _value(Type::CppType<C>(), s, Dynamic(std::forward<C>(v)), [](void* l, void* r){ return *(C*)l == *(C*)r; });
         }
-        static void delegate (const GetSet1<C>& gs) {
-            _delegate(Type::CppType<C>(), gs);
+        static void array () {
+            _array(Type::CppType<C>());
         }
         static void to_tree (const Func<Tree (const C&)>& f) {
             _to_tree(Type::CppType<C>(), reinterpret_cast<const Func<Tree (void*)>&>(f));
@@ -189,9 +190,13 @@ namespace hacc {
         static void finish (const Func<void (C&)>& f) {
             _finish(Type::CppType<C>(), reinterpret_cast<const Func<void (void*)>&>(f));
         }
+        static void delegate (const GetSet1<C>& gs) {
+            _delegate(Type::CppType<C>(), gs);
+        }
         static void is_raw_pointer (Type t) {
             _is_raw_pointer(Type::CppType<C>(), t);
         }
+
         static Type get_type () {
             static Type dt = _get_type(
                 typeid(C), sizeof(C),
@@ -232,11 +237,12 @@ namespace hacc {
     using hcb::length; \
     using hcb::elems; \
     using hcb::elem; \
-    using hcb::delegate; \
+    using hcb::array; \
     using hcb::to_tree; \
     using hcb::prepare; \
     using hcb::fill; \
     using hcb::finish; \
+    using hcb::delegate; \
     using hcb::is_raw_pointer; \
     using hcb::member; \
     using hcb::value_funcs; \

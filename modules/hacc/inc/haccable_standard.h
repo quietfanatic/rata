@@ -20,6 +20,7 @@ HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
     name([](){
         return "std::vector<" + Type::CppType<C>().name() + ">";
     });
+    array();
     length(hcb::template value_funcs<size_t>(
         [](const std::vector<C>& v){
             return v.size();

@@ -282,25 +282,25 @@ namespace hacc {
         }
          // Then as an object or an array
         else {
-            const std::vector<String>& ks = keys();
-            if (!ks.empty()) {
-                Object o;
-                for (auto& k : ks) {
-                    o.emplace_back(k, attr(k).to_tree());
-                }
-                return Tree(std::move(o));
-            }
-            else {
-                size_t n = length();
-                if (n > 0) {
-                    Array a (n);
-                    for (size_t i = 0; i < n; i++) {
-                        a[i] = elem(i).to_tree();
+            if (!type().data->array) {
+                const std::vector<String>& ks = keys();
+                if (!ks.empty()) {
+                    Object o;
+                    for (auto& k : ks) {
+                        o.emplace_back(k, attr(k).to_tree());
                     }
-                    return Tree(std::move(a));
+                    return Tree(std::move(o));
                 }
-                else return Tree(Object());
             }
+            size_t n = length();
+            if (n > 0) {
+                Array a (n);
+                for (size_t i = 0; i < n; i++) {
+                    a[i] = elem(i).to_tree();
+                }
+                return Tree(std::move(a));
+            }
+            else return Tree(Object());
         }
     }
      // TODO: figure out the proper relationship between delegation

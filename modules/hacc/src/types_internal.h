@@ -90,8 +90,9 @@ namespace hacc {
         Func<void (void*, Tree)> prepare = null;
         Func<void (void*, Tree)> fill = null;
         Func<void (void*)> finish = null;
-        GetSet0 delegate = null;
         TypeData* pointee_type = null;
+        GetSet0 delegate = null;
+        bool array = false;
         bool initialized = false;
 
         TypeData (
