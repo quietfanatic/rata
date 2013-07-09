@@ -10,6 +10,7 @@ namespace ent {
         def = _def;
         apply_bdf(def->body_def);
         model.apply_skel(def->skel);
+        stats = *def->stats;
     }
 
      // Draws_Sprites
