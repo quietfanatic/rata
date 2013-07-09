@@ -1,4 +1,4 @@
-{"std::unordered_map<std::string, hacc::Dynamic>":{
+{"hacc::Document":{
     font:{"vis::Font":{
         texture:$.img.ALL
         width:8 height:8 line_height:8

@@ -1,4 +1,4 @@
-{"std::unordered_map<std::string, hacc::Dynamic>":{
+{"hacc::Document":{
     def:{"ent::BipedDef":{
         body_def: $("modules/ent/res/small.bdf").bdf
         stats: $.stats

@@ -1,4 +1,4 @@
-{"std::unordered_map<std::string, hacc::Dynamic>":{
+{"hacc::Document":{
     prog:{"core::Program":{
         shaders: [$.vert $.frag]
         attributes: { vert_pos:0 }

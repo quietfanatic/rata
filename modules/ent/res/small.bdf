@@ -1,4 +1,4 @@
-{"std::unordered_map<std::string, hacc::Dynamic>":{
+{"hacc::Document":{
     bdf:{"phys::BodyDef":{
         fixtures:[
             { b2:{ shape:$.shape.b2Shape } coll_a:[ground] coll_b:[ground] }
