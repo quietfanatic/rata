@@ -4,6 +4,7 @@
 int main () {
     core::load("modules/rata/test_state.hacc");
     core::start();
+    fprintf(stderr, "Quit successfully\n");
 }
 
 

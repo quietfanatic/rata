@@ -117,7 +117,6 @@ HCB_BEGIN(Room)
     attr("neighbors", member(&Room::neighbors));
 HCB_END(Room)
 
-
 HCB_BEGIN(Resident)
     name("geo::Resident");
     attr("room", member(&Resident::room));

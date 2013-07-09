@@ -288,7 +288,10 @@ HCB_BEGIN(Tilemap)
     attr("width", member(&Tilemap::width));
     attr("height", member(&Tilemap::height));
     attr("tiles", member(&Tilemap::tiles));
-    finish([](Tilemap& t){ t.finish(); });
+    finish([](Tilemap& t){
+        t.Resident::finish();
+        t.finish();
+    });
 HCB_END(Tilemap)
 
 
