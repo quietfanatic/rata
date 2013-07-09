@@ -1,17 +1,11 @@
 {"hacc::Document":{
     rata:{"ent::Biped":{
-        def:$("modules/rata/res/rata.biped").def
+        def:$("modules/rata/res/rata.hacc").def
         Object:{ pos:[10 10.5] }
         Resident:{ room:$("modules/rata/res/test.room").room }
         direction:1
     }}
-    test:{"ent::Test_Actor":{
-        Object:{ pos:[10 7.5] }
-        texture:$("modules/vis/res/test.hacc").img.ALL
-        frame:$("modules/vis/res/test.hacc").layout.green
+    beholder:{"geo::Beholder":{
+        target:$.rata.Resident
     }}
-    boundary:{"ent::Boundary":{
-        Object:{ pos:[0 0] }
-    }}
-    mt:{"vis::Model_Tester":{ }}
 }}

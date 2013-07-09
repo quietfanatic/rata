@@ -169,7 +169,6 @@ namespace ent {
 
     void Biped::finish () {
         biped_logger.log("Biped::finish");
-        geo::behold(this);
     }
 
 } using namespace ent;

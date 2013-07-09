@@ -8,8 +8,8 @@ namespace geo {
 
     Logger geo_logger ("geo");
     Room* current_room = NULL;
-    Resident* beholder = NULL;
     Room tumbolia;
+    Links<Beholder> beholders;
 
     void Room::activate () {
         active = true;
@@ -62,12 +62,6 @@ namespace geo {
         }
     }
 
-    void behold (Resident* res) {
-        geo_logger.log("behold: @%lx", (unsigned long)res);
-        beholder = res;
-        enter(res->room);
-    }
-
     Room::~Room () {
         if (current_room == this) current_room = NULL;
     }
@@ -90,7 +84,7 @@ namespace geo {
                 if (n->boundary.covers(pos)) {
                     room = n;
                     link(n->residents);
-                    if (beholder == this)
+                    if (beholding() == this)
                         enter(n);
                     else if (!n->active)
                         reclude();
@@ -98,7 +92,7 @@ namespace geo {
                 }
             }
             if (room != &tumbolia) {
-                if (beholder != this)
+                if (beholding() != this)
                     geo_logger.log("Resident @%lx ended up in tumbolia.", this);
                 else
                     geo_logger.log("The Beholder has left the building.  Party's over.", this);
@@ -107,6 +101,22 @@ namespace geo {
                 reclude();
             }
         }
+    }
+
+    void Beholder::activate () {
+        link(beholders);
+        if (target && target->room) {
+            geo_logger.log("Behold: @%lx", (unsigned long)target);
+            enter(target->room);
+        }
+    }
+    void Beholder::deactivate () { unlink(); }
+
+    Resident* beholding () {
+        if (Beholder* b = beholders.last()) {
+            return b->target;
+        }
+        else return NULL;
     }
 
 } using namespace geo;
@@ -122,3 +132,9 @@ HCB_BEGIN(Resident)
     attr("room", member(&Resident::room));
     finish(&Resident::finish);
 HCB_END(Resident)
+
+HCB_BEGIN(Beholder)
+    name("geo::Beholder");
+    attr("target", member(&Beholder::target));
+    finish(&Beholder::activate);
+HCB_END(Beholder)

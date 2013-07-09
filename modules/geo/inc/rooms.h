@@ -32,11 +32,23 @@ namespace geo {
     };
 
     extern Room* current_room;
-    extern Resident* beholder;
     extern Room tumbolia;
 
     void enter (Room*);
-    void behold (Resident*);
+
+     // The camera and the geography focus on the target of the last-created
+     //  beholder.  When it's destroyed, the previous beholder takes over.
+     //  If there are no beholders or the current beholder has no target,
+     //  the camera and geography remain stationary.  If no beholders are ever
+     //  created, no rooms will be activated.
+    struct Beholder : Linkable<Beholder> {
+        Resident* target = NULL;
+        void activate ();
+        void deactivate ();
+    };
+    extern Links<Beholder> beholders;
+
+    Resident* beholding ();
 
 }
 
