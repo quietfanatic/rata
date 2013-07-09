@@ -1,11 +1,12 @@
 
 #include <stdexcept>
+#include "../inc/tiles.h"
 #include "../../hacc/inc/everything.h"
 #include "../../util/inc/math.h"
 #include "../../util/inc/debug.h"
 #include "../../core/inc/opengl.h"
 #include "../../core/inc/phases.h"
-#include "../inc/tiles.h"
+#include "../../vis/inc/sprites.h"
 
 namespace geo {
 
@@ -247,7 +248,7 @@ namespace geo {
             glEnable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
             glUseProgram(program->glid);
-            glUniform2f(camera_pos, 10, 7.5);  // TODO make this dynamic
+            glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
         }
          // Layer
         void run () {
