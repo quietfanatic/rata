@@ -43,10 +43,7 @@ namespace vis {
             glUseProgram(program->glid);
             glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
         }
-         // for Game_Object
-        void start () { }
-         // for Layer
-        void run () {
+        void Layer_run () {
             for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
                 p->text_draw();
             }

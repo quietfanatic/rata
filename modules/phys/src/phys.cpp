@@ -66,14 +66,14 @@ namespace phys {
     Space space;
 
     Space::Space () : core::Phase("D.M", "space") { }
-    void Space::start () {
+    void Space::Phase_start () {
         space_logger.log("Creating the spacetime continuum.  Well, the space part anyway.");
         b2world = new b2World(
             b2Vec2(0, -30)
         );
         b2world->SetContactListener(&mycl);
     }
-    void Space::run () {
+    void Space::Phase_run () {
         for (b2Body* b2b = b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
             if (Object* obj = (Object*)b2b->GetUserData())
                 if (b2b->IsActive())
@@ -132,8 +132,8 @@ namespace phys {
     
     struct Phys_Debug_Layer : core::Layer {
         Phys_Debug_Layer () : core::Layer("G.M", "phys_debug", false) { }
-        void start () { }
-        void run () {
+        void Layer_start () { }
+        void Layer_run () {
             for (b2Body* b2b = space.b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
                 if (b2b->IsActive()) {
                     uint32 color = 0xffffff7f;

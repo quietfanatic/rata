@@ -55,11 +55,11 @@ namespace core {
         game_logger.log("We have %lu phases and %lu layers", all_phases().size(), all_layers().size());
         for (Phase* p : all_phases()) {
             game_logger.log("Starting phase: " + p->name);
-            p->start();
+            p->Phase_start();
         }
         for (Layer* l : all_layers()) {
             game_logger.log("Starting layer: " + l->name);
-            l->start();
+            l->Layer_start();
         }
         try {
             for (;;) {
@@ -88,12 +88,12 @@ namespace core {
                 glfwSwapBuffers();
                 glfwSleep(1/60.0);
             }
-            for (Phase* p : all_phases()) p->stop();
-            for (Layer* l : all_layers()) l->stop();
+            for (Phase* p : all_phases()) p->Phase_stop();
+            for (Layer* l : all_layers()) l->Layer_stop();
         }
         catch (...) {
-            for (Phase* p : all_phases()) p->stop();
-            for (Layer* l : all_layers()) l->stop();
+            for (Phase* p : all_phases()) p->Phase_stop();
+            for (Layer* l : all_layers()) l->Layer_stop();
             throw;
         }
     }

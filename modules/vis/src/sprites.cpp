@@ -111,8 +111,7 @@ namespace vis {
         void (* glBindVertexArray )(GLuint);
 
         Sprite_Layer () : Layer("C.M", "sprites") { }
-         // Layer
-        void start () {
+        void Layer_start () {
             glUseProgram = glproc<void (GLuint)>("glUseProgram");
             glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
             glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
@@ -138,7 +137,7 @@ namespace vis {
             glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
         }
          // Layer
-        void run () {
+        void Layer_run () {
             glClearColor(0.5, 0.5, 0.5, 0);
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 

@@ -14,9 +14,9 @@ namespace core {
         std::string name;
         bool on;
 
-        virtual void start () { }
-        virtual void run () { }
-        virtual void stop () { }
+        virtual void Phase_start () { }
+        virtual void Phase_run () { }
+        virtual void Phase_stop () { }
         virtual ~Phase () { }
 
         Phase (std::string order, std::string name = "", bool on = true) :
@@ -25,7 +25,7 @@ namespace core {
          // TODO make this not necessary
         Phase () : Ordered("ZZZ"), name(""), on(false) { }
 
-        void run_if_on () { if (on) run(); }
+        void run_if_on () { if (on) Phase_run(); }
     };
 
     struct Layer;
@@ -34,9 +34,9 @@ namespace core {
         std::string name;
         bool on;
 
-        virtual void start () { }
-        virtual void run () { }
-        virtual void stop () { }
+        virtual void Layer_start () { }
+        virtual void Layer_run () { }
+        virtual void Layer_stop () { }
         virtual ~Layer () { }
 
         Layer (std::string order, std::string name = "", bool on = true) :
@@ -45,7 +45,7 @@ namespace core {
          // TODO make this not necessary
         Layer () : Ordered("ZZZ"), name(""), on(false) { }
 
-        void run_if_on () { if (on) run(); }
+        void run_if_on () { if (on) Layer_run(); }
     };
 
 }

@@ -16,8 +16,8 @@ namespace phys {
         Vec get_gravity () const { return b2world->GetGravity(); }
         void set_gravity (Vec g) { b2world->SetGravity(g); }
 
-        void start ();
-        void run ();
+        void Phase_start ();
+        void Phase_run ();
         ~Space ();
     };
     extern Space space;
