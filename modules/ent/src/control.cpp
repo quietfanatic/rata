@@ -6,7 +6,7 @@
 
 namespace ent {
 
-    void Player::draws_sprites () {
+    void Player::Sprite_draw () {
          // TODO: draw cursor
     }
     void Player::think () {
@@ -37,7 +37,7 @@ namespace ent {
     }
 
     void Player::finish () {
-        Draws_Sprites::activate();
+        appear();
     }
 
     INIT_SAFE(Links<Mind>, minds);

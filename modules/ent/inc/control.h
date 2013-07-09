@@ -56,11 +56,10 @@ namespace ent {
     };
 
      // We're querying key state instead of going through Key_Listener
-    struct Player : vis::Draws_Sprites, Mind {
+    struct Player : vis::Sprite, Mind {
         std::vector<int> mappings [N_BUTTONS];  // TODO: mouse buttons
         Controllable* character = NULL;
-         // Draws_Sprites
-        void draws_sprites ();  // Draws the cursor
+        void Sprite_draw () override;  // Draws the cursor
          // Mind
         void think ();  // Read input and send control to character
 

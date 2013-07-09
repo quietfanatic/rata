@@ -7,11 +7,11 @@ static phys::BodyDef*& test_bdf () {
     static phys::BodyDef* test_bdf = hacc::File("modules/ent/res/test_actor.bdf").data().attr("bdf");
     return test_bdf;
 }
-struct Test_Actor : phys::Object, vis::Draws_Sprites {
+struct Test_Actor : phys::Object, vis::Sprite {
     core::Texture* texture;
     vis::Frame* frame;
 
-    void draws_sprites () {
+    void Sprite_draw () {
         draw_sprite(frame, texture, pos());
     }
 
@@ -19,7 +19,7 @@ struct Test_Actor : phys::Object, vis::Draws_Sprites {
     void finish () {
         apply_bdf(test_bdf());
         materialize();
-        vis::Draws_Sprites::activate();
+        appear();
     }
 };
 

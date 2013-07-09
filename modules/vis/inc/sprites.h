@@ -31,13 +31,13 @@ namespace vis {
         Frame* frame_named (std::string);
     };
 
+    void draw_sprite (Frame*, core::Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
 
-    struct Draws_Sprites : Linkable<Draws_Sprites> {
-        virtual void draws_sprites () = 0;
-        bool is_active () { return is_linked(); }
-        void activate ();
-        void deactivate ();
-        static void draw_sprite (Frame*, core::Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
+    struct Sprite : Linkable<Sprite> {
+        virtual void Sprite_draw () = 0;
+        bool visible () { return is_linked(); }
+        void appear ();
+        void disappear ();
     };
 
      // We're stuffing rendering camera control here for lack of a better place

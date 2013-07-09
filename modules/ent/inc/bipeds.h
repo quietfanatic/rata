@@ -28,7 +28,7 @@ namespace ent {
     struct BipedDef;
 
      // TODO: separate soul from body
-    struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Draws_Sprites, Controllable {
+    struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Sprite, Controllable {
 
         BipedDef* def;
          // Bleh
@@ -46,8 +46,7 @@ namespace ent {
         vis::Model model;  // Must be a humanlike model
         float distance_walked = 0;
         float oldxrel = 0;
-         // Draws_Sprites
-        void draws_sprites () override;
+        void Sprite_draw () override;
 
         ButtonBits buttons;
          // Controllable

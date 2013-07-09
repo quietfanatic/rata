@@ -10,9 +10,9 @@ namespace vis {
 
     using namespace core;
 
-    static Links<Draws_Text> text_drawers;
-    void Draws_Text::text_appear () { link(text_drawers); }
-    void Draws_Text::text_disappear () { unlink(); }
+    static Links<Text> texts;
+    void Text::appear () { link(texts); }
+    void Text::disappear () { unlink(); }
 
     struct Text_Layer : Layer, Renderer {
         Program* program = hacc::File("modules/vis/res/text.prog").data().attr("prog");
@@ -44,8 +44,8 @@ namespace vis {
             glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
         }
         void Layer_run () override {
-            for (Draws_Text* p = text_drawers.first(); p; p = p->next()) {
-                p->text_draw();
+            for (auto p = texts.first(); p; p = p->next()) {
+                p->Text_draw();
             }
         }
     };

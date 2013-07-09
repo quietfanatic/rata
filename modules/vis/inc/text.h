@@ -27,11 +27,11 @@ namespace vis {
      // Returns the size of the rectangle encompassing the drawn text.
     Vec draw_text (std::string text, Font* font, Vec pos, Vec align = Vec(1, 1), uint32 color = 0xffffffff, float wrap = 0);
 
-    struct Draws_Text : Linkable<Draws_Text> {
-        virtual void text_draw () = 0;
-        bool text_is_visible () { return is_linked(); }
-        void text_appear ();
-        void text_disappear ();
+    struct Text : Linkable<Text> {
+        virtual void Text_draw () = 0;
+        bool visible () { return is_linked(); }
+        void appear ();
+        void disappear ();
     };
      // Returns the size of the rectangle encompassing the drawn text.
     Vec text_size (std::string text, Font* font, float wrap = 0);

@@ -42,7 +42,7 @@ namespace vis {
         if (!ms->skin) return;
         if (!ms->pose) return;
         for (core::Texture* tex : ms->skin->textures) {
-            Draws_Sprites::draw_sprite(
+            draw_sprite(
                 ms->pose->frame, tex, pos,
                 ms->pose->fliph?!fh:fh, ms->pose->flipv?!fv:fv,
                 z + ss->z_offset
@@ -87,7 +87,7 @@ namespace vis {
     Model::Model (Skel* skel) : skel(skel), segs(skel ? skel->segs.size() : 0) { }
 
 
-    struct Model_Tester : vis::Draws_Sprites {
+    struct Model_Tester : Sprite {
         bool flip = false;
         Model model = Model(hacc::File("modules/ent/res/small.skel").data());
 
@@ -95,9 +95,9 @@ namespace vis {
         void finish () {
             model.apply_skin(hacc::File("modules/rata/res/rata-base.hacc").data().attr("skin"));
             model.apply_pose(hacc::File("modules/ent/res/small.hacc").data().attr("poses").attr("stand"));
-            Draws_Sprites::activate();
+            appear();
         }
-        void draws_sprites () override {
+        void Sprite_draw () override {
             model.draw(Vec(10, 4), flip, false, 0.5);
         }
     };

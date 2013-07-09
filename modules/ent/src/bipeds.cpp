@@ -14,7 +14,7 @@ namespace ent {
     }
 
      // Draws_Sprites
-    void Biped::draws_sprites () {
+    void Biped::Sprite_draw () {
         model.apply_skin(def->skin);
         if (ground) {
             if (fabs(vel().x) < 0.01) {
@@ -41,11 +41,11 @@ namespace ent {
     }
     void Biped::Resident_emerge () {
         materialize();
-        Draws_Sprites::activate();
+        appear();
     }
     void Biped::Resident_reclude () {
         dematerialize();
-        Draws_Sprites::deactivate();
+        disappear();
     }
 
     bool Biped::allow_movement () {

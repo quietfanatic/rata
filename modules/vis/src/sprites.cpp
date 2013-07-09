@@ -89,12 +89,12 @@ namespace vis {
         return NULL;
     }
 
-    static Links<Draws_Sprites> sprite_drawers;
+    static Links<Sprite> sprites;
 
-    void Draws_Sprites::activate () {
-        link(sprite_drawers);
+    void Sprite::appear () {
+        link(sprites);
     }
-    void Draws_Sprites::deactivate () {
+    void Sprite::disappear () {
         unlink();
     }
 
@@ -141,15 +141,15 @@ namespace vis {
             glClearColor(0.5, 0.5, 0.5, 0);
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-            for (Draws_Sprites* p = sprite_drawers.first(); p; p = p->next()) {
-                p->draws_sprites();
+            for (auto p = sprites.first(); p; p = p->next()) {
+                p->Sprite_draw();
             }
         }
     } sprite_layer;
 
     static Logger draw_sprite_logger ("draw_sprite", false);
 
-    void Draws_Sprites::draw_sprite (Frame* frame, core::Texture* tex, Vec p, bool fliph, bool flipv, float z) {
+    void draw_sprite (Frame* frame, core::Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         if (draw_sprite_logger.on) {
             draw_sprite_logger.log("tex: %s frame: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
                 tex ? tex->name.c_str() : "NULL", frame ? frame->offset.x : 0/0.0, frame ? frame->offset.y : 0/0.0,
@@ -169,9 +169,9 @@ namespace vis {
         diagnose_opengl("After rendering a sprite");
     }
 
-    struct Sprite_Test : Draws_Sprites {
-        void finish () { Draws_Sprites::activate(); }
-        void draws_sprites () override {
+    struct Sprite_Test : Sprite {
+        void finish () { appear(); }
+        void Sprite_draw () override {
             static Image* image = hacc::File("modules/vis/res/test.hacc").data().attr("img");
             static Texture* texture = image->texture_named("ALL");
             static Layout* layout = hacc::File("modules/vis/res/test.hacc").data().attr("layout");
