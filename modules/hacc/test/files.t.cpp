@@ -11,7 +11,7 @@ using namespace tap;
 HCB_INSTANCE(int32*)
 HCB_INSTANCE(float*)
 
-void with_file (const char* filename, const char* mode, const Func<void (FILE*)>& f) {
+static void with_file (const char* filename, const char* mode, const Func<void (FILE*)>& f) {
     FILE* file = fopen(filename, mode);
     if (!file) BAIL_OUT((
         "Failed to open \"" + String(filename)
@@ -24,7 +24,7 @@ void with_file (const char* filename, const char* mode, const Func<void (FILE*)>
       + "\": " + strerror(errno)
     ).c_str());
 }
-String slurp (const char* filename) {
+static String slurp (const char* filename) {
     String r;
     with_file(filename, "r", [&](FILE* f){
         fseek(f, 0, SEEK_END);
@@ -37,7 +37,7 @@ String slurp (const char* filename) {
     });
     return r;
 }
-void clobber (const char* filename) {
+static void clobber (const char* filename) {
     with_file(filename, "w", [](FILE*){});
 }
 
