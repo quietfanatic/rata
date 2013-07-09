@@ -1,4 +1,4 @@
-{"std::unordered_map<std::string, hacc::Dynamic>":{
+{"hacc::Document":{
     rata:{"ent::Biped":{
         def:$("modules/rata/res/rata.biped").def
         Object:{ pos:[10 10.5] }

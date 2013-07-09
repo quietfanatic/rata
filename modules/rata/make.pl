@@ -20,6 +20,7 @@ workflow {
         ../geo/tmp/rooms.o
         ../geo/tmp/tiles.o
         ../hacc/tmp/common.o
+        ../hacc/tmp/documents.o
         ../hacc/tmp/dynamicism.o
         ../hacc/tmp/files.o
         ../hacc/tmp/haccable.o
