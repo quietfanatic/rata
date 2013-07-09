@@ -99,4 +99,7 @@ tap::Tester files_tester ("hacc/files", [](){
     }, "Can load a file that was unloaded");
     ok(File("../test/seven.hacc").loaded(), "Depended-upon files are automatically loaded");
 
+    clobber("../test/eight.hacc");
+    clobber("../test/pointer2.hacc");
+
 });

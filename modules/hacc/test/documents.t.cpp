@@ -49,4 +49,5 @@ tap::Tester documents_tester ("hacc/documents", [](){
         String("{ \"hacc::Document\":{ _next_id:1 asdf:{ int32:50 } } }\n"),
         "Saved document has the right data"
     );
+    clobber("../test/document2.hacc");
 });
