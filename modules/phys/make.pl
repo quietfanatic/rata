@@ -10,9 +10,7 @@ workflow {
 
     include '../..';
 
-    cppc_rule('tmp/phys.o', 'src/phys.cpp');
-    cppc_rule('tmp/aux.o', 'src/aux.cpp');
-    cppc_rule('tmp/ground.o', 'src/ground.cpp');
+    objects(qw(phys ground));
 
     clean_rule(glob 'tmp/*');
 

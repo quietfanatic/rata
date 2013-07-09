@@ -30,7 +30,6 @@ workflow {
         ../hacc/tmp/strings.o
         ../hacc/tmp/tree.o
         ../hacc/tmp/types.o
-        ../phys/tmp/aux.o
         ../phys/tmp/ground.o
         ../phys/tmp/phys.o
         ../vis/tmp/graffiti.o

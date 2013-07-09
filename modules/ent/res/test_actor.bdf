@@ -1,12 +1,13 @@
 {"hacc::Document":{
     bdf:{"phys::BodyDef":{
-        fixtures:[{
-            b2:{
-                shape:$.shape.b2Shape
-                friction:0.4
-            }
-            coll_b:[ground]
-        }]
+        fixtures:[$.fix]
+    }}
+    fix:{"phys::FixtureDef":{
+        b2:{
+            shape:$.shape.b2Shape
+            friction:0.4
+        }
+        coll_b:[ground]
     }}
     shape:{b2PolygonShape:{
         verts:[[-1 -1] [1 -1] [1 1] [-1 1]]

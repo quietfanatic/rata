@@ -94,32 +94,37 @@ namespace phys {
     }
 
      // Objects
+    void Object::apply_bdf (BodyDef* bdf) {
+        b2body->SetType(bdf->type);
+        b2body->SetLinearDamping(bdf->damping);
+        b2body->SetGravityScale(bdf->gravity_scale);
+        for (auto fix : bdf->fixtures) {
+            add_fixture(fix);
+        }
+    }
     b2Fixture* Object::add_fixture (FixtureDef* fdf) {
         b2Fixture* b2f = b2body->CreateFixture(&fdf->b2);
         b2f->SetUserData(fdf);
         return b2f;
     }
-
-    void Object::apply_bdf (BodyDef* bdf) {
-        b2body->SetType(bdf->type);
-        b2body->SetLinearDamping(bdf->damping);
-        b2body->SetGravityScale(bdf->gravity_scale);
-        for (auto& fix : bdf->fixtures) {
-            add_fixture(&fix);
+    b2Fixture* Object::get_fixture (FixtureDef* fd) {
+        for (b2Fixture* fix = b2body->GetFixtureList(); fix; fix = fix->GetNext()) {
+            if ((FixtureDef*)fix->GetUserData() == fd)
+                return fix;
         }
+        return NULL;
     }
 
-    static void create_b2body (Object* o) {
+    Object::Object () {
         b2BodyDef b2bd;
         b2bd.active = false;
         b2bd.fixedRotation = true;
         b2bd.type = b2_dynamicBody;
-        b2bd.userData = o;
-        o->b2body = space.b2world->CreateBody(&b2bd);
+        b2bd.userData = this;
+        b2body = space.b2world->CreateBody(&b2bd);
         space_logger.log("%d objects in space.", space.b2world->GetBodyCount());
     }
 
-    Object::Object () { create_b2body(this); }
     void Object::materialize () { b2body->SetActive(true); }
     void Object::dematerialize () { b2body->SetActive(false); }
 
@@ -257,7 +262,6 @@ static uint64 coll_v2b (const std::vector<Collision_Rule*>& v) {
 
 HCB_BEGIN(FixtureDef)
     name("phys::FixtureDef");
-    attr("name", member(&FixtureDef::name).optional());
     attr("b2", member(&FixtureDef::b2));
     attr("coll_a", value_funcs<std::vector<Collision_Rule*>>(
         [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_a); },

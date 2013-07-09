@@ -42,31 +42,19 @@ namespace ent {
     }
     void Biped::emerge () {
         materialize();
-        legs.enable();
         Draws_Sprites::activate();
     }
     void Biped::reclude () {
         dematerialize();
-        legs.disable();
         Draws_Sprites::deactivate();
-    }
-
-    void set_ambulate_friction (Biped* b, float fric) {
-        b->legs.ambulate_force(
-            b->b2body->GetMass()
-          * -phys::space.get_gravity().y
-          * sqrt(fric * b->get_ground_fix()->GetFriction())
-        );
     }
 
     bool Biped::allow_movement () {
         if (ground) {
-            legs.enable();
             allow_walk();
             allow_jump();
         }
         else {
-            legs.disable();
             allow_airmove();
         }
         if (ground)
@@ -76,28 +64,36 @@ namespace ent {
     bool Biped::allow_walk () {
         if (ground) {
             if (buttons & LEFT_BIT && !(buttons & RIGHT_BIT)) {
-                legs.ambulate_x(this, -stats.walk_speed);
-                if (vel().x <= 0) {
-                    direction = -1;
-                    set_ambulate_friction(this, stats.walk_friction);
+                if (vel().x > -(stats.walk_speed - stats.walk_friction / FPS)) {
+                    if (vel().x <= 0) {
+                        direction = -1;
+                        force(Vec(-stats.walk_friction, 0));
+                    }
+                    else {
+                        force(Vec(-stats.skid_friction, 0));
+                    }
                 }
-                else {
-                    set_ambulate_friction(this, stats.skid_friction);
-                }
+                else set_vel(Vec(-stats.walk_speed, vel().y));
             }
             else if (buttons & RIGHT_BIT) {
-                legs.ambulate_x(this, stats.walk_speed);
-                if (vel().x >= 0) {
-                    direction = 1;
-                    set_ambulate_friction(this, stats.walk_friction);
+                if (vel().x < (stats.walk_speed - stats.walk_friction / FPS)) {
+                    if (vel().x >= 0) {
+                        direction = 1;
+                        force(Vec(stats.walk_friction, 0));
+                    }
+                    else {
+                        force(Vec(stats.skid_friction, 0));
+                    }
                 }
-                else {
-                    set_ambulate_friction(this, stats.skid_friction);
-                }
+                else set_vel(Vec(stats.walk_speed, vel().y));
             }
             else {
-                set_ambulate_friction(this, stats.stop_friction);
-                legs.ambulate_x(this, 0);
+                if (vel().x > stats.stop_friction / FPS)
+                    force(Vec(-stats.stop_friction, 0));
+                else if (vel().x < -(stats.stop_friction / FPS))
+                    force(Vec(stats.stop_friction, 0));
+                else
+                    set_vel(Vec(0, vel().y));
             }
             return fabs(vel().x) >= 0.01;
         }
@@ -105,7 +101,6 @@ namespace ent {
     }
     bool Biped::allow_jump () {
         if (buttons & JUMP_BIT) {
-            legs.disable();
              // I'd like to be able to do a mutual push between the ground and
              //  the character, but Box2D isn't well-equipped for that, because
              //  it doesn't do shock propagation.
@@ -123,7 +118,6 @@ namespace ent {
         return false;
     }
     bool Biped::allow_airmove () {
-        legs.disable();
          // If you were in a 2D platformer, you'd be able to push against the air too.
         if (buttons & LEFT_BIT && !(buttons & RIGHT_BIT)) {
             force(Vec(-stats.air_force, 0));
@@ -160,8 +154,8 @@ namespace ent {
         buttons = bits;
     }
 
-    Biped::Biped () : legs(this) { }
-
+     // Kinda weird that neither of these has anything
+    Biped::Biped () { }
     void Biped::finish () { }
 
 } using namespace ent;

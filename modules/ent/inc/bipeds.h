@@ -3,7 +3,6 @@
 
 #include "../inc/control.h"
 #include "../../phys/inc/phys.h"
-#include "../../phys/inc/aux.h"
 #include "../../phys/inc/ground.h"
 #include "../../geo/inc/rooms.h"
 #include "../../vis/inc/models.h"
@@ -37,7 +36,6 @@ namespace ent {
         void set_def (BipedDef*);
 
          // For movement
-        phys::Ambulator legs;
         BipedStats stats;
         int8 direction = 1;  // 1 = right, -1 = left
          // Object

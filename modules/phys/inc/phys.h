@@ -25,7 +25,6 @@ namespace phys {
      // Static things, probably stored in files
 
     struct FixtureDef {
-        std::string name;
         b2FixtureDef b2;
         uint64 coll_a = 0;
         uint64 coll_b = 0;
@@ -34,7 +33,7 @@ namespace phys {
         b2BodyType type = b2_dynamicBody;
         float damping = 0;
         float gravity_scale = 1;
-        std::vector<FixtureDef> fixtures;
+        std::vector<FixtureDef*> fixtures;
     };
 
      // The dynamic thing
@@ -52,24 +51,9 @@ namespace phys {
         void apply_bdf (BodyDef*);
         b2Fixture* add_fixture (FixtureDef*);
 
-        b2Fixture* fix_no (uint i) {
-            b2Fixture* fix = b2body->GetFixtureList();
-            while (fix && i) {
-                fix = fix->GetNext();
-                i--;
-            }
-            return fix;
-        }
-        uint fix_index (b2Fixture* fix) {
-            b2Fixture* bfix = b2body->GetFixtureList();
-            uint r = 0;
-            while (bfix && bfix != fix) {
-                bfix = bfix->GetNext();
-                r++;
-            }
-            return r;
-        }   
+        b2Fixture* get_fixture (FixtureDef* fd);
 
+         // These activate and deactivate the b2Body
         void materialize ();
         void dematerialize ();
 

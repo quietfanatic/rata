@@ -18,7 +18,7 @@ namespace phys {
                 );
                 if (grd) {
                     grd->ground = (Object*)ground->GetBody()->GetUserData();
-                    grd->ground_fix_index = grd->ground->fix_index(ground);
+                    grd->ground_fixdef = (FixtureDef*)ground->GetUserData();
                 }
             }
         }
@@ -26,9 +26,9 @@ namespace phys {
             Grounded* grd = dynamic_cast<Grounded*>(
                 (Object*)grounded->GetBody()->GetUserData()
             );
-            if (grd && grd->get_ground_fix() == ground) {
+            if (grd && grd->ground_fixdef == (FixtureDef*)ground->GetUserData()) {
                 grd->ground = NULL;
-                grd->ground_fix_index = 0;
+                grd->ground_fixdef = NULL;
             }
         }
     } ground_rule;
@@ -37,7 +37,7 @@ namespace phys {
 
 HCB_BEGIN(Grounded)
     name("phys::Grounded");
-    attr("ground", member(&Grounded::ground));
-    attr("ground_fix_index", member(&Grounded::ground_fix_index).optional());
+    attr("ground", member(&Grounded::ground).optional());
+    attr("ground_fixdef", member(&Grounded::ground_fixdef).optional());
 HCB_END(Grounded)
 
