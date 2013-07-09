@@ -74,8 +74,10 @@ namespace geo {
         }
     }
 
-    void Resident::reroom (Vec pos) {
+    void Resident::reroom () {
         if (!room) room = current_room;
+        Vec pos = resident_pos();
+        if (!pos.is_defined()) pos = room->boundary.center();
         Room* origin =
             room == &tumbolia
                 ? current_room : room;

@@ -137,7 +137,7 @@ namespace ent {
     }
      // Ensure we're in the right room and also calculate walk animation.
     void Biped::after_move () {
-        reroom(pos());
+        reroom();
         if (ground) {
             if (fabs(vel().x) < 0.01) {
                 distance_walked = 0;

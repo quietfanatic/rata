@@ -33,6 +33,7 @@ struct Rect {
     CE Vec size () const {
         return Vec(r - l, t - b);
     }
+    CE Vec center () const { return lb() + rt() / 2; }
     CE Rect uninvert () const {
         return Rect(
             (l > r) ? r : l,

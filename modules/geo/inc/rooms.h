@@ -26,9 +26,10 @@ namespace geo {
         Room* room = NULL;
         virtual void emerge () = 0;
         virtual void reclude () = 0;
+        virtual Vec resident_pos () { return Vec(NAN, NAN); }
         virtual ~Resident () { }
         void finish ();
-        void reroom (Vec pos);
+        void reroom ();
     };
 
     extern Room* current_room;
