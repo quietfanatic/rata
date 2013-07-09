@@ -1,0 +1,14 @@
+{"hacc::Document":{
+    img:{"core::Image":{
+        filename: "modules/vis/res/test.png"
+    }}
+    layout:{"vis::Layout":{
+        size:[64 64]
+        frames:[
+            {name:"white" offset:[16 48] box:[-16 -16 16 16]}
+            {name:"red"   offset:[48 48] box:[-16 -16 16 16]}
+            {name:"green" offset:[48 16] box:[-16 -16 16 16]}
+            {name:"blue"  offset:[16 16] box:[-16 -16 16 16]}
+        ]
+    }}
+}}
