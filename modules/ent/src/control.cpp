@@ -56,6 +56,10 @@ namespace ent {
 
 } using namespace ent;
 
+HCB_BEGIN(Controllable)
+    name("ent::Controllable");
+HCB_END(Controllable)
+
 HCB_BEGIN(Player)
     name("ent::Player");
     attr("character", member(&Player::character));
