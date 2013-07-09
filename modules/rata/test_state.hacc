@@ -7,8 +7,8 @@
     }}
     test:{"ent::Test_Actor":{
         Object:{ pos:[10 7.5] }
-        texture:$("modules/vis/res/test.image").ALL
-        frame:$("modules/vis/res/test.layout").green
+        texture:$("modules/vis/res/test.hacc").img.ALL
+        frame:$("modules/vis/res/test.hacc").layout.green
     }}
     boundary:{"ent::Boundary":{
         Object:{ pos:[0 0] }

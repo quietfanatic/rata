@@ -97,7 +97,7 @@ namespace vis {
 
         Model_Tester () { }
         void finish () {
-            model.apply_skin(hacc::File("modules/rata/res/rata-base.skin").data());
+            model.apply_skin(hacc::File("modules/rata/res/rata-base.hacc").data().attr("skin"));
             model.apply_pose(model.skel->poses.named("stand"));
             Draws_Sprites::activate();
         }

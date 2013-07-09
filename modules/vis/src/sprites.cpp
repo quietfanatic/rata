@@ -171,9 +171,9 @@ namespace vis {
     struct Sprite_Test : Draws_Sprites {
         void finish () { Draws_Sprites::activate(); }
         void draws_sprites () {
-            static Image* image = hacc::File("modules/vis/res/test.image").data();
+            static Image* image = hacc::File("modules/vis/res/test.hacc").data().attr("img");
             static Texture* texture = image->texture_named("ALL");
-            static Layout* layout = hacc::File("modules/vis/res/test.layout").data();
+            static Layout* layout = hacc::File("modules/vis/res/test.hacc").data().attr("layout");
             static Frame* white = layout->frame_named("white");
             static Frame* red = layout->frame_named("red");
             static Frame* green = layout->frame_named("green");

@@ -1,9 +1,0 @@
-{"core::Image":{
-    filename: "modules/rata/res/rata-base.png"
-    textures: [
-        {name:body    offset:[  0   0] size:[ 85 43]}
-        {name:head    offset:[117   1] size:[127 88]}
-        {name:arm     offset:[  0  95] size:[100 16]}
-        {name:forearm offset:[  0 112] size:[100 16]}
-    ]
-}}

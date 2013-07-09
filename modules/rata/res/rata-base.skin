@@ -1,8 +1,0 @@
-{"vis::Skin":{
-    apps: [
-        [$("modules/ent/res/small.skel").segs.body [$("modules/rata/res/rata-base.image").body]]
-        [$("modules/ent/res/small.skel").segs.head [$("modules/rata/res/rata-base.image").head]]
-        [$("modules/ent/res/small.skel").segs.arm [$("modules/rata/res/rata-base.image").arm]]
-        [$("modules/ent/res/small.skel").segs.forearm [$("modules/rata/res/rata-base.image").forearm]]
-    ]
-}}
