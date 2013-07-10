@@ -91,27 +91,22 @@ namespace ent {
     }
     float Biped::Grounded_velocity () {
         switch (move_direction()) {
-            case -1: return -stats.walk_speed;
-            case 1: return stats.walk_speed;
+            case -1: return -stats.run_speed;
+            case 1: return stats.run_speed;
             default: return 0;
         }
     }
     float Biped::Grounded_friction () {
-        switch (move_direction()) {
-            case -1: {
-                if (vel().x <= 0)
-                    return stats.walk_friction;
-                else
-                    return stats.skid_friction;
-            }
-            case 1: {
-                if (vel().x >= 0)
-                    return stats.walk_friction;
-                else
-                    return stats.skid_friction;
-            }
-            default: return stats.stop_friction;
+        int8 dir = move_direction();
+        if (dir) {
+            if (vel().x * dir >= stats.walk_speed)
+                return stats.run_friction;
+            else if (vel().x * dir >= 0)
+                return stats.walk_friction;
+            else
+                return stats.skid_friction;
         }
+        else return stats.stop_friction;
     }
      // Ensure we're in the right room and also calculate walk animation.
     void Biped::after_move () {
