@@ -37,6 +37,7 @@
 
             void main () {
                 gl_FragColor = texture2D(tex, tex_coords);
+                 // TODO: depth test based on alpha
                 if (gl_FragColor.a < 0.5)
                     discard;
             }
