@@ -40,6 +40,12 @@
             [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a23     true]
             [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a23 true]
         ]
+        crouch:[
+            [$.skel.segs.body    $("modules/ent/res/small.layouts").body.kneel  ]
+            [$.skel.segs.head    $("modules/ent/res/small.layouts").head.stand90]
+            [$.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a23     ]
+            [$.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a45 ]
+        ]
         crawl1:[
             [$.skel.segs.body    $("modules/ent/res/small.layouts").body.crawl1]
             [$.skel.segs.head    $("modules/ent/res/small.layouts").head.crawl ]

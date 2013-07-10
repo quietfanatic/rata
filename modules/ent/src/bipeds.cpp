@@ -47,12 +47,20 @@ namespace ent {
                 }
                 default: break;
             }
+            if (buttons & CROUCH_BIT) {
+                crouching = true;
+                if (buttons & LEFT_BIT || buttons & RIGHT_BIT)
+                    crawling = true;
+            }
+            else {
+                crouching = false;
+                crawling = false;
+            }
              // For animation
             oldxrel = pos().x - ground->pos().x;
             if (buttons & JUMP_BIT) {
                  // TODO: jump delay
                 set_vel(Vec(vel().x, stats.jump_speed));
-                ground = NULL;
             }
         }
         else {  // In the air
@@ -66,11 +74,16 @@ namespace ent {
         }
     }
     float Biped::Grounded_velocity () {
-        return stats.run_speed * move_direction();
+        if (crouching)
+            return stats.crawl_speed * move_direction();
+        else 
+            return stats.run_speed * move_direction();
     }
     float Biped::Grounded_friction () {
-        int8 dir = move_direction();
-        if (dir) {
+        if (crouching) {
+            return stats.crawl_friction;
+        }
+        else if (int8 dir = move_direction()) {
             if (vel().x * dir >= stats.walk_speed)
                 return stats.run_friction;
             else if (vel().x * dir >= 0)
@@ -85,7 +98,7 @@ namespace ent {
          // Clear input before next frame
         buttons = ButtonBits(0);
         reroom();
-        if (ground) {
+        if (ground && (!crouching || crawling)) {
             if (fabs(vel().x) < 0.01) {
                 distance_walked = 0;
             }
@@ -101,17 +114,36 @@ namespace ent {
     void Biped::Sprite_draw () {
         model.apply_skin(def->skin);
         if (ground) {
-            if (fabs(vel().x) < 0.01) {
-                model.apply_pose(&def->poses->stand);
+            if (crawling) {
+                if (fabs(vel().x) < 0.01) {
+                    model.apply_pose(&def->poses->crawl1);
+                }
+                else {
+                    float stepdist = fmod(distance_walked, 2.0);
+                    if (stepdist < 0.5)
+                        model.apply_pose(&def->poses->crawl2_1);
+                    else if (stepdist >= 1 && stepdist < 1.5)
+                        model.apply_pose(&def->poses->crawl2_2);
+                    else
+                        model.apply_pose(&def->poses->crawl1);
+                }
+            }
+            else if (crouching) {
+                model.apply_pose(&def->poses->crouch);
             }
             else {
-                float stepdist = fmod(distance_walked, 2.0);
-                if (stepdist < 0.5)
-                    model.apply_pose(&def->poses->walk1);
-                else if (stepdist >= 1 && stepdist < 1.5)
-                    model.apply_pose(&def->poses->walk2);
-                else
+                if (fabs(vel().x) < 0.01) {
                     model.apply_pose(&def->poses->stand);
+                }
+                else {
+                    float stepdist = fmod(distance_walked, 2.0);
+                    if (stepdist < 0.5)
+                        model.apply_pose(&def->poses->walk1);
+                    else if (stepdist >= 1 && stepdist < 1.5)
+                        model.apply_pose(&def->poses->walk2);
+                    else
+                        model.apply_pose(&def->poses->stand);
+                }
             }
         }
         else {
@@ -135,6 +167,8 @@ HCB_BEGIN(Biped)
     attr("Controllable", base<ent::Controllable>().optional());
     attr("direction", member(&Biped::direction).optional());
     attr("distance_walked", member(&Biped::distance_walked).optional());
+    attr("crouching", member(&Biped::crouching).optional());
+    attr("crawling", member(&Biped::crawling).optional());
     finish([](Biped& b){
         b.Resident::finish();
         b.finish();
@@ -170,6 +204,7 @@ HCB_BEGIN(BipedPoses)
     attr("stand", member(&BipedPoses::stand));
     attr("walk1", member(&BipedPoses::walk1));
     attr("walk2", member(&BipedPoses::walk2));
+    attr("crouch", member(&BipedPoses::crouch));
     attr("crawl1", member(&BipedPoses::crawl1));
     attr("crawl2_1", member(&BipedPoses::crawl2_1));
     attr("crawl2_2", member(&BipedPoses::crawl2_2));

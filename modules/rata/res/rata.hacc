@@ -11,7 +11,7 @@
         walk_speed: 5.0
         run_friction: 0.2
         run_speed: 10.0
-        crawl_friction: 1.0
+        crawl_friction: 2.0
         crawl_speed: 3.0
         stop_friction: 1.0
         skid_friction: 2.0

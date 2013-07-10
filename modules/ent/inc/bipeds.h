@@ -38,7 +38,8 @@ namespace ent {
          // For movement
         BipedStats stats;
         int8 direction = 1;
-        bool crouched = false;
+        bool crouching = false;
+        bool crawling = false;
          // Object
         void before_move () override;
         void after_move () override;
@@ -71,6 +72,7 @@ namespace ent {
         vis::Pose stand;
         vis::Pose walk1;
         vis::Pose walk2;
+        vis::Pose crouch;
         vis::Pose crawl1;
         vis::Pose crawl2_1;
         vis::Pose crawl2_2;
