@@ -14,6 +14,13 @@ namespace phys {
          // We can't record the b2Fixture* directly, since it
          //  has no path and cannot be saved to a file.
         FixtureDef* ground_fixdef = NULL;
+
+         // Use these to walk.  The velocity is your ideal speed
+         //  (positive -> right) and the friction is your acceleration
+         //  or deceleration.  If friction returns NAN, the bodydef's normal
+         //  friction value will be used.
+        virtual float Grounded_velocity () { return 0; }
+        virtual float Grounded_friction () { return NAN; }
     };
 
 }

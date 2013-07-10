@@ -25,35 +25,39 @@ namespace phys {
 
      // Box2D callbacks
     struct myCL : b2ContactListener {
-        void PostSolve (b2Contact* contact, const b2ContactImpulse* ci) {
+        void PreSolve (b2Contact* contact, const b2Manifold* old_manifold) override {
             b2Fixture* a = contact->GetFixtureA();
             b2Fixture* b = contact->GetFixtureB();
             FixtureDef* afdf = (FixtureDef*)a->GetUserData();
             FixtureDef* bfdf = (FixtureDef*)b->GetUserData();
             uint64 coll_ab = afdf->coll_a & bfdf->coll_b;
             for (uint i = 0; coll_ab; i++) {
-                if (coll_ab & 1) coll_rules()[i]->post(contact, a, b);
+                if (coll_ab & 1)
+                    coll_rules()[i]->Collision_Rule_presolve(contact, a, b);
                 coll_ab >>= 1;
             }
             uint64 coll_ba = afdf->coll_b & bfdf->coll_a;
             for (uint i = 0; coll_ba; i++) {
-                if (coll_ba & 1) coll_rules()[i]->post(contact, b, a);
+                if (coll_ba & 1)
+                    coll_rules()[i]->Collision_Rule_presolve(contact, b, a);
                 coll_ba >>= 1;
             }
         }
-        void EndContact (b2Contact* contact) {
+        void EndContact (b2Contact* contact) override {
             b2Fixture* a = contact->GetFixtureA();
             b2Fixture* b = contact->GetFixtureB();
             FixtureDef* afdf = (FixtureDef*)a->GetUserData();
             FixtureDef* bfdf = (FixtureDef*)b->GetUserData();
             uint64 coll_ab = afdf->coll_a & bfdf->coll_b;
             for (uint i = 0; coll_ab; i++) {
-                if (coll_ab & 1) coll_rules()[i]->end(contact, a, b);
+                if (coll_ab & 1)
+                    coll_rules()[i]->Collision_Rule_end(contact, a, b);
                 coll_ab >>= 1;
             }
             uint64 coll_ba = afdf->coll_b & bfdf->coll_a;
             for (uint i = 0; coll_ba; i++) {
-                if (coll_ba & 1) coll_rules()[i]->end(contact, b, a);
+                if (coll_ba & 1)
+                    coll_rules()[i]->Collision_Rule_end(contact, b, a);
                 coll_ba >>= 1;
             }
         }

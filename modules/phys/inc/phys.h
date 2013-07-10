@@ -71,8 +71,8 @@ namespace phys {
     struct Collision_Rule {
         uint index;
         virtual std::string name () const = 0;
-        virtual void post (b2Contact*, b2Fixture*, b2Fixture*) { }
-        virtual void end (b2Contact*, b2Fixture*, b2Fixture*) { }
+        virtual void Collision_Rule_presolve (b2Contact*, b2Fixture*, b2Fixture*) { }
+        virtual void Collision_Rule_end (b2Contact*, b2Fixture*, b2Fixture*) { }
         virtual ~Collision_Rule () { }  // To make the compiler happy, mostly
 
         Collision_Rule ();

@@ -6,29 +6,34 @@ namespace phys {
 
     struct Ground_Rule : Collision_Rule {
         std::string name () const { return "ground"; }
-        void post (b2Contact* contact, b2Fixture* grounded, b2Fixture* ground) {
+        void Collision_Rule_presolve (b2Contact* contact, b2Fixture* grounded, b2Fixture* ground) override {
             b2WorldManifold wm;
             contact->GetWorldManifold(&wm);
             if (contact->GetFixtureA() == grounded
-                ? wm.normal.y < -0.7
+                ? wm.normal.y < -0.7  // TODO: make this value configurable
                 : wm.normal.y > 0.7
             ) {
-                Grounded* grd = dynamic_cast<Grounded*>(
+                Grounded* grdd = dynamic_cast<Grounded*>(
                     (Object*)grounded->GetBody()->GetUserData()
                 );
-                if (grd) {
-                    grd->ground = (Object*)ground->GetBody()->GetUserData();
-                    grd->ground_fixdef = (FixtureDef*)ground->GetUserData();
+                if (grdd) {
+                    grdd->ground = (Object*)ground->GetBody()->GetUserData();
+                    grdd->ground_fixdef = (FixtureDef*)ground->GetUserData();
+                     // Allow walking via friction
+                    contact->SetTangentSpeed(grdd->Grounded_velocity());
+                    float fric = grdd->Grounded_velocity();
+                    if (fric == fric)
+                        contact->SetFriction(b2MixFriction(fric, ground->GetFriction()));
                 }
             }
         }
-        void end (b2Contact* contact, b2Fixture* grounded, b2Fixture* ground) {
-            Grounded* grd = dynamic_cast<Grounded*>(
+        void Collision_Rule_end (b2Contact* contact, b2Fixture* grounded, b2Fixture* ground) override {
+            Grounded* grdd = dynamic_cast<Grounded*>(
                 (Object*)grounded->GetBody()->GetUserData()
             );
-            if (grd && grd->ground_fixdef == (FixtureDef*)ground->GetUserData()) {
-                grd->ground = NULL;
-                grd->ground_fixdef = NULL;
+            if (grdd && grdd->ground_fixdef == (FixtureDef*)ground->GetUserData()) {
+                grdd->ground = NULL;
+                grdd->ground_fixdef = NULL;
             }
         }
     } ground_rule;
