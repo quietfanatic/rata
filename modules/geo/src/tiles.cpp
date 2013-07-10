@@ -1,5 +1,6 @@
 
 #include <stdexcept>
+#include <sstream>
 #include "../inc/tiles.h"
 #include "../../hacc/inc/everything.h"
 #include "../../util/inc/math.h"
@@ -128,9 +129,15 @@ namespace geo {
         uint merged = 0;
         uint eaten = 0;
         uint final = 0;
+        if (tiles.size() != width * height) {
+            std::ostringstream ss;
+            ss << "Tilemap has wrong number of tiles (";
+            ss << tiles.size() << " != " << (width * height) << " == " << width << " * " << height << ")";
+            throw hacc::X::Logic_Error(ss.str());
+        }
         for (uint y = 0; y < height; y++)
         for (uint x = 0; x < width; x++) {
-            TileDef* def = tileset->tiles[tiles[y*width+x]];
+            TileDef* def = tileset->tiles.at(tiles[y*width+x] & 0x3fff);
             if (def) {
                 uint n_edges = def->vertices.size();
                  // Create the edges for this tile
