@@ -161,7 +161,7 @@ namespace phys {
                             case b2Shape::e_polygon: {
                                 auto b2ps = static_cast<b2PolygonShape*>(b2s);
                                  // I love binary compatibility
-                                vis::draw_loop(b2ps->m_vertexCount, (Vec*)b2ps->m_vertices, fcolor);
+                                vis::draw_loop(b2ps->m_count, (Vec*)b2ps->m_vertices, fcolor);
                                 break;
                             }
                             case b2Shape::e_edge: {
@@ -218,7 +218,7 @@ HCB_BEGIN(b2PolygonShape)
     attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius).optional());
     attr("verts", mixed_funcs<std::vector<b2Vec2>>(
         [](const b2PolygonShape& ps){
-            return std::vector<b2Vec2>(ps.m_vertices, ps.m_vertices + ps.m_vertexCount);
+            return std::vector<b2Vec2>(ps.m_vertices, ps.m_vertices + ps.m_count);
         },
         [](b2PolygonShape& ps, const std::vector<b2Vec2>& v){
             ps.Set(v.data(), v.size());

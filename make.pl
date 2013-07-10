@@ -18,7 +18,7 @@ workflow {
      # we require advanced C++11 features.  All modules' make.pls should include
      # this file.
     sub cppc {
-        run "$here/tool/filter_errors.pl", qw<g++-4.7 -std=c++11 -fmax-errors=10 -c -Wall -Wno-format-security -Wno-unused-function -ggdb>, "-I$here/lib", @_;
+        run "$here/tool/filter_errors.pl", qw<g++-4.7 -std=c++11 -fmax-errors=10 -c -Wall -Wno-format-security -Wno-unused-function -ggdb>, "-I$here/lib/Box2D", @_;
     }
     sub ld {
         run qw<g++-4.7>, @_;
@@ -68,6 +68,17 @@ workflow {
     phony 'test', sub { targetmatch qr/^modules\/.*\/test/ }, sub { };
 
     phony 'clean', sub { targetmatch qr/^modules\/.*\/clean/ }, sub { };
+
+    rule 'lib/libBox2D.a', [], sub {
+        die <<END
+This program requires the physics engine Box2D.  Please get libBox2D via:
+    cd lib
+    svn checkout http://box2d.googlecode.com/svn/trunk/ box2d-read-only -r 252
+and compile it somehow.  Then copy libBox2D.a into lib/ and make sure the Box2D
+headers are in lib/ (such that the file lib/Box2D/Box2D/Box2D.h exists).
+Sorry for the inconvenience.
+END
+    };
 
     defaults 'test';
 

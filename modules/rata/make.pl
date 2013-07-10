@@ -38,8 +38,9 @@ workflow {
         ../vis/tmp/text.o
         ../util/tmp/debug.o
         ../util/tmp/math.o
+        ../../lib/libBox2D.a
     >;
-    our @libs = qw(-lgc -lGL -lglfw -lSOIL ../../lib/libBox2D.a);
+    our @libs = qw(-lgc -lGL -lglfw -lSOIL);
 
     include '../..';
 
