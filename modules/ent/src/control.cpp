@@ -19,13 +19,13 @@ namespace ent {
                     buttons |= bit;
             bit <<= 1;
         }
-        character->control_buttons(ButtonBits(buttons));
+        character->Controllable_buttons(ButtonBits(buttons));
     }
     bool Player::Cursor_Listener_active () { return character; }
     bool Player::Cursor_Listener_trap () { return true; }
     void Player::Cursor_Listener_motion (int x, int y) {
         if (!character) return;
-        character->move_focus(Vec(x*PX, y*PX));
+        character->Controllable_move_focus(Vec(x*PX, y*PX));
     }
 
     Player::Player () {
@@ -70,6 +70,7 @@ HCB_END(Controllable)
 HCB_BEGIN(Player)
     name("ent::Player");
     attr("character", member(&Player::character));
+    attr("cursor_tex", member(&Player::cursor_tex).optional());
     attr("map_left", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_LEFT]; }).optional());
     attr("map_right", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_RIGHT]; }).optional());
     attr("map_down", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_DOWN]; }).optional());

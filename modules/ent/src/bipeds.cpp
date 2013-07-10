@@ -25,9 +25,12 @@ namespace ent {
         disappear();
     }
 
-     // Controllable
-    void Biped::control_buttons (ButtonBits bits) {
+    void Biped::Controllable_buttons (ButtonBits bits) {
         buttons = bits;
+    }
+    void Biped::Controllable_move_focus (Vec diff) { }  // TODO
+    Vec Biped::Controllable_get_focus () {
+        return Vec(NAN, NAN);
     }
 
     void Biped::before_move () {

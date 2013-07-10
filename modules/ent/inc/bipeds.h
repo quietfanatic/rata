@@ -56,8 +56,9 @@ namespace ent {
         void Sprite_draw () override;
 
         ButtonBits buttons;
-         // Controllable
-        void control_buttons (ButtonBits) override;
+        void Controllable_buttons (ButtonBits) override;
+        void Controllable_move_focus (Vec) override;
+        Vec Controllable_get_focus () override;
         int8 move_direction () {
             return !!(buttons & RIGHT_BIT) - !!(buttons & LEFT_BIT);
         }
