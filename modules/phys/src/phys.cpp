@@ -123,6 +123,17 @@ namespace phys {
         return NULL;
     }
 
+    void Object::foreach_contact (std::function<void (b2Fixture*, b2Fixture*)>& f) {
+        for (auto ce = b2body->GetContactList(); ce; ce = ce->next) {
+            auto fix_a = ce->contact->GetFixtureA();
+            auto fix_b = ce->contact->GetFixtureB();
+            if ((Object*)fix_a->GetBody()->GetUserData() == this)
+                f(fix_a, fix_b);
+            else
+                f(fix_b, fix_a);
+        }
+    }
+
     Object::Object () {
         b2BodyDef b2bd;
         b2bd.active = false;

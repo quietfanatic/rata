@@ -54,6 +54,9 @@ namespace phys {
 
         b2Fixture* get_fixture (FixtureDef* fd);
 
+         // For big convenience
+        void foreach_contact (std::function<void (b2Fixture* mine, b2Fixture* other)>&);
+
          // These activate and deactivate the b2Body
         void materialize ();
         void dematerialize ();
