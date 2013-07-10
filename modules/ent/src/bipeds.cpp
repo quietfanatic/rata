@@ -193,6 +193,7 @@ HCB_END(BipedStats)
 HCB_BEGIN(BipedDef)
     name("ent::BipedDef");
     attr("body_def", member(&BipedDef::body_def));
+    attr("fixdefs", member(&BipedDef::fixdefs));
     attr("stats", member(&BipedDef::stats));
     attr("skel", member(&BipedDef::skel));
     attr("poses", member(&BipedDef::poses));

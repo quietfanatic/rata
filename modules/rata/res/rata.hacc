@@ -1,6 +1,7 @@
 {"hacc::Document":{
     def:{"ent::BipedDef":{
         body_def: $("modules/ent/res/small.hacc").bdf
+        fixdefs: $("modules/ent/res/small.hacc").fixdefs
         stats: $.stats
         skel: $("modules/ent/res/small.hacc").skel
         poses: $("modules/ent/res/small.hacc").poses

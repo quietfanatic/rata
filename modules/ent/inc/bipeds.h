@@ -91,6 +91,7 @@ namespace ent {
 
     struct BipedDef {
         phys::BodyDef* body_def;
+        BipedFixdefs* fixdefs;
         BipedStats* stats;  // Initial stats only.
         BipedPoses* poses;
         vis::Skel* skel;
