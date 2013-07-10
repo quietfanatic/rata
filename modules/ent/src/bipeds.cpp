@@ -31,10 +31,11 @@ namespace ent {
     }
 
     void Biped::before_move () {
+        int8 mdir = move_direction();
          // Change some kinds of movement state
          // Do not change ground velocity, but do change air velocity
         if (ground) {
-            switch (move_direction()) {
+            switch (mdir) {
                 case -1: {
                     if (vel().x <= 0)
                         direction = -1;
@@ -49,7 +50,7 @@ namespace ent {
             }
             if (buttons & CROUCH_BIT) {
                 crouching = true;
-                if (buttons & LEFT_BIT || buttons & RIGHT_BIT)
+                if (mdir)
                     crawling = true;
             }
             else {
@@ -64,13 +65,30 @@ namespace ent {
             }
         }
         else {  // In the air
-            int8 dir = move_direction();
-            if (vel().x * dir <= stats.air_speed - stats.air_friction) {
-                set_vel(Vec(vel().x + stats.air_friction * dir, vel().y));
+            if (vel().x * mdir <= stats.air_speed - stats.air_friction) {
+                set_vel(Vec(vel().x + stats.air_friction * mdir, vel().y));
             }
-            else if (vel().x * dir <= stats.air_speed) {
-                set_vel(Vec(stats.air_speed * dir, vel().y));
+            else if (vel().x * mdir <= stats.air_speed) {
+                set_vel(Vec(stats.air_speed * mdir, vel().y));
             }
+        }
+         // Change active fixture
+        auto active = (
+            ground
+                ? crawling
+                    ? mdir == 1
+                        ? &def->fixdefs->crawl_r
+                        : &def->fixdefs->crawl_l
+                    : crouching
+                        ? &def->fixdefs->crouch
+                    : &def->fixdefs->stand
+                : &def->fixdefs->stand
+        );
+        for (auto fix = b2body->GetFixtureList(); fix; fix = fix->GetNext()) {
+            auto fd = (phys::FixtureDef*)fix->GetUserData();
+//            if (def->fixdefs->is_primary(fd)) {
+                fix->SetSensor(fd != active);
+//            }
         }
     }
     float Biped::Grounded_velocity () {

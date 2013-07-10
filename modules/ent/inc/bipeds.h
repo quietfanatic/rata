@@ -87,6 +87,10 @@ namespace ent {
         phys::FixtureDef crouch;
         phys::FixtureDef crawl_l;
         phys::FixtureDef crawl_r;
+         // LOL, categorizing things by comparing their addresses
+        bool is_primary (phys::FixtureDef* fd) {
+            return fd >= &stand && fd <= &crawl_r;
+        }
     };
 
     struct BipedDef {
