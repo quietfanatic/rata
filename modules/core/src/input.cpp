@@ -60,6 +60,13 @@ namespace core {
             glfwSetWindowCloseCallback(close_cb);
             glfwDisable(GLFW_AUTO_POLL_EVENTS);
         }
+         // Not doing this seems to cause surprising happenings
+        void Phase_stop () override {
+            glfwSetKeyCallback(NULL);
+            glfwSetCharCallback(NULL);
+            glfwSetMousePosCallback(NULL);
+            glfwSetWindowCloseCallback(NULL);
+        }
         void Phase_run () override {
             for (auto ct : cursor_listeners()) {
                 if (ct->Cursor_Listener_active()) {
