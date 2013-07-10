@@ -7,10 +7,13 @@
 #include "../../util/inc/honestly.h"
 #include "../../util/inc/organization.h"
 
-struct CommandData;
+struct CommandData : hacc::DPtee {
+    virtual void operator () () = 0;
+};
+
 struct Command final : hacc::DPtr<CommandData> {
     explicit Command (CommandData* d = NULL) : DPtr(d) { }
-    void operator () ();
+    void operator () () { (**this)(); }
 };
 
 namespace core {

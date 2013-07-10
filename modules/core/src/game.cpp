@@ -1,6 +1,7 @@
 #include <GL/glfw.h>
 #include "../inc/game.h"
 #include "../inc/phases.h"
+#include "../inc/commands.h"
 #include "../../util/inc/debug.h"
 #include "../../hacc/inc/files.h"
 
@@ -42,6 +43,7 @@ namespace core {
     }
 
     void set_video (uint scale) {
+        if (scale > 8) scale = 8;
         glfwOpenWindow(
             320*scale, 240*scale,
             8, 8, 8, 0,  // r g b a
@@ -98,4 +100,58 @@ namespace core {
         }
     }
 
-}
+} using namespace core;
+
+struct LoadCommand : CommandData {
+    std::string filename;
+    void operator () () { load(filename); }
+};
+HCB_BEGIN(LoadCommand)
+    new_command<LoadCommand>("load", "Manually load a file by its filename");
+    elem(member(&LoadCommand::filename));
+HCB_END(LoadCommand)
+
+struct SaveCommand : CommandData {
+    std::string filename;
+    void operator () () { save(filename); }
+};
+HCB_BEGIN(SaveCommand)
+    new_command<SaveCommand>("save", "Save the file object with the given filename");
+    elem(member(&SaveCommand::filename));
+HCB_END(SaveCommand)
+
+struct UnloadCommand : CommandData {
+    std::string filename;
+    void operator () () { unload(filename); }
+};
+HCB_BEGIN(UnloadCommand)
+    new_command<UnloadCommand>("unload", "Unload the file object with the given filename.  Fails if there are outside references to it.");
+    elem(member(&UnloadCommand::filename));
+HCB_END(SaveCommand)
+
+struct RenameCommand : CommandData {
+    std::string old_name;
+    std::string new_name;
+    void operator () () { hacc::File(old_name).rename(new_name); }
+};
+HCB_BEGIN(RenameCommand)
+    new_command<RenameCommand>("rename", "Change the filename associated with a file object");
+    elem(member(&RenameCommand::old_name));
+    elem(member(&RenameCommand::new_name));
+HCB_END(SaveCommand)
+
+struct ScaleCommand : CommandData {
+    uint factor = 1;
+    void operator () () { set_video(factor); }
+};
+HCB_BEGIN(ScaleCommand)
+    new_command<ScaleCommand>("scale", "Scale the main window by an integer factor (1 = 320x240, 2 = 640x480)");
+    elem(member(&ScaleCommand::factor).optional());
+HCB_END(ScaleCommand)
+
+struct QuitCommand : CommandData {
+    void operator() () { core::quick_exit(); }
+};
+HCB_BEGIN(QuitCommand)
+    new_command<QuitCommand>("quit", "Quit the program without saving anything.");
+HCB_END(QuitCommand)

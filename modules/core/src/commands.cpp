@@ -13,12 +13,6 @@
 
 using namespace hacc;
 
-struct CommandData : DPtee {
-    virtual void operator () () = 0;
-};
-
-void Command::operator () () { (**this)(); }
-
 HCB_BEGIN(Command)
     name("Command");
     to_tree([](const Command& cmd){
@@ -155,13 +149,6 @@ HCB_BEGIN(EchoCommand)
     new_command<EchoCommand>("echo", "Print the given string to all console-like places.");
     elem(member(&EchoCommand::s));
 HCB_END(EchoCommand)
-
-struct QuitCommand : CommandData {
-    void operator() () { core::quick_exit(); }
-};
-HCB_BEGIN(QuitCommand)
-    new_command<QuitCommand>("quit", "Quit the program without saving anything.");
-HCB_END(QuitCommand)
 
 struct SeqCommand : CommandData {
     std::vector<Command> seq;
