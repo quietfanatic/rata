@@ -34,7 +34,6 @@ namespace vis {
             static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
             glDisable(GL_DEPTH_TEST);
-            glEnable(GL_TEXTURE_2D);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glBindVertexArray(0);

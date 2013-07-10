@@ -131,7 +131,6 @@ namespace vis {
          // Renderer
         void start_rendering () override {
             glDisable(GL_BLEND);
-            glEnable(GL_TEXTURE_2D);
             glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
             glUseProgram(program->glid);
             glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
