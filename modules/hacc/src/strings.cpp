@@ -503,7 +503,7 @@ namespace hacc {
 
     void tree_to_file (Tree tree, String filename) {
         with_file(filename, "wb", [&](FILE* f){
-            String s = tree_to_string(tree, filename);
+            String s = tree_to_string(tree, filename, 5);
             fwrite(s.data(), 1, s.size(), f);
             if (s[s.size()-1] != '\n')
                 fputc('\n', f);
