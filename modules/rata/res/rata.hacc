@@ -8,13 +8,13 @@
     }}
     stats:{"ent::BipedStats":{
         walk_friction: 0.8
-        walk_speed: 4.0
+        walk_speed: 5.0
         run_friction: 0.2
-        run_speed: 8.0
+        run_speed: 10.0
         crawl_friction: 1.0
-        crawl_speed: 2.0
+        crawl_speed: 3.0
         stop_friction: 1.0
-        skid_friction: 1.0
+        skid_friction: 2.0
         air_friction: 0.2
         air_speed: 4.0
         jump_speed: 16.0

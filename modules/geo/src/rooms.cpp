@@ -103,6 +103,10 @@ namespace geo {
             }
         }
     }
+    void Resident::deroom () {
+        Resident_reclude();
+        room = NULL;
+    }
 
     Vec Resident::Resident_pos () {
         if (room)

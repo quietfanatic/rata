@@ -30,6 +30,7 @@ namespace geo {
         virtual ~Resident () { }
         void finish ();
         void reroom ();
+        void deroom ();
     };
 
     extern Room* current_room;
