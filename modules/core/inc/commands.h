@@ -8,8 +8,8 @@
 #include "../../util/inc/organization.h"
 
 struct CommandData;
-struct Command final : hacc::DPtr<const CommandData> {
-    explicit Command (const CommandData* d = NULL) : DPtr(d) { }
+struct Command final : hacc::DPtr<CommandData> {
+    explicit Command (CommandData* d = NULL) : DPtr(d) { }
     void operator () ();
 };
 

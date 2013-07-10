@@ -17,7 +17,7 @@ struct CommandData : DPtee {
     virtual void operator () () = 0;
 };
 
-void Command::operator () () { (*this)(); }
+void Command::operator () () { (**this)(); }
 
 HCB_BEGIN(Command)
     name("Command");
@@ -29,10 +29,11 @@ HCB_BEGIN(Command)
           : less.form() == OBJECT && less.as<const Object&>().size() == 0
                 ? Array()
           : throw X::Logic_Error("The CommandData subtype " + Type(typeid(*cmd)).name() + " didn't produce an array tree");
-        Array more (a.size() + 1);
+        Array more;
+        more.reserve(a.size() + 1);
         auto iter = commands_by_type().find(Type(typeid(*cmd)).data);
         if (iter != commands_by_type().end()) {
-            more.push_back(Tree(iter->second->name));
+            more.emplace_back(Tree(iter->second->name));
             for (auto& t : a)
                 more.emplace_back(t);
             return Tree(more);
@@ -54,7 +55,8 @@ HCB_BEGIN(Command)
             void* dat = operator new (desc->type.size());
             desc->type.construct(dat);
             cmd = Command((CommandData*)dat);
-            Array less (a.size() - 1);
+            Array less;
+            less.reserve(a.size() - 1);
             for (size_t i = 1; i < a.size(); i++)
                 less.push_back(a[i]);
             Reference(desc->type, dat).prepare(Tree(std::move(less)));
@@ -65,18 +67,19 @@ HCB_BEGIN(Command)
         auto& a = tree.as<const Array&>();
         if (a.size() == 0)
             throw X::Logic_Error("A command cannot be represented by an empty array");
-        Array less (a.size() - 1);
+        Array less;
+        less.reserve(a.size() - 1);
         for (size_t i = 1; i < a.size(); i++)
             less.push_back(a[i]);
         Reference(
             Type(typeid(*cmd)),
-            const_cast<CommandData*>(&*cmd)
+            &*cmd
         ).fill(Tree(std::move(less)));
     });
     finish([](Command& cmd){
         Reference(
             Type(typeid(*cmd)),
-            const_cast<CommandData*>(&*cmd)
+            &*cmd
         ).finish();
     });
 HCB_END(Command)
@@ -161,8 +164,8 @@ HCB_BEGIN(QuitCommand)
 HCB_END(QuitCommand)
 
 struct SeqCommand : CommandData {
-    std::vector<Command*> seq;
-    void operator() () { for (auto& c : seq) (*c)(); }
+    std::vector<Command> seq;
+    void operator() () { for (auto& c : seq) c(); }
 };
 HCB_BEGIN(SeqCommand)
     new_command<SeqCommand>("seq", "Perform a sequence of commands.  Usage: seq [[command1 args...] [command2 args...]...]");
