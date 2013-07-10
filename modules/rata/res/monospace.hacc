@@ -1,0 +1,9 @@
+{"hacc::Document":{
+    font:{"vis::Font":{
+        texture:$.img.ALL
+        width:6 height:12 line_height:12
+    }}
+    {img:{"core::Image":{
+        filename:"modules/rata/res/monospace.png"
+    }}
+}}
