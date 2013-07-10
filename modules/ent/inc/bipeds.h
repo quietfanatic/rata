@@ -37,10 +37,13 @@ namespace ent {
 
          // For movement
         BipedStats stats;
-        int8 direction = 1;  // 1 = right, -1 = left
+        int8 direction = 1;
+        bool crouched = false;
          // Object
         void before_move () override;
         void after_move () override;
+        float Grounded_velocity () override;
+        float Grounded_friction () override;
 
          // For animation
         vis::Model model;  // Must be a humanlike model
@@ -51,18 +54,13 @@ namespace ent {
         ButtonBits buttons;
          // Controllable
         void control_buttons (ButtonBits) override;
+        int8 move_direction () {
+            return !!(buttons & RIGHT_BIT) - !!(buttons & LEFT_BIT);
+        }
 
         Vec Resident_pos () override;
         void Resident_emerge () override;
         void Resident_reclude () override;
-
-         // Primarily for internal use.
-        bool allow_movement ();
-        bool allow_walk ();
-        bool allow_jump ();
-        bool allow_crouch ();
-        bool allow_crawl ();
-        bool allow_airmove ();
 
         Biped ();
         void finish ();

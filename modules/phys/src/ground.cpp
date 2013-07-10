@@ -20,9 +20,10 @@ namespace phys {
                     grdd->ground = (Object*)ground->GetBody()->GetUserData();
                     grdd->ground_fixdef = (FixtureDef*)ground->GetUserData();
                      // Allow walking via friction
-                    contact->SetTangentSpeed(grdd->Grounded_velocity());
-                    float fric = grdd->Grounded_velocity();
-                    if (fric == fric)
+                    float vel = grdd->Grounded_velocity();
+                    float fric = grdd->Grounded_friction();
+                    contact->SetTangentSpeed(vel);
+                    if (fric == fric && fric >= 0)
                         contact->SetFriction(b2MixFriction(fric, ground->GetFriction()));
                 }
             }

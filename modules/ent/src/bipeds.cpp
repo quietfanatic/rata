@@ -13,7 +13,6 @@ namespace ent {
         stats = *def->stats;
     }
 
-     // Draws_Sprites
     void Biped::Sprite_draw () {
         model.apply_skin(def->skin);
         if (ground) {
@@ -48,88 +47,74 @@ namespace ent {
         disappear();
     }
 
-    bool Biped::allow_movement () {
-        if (ground) {
-            allow_walk();
-            allow_jump();
-        }
-        else {
-            allow_airmove();
-        }
-        if (ground)
-            oldxrel = pos().x - ground->pos().x;
-        return true;
-    }
-    bool Biped::allow_walk () {
-        if (ground) {
-            if (buttons & LEFT_BIT && !(buttons & RIGHT_BIT)) {
-                if (vel().x > -(stats.walk_speed - stats.walk_friction / FPS)) {
-                    if (vel().x <= 0) {
-                        direction = -1;
-                        force(Vec(-stats.walk_friction, 0));
-                    }
-                    else {
-                        force(Vec(-stats.skid_friction, 0));
-                    }
-                }
-                else set_vel(Vec(-stats.walk_speed, vel().y));
-            }
-            else if (buttons & RIGHT_BIT) {
-                if (vel().x < (stats.walk_speed - stats.walk_friction / FPS)) {
-                    if (vel().x >= 0) {
-                        direction = 1;
-                        force(Vec(stats.walk_friction, 0));
-                    }
-                    else {
-                        force(Vec(stats.skid_friction, 0));
-                    }
-                }
-                else set_vel(Vec(stats.walk_speed, vel().y));
-            }
-            else {
-                if (vel().x > stats.stop_friction / FPS)
-                    force(Vec(-stats.stop_friction, 0));
-                else if (vel().x < -(stats.stop_friction / FPS))
-                    force(Vec(stats.stop_friction, 0));
-                else
-                    set_vel(Vec(0, vel().y));
-            }
-            return fabs(vel().x) >= 0.01;
-        }
-        else return false;
-    }
-    bool Biped::allow_jump () {
-        if (buttons & JUMP_BIT) {
-             // I'd like to be able to do a mutual push between the ground and
-             //  the character, but Box2D isn't well-equipped for that, because
-             //  it doesn't do shock propagation.
-            impulse(Vec(0, stats.jump_impulse));
-            ground = NULL;
-            return true;
-        }
-        else return false;
+     // Controllable
+    void Biped::control_buttons (ButtonBits bits) {
+        buttons = bits;
     }
 
-    bool Biped::allow_crouch () {
-        return false;
-    }
-    bool Biped::allow_crawl () {
-        return false;
-    }
-    bool Biped::allow_airmove () {
-         // If you were in a 2D platformer, you'd be able to push against the air too.
-        if (buttons & LEFT_BIT && !(buttons & RIGHT_BIT)) {
-            force(Vec(-stats.air_force, 0));
-            return true;
+    void Biped::before_move () {
+         // Change some kinds of movement state
+         // Do not change ground velocity, but do change air velocity
+        if (ground) {
+            switch (move_direction()) {
+                case -1: {
+                    if (vel().x <= 0)
+                        direction = -1;
+                    break;
+                }
+                case 1: {
+                    if (vel().x >= 0)
+                        direction = 1;
+                    break;
+                }
+                default: break;
+            }
+            if (buttons & JUMP_BIT) {
+                 // TODO: jump delay
+                 // We're cheating in that our jump impulse does not depend
+                 //  on the resistance of the ground, because it's hard to
+                 //  calculate that.
+                impulse(Vec(0, stats.jump_impulse));
+                ground->impulse(Vec(0, -stats.jump_impulse));
+                ground = NULL;
+            }
         }
-        else if (buttons & RIGHT_BIT) {
-            force(Vec(stats.air_force, 0));
-            return true;
+        else {  // In the air
+            switch (move_direction()) {
+                case -1: force(Vec(-stats.air_force, 0)); break;
+                case 1: force(Vec(stats.air_force, 0)); break;
+                default: break;
+            }
         }
-        else return false;
+    }
+    float Biped::Grounded_velocity () {
+        switch (move_direction()) {
+            case -1: return -stats.walk_speed;
+            case 1: return stats.walk_speed;
+            default: return 0;
+        }
+    }
+    float Biped::Grounded_friction () {
+        switch (move_direction()) {
+            case -1: {
+                if (vel().x <= 0)
+                    return stats.walk_friction;
+                else
+                    return stats.skid_friction;
+            }
+            case 1: {
+                if (vel().x >= 0)
+                    return stats.walk_friction;
+                else
+                    return stats.skid_friction;
+            }
+            default: return stats.stop_friction;
+        }
     }
      // Ensure we're in the right room and also calculate walk animation.
     void Biped::after_move () {
+         // Clear input before next frame
+        buttons = ButtonBits(0);
         reroom();
         if (ground) {
             if (fabs(vel().x) < 0.01) {
@@ -142,15 +127,6 @@ namespace ent {
         else {
             distance_walked = 0;
         }
-    }
-    void Biped::before_move () {
-        allow_movement();
-        buttons = ButtonBits(0);
-    }
-
-     // Controllable
-    void Biped::control_buttons (ButtonBits bits) {
-        buttons = bits;
     }
 
      // Kinda weird that neither of these has anything

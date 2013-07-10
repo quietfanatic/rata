@@ -13,29 +13,29 @@ namespace ent {
      // Focus adjustment, however, can be pushed at any time.
 
     enum Button {
-        LEFT,
-        RIGHT,
-        DOWN,
-        UP,
-        CROUCH,
-        JUMP,
-        ACTION,  // Nearby
-        EXAMINE,  // Faraway
-        AIM,
-        ATTACK,
+        BTN_LEFT,
+        BTN_RIGHT,
+        BTN_DOWN,
+        BTN_UP,
+        BTN_CROUCH,
+        BTN_JUMP,
+        BTN_ACTION,  // Nearby
+        BTN_EXAMINE,  // Faraway
+        BTN_AIM,
+        BTN_ATTACK,
         N_BUTTONS
     };
     enum ButtonBits {
-        LEFT_BIT = 1<<LEFT,
-        RIGHT_BIT = 1<<RIGHT,
-        DOWN_BIT = 1<<DOWN,
-        UP_BIT = 1<<UP,
-        CROUCH_BIT = 1<<CROUCH,
-        JUMP_BIT = 1<<JUMP,
-        ACTION_BIT = 1<<ACTION,
-        EXAMINE_BIT = 1<<EXAMINE,
-        AIM_BIT = 1<<AIM,
-        ATTACK_BIT = 1<<ATTACK
+        LEFT_BIT = 1<<BTN_LEFT,
+        RIGHT_BIT = 1<<BTN_RIGHT,
+        DOWN_BIT = 1<<BTN_DOWN,
+        UP_BIT = 1<<BTN_UP,
+        CROUCH_BIT = 1<<BTN_CROUCH,
+        JUMP_BIT = 1<<BTN_JUMP,
+        ACTION_BIT = 1<<BTN_ACTION,
+        EXAMINE_BIT = 1<<BTN_EXAMINE,
+        AIM_BIT = 1<<BTN_AIM,
+        ATTACK_BIT = 1<<BTN_ATTACK
     };
 
     struct Controllable {
