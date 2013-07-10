@@ -41,6 +41,8 @@ namespace ent {
         int8 direction = 1;
         bool crouching = false;
         bool crawling = false;
+         // Established by a sensor
+        bool ceiling_low = false;
          // Object
         void before_move () override;
         void after_move () override;
@@ -87,9 +89,13 @@ namespace ent {
         phys::FixtureDef crouch;
         phys::FixtureDef crawl_l;
         phys::FixtureDef crawl_r;
+        phys::FixtureDef ceiling_low;
          // LOL, categorizing things by comparing their addresses
         bool is_primary (phys::FixtureDef* fd) {
             return fd >= &stand && fd <= &crawl_r;
+        }
+        bool is_sensor (phys::FixtureDef* fd) {
+            return fd == &ceiling_low;
         }
     };
 

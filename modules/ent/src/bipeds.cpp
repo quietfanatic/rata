@@ -35,30 +35,35 @@ namespace ent {
          // Change some kinds of movement state
          // Do not change ground velocity, but do change air velocity
         if (ground) {
-            switch (mdir) {
-                case -1: {
-                    if (vel().x <= 0)
-                        direction = -1;
-                    break;
+             // Turn around
+            if (!crawling || !ceiling_low) {
+                switch (mdir) {
+                    case -1: {
+                        if (vel().x <= 0)
+                            direction = -1;
+                        break;
+                    }
+                    case 1: {
+                        if (vel().x >= 0)
+                            direction = 1;
+                        break;
+                    }
+                    default: break;
                 }
-                case 1: {
-                    if (vel().x >= 0)
-                        direction = 1;
-                    break;
-                }
-                default: break;
             }
+             // Decide whether we're crouching
             if (buttons & CROUCH_BIT) {
                 crouching = true;
                 if (mdir)
                     crawling = true;
             }
-            else {
+            else if (!crouching || !ceiling_low) {
                 crouching = false;
                 crawling = false;
             }
-             // For animation
+             // For walking animation
             oldxrel = pos().x - ground->pos().x;
+             // Initiate jump
             if (buttons & JUMP_BIT) {
                  // TODO: jump delay
                 set_vel(Vec(vel().x, stats.jump_speed));
@@ -127,6 +132,15 @@ namespace ent {
         else {
             distance_walked = 0;
         }
+         // Read sensors
+        ceiling_low = false;
+        foreach_contact([&](b2Fixture* mine, b2Fixture* other){
+            auto fd = (phys::FixtureDef*)mine->GetUserData();
+            if (fd == &def->fixdefs->ceiling_low) {
+                fprintf(stderr, "Ceiling is low\n");
+                ceiling_low = true;
+            }
+        });
     }
 
     void Biped::Sprite_draw () {
@@ -187,6 +201,7 @@ HCB_BEGIN(Biped)
     attr("distance_walked", member(&Biped::distance_walked).optional());
     attr("crouching", member(&Biped::crouching).optional());
     attr("crawling", member(&Biped::crawling).optional());
+    attr("ceiling_low", member(&Biped::ceiling_low).optional());
     finish([](Biped& b){
         b.Resident::finish();
         b.finish();
@@ -238,4 +253,5 @@ HCB_BEGIN(BipedFixdefs)
     attr("crouch", member(&BipedFixdefs::crouch));
     attr("crawl_l", member(&BipedFixdefs::crawl_l));
     attr("crawl_r", member(&BipedFixdefs::crawl_r));
+    attr("ceiling_low", member(&BipedFixdefs::ceiling_low));
 HCB_END(BipedFixdefs)
