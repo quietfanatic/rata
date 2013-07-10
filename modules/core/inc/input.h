@@ -16,9 +16,6 @@ namespace core {
         virtual bool hear_key (int keycode, int action) = 0;
 
         Key_Listener (std::string order = "Z") : Ordered(order) { }
-
-        void activate ();
-        void deactivate ();
     };
 
     struct Char_Listener;
@@ -28,9 +25,16 @@ namespace core {
         virtual bool hear_char (int code, int action) = 0;
 
         Char_Listener (std::string order = "Z") : Ordered(order) { }
+    };
 
-        void activate ();
-        void deactivate ();
+    struct Cursor_Trapper;
+    EXTERN_INIT_SAFE(std::vector<Cursor_Trapper*>, cursor_trappers)
+    struct Cursor_Trapper : Ordered<Cursor_Trapper, cursor_trappers> {
+         // Return true if you've handled the key.
+        virtual bool Cursor_Trapper_active () = 0;
+        virtual void Cursor_Trapper_motion (int x, int y) = 0;
+
+        Cursor_Trapper (std::string order = "Z") : Ordered(order) { }
     };
 
 }
