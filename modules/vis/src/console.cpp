@@ -6,6 +6,7 @@
 #include "../../core/inc/opengl.h"
 #include "../inc/graffiti.h"
 #include "../inc/text.h"
+#include "../inc/sprites.h"
 
 namespace vis {
 
@@ -160,6 +161,8 @@ namespace vis {
         }
         void Layer_start () { }
         void Layer_run () {
+             // TODO: this is a little dirty.
+            vis::camera_pos = Vec(10,7.5);
             if (!font || !is_active) return;
              // Darken background
             Vec pts [4];
