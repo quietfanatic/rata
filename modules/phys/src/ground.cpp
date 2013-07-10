@@ -17,13 +17,14 @@ namespace phys {
                     (Object*)grounded->GetBody()->GetUserData()
                 );
                 if (grdd) {
+                    bool had_ground = grdd->ground;
                     grdd->ground = (Object*)ground->GetBody()->GetUserData();
                     grdd->ground_fixdef = (FixtureDef*)ground->GetUserData();
                      // Allow walking via friction
                     float vel = grdd->Grounded_velocity();
                     float fric = grdd->Grounded_friction();
                     contact->SetTangentSpeed(vel);
-                    if (fric == fric && fric >= 0)
+                    if (had_ground && fric == fric && fric >= 0)
                         contact->SetFriction(b2MixFriction(fric, ground->GetFriction()));
                 }
             }
