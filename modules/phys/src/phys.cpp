@@ -205,7 +205,7 @@ namespace phys {
                 }
             }
         }
-    };
+    } phys_debug_layer;
 
 } using namespace phys;
 
