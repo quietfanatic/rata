@@ -245,7 +245,7 @@ namespace geo {
             glUniform1i = core::glproc<void (GLint, GLint)>("glUniform1i");
             glUniform2f = core::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
             glBindVertexArray = core::glproc<void (GLuint)>("glBindVertexArray");
-            program = hacc::File("modules/geo/res/tiles.prog").data().attr("prog");
+            program = hacc::File("modules/vis/res/tiles.prog").data().attr("prog");
             tex = program->require_uniform("tex");
             camera_pos = program->require_uniform("camera_pos");
             model_pos = program->require_uniform("model_pos");
