@@ -1,15 +1,46 @@
 {"hacc::Document":{
     bdf:{"phys::BodyDef":{
-        fixtures:[$.fix]
+        fixtures:[$.fixdefs.stand $.fixdefs.hurt $.fixdefs.crouch $.fixdefs.crawl_l $.fixdefs.crawl_r]
         mass:1
     }}
-    fix:{"phys::FixtureDef":{
-        b2:{ shape:$.shape.b2Shape friction:0 }
-        coll_a:[ground] coll_b:[ground]
+    fixdefs:{"ent::BipedFixdefs":{
+        stand:{
+            b2:{ shape:$.stand_shape.b2Shape friction:0 }
+            coll_a:[ground] coll_b:[ground]
+        }
+        hurt:{
+            b2:{ shape:$.hurt_shape.b2Shape friction:0 is_sensor:true }
+            coll_a:[ground] coll_b:[ground]
+        }
+        crouch:{
+            b2:{ shape:$.crouch_shape.b2Shape friction:0 is_sensor:true }
+            coll_a:[ground] coll_b:[ground]
+        }
+        crawl_l:{
+            b2:{ shape:$.crawl_l_shape.b2Shape friction:0 is_sensor:true }
+            coll_a:[ground] coll_b:[ground]
+        }
+        crawl_r:{
+            b2:{ shape:$.crawl_r_shape.b2Shape friction:0 is_sensor:true }
+            coll_a:[ground] coll_b:[ground]
+        }
     }}
-    shape:{b2PolygonShape:{
-         // 16ths: 0.0625 0.125 0.1875 0.25 0.3125 0.375 0.4375 0.5
+     // 16ths: 0.0625 0.125 0.1875 0.25 0.3125 0.375 0.4375 0.5
+     //        0.5625 0.625 0.6875 0.75 0.8125 0.875 0.9375 1.0
+    stand_shape:{b2PolygonShape:{
         verts:[[-0.15625 0] [0.15625 0] [0.34375 1.0625] [0.34375 1.5] [0 1.6875] [-0.34375 1.5] [-0.34375 1.0625]]
+    }}
+    hurt_shape:{b2PolygonShape:{
+        verts:[[-0.15625 0] [0.15625 0] [0.34375 0.9375] [0.34375 1.375] [0 1.5625] [-0.34375 1.375] [-0.34375 0.9375]]
+    }}
+    crouch_shape:{b2PolygonShape:{
+        verts:[[-0.15625 0] [0.15625 0] [0.34375 0.6875] [0.34375 1.125] [0 1.2125] [-0.34375 1.125] [-0.34375 0.6875]]
+    }}
+    crawl_l_shape:{b2PolygonShape:{
+        verts:[[-0.25 0.875] [-0.625 0.6875] [-0.625 0.25] [-0.375 0] [0.6875 0]]
+    }}
+    crawl_r_shape:{b2PolygonShape:{
+        verts:[[-0.6875 0] [0.375 0] [0.625 0.25] [-0.625 0.6875] [-0.25 0.875]]
     }}
     skel:{"vis::Skel":{
         segs:[

@@ -211,3 +211,12 @@ HCB_BEGIN(BipedPoses)
     attr("hurtbk", member(&BipedPoses::hurtbk));
     attr("laybk", member(&BipedPoses::laybk));
 HCB_END(BipedPoses)
+
+HCB_BEGIN(BipedFixdefs)
+    name("ent::BipedFixdefs");
+    attr("stand", member(&BipedFixdefs::stand));
+    attr("hurt", member(&BipedFixdefs::hurt));
+    attr("crouch", member(&BipedFixdefs::crouch));
+    attr("crawl_l", member(&BipedFixdefs::crawl_l));
+    attr("crawl_r", member(&BipedFixdefs::crawl_r));
+HCB_END(BipedFixdefs)

@@ -25,6 +25,7 @@ namespace ent {
         float jump_speed;
     };
     struct BipedPoses;
+    struct BipedFixdefs;
     struct BipedDef;
 
      // TODO: separate soul from body
@@ -78,6 +79,14 @@ namespace ent {
         vis::Pose crawl2_2;
         vis::Pose hurtbk;
         vis::Pose laybk;
+    };
+
+    struct BipedFixdefs {
+        phys::FixtureDef stand;
+        phys::FixtureDef hurt;
+        phys::FixtureDef crouch;
+        phys::FixtureDef crawl_l;
+        phys::FixtureDef crawl_r;
     };
 
     struct BipedDef {
