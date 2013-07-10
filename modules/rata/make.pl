@@ -10,6 +10,7 @@ workflow {
 
     our @objects = qw<
         tmp/main.o
+        ../core/tmp/commands.o
         ../core/tmp/game.o
         ../core/tmp/images.o
         ../core/tmp/input.o

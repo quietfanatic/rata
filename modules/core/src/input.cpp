@@ -3,6 +3,7 @@
 #include "../inc/input.h"
 #include "../inc/game.h"
 #include "../inc/phases.h"
+#include "../inc/commands.h"
 
 namespace core {
 
@@ -22,6 +23,10 @@ namespace core {
         }
         if (action == GLFW_PRESS) {
             switch (keycode) {
+                case '`': {
+                    command_from_terminal();
+                    break;
+                }
                 case GLFW_KEY_ESC: {
                     stop();
                     break;

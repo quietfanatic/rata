@@ -86,10 +86,10 @@ struct Linkable : Linkable_Link<C, which> {
     Linkable (Links<C, which>& l) { link(l); }
 };
 
-template <class C, Links<C>& all>
+template <class C, Links<C>&(* all)()>
 struct Linked : Linkable<C> {
     Linked (bool a = true) { if (a) activate(); }
-    void activate () { Linkable<C>::link(all); }
+    void activate () { Linkable<C>::link(all()); }
     void deactivate () { Linkable<C>::unlink(); }
 };
 

@@ -8,7 +8,8 @@
 #include "../../util/inc/organization.h"
 
 struct CommandData;
-struct Command : hacc::DPtr<CommandData> {
+struct Command final : hacc::DPtr<const CommandData> {
+    explicit Command (const CommandData* d = NULL) : DPtr(d) { }
     void operator () ();
 };
 
@@ -22,23 +23,30 @@ namespace core {
 
     void print_to_console (std::string);
 
-    struct Receives_Output;
-    extern Links<Receives_Output> output_receivers;
-    struct Receives_Output : Linked<Receives_Output, output_receivers> {
-        virtual void receive_output (std::string) = 0;
+    struct Console;
+    EXTERN_INIT_SAFE(Links<Console>, consoles);
+    struct Console : Linked<Console, consoles> {
+        virtual void Console_print (std::string) = 0;
     };
+
+    std::string no_description_available ();
 
 }
 
 struct Command_Description {
+    hacc::Type type;
+    std::string name;
     std::string description;
-    Type type;
-}
-extern std::unordered_map<std::string, Command_Description> commands;
+};
+
+EXTERN_INIT_SAFE(std::unordered_map<hacc::TypeData* _COMMA Command_Description*>, commands_by_type);
+EXTERN_INIT_SAFE(std::unordered_map<std::string _COMMA Command_Description*>, commands_by_name);
 
 template <class Cmd>
-void command_description (std::string name, std::string desc) {
-    commands.emplace(name, Command_Description{desc, hacc::Type::CppType<Cmd>());
+void new_command (std::string name, std::string desc = core::no_description_available()) {
+    auto cd = new Command_Description{hacc::Type::CppType<Cmd>(), name, desc};
+    commands_by_type().emplace(cd->type.data, cd);
+    commands_by_name().emplace(cd->name, cd);
 }
 
 #endif
