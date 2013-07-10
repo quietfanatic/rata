@@ -2,7 +2,7 @@
 #include "../inc/camera.h"
 #include "../inc/rooms.h"
 #include "../../core/inc/phases.h"
-#include "../../vis/inc/sprites.h"
+#include "../../vis/inc/common.h"
 
 namespace geo {
 
