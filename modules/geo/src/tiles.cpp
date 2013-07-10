@@ -193,10 +193,12 @@ namespace geo {
                 uint py = height - y - 1;
                 uint tx = (tile & 0x3fff) % 16 * 16;
                 uint ty = (tile & 0x3fff) / 16 * 16;
-                vdats[vdat_i][0] = Tilemap_Vertex(px+0, py+0, tx+0, ty+0);
-                vdats[vdat_i][1] = Tilemap_Vertex(px+1, py+0, tx+16, ty+0);
-                vdats[vdat_i][2] = Tilemap_Vertex(px+1, py+1, tx+16, ty+16);
-                vdats[vdat_i][3] = Tilemap_Vertex(px+0, py+1, tx+0, ty+16);
+                bool flipx = !!(tile & 0x8000);
+                bool flipy = !!(tile & 0x4000);
+                vdats[vdat_i][0] = Tilemap_Vertex(px+0, py+0, tx+(16* flipx), ty+(16*!flipy));
+                vdats[vdat_i][1] = Tilemap_Vertex(px+1, py+0, tx+(16*!flipx), ty+(16*!flipy));
+                vdats[vdat_i][2] = Tilemap_Vertex(px+1, py+1, tx+(16*!flipx), ty+(16* flipy));
+                vdats[vdat_i][3] = Tilemap_Vertex(px+0, py+1, tx+(16* flipx), ty+(16* flipy));
                 vdat_i++;
             }
         }
