@@ -51,6 +51,9 @@ namespace core {
     }
 
     struct Input_Phase : core::Phase {
+        bool cursor_trapped = false;
+        int cursor_old_x = 160;  // These values probably don't really matter
+        int cursor_old_y = 120;
          // Input phase doesn't have a name to keep you from locking out your controls.
         Input_Phase () : core::Phase("A.M") { }
         void Phase_start () override {
@@ -60,10 +63,10 @@ namespace core {
             glfwSetWindowCloseCallback(close_cb);
             glfwDisable(GLFW_AUTO_POLL_EVENTS);
         }
-         // Not doing this seems to cause surprising happenings,
-         //  such as the callbacks being called upon exit() when the
-         //  input listeners are partially destructed.
         void Phase_stop () override {
+             // Not doing this seems to cause surprising happenings,
+             //  such as the callbacks being called upon exit() when the
+             //  input listeners are partially destructed.
             glfwSetKeyCallback(NULL);
             glfwSetCharCallback(NULL);
             glfwSetMousePosCallback(NULL);
@@ -72,16 +75,22 @@ namespace core {
         void Phase_run () override {
             for (auto ct : cursor_listeners()) {
                 if (ct->Cursor_Listener_active()) {
-                    if (ct->Cursor_Listener_trap()) {
-                        glfwDisable(GLFW_MOUSE_CURSOR);
-                        glfwSetMousePos(0, 0);
-                    }
-                    else {
-                        glfwEnable(GLFW_MOUSE_CURSOR);
+                    if (ct->Cursor_Listener_trap() != cursor_trapped) {
+                        cursor_trapped = !cursor_trapped;
+                        if (cursor_trapped) {
+                            glfwGetMousePos(&cursor_old_x, &cursor_old_y);
+                            glfwDisable(GLFW_MOUSE_CURSOR);
+                        }
+                        else {
+                            glfwEnable(GLFW_MOUSE_CURSOR);
+                            glfwSetMousePos(cursor_old_x, cursor_old_y);
+                        }
                     }
                     break;
                 }
             }
+            if (cursor_trapped)
+                glfwSetMousePos(0, 0);
             glfwPollEvents();
         }
     } input_phase;
