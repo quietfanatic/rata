@@ -5,6 +5,7 @@
 lib
 /res
 img
+/save
 
 # intermediates
 tmp

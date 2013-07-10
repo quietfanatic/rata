@@ -2,11 +2,14 @@
 #include "../../core/inc/game.h"
 #include "../../hacc/inc/files.h"
 
+static std::string initial_state = "modules/rata/test_state.hacc";
+static std::string stop_state = "save/last_stop.hacc";
+
 int main () {
-    core::load("modules/rata/test_state.hacc");
+    core::load(initial_state);
     core::start();
-    hacc::File("modules/rata/test_state.hacc").rename("modules/rata/test_state_out.hacc");
-    hacc::save(hacc::File("modules/rata/test_state_out.hacc"));
+    hacc::File(initial_state).rename(stop_state);
+    hacc::save(hacc::File(stop_state));
     fprintf(stderr, "Quit successfully\n");
 }
 
