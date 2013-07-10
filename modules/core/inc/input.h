@@ -27,14 +27,15 @@ namespace core {
         Char_Listener (std::string order = "Z") : Ordered(order) { }
     };
 
-    struct Cursor_Trapper;
-    EXTERN_INIT_SAFE(std::vector<Cursor_Trapper*>, cursor_trappers)
-    struct Cursor_Trapper : Ordered<Cursor_Trapper, cursor_trappers> {
+    struct Cursor_Listener;
+    EXTERN_INIT_SAFE(std::vector<Cursor_Listener*>, cursor_listeners)
+    struct Cursor_Listener : Ordered<Cursor_Listener, cursor_listeners> {
          // Return true if you've handled the key.
-        virtual bool Cursor_Trapper_active () = 0;
-        virtual void Cursor_Trapper_motion (int x, int y) = 0;
+        virtual bool Cursor_Listener_active () = 0;
+        virtual bool Cursor_Listener_trap () { return false; }
+        virtual void Cursor_Listener_motion (int x, int y) = 0;
 
-        Cursor_Trapper (std::string order = "Z") : Ordered(order) { }
+        Cursor_Listener (std::string order = "Z") : Ordered(order) { }
     };
 
 }
