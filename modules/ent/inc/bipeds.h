@@ -20,9 +20,9 @@ namespace ent {
         float crawl_speed;
         float stop_friction;
         float skid_friction;
-        float air_force;
+        float air_friction;
         float air_speed;
-        float jump_impulse;
+        float jump_speed;
     };
     struct BipedPoses;
     struct BipedDef;

@@ -15,8 +15,8 @@
         crawl_speed: 2.0
         stop_friction: 1.0
         skid_friction: 1.0
-        air_force: 0.2
+        air_friction: 0.2
         air_speed: 4.0
-        jump_impulse: 8.0
+        jump_speed: 16.0
     }}
 }}

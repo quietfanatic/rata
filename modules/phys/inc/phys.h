@@ -31,6 +31,7 @@ namespace phys {
     };
     struct BodyDef {
         b2BodyType type = b2_dynamicBody;
+        float mass = NAN;
         float damping = 0;
         float gravity_scale = 1;
         std::vector<FixtureDef*> fixtures;

@@ -51,19 +51,17 @@ namespace ent {
             oldxrel = pos().x - ground->pos().x;
             if (buttons & JUMP_BIT) {
                  // TODO: jump delay
-                 // We're cheating in that our jump impulse does not depend
-                 //  on the resistance of the ground, because it's hard to
-                 //  calculate that.
-                impulse(Vec(0, stats.jump_impulse));
-                ground->impulse(Vec(0, -stats.jump_impulse));
+                set_vel(Vec(vel().x, stats.jump_speed));
                 ground = NULL;
             }
         }
         else {  // In the air
-            switch (move_direction()) {
-                case -1: force(Vec(-stats.air_force, 0)); break;
-                case 1: force(Vec(stats.air_force, 0)); break;
-                default: break;
+            int8 dir = move_direction();
+            if (vel().x * dir <= stats.air_speed - stats.air_friction) {
+                set_vel(Vec(vel().x + stats.air_friction * dir, vel().y));
+            }
+            else if (vel().x * dir <= stats.air_speed) {
+                set_vel(Vec(stats.air_speed * dir, vel().y));
             }
         }
     }
@@ -153,9 +151,9 @@ HCB_BEGIN(BipedStats)
     attr("crawl_speed", member(&BipedStats::crawl_speed).optional());
     attr("stop_friction", member(&BipedStats::stop_friction).optional());
     attr("skid_friction", member(&BipedStats::skid_friction).optional());
-    attr("air_force", member(&BipedStats::air_force).optional());
+    attr("air_friction", member(&BipedStats::air_friction).optional());
     attr("air_speed", member(&BipedStats::air_speed).optional());
-    attr("jump_impulse", member(&BipedStats::jump_impulse).optional());
+    attr("jump_speed", member(&BipedStats::jump_speed).optional());
 HCB_END(BipedStats)
 
 HCB_BEGIN(BipedDef)

@@ -102,6 +102,10 @@ namespace phys {
         b2body->SetType(bdf->type);
         b2body->SetLinearDamping(bdf->damping);
         b2body->SetGravityScale(bdf->gravity_scale);
+        if (bdf->mass == bdf->mass) {
+            b2MassData md {bdf->mass, Vec(0, 0), 0};
+            b2body->SetMassData(&md);
+        }
         for (auto fix : bdf->fixtures) {
             add_fixture(fix);
         }
@@ -291,6 +295,7 @@ HCB_END(b2BodyType)
 HCB_BEGIN(BodyDef)
     name("phys::BodyDef");
     attr("type", member(&BodyDef::type).optional());
+    attr("mass", member(&BodyDef::mass).optional());
     attr("damping", member(&BodyDef::damping).optional());
     attr("gravity_scale", member(&BodyDef::gravity_scale).optional());
     attr("fixtures", member(&BodyDef::fixtures));
