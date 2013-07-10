@@ -13,28 +13,6 @@ namespace ent {
         stats = *def->stats;
     }
 
-    void Biped::Sprite_draw () {
-        model.apply_skin(def->skin);
-        if (ground) {
-            if (fabs(vel().x) < 0.01) {
-                model.apply_pose(&def->poses->stand);
-            }
-            else {
-                float stepdist = fmod(distance_walked, 2.0);
-                if (stepdist < 0.5)
-                    model.apply_pose(&def->poses->walk1);
-                else if (stepdist >= 1 && stepdist < 1.5)
-                    model.apply_pose(&def->poses->walk2);
-                else
-                    model.apply_pose(&def->poses->stand);
-            }
-        }
-        else {
-            model.apply_pose(&def->poses->walk1);
-        }
-        model.draw(pos(), direction < 0);
-    }
-
     Vec Biped::Resident_pos () {
         return pos();
     }
@@ -90,11 +68,7 @@ namespace ent {
         }
     }
     float Biped::Grounded_velocity () {
-        switch (move_direction()) {
-            case -1: return -stats.run_speed;
-            case 1: return stats.run_speed;
-            default: return 0;
-        }
+        return stats.run_speed * move_direction();
     }
     float Biped::Grounded_friction () {
         int8 dir = move_direction();
@@ -126,6 +100,28 @@ namespace ent {
         }
     }
 
+    void Biped::Sprite_draw () {
+        model.apply_skin(def->skin);
+        if (ground) {
+            if (fabs(vel().x) < 0.01) {
+                model.apply_pose(&def->poses->stand);
+            }
+            else {
+                float stepdist = fmod(distance_walked, 2.0);
+                if (stepdist < 0.5)
+                    model.apply_pose(&def->poses->walk1);
+                else if (stepdist >= 1 && stepdist < 1.5)
+                    model.apply_pose(&def->poses->walk2);
+                else
+                    model.apply_pose(&def->poses->stand);
+            }
+        }
+        else {
+            model.apply_pose(&def->poses->walk1);
+        }
+        model.draw(pos(), direction < 0);
+    }
+
      // Kinda weird that neither of these has anything
     Biped::Biped () { }
     void Biped::finish () { }
@@ -141,7 +137,6 @@ HCB_BEGIN(Biped)
     attr("Controllable", base<ent::Controllable>().optional());
     attr("direction", member(&Biped::direction).optional());
     attr("distance_walked", member(&Biped::distance_walked).optional());
-    attr("oldxrel", member(&Biped::oldxrel).optional());
     finish([](Biped& b){
         b.Resident::finish();
         b.finish();
