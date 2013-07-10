@@ -69,6 +69,8 @@ namespace ent {
                 }
                 default: break;
             }
+             // For animation
+            oldxrel = pos().x - ground->pos().x;
             if (buttons & JUMP_BIT) {
                  // TODO: jump delay
                  // We're cheating in that our jump impulse does not depend
