@@ -12,7 +12,7 @@ namespace vis {
 
     using namespace core;
 
-    struct Console : Layer, Key_Listener, Char_Listener, core::Console {
+    struct Console : Layer, Key_Listener, Char_Listener, Cursor_Listener, core::Console {
         bool is_active = false;
         std::string contents = console_help();
         std::string cli = "";
@@ -26,7 +26,7 @@ namespace vis {
         Font* font = NULL;
         char trigger = '`';
 
-        Console () : Layer("Z.M"), Key_Listener("A"), Char_Listener("A") { }
+        Console () : Layer("Z.M"), Key_Listener("A"), Char_Listener("A"), Cursor_Listener("A") { }
 
         void Console_print (std::string message) {
             contents += message;
@@ -153,6 +153,11 @@ namespace vis {
             }
             return true;
         }
+         // We only implement Cursor_Listener in order to cancel any cursor
+         //  trap that might be happening.
+        bool Cursor_Listener_active () { return is_active; }
+        bool Cursor_Listener_trap () { return false; }
+        void Cursor_Listener_motion (int x, int y) { }
         void enter_console () {
             is_active = true;
         }

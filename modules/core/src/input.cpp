@@ -79,6 +79,7 @@ namespace core {
                     else {
                         glfwEnable(GLFW_MOUSE_CURSOR);
                     }
+                    break;
                 }
             }
             glfwPollEvents();
