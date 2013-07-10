@@ -137,7 +137,6 @@ namespace ent {
         foreach_contact([&](b2Fixture* mine, b2Fixture* other){
             auto fd = (phys::FixtureDef*)mine->GetUserData();
             if (fd == &def->fixdefs->ceiling_low) {
-                fprintf(stderr, "Ceiling is low\n");
                 ceiling_low = true;
             }
         });
