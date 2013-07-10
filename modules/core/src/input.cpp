@@ -60,7 +60,9 @@ namespace core {
             glfwSetWindowCloseCallback(close_cb);
             glfwDisable(GLFW_AUTO_POLL_EVENTS);
         }
-         // Not doing this seems to cause surprising happenings
+         // Not doing this seems to cause surprising happenings,
+         //  such as the callbacks being called upon exit() when the
+         //  input listeners are partially destructed.
         void Phase_stop () override {
             glfwSetKeyCallback(NULL);
             glfwSetCharCallback(NULL);

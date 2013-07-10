@@ -21,6 +21,12 @@ namespace ent {
         }
         character->control_buttons(ButtonBits(buttons));
     }
+    bool Player::Cursor_Listener_active () { return character; }
+    bool Player::Cursor_Listener_trap () { return true; }
+    void Player::Cursor_Listener_motion (int x, int y) {
+        if (!character) return;
+        character->move_focus(Vec(x*PX, y*PX));
+    }
 
     Player::Player () {
          // Default mappings
