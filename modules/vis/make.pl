@@ -10,10 +10,7 @@ workflow {
 
     include '../..';
 
-    cppc_rule('tmp/sprites.o', 'src/sprites.cpp');
-    cppc_rule('tmp/models.o', 'src/models.cpp');
-    cppc_rule('tmp/graffiti.o', 'src/graffiti.cpp');
-    cppc_rule('tmp/text.o', 'src/text.cpp');
+    objects(qw(sprites models graffiti text console));
 
     clean_rule(glob 'tmp/*');
 

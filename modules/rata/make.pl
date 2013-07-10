@@ -33,6 +33,7 @@ workflow {
         ../hacc/tmp/types.o
         ../phys/tmp/ground.o
         ../phys/tmp/phys.o
+        ../vis/tmp/console.o
         ../vis/tmp/graffiti.o
         ../vis/tmp/models.o
         ../vis/tmp/sprites.o

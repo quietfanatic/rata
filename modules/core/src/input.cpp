@@ -23,7 +23,7 @@ namespace core {
         }
         if (action == GLFW_PRESS) {
             switch (keycode) {
-                case '`': {
+                case '~': {
                     command_from_terminal();
                     break;
                 }

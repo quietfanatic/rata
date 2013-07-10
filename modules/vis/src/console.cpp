@@ -11,7 +11,7 @@ namespace vis {
 
     using namespace core;
 
-    struct Console : Stateful, Layer, Key_Listener, Char_Listener, Receives_Output {
+    struct Console : Layer, Key_Listener, Char_Listener, core::Console {
         bool is_active = false;
         std::string contents = console_help();
         std::string cli = "";
@@ -27,7 +27,7 @@ namespace vis {
 
         Console () : Layer("Z.M"), Key_Listener("A"), Char_Listener("A") { }
 
-        void receive_output (std::string message) {
+        void Console_print (std::string message) {
             contents += message;
         }
 
@@ -158,8 +158,8 @@ namespace vis {
         void exit_console () {
             is_active = false;
         }
-        void start () { }
-        void run () {
+        void Layer_start () { }
+        void Layer_run () {
             if (!font || !is_active) return;
              // Darken background
             Vec pts [4];
@@ -172,7 +172,7 @@ namespace vis {
              // Draw console
             Vec cli_size = draw_text(cli + " ", font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, 20);
             Vec cursor_pos = get_glyph_pos(cli, font, cli_pos, Vec(1, -1), 20);
-            if (core::frame_number % 40 < 20) {
+            if (core::frames_drawn % 40 < 20) {
                 draw_text("_", font, Vec(1*PX + cursor_pos.x, cli_size.y - cursor_pos.y - font->line_height*PX - 2*PX), Vec(1, -1), 0xffffffff);
             }
             draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, 20);
@@ -180,10 +180,9 @@ namespace vis {
     };
 } using namespace vis;
 
-HCB_BEGIN(Console)
-    type_name("vis::Console");
-    base<core::Stateful>("Console");
-    attr("font", member(&Console::font)(required));
-    attr("trigger", member(&Console::trigger)(optional));
-HCB_END(Console)
+HCB_BEGIN(vis::Console)
+    name("vis::Console");
+    attr("font", member(&vis::Console::font));
+    attr("trigger", member(&vis::Console::trigger).optional());
+HCB_END(vis::Console)
 

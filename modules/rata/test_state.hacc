@@ -11,4 +11,7 @@
     player:{"ent::Player":{
         character:$.rata.Controllable
     }}
+    console:{"vis::Console":{
+        font:$("modules/rata/res/font-small.hacc").font
+    }}
 }}
