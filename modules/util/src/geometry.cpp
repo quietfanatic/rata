@@ -7,10 +7,10 @@ namespace util {
         return d1 > PI ? 2*PI - d1 : d1;
     }
 
-    Vec constrain (Vec p, Rect& r) {
+    Vec constrain (Vec p, const Rect& r) {
         return Vec(
             p.x < r.l ? r.l : p.x > r.r ? r.r : p.x,
-            p.y < r.b ? r.b : p.x > r.t ? r.t : p.y
+            p.y < r.b ? r.b : p.y > r.t ? r.t : p.y
         );
     }
 

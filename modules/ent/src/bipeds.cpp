@@ -29,11 +29,7 @@ namespace ent {
         buttons = bits;
     }
     void Biped::Controllable_move_focus (Vec diff) {
-        focus += diff;
-        if (focus.x > 18) focus.x = 18;
-        else if (focus.x < -18) focus.x = -18;
-        if (focus.y > 13) focus.y = 13;
-        else if (focus.y < -13) focus.y = -13;
+        focus = constrain(focus + diff, Rect(-18, -13, 18, 13));
     }
     Vec Biped::Controllable_get_focus () {
         return focus + pos();
