@@ -42,12 +42,6 @@ namespace core {
         }
     }
     static void GLFWCALL cursor_cb (int x, int y) {
-        for (auto ct : cursor_listeners()) {
-            if (ct->Cursor_Listener_active()) {
-                ct->Cursor_Listener_motion(x, y);
-                break;
-            }
-        }
     }
 
     struct Input_Phase : core::Phase {
@@ -59,7 +53,6 @@ namespace core {
         void Phase_start () override {
             glfwSetKeyCallback(key_cb);
             glfwSetCharCallback(char_cb);
-            glfwSetMousePosCallback(cursor_cb);
             glfwSetWindowCloseCallback(close_cb);
             glfwDisable(GLFW_AUTO_POLL_EVENTS);
         }
@@ -69,7 +62,6 @@ namespace core {
              //  input listeners are partially destructed.
             glfwSetKeyCallback(NULL);
             glfwSetCharCallback(NULL);
-            glfwSetMousePosCallback(NULL);
             glfwSetWindowCloseCallback(NULL);
         }
         void Phase_run () override {
@@ -92,6 +84,16 @@ namespace core {
             if (cursor_trapped)
                 glfwSetMousePos(0, 0);
             glfwPollEvents();
+            int x, y;
+            glfwGetMousePos(&x, &y);
+            if (!cursor_trapped || (x != 0 && y != 0)) {
+                for (auto ct : cursor_listeners()) {
+                    if (ct->Cursor_Listener_active()) {
+                        ct->Cursor_Listener_motion(x+1, -(y+1));
+                        break;
+                    }
+                }
+            }
         }
     } input_phase;
 
