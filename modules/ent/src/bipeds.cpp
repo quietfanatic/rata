@@ -36,7 +36,7 @@ namespace ent {
         else if (focus.y < -13) focus.y = -13;
     }
     Vec Biped::Controllable_get_focus () {
-        return focus;
+        return focus + pos();
     }
 
     void Biped::before_move () {
