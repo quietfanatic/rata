@@ -40,7 +40,7 @@ workflow {
         ../vis/tmp/sprites.o
         ../vis/tmp/text.o
         ../util/tmp/debug.o
-        ../util/tmp/math.o
+        ../util/tmp/geometry.o
         ../../lib/libBox2D.a
     >;
     our @libs = qw(-lgc -lGL -lglfw -lSOIL);

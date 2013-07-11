@@ -3,10 +3,11 @@
 
 #include <stdexcept>
 #include "../../hacc/inc/haccable_standard.h"
-#include "../../util/inc/Vec.h"
+#include "../../util/inc/geometry.h"
 #include "sprites.h"
 
 namespace vis {
+    using namespace util;
 
      // Static things
     struct Pose;

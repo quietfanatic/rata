@@ -3,10 +3,11 @@
 
 #include <GL/glfw.h>
 #include "../../util/inc/honestly.h"
-#include "../../util/inc/Vec.h"
+#include "../../util/inc/geometry.h"
 #include "../../util/inc/organization.h"
 
 namespace core {
+    using namespace util;
 
     bool key_pressed (int keycode);
 

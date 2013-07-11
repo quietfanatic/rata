@@ -1,14 +1,14 @@
 #ifndef HAVE_VIS_COMMON_H
 #define HAVE_VIS_COMMON_H
 
-#include "../../util/inc/Vec.h"
-#include "../../util/inc/Rect.h"
+#include "../../util/inc/geometry.h"
 
  // The vis namespace handles all rendering (though not all opengl
  //  integration; some of that's in core).
  // TODO: move tile rendering into vis
 
 namespace vis {
+    using namespace util;
 
      // Setting this alters all rendering.
     extern Vec camera_pos;

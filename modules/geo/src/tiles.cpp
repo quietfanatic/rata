@@ -3,13 +3,14 @@
 #include <sstream>
 #include "../inc/tiles.h"
 #include "../../hacc/inc/everything.h"
-#include "../../util/inc/math.h"
+#include "../../util/inc/geometry.h"
 #include "../../util/inc/debug.h"
 #include "../../core/inc/opengl.h"
 #include "../../core/inc/phases.h"
 #include "../../vis/inc/sprites.h"
 
 namespace geo {
+    using namespace util;
 
     static phys::BodyDef*& tilemap_bdf () {
         static phys::BodyDef* r = hacc::File("modules/geo/res/tilemap.bdf").data();
@@ -72,7 +73,7 @@ namespace geo {
         TileEdge* ne = te->next;
         if (ne == te)
             throw std::logic_error("The tile edge merging algorithm went wrong somewhere.\n");
-        float angle = ang_diff((te->v2 - te->v1).ang(), (ne->v2 - ne->v1).ang());
+        float angle = angle_diff((te->v2 - te->v1).ang(), (ne->v2 - ne->v1).ang());
         if (angle < 0.01 && te->def == ne->def) {
              // merge edges only with the same nature
             te->next = ne->next;

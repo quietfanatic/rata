@@ -1,9 +1,10 @@
 #ifndef HAVE_VIS_GRAFFITI_H
 #define HAVE_VIS_GRAFFITI_H
 
-#include "../../util/inc/Vec.h"
+#include "../../util/inc/geometry.h"
 
 namespace vis {
+    using namespace util;
 
      // Do this after graffiti layer has run
     void draw_line (Vec a, Vec b, uint32 color, float width = 1);

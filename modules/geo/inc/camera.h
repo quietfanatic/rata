@@ -1,10 +1,10 @@
 #ifndef HAVE_GEO_CAMERA_H
 #define HAVE_GEO_CAMERA_H
 
-#include "../../util/inc/Vec.h"
-#include "../../util/inc/Rect.h"
+#include "../../util/inc/geometry.h"
 
 namespace geo {
+    using namespace util;
 
     Vec get_camera_pos ();
      // Make the camera jump straight to its ideal position.

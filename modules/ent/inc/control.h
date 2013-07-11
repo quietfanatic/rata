@@ -1,11 +1,12 @@
 #ifndef HAVE_ENT_CONTROL_H
 #define HAVE_ENT_CONTROL_H
 
-#include "../../util/inc/Vec.h"
+#include "../../util/inc/geometry.h"
 #include "../../core/inc/input.h"
 #include "../../vis/inc/sprites.h"
 
 namespace ent {
+    using namespace util;
 
      // Buttons are sent from a Controller to a Controllable every frame.
      // If a Controllable does not receive input, it should stop all

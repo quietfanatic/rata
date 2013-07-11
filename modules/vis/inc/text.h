@@ -2,11 +2,12 @@
 #define HAVE_VIS_TEXT_H
 
 #include <string>
-#include "../../util/inc/Vec.h"
+#include "../../util/inc/geometry.h"
 #include "../../util/inc/organization.h"
 #include "../../core/inc/images.h"
 
 namespace vis {
+    using namespace util;
 
      // A font's image should be composed of 16x16 tiles.
     struct Font {

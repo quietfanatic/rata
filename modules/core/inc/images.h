@@ -2,9 +2,10 @@
 #define HAVE_CORE_IMAGES_H
 
 #include <string>
-#include "../../util/inc/Vec.h"
+#include "../../util/inc/geometry.h"
 
 namespace core {
+    using namespace util;
 
      // All positions of these structures are in PX
     struct Texture;

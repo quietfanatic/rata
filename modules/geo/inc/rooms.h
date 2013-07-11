@@ -1,11 +1,11 @@
 #ifndef HAVE_GEO_ROOMS_H
 #define HAVE_GEO_ROOMS_H
 
-#include "../../util/inc/Vec.h"
-#include "../../util/inc/Rect.h"
+#include "../../util/inc/geometry.h"
 #include "../../util/inc/organization.h"
 
 namespace geo {
+    using namespace util;
 
      // A resident is something that belongs to a room.
     struct Resident;

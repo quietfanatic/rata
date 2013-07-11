@@ -3,9 +3,10 @@
 
 #include <Box2D/Box2D.h>
 #include "../../core/inc/phases.h"
-#include "../../util/inc/Vec.h"
+#include "../../util/inc/geometry.h"
 
 namespace phys {
+    using namespace util;
 
     struct Object;
 
