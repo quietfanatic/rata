@@ -7,7 +7,9 @@
 namespace ent {
 
     void Player::Sprite_draw () {
-         // TODO: draw cursor
+        if (character && cursor_tex && cursor_frame) {
+            draw_sprite(cursor_frame, cursor_tex, character->Controllable_get_focus());
+        }
     }
     void Player::Mind_think () {
         if (!character) return;
@@ -71,6 +73,7 @@ HCB_BEGIN(Player)
     name("ent::Player");
     attr("character", member(&Player::character));
     attr("cursor_tex", member(&Player::cursor_tex).optional());
+    attr("cursor_frame", member(&Player::cursor_frame).optional());
     attr("map_left", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_LEFT]; }).optional());
     attr("map_right", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_RIGHT]; }).optional());
     attr("map_down", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_DOWN]; }).optional());

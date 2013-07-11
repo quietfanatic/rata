@@ -10,6 +10,8 @@
     }}
     player:{"ent::Player":{
         character:$.rata.Controllable
+        cursor_tex:$("modules/ent/res/cursor.hacc").img.ALL
+        cursor_frame:$("modules/ent/res/cursor.hacc").layout.normal
     }}
     console:{"vis::Console":{
         font:$("modules/shell/res/font-small.hacc").font
