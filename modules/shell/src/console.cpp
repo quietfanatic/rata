@@ -7,9 +7,10 @@
 #include "../../vis/inc/graffiti.h"
 #include "../../vis/inc/text.h"
 
-namespace vis {
+namespace shell {
 
     using namespace core;
+    using namespace vis;
 
     struct Console : Layer, Key_Listener, Char_Listener, Cursor_Listener, core::Console {
         bool is_active = false;
@@ -185,11 +186,11 @@ namespace vis {
             draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, 20);
         }
     };
-} using namespace vis;
+} using namespace shell;
 
-HCB_BEGIN(vis::Console)
-    name("vis::Console");
-    attr("font", member(&vis::Console::font));
-    attr("trigger", member(&vis::Console::trigger).optional());
-HCB_END(vis::Console)
+HCB_BEGIN(shell::Console)
+    name("shell::Console");
+    attr("font", member(&shell::Console::font));
+    attr("trigger", member(&shell::Console::trigger).optional());
+HCB_END(shell::Console)
 
