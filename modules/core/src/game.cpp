@@ -17,6 +17,7 @@ namespace core {
      // Scheduled operations
     static std::vector<std::function<void ()>> ops;
     static bool to_stop = false;
+    static uint window_scale = 3;
 
     void init () {
         static bool initialized = false;
@@ -51,7 +52,9 @@ namespace core {
             8, 0,  // depth stencil
             GLFW_WINDOW
         );
+        window_scale = scale;
     }
+    uint get_window_scale () { return window_scale; }
     
     void start () {
         init();

@@ -25,9 +25,9 @@ namespace ent {
     }
     bool Player::Cursor_Listener_active () { return character; }
     bool Player::Cursor_Listener_trap () { return true; }
-    void Player::Cursor_Listener_motion (int x, int y) {
+    void Player::Cursor_Listener_motion (Vec rel) {
         if (!character) return;
-        character->Controllable_move_focus(Vec(x*PX, y*PX));
+        character->Controllable_move_focus(rel);
     }
 
     Player::Player () {

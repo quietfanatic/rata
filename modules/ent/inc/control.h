@@ -69,7 +69,7 @@ namespace ent {
         void Mind_think () override;  // Read input and send control to character
         bool Cursor_Listener_active () override;
         bool Cursor_Listener_trap () override;
-        void Cursor_Listener_motion (int, int) override;
+        void Cursor_Listener_motion (Vec) override;
 
         Player ();
         void finish ();

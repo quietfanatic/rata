@@ -18,6 +18,7 @@ namespace core {
     void unload (std::string filename);
     void save (std::string filename);
     void set_video (uint scale);
+    uint get_window_scale ();
     void start ();
     void stop ();
      // Immediately close the window and exit the program.  Does not return.

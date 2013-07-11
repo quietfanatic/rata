@@ -41,8 +41,6 @@ namespace core {
             if (cl->hear_char(code, action)) return;
         }
     }
-    static void GLFWCALL cursor_cb (int x, int y) {
-    }
 
     struct Input_Phase : core::Phase {
         bool cursor_trapped = false;
@@ -89,7 +87,7 @@ namespace core {
             if (!cursor_trapped || (x != 0 && y != 0)) {
                 for (auto ct : cursor_listeners()) {
                     if (ct->Cursor_Listener_active()) {
-                        ct->Cursor_Listener_motion(x+1, -(y+1));
+                        ct->Cursor_Listener_motion(Vec(x+1, -(y+1))*PX / get_window_scale());
                         break;
                     }
                 }

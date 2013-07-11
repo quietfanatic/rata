@@ -3,6 +3,7 @@
 
 #include <GL/glfw.h>
 #include "../../util/inc/honestly.h"
+#include "../../util/inc/Vec.h"
 #include "../../util/inc/organization.h"
 
 namespace core {
@@ -33,7 +34,10 @@ namespace core {
          // Return true if you've handled the key.
         virtual bool Cursor_Listener_active () = 0;
         virtual bool Cursor_Listener_trap () { return false; }
-        virtual void Cursor_Listener_motion (int x, int y) = 0;
+         // Block coordinates
+         //  - if trapped, world coordinates, relative to last frame
+         //  - else window coordinates, relative to lower-left corner
+        virtual void Cursor_Listener_motion (Vec) = 0;
 
         Cursor_Listener (std::string order = "Z") : Ordered(order) { }
     };
