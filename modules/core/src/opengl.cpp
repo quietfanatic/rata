@@ -3,15 +3,6 @@
 
 namespace core {
 
-    void* g_glproc (const char* name) {
-        void* r = glfwGetProcAddress(name);
-        if (!r) {
-            fprintf(stderr, "No GL proc was found named %s\n", name);
-            throw std::logic_error("Missing GL procedure.");
-        }
-        return r;
-    }
-
     GLenum diagnose_opengl (std::string when) {
         GLenum err = glGetError();
         if (err)
@@ -36,14 +27,6 @@ namespace core {
     }
 
     void Shader::compile () {
-
-        static auto glCreateShader = glproc<GLuint (GLenum)>("glCreateShader");
-        static auto glShaderSource = glproc<void (GLuint, GLsizei, const GLchar**, const GLint*)>("glShaderSource");
-        static auto glCompileShader = glproc<void (GLuint)>("glCompileShader");
-        static auto glGetShaderiv = glproc<void (GLuint, GLenum, GLint*)>("glGetShaderiv");
-        static auto glGetShaderInfoLog = glproc<void (GLuint, GLsizei, GLsizei*, GLchar*)>("glGetShaderInfoLog");
-        static auto glDeleteShader = glproc<void (GLuint)>("glDeleteShader");
-
         GLuint newid = glCreateShader(type);
         if (!newid) {
             diagnose_opengl("after glCreateShader");
@@ -77,21 +60,10 @@ namespace core {
     }
 
     Shader::~Shader () {
-        static auto glDeleteShader = glproc<void (GLuint)>("glDeleteShader");
         if (glid) glDeleteShader(glid);
     }
 
     void Program::link () {
-
-        static auto glCreateProgram = glproc<GLuint ()>("glCreateProgram");
-        static auto glAttachShader = glproc<void (GLuint, GLuint)>("glAttachShader");
-        static auto glBindAttribLocation = glproc<void (GLuint, GLuint, const GLchar*)>("glBindAttribLocation");
-        static auto glLinkProgram = glproc<void (GLuint)>("glLinkProgram");
-        static auto glGetProgramiv = glproc<void (GLuint, GLenum, GLint*)>("glGetProgramiv");
-        static auto glGetProgramInfoLog = glproc<void (GLuint, GLsizei, GLsizei*, GLchar*)>("glGetProgramInfoLog");
-        //static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
-        static auto glDeleteProgram = glproc<void (GLuint)>("glDeleteProgram");
-
         for (Shader* s : shaders) {
             if (s->glid == 0)
                 s->compile();
@@ -135,12 +107,10 @@ namespace core {
     }
 
     Program::~Program () {
-        static auto glDeleteProgram = glproc<void (GLuint)>("glDeleteProgram");
         if (glid) glDeleteProgram(glid);
     }
 
     int Program::require_uniform (const char* uni) {
-        static auto glGetUniformLocation = glproc<GLint (GLuint, const GLchar*)>("glGetUniformLocation");
         int r = glGetUniformLocation(glid, uni);
         if (r == -1) {
             fprintf(stderr, "Program %s has no uniform named %s\n", name.c_str(), uni);
@@ -172,3 +142,61 @@ HCB_BEGIN(Program)
     finish([](Program& p){ p.link(); });
 HCB_END(Program)
 
+template <class C> using P = C*;
+ // This is a lazy-loaded thunk that replaces itself with an OpenGL function
+template <class Ret, class... Args>
+struct glthunk1 {
+    template <Ret(** fp )(Args...), const char** name>
+    static Ret glthunk2 (Args... args) {
+        void* func = glfwGetProcAddress(*name);
+        if (!func)
+            throw hacc::X::Error("OpenGL procedure not found: " + std::string(*name));
+        *(void**)fp = func;
+         // Can't use std::forward, but these are all C types anyway
+        return (**fp)(args...);
+    }
+};
+#define OPENGL_THUNK(name, Ret, ...) \
+    static const char* name##_name = #name; \
+    Ret (* name )(__VA_ARGS__) = &glthunk1<Ret, __VA_ARGS__>::glthunk2<&name, &name##_name>;
+#define OPENGL_THUNK0(name, Ret) \
+    static const char* name##_name = #name; \
+    Ret (* name )() = &glthunk1<Ret>::glthunk2<&name, &name##_name>;
+
+OPENGL_THUNK(glGenBuffers, void, GLsizei, GLuint*)
+OPENGL_THUNK(glBindBuffer, void, GLenum, GLuint)
+OPENGL_THUNK(glBufferData, void, GLenum, GLsizeiptr, const GLvoid*, GLenum)
+OPENGL_THUNK(glDeleteBuffers, void, GLsizei, const GLuint*)
+
+OPENGL_THUNK(glGenVertexArrays, void, GLsizei, GLuint*)
+OPENGL_THUNK(glBindVertexArray, void, GLuint)
+OPENGL_THUNK(glEnableVertexAttribArray, void, GLuint)
+OPENGL_THUNK(glDisableVertexAttribArray, void, GLuint)
+OPENGL_THUNK(glVertexAttribPointer, void, GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)
+OPENGL_THUNK(glDeleteVertexArrays, void, GLsizei, const GLuint*)
+
+OPENGL_THUNK(glCreateShader, GLuint, GLenum)
+OPENGL_THUNK(glShaderSource, void, GLuint, GLsizei, const GLchar**, const GLint*)
+OPENGL_THUNK(glCompileShader, void, GLuint)
+OPENGL_THUNK(glGetShaderiv, void, GLuint, GLenum, GLint*)
+OPENGL_THUNK(glGetShaderInfoLog, void, GLuint, GLsizei, GLsizei*, GLchar*)
+OPENGL_THUNK(glDeleteShader, void, GLuint)
+
+OPENGL_THUNK0(glCreateProgram, GLuint)
+OPENGL_THUNK(glAttachShader, GLuint, GLuint, GLuint)
+OPENGL_THUNK(glBindAttribLocation, void, GLuint, GLuint, const GLchar*)
+OPENGL_THUNK(glLinkProgram, void, GLuint)
+OPENGL_THUNK(glGetProgramiv, void, GLuint, GLenum, GLint*)
+OPENGL_THUNK(glGetProgramInfoLog, void, GLuint, GLsizei, GLsizei*, GLchar*)
+OPENGL_THUNK(glDeleteProgram, void, GLuint)
+OPENGL_THUNK(glGetUniformLocation, GLint, GLuint, const GLchar*)
+
+OPENGL_THUNK(glUseProgram, void, GLuint)
+OPENGL_THUNK(glUniform1i, void, GLint, GLint)
+OPENGL_THUNK(glUniform2i, void, GLint, GLint, GLint)
+OPENGL_THUNK(glUniform3i, void, GLint, GLint, GLint, GLint)
+OPENGL_THUNK(glUniform4i, void, GLint, GLint, GLint, GLint, GLint)
+OPENGL_THUNK(glUniform1f, void, GLint, GLfloat)
+OPENGL_THUNK(glUniform2f, void, GLint, GLfloat, GLfloat)
+OPENGL_THUNK(glUniform3f, void, GLint, GLfloat, GLfloat, GLfloat)
+OPENGL_THUNK(glUniform4f, void, GLint, GLfloat, GLfloat, GLfloat, GLfloat)

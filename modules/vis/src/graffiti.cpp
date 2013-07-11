@@ -15,26 +15,12 @@ namespace vis {
         int camera_pos;
         int model_pos;
         int color;
-        void (* glUseProgram )(GLuint);
-        void (* glUniform2f )(GLint, GLfloat, GLfloat);
-        void (* glUniform4f )(GLint, GLfloat, GLfloat, GLfloat, GLfloat);
-        void (* glBindVertexArray )(GLuint);
-        void (* glEnableVertexAttribArray )(GLuint);
-        void (* glDisableVertexAttribArray )(GLuint);
-        void (* glVertexAttribPointer )(GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*);
         void start_rendering () {
             if (!program) {
                 program = hacc::File("modules/vis/res/color.prog").data().attr("prog");
                 camera_pos = program->require_uniform("camera_pos");
                 model_pos = program->require_uniform("model_pos");
                 color = program->require_uniform("color");
-                glUseProgram = glproc<void (GLuint)>("glUseProgram");
-                glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-                glUniform4f = glproc<void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)>("glUniform4f");
-                glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
-                glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
-                glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
-                glDisableVertexAttribArray = glproc<void (GLuint)>("glDisableVertexAttribArray");
             }
             glDisable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
@@ -63,19 +49,19 @@ namespace vis {
     }
     void draw_primitive (uint type, uint n_pts, Vec* pts, uint32 color) {
         gr.use();
-        gr.glUniform4f(gr.color,
+        glUniform4f(gr.color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,
             ((color >> 8) & 255) / 255.0,
             (color & 255) / 255.0
         );
-        gr.glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, pts);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, pts);
         glDrawArrays(type, 0, n_pts);
         diagnose_opengl("after drawing some graffiti");
     }
     void graffiti_pos (Vec pos) {
         gr.use();
-        gr.glUniform2f(gr.model_pos, pos.x, pos.y);
+        glUniform2f(gr.model_pos, pos.x, pos.y);
     }
 
 }

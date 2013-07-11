@@ -9,9 +9,6 @@
 
 namespace core {
 
-    void* g_glproc (const char* name);
-    template <class F>
-    F* glproc (const char* name) { return (F*)g_glproc(name); }
     GLenum diagnose_opengl (std::string when = "");
 
     struct Renderer {
@@ -48,5 +45,44 @@ namespace core {
     };
 
 }
+
+ // These are autovivifying OpenGL wrappers.
+extern void (* glGenBuffers )(GLsizei, GLuint*);
+extern void (* glBindBuffer )(GLenum, GLuint);
+extern void (* glBufferData )(GLenum, GLsizeiptr, const GLvoid*, GLenum);
+extern void (* glDeleteBuffers )(GLsizei, const GLuint*);
+
+extern void (* glGenVertexArrays )(GLsizei, GLuint*);
+extern void (* glBindVertexArray )(GLuint);
+extern void (* glEnableVertexAttribArray )(GLuint);
+extern void (* glDisableVertexAttribArray )(GLuint);
+extern void (* glVertexAttribPointer )(GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*);
+extern void (* glDeleteVertexArrays )(GLsizei, const GLuint*);
+
+extern GLuint (* glCreateShader )(GLenum);
+extern void (* glShaderSource )(GLuint, GLsizei, const GLchar**, const GLint*);
+extern void (* glCompileShader )(GLuint);
+extern void (* glGetShaderiv )(GLuint, GLenum, GLint*);
+extern void (* glGetShaderInfoLog )(GLuint, GLsizei, GLsizei*, GLchar*);
+extern void (* glDeleteShader )(GLuint);
+
+extern GLuint (* glCreateProgram )();
+extern GLuint (* glAttachShader )(GLuint, GLuint);
+extern void (* glBindAttribLocation )(GLuint, GLuint, const GLchar*);
+extern void (* glLinkProgram )(GLuint);
+extern void (* glGetProgramiv )(GLuint, GLenum, GLint*);
+extern void (* glGetProgramInfoLog )(GLuint, GLsizei, GLsizei*, GLchar*);
+extern void (* glDeleteProgram )(GLuint);
+extern GLint (* glGetUniformLocation )(GLuint, const GLchar*);
+
+extern void (* glUseProgram )(GLuint);
+extern void (* glUniform1i )(GLint, GLint);
+extern void (* glUniform2i )(GLint, GLint, GLint);
+extern void (* glUniform3i )(GLint, GLint, GLint, GLint);
+extern void (* glUniform4i )(GLint, GLint, GLint, GLint, GLint);
+extern void (* glUniform1f )(GLint, GLfloat);
+extern void (* glUniform2f )(GLint, GLfloat, GLfloat);
+extern void (* glUniform3f )(GLint, GLfloat, GLfloat, GLfloat);
+extern void (* glUniform4f )(GLint, GLfloat, GLfloat, GLfloat, GLfloat);
 
 #endif

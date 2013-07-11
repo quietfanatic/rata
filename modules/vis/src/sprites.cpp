@@ -24,19 +24,9 @@ namespace vis {
         GLint camera_pos;
         GLint model_pos;
         GLint model_scale;
-        void (* glUseProgram )(GLuint);
-        void (* glUniform1i )(GLint, GLint);
-        void (* glUniform2f )(GLint, GLfloat, GLfloat);
-        void (* glUniform3f )(GLint, GLfloat, GLfloat, GLfloat);
-        void (* glBindVertexArray )(GLuint);
 
         Sprite_Layer () : Layer("C.M", "sprites") { }
         void Layer_start () override {
-            glUseProgram = glproc<void (GLuint)>("glUseProgram");
-            glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
-            glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-            glUniform3f = glproc<void (GLint, GLfloat, GLfloat, GLfloat)>("glUniform3f");
-            glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
             program = hacc::File("modules/vis/res/sprite.prog").data().attr("prog");
             tex = program->require_uniform("tex");
             camera_pos = program->require_uniform("camera_pos");
@@ -79,10 +69,10 @@ namespace vis {
 
         sprite_layer.use();
 
-        sprite_layer.glUniform3f(sprite_layer.model_pos, p.x, p.y, z);
-        sprite_layer.glUniform2f(sprite_layer.model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
+        glUniform3f(sprite_layer.model_pos, p.x, p.y, z);
+        glUniform2f(sprite_layer.model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->tex);
-        sprite_layer.glBindVertexArray(frame->parent->vao_id);
+        glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
 
         diagnose_opengl("After rendering a sprite");

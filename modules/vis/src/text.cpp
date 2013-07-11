@@ -22,17 +22,11 @@ namespace vis {
         GLint color = program->require_uniform("color");
 
         Text_Layer () : Layer("G.M", "text") {
-            static auto glUniform1i = glproc<void (GLint, GLint)>("glUniform1i");
-            static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
             glUseProgram(program->glid);
             glUniform1i(tex, 0);
         }
          // for Renderer
         void start_rendering () override {
-            static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
-            static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
-            static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-            static auto glUseProgram = glproc<void (GLuint)>("glUseProgram");
             glDisable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -103,9 +97,6 @@ namespace vis {
                 vert_i++;
             }
         }
-        static auto glUniform2f = glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-        static auto glUniform4f = glproc<void (GLint, GLfloat, GLfloat, GLfloat, GLfloat)>("glUniform4f");
-        static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
         Vec size = Vec(maxx*PX, maxy*PX);
         Vec ul = Vec(pos.x - (1 - align.x) / 2 * size.x, pos.y + (1 - align.y) / 2 * size.y);
         text_layer().use();

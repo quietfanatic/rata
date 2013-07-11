@@ -183,14 +183,6 @@ namespace geo {
          // And...we're done with the edges.
         delete[] es;
          // Now for the graphics buffers
-        using core::glproc;
-        static auto glGenBuffers = glproc<void (GLsizei, GLuint*)>("glGenBuffers");
-        static auto glBindBuffer = glproc<void (GLenum, GLuint)>("glBindBuffer");
-        static auto glBufferData = glproc<void (GLenum, GLsizeiptr, const GLvoid*, GLenum)>("glBufferData");
-        static auto glGenVertexArrays = glproc<void (GLsizei, GLuint*)>("glGenVertexArrays");
-        static auto glBindVertexArray = glproc<void (GLuint)>("glBindVertexArray");
-        static auto glEnableVertexAttribArray = glproc<void (GLuint)>("glEnableVertexAttribArray");
-        static auto glVertexAttribPointer = glproc<void (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*)>("glVertexAttribPointer");
         auto vdats = new Tilemap_Vertex [height * width][4];
         uint vdat_i = 0;
         for (uint y = 0; y < height; y++)
@@ -229,10 +221,6 @@ namespace geo {
      // Now for drawing tilemaps.
 
     struct Tilemap_Layer : core::Layer, core::Renderer {
-        void (* glUseProgram )(GLuint);
-        void (* glUniform1i )(GLint, GLint);
-        void (* glUniform2f )(GLint, GLfloat, GLfloat);
-        void (* glBindVertexArray )(GLuint);
         core::Program* program;
         int tex;
         int camera_pos;
@@ -241,10 +229,6 @@ namespace geo {
 
         Tilemap_Layer () : core::Layer("E.M", "tilemaps") { }
         void Layer_start () override {
-            glUseProgram = core::glproc<void (GLuint)>("glUseProgram");
-            glUniform1i = core::glproc<void (GLint, GLint)>("glUniform1i");
-            glUniform2f = core::glproc<void (GLint, GLfloat, GLfloat)>("glUniform2f");
-            glBindVertexArray = core::glproc<void (GLuint)>("glBindVertexArray");
             program = hacc::File("modules/vis/res/tiles.prog").data().attr("prog");
             tex = program->require_uniform("tex");
             camera_pos = program->require_uniform("camera_pos");
