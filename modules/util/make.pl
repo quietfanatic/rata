@@ -10,10 +10,7 @@ workflow {
 
     include '../..';
 
-    objects(qw(debug geometry annotations));
-
-    ld_rule('tmp/t', [qw[tmp/annotations.o tmp/annotations.t.o ../tap/tmp/tap.o ../tap/tmp/tap_make_test_main.o]]);
-    test_rule('tmp/t');
+    objects(qw(debug geometry));
 
     clean_rule(glob 'tmp/*');
     
