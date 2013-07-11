@@ -4,6 +4,7 @@
 #include "../inc/commands.h"
 #include "../../util/inc/debug.h"
 #include "../../hacc/inc/files.h"
+#include "../../hacc/inc/strings.h"
 
 namespace core {
 
@@ -153,5 +154,24 @@ struct QuitCommand : CommandData {
     void operator() () { core::quick_exit(); }
 };
 HCB_BEGIN(QuitCommand)
-    new_command<QuitCommand>("quit", "Quit the program without saving anything.");
+    new_command<QuitCommand>("quit", "Quit the program without saving anything");
 HCB_END(QuitCommand)
+
+struct StopCommand : CommandData {
+    void operator() () { core::stop(); }
+};
+HCB_BEGIN(StopCommand)
+    new_command<StopCommand>("stop", "Stop the game (probably saving its state to somewhere)");
+HCB_END(StopCommand)
+
+struct FilesCommand : CommandData {
+    void operator() () {
+        for (auto f : hacc::loaded_files()) {
+            print_to_console(hacc::escape_string(f.filename()));
+            print_to_console("\n");
+        }
+    }
+};
+HCB_BEGIN(FilesCommand)
+    new_command<FilesCommand>("files", "List all loaded files");
+HCB_END(FilesCommand)
