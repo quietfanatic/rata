@@ -55,7 +55,8 @@ namespace ent {
         float oldxrel = 0;
         void Sprite_draw () override;
 
-        ButtonBits buttons;
+        ButtonBits buttons = ButtonBits(0);
+        Vec focus = Vec(2, 0);
         void Controllable_buttons (ButtonBits) override;
         void Controllable_move_focus (Vec) override;
         Vec Controllable_get_focus () override;

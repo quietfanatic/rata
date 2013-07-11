@@ -28,9 +28,15 @@ namespace ent {
     void Biped::Controllable_buttons (ButtonBits bits) {
         buttons = bits;
     }
-    void Biped::Controllable_move_focus (Vec diff) { }  // TODO
+    void Biped::Controllable_move_focus (Vec diff) {
+        focus += diff;
+        if (focus.x > 18) focus.x = 18;
+        else if (focus.x < -18) focus.x = -18;
+        if (focus.y > 13) focus.y = 13;
+        else if (focus.y < -13) focus.y = -13;
+    }
     Vec Biped::Controllable_get_focus () {
-        return Vec(NAN, NAN);
+        return focus;
     }
 
     void Biped::before_move () {
@@ -204,6 +210,7 @@ HCB_BEGIN(Biped)
     attr("crouching", member(&Biped::crouching).optional());
     attr("crawling", member(&Biped::crawling).optional());
     attr("ceiling_low", member(&Biped::ceiling_low).optional());
+    attr("focus", member(&Biped::focus).optional());
     finish([](Biped& b){
         b.Resident::finish();
         b.finish();
