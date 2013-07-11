@@ -22,6 +22,9 @@ namespace hacc {
     Tree tree_from_string (String, String filename = "");
     Tree tree_from_string (const char*, String filename = "");
 
+    void string_to_file (String, String);
+    String string_from_file (String);
+
     void tree_to_file (Tree, String);
     Tree tree_from_file (String);
 

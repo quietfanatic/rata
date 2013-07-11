@@ -526,17 +526,16 @@ namespace hacc {
         }
     }
 
-    void tree_to_file (Tree tree, String filename) {
+    void string_to_file (String str, String filename) {
         with_file(filename, "wb", [&](FILE* f){
-            String s = tree_to_string(tree, filename, 5);
-            fwrite(s.data(), 1, s.size(), f);
-            if (s[s.size()-1] != '\n')
+            fwrite(str.data(), 1, str.size(), f);
+            if (str[str.size()-1] != '\n')
                 fputc('\n', f);
         });
     }
-
-    Tree tree_from_file (String filename) {
+    String string_from_file (String filename) {
         String r;
+         // Oughta be a way to do this without reallocating but whatever
         with_file(filename, "rb", [&](FILE* f){
             fseek(f, 0, SEEK_END);
             size_t size = ftell(f);
@@ -546,7 +545,14 @@ namespace hacc {
             r = String(cs, size);
             free(cs);
         });
-        return tree_from_string(r, filename);
+        return r;
+    }
+    void tree_to_file (Tree tree, String filename) {
+        return string_to_file(tree_to_string(tree, filename, 5), filename);
+    }
+
+    Tree tree_from_file (String filename) {
+        return tree_from_string(string_from_file(filename), filename);
     }
 
     namespace X {
