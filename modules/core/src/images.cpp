@@ -47,14 +47,14 @@ namespace core {
         int iw; int ih; int ich;
         data = SOIL_load_image(filename.c_str(), &iw, &ih, &ich, 4);
         if (!data) {
-            throw std::logic_error(SOIL_last_result());
+            throw hacc::X::Logic_Error("Couldn't open image \"" + filename + "\": " + SOIL_last_result());
         }
         size = Vec(iw, ih);
         for (Texture& t : textures) {
             if (t.offset.x < 0 || t.offset.y < 0
              || t.offset.x + t.size.x > size.x
              || t.offset.y + t.size.y > size.y)
-                throw std::logic_error("Texture specified outside of image");
+                throw hacc::X::Logic_Error("Error processing image \"" + filename + "\": Texture boundary is outside of image");
         }
         for (Texture& t : textures) {
             t.load(this);
