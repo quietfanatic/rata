@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <sstream>
 #include <iomanip>
+#include <unordered_map>
 #include "../inc/files.h"  // for Path
 #include "../inc/strings.h"
 #include "paths_internal.h"
@@ -159,6 +160,8 @@ namespace hacc {
         const char* end;
         Parser (String s, String file = "") : file(file), begin(s.data()), p(s.data()), end(s.data()+s.length()) { }
         Parser (const char* s, String file = "") : file(file), begin(s), p(s), end(s + strlen(s)) { }
+         // Just a little YAML-inspired syntax sugar
+        std::unordered_map<String, Tree> refs;
 
         int look () { return p == end ? EOF : *p; }
 
@@ -445,6 +448,26 @@ namespace hacc {
             }
         }
 
+        Tree parse_refdecl () {
+            p++;  // for the &
+            std::string name = parse_ident("After the & for a ref declaration");
+            return parse_reffed_term(name);
+        }
+        Tree parse_backref () {
+            p++;  // for the *
+            std::string name = parse_ident("after the * for a backreference");
+            auto iter = refs.find(name);
+            if (iter != refs.end())
+                return iter->second;
+            else throw error("Unknown backreference: *" + escape_ident(name));
+        }
+
+        Tree parse_reffed_term (std::string name) {
+            Tree term = parse_term();
+            refs.emplace(name, term);
+            return term;
+        }
+
         Tree parse_term () {
             parse_ws();
             for (;;) switch (char next = look()) {
@@ -468,6 +491,8 @@ namespace hacc {
                 case '(': return parse_parens();
                 case '_': return parse_bareword();
                 case '<': return parse_heredoc();
+                case '&': return parse_refdecl();
+                case '*': return parse_backref();
                 default:
                     if (isalnum(next))
                         return parse_bareword();

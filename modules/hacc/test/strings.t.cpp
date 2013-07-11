@@ -20,7 +20,7 @@ void tst (hacc::String from, hacc::String to) {
 
 tap::Tester tree_strings_tester ("hacc/strings", [](){
     using namespace tap;
-    plan(45);
+    plan(46);
      printf(" # Bools\n");  // 2
     tst("true", "true");
     tst("false", "false");
@@ -76,6 +76,8 @@ tap::Tester tree_strings_tester ("hacc/strings", [](){
     tst("$(\"asdf\").attr[7].a2", "$(\"asdf\").attr[7].a2");
      printf(" # Misc\n");  // 1
     tst("{ things: [ {test_actor: {}} ] }", "{ things:[{ test_actor:{} }] }");
+     printf(" # Refs\n");  // 1
+    tst("[&ref 4 5 *ref]", "[4 5 4]");
     
 });
 
