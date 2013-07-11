@@ -7,6 +7,6 @@
         vertices:[[0 0] [1 0] [1 1] [0 1]]
     }}
     img:{"core::Image":{
-        filename:"modules/rata/res/test-tiles.png"
+        filename:"modules/world/res/test-tiles.png"
     }}
 }}

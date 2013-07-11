@@ -1,8 +1,8 @@
 {"hacc::Document":{
     rata:{"ent::Biped":{
-        def:$("modules/rata/res/rata.hacc").def
+        def:$("modules/world/res/rata.hacc").def
         Object:{ pos:[1 22] }
-        Resident:{ room:$("modules/rata/res/test.room").room }
+        Resident:{ room:$("modules/world/res/test.room").room }
         direction:1
     }}
     beholder:{"geo::Beholder":{
@@ -12,6 +12,6 @@
         character:$.rata.Controllable
     }}
     console:{"vis::Console":{
-        font:$("modules/rata/res/font-small.hacc").font
+        font:$("modules/shell/res/font-small.hacc").font
     }}
 }}

@@ -23,6 +23,6 @@
         ]
     }}
     img:{"core::Image":{
-        filename:"modules/rata/res/font-small.png"
+        filename:"modules/shell/res/font-small.png"
     }}
 }}

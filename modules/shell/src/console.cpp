@@ -3,10 +3,9 @@
 #include "../../core/inc/input.h"
 #include "../../core/inc/commands.h"
 #include "../../core/inc/game.h"
-#include "../../core/inc/opengl.h"
-#include "../inc/graffiti.h"
-#include "../inc/text.h"
-#include "../inc/sprites.h"
+#include "../../vis/inc/common.h"
+#include "../../vis/inc/graffiti.h"
+#include "../../vis/inc/text.h"
 
 namespace vis {
 

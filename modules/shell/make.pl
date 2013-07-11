@@ -10,6 +10,7 @@ workflow {
 
     our @objects = qw<
         tmp/main.o
+        tmp/console.o
         ../core/tmp/commands.o
         ../core/tmp/game.o
         ../core/tmp/images.o
@@ -34,7 +35,6 @@ workflow {
         ../phys/tmp/ground.o
         ../phys/tmp/phys.o
         ../vis/tmp/common.o
-        ../vis/tmp/console.o
         ../vis/tmp/graffiti.o
         ../vis/tmp/models.o
         ../vis/tmp/sprites.o
@@ -47,7 +47,7 @@ workflow {
 
     include '../..';
 
-    cppc_rule('tmp/main.o', 'src/main.cpp');
+    objects(qw(main console));
 
      # Here's the main program
     ld_rule('../../rata', [@objects], [@libs]);

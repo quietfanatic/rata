@@ -2,7 +2,7 @@
 #include "../../core/inc/game.h"
 #include "../../hacc/inc/files.h"
 
-static std::string initial_state = "modules/rata/test_state.hacc";
+static std::string initial_state = "modules/shell/start.hacc";
 static std::string stop_state = "save/last_stop.hacc";
 
 int main () {

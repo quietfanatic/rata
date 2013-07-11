@@ -4,6 +4,6 @@
         width:6 height:12 line_height:12
     }}
     {img:{"core::Image":{
-        filename:"modules/rata/res/monospace.png"
+        filename:"modules/shell/res/monospace.png"
     }}
 }}

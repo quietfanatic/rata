@@ -1,6 +1,6 @@
 {"hacc::Document":{
     img:{"core::Image":{
-        filename: "modules/rata/res/rata-base.png"
+        filename: "modules/world/res/rata-base.png"
         textures: [
             {name:body    offset:[  0   0] size:[ 85 43]}
             {name:head    offset:[117   1] size:[127 88]}

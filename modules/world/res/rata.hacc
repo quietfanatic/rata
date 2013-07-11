@@ -5,7 +5,7 @@
         stats: $.stats
         skel: $("modules/ent/res/small.hacc").skel
         poses: $("modules/ent/res/small.hacc").poses
-        skin: $("modules/rata/res/rata-base.hacc").skin
+        skin: $("modules/world/res/rata-base.hacc").skin
     }}
     stats:{"ent::BipedStats":{
         walk_friction: 0.8
