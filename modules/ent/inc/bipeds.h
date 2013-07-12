@@ -36,15 +36,23 @@ namespace ent {
         BipedDef* get_def () const { return def; }
         void set_def (BipedDef*);
 
+         // For control
+        ButtonBits buttons = ButtonBits(0);
+        Vec focus = Vec(2, 0);
+        void Controllable_buttons (ButtonBits) override;
+        void Controllable_move_focus (Vec) override;
+        Vec Controllable_get_focus () override;
+        int8 move_direction () {
+            return !!(buttons & RIGHT_BIT) - !!(buttons & LEFT_BIT);
+        }
+
          // For movement
         BipedStats stats;
         int8 direction = 1;
         bool crouching = false;
         bool crawling = false;
-         // Established by a sensor
-        bool ceiling_low = false;
-         // Object
-        void before_move () override;
+        bool ceiling_low = false;  // Established by a sensor
+        void before_move () override;  // Object
         void after_move () override;
         float Grounded_velocity () override;
         float Grounded_friction () override;
@@ -55,14 +63,6 @@ namespace ent {
         float oldxrel = 0;
         void Sprite_draw () override;
 
-        ButtonBits buttons = ButtonBits(0);
-        Vec focus = Vec(2, 0);
-        void Controllable_buttons (ButtonBits) override;
-        void Controllable_move_focus (Vec) override;
-        Vec Controllable_get_focus () override;
-        int8 move_direction () {
-            return !!(buttons & RIGHT_BIT) - !!(buttons & LEFT_BIT);
-        }
 
         Vec Resident_pos () override;
         void Resident_emerge () override;

@@ -35,15 +35,15 @@ namespace ent {
         return focus + pos();
     }
 
+     // Change some kinds of movement state
+     // Do not change ground velocity, but do change air velocity
     void Biped::before_move () {
         int8 mdir = move_direction();
-         // Change some kinds of movement state
-         // Do not change ground velocity, but do change air velocity
+         // Turn around
+        if (!crawling || !ceiling_low) {
+            direction = focus.x > 0 ? 1 : focus.x < 0 ? -1 : direction;
+        }
         if (ground) {
-             // Turn around
-            if (!crawling || !ceiling_low) {
-                direction = focus.x > 0 ? 1 : focus.x < 0 ? -1 : direction;
-            }
              // Decide whether we're crouching
             if (buttons & CROUCH_BIT) {
                 crouching = true;
@@ -84,19 +84,19 @@ namespace ent {
         );
         for (auto fix = b2body->GetFixtureList(); fix; fix = fix->GetNext()) {
             auto fd = (phys::FixtureDef*)fix->GetUserData();
-//            if (def->fixdefs->is_primary(fd)) {
+            if (def->fixdefs->is_primary(fd)) {
                 fix->SetSensor(fd != active);
-//            }
+            }
         }
     }
     float Biped::Grounded_velocity () {
         uint8 mdir = move_direction();
         if (crouching)
             return stats.crawl_speed * mdir;
-        else if (direction != mdir)
-            return stats.walk_speed * mdir;
-        else 
+        else if (direction == mdir)
             return stats.run_speed * mdir;
+        else 
+            return stats.walk_speed * mdir;
     }
     float Biped::Grounded_friction () {
         if (crouching) {
@@ -202,11 +202,11 @@ HCB_BEGIN(Biped)
     attr("Grounded", base<phys::Grounded>().optional());
     attr("Controllable", base<ent::Controllable>().optional());
     attr("direction", member(&Biped::direction).optional());
-    attr("distance_walked", member(&Biped::distance_walked).optional());
     attr("crouching", member(&Biped::crouching).optional());
     attr("crawling", member(&Biped::crawling).optional());
     attr("ceiling_low", member(&Biped::ceiling_low).optional());
     attr("focus", member(&Biped::focus).optional());
+    attr("distance_walked", member(&Biped::distance_walked).optional());
     finish([](Biped& b){
         b.Resident::finish();
         b.finish();
