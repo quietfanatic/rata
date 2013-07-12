@@ -85,7 +85,11 @@ namespace ent {
         for (auto fix = b2body->GetFixtureList(); fix; fix = fix->GetNext()) {
             auto fd = (phys::FixtureDef*)fix->GetUserData();
             if (def->fixdefs->is_primary(fd)) {
-                fix->SetSensor(fd != active);
+                phys::Filter filt = fix->GetFilterData();
+                if (filt.active != (fd == active)) {
+                    filt.active = (fd == active);
+                    fix->SetFilterData(filt);
+                }
             }
         }
     }
