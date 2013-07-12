@@ -193,19 +193,25 @@ namespace ent {
                 model.apply_pose(&def->poses->crouch);
                 model.apply_pose(&def->poses->look_stand[look_frame]);
             }
-            else {
-                if (fabs(vel().x) < 0.01) {
-                    model.apply_pose(&def->poses->stand);
+            else if (vel().x * direction > stats.walk_speed) {
+                uint step = fmod(distance_walked * 2.0, 6.0);
+                model.apply_pose(&def->poses->run[step]);
+                if (step % 3 < 1)
                     model.apply_pose(&def->poses->look_stand[look_frame]);
-                }
-                else {
-                    uint step = fmod(distance_walked * 2.0, 4.0);
-                    model.apply_pose(&def->poses->walk[step]);
-                    if (step % 2 < 1)
-                        model.apply_pose(&def->poses->look_walk[look_frame]);
-                    else
-                        model.apply_pose(&def->poses->look_stand[look_frame]);
-                }
+                else
+                    model.apply_pose(&def->poses->look_walk[look_frame]);
+            }
+            else if (fabs(vel().x) >= 0.01) {
+                uint step = fmod(distance_walked * 2.0, 4.0);
+                model.apply_pose(&def->poses->walk[step]);
+                if (step % 2 < 1)
+                    model.apply_pose(&def->poses->look_walk[look_frame]);
+                else
+                    model.apply_pose(&def->poses->look_stand[look_frame]);
+            }
+            else {
+                model.apply_pose(&def->poses->stand);
+                model.apply_pose(&def->poses->look_stand[look_frame]);
             }
         }
         else {
