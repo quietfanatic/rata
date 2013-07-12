@@ -23,12 +23,27 @@ namespace phys {
     };
     extern Space space;
 
+     // Box2D's default filtering system is really weird.  We're gonna
+     //  use our own.  We can reinterpret the b2Filter that's on every
+     //  fixture however we want, as long as we stay limited to 48 bits.
+    struct Filter {
+        uint16 mask = 1;
+        uint16 unmask = 0;
+        bool active = true;
+        Filter () { }
+        Filter (const b2Filter& b2f) : Filter(reinterpret_cast<const Filter&>(b2f)) { }
+        operator b2Filter& () { return reinterpret_cast<b2Filter&>(*this); }
+        operator const b2Filter& () const { return reinterpret_cast<const b2Filter&>(*this); }
+    };
+
+
      // Static things, probably stored in files
 
     struct FixtureDef {
         b2FixtureDef b2;
         uint64 coll_a = 0;
         uint64 coll_b = 0;
+        Filter filter;  // Just the initial filter
     };
     struct BodyDef {
         b2BodyType type = b2_dynamicBody;
@@ -83,18 +98,6 @@ namespace phys {
         Collision_Rule ();
 
         uint64 bit () { return 1 << index; }
-    };
-
-     // Box2D's default filtering system is really weird.  We're gonna
-     //  use our own.  We can reinterpret the b2Filter that's on every
-     //  fixture however we want, as long as we stay limited to 48 bits.
-    struct Filter {
-        uint16 mask = 1;
-        uint16 unmask = 0;
-        bool active = true;
-        Filter (const b2Filter& b2f) : Filter(reinterpret_cast<const Filter&>(b2f)) { }
-        operator b2Filter& () { return reinterpret_cast<b2Filter&>(*this); }
-        operator const b2Filter& () const { return reinterpret_cast<const b2Filter&>(*this); }
     };
 
 }

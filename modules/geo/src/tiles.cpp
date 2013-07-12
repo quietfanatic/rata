@@ -105,6 +105,7 @@ namespace geo {
         b2es.m_hasVertex3 = true;
         b2es.m_vertex3 = te->next->v2;
         b2FixtureDef b2fdf = te->def->nature.b2;
+        b2fdf.filter = phys::Filter();  // Default filter should be okay
         b2fdf.shape = &b2es;
         b2fdf.userData = te->def;
         b2body->CreateFixture(&b2fdf);

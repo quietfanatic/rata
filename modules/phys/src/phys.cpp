@@ -65,14 +65,11 @@ namespace phys {
 
     struct myCF : b2ContactFilter {
         bool ShouldCollide (b2Fixture* a, b2Fixture* b) override {
-            FixtureDef* adef = (FixtureDef*)a->GetUserData();
-            FixtureDef* bdef = (FixtureDef*)b->GetUserData();
             const Filter& afilt = reinterpret_cast<const Filter&>(a->GetFilterData());
             const Filter& bfilt = reinterpret_cast<const Filter&>(b->GetFilterData());
             return afilt.active && bfilt.active
-                && afilt.mask & bfilt.mask
-                && !(afilt.unmask & bfilt.unmask)
-                && (adef->coll_a & bdef->coll_b || adef->coll_b & bdef->coll_a);
+                && (afilt.mask & bfilt.mask)
+                && !(afilt.unmask & bfilt.unmask);
         }
     } mycf;
 
@@ -89,6 +86,7 @@ namespace phys {
             b2Vec2(0, -30)
         );
         b2world->SetContactListener(&mycl);
+        b2world->SetContactFilter(&mycf);
     }
     void Space::Phase_run () {
         for (b2Body* b2b = b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
@@ -124,6 +122,7 @@ namespace phys {
         }
     }
     b2Fixture* Object::add_fixture (FixtureDef* fdf) {
+        fdf->b2.filter = fdf->filter;
         b2Fixture* b2f = b2body->CreateFixture(&fdf->b2);
         b2f->SetUserData(fdf);
         return b2f;
@@ -276,7 +275,6 @@ HCB_BEGIN(b2FixtureDef)
     attr("restitution", member(&b2FixtureDef::restitution).optional());
     attr("density", member(&b2FixtureDef::density).optional());
     attr("is_sensor", member(&b2FixtureDef::isSensor).optional());
-    attr("filter", ref_func<Filter>([](b2FixtureDef& fd)->Filter&{ return reinterpret_cast<Filter&>(fd.filter); }).optional());
 HCB_END(b2FixtureDef)
 
 static std::vector<Collision_Rule*> coll_b2v (uint64 b) {
@@ -310,6 +308,7 @@ HCB_BEGIN(FixtureDef)
             fdf.coll_b = coll_v2b(rules);
         }
     ).optional().narrow());
+    attr("filter", member(&FixtureDef::filter).optional());
 HCB_END(FixtureDef)
 
 HCB_BEGIN(Filter)
