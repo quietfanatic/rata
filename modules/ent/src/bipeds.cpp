@@ -49,8 +49,26 @@ namespace ent {
             direction = focus.x > 0 ? 1 : focus.x < 0 ? -1 : direction;
         }
         if (ground) {
-             // Decide whether we're crouching
-            if (buttons & CROUCH_BIT) {
+            if (ceiling_low) {
+                crouching = true;
+                crawling = true;
+            }
+            else if (jump_timer) {
+                if (jump_timer >= stats.jump_delay / FR) {
+                    set_vel(Vec(vel().x, stats.jump_speed));
+                    jump_timer = 0;
+                    ground = NULL;
+                }
+                else if (buttons & JUMP_BIT) {
+                    jump_timer++;
+                }
+                else {  // Short jump
+                    set_vel(Vec(vel().x, stats.jump_speed * 2 / 3));
+                    jump_timer = 0;
+                    ground = NULL;
+                }
+            }
+            else if (buttons & CROUCH_BIT) {
                 crouching = true;
                 if (mdir)
                     crawling = true;
@@ -60,15 +78,14 @@ namespace ent {
                 crawling = false;
                  // Initiate jump
                 if (buttons & JUMP_BIT) {
-                     // TODO: jump delay
-                    set_vel(Vec(vel().x, stats.jump_speed));
-                    ground = NULL;
+                    jump_timer++;
                 }
             }
         }
         else {  // In the air
             crouching = false;
             crawling = false;
+            jump_timer = 0;
             if (vel().x * mdir <= stats.air_speed - stats.air_friction) {
                 set_vel(Vec(vel().x + stats.air_friction * mdir, vel().y));
             }
@@ -84,13 +101,15 @@ namespace ent {
          // Change active fixture
         auto active = (
             ground
-                ? crawling
-                    ? mdir == 1
-                        ? &def->fixdefs->crawl_r
-                        : &def->fixdefs->crawl_l
-                    : crouching
-                        ? &def->fixdefs->crouch
-                    : &def->fixdefs->stand
+                ? jump_timer
+                    ? &def->fixdefs->crouch
+                    : crawling
+                        ? mdir == 1
+                            ? &def->fixdefs->crawl_r
+                            : &def->fixdefs->crawl_l
+                        : crouching
+                            ? &def->fixdefs->crouch
+                        : &def->fixdefs->stand
                 : &def->fixdefs->stand
         );
         for (auto fix = b2body->GetFixtureList(); fix; fix = fix->GetNext()) {
@@ -157,7 +176,12 @@ namespace ent {
         model.apply_skin(def->skin);
         uint8 look_frame = angle_frame(atan2(focus.y, focus.x));
         if (ground) {
-            if (crawling) {
+            if (jump_timer) {
+                 // TODO: this looks weird
+                model.apply_pose(&def->poses->crouch);
+                model.apply_pose(&def->poses->look_stand[look_frame]);
+            }
+            else if (crawling) {
                 if (fabs(vel().x) < 0.01) {
                     model.apply_pose(&def->poses->crawl1);
                 }
@@ -221,6 +245,7 @@ HCB_BEGIN(Biped)
     attr("crouching", member(&Biped::crouching).optional());
     attr("crawling", member(&Biped::crawling).optional());
     attr("ceiling_low", member(&Biped::ceiling_low).optional());
+    attr("jump_timer", member(&Biped::jump_timer).optional());
     attr("focus", member(&Biped::focus).optional());
     attr("distance_walked", member(&Biped::distance_walked).optional());
     finish([](Biped& b){
@@ -242,6 +267,7 @@ HCB_BEGIN(BipedStats)
     attr("air_friction", member(&BipedStats::air_friction).optional());
     attr("air_speed", member(&BipedStats::air_speed).optional());
     attr("jump_speed", member(&BipedStats::jump_speed).optional());
+    attr("jump_delay", member(&BipedStats::jump_delay).optional());
 HCB_END(BipedStats)
 
 HCB_BEGIN(BipedDef)

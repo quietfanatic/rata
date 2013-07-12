@@ -23,6 +23,7 @@ namespace ent {
         float air_friction;
         float air_speed;
         float jump_speed;
+        float jump_delay;
     };
     struct BipedPoses;
     struct BipedFixdefs;
@@ -52,6 +53,7 @@ namespace ent {
         bool crouching = false;
         bool crawling = false;
         bool ceiling_low = false;  // Established by a sensor
+        uint8 jump_timer = 0;  // counts up until stats.jump_delay
         void before_move () override;  // Object
         void after_move () override;
         float Grounded_velocity () override;
