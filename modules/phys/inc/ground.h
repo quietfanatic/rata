@@ -3,9 +3,15 @@
 
 #include "phys.h"
 
- // Slightly annoying to have this in its own module, but
- //  since it registers a collision rule, we don't want to
- //  tie it into the base physics module.
+ // This modules provides a collision rule "ground" that
+ //  allows Grounded objects to walk using friction and surface
+ //  velocity, kinda like you actually walk.
+
+ // Notice: due to unfortunate ramifications between how this and the
+ //  physics library work together, the ground collision rule cannot
+ //  wake objects up when their ground velocity is going to change.
+ //  So you must make sure to call b2body->SetAwake(true) on any
+ //  frames your ground velocity is likely to change.
 
 namespace phys {
 
