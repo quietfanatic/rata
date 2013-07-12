@@ -182,16 +182,11 @@ namespace ent {
             }
             else if (crawling) {
                 if (fabs(vel().x) < 0.01) {
-                    model.apply_pose(&def->poses->crawl1);
+                    model.apply_pose(&def->poses->crawl[3]);
                 }
                 else {
-                    float stepdist = fmod(distance_walked, 2.0);
-                    if (stepdist < 0.5)
-                        model.apply_pose(&def->poses->crawl2_1);
-                    else if (stepdist >= 1 && stepdist < 1.5)
-                        model.apply_pose(&def->poses->crawl2_2);
-                    else
-                        model.apply_pose(&def->poses->crawl1);
+                    uint step = fmod(distance_walked * 2.0, 4.0);
+                    model.apply_pose(&def->poses->crawl[step]);
                 }
             }
             else if (crouching) {
@@ -204,19 +199,12 @@ namespace ent {
                     model.apply_pose(&def->poses->look_stand[look_frame]);
                 }
                 else {
-                    float stepdist = fmod(distance_walked, 2.0);
-                    if (stepdist < 0.5) {
-                        model.apply_pose(&def->poses->walk1);
+                    uint step = fmod(distance_walked * 2.0, 4.0);
+                    model.apply_pose(&def->poses->walk[step]);
+                    if (step % 2 < 1)
                         model.apply_pose(&def->poses->look_walk[look_frame]);
-                    }
-                    else if (stepdist >= 1 && stepdist < 1.5) {
-                        model.apply_pose(&def->poses->walk2);
-                        model.apply_pose(&def->poses->look_walk[look_frame]);
-                    }
-                    else {
-                        model.apply_pose(&def->poses->stand);
+                    else
                         model.apply_pose(&def->poses->look_stand[look_frame]);
-                    }
                 }
             }
         }
@@ -283,15 +271,12 @@ HCB_END(BipedDef)
 HCB_BEGIN(BipedPoses)
     name("ent::BipedPoses");
     attr("stand", member(&BipedPoses::stand));
-    attr("walk1", member(&BipedPoses::walk1));
-    attr("walk2", member(&BipedPoses::walk2));
+    attr("walk", member(&BipedPoses::walk));
     attr("run", member(&BipedPoses::run));
     attr("crouch", member(&BipedPoses::crouch));
     attr("prejump", member(&BipedPoses::prejump));
     attr("jump", member(&BipedPoses::jump));
-    attr("crawl1", member(&BipedPoses::crawl1));
-    attr("crawl2_1", member(&BipedPoses::crawl2_1));
-    attr("crawl2_2", member(&BipedPoses::crawl2_2));
+    attr("crawl", member(&BipedPoses::crawl));
     attr("hurtbk", member(&BipedPoses::hurtbk));
     attr("laybk", member(&BipedPoses::laybk));
     attr("look_stand", member(&BipedPoses::look_stand));
