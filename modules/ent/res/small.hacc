@@ -65,18 +65,28 @@
             layout:&lh $("modules/ent/res/small.layouts").head
             z_offset:-0.02  // Only 8-bit precision if that
         } {
-            name:forearm
+            name:forearm1
             branches:[]
             layout:&lf $("modules/ent/res/small.layouts").forearm
             z_offset:-0.06
         } {
-            name:arm
-            branches:[$.skel.segs.forearm]
+            name:arm1
+            branches:[$.skel.segs.forearm1]
             layout:&la $("modules/ent/res/small.layouts").arm
             z_offset:-0.04
         } {
+            name:forearm2
+            branches:[]
+            layout:*lf
+            z_offset:0.06
+        } {
+            name:arm2
+            branches:[$.skel.segs.forearm2]
+            layout:*la
+            z_offset:0.04
+        } {
             name:body
-            branches:[$.skel.segs.head $.skel.segs.arm]
+            branches:[$.skel.segs.head $.skel.segs.arm1 $.skel.segs.arm2]
             layout:&lb$("modules/ent/res/small.layouts").body
             z_offset: 0.00
         }]
@@ -85,29 +95,31 @@
     }}
     poses:{"ent::BipedPoses":{
         stand:[
-            [&b $.skel.segs.body    *lb.stand  ]
-            [&h $.skel.segs.head    *lh.stand90]
-            [&a $.skel.segs.arm     *la.a0     ]
-            [&f $.skel.segs.forearm *lf.a0     ]
+            [&b  $.skel.segs.body     *lb.stand  ]
+            [&h  $.skel.segs.head     *lh.stand90]
+            [&a1 $.skel.segs.arm1     *la.a0     ]
+            [&f1 $.skel.segs.forearm1 *lf.a0     ]
+            [&a2 $.skel.segs.arm2     *la.a0     ]
+            [&f2 $.skel.segs.forearm2 *lf.a0     ]
         ]
-        walk1:   [[*b *lb.walk  ] [*h *lh.walk90 ] [*a *la.a23     ] [*f *lf.a23     ]]
-        walk2:   [[*b *lb.walk  ] [*h *lh.walk90 ] [*a *la.a23 true] [*f *lf.a23 true]]
+        walk1:   [[*b *lb.walk  ] [*h *lh.walk90 ] [*a1 *la.a23     ] [*f1 *lf.a23     ] [*a2 *la.a23 true] [*f2 *lf.a23 true]]
+        walk2:   [[*b *lb.walk  ] [*h *lh.walk90 ] [*a1 *la.a23 true] [*f1 *lf.a23 true] [*a2 *la.a23     ] [*f2 *lf.a23     ]]
         run:[
-            [[*b *lb.run1] [*h *lh.stand90] [*a *la.a23     ] [*f *lf.a113]]
-            [[*b *lb.run2] [*h *lh.walk90 ] [*a *la.a45     ] [*f *lf.a135]]
-            [[*b *lb.run3] [*h *lh.walk90 ] [*a *la.a23     ] [*f *lf.a113]]
-            [[*b *lb.run1] [*h *lh.stand90] [*a *la.a23 true] [*f *lf.a68 ]]
-            [[*b *lb.run2] [*h *lh.walk90 ] [*a *la.a45 true] [*f *lf.a45 ]]
-            [[*b *lb.run3] [*h *lh.walk90 ] [*a *la.a23 true] [*f *lf.a23 ]]
+            [[*b *lb.run1] [*h *lh.stand90] [*a1 *la.a23     ] [*f1 *lf.a113] [*a2 *la.a23 true] [*f2 *lf.a68 ]]
+            [[*b *lb.run2] [*h *lh.walk90 ] [*a1 *la.a45     ] [*f1 *lf.a135] [*a2 *la.a45 true] [*f2 *lf.a45 ]]
+            [[*b *lb.run3] [*h *lh.walk90 ] [*a1 *la.a23     ] [*f1 *lf.a113] [*a2 *la.a23 true] [*f2 *lf.a68 ]]
+            [[*b *lb.run1] [*h *lh.stand90] [*a1 *la.a23 true] [*f1 *lf.a68 ] [*a2 *la.a23     ] [*f2 *lf.a113]]
+            [[*b *lb.run2] [*h *lh.walk90 ] [*a1 *la.a45 true] [*f1 *lf.a45 ] [*a2 *la.a45     ] [*f2 *lf.a135]]
+            [[*b *lb.run3] [*h *lh.walk90 ] [*a1 *la.a23 true] [*f1 *lf.a68 ] [*a2 *la.a23     ] [*f2 *lf.a113]]
         ]
-        crouch:  [[*b *lb.kneel ] [*h *lh.stand90] [*a *la.a23     ] [*f *lf.a45     ]]
-        crawl1:  [[*b *lb.crawl1] [*h *lh.crawl  ] [*a *la.a0      ] [*f *lf.a90     ]]
-        crawl2_1:[[*b *lb.crawl2] [*h *lh.crawl  ] [*a *la.a45     ] [*f *lf.a90     ]]
-        crawl2_2:[[*b *lb.crawl2] [*h *lh.crawl  ] [*a *la.a45 true] [*f *lf.a90     ]]
-        prejump: [[*b *lb.run3  ] [*h *lh.stand90] [*a *la.a23     ] [*f *lf.a113    ]]
-        jump:    [[*b *lb.run1  ] [*h *lh.walk90 ] [*a *la.a23 true] [*f *lf.a68     ]]
-        hurtbk:  [[*b *lb.hurtbk] [*h *lh.hurtbk ] [*a *la.a23     ] [*f *lf.a68     ]]
-        laybk:   [[*b *lb.laybk ] [*h *lh.laybk  ] [*a *la.a90     ] [*f *lf.a90     ]]
+        crouch:  [[*b *lb.kneel ] [*h *lh.stand90] [*a1 *la.a23     ] [*f1 *lf.a45     ] [*a2 *la.a0      ] [*f2 *lf.a45     ]]
+        crawl1:  [[*b *lb.crawl1] [*h *lh.crawl  ] [*a1 *la.a0      ] [*f1 *lf.a90     ] [*a2 *la.a0      ] [*f2 *lf.a90     ]]
+        crawl2_1:[[*b *lb.crawl2] [*h *lh.crawl  ] [*a1 *la.a45     ] [*f1 *lf.a90     ] [*a2 *la.a45 true] [*f2 *lf.a90     ]]
+        crawl2_2:[[*b *lb.crawl2] [*h *lh.crawl  ] [*a1 *la.a45 true] [*f1 *lf.a90     ] [*a2 *la.a45     ] [*f2 *lf.a90     ]]
+        prejump: [[*b *lb.run3  ] [*h *lh.stand90] [*a1 *la.a23     ] [*f1 *lf.a113    ] [*a2 *la.a23 true] [*f2 *lf.a68     ]]
+        jump:    [[*b *lb.run1  ] [*h *lh.walk90 ] [*a1 *la.a23 true] [*f1 *lf.a68     ] [*a2 *la.a23     ] [*f2 *lf.a113    ]]
+        hurtbk:  [[*b *lb.hurtbk] [*h *lh.hurtbk ] [*a1 *la.a45 true] [*f1 *lf.a68     ] [*a2 *la.a0      ] [*f2 *lf.a113    ]]
+        laybk:   [[*b *lb.laybk ] [*h *lh.laybk  ] [*a1 *la.a90     ] [*f1 *lf.a90     ] [*a2 *la.a90     ] [*f2 *lf.a90     ]]
         look_stand:[
             [[*h *lh.stand23]]
             [[*h *lh.stand23]]
