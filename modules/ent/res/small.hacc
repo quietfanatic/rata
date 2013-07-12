@@ -5,7 +5,7 @@
     }}
     fixdefs:{"ent::BipedFixdefs":{
         stand:{
-            b2:{ shape:$.stand_shape.b2Shape friction:0 }
+            b2:{ shape:$.stand_shape.b2Shape friction:0 is_sensor:true }
             coll_a:[ground] coll_b:[ground]
         }
         hurt:{

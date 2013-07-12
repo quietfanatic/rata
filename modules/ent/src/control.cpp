@@ -8,7 +8,9 @@ namespace ent {
 
     void Player::Sprite_draw () {
         if (character && cursor_tex && cursor_frame) {
-            draw_sprite(cursor_frame, cursor_tex, character->Controllable_get_focus());
+            Vec focus = character->Controllable_get_focus();
+            if (focus.is_defined())
+                draw_sprite(cursor_frame, cursor_tex, focus);
         }
     }
     void Player::Mind_think () {
