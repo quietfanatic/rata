@@ -88,6 +88,7 @@ namespace ent {
     };
 
     struct BipedFixdefs {
+        phys::FixtureDef feet;
         phys::FixtureDef stand;
         phys::FixtureDef hurt;
         phys::FixtureDef crouch;

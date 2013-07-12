@@ -86,21 +86,16 @@ namespace ent {
                     : &def->fixdefs->stand
                 : &def->fixdefs->stand
         );
-        size_t n_fixes = 0;
-        size_t n_active = 0;
         for (auto fix = b2body->GetFixtureList(); fix; fix = fix->GetNext()) {
             auto fd = (phys::FixtureDef*)fix->GetUserData();
             if (def->fixdefs->is_primary(fd)) {
-                n_fixes++;
                 phys::Filter filt = fix->GetFilterData();
                 if (filt.active != (fd == active)) {
                     filt.active = (fd == active);
                     fix->SetFilterData(filt);
                 }
-                if (filt.active) n_active++;
             }
         }
-        fprintf(stderr, "[biped] fixes:%lu active:%lu\n", n_fixes, n_active);
     }
     float Biped::Grounded_velocity () {
         int8 mdir = move_direction();
@@ -143,15 +138,12 @@ namespace ent {
         }
          // Read sensors
         ceiling_low = false;
-        size_t n_contacts = 0;
         foreach_contact([&](b2Fixture* mine, b2Fixture* other){
             auto fd = (phys::FixtureDef*)mine->GetUserData();
             if (fd == &def->fixdefs->ceiling_low) {
                 ceiling_low = true;
             }
-            else n_contacts++;
         });
-        fprintf(stderr, "[biped] n_contacts:%lu\n", n_contacts);
     }
 
     void Biped::Sprite_draw () {
@@ -271,6 +263,7 @@ HCB_END(BipedPoses)
 
 HCB_BEGIN(BipedFixdefs)
     name("ent::BipedFixdefs");
+    attr("feet", member(&BipedFixdefs::feet));
     attr("stand", member(&BipedFixdefs::stand));
     attr("hurt", member(&BipedFixdefs::hurt));
     attr("crouch", member(&BipedFixdefs::crouch));
