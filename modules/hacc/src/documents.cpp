@@ -108,15 +108,10 @@ namespace hacc {
     }
 
     namespace X {
-        static String stos (size_t s) {
-            std::ostringstream ss;
-            ss << s;
-            return ss.str();
-        }
         Document_Bad_ID::Document_Bad_ID (size_t got, size_t next) :
             Logic_Error(
-                "Invalid hacc::Document special ID: " + stos(got)
-              + " >= _next_id " + stos(next)
+                "Invalid hacc::Document special ID: " + std::to_string(got)
+              + " >= _next_id " + std::to_string(next)
             ), got(got), next(next)
         { }
     }

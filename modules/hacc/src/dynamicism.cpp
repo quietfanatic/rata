@@ -525,12 +525,6 @@ namespace hacc {
     }
 
     namespace X {
-        static String stos (size_t s) {
-            std::stringstream ss;
-            ss << s;
-            return ss.str();
-        }
-
         Unhaccable_Type::Unhaccable_Type (Type t) :
             Logic_Error(
                 "Unhaccable type: " + t.name()
@@ -568,15 +562,15 @@ namespace hacc {
         { }
         Missing_Elem::Missing_Elem (Type type, size_t i) :
             Logic_Error(
-                "Missing required element " + stos(i)
+                "Missing required element " + std::to_string(i)
               + " of type " + type.name()
             ), type(type), index(i)
         { }
         Too_Long::Too_Long (Type type, size_t wanted, size_t max) :
             Logic_Error(
-                "Provided length " + stos(wanted)
+                "Provided length " + std::to_string(wanted)
               + " is too long for type " + type.name()
-              + " with maximum size " + stos(max)
+              + " with maximum size " + std::to_string(max)
             ), type(type), wanted(wanted), maximum(max)
         { }
         No_Attr::No_Attr (Type type, String n) :
@@ -586,9 +580,9 @@ namespace hacc {
         { }
         Out_Of_Range::Out_Of_Range (Type type, size_t i, size_t len) :
             Logic_Error(
-                "Index " + stos(i)
+                "Index " + std::to_string(i)
               + " is out of range for instance of type " + type.name()
-              + " with length " + stos(len)
+              + " with length " + std::to_string(len)
             ), type(type), index(i), length(len)
         { }
         No_Attrs::No_Attrs (Type type) :
@@ -611,7 +605,7 @@ namespace hacc {
         { }
         No_Elems::No_Elems (Type type, size_t i) :
             Logic_Error(
-                "Cannot get element " + stos(i)
+                "Cannot get element " + std::to_string(i)
               + " from instance of type " + type.name()
               + " because it has no elements"
             ), type(type), index(i)
@@ -619,7 +613,7 @@ namespace hacc {
         Address_Not_Found::Address_Not_Found (Pointer p) :
             Logic_Error(
                 "Could not find the path of " + p.type.name()
-              + " at " + stos((size_t)p.address)
+              + " at " + std::to_string((size_t)p.address)
             ), pointer(p)
         { }
         Null_Pointer::Null_Pointer (Pointer p) :
