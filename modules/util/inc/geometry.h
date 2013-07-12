@@ -9,6 +9,8 @@ namespace util {
 
      // ANGLES
     float angle_diff (float, float);
+     // For animation; returns 0..8 where 0 = down, 4 = forward, 8 = up
+    uint8 angle_frame (float ang);
 
      // Our wheels are better.
     struct Vec {

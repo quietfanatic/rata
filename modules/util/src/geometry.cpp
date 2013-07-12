@@ -4,7 +4,14 @@ namespace util {
 
     float angle_diff (float a, float b) {
         float d1 = fabs(a - b);
+         // In case the angles were not normalized
+        if (d1 > 2*PI) d1 = fmod(d1, 2*PI);
         return d1 > PI ? 2*PI - d1 : d1;
+    }
+
+    uint8 angle_frame (float ang) {
+        float up_ang = angle_diff(ang, -PI/2);
+        return lround(up_ang / PI * 8);
     }
 
     Vec constrain (Vec p, const Rect& r) {
