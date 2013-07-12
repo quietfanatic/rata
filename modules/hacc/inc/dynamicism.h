@@ -198,11 +198,11 @@ namespace hacc {
             size_t index;
             Missing_Elem (Type, size_t);
         };
-        struct Too_Long : Logic_Error {
+        struct Wrong_Size : Logic_Error {
             Type type;
-            size_t wanted;
-            size_t maximum;
-            Too_Long (Type, size_t, size_t);
+            size_t got;
+            size_t expected;
+            Wrong_Size (Type, size_t, size_t);
         };
         struct No_Attr : Logic_Error {
             Type type;

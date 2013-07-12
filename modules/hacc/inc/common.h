@@ -2,6 +2,7 @@
 #define HAVE_HACC_COMMON_H
 
 #include <stdint.h>
+#include <stddef.h>
 #include <string>
 #include <vector>
 #include <functional>
@@ -19,8 +20,11 @@ namespace hacc {
     typedef decltype(nullptr) Null;
     constexpr Null null = nullptr;
 
-    template <class F> using Func = std::function<F>;
+    template <class F>
+    using Func = std::function<F>;
     typedef Func<void (void*)> Cont;
+    template <class C, size_t n>
+    using CArray = C[n];
 
     struct Unknown { };
     struct Tree;

@@ -120,5 +120,11 @@ namespace hacc {
               + " because it has no copy assignment operator"
             ), type(t)
         { }
+        Not_Destructible::Not_Destructible (Type t) :
+            Logic_Error(
+                "Cannot destruct an object of type " + t.name()
+              + " because its destructor is non-existant or deleted"
+            ), type(t)
+        { }
     }
 }

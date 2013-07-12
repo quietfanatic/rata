@@ -196,7 +196,7 @@ namespace hacc {
         else if (!type().data->elem_list.empty()) {
             size_t n = type().data->elem_list.size();
             if (length > n) {
-                throw X::Too_Long(type(), length, n);
+                throw X::Wrong_Size(type(), length, n);
             }
             else for (size_t i = length; i < n; i++) {
                 if (!type().data->elem_list[i]->optional) {
@@ -565,12 +565,19 @@ namespace hacc {
               + " of type " + type.name()
             ), type(type), index(i)
         { }
-        Too_Long::Too_Long (Type type, size_t wanted, size_t max) :
-            Logic_Error(
-                "Provided length " + std::to_string(wanted)
-              + " is too long for type " + type.name()
-              + " with maximum size " + std::to_string(max)
-            ), type(type), wanted(wanted), maximum(max)
+        Wrong_Size::Wrong_Size (Type type, size_t got, size_t expected) :
+            Logic_Error( got > expected ? (
+                    "Provided length " + std::to_string(got)
+                  + " is too long for type " + type.name()
+                  + " with maximum size " + std::to_string(expected)
+            ) : got < expected ? (
+                    "Provided length " + std::to_string(got)
+                  + " is too short for type " + type.name()
+                  + " with minimum size " + std::to_string(expected)
+            ) : (
+                "Somebody threw a Wrong_Size error with equal got and expected values "
+              + std::to_string(got) + " >_>")
+            ), type(type), got(got), expected(expected)
         { }
         No_Attr::No_Attr (Type type, String n) :
             Logic_Error(

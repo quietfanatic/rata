@@ -42,6 +42,8 @@ namespace hacc {
     struct Constructibility;
     template <class C, bool assgn = std::is_copy_assignable<C>::value>
     struct Assignability;
+    template <class C, bool destr = std::is_destructible<C>::value && !std::is_array<C>::value>
+    struct Destructibility;
 
      // Internal wrapper for declaring and getting types
     Type _get_type (
@@ -78,6 +80,10 @@ namespace hacc {
             Type type;
             Not_Assignable (Type);
         };
+        struct Not_Destructible : Logic_Error {
+            Type type;
+            Not_Destructible (Type);
+        };
     }
 
     template <class C>
@@ -107,6 +113,14 @@ namespace hacc {
     struct Assignability<C, false> {
         static void assign (void* to, void* from) { throw X::Not_Assignable(Type::CppType<C>()); }
     };
+    template <class C>
+    struct Destructibility<C, true> {
+        static void destruct (void* p) { ((C*)p)->~C(); }
+    };
+    template <class C>
+    struct Destructibility<C, false> {
+        static void destruct (void* p) { throw X::Not_Destructible(Type::CppType<C>()); }
+    };
 
 }
 
@@ -117,7 +131,7 @@ template <class C> struct Hacc_TypeDecl {
         static hacc::Type t = hacc::_get_type(
             typeid(C), sizeof(C),
             hacc::Constructibility<C>::construct,
-            [](void* p){ ((C*)p)->~C(); },
+            hacc::Destructibility<C>::destruct,
             hacc::Assignability<C>::assign,
             hacc::Constructibility<C>::stalloc,
             hacc::null

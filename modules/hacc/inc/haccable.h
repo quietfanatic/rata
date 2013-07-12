@@ -200,7 +200,7 @@ namespace hacc {
             static Type dt = _get_type(
                 typeid(C), sizeof(C),
                 Constructibility<C>::construct,
-                [](void* p){ ((C*)p)->~C(); },
+                Destructibility<C>::destruct,
                 Assignability<C>::assign,
                 Constructibility<C>::stalloc,
                 Hacc_TypeDecl<C>::describe
