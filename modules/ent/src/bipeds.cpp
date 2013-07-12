@@ -42,19 +42,7 @@ namespace ent {
         if (ground) {
              // Turn around
             if (!crawling || !ceiling_low) {
-                switch (mdir) {
-                    case -1: {
-                        if (vel().x <= 0)
-                            direction = -1;
-                        break;
-                    }
-                    case 1: {
-                        if (vel().x >= 0)
-                            direction = 1;
-                        break;
-                    }
-                    default: break;
-                }
+                direction = focus.x > 0 ? 1 : focus.x < 0 ? -1 : direction;
             }
              // Decide whether we're crouching
             if (buttons & CROUCH_BIT) {
@@ -102,19 +90,22 @@ namespace ent {
         }
     }
     float Biped::Grounded_velocity () {
+        uint8 mdir = move_direction();
         if (crouching)
-            return stats.crawl_speed * move_direction();
+            return stats.crawl_speed * mdir;
+        else if (direction != mdir)
+            return stats.walk_speed * mdir;
         else 
-            return stats.run_speed * move_direction();
+            return stats.run_speed * mdir;
     }
     float Biped::Grounded_friction () {
         if (crouching) {
             return stats.crawl_friction;
         }
-        else if (int8 dir = move_direction()) {
-            if (vel().x * dir >= stats.walk_speed)
+        else if (int8 mdir = move_direction()) {
+            if (vel().x * mdir > stats.walk_speed)
                 return stats.run_friction;
-            else if (vel().x * dir >= 0)
+            else if (vel().x * mdir >= 0)
                 return stats.walk_friction;
             else
                 return stats.skid_friction;
@@ -149,6 +140,7 @@ namespace ent {
 
     void Biped::Sprite_draw () {
         model.apply_skin(def->skin);
+         // Basic pose
         if (ground) {
             if (crawling) {
                 if (fabs(vel().x) < 0.01) {
@@ -166,6 +158,7 @@ namespace ent {
             }
             else if (crouching) {
                 model.apply_pose(&def->poses->crouch);
+                model.apply_pose(&def->poses->look_stand[angle_frame(atan2(focus.y, focus.x))]);
             }
             else {
                 if (fabs(vel().x) < 0.01) {
@@ -173,17 +166,24 @@ namespace ent {
                 }
                 else {
                     float stepdist = fmod(distance_walked, 2.0);
-                    if (stepdist < 0.5)
+                    if (stepdist < 0.5) {
                         model.apply_pose(&def->poses->walk1);
-                    else if (stepdist >= 1 && stepdist < 1.5)
+                        model.apply_pose(&def->poses->look_walk[angle_frame(atan2(focus.y, focus.x))]);
+                    }
+                    else if (stepdist >= 1 && stepdist < 1.5) {
                         model.apply_pose(&def->poses->walk2);
-                    else
+                        model.apply_pose(&def->poses->look_walk[angle_frame(atan2(focus.y, focus.x))]);
+                    }
+                    else {
                         model.apply_pose(&def->poses->stand);
+                        model.apply_pose(&def->poses->look_stand[angle_frame(atan2(focus.y, focus.x))]);
+                    }
                 }
             }
         }
         else {
             model.apply_pose(&def->poses->walk1);
+            model.apply_pose(&def->poses->look_walk[angle_frame(atan2(focus.y, focus.x))]);
         }
         model.draw(pos(), direction < 0);
     }
