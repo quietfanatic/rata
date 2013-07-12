@@ -148,7 +148,6 @@ namespace ent {
 
     void Biped::Sprite_draw () {
         model.apply_skin(def->skin);
-         // Basic pose
         if (ground) {
             if (crawling) {
                 if (fabs(vel().x) < 0.01) {
@@ -171,6 +170,7 @@ namespace ent {
             else {
                 if (fabs(vel().x) < 0.01) {
                     model.apply_pose(&def->poses->stand);
+                    model.apply_pose(&def->poses->look_stand[angle_frame(atan2(focus.y, focus.x))]);
                 }
                 else {
                     float stepdist = fmod(distance_walked, 2.0);
