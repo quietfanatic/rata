@@ -1,6 +1,6 @@
 {"std::unordered_map<std::string, vis::Layout>":{
     body: {
-        size: [85 63]
+        size: [85 64]
         frames: [
             {name: stand  offset: [11  3] box: [-10 -2 10 18] points: [[ 0 16] [-1 14]]}
             {name: walk   offset: [32  3] box: [-10 -2 10 18] points: [[ 0 15] [-1 13]]}
