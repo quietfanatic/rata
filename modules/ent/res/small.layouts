@@ -25,7 +25,7 @@
             {name: walk45   offset: [ 33 42] box: [-11 -12  9 16]}
             {name: walk68   offset: [ 54 42] box: [-11 -12  9 16]}
             {name: walk90   offset: [ 75 42] box: [-11 -12  9 16]}
-            {name: walk425  offset: [ 96 42] box: [-11 -12  9 16]}
+            {name: walk135  offset: [ 96 42] box: [-11 -12  9 16]}
             {name: walk158  offset: [117 42] box: [-11 -12  9 16]}
             {name: hurtbk   offset: [ 12 71] box: [-11 -12  9 16]}
             {name: crawl    offset: [ 32 71] box: [-10 -12 10 16]}

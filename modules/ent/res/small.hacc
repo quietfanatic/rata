@@ -88,5 +88,27 @@
         crawl2_2:[[*b *lb.crawl2] [*h *lh.crawl  ] [*a *la.a45 true] [*f *lf.a90     ]]
         hurtbk:  [[*b *lb.hurtbk] [*h *lh.hurtbk ] [*a *la.a23     ] [*f *lf.a68     ]]
         laybk:   [[*b *lb.laybk ] [*h *lh.laybk  ] [*a *la.a90     ] [*f *lf.a90     ]]
+        look_stand:[
+            [[*h *lh.stand23]]
+            [[*h *lh.stand23]]
+            [[*h *lh.stand45]]
+            [[*h *lh.stand68]]
+            [[*h *lh.stand90]]
+            [[*h *lh.stand90]]
+            [[*h *lh.stand135]]
+            [[*h *lh.stand158]]
+            [[*h *lh.stand158]]
+        ]
+        look_walk:[
+            [[*h *lh.walk23]]
+            [[*h *lh.walk23]]
+            [[*h *lh.walk45]]
+            [[*h *lh.walk68]]
+            [[*h *lh.walk90]]
+            [[*h *lh.walk90]]
+            [[*h *lh.walk135]]
+            [[*h *lh.walk158]]
+            [[*h *lh.walk158]]
+        ]
     }}
 }}

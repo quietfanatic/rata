@@ -83,6 +83,8 @@ namespace ent {
         vis::Pose crawl2_2;
         vis::Pose hurtbk;
         vis::Pose laybk;
+        vis::Pose look_stand [9];
+        vis::Pose look_walk [9];
     };
 
     struct BipedFixdefs {

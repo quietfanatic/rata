@@ -249,6 +249,8 @@ HCB_BEGIN(BipedPoses)
     attr("crawl2_2", member(&BipedPoses::crawl2_2));
     attr("hurtbk", member(&BipedPoses::hurtbk));
     attr("laybk", member(&BipedPoses::laybk));
+    attr("look_stand", member(&BipedPoses::look_stand));
+    attr("look_walk", member(&BipedPoses::look_walk));
 HCB_END(BipedPoses)
 
 HCB_BEGIN(BipedFixdefs)
