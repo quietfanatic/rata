@@ -14,16 +14,20 @@ namespace vis {
             auto n_branches = seg.branches.size();
             for (auto& frame : seg.layout->frames) {
                 if (frame.points.size() < n_branches) {
-                    fprintf(stderr, "Skeleton error: Frame %s of Seg %s doesn't have enough points (%lu < %lu).\n",
-                        frame.name.c_str(), seg.name.c_str(), frame.points.size(), n_branches
+                    throw hacc::X::Logic_Error(
+                        "Skeleton error: Frame " + frame.name
+                      + " of Seg " + seg.name
+                      + " doesn't have enough points (" + std::to_string(frame.points.size())
+                      + " < " + std::to_string(n_branches) + ")"
                     );
-                    throw std::logic_error("Skeleton contained errors.");
                 }
             }
             for (Skel::Seg* branch : seg.branches) {
                 if (branch->parent) {
-                    fprintf(stderr, "Skeleton error: Seg %s was claimed by multiple parents.\n", branch->name.c_str());
-                    throw std::logic_error("Skeleton contained errors.");
+                    throw hacc::X::Logic_Error(
+                        "Skeleton error: Seg " + branch->name
+                      + " was claimed by multiple parents"
+                    );
                 }
                 branch->parent = branch;
             }
@@ -65,10 +69,7 @@ namespace vis {
             return;
         }
         model_logger.log("Drawing a model with %lu segs", segs.size());
-        draw_seg(
-            skel->root, pos + skel->root_offset,
-            fliph, flipv, z
-        );
+        draw_seg(skel->root, pos + skel->root_offset, fliph, flipv, z);
     }
 
     void Model::apply_skel (Skel* skel_) {
