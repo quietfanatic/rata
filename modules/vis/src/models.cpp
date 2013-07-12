@@ -38,21 +38,25 @@ namespace vis {
         return r;
     }
 
-    void Model::draw_seg (Model::Seg* ms, Skel::Seg* ss, Vec pos, bool fh, bool fv, float z) {
-        if (!ms->skin) return;
+    void Model::draw_seg (Skel::Seg* ss, Vec pos, bool fliph, bool flipv, float z) {
+        Model::Seg* ms = &segs[skel->seg_index(ss)];
         if (!ms->pose) return;
-        for (core::Texture* tex : ms->skin->textures) {
-            draw_sprite(
-                ms->pose->frame, tex, pos,
-                ms->pose->fliph?!fh:fh, ms->pose->flipv?!fv:fv,
-                z + ss->z_offset
-            );
+         // Wishing for a boolean xor
+        bool fh = ms->pose->fliph ? !fliph : fliph;
+        bool fv = ms->pose->flipv ? !flipv : flipv;
+        if (ms->skin) {
+            for (core::Texture* tex : ms->skin->textures) {
+                draw_sprite(
+                    ms->pose->frame, tex, pos,
+                    fh, fv, z + ss->z_offset
+                );
+            }
         }
         for (Skel::Seg*& branch : ss->branches) {
             Vec pt = PX*ms->pose->frame->points[&branch - ss->branches.data()];
             if (fh) pt.x = -pt.x;
             if (fv) pt.y = -pt.y;
-            draw_seg(&segs[skel->seg_index(branch)], branch, pos + pt, fh, fv, z);
+            draw_seg(branch, pos + pt, fliph, flipv, z);
         }
     }
     void Model::draw (Vec pos, bool fliph, bool flipv, float z) {
@@ -62,8 +66,8 @@ namespace vis {
         }
         model_logger.log("Drawing a model with %lu segs", segs.size());
         draw_seg(
-            &segs[skel->seg_index(skel->root)], skel->root,
-            pos + skel->root_offset, fliph, flipv, z
+            skel->root, pos + skel->root_offset,
+            fliph, flipv, z
         );
     }
 

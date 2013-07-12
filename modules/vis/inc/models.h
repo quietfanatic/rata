@@ -58,7 +58,6 @@ namespace vis {
         struct Seg {
             Skin::App* skin = NULL;
             Pose::App* pose = NULL;
-
         };
 
         Skel* skel = NULL;
@@ -72,10 +71,9 @@ namespace vis {
         void apply_pose (Pose*);
         void apply_skin (Skin*);
 
-        void draw_seg (Model::Seg* ms, Skel::Seg* ss, Vec pos, bool fh, bool fv, float z);
+        void draw_seg (Skel::Seg* ss, Vec pos, bool fh, bool fv, float z);
         void draw (Vec pos, bool fliph = false, bool flipv = false, float z = 0);
     };
-
 
 }
 
