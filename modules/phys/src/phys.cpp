@@ -63,6 +63,19 @@ namespace phys {
         }
     } mycl;
 
+    struct myCF : b2ContactFilter {
+        bool ShouldCollide (b2Fixture* a, b2Fixture* b) override {
+            FixtureDef* adef = (FixtureDef*)a->GetUserData();
+            FixtureDef* bdef = (FixtureDef*)b->GetUserData();
+            const Filter& afilt = reinterpret_cast<const Filter&>(a->GetFilterData());
+            const Filter& bfilt = reinterpret_cast<const Filter&>(b->GetFilterData());
+            return afilt.active && bfilt.active
+                && afilt.mask & bfilt.mask
+                && !(afilt.unmask & bfilt.unmask)
+                && (adef->coll_a & bdef->coll_b || adef->coll_b & bdef->coll_a);
+        }
+    } mycf;
+
      // Space handling
 
     static Logger space_logger ("space");
@@ -263,6 +276,7 @@ HCB_BEGIN(b2FixtureDef)
     attr("restitution", member(&b2FixtureDef::restitution).optional());
     attr("density", member(&b2FixtureDef::density).optional());
     attr("is_sensor", member(&b2FixtureDef::isSensor).optional());
+    attr("filter", ref_func<Filter>([](b2FixtureDef& fd)->Filter&{ return reinterpret_cast<Filter&>(fd.filter); }).optional());
 HCB_END(b2FixtureDef)
 
 static std::vector<Collision_Rule*> coll_b2v (uint64 b) {
@@ -297,6 +311,13 @@ HCB_BEGIN(FixtureDef)
         }
     ).optional().narrow());
 HCB_END(FixtureDef)
+
+HCB_BEGIN(Filter)
+    name("phys::Filter");
+    attr("mask", member(&Filter::mask).optional());
+    attr("unmask", member(&Filter::unmask).optional());
+    attr("active", member(&Filter::active).optional());
+HCB_END(Filter)
 
 HCB_BEGIN(b2BodyType)
     name("b2BodyType");
