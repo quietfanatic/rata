@@ -20,6 +20,6 @@
         air_friction: 0.2
         air_speed: 4.0
         jump_speed: 16.0
-        jump_delay: 0.99
+        jump_delay: 0.099
     }}
 }}

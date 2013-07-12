@@ -79,7 +79,10 @@ namespace ent {
         vis::Pose stand;
         vis::Pose walk1;
         vis::Pose walk2;
+        vis::Pose run [6];
         vis::Pose crouch;
+        vis::Pose prejump;
+        vis::Pose jump;
         vis::Pose crawl1;
         vis::Pose crawl2_1;
         vis::Pose crawl2_2;

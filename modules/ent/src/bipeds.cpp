@@ -177,8 +177,7 @@ namespace ent {
         uint8 look_frame = angle_frame(atan2(focus.y, focus.x));
         if (ground) {
             if (jump_timer) {
-                 // TODO: this looks weird
-                model.apply_pose(&def->poses->crouch);
+                model.apply_pose(&def->poses->prejump);
                 model.apply_pose(&def->poses->look_stand[look_frame]);
             }
             else if (crawling) {
@@ -222,7 +221,7 @@ namespace ent {
             }
         }
         else {
-            model.apply_pose(&def->poses->walk1);
+            model.apply_pose(&def->poses->jump);
             model.apply_pose(&def->poses->look_walk[look_frame]);
         }
         model.draw(pos(), direction < 0);
@@ -286,7 +285,10 @@ HCB_BEGIN(BipedPoses)
     attr("stand", member(&BipedPoses::stand));
     attr("walk1", member(&BipedPoses::walk1));
     attr("walk2", member(&BipedPoses::walk2));
+    attr("run", member(&BipedPoses::run));
     attr("crouch", member(&BipedPoses::crouch));
+    attr("prejump", member(&BipedPoses::prejump));
+    attr("jump", member(&BipedPoses::jump));
     attr("crawl1", member(&BipedPoses::crawl1));
     attr("crawl2_1", member(&BipedPoses::crawl2_1));
     attr("crawl2_2", member(&BipedPoses::crawl2_2));
