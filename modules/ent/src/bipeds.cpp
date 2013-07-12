@@ -53,13 +53,12 @@ namespace ent {
             else if (!crouching || !ceiling_low) {
                 crouching = false;
                 crawling = false;
-            }
-             // For walking animation
-            oldxrel = pos().x - ground->pos().x;
-             // Initiate jump
-            if (buttons & JUMP_BIT) {
-                 // TODO: jump delay
-                set_vel(Vec(vel().x, stats.jump_speed));
+                 // Initiate jump
+                if (buttons & JUMP_BIT) {
+                     // TODO: jump delay
+                    set_vel(Vec(vel().x, stats.jump_speed));
+                    ground = NULL;
+                }
             }
         }
         else {  // In the air
@@ -70,6 +69,11 @@ namespace ent {
                 set_vel(Vec(stats.air_speed * mdir, vel().y));
             }
         }
+         // For walking animation
+        if (ground)
+            oldxrel = pos().x - ground->pos().x;
+        else
+            oldxrel = 0;
          // Change active fixture
         auto active = (
             ground
@@ -82,19 +86,24 @@ namespace ent {
                     : &def->fixdefs->stand
                 : &def->fixdefs->stand
         );
+        size_t n_fixes = 0;
+        size_t n_active = 0;
         for (auto fix = b2body->GetFixtureList(); fix; fix = fix->GetNext()) {
             auto fd = (phys::FixtureDef*)fix->GetUserData();
             if (def->fixdefs->is_primary(fd)) {
+                n_fixes++;
                 phys::Filter filt = fix->GetFilterData();
                 if (filt.active != (fd == active)) {
                     filt.active = (fd == active);
                     fix->SetFilterData(filt);
                 }
+                if (filt.active) n_active++;
             }
         }
+        fprintf(stderr, "[biped] fixes:%lu active:%lu\n", n_fixes, n_active);
     }
     float Biped::Grounded_velocity () {
-        uint8 mdir = move_direction();
+        int8 mdir = move_direction();
         if (crouching)
             return stats.crawl_speed * mdir;
         else if (direction == mdir)
@@ -134,12 +143,15 @@ namespace ent {
         }
          // Read sensors
         ceiling_low = false;
+        size_t n_contacts = 0;
         foreach_contact([&](b2Fixture* mine, b2Fixture* other){
             auto fd = (phys::FixtureDef*)mine->GetUserData();
             if (fd == &def->fixdefs->ceiling_low) {
                 ceiling_low = true;
             }
+            else n_contacts++;
         });
+        fprintf(stderr, "[biped] n_contacts:%lu\n", n_contacts);
     }
 
     void Biped::Sprite_draw () {

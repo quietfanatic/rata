@@ -25,7 +25,7 @@
             coll_a:[ground] coll_b:[ground]
         }
         ceiling_low:{
-            b2:{ shape:$.ceiling_low_shape.b2Shape friction:0 }
+            b2:{ shape:$.ceiling_low_shape.b2Shape friction:0 is_sensor:true }
         }
     }}
      // 16ths: 0.0625 0.125 0.1875 0.25 0.3125 0.375 0.4375 0.5
