@@ -49,69 +49,44 @@
         verts:[[-0.1875 0.0625] [0.1875 0.0625] [0.1875 1.375] [-0.1875 1.375]]
     }}
     skel:{"vis::Skel":{
-        segs:[
-            {name:head    branches:[]                       layout:$("modules/ent/res/small.layouts").head    z_offset:-0.02}
-            {name:forearm branches:[]                       layout:$("modules/ent/res/small.layouts").forearm z_offset:-0.06}
-            {name:arm     branches:[$.skel.segs.forearm]         layout:$("modules/ent/res/small.layouts").arm     z_offset:-0.04}
-            {name:body    branches:[$.skel.segs.head $.skel.segs.arm] layout:$("modules/ent/res/small.layouts").body    z_offset: 0.00}
-        ]
+        segs:[{
+            name:head 
+            branches:[]
+            layout:&lh $("modules/ent/res/small.layouts").head
+            z_offset:-0.02  // Only 8-bit precision if that
+        } {
+            name:forearm
+            branches:[]
+            layout:&lf $("modules/ent/res/small.layouts").forearm
+            z_offset:-0.06
+        } {
+            name:arm
+            branches:[$.skel.segs.forearm]
+            layout:&la $("modules/ent/res/small.layouts").arm
+            z_offset:-0.04
+        } {
+            name:body
+            branches:[$.skel.segs.head $.skel.segs.arm]
+            layout:&lb$("modules/ent/res/small.layouts").body
+            z_offset: 0.00
+        }]
         root:$.skel.segs.body
         root_offset:[0 0]
     }}
     poses:{"ent::BipedPoses":{
         stand:[
-            [&b $.skel.segs.body    $("modules/ent/res/small.layouts").body.stand  ]
-            [&h $.skel.segs.head    $("modules/ent/res/small.layouts").head.stand90]
-            [&a $.skel.segs.arm     $("modules/ent/res/small.layouts").arm.a0      ]
-            [&f $.skel.segs.forearm $("modules/ent/res/small.layouts").forearm.a0  ]
+            [&b $.skel.segs.body    *lb.stand  ]
+            [&h $.skel.segs.head    *lh.stand90]
+            [&a $.skel.segs.arm     *la.a0     ]
+            [&f $.skel.segs.forearm *lf.a0     ]
         ]
-        walk1:[
-            [*b $("modules/ent/res/small.layouts").body.walk  ]
-            [*h $("modules/ent/res/small.layouts").head.walk90]
-            [*a $("modules/ent/res/small.layouts").arm.a23    ]
-            [*f $("modules/ent/res/small.layouts").forearm.a23]
-        ]
-        walk2:[
-            [*b $("modules/ent/res/small.layouts").body.walk  ]
-            [*h $("modules/ent/res/small.layouts").head.walk90]
-            [*a $("modules/ent/res/small.layouts").arm.a23     true]
-            [*f $("modules/ent/res/small.layouts").forearm.a23 true]
-        ]
-        crouch:[
-            [*b $("modules/ent/res/small.layouts").body.kneel  ]
-            [*h $("modules/ent/res/small.layouts").head.stand90]
-            [*a $("modules/ent/res/small.layouts").arm.a23     ]
-            [*f $("modules/ent/res/small.layouts").forearm.a45 ]
-        ]
-        crawl1:[
-            [*b $("modules/ent/res/small.layouts").body.crawl1]
-            [*h $("modules/ent/res/small.layouts").head.crawl ]
-            [*a $("modules/ent/res/small.layouts").arm.a0     ]
-            [*f $("modules/ent/res/small.layouts").forearm.a90]
-        ]
-        crawl2_1:[
-            [*b $("modules/ent/res/small.layouts").body.crawl2]
-            [*h $("modules/ent/res/small.layouts").head.crawl ]
-            [*a $("modules/ent/res/small.layouts").arm.a45    ]
-            [*f $("modules/ent/res/small.layouts").forearm.a90]
-        ]
-        crawl2_2:[
-            [*b $("modules/ent/res/small.layouts").body.crawl2 ]
-            [*h $("modules/ent/res/small.layouts").head.crawl  ]
-            [*a $("modules/ent/res/small.layouts").arm.a45 true]
-            [*f $("modules/ent/res/small.layouts").forearm.a90 ]
-        ]
-        hurtbk:[
-            [*b $("modules/ent/res/small.layouts").body.hurtbk]
-            [*h $("modules/ent/res/small.layouts").head.hurtbk]
-            [*a $("modules/ent/res/small.layouts").arm.a23    ]
-            [*f $("modules/ent/res/small.layouts").forearm.a68]
-        ]
-        laybk:[
-            [*b $("modules/ent/res/small.layouts").body.laybk ]
-            [*h $("modules/ent/res/small.layouts").head.laybk ]
-            [*a $("modules/ent/res/small.layouts").arm.a90    ]
-            [*f $("modules/ent/res/small.layouts").forearm.a90]
-        ]
+        walk1:   [[*b *lb.walk  ] [*h *lh.walk90 ] [*a *la.a23     ] [*f *lf.a23     ]]
+        walk2:   [[*b *lb.walk  ] [*h *lh.walk90 ] [*a *la.a23 true] [*f *lf.a23 true]]
+        crouch:  [[*b *lb.kneel ] [*h *lh.stand90] [*a *la.a23     ] [*f *lf.a45     ]]
+        crawl1:  [[*b *lb.crawl1] [*h *lh.crawl  ] [*a *la.a0      ] [*f *lf.a90     ]]
+        crawl2_1:[[*b *lb.crawl2] [*h *lh.crawl  ] [*a *la.a45     ] [*f *lf.a90     ]]
+        crawl2_2:[[*b *lb.crawl2] [*h *lh.crawl  ] [*a *la.a45 true] [*f *lf.a90     ]]
+        hurtbk:  [[*b *lb.hurtbk] [*h *lh.hurtbk ] [*a *la.a23     ] [*f *lf.a68     ]]
+        laybk:   [[*b *lb.laybk ] [*h *lh.laybk  ] [*a *la.a90     ] [*f *lf.a90     ]]
     }}
 }}
