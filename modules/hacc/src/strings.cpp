@@ -375,16 +375,6 @@ namespace hacc {
                 }
             }
         }
-        Tree parse_parens () {
-            p++;  // for the (
-            Tree r = parse_term();
-            parse_ws();
-            if (look() == ')') p++;
-            else {
-                throw error("Extra stuff in parens");
-            }
-            return r;
-        }
         Tree parse_bareword () {
              // A previous switch ensures this is a bare word and not a string.
             String word = parse_ident("An ID of some sort (this shouldn't happen)");
@@ -457,8 +447,13 @@ namespace hacc {
             p++;  // for the *
             std::string name = parse_ident("after the * for a backreference");
             auto iter = refs.find(name);
-            if (iter != refs.end())
-                return iter->second;
+            if (iter != refs.end()) {
+                Tree r = iter->second;
+                if (r.form() == PATH)
+                    return Tree(continue_path(r.as<Path>()));
+                else
+                    return r;
+            }
             else throw error("Unknown backreference: *" + escape_ident(name));
         }
 
@@ -466,6 +461,18 @@ namespace hacc {
             Tree term = parse_term();
             refs.emplace(name, term);
             return term;
+        }
+        Tree parse_parens () {
+            p++;  // for the (
+            Tree term = parse_term();
+            if (look() == ')') p++;
+            else {
+                throw error("Extra stuff in parens");
+            }
+            if (term.form() == PATH)
+                return Tree(continue_path(term.as<Path>()));
+            else
+                return term;
         }
 
         Tree parse_term () {
