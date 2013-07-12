@@ -1,4 +1,3 @@
-#include <sstream>
 #include "../inc/tree.h"
 #include "../inc/strings.h"  // for path_to_string for diagnostics
 #include "../inc/files.h"

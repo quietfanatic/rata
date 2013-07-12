@@ -78,9 +78,7 @@ namespace hacc {
             for (DocLink* link = data->next; link != data; link = link->next) {
                 auto obj = static_cast<DocObj*>(link);
                 if (obj->id.empty()) {
-                    std::ostringstream ss ("_");
-                    ss << data->next_id++;
-                    obj->id = ss.str();
+                    obj->id = "_" + std::to_string(data->next_id++);
                 }
                 if (obj->id == s)
                     return Pointer(obj->type, obj + 1);
@@ -95,9 +93,7 @@ namespace hacc {
         for (DocLink* link = data->next; link != data; link = link->next) {
             auto obj = static_cast<DocObj*>(link);
             if (obj->id.empty()) {
-                std::ostringstream ss ("_");
-                ss << data->next_id++;
-                obj->id = ss.str();
+                obj->id = "_" + std::to_string(data->next_id++);
             }
             r.push_back(obj->id);
         }

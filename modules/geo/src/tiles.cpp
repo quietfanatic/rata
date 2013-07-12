@@ -1,6 +1,5 @@
 
 #include <stdexcept>
-#include <sstream>
 #include "../inc/tiles.h"
 #include "../../hacc/inc/everything.h"
 #include "../../util/inc/geometry.h"
@@ -131,10 +130,13 @@ namespace geo {
         uint eaten = 0;
         uint final = 0;
         if (tiles.size() != width * height) {
-            std::ostringstream ss;
-            ss << "Tilemap has wrong number of tiles (";
-            ss << tiles.size() << " != " << (width * height) << " == " << width << " * " << height << ")";
-            throw hacc::X::Logic_Error(ss.str());
+            throw hacc::X::Logic_Error(
+                "Tilemap has wrong number of tiles (" + std::to_string(tiles.size())
+              + " != " + std::to_string(width * height)
+              + " == " + std::to_string(width)
+              + " * " + std::to_string(height)
+              + ")"
+            );
         }
         for (uint y = 0; y < height; y++)
         for (uint x = 0; x < width; x++) {

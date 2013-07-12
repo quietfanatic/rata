@@ -1,10 +1,8 @@
 
  // #giveupandusethestl for getline
-#include <iostream>
 #include <string>
-#include <sstream>
 #include <stdexcept>
-
+#include <iostream>
 #include "../../hacc/inc/everything.h"
 #include "../../hacc/src/types_internal.h"
 #include "../inc/commands.h"
@@ -197,8 +195,7 @@ HCB_END(HelpCommand)
 struct HistoryCommand : CommandData {
     void operator () () {
         for (uint i = 0; i < command_history.size(); i++) {
-            std::ostringstream num; num << i;
-            print_to_console(num.str() + ": " + command_history[i] + "\n");
+            print_to_console(std::to_string(i) + ": " + command_history[i] + "\n");
         }
     }
 };

@@ -1,4 +1,3 @@
-#include <sstream>
 #include "../inc/common.h"
 #include "../inc/haccable.h"
 
@@ -7,20 +6,20 @@ namespace hacc {
     namespace X {
         const char* Error::what () const noexcept {
             if (longmess.empty()) {
-                std::stringstream ss;
-                ss << mess;
+                longmess = mess;
                 if (!filename.empty()) {
                     if (line) {
-                        ss << " at " << filename << " " << line << ":" << col;
+                        longmess += " at " + filename
+                                     + " " + std::to_string(line)
+                                     + ":" + std::to_string(col);
                     }
                     else {
-                        ss << " while processing " << filename;
+                        longmess += " while processing " + filename;
                     }
                 }
                 else if (line) {
-                    ss << " at " << line << ":" << col;
+                    longmess += " at " + std::to_string(line) + ":" + std::to_string(col);
                 }
-                longmess = ss.str();
             }
             return longmess.c_str();
         }

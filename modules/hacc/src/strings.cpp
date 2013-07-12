@@ -59,9 +59,7 @@ namespace hacc {
             }
             case ELEM: {
                 auto& pe = static_cast<const PathElem&>(*p);
-                std::ostringstream s;
-                s << pe.index;
-                return path_to_string(pe.left, filename) + "[" + s.str() + "]";
+                return path_to_string(pe.left, filename) + "[" + std::to_string(pe.index) + "]";
             }
             default: throw X::Corrupted_Path(p);
         }
@@ -70,12 +68,8 @@ namespace hacc {
     String tree_to_string (Tree t, String filename, uint ind, uint prior_ind) {
         switch (t.form()) {
             case NULLFORM: return "null";
-            case BOOL: return bool(t) ? "true" : "false";
-            case INTEGER: {
-                std::ostringstream s;
-                s << int64(t);
-                return s.str();
-            }
+            case BOOL: return t.as<bool>() ? "true" : "false";
+            case INTEGER: return std::to_string(t.as<int64>());
             case FLOAT: {
                 float f = t.as<float>();
                 std::ostringstream s;
