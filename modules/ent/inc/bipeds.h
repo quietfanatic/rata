@@ -111,6 +111,8 @@ namespace ent {
         BipedPoses* poses;
         vis::Skel* skel;
         vis::Skin* skin;
+         // Not part of the frame pts, because it shouldn't vary.
+        Vec focus_offset;
     };
 
 }

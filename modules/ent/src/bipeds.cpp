@@ -37,7 +37,7 @@ namespace ent {
         focus = constrain(focus + diff, Rect(-18, -13, 18, 13));
     }
     Vec Biped::Controllable_get_focus () {
-        return focus + pos();
+        return focus + pos() + def->focus_offset;
     }
 
      // Change some kinds of movement state
@@ -153,6 +153,7 @@ namespace ent {
 
     void Biped::Sprite_draw () {
         model.apply_skin(def->skin);
+        uint8 look_frame = angle_frame(atan2(focus.y, focus.x));
         if (ground) {
             if (crawling) {
                 if (fabs(vel().x) < 0.01) {
@@ -170,33 +171,33 @@ namespace ent {
             }
             else if (crouching) {
                 model.apply_pose(&def->poses->crouch);
-                model.apply_pose(&def->poses->look_stand[angle_frame(atan2(focus.y, focus.x))]);
+                model.apply_pose(&def->poses->look_stand[look_frame]);
             }
             else {
                 if (fabs(vel().x) < 0.01) {
                     model.apply_pose(&def->poses->stand);
-                    model.apply_pose(&def->poses->look_stand[angle_frame(atan2(focus.y, focus.x))]);
+                    model.apply_pose(&def->poses->look_stand[look_frame]);
                 }
                 else {
                     float stepdist = fmod(distance_walked, 2.0);
                     if (stepdist < 0.5) {
                         model.apply_pose(&def->poses->walk1);
-                        model.apply_pose(&def->poses->look_walk[angle_frame(atan2(focus.y, focus.x))]);
+                        model.apply_pose(&def->poses->look_walk[look_frame]);
                     }
                     else if (stepdist >= 1 && stepdist < 1.5) {
                         model.apply_pose(&def->poses->walk2);
-                        model.apply_pose(&def->poses->look_walk[angle_frame(atan2(focus.y, focus.x))]);
+                        model.apply_pose(&def->poses->look_walk[look_frame]);
                     }
                     else {
                         model.apply_pose(&def->poses->stand);
-                        model.apply_pose(&def->poses->look_stand[angle_frame(atan2(focus.y, focus.x))]);
+                        model.apply_pose(&def->poses->look_stand[look_frame]);
                     }
                 }
             }
         }
         else {
             model.apply_pose(&def->poses->walk1);
-            model.apply_pose(&def->poses->look_walk[angle_frame(atan2(focus.y, focus.x))]);
+            model.apply_pose(&def->poses->look_walk[look_frame]);
         }
         model.draw(pos(), direction < 0);
     }
@@ -249,6 +250,7 @@ HCB_BEGIN(BipedDef)
     attr("skel", member(&BipedDef::skel));
     attr("poses", member(&BipedDef::poses));
     attr("skin", member(&BipedDef::skin));
+    attr("focus_offset", member(&BipedDef::focus_offset));
 HCB_END(BipedDef)
 
 HCB_BEGIN(BipedPoses)
