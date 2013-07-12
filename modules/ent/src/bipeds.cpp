@@ -67,6 +67,8 @@ namespace ent {
             }
         }
         else {  // In the air
+            crouching = false;
+            crawling = false;
             if (vel().x * mdir <= stats.air_speed - stats.air_friction) {
                 set_vel(Vec(vel().x + stats.air_friction * mdir, vel().y));
             }
