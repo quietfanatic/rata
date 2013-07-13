@@ -4,6 +4,7 @@
 #include "../inc/rooms.h"
 #include "../../phys/inc/phys.h"
 #include "../../core/inc/images.h"
+#include "../../vis/inc/tiles.h"
 
 namespace geo {
 
@@ -16,19 +17,18 @@ namespace geo {
         std::vector<TileDef*> tiles;  // TileDefs can be provided with local()
     };
 
-    struct Tilemap : Resident, phys::Object, Linkable<Tilemap> {
-         // Using Object::pos for position
+    struct Tilemap : Resident, phys::Object, vis::Tiles {
         Tileset* tileset;
         core::Texture* texture;
         uint32 width;
         uint32 height;
         std::vector<uint16> tiles;
-        uint vbo_id;
-        uint vao_id;
-        size_t vao_size;
 
         void Resident_emerge () override;
         void Resident_reclude () override;
+
+        Vec Tiles_pos () override { return Object::pos(); }
+        core::Texture* Tiles_texture () override { return texture; }
 
         Tilemap ();
         void finish ();

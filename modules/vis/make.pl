@@ -10,7 +10,7 @@ workflow {
 
     include '../..';
 
-    objects(qw(common sprites models graffiti text));
+    objects(qw(common sprites models graffiti text tiles));
 
     clean_rule(glob 'tmp/*');
 

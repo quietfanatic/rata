@@ -39,6 +39,7 @@ workflow {
         ../vis/tmp/models.o
         ../vis/tmp/sprites.o
         ../vis/tmp/text.o
+        ../vis/tmp/tiles.o
         ../util/tmp/debug.o
         ../util/tmp/geometry.o
         ../../lib/libBox2D.a

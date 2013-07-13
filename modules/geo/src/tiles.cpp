@@ -18,17 +18,15 @@ namespace geo {
 
     static Logger tilemap_logger ("tilemap");
 
-    Links<Tilemap> active_tilemaps;
-
-    Tilemap::Tilemap () : phys::Object() { tilemap_bdf(); }
+    Tilemap::Tilemap () { tilemap_bdf(); }
 
     void Tilemap::Resident_emerge () {
         materialize();
-        Linkable<Tilemap>::link(active_tilemaps);
+        appear();
     }
     void Tilemap::Resident_reclude () {
         dematerialize();
-        Linkable<Tilemap>::unlink();
+        disappear();
     }
 
 
@@ -112,15 +110,6 @@ namespace geo {
         (*final)++;
     }
 
-    struct Tilemap_Vertex {
-        uint16 px;  // None of these are normalized
-        uint16 py;
-        uint16 tx;  // divided by tex size in shader
-        uint16 ty;
-        Tilemap_Vertex (uint16 px, uint16 py, uint16 tx, uint16 ty) : px(px), py(py), tx(tx), ty(ty) { }
-        Tilemap_Vertex () { }
-    };
-
     void Tilemap::finish () {
         apply_bdf(tilemap_bdf());
          // Build up all the edges
@@ -186,87 +175,9 @@ namespace geo {
         );
          // And...we're done with the edges.
         delete[] es;
-         // Now for the graphics buffers
-        auto vdats = new Tilemap_Vertex [height * width][4];
-        uint vdat_i = 0;
-        for (uint y = 0; y < height; y++)
-        for (uint x = 0; x < width; x++) {
-            if (uint tile = tiles[y*width+x]) {
-                uint px = x;
-                uint py = height - y - 1;
-                uint tx = (tile & 0x3fff) % 16 * 16;
-                uint ty = (tile & 0x3fff) / 16 * 16;
-                bool flipx = !!(tile & 0x8000);
-                bool flipy = !!(tile & 0x4000);
-                vdats[vdat_i][0] = Tilemap_Vertex(px+0, py+0, tx+(16* flipx), ty+(16*!flipy));
-                vdats[vdat_i][1] = Tilemap_Vertex(px+1, py+0, tx+(16*!flipx), ty+(16*!flipy));
-                vdats[vdat_i][2] = Tilemap_Vertex(px+1, py+1, tx+(16*!flipx), ty+(16* flipy));
-                vdats[vdat_i][3] = Tilemap_Vertex(px+0, py+1, tx+(16* flipx), ty+(16* flipy));
-                vdat_i++;
-            }
-        }
-        vao_size = vdat_i * 4;
-        glGenBuffers(1, &vbo_id);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
-        glBufferData(GL_ARRAY_BUFFER, vao_size * 4 * sizeof(Tilemap_Vertex), vdats, GL_STATIC_DRAW);
-        glGenVertexArrays(1, &vao_id);
-        glBindVertexArray(vao_id);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-         // index, n_elements, type, normalize, stride, offset
-        glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tilemap_Vertex), (void*)offsetof(Tilemap_Vertex, px));
-        glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tilemap_Vertex), (void*)offsetof(Tilemap_Vertex, tx));
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-         // Done.
-        delete[] vdats;
-
+         // Set up graphics
+        Tiles::finish(width, height, tiles.data());
     }
-
-     // Now for drawing tilemaps.
-
-    struct Tilemap_Layer : core::Layer, core::Renderer {
-        core::Program* program;
-        int tex;
-        int camera_pos;
-        int model_pos;
-        int tileset_size;
-
-        Tilemap_Layer () : core::Layer("E.M", "tilemaps") { }
-        void Layer_start () override {
-            program = hacc::File("modules/vis/res/tiles.prog").data().attr("prog");
-            tex = program->require_uniform("tex");
-            camera_pos = program->require_uniform("camera_pos");
-            model_pos = program->require_uniform("model_pos");
-            tileset_size = program->require_uniform("tileset_size");
-            glUseProgram(program->glid);
-            glUniform1i(tex, 0);  // Texture unit 0
-            if (core::diagnose_opengl("after creating tilemap renderer")) {
-                throw std::logic_error("tilemaps layer init failed due to GL error");
-            }
-        }
-
-         // Renderer
-        void start_rendering () override {
-            glEnable(GL_TEXTURE_2D);
-            glEnable(GL_DEPTH_TEST);
-            glDisable(GL_BLEND);
-            glUseProgram(program->glid);
-            glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
-        }
-        void Layer_run () override {
-            use();
-            for (Tilemap* map = active_tilemaps.first(); map; map = map->Linkable<Tilemap>::next()) {
-                Vec pos = map->Object::pos();
-                glUniform2f(model_pos, pos.x, pos.y);
-                Vec ts = map->texture->size;
-                glUniform2f(tileset_size, ts.x, ts.y);
-                glBindTexture(GL_TEXTURE_2D, map->texture->tex);
-                glBindVertexArray(map->vao_id);
-                glDrawArrays(GL_QUADS, 0, map->vao_size);
-                core::diagnose_opengl("After rendering a tilemap");
-            }
-        }
-    } tilemap_layer;
 
 } using namespace geo;
 
