@@ -90,7 +90,7 @@ namespace vis {
                 auto tex = t->Tiles_texture();
                 Vec ts = tex->size;
                 glUniform2f(tileset_size, ts.x, ts.y);
-                glBindTexture(GL_TEXTURE_2D, tex->tex);
+                glBindTexture(GL_TEXTURE_2D, tex->id);
                 glBindVertexArray(t->vao_id);
                 glDrawArrays(GL_QUADS, 0, t->vao_size);
                 core::diagnose_opengl("After rendering a tilemap");

@@ -11,7 +11,7 @@ workflow {
 
     include '../..';
 
-    objects(qw(commands game phases input images opengl));
+    objects(qw(commands game phases input opengl));
 
     clean_rule(glob 'tmp/*');
 

@@ -49,7 +49,7 @@ namespace vis {
         bool fh = ms->pose->fliph ? !fliph : fliph;
         bool fv = ms->pose->flipv ? !flipv : flipv;
         if (ms->skin) {
-            for (core::Texture* tex : ms->skin->textures) {
+            for (Texture* tex : ms->skin->textures) {
                 draw_sprite(
                     ms->pose->frame, tex, pos,
                     fh, fv, z + ss->z_offset

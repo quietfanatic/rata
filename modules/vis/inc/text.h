@@ -4,14 +4,14 @@
 #include <string>
 #include "../../util/inc/geometry.h"
 #include "../../util/inc/organization.h"
-#include "../../core/inc/images.h"
+#include "images.h"
 
 namespace vis {
     using namespace util;
 
      // A font's image should be composed of 16x16 tiles.
     struct Font {
-        core::Texture* texture;
+        vis::Texture* texture;
         uint width;
         uint height;
         uint line_height;

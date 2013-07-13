@@ -12,27 +12,6 @@ namespace vis {
      // Setting this alters all rendering.
     extern Vec camera_pos;
 
-    struct Layout;
-    struct Frame;
-
-    struct Layout {
-        Vec size;
-        std::vector<Frame> frames;
-        uint vbo_id;
-        uint vao_id;
-        void finish ();
-        ~Layout ();
-         // Hacc attribute lookup goes here
-        Frame* frame_named (std::string);
-    };
-
-    struct Frame {
-        Layout* parent;
-        std::string name;
-        Vec offset;
-        Rect box;
-        std::vector<Vec> points;
-    };
 }
 
 #endif

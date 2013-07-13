@@ -3,7 +3,7 @@
 
 #include "../inc/rooms.h"
 #include "../../phys/inc/phys.h"
-#include "../../core/inc/images.h"
+#include "../../vis/inc/images.h"
 #include "../../vis/inc/tiles.h"
 
 namespace geo {
@@ -19,7 +19,7 @@ namespace geo {
 
     struct Tilemap : Resident, phys::Object, vis::Tiles {
         Tileset* tileset;
-        core::Texture* texture;
+        vis::Texture* texture;
         uint32 width;
         uint32 height;
         std::vector<uint16> tiles;
@@ -28,7 +28,7 @@ namespace geo {
         void Resident_reclude () override;
 
         Vec Tiles_pos () override { return Object::pos(); }
-        core::Texture* Tiles_texture () override { return texture; }
+        vis::Texture* Tiles_texture () override { return texture; }
 
         Tilemap ();
         void finish ();

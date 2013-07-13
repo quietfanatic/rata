@@ -58,7 +58,7 @@ namespace vis {
 
     static Logger draw_sprite_logger ("draw_sprite", false);
 
-    void draw_sprite (Frame* frame, core::Texture* tex, Vec p, bool fliph, bool flipv, float z) {
+    void draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         if (draw_sprite_logger.on) {
             draw_sprite_logger.log("tex: %s frame: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
                 tex ? tex->name.c_str() : "NULL", frame ? frame->offset.x : 0/0.0, frame ? frame->offset.y : 0/0.0,
@@ -71,7 +71,7 @@ namespace vis {
 
         glUniform3f(sprite_layer.model_pos, p.x, p.y, z);
         glUniform2f(sprite_layer.model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
-        glBindTexture(GL_TEXTURE_2D, tex->tex);
+        glBindTexture(GL_TEXTURE_2D, tex->id);
         glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
 

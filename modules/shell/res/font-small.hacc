@@ -22,7 +22,7 @@
             0 0 0 0 0 0 0 0  0 0 0 0 0 0 0 0
         ]
     }}
-    img:{"core::Image":{
+    img:{"vis::Image":{
         filename:"modules/shell/res/font-small.png"
     }}
 }}

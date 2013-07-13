@@ -13,7 +13,6 @@ workflow {
         tmp/console.o
         ../core/tmp/commands.o
         ../core/tmp/game.o
-        ../core/tmp/images.o
         ../core/tmp/input.o
         ../core/tmp/phases.o
         ../core/tmp/opengl.o
@@ -36,6 +35,7 @@ workflow {
         ../phys/tmp/phys.o
         ../vis/tmp/common.o
         ../vis/tmp/graffiti.o
+        ../vis/tmp/images.o
         ../vis/tmp/models.o
         ../vis/tmp/sprites.o
         ../vis/tmp/text.o

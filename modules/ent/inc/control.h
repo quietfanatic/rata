@@ -88,7 +88,7 @@ namespace ent {
     struct Player : vis::Sprite, Mind, core::Cursor_Listener {
         Mappings mappings;
         Controllable* character = NULL;
-        core::Texture* cursor_tex = NULL;
+        vis::Texture* cursor_tex = NULL;
         vis::Frame* cursor_frame = NULL;
 
         void Sprite_draw () override;  // Draws the cursor

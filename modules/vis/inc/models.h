@@ -48,7 +48,7 @@ namespace vis {
     struct Skin {
         struct App {
             Skel::Seg* target;
-            std::vector<core::Texture*> textures;
+            std::vector<vis::Texture*> textures;
         };
         
         std::vector<Skin::App> apps;

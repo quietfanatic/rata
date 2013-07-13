@@ -3,7 +3,7 @@
 
 #include "../../util/inc/geometry.h"
 #include "../../util/inc/organization.h"
-#include "../../core/inc/images.h"
+#include "images.h"
 
 namespace vis {
     using namespace util;
@@ -13,7 +13,7 @@ namespace vis {
         uint vao_id;
         size_t vao_size;
         virtual Vec Tiles_pos () = 0;
-        virtual core::Texture* Tiles_texture () = 0;
+        virtual vis::Texture* Tiles_texture () = 0;
         void appear ();
         void disappear ();
          // Call this in your own finish

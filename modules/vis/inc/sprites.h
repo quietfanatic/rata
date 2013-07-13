@@ -2,7 +2,7 @@
 #define HAVE_VIS_SPRITES_H
 
 #include "common.h"
-#include "../../core/inc/images.h"
+#include "images.h"
 #include "../../util/inc/organization.h"
 
 namespace vis {
@@ -16,7 +16,7 @@ namespace vis {
 
      // Call this in Sprite_draw.  You can call it elsewhere I guess, but if
      //  it's not called during the Sprite layer, results may be undefined.
-    void draw_sprite (Frame*, core::Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
+    void draw_sprite (Frame*, Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
 
 }
 

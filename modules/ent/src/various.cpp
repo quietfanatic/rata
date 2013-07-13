@@ -8,7 +8,7 @@ static phys::BodyDef*& test_bdf () {
     return test_bdf;
 }
 struct Test_Actor : phys::Object, vis::Sprite {
-    core::Texture* texture;
+    vis::Texture* texture;
     vis::Frame* frame;
 
     void Sprite_draw () {
