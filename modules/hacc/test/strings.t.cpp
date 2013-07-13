@@ -77,7 +77,7 @@ tap::Tester tree_strings_tester ("hacc/strings", [](){
      printf(" # Misc\n");  // 1
     tst("{ things: [ {test_actor: {}} ] }", "{ things:[{ test_actor:{} }] }");
      printf(" # Refs\n");  // 1
-    tst("[&ref 4 5 *ref]", "[4 5 4]");
+    tst("[$ref=4 5 $ref]", "[4 5 4]");
     
 });
 

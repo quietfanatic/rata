@@ -414,8 +414,14 @@ namespace hacc {
                 default: return left;
             }
         }
-        Tree parse_path () {
+        Tree parse_dollar_thing () {
             p++;  // for the $
+            switch (look()) {
+                case '(': case '.': case '[': return parse_path();
+                default: return parse_ref();
+            }
+        }
+        Tree parse_path () {
             if (look() == '(') {
                 p++;
                 String f = parse_ident("After the $( in a path");
@@ -432,30 +438,28 @@ namespace hacc {
             }
         }
 
-        Tree parse_refdecl () {
-            p++;  // for the &
-            std::string name = parse_ident("After the & for a ref declaration");
-            return parse_reffed_term(name);
-        }
-        Tree parse_backref () {
-            p++;  // for the *
-            std::string name = parse_ident("after the * for a backreference");
-            auto iter = refs.find(name);
-            if (iter != refs.end()) {
-                Tree r = iter->second;
-                if (r.form() == PATH)
-                    return Tree(continue_path(r.as<Path>()));
-                else
-                    return r;
+        Tree parse_ref () {
+            std::string name = parse_ident("After the $ for a reference");
+            parse_ws();
+            if (look() == '=') {
+                p++;
+                Tree term = parse_term();
+                refs.emplace(name, term);
+                return term;
             }
-            else throw error("Unknown backreference: *" + escape_ident(name));
+            else {
+                auto iter = refs.find(name);
+                if (iter != refs.end()) {
+                    Tree r = iter->second;
+                    if (r.form() == PATH)
+                        return Tree(continue_path(r.as<Path>()));
+                    else
+                        return r;
+                }
+                else throw error("Unknown backreference: *" + escape_ident(name));
+            }
         }
 
-        Tree parse_reffed_term (std::string name) {
-            Tree term = parse_term();
-            refs.emplace(name, term);
-            return term;
-        }
         Tree parse_parens () {
             p++;  // for the (
             Tree term = parse_term();
@@ -488,12 +492,10 @@ namespace hacc {
                 case '"': return parse_string();
                 case '[': return parse_array();
                 case '{': return parse_object();
-                case '$': return parse_path();
+                case '$': return parse_dollar_thing();
                 case '(': return parse_parens();
                 case '_': return parse_bareword();
                 case '<': return parse_heredoc();
-                case '&': return parse_refdecl();
-                case '*': return parse_backref();
                 default:
                     if (isalnum(next))
                         return parse_bareword();
