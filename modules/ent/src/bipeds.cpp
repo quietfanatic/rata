@@ -194,7 +194,15 @@ namespace ent {
                 model.apply_pose(&def->poses->look_stand[look_frame]);
             }
             else if (vel().x * direction > stats.walk_speed) {
-                uint step = fmod(distance_walked * 2.0, 6.0);
+                float stepdist = fmod(distance_walked * 1.5, 6.0);
+                 // Expand frames 1 and 4 a little
+                uint step =
+                    stepdist < 0.9 ? 0
+                  : stepdist < 2.1 ? 1
+                  : stepdist < 3   ? 2
+                  : stepdist < 3.9 ? 3
+                  : stepdist < 5.1 ? 4
+                  :                  5;
                 model.apply_pose(&def->poses->run[step]);
                 if (step % 3 < 1)
                     model.apply_pose(&def->poses->look_stand[look_frame]);

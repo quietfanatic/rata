@@ -8,11 +8,11 @@
             {name: sit    offset: [74  3] box: [-10 -2 10 18] points: [[-2  9] [-3  7] [-1  7]]}
             {name: crawl1 offset: [11 24] box: [-10 -2 10 18] points: [[ 6  5] [ 4  4] [ 4  4]]}
             {name: crawl2 offset: [32 24] box: [-10 -2 10 18] points: [[ 6  4] [ 4  3] [ 4  3]]}
-            {name: hurtbk offset: [53 24] box: [-10 -2 10 18] points: [[ 0 15] [-1 13] [ 0 13]]}
+            {name: hurtbk offset: [53 24] box: [-10 -2 10 18] points: [[ 0 15] [-1 13] [-1 13]]}
             {name: laybk  offset: [74 24] box: [-10 -2 10 18] points: [[-8  2] [-6  1] [-6  1]]}
-            {name: run1   offset: [11 45] box: [-10 -2 10 18] points: [[ 1 15] [ 0 13] [ 1 13]]}
-            {name: run2   offset: [32 45] box: [-10 -2 10 18] points: [[ 1 16] [ 0 14] [ 1 14]]}
-            {name: run3   offset: [53 45] box: [-10 -2 10 18] points: [[ 1 15] [ 0 13] [ 1 13]]}
+            {name: run1   offset: [11 45] box: [-10 -2 10 18] points: [[ 1 15] [ 0 13] [ 0 13]]}
+            {name: run2   offset: [32 45] box: [-10 -2 10 18] points: [[ 1 16] [ 0 14] [ 0 14]]}
+            {name: run3   offset: [53 45] box: [-10 -2 10 18] points: [[ 1 15] [ 0 13] [ 0 13]]}
         ]
     }
     head: {
