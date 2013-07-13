@@ -52,12 +52,11 @@ namespace ent {
         mappings[BTN_UP].emplace_back(KEY, 'W');
         mappings[BTN_CROUCH].emplace_back(KEY, 'S');
         mappings[BTN_JUMP].emplace_back(KEY, GLFW_KEY_SPACE);
-        mappings[BTN_JUMP].emplace_back(BTN, 3);
         mappings[BTN_ACTION].emplace_back(KEY, 'E');
-        mappings[BTN_EXAMINE].emplace_back(BTN, 1);
-        mappings[BTN_AIM].emplace_back(BTN, 2);  // in GLFW 2=right 3=middle
+        mappings[BTN_EXAMINE].emplace_back(BTN, GLFW_MOUSE_BUTTON_LEFT);
+        mappings[BTN_AIM].emplace_back(BTN, GLFW_MOUSE_BUTTON_RIGHT);
         mappings[BTN_AIM].emplace_back(KEY, GLFW_KEY_LSHIFT);
-        mappings[BTN_ATTACK].emplace_back(BTN, 1);
+        mappings[BTN_ATTACK].emplace_back(BTN, GLFW_MOUSE_BUTTON_LEFT);
     }
 
     void Player::finish () {
