@@ -29,7 +29,6 @@ namespace ent {
     struct BipedFixdefs;
     struct BipedDef;
 
-     // TODO: separate soul from body
     struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Sprite, Controllable {
 
         BipedDef* def;

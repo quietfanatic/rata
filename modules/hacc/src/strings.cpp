@@ -145,8 +145,7 @@ namespace hacc {
         }
     }
 
-     // Parsing is simple enough that we don't need a separate lexer step
-     // TODO: refactor with a lexer step T_T
+     // Parsing is simple enough that we don't need a separate lexer step (yet)
     struct Parser {
         String file;
         const char* begin;
