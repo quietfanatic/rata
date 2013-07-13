@@ -5,7 +5,6 @@
 
  // The vis namespace handles all rendering (though not all opengl
  //  integration; some of that's in core).
- // TODO: move tile rendering into vis
 
 namespace vis {
     using namespace util;
