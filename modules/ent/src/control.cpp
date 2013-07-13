@@ -18,9 +18,21 @@ namespace ent {
         size_t buttons = 0;
         size_t bit = 1;
         for (size_t i = 0; i < N_BUTTONS; i++) {
-            for (auto& k : mappings[i])
-                if (core::key_pressed(k))
-                    buttons |= bit;
+            for (auto& m : mappings[Button(i)]) {
+                switch (m.type) {
+                    case KEY: {
+                        if (core::key_pressed(m.code))
+                            buttons |= bit;
+                        break;
+                    }
+                    case BTN: {
+                        if (core::btn_pressed(m.code))
+                            buttons |= bit;
+                        break;
+                    }
+                    default: break;
+                }
+            }
             bit <<= 1;
         }
         character->Controllable_buttons(ButtonBits(buttons));
@@ -34,16 +46,18 @@ namespace ent {
 
     Player::Player () {
          // Default mappings
-        mappings[BTN_LEFT].push_back('A');
-        mappings[BTN_RIGHT].push_back('D');
-        mappings[BTN_DOWN].push_back('S');
-        mappings[BTN_UP].push_back('W');
-        mappings[BTN_CROUCH].push_back('S');
-        mappings[BTN_JUMP].push_back(GLFW_KEY_SPACE);
-        mappings[BTN_ACTION].push_back('E');  // TODO: mouse control
-        mappings[BTN_EXAMINE].push_back('R');
-        mappings[BTN_AIM].push_back(GLFW_KEY_LSHIFT);
-        mappings[BTN_ATTACK].push_back('Q');
+        mappings[BTN_LEFT].emplace_back(KEY, 'A');
+        mappings[BTN_RIGHT].emplace_back(KEY, 'D');
+        mappings[BTN_DOWN].emplace_back(KEY, 'S');
+        mappings[BTN_UP].emplace_back(KEY, 'W');
+        mappings[BTN_CROUCH].emplace_back(KEY, 'S');
+        mappings[BTN_JUMP].emplace_back(KEY, GLFW_KEY_SPACE);
+        mappings[BTN_JUMP].emplace_back(BTN, 3);
+        mappings[BTN_ACTION].emplace_back(KEY, 'E');
+        mappings[BTN_EXAMINE].emplace_back(BTN, 1);
+        mappings[BTN_AIM].emplace_back(BTN, 2);  // in GLFW 2=right 3=middle
+        mappings[BTN_AIM].emplace_back(KEY, GLFW_KEY_LSHIFT);
+        mappings[BTN_ATTACK].emplace_back(BTN, 1);
     }
 
     void Player::finish () {
@@ -71,21 +85,38 @@ HCB_BEGIN(Controllable)
     name("ent::Controllable");
 HCB_END(Controllable)
 
+HCB_BEGIN(MappingType)
+    name("ent::MappingType");
+    value("key", KEY);
+    value("btn", BTN);
+HCB_END(MappingType)
+
+HCB_BEGIN(Mapping)
+    name("ent::Mapping");
+    elem(member(&Mapping::type));
+    elem(member(&Mapping::code));
+HCB_END(Mapping)
+
+HCB_BEGIN(Mappings)
+    name("ent::Mappings");
+    attr("left", member(&Mappings::left).optional());
+    attr("right", member(&Mappings::right).optional());
+    attr("down", member(&Mappings::down).optional());
+    attr("up", member(&Mappings::up).optional());
+    attr("crouch", member(&Mappings::crouch).optional());
+    attr("jump", member(&Mappings::jump).optional());
+    attr("action", member(&Mappings::action).optional());
+    attr("examine", member(&Mappings::up).optional());
+    attr("aim", member(&Mappings::aim).optional());
+    attr("attack", member(&Mappings::up).optional());
+HCB_END(Mappings)
+
 HCB_BEGIN(Player)
     name("ent::Player");
     attr("character", member(&Player::character));
     attr("cursor_tex", member(&Player::cursor_tex).optional());
     attr("cursor_frame", member(&Player::cursor_frame).optional());
-    attr("map_left", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_LEFT]; }).optional());
-    attr("map_right", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_RIGHT]; }).optional());
-    attr("map_down", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_DOWN]; }).optional());
-    attr("map_up", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_UP]; }).optional());
-    attr("map_crouch", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_CROUCH]; }).optional());
-    attr("map_jump", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_JUMP]; }).optional());
-    attr("map_action", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_ACTION]; }).optional());
-    attr("map_examine", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_EXAMINE]; }).optional());
-    attr("map_aim", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_AIM]; }).optional());
-    attr("map_attack", ref_func<std::vector<int>>([](Player& p)->std::vector<int>&{ return p.mappings[BTN_ATTACK]; }).optional());
+    attr("mappings", member(&Player::mappings).optional());
     finish(&Player::finish);
 HCB_END(Player)
 

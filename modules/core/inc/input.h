@@ -10,6 +10,7 @@ namespace core {
     using namespace util;
 
     bool key_pressed (int keycode);
+    bool btn_pressed (int code);
 
     struct Key_Listener;
     EXTERN_INIT_SAFE(std::vector<Key_Listener*>, key_listeners)

@@ -12,6 +12,7 @@ namespace core {
     INIT_SAFE(std::vector<Cursor_Listener*>, cursor_listeners);
 
     bool key_pressed (int code) { return glfwGetKey(code); }
+    bool btn_pressed (int code) { return glfwGetMouseButton(code); }
 
     static int GLFWCALL close_cb () {
         quick_exit();

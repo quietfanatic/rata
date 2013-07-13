@@ -39,6 +39,31 @@ namespace ent {
         ATTACK_BIT = 1<<BTN_ATTACK
     };
 
+    enum MappingType {
+        KEY,
+        BTN
+    };
+
+    struct Mapping {
+        MappingType type;
+        int code;
+        Mapping () { }
+        Mapping (MappingType type, int code) : type(type), code(code) { }
+    };
+    struct Mappings {
+        std::vector<Mapping> left;
+        std::vector<Mapping> right;
+        std::vector<Mapping> down;
+        std::vector<Mapping> up;
+        std::vector<Mapping> crouch;
+        std::vector<Mapping> jump;
+        std::vector<Mapping> action;
+        std::vector<Mapping> examine;
+        std::vector<Mapping> aim;
+        std::vector<Mapping> attack;
+        std::vector<Mapping>& operator [] (Button b) { return *(&left + uint(b)); }
+    };
+
     struct Controllable {
         virtual void Controllable_buttons (ButtonBits) { }
          // This changes the focus relative to its current position
@@ -61,7 +86,7 @@ namespace ent {
      // We're querying key state instead of going through Key_Listener
      // TODO: use core::Layer instead of vis::Sprite
     struct Player : vis::Sprite, Mind, core::Cursor_Listener {
-        std::vector<int> mappings [N_BUTTONS];  // TODO: mouse buttons
+        Mappings mappings;
         Controllable* character = NULL;
         core::Texture* cursor_tex = NULL;
         vis::Frame* cursor_frame = NULL;
