@@ -96,13 +96,12 @@ namespace hacc {
         void set_keys (const std::vector<String>&) const;
         size_t length () const;
         void set_length (size_t) const;
-         // These require that this reference be addressable.
+         // These might require addressability
         Reference attr (String) const;
         Reference elem (size_t) const;
-         // These might require addressability
         Tree to_tree () const;
         void prepare (Tree) const;
-        void fill (Tree) const;
+        void fill (Tree, bool force = false) const;
         void finish () const;
         void from_tree (Tree) const;
          // These are primarily for use by files.cpp

@@ -302,8 +302,6 @@ namespace hacc {
             else return Tree(Object());
         }
     }
-     // TODO: figure out the proper relationship between delegation
-     //  and cascading calls (prepare and finish)
     void Reference::prepare (Tree t) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Reference(*this, "call from_tree on");
@@ -353,11 +351,11 @@ namespace hacc {
             }
             default: break;
         }
-        if (gs->prepare) fill(t);
+        if (gs->prepare) fill(t, true);
     }
 
-    void Reference::fill (Tree t) const {
-         // TODO: Skip if gs->prepare
+    void Reference::fill (Tree t, bool force) const {
+        if (!force && gs->prepare) return;
         if (gs->narrow) {
             mod([&](void* p){
                 Reference(type(), p).from_tree(t);
