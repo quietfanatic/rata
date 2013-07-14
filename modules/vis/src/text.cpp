@@ -14,14 +14,20 @@ namespace vis {
     void Text::appear () { link(texts); }
     void Text::disappear () { unlink(); }
 
-    struct Text_Layer : Layer, Renderer {
-        Program* program = hacc::File("modules/vis/res/text.prog").data().attr("prog");
-        GLint tex = program->require_uniform("tex");
-        GLint camera_pos = program->require_uniform("camera_pos");
-        GLint model_pos = program->require_uniform("model_pos");
-        GLint color = program->require_uniform("color");
+    struct Text_Renderer::Data : Layer, Renderer {
+        Program* program;
+        GLint tex;
+        GLint camera_pos;
+        GLint model_pos;
+        GLint color;
 
-        Text_Layer () : Layer("G.M", "text") {
+        Data () : Layer("G.M", "text") { }
+        void Layer_start () override {
+            program = hacc::File("modules/vis/res/text.prog").data().attr("prog");
+            tex = program->require_uniform("tex");
+            camera_pos = program->require_uniform("camera_pos");
+            model_pos = program->require_uniform("model_pos");
+            color = program->require_uniform("color");
             glUseProgram(program->glid);
             glUniform1i(tex, 0);
         }
@@ -38,14 +44,10 @@ namespace vis {
         }
         void Layer_run () override {
             for (auto p = texts.first(); p; p = p->next()) {
-                p->Text_draw();
+                p->Text_draw(Text_Renderer{this});
             }
         }
-    };
-    Text_Layer& text_layer () {
-        static Text_Layer r;
-        return r;
-    }
+    } text_layer;
 
     struct Text_Vert {
         uint16 px;
@@ -57,7 +59,7 @@ namespace vis {
     };
 
      // TODO: Make align.x affect each line individually
-    Vec draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color, float wrap) {
+    Vec Text_Renderer::draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color, float wrap) {
          // Coordinates here work with y being down instead of up.
          //  This may be a little confusing.
         auto verts = new Text_Vert [text.length()][4];
@@ -99,9 +101,9 @@ namespace vis {
         }
         Vec size = Vec(maxx*PX, maxy*PX);
         Vec ul = Vec(pos.x - (1 - align.x) / 2 * size.x, pos.y + (1 - align.y) / 2 * size.y);
-        text_layer().use();
-        glUniform2f(text_layer().model_pos, ul.x, ul.y);
-        glUniform4f(text_layer().color,
+        data->use();
+        glUniform2f(data->model_pos, ul.x, ul.y);
+        glUniform4f(data->color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,
             ((color >> 8) & 255) / 255.0,

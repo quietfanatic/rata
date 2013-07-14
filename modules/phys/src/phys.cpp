@@ -163,10 +163,8 @@ namespace phys {
 
      // Debug fixture drawing
     
-    struct Phys_Debug_Layer : core::Layer {
-        Phys_Debug_Layer () : core::Layer("G.M", "phys_debug", false) { }
-        void Layer_start () { }
-        void Layer_run () {
+    struct Phys_Debug_Layer : vis::Graffiti {
+        void Graffiti_draw (vis::Graffiti_Renderer r) {
             for (b2Body* b2b = space.b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
                 if (b2b->IsActive()) {
                     uint32 color = 0xffffff7f;
@@ -176,7 +174,7 @@ namespace phys {
                         case b2_kinematicBody: color = 0x00ffff7f; break;
                         default: color = 0xffffff7f; break;  // shouldn't happen
                     }
-                    vis::graffiti_pos(b2b->GetPosition());
+                    r.offset(b2b->GetPosition());
                     for (b2Fixture* b2f = b2b->GetFixtureList(); b2f; b2f = b2f->GetNext()) {
                         uint32 fcolor = b2f->IsSensor() ? 0xff00ff7f : color;
                         b2Shape* b2s = b2f->GetShape();
@@ -188,27 +186,27 @@ namespace phys {
                                 pts[1] = Vec(b2cs->m_p.x, b2cs->m_p.y - b2cs->m_radius);
                                 pts[2] = Vec(b2cs->m_p.x + b2cs->m_radius, b2cs->m_p.y);
                                 pts[3] = Vec(b2cs->m_p.x, b2cs->m_p.y + b2cs->m_radius);
-                                vis::draw_loop(4, pts, fcolor);
+                                r.draw_loop(4, pts, fcolor);
                                 break;
                             }
                             case b2Shape::e_polygon: {
                                 auto b2ps = static_cast<b2PolygonShape*>(b2s);
                                  // I love binary compatibility
-                                vis::draw_loop(b2ps->m_count, (Vec*)b2ps->m_vertices, fcolor);
+                                r.draw_loop(b2ps->m_count, (Vec*)b2ps->m_vertices, fcolor);
                                 break;
                             }
                             case b2Shape::e_edge: {
                                 auto b2es = static_cast<b2EdgeShape*>(b2s);
-                                vis::draw_line(b2es->m_vertex1, b2es->m_vertex2, fcolor);
+                                r.draw_line(b2es->m_vertex1, b2es->m_vertex2, fcolor);
                                 if (b2es->m_hasVertex0)
-                                    vis::draw_line(Vec(b2es->m_vertex0)-Vec(.25,.25), b2es->m_vertex1, (fcolor&~0xff)|0x3f);
+                                    r.draw_line(Vec(b2es->m_vertex0)-Vec(.25,.25), b2es->m_vertex1, (fcolor&~0xff)|0x3f);
                                 if (b2es->m_hasVertex3)
-                                    vis::draw_line(b2es->m_vertex2, Vec(b2es->m_vertex3)+Vec(.25,.25), (fcolor&~0xff)|0x3f);
+                                    r.draw_line(b2es->m_vertex2, Vec(b2es->m_vertex3)+Vec(.25,.25), (fcolor&~0xff)|0x3f);
                                 break;
                             }
                             case b2Shape::e_chain: {
                                 auto b2cs = static_cast<b2ChainShape*>(b2s);
-                                vis::draw_chain(b2cs->m_count, (Vec*)b2cs->m_vertices, fcolor);
+                                r.draw_chain(b2cs->m_count, (Vec*)b2cs->m_vertices, fcolor);
                                 break;
                             }
                             default: { }  // shouldn't happen

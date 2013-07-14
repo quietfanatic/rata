@@ -12,7 +12,7 @@ namespace shell {
     using namespace core;
     using namespace vis;
 
-    struct Console : Layer, Key_Listener, Char_Listener, Cursor_Listener, core::Console {
+    struct Console : Graffiti, Text, Key_Listener, Char_Listener, Cursor_Listener, core::Console {
         bool is_active = false;
         std::string contents = console_help();
         std::string cli = "";
@@ -26,7 +26,7 @@ namespace shell {
         Font* font = NULL;
         char trigger = '`';
 
-        Console () : Layer("Z.M"), Key_Listener("A"), Char_Listener("A"), Cursor_Listener("A") { }
+        Console () : Key_Listener("A"), Char_Listener("A"), Cursor_Listener("A") { }
 
         void Console_print (std::string message) {
             contents += message;
@@ -160,12 +160,15 @@ namespace shell {
         void Cursor_Listener_motion (Vec p) override { }
         void enter_console () {
             is_active = true;
+            Graffiti::appear();
+            Text::appear();
         }
         void exit_console () {
             is_active = false;
+            Graffiti::disappear();
+            Text::disappear();
         }
-        void Layer_start () { }
-        void Layer_run () {
+        void Graffiti_draw (Graffiti_Renderer r) {
              // TODO: this is a little dirty.
             vis::camera_pos = Vec(10,7.5);
             if (!font || !is_active) return;
@@ -175,15 +178,15 @@ namespace shell {
             pts[1] = Vec(20, 0);
             pts[2] = Vec(20, 15);
             pts[3] = Vec(0, 15);
-            graffiti_pos(Vec(0, 0));
-            draw_primitive(GL_QUADS, 4, pts, 0x000000cf);
-             // Draw console
-            Vec cli_size = draw_text(cli + " ", font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, 20);
+            r.draw_primitive(GL_QUADS, 4, pts, 0x000000cf);
+        }
+        void Text_draw (Text_Renderer r) {
+            Vec cli_size = r.draw_text(cli + " ", font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, 20);
             Vec cursor_pos = get_glyph_pos(cli, font, cli_pos, Vec(1, -1), 20);
             if (core::frames_drawn % 40 < 20) {
-                draw_text("_", font, Vec(1*PX + cursor_pos.x, cli_size.y - cursor_pos.y - font->line_height*PX - 2*PX), Vec(1, -1), 0xffffffff);
+                r.draw_text("_", font, Vec(1*PX + cursor_pos.x, cli_size.y - cursor_pos.y - font->line_height*PX - 2*PX), Vec(1, -1), 0xffffffff);
             }
-            draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, 20);
+            r.draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, 20);
         }
     };
 } using namespace shell;
