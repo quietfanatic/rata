@@ -15,7 +15,7 @@ namespace vis {
     void Sprites::disappear () { unlink(); }
 
     struct Sprites_Renderer::Data {
-        Program* program = hacc::File("modules/vis/res/sprite.prog").data().attr("prog");
+        Program* program = hacc::File("modules/vis/res/sprites.prog").data().attr("prog");
         GLint tex = program->require_uniform("tex");
         GLint camera_pos = program->require_uniform("camera_pos");
         GLint model_pos = program->require_uniform("model_pos");
@@ -33,8 +33,7 @@ namespace vis {
     Sprites_Renderer::Sprites_Renderer () : data(new Data) { }
 
     void Sprites_Renderer::run () {
-        glDisable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
+        glDepthFunc(GL_LESS);
         glUseProgram(data->program->glid);
         glUniform2f(data->camera_pos, vis::camera_pos.x, vis::camera_pos.y);
 

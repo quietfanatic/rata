@@ -73,9 +73,9 @@ namespace vis {
     Tiles_Renderer::Tiles_Renderer () : data(new Data) { }
 
     void Tiles_Renderer::run () {
-        glEnable(GL_TEXTURE_2D);
-        glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_ALWAYS);
         glUseProgram(data->program->glid);
         glUniform2f(data->camera_pos, vis::camera_pos.x, vis::camera_pos.y);
         for (auto& t : tileses) {

@@ -29,8 +29,10 @@ namespace vis {
     Renderers* renderers = NULL;
 
     void init () {
-        if (!renderers)
+        if (!renderers) {
             renderers = new Renderers;
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
     }
     void render () {
         init();

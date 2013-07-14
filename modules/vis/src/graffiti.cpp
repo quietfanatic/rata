@@ -25,7 +25,6 @@ namespace vis {
     void Graffiti_Renderer::run () {
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glBindVertexArray(0);
         glEnableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
