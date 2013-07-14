@@ -9,8 +9,15 @@
 namespace vis {
     using namespace util;
 
-     // Setting this alters all rendering.
+     // Setting this alters rendering until the HUD step.
     extern Vec camera_pos;
+
+     // This can be called automatically, but it's better to do it manually,
+     //  to avoid first-frame lag.
+    void init ();
+
+     // Do it.
+    void render ();
 
 }
 

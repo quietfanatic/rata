@@ -172,7 +172,7 @@ namespace ent {
         });
     }
 
-    void Biped::Sprite_draw () {
+    void Biped::Sprites_draw (vis::Sprites_Renderer r) {
         model.apply_skin(def->skin);
         uint8 look_frame = angle_frame(atan2(focus.y, focus.x));
         if (ground) {
@@ -226,7 +226,7 @@ namespace ent {
             model.apply_pose(&def->poses->jump);
             model.apply_pose(&def->poses->look_walk[look_frame]);
         }
-        model.draw(pos(), direction < 0);
+        model.draw(r, pos(), direction < 0);
     }
 
      // Kinda weird that neither of these has anything

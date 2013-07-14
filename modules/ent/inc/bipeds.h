@@ -29,7 +29,7 @@ namespace ent {
     struct BipedFixdefs;
     struct BipedDef;
 
-    struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Sprite, Controllable {
+    struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Sprites, Controllable {
 
         BipedDef* def;
          // Bleh
@@ -62,7 +62,7 @@ namespace ent {
         vis::Model model;  // Must be a humanlike model
         float distance_walked = 0;
         float oldxrel = 0;
-        void Sprite_draw () override;
+        void Sprites_draw (vis::Sprites_Renderer) override;
 
 
         Vec Resident_pos () override;

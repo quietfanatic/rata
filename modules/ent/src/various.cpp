@@ -7,12 +7,12 @@ static phys::BodyDef*& test_bdf () {
     static phys::BodyDef* test_bdf = hacc::File("modules/ent/res/test_actor.bdf").data().attr("bdf");
     return test_bdf;
 }
-struct Test_Actor : phys::Object, vis::Sprite {
+struct Test_Actor : phys::Object, vis::Sprites {
     vis::Texture* texture;
     vis::Frame* frame;
 
-    void Sprite_draw () {
-        draw_sprite(frame, texture, pos());
+    void Sprites_draw (vis::Sprites_Renderer r) {
+        r.draw_sprite(frame, texture, pos());
     }
 
     Test_Actor () : Object() { test_bdf(); }

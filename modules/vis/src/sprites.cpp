@@ -6,26 +6,22 @@
 #include "../inc/sprites.h"
 
 namespace vis {
-
     using namespace core;
 
-    static Links<Sprite> sprites;
+    static Logger draw_sprite_logger ("draw_sprite", false);
+    static Links<Sprites> sprites;
 
-    void Sprite::appear () {
-        link(sprites);
-    }
-    void Sprite::disappear () {
-        unlink();
-    }
+    void Sprites::appear () { link(sprites); }
+    void Sprites::disappear () { unlink(); }
 
-    struct Sprite_Layer : Layer, Renderer {
+    struct Sprites_Renderer::Data : Layer, Renderer {
         Program* program;
         GLint tex;
         GLint camera_pos;
         GLint model_pos;
         GLint model_scale;
 
-        Sprite_Layer () : Layer("C.M", "sprites") { }
+        Data () : Layer("C.M", "sprites") { }
         void Layer_start () override {
             program = hacc::File("modules/vis/res/sprite.prog").data().attr("prog");
             tex = program->require_uniform("tex");
@@ -51,14 +47,12 @@ namespace vis {
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
             for (auto p = sprites.first(); p; p = p->next()) {
-                p->Sprite_draw();
+                p->Sprites_draw(Sprites_Renderer{this});
             }
         }
     } sprite_layer;
 
-    static Logger draw_sprite_logger ("draw_sprite", false);
-
-    void draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
+    void Sprites_Renderer::draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         if (draw_sprite_logger.on) {
             draw_sprite_logger.log("tex: %s frame: [%g %g] [%g %g %g %g] p: [%g %g] fliph: %u flipv: %u, z: %g",
                 tex ? tex->name.c_str() : "NULL", frame ? frame->offset.x : 0/0.0, frame ? frame->offset.y : 0/0.0,
@@ -67,10 +61,10 @@ namespace vis {
             );
         }
 
-        sprite_layer.use();
+        data->use();
 
-        glUniform3f(sprite_layer.model_pos, p.x, p.y, z);
-        glUniform2f(sprite_layer.model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
+        glUniform3f(data->model_pos, p.x, p.y, z);
+        glUniform2f(data->model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
         glBindTexture(GL_TEXTURE_2D, tex->id);
         glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
@@ -78,21 +72,22 @@ namespace vis {
         diagnose_opengl("After rendering a sprite");
     }
 
-    struct Sprite_Test : Sprite {
-        void finish () { appear(); }
-        void Sprite_draw () override {
-            static Image* image = hacc::File("modules/vis/res/test.hacc").data().attr("img");
-            static Texture* texture = image->texture_named("ALL");
-            static Layout* layout = hacc::File("modules/vis/res/test.hacc").data().attr("layout");
-            static Frame* white = layout->frame_named("white");
-            static Frame* red = layout->frame_named("red");
-            static Frame* green = layout->frame_named("green");
-            static Frame* blue = layout->frame_named("blue");
+    struct Sprite_Test : Sprites {
+        Image* image = hacc::File("modules/vis/res/test.hacc").data().attr("img");
+        Texture* texture = image->texture_named("ALL");
+        Layout* layout = hacc::File("modules/vis/res/test.hacc").data().attr("layout");
+        Frame* white = layout->frame_named("white");
+        Frame* red = layout->frame_named("red");
+        Frame* green = layout->frame_named("green");
+        Frame* blue = layout->frame_named("blue");
 
-            draw_sprite(white, texture, Vec(2, 2), false, false, 0);
-            draw_sprite(red, texture, Vec(18, 2), false, false, 0);
-            draw_sprite(green, texture, Vec(18, 13), false, false, 0);
-            draw_sprite(blue, texture, Vec(2, 13), false, false, 0);
+        void finish () { appear(); }
+        void Sprites_draw (Sprites_Renderer r) override {
+
+            r.draw_sprite(white, texture, Vec(2, 2), false, false, 0);
+            r.draw_sprite(red, texture, Vec(18, 2), false, false, 0);
+            r.draw_sprite(green, texture, Vec(18, 13), false, false, 0);
+            r.draw_sprite(blue, texture, Vec(2, 13), false, false, 0);
         }
     };
 

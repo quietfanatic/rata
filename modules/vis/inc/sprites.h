@@ -7,16 +7,18 @@
 
 namespace vis {
 
-    struct Sprite : Linkable<Sprite> {
-        virtual void Sprite_draw () = 0;
+    struct Sprites_Renderer {
+        struct Data;
+        Data* data;
+        void draw_sprite (Frame*, Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
+    };
+
+    struct Sprites : Linkable<Sprites> {
+        virtual void Sprites_draw (Sprites_Renderer) = 0;
         bool visible () { return is_linked(); }
         void appear ();
         void disappear ();
     };
-
-     // Call this in Sprite_draw.  You can call it elsewhere I guess, but if
-     //  it's not called during the Sprite layer, results may be undefined.
-    void draw_sprite (Frame*, Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
 
 }
 

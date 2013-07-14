@@ -85,13 +85,13 @@ namespace ent {
 
      // We're querying key state instead of going through Key_Listener
      // TODO: use core::Layer instead of vis::Sprite
-    struct Player : vis::Sprite, Mind, core::Cursor_Listener {
+    struct Player : vis::Sprites, Mind, core::Cursor_Listener {
         Mappings mappings;
         Controllable* character = NULL;
         vis::Texture* cursor_tex = NULL;
         vis::Frame* cursor_frame = NULL;
 
-        void Sprite_draw () override;  // Draws the cursor
+        void Sprites_draw (vis::Sprites_Renderer) override;  // Draws the cursor
         void Mind_think () override;  // Read input and send control to character
         bool Cursor_Listener_active () override;
         bool Cursor_Listener_trap () override;
