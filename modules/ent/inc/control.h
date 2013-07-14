@@ -74,7 +74,7 @@ namespace ent {
     };
 
      // Between input and simulation, these run to do player interaction and AI
-    struct Mind : Linkable<Mind> {
+    struct Mind : Link<Mind> {
         virtual void Mind_think () = 0;
         Mind ();
         ~Mind ();

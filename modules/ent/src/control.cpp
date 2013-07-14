@@ -72,8 +72,8 @@ namespace ent {
     struct Mind_Phase : core::Phase {
         Mind_Phase () : core::Phase("B.M", "minds") { }
         void Phase_run () {
-            for (auto m = minds().first(); m; m = m->next()) {
-                m->Mind_think();
+            for (auto& m : minds()) {
+                m.Mind_think();
             }
         }
     } mind_phase;

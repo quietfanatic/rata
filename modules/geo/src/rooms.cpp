@@ -15,8 +15,8 @@ namespace geo {
         active = true;
         geo_logger.log("Activating room @%lx", (unsigned long)this);
         size_t i = 0;
-        for (auto r = residents.first(); r; r = r->next()) {
-            r->Resident_emerge();
+        for (auto& r : residents) {
+            r.Resident_emerge();
             i++;
         }
         geo_logger.log("...and its %lu residents", i);
@@ -24,8 +24,8 @@ namespace geo {
     void Room::deactivate () {
         active = false;
         geo_logger.log("Deactivating room @%lx", (unsigned long)this);
-        for (auto r = residents.first(); r; r = r->next())
-            r->Resident_reclude();
+        for (auto& r : residents)
+            r.Resident_reclude();
     }
 
     void enter (Room* r) {

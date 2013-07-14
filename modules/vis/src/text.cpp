@@ -38,8 +38,8 @@ namespace vis {
         glEnableVertexAttribArray(1);
         glUseProgram(data->program->glid);
         glUniform2f(data->camera_pos, vis::camera_pos.x, vis::camera_pos.y);
-        for (auto p = texts.first(); p; p = p->next()) {
-            p->Text_draw(*this);
+        for (auto& p : texts) {
+            p.Text_draw(*this);
         }
     }
 

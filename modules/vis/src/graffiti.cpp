@@ -31,8 +31,8 @@ namespace vis {
         glDisableVertexAttribArray(1);
         glUseProgram(data->program->glid);
         glUniform2f(data->camera_pos, vis::camera_pos.x, vis::camera_pos.y);
-        for (auto g = graffiti_drawers.first(); g; g = g->next()) {
-            g->Graffiti_draw(*this);
+        for (auto& g : graffiti_drawers) {
+            g.Graffiti_draw(*this);
         }
     }
 

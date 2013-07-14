@@ -78,15 +78,15 @@ namespace vis {
         glDisable(GL_BLEND);
         glUseProgram(data->program->glid);
         glUniform2f(data->camera_pos, vis::camera_pos.x, vis::camera_pos.y);
-        for (Tiles* t = tileses.first(); t; t = t->next()) {
-            Vec pos = t->Tiles_pos();
+        for (auto& t : tileses) {
+            Vec pos = t.Tiles_pos();
             glUniform2f(data->model_pos, pos.x, pos.y);
-            auto tex = t->Tiles_texture();
+            auto tex = t.Tiles_texture();
             Vec ts = tex->size;
             glUniform2f(data->tileset_size, ts.x, ts.y);
             glBindTexture(GL_TEXTURE_2D, tex->id);
-            glBindVertexArray(t->vao_id);
-            glDrawArrays(GL_QUADS, 0, t->vao_size);
+            glBindVertexArray(t.vao_id);
+            glDrawArrays(GL_QUADS, 0, t.vao_size);
             core::diagnose_opengl("After rendering a tilemap");
         }
     }

@@ -14,11 +14,11 @@ namespace vis {
         void draw_sprite (Frame*, Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
     };
 
-    struct Sprites : Linkable<Sprites> {
+    struct Sprites : Link<Sprites> {
         virtual void Sprites_draw (Sprites_Renderer) = 0;
-        bool visible () { return is_linked(); }
         void appear ();
         void disappear ();
+        bool visible () { return linked(); }
     };
 
 }

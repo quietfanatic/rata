@@ -22,7 +22,7 @@ namespace geo {
         ~Room ();
     };
 
-    struct Resident : Linkable<Resident> {
+    struct Resident : Link<Resident> {
         Room* room = NULL;
         virtual void Resident_emerge () = 0;
         virtual void Resident_reclude () = 0;
@@ -43,7 +43,7 @@ namespace geo {
      //  If there are no beholders or the current beholder has no target,
      //  the camera and geography remain stationary.  If no beholders are ever
      //  created, no rooms will be activated.
-    struct Beholder : Linkable<Beholder> {
+    struct Beholder : Link<Beholder> {
         Resident* target = NULL;
         void activate ();
         void deactivate ();

@@ -38,8 +38,8 @@ namespace vis {
         glUseProgram(data->program->glid);
         glUniform2f(data->camera_pos, vis::camera_pos.x, vis::camera_pos.y);
 
-        for (auto p = sprites.first(); p; p = p->next()) {
-            p->Sprites_draw(*this);
+        for (auto& p : sprites) {
+            p.Sprites_draw(*this);
         }
     }
 

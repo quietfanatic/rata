@@ -8,7 +8,7 @@
 namespace vis {
     using namespace util;
 
-    struct Tiles : Linkable<Tiles> {
+    struct Tiles : Link<Tiles> {
         uint vbo_id;
         uint vao_id;
         size_t vao_size;
@@ -16,6 +16,7 @@ namespace vis {
         virtual vis::Texture* Tiles_texture () = 0;
         void appear ();
         void disappear ();
+        bool visible () { return linked(); }
          // Call this in your own finish
         void finish (uint32 width, uint32 height, const uint16* tiles);
     };

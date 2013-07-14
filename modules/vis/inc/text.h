@@ -33,11 +33,11 @@ namespace vis {
         Vec draw_text (std::string text, Font* font, Vec pos, Vec align = Vec(1, 1), uint32 color = 0xffffffff, float wrap = 0);
     };
 
-    struct Text : Linkable<Text> {
+    struct Text : Link<Text> {
         virtual void Text_draw (Text_Renderer) = 0;
-        bool visible () { return is_linked(); }
         void appear ();
         void disappear ();
+        bool visible () { return linked(); }
     };
 
      // Returns the size of the rectangle encompassing the drawn text.

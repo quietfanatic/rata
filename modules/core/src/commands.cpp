@@ -120,8 +120,8 @@ namespace core {
 
     void print_to_console (std::string message) {
         fputs(message.c_str(), stdout);
-        for (auto r = consoles().first(); r; r = r->next()) {
-            r->Console_print(message);
+        for (auto& r : consoles()) {
+            r.Console_print(message);
         }
     }
 

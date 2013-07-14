@@ -20,11 +20,11 @@ namespace vis {
         void draw_primitive (uint type, uint n_pts, Vec* pts, uint32 color);
     };
 
-    struct Graffiti : Linkable<Graffiti> {
+    struct Graffiti : Link<Graffiti> {
         virtual void Graffiti_draw (Graffiti_Renderer) = 0;
         void appear ();
         void disappear ();
-        bool visible () { return is_linked(); }
+        bool visible () { return linked(); }
     };
 
 }
