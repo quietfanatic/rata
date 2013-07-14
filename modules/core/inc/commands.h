@@ -17,6 +17,7 @@ struct Command final : hacc::DPtr<CommandData> {
 };
 
 namespace core {
+    using namespace util;
 
     void command_from_string (std::string s);
     void command_from_terminal ();

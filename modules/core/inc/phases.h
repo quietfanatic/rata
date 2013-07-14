@@ -7,6 +7,7 @@
 #include "../../util/inc/organization.h"
 
 namespace core {
+    using namespace util;
 
     struct Phase;
     EXTERN_INIT_SAFE(std::vector<Phase*>, all_phases)
