@@ -56,16 +56,11 @@ namespace core {
     }
     uint get_window_scale () { return window_scale; }
     
-    void start () {
+    void start (const std::function<void ()>& render) {
         init();
-        game_logger.log("We have %lu phases and %lu layers", all_phases().size(), all_layers().size());
         for (Phase* p : all_phases()) {
             game_logger.log("Starting phase: " + p->name);
             p->Phase_start();
-        }
-        for (Layer* l : all_layers()) {
-            game_logger.log("Starting layer: " + l->name);
-            l->Layer_start();
         }
         try {
             for (;;) {
@@ -89,17 +84,15 @@ namespace core {
                  // TODO: real timing and allow frame-skipping the all_layers
                 for (Phase* p : all_phases()) p->run_if_on();
                 frames_simulated++;
-                for (Layer* l : all_layers()) l->run_if_on();
+                render();
                 frames_drawn++;
                 glfwSwapBuffers();
                 glfwSleep(1/60.0);
             }
             for (Phase* p : all_phases()) p->Phase_stop();
-            for (Layer* l : all_layers()) l->Layer_stop();
         }
         catch (...) {
             for (Phase* p : all_phases()) p->Phase_stop();
-            for (Layer* l : all_layers()) l->Layer_stop();
             throw;
         }
     }

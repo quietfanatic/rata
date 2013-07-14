@@ -8,8 +8,9 @@ namespace vis {
     using namespace util;
 
     struct Graffiti_Renderer {
-        struct Data;
-        Data* data;
+        struct Data; Data* data;
+        Graffiti_Renderer ();
+        void run ();
          // This will be added to coordinates while rendering this graffiti object.
          // It will not affect the next Graffiti object.
         void offset (Vec pos);

@@ -21,8 +21,9 @@ namespace vis {
     extern Font* console_font;
 
     struct Text_Renderer {
-        struct Data;
-        Data* data;
+        struct Data; Data* data;
+        Text_Renderer ();
+        void run ();
          // Draws a string of text with a transparent background.
          // Multiple lines will be separated by font->line_height.
          // align.x: 1 -> left justification, 0 -> center, -1 -> right

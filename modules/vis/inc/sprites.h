@@ -8,8 +8,9 @@
 namespace vis {
 
     struct Sprites_Renderer {
-        struct Data;
-        Data* data;
+        struct Data; Data* data;
+        Sprites_Renderer ();
+        void run ();
         void draw_sprite (Frame*, Texture*, Vec p, bool fliph = false, bool flipv = false, float z = 0);
     };
 

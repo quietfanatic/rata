@@ -20,6 +20,13 @@ namespace vis {
         void finish (uint32 width, uint32 height, const uint16* tiles);
     };
 
+     // Not really doing anythig but whatever
+    struct Tiles_Renderer {
+        struct Data; Data* data;
+        Tiles_Renderer ();
+        void run ();
+    };
+
 }
 
 #endif

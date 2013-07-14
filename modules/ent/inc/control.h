@@ -84,7 +84,6 @@ namespace ent {
     };
 
      // We're querying key state instead of going through Key_Listener
-     // TODO: use core::Layer instead of vis::Sprite
     struct Player : vis::Sprites, Mind, core::Cursor_Listener {
         Mappings mappings;
         Controllable* character = NULL;

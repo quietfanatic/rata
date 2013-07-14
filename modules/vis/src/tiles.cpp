@@ -5,6 +5,7 @@
 #include "../../hacc/inc/files.h"
 
 namespace vis {
+    using namespace core;
 
     Links<Tiles> tileses;
     void Tiles::appear () { link(tileses); }
@@ -53,49 +54,41 @@ namespace vis {
         delete[] vdats;
     }
 
-    struct Tiles_Layer : core::Layer, core::Renderer {
-        core::Program* program;
-        int tex;
-        int camera_pos;
-        int model_pos;
-        int tileset_size;
+    struct Tiles_Renderer::Data {
+        Program* program = hacc::File("modules/vis/res/tiles.prog").data().attr("prog");
+        GLint tex = program->require_uniform("tex");
+        GLint camera_pos = program->require_uniform("camera_pos");
+        GLint model_pos = program->require_uniform("model_pos");
+        GLint tileset_size = program->require_uniform("tileset_size");
 
-        Tiles_Layer () : core::Layer("E.M", "tiles") { }
-        void Layer_start () override {
-            program = hacc::File("modules/vis/res/tiles.prog").data().attr("prog");
-            tex = program->require_uniform("tex");
-            camera_pos = program->require_uniform("camera_pos");
-            model_pos = program->require_uniform("model_pos");
-            tileset_size = program->require_uniform("tileset_size");
+        Data () {
             glUseProgram(program->glid);
             glUniform1i(tex, 0);  // Texture unit 0
             if (core::diagnose_opengl("after creating tilemap renderer")) {
                 throw std::logic_error("tilemaps layer init failed due to GL error");
             }
         }
+    };
 
-         // Renderer
-        void start_rendering () override {
-            glEnable(GL_TEXTURE_2D);
-            glEnable(GL_DEPTH_TEST);
-            glDisable(GL_BLEND);
-            glUseProgram(program->glid);
-            glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
+    Tiles_Renderer::Tiles_Renderer () : data(new Data) { }
+
+    void Tiles_Renderer::run () {
+        glEnable(GL_TEXTURE_2D);
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
+        glUseProgram(data->program->glid);
+        glUniform2f(data->camera_pos, vis::camera_pos.x, vis::camera_pos.y);
+        for (Tiles* t = tileses.first(); t; t = t->next()) {
+            Vec pos = t->Tiles_pos();
+            glUniform2f(data->model_pos, pos.x, pos.y);
+            auto tex = t->Tiles_texture();
+            Vec ts = tex->size;
+            glUniform2f(data->tileset_size, ts.x, ts.y);
+            glBindTexture(GL_TEXTURE_2D, tex->id);
+            glBindVertexArray(t->vao_id);
+            glDrawArrays(GL_QUADS, 0, t->vao_size);
+            core::diagnose_opengl("After rendering a tilemap");
         }
-        void Layer_run () override {
-            use();
-            for (Tiles* t = tileses.first(); t; t = t->next()) {
-                Vec pos = t->Tiles_pos();
-                glUniform2f(model_pos, pos.x, pos.y);
-                auto tex = t->Tiles_texture();
-                Vec ts = tex->size;
-                glUniform2f(tileset_size, ts.x, ts.y);
-                glBindTexture(GL_TEXTURE_2D, tex->id);
-                glBindVertexArray(t->vao_id);
-                glDrawArrays(GL_QUADS, 0, t->vao_size);
-                core::diagnose_opengl("After rendering a tilemap");
-            }
-        }
-    } tiles_layer;
+    }
 
 }

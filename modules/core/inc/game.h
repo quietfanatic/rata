@@ -1,6 +1,7 @@
 #ifndef HAVE_CORE_GAME_H
 #define HAVE_CORE_GAME_H
 
+#include <functional>
 #include "../../util/inc/honestly.h"
 
 namespace core {
@@ -19,7 +20,7 @@ namespace core {
     void save (std::string filename);
     void set_video (uint scale);
     uint get_window_scale ();
-    void start ();
+    void start (const std::function<void ()>& render);
     void stop ();
      // Immediately close the window and exit the program.  Does not return.
     void quick_exit ();

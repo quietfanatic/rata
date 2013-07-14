@@ -14,43 +14,34 @@ namespace vis {
     void Sprites::appear () { link(sprites); }
     void Sprites::disappear () { unlink(); }
 
-    struct Sprites_Renderer::Data : Layer, Renderer {
-        Program* program;
-        GLint tex;
-        GLint camera_pos;
-        GLint model_pos;
-        GLint model_scale;
+    struct Sprites_Renderer::Data {
+        Program* program = hacc::File("modules/vis/res/sprite.prog").data().attr("prog");
+        GLint tex = program->require_uniform("tex");
+        GLint camera_pos = program->require_uniform("camera_pos");
+        GLint model_pos = program->require_uniform("model_pos");
+        GLint model_scale = program->require_uniform("model_scale");
 
-        Data () : Layer("C.M", "sprites") { }
-        void Layer_start () override {
-            program = hacc::File("modules/vis/res/sprite.prog").data().attr("prog");
-            tex = program->require_uniform("tex");
-            camera_pos = program->require_uniform("camera_pos");
-            model_pos = program->require_uniform("model_pos");
-            model_scale = program->require_uniform("model_scale");
+        Data () {
             glUseProgram(program->glid);
             glUniform1i(tex, 0);  // Texture unit 0
             if (diagnose_opengl("after setting uniforms and stuff")) {
                 throw std::logic_error("sprites init failed due to GL error");
             }
         }
-         // Renderer
-        void start_rendering () override {
-            glDisable(GL_BLEND);
-            glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
-            glUseProgram(program->glid);
-            glUniform2f(camera_pos, vis::camera_pos.x, vis::camera_pos.y);
-        }
-         // Layer
-        void Layer_run () override {
-            glClearColor(0.5, 0.5, 0.5, 0);
-            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    };
 
-            for (auto p = sprites.first(); p; p = p->next()) {
-                p->Sprites_draw(Sprites_Renderer{this});
-            }
+    Sprites_Renderer::Sprites_Renderer () : data(new Data) { }
+
+    void Sprites_Renderer::run () {
+        glDisable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST); // Depth buffer is awesome
+        glUseProgram(data->program->glid);
+        glUniform2f(data->camera_pos, vis::camera_pos.x, vis::camera_pos.y);
+
+        for (auto p = sprites.first(); p; p = p->next()) {
+            p->Sprites_draw(*this);
         }
-    } sprite_layer;
+    }
 
     void Sprites_Renderer::draw_sprite (Frame* frame, Texture* tex, Vec p, bool fliph, bool flipv, float z) {
         if (draw_sprite_logger.on) {
@@ -60,8 +51,6 @@ namespace vis {
                 p.x, p.y, fliph, flipv, z
             );
         }
-
-        data->use();
 
         glUniform3f(data->model_pos, p.x, p.y, z);
         glUniform2f(data->model_scale, fliph ? -1.0 : 1.0, flipv ? -1.0 : 1.0);
