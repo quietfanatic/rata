@@ -8,12 +8,12 @@ namespace geo {
 
     bool camera_jump = false;
 
-    struct Camera : core::Layer {
-        Camera () : core::Layer("A.M", "camera", true) { }
+    struct Camera : core::Phase {
+        Camera () : core::Phase("Z.M", "camera", true) { }
         Vec pos = Vec(10, 7.5);
 
-        void Layer_start () override { }
-        void Layer_run () override {
+        void Phase_start () override { }
+        void Phase_run () override {
             if (Resident* r = beholding()) {
                 pos = r->Resident_pos();
             }
