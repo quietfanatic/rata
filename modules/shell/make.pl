@@ -34,10 +34,9 @@ workflow {
         ../phys/tmp/ground.o
         ../phys/tmp/phys.o
         ../vis/tmp/common.o
-        ../vis/tmp/graffiti.o
+        ../vis/tmp/color.o
         ../vis/tmp/images.o
         ../vis/tmp/models.o
-        ../vis/tmp/sprites.o
         ../vis/tmp/text.o
         ../vis/tmp/tiles.o
         ../util/tmp/debug.o

@@ -1,5 +1,5 @@
-{"std::unordered_map<std::string, hacc::Dynamic>":{
-    prog:{"core::Program":{
+{"hacc::Document":{
+    prog:{"vis::Tiles_Program":{
         shaders:[$.vert $.frag]
         attributes:{
             vert_pos:0

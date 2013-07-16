@@ -10,21 +10,29 @@ namespace core {
         return err;
     }
 
-    Renderer* Renderer::current = NULL;
+    Program* Program::current = NULL;
+    size_t Program::current_attr_count = 0;
 
-    void Renderer::use () {
+    void Program::use () {
         if (current != this) {
-            if (current) current->finish_rendering();
-            start_rendering();
+            if (current) current->Program_end();
+            Program_begin();
             current = this;
         }
     }
-
-    Renderer::~Renderer () {
-         // Not good to call finish_rendering on a deleted renderer :)
-        if (current == this) finish_rendering();
+    void Program::unuse () {
+        if (current) current->Program_end();
         current = NULL;
     }
+    void Program::Program_begin () {
+         // Change attribute vertex enabledness
+        for (size_t i = attributes.size(); i < current_attr_count; i++)
+            glDisableVertexAttribArray(i);
+        for (size_t i = current_attr_count; i < attributes.size(); i++)
+            glEnableVertexAttribArray(i);
+        current_attr_count = attributes.size();
+    }
+    void Program::Program_end () { }  // No default behavior
 
     void Shader::compile () {
         GLuint newid = glCreateShader(type);
@@ -36,10 +44,11 @@ namespace core {
             const char* srcp = source.c_str();
             int srclen = source.length();
             glShaderSource(newid, 1, &srcp, &srclen);
+            diagnose_opengl("after glShaderSource");
             glCompileShader(newid);
+            diagnose_opengl("after glCompileShader");
             GLint status; glGetShaderiv(newid, GL_COMPILE_STATUS, &status);
             GLint loglen; glGetShaderiv(newid, GL_INFO_LOG_LENGTH, &loglen);
-            diagnose_opengl("after glCompileShader");
             if (!status || loglen > 1) {
                 char log [loglen];
                 glGetShaderInfoLog(newid, loglen, NULL, log);
@@ -107,6 +116,10 @@ namespace core {
     }
 
     Program::~Program () {
+        if (current == this) {
+            Program_end();
+            current = NULL;
+        }
         if (glid) glDeleteProgram(glid);
     }
 

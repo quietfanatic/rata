@@ -5,8 +5,8 @@
 #include "../../phys/inc/phys.h"
 #include "../../phys/inc/ground.h"
 #include "../../geo/inc/rooms.h"
+#include "../../vis/inc/common.h"
 #include "../../vis/inc/models.h"
-#include "../../vis/inc/sprites.h"
 
 namespace ent {
 
@@ -29,7 +29,7 @@ namespace ent {
     struct BipedFixdefs;
     struct BipedDef;
 
-    struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Sprites, Controllable {
+    struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Drawn<vis::Sprites>, Controllable {
 
         BipedDef* def;
          // Bleh
@@ -62,7 +62,7 @@ namespace ent {
         vis::Model model;  // Must be a humanlike model
         float distance_walked = 0;
         float oldxrel = 0;
-        void Sprites_draw (vis::Sprites_Renderer) override;
+        void Drawn_draw (vis::Sprites) override;
 
 
         Vec Resident_pos () override;

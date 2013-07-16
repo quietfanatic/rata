@@ -1,6 +1,6 @@
 
 #include "../inc/models.h"
-#include "../inc/sprites.h"
+#include "../inc/common.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/phases.h"
 #include "../../util/inc/debug.h"
@@ -42,7 +42,7 @@ namespace vis {
         return r;
     }
 
-    void Model::draw_seg (Sprites_Renderer r, Skel::Seg* ss, Vec pos, bool fliph, bool flipv, float z) {
+    void Model::draw_seg (Skel::Seg* ss, Vec pos, bool fliph, bool flipv, float z) {
         Model::Seg* ms = &segs[skel->seg_index(ss)];
         if (!ms->pose) return;
          // Wishing for a boolean xor
@@ -50,9 +50,9 @@ namespace vis {
         bool fv = ms->pose->flipv ? !flipv : flipv;
         if (ms->skin) {
             for (Texture* tex : ms->skin->textures) {
-                r.draw_sprite(
+                draw_frame(
                     ms->pose->frame, tex, pos,
-                    fh, fv, z + ss->z_offset
+                    Vec(fh?-1:1, fv?-1:1)
                 );
             }
         }
@@ -60,16 +60,16 @@ namespace vis {
             Vec pt = PX*ms->pose->frame->points[&branch - ss->branches.data()];
             if (fh) pt.x = -pt.x;
             if (fv) pt.y = -pt.y;
-            draw_seg(r, branch, pos + pt, fliph, flipv, z);
+            draw_seg(branch, pos + pt, fliph, flipv, z);
         }
     }
-    void Model::draw (Sprites_Renderer r, Vec pos, bool fliph, bool flipv, float z) {
+    void Model::draw (Vec pos, bool fliph, bool flipv, float z) {
         if (!skel) {
             model_logger.log("Model has no associated skeleton");
             return;
         }
         model_logger.log("Drawing a model with %lu segs", segs.size());
-        draw_seg(r, skel->root, pos + skel->root_offset, fliph, flipv, z);
+        draw_seg(skel->root, pos + skel->root_offset, fliph, flipv, z);
     }
 
     void Model::apply_skel (Skel* skel_) {
@@ -92,7 +92,7 @@ namespace vis {
     Model::Model (Skel* skel) : skel(skel), segs(skel ? skel->segs.size() : 0) { }
 
 
-    struct Model_Tester : Sprites {
+    struct Model_Tester : Drawn<Sprites> {
         bool flip = false;
         Model model = Model(hacc::File("modules/ent/res/small.skel").data());
 
@@ -102,8 +102,8 @@ namespace vis {
             model.apply_pose(hacc::File("modules/ent/res/small.hacc").data().attr("poses").attr("stand"));
             appear();
         }
-        void Sprites_draw (Sprites_Renderer r) override {
-            model.draw(r, Vec(10, 4), flip, false, 0.5);
+        void Drawn_draw (Sprites) override {
+            model.draw(Vec(10, 4), flip, false, 0.5);
         }
     };
 

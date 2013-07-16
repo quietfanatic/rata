@@ -6,7 +6,6 @@
 #include "../../util/inc/debug.h"
 #include "../../core/inc/opengl.h"
 #include "../../core/inc/phases.h"
-#include "../../vis/inc/sprites.h"
 
 namespace geo {
     using namespace util;
@@ -27,6 +26,10 @@ namespace geo {
     void Tilemap::Resident_reclude () {
         dematerialize();
         disappear();
+    }
+
+    void Tilemap::Drawn_draw (vis::Map) {
+        vis::draw_tiles(&vis_tiles, texture, Object::pos());
     }
 
 
@@ -176,7 +179,7 @@ namespace geo {
          // And...we're done with the edges.
         delete[] es;
          // Set up graphics
-        Tiles::finish(width, height, tiles.data());
+        vis_tiles.finish(width, height, tiles.data());
     }
 
 } using namespace geo;

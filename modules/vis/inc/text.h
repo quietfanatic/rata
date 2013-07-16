@@ -18,29 +18,11 @@ namespace vis {
         std::vector<uint8> widths;
     };
 
-    extern Font* console_font;
-
-    struct Text_Renderer {
-        struct Data; Data* data;
-        Text_Renderer ();
-        void run ();
-         // Draws a string of text with a transparent background.
-         // Multiple lines will be separated by font->line_height.
-         // align.x: 1 -> left justification, 0 -> center, -1 -> right
-         // align.y: 1 -> top of text is at pos, 0 -> center, -1 -> bottom
-         //  horizontal alignment affects each line individually.
-         // Returns the size of the rectangle encompassing the drawn text.
-        Vec draw_text (std::string text, Font* font, Vec pos, Vec align = Vec(1, 1), uint32 color = 0xffffffff, float wrap = 0);
-    };
-
-    struct Text : Link<Text> {
-        virtual void Text_draw (Text_Renderer) = 0;
-        void appear ();
-        void disappear ();
-        bool visible () { return linked(); }
-    };
+    void text_init ();
 
      // Returns the size of the rectangle encompassing the drawn text.
+    Vec draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color = 0xffffffff, float wrap = 0);
+     // Returns size without drawing
     Vec text_size (std::string text, Font* font, float wrap = 0);
      // Gets the position of the upper-left corner of the ith character in text,
      //  relative to the upper-left corner of the whole text.

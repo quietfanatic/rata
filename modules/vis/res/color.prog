@@ -1,5 +1,5 @@
 {"hacc::Document":{
-    prog:{"core::Program":{
+    prog:{"vis::Color_Program":{
         shaders: [$.vert $.frag]
         attributes: { vert_pos:0 }
     }}

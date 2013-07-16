@@ -11,19 +11,6 @@ namespace core {
 
     GLenum diagnose_opengl (std::string when = "");
 
-    struct Renderer {
-         // Called when the current renderer is switched to this one
-        virtual void start_rendering () { }
-         // Called when the current renderer is switched away from this one
-        virtual void finish_rendering () { }
-         // Does the aforementioned switch
-        void use ();
-         // Keeps track
-        static Renderer* current;
-
-        virtual ~Renderer ();
-    };
-
     struct Shader {
         uint glid = 0;
         GLenum type;
@@ -34,6 +21,8 @@ namespace core {
     };
 
     struct Program {
+        static Program* current;
+        static size_t current_attr_count;
         std::string name = "<Anonymous Program>";
         uint glid = 0;
         std::vector<Shader*> shaders;
@@ -42,6 +31,11 @@ namespace core {
         int require_uniform (const char* name);
         void link ();
         ~Program ();
+         // Supercall if you override these
+        virtual void Program_begin ();
+        virtual void Program_end ();
+        void use ();
+        static void unuse ();
     };
 
 }

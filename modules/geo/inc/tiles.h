@@ -3,7 +3,7 @@
 
 #include "../inc/rooms.h"
 #include "../../phys/inc/phys.h"
-#include "../../vis/inc/images.h"
+#include "../../vis/inc/common.h"
 #include "../../vis/inc/tiles.h"
 
 namespace geo {
@@ -17,18 +17,18 @@ namespace geo {
         std::vector<TileDef*> tiles;  // TileDefs can be provided with local()
     };
 
-    struct Tilemap : Resident, phys::Object, vis::Tiles {
+    struct Tilemap : Resident, phys::Object, vis::Drawn<vis::Map> {
         Tileset* tileset;
         vis::Texture* texture;
         uint32 width;
         uint32 height;
         std::vector<uint16> tiles;
+        vis::Tiles vis_tiles;
 
         void Resident_emerge () override;
         void Resident_reclude () override;
 
-        Vec Tiles_pos () override { return Object::pos(); }
-        vis::Texture* Tiles_texture () override { return texture; }
+        void Drawn_draw (vis::Map) override;
 
         Tilemap ();
         void finish ();

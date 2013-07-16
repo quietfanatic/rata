@@ -63,6 +63,11 @@ namespace vis {
         Rect box;
         std::vector<Vec> points;
     };
+
+    void images_init ();
+
+    void draw_frame (Frame*, Texture*, Vec pos, Vec scale = Vec(1, 1));
+
 }
 
 #endif

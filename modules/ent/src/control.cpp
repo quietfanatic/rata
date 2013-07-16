@@ -6,11 +6,11 @@
 
 namespace ent {
 
-    void Player::Sprites_draw (vis::Sprites_Renderer r) {
+    void Player::Drawn_draw (vis::Overlay) {
         if (character && cursor_tex && cursor_frame) {
             Vec focus = character->Controllable_get_focus();
             if (focus.is_defined())
-                r.draw_sprite(cursor_frame, cursor_tex, focus);
+                vis::draw_frame(cursor_frame, cursor_tex, focus);
         }
     }
     void Player::Mind_think () {

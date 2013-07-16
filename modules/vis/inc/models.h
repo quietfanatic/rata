@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include "../../hacc/inc/haccable_standard.h"
 #include "../../util/inc/geometry.h"
-#include "sprites.h"
+#include "images.h"
 
 namespace vis {
     using namespace util;
@@ -71,8 +71,8 @@ namespace vis {
         void apply_pose (Pose*);
         void apply_skin (Skin*);
 
-        void draw_seg (Sprites_Renderer, Skel::Seg* ss, Vec pos, bool fh, bool fv, float z);
-        void draw (Sprites_Renderer, Vec pos, bool fliph = false, bool flipv = false, float z = 0);
+        void draw_seg (Skel::Seg* ss, Vec pos, bool fh, bool fv, float z);
+        void draw (Vec pos, bool fliph = false, bool flipv = false, float z = 0);
     };
 
 }

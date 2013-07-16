@@ -2,9 +2,10 @@
 #include <GL/gl.h>
 #include <GL/glfw.h>
 #include <SOIL/SOIL.h>
+#include "../inc/images.h"
+#include "../inc/common.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/opengl.h"
-#include "../inc/images.h"
 
 namespace vis {
 
@@ -141,6 +142,36 @@ namespace vis {
         return NULL;
     }
 
+    struct Images_Program : Cameraed_Program {
+        GLint model_pos = 0;
+        GLint model_scale = 0;
+        GLint tex = 0;
+        void finish () {
+            Cameraed_Program::finish();
+            model_pos = require_uniform("model_pos");
+            model_scale = require_uniform("model_scale");
+            tex = require_uniform("tex");
+            glUniform1i(tex, 0);
+        }
+        void Program_begin () override {
+            Cameraed_Program::Program_begin();
+        }
+    };
+
+    static Images_Program* prog = NULL;
+    void images_init () {
+        prog = hacc::File("modules/vis/res/images.prog").data().attr("prog");
+    }
+
+    void draw_frame (Frame* frame, Texture* texture, Vec pos, Vec scale) {
+        prog->use();
+        glUniform2f(prog->model_pos, pos.x, pos.y);
+        glUniform2f(prog->model_scale, scale.x, scale.y);
+        glBindTexture(GL_TEXTURE_2D, texture->id);
+        glBindVertexArray(frame->parent->vao_id);
+        glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
+    }
+
 } using namespace vis;
 
 HCB_BEGIN(Texture)
@@ -183,3 +214,9 @@ HCB_BEGIN(Frame)
     attr("box", member(&Frame::box));
     attr("points", member(&Frame::points).optional());
 HCB_END(Frame)
+
+HCB_BEGIN(Images_Program)
+    name("vis::Images_Program");
+    delegate(base<core::Program>());
+    finish(&Images_Program::finish);
+HCB_END(Images_Program)

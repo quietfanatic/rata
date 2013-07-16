@@ -4,7 +4,8 @@
 #include "../../core/inc/phases.h"
 #include "../../hacc/inc/haccable_standard.h"
 #include "../../util/inc/debug.h"
-#include "../../vis/inc/graffiti.h"
+#include "../../vis/inc/common.h"
+#include "../../vis/inc/color.h"
 
 namespace phys {
 
@@ -163,8 +164,9 @@ namespace phys {
 
      // Debug fixture drawing
     
-    struct Phys_Debug_Layer : vis::Graffiti {
-        void Graffiti_draw (vis::Graffiti_Renderer r) {
+    struct Phys_Debug_Layer : vis::Drawn<vis::Overlay> {
+        void Drawn_draw (vis::Overlay) override {
+            using namespace vis;
             for (b2Body* b2b = space.b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
                 if (b2b->IsActive()) {
                     uint32 color = 0xffffff7f;
@@ -174,9 +176,10 @@ namespace phys {
                         case b2_kinematicBody: color = 0x00ffff7f; break;
                         default: color = 0xffffff7f; break;  // shouldn't happen
                     }
-                    r.offset(b2b->GetPosition());
+                    color_offset(b2b->GetPosition());
                     for (b2Fixture* b2f = b2b->GetFixtureList(); b2f; b2f = b2f->GetNext()) {
                         uint32 fcolor = b2f->IsSensor() ? 0xff00ff7f : color;
+                        draw_color(fcolor);
                         b2Shape* b2s = b2f->GetShape();
                         switch (b2s->m_type) {
                             case b2Shape::e_circle: {
@@ -186,27 +189,31 @@ namespace phys {
                                 pts[1] = Vec(b2cs->m_p.x, b2cs->m_p.y - b2cs->m_radius);
                                 pts[2] = Vec(b2cs->m_p.x + b2cs->m_radius, b2cs->m_p.y);
                                 pts[3] = Vec(b2cs->m_p.x, b2cs->m_p.y + b2cs->m_radius);
-                                r.draw_loop(4, pts, fcolor);
+                                draw_loop(4, pts);
                                 break;
                             }
                             case b2Shape::e_polygon: {
                                 auto b2ps = static_cast<b2PolygonShape*>(b2s);
                                  // I love binary compatibility
-                                r.draw_loop(b2ps->m_count, (Vec*)b2ps->m_vertices, fcolor);
+                                draw_loop(b2ps->m_count, (Vec*)b2ps->m_vertices);
                                 break;
                             }
                             case b2Shape::e_edge: {
                                 auto b2es = static_cast<b2EdgeShape*>(b2s);
-                                r.draw_line(b2es->m_vertex1, b2es->m_vertex2, fcolor);
-                                if (b2es->m_hasVertex0)
-                                    r.draw_line(Vec(b2es->m_vertex0)-Vec(.25,.25), b2es->m_vertex1, (fcolor&~0xff)|0x3f);
-                                if (b2es->m_hasVertex3)
-                                    r.draw_line(b2es->m_vertex2, Vec(b2es->m_vertex3)+Vec(.25,.25), (fcolor&~0xff)|0x3f);
+                                draw_line(b2es->m_vertex1, b2es->m_vertex2);
+                                if (b2es->m_hasVertex0) {
+                                    draw_color((fcolor&~0xff)|0x3f);
+                                    draw_line(Vec(b2es->m_vertex0)-Vec(.25,.25), b2es->m_vertex1);
+                                }
+                                if (b2es->m_hasVertex3) {
+                                    draw_color((fcolor&~0xff)|0x3f);
+                                    draw_line(b2es->m_vertex2, Vec(b2es->m_vertex3)+Vec(.25,.25));
+                                }
                                 break;
                             }
                             case b2Shape::e_chain: {
                                 auto b2cs = static_cast<b2ChainShape*>(b2s);
-                                r.draw_chain(b2cs->m_count, (Vec*)b2cs->m_vertices, fcolor);
+                                draw_chain(b2cs->m_count, (Vec*)b2cs->m_vertices);
                                 break;
                             }
                             default: { }  // shouldn't happen

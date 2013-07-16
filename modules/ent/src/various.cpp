@@ -1,18 +1,19 @@
 
 #include "../../hacc/inc/everything.h"
 #include "../../phys/inc/phys.h"
-#include "../../vis/inc/sprites.h"
+#include "../../vis/inc/common.h"
+#include "../../vis/inc/images.h"
 
 static phys::BodyDef*& test_bdf () {
     static phys::BodyDef* test_bdf = hacc::File("modules/ent/res/test_actor.bdf").data().attr("bdf");
     return test_bdf;
 }
-struct Test_Actor : phys::Object, vis::Sprites {
+struct Test_Actor : phys::Object, vis::Drawn<vis::Sprites> {
     vis::Texture* texture;
     vis::Frame* frame;
 
-    void Sprites_draw (vis::Sprites_Renderer r) {
-        r.draw_sprite(frame, texture, pos());
+    void Drawn_draw (vis::Sprites) {
+        vis::draw_frame(frame, texture, pos());
     }
 
     Test_Actor () : Object() { test_bdf(); }

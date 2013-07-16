@@ -1,6 +1,5 @@
 #include "../inc/text.h"
-#include "../inc/graffiti.h"
-#include "../inc/sprites.h"
+#include "../inc/common.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/opengl.h"
 #include "../../core/inc/phases.h"
@@ -9,36 +8,6 @@
 namespace vis {
 
     using namespace core;
-
-    static Links<Text> texts;
-    void Text::appear () { link(texts); }
-    void Text::disappear () { unlink(); }
-
-    struct Text_Renderer::Data {
-        Program* program = hacc::File("modules/vis/res/text.prog").data().attr("prog");
-        GLint tex = program->require_uniform("tex");
-        GLint camera_pos = program->require_uniform("camera_pos");
-        GLint model_pos = program->require_uniform("model_pos");
-        GLint color = program->require_uniform("color");
-
-        Data () {
-            glUseProgram(program->glid);
-            glUniform1i(tex, 0);
-        }
-    };
-
-    Text_Renderer::Text_Renderer () : data(new Data) { }
-
-    void Text_Renderer::run () {
-        glBindVertexArray(0);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glUseProgram(data->program->glid);
-        glUniform2f(data->camera_pos, vis::camera_pos.x, vis::camera_pos.y);
-        for (auto& p : texts) {
-            p.Text_draw(*this);
-        }
-    }
 
     struct Text_Vert {
         uint16 px;
@@ -49,8 +18,31 @@ namespace vis {
         Text_Vert(uint16 px, uint16 py, uint16 tx, uint16 ty) : px(px), py(py), tx(tx), ty(ty) { }
     };
 
+    struct Text_Program : Cameraed_Program {
+        GLint model_pos = 0;
+        GLint color = 0;
+        GLint tex = 0;
+        void finish () {
+            Cameraed_Program::finish();
+            model_pos = require_uniform("model_pos");
+            color = require_uniform("color");
+            tex = require_uniform("tex");
+            glUniform1i(tex, 0);
+        }
+        void Program_begin () override {
+            Cameraed_Program::Program_begin();
+             // No VAOs
+            glBindVertexArray(0);
+        }
+    };
+    static Text_Program* prog = NULL;
+    void text_init () {
+        prog = hacc::File("modules/vis/res/text.prog").data().attr("prog");
+    }
+
      // TODO: Make align.x affect each line individually
-    Vec Text_Renderer::draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color, float wrap) {
+    Vec draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color, float wrap) {
+        prog->use();
          // Coordinates here work with y being down instead of up.
          //  This may be a little confusing.
         auto verts = new Text_Vert [text.length()][4];
@@ -92,8 +84,8 @@ namespace vis {
         }
         Vec size = Vec(maxx*PX, maxy*PX);
         Vec ul = Vec(pos.x - (1 - align.x) / 2 * size.x, pos.y + (1 - align.y) / 2 * size.y);
-        glUniform2f(data->model_pos, ul.x, ul.y);
-        glUniform4f(data->color,
+        glUniform2f(prog->model_pos, ul.x, ul.y);
+        glUniform4f(prog->color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,
             ((color >> 8) & 255) / 255.0,
@@ -107,6 +99,7 @@ namespace vis {
         delete[] verts;
         return size;
     }
+
     Vec text_size (std::string text, Font* font, float wrap) {
         uint16 maxx = 0;
         uint16 maxy = 0;
@@ -131,6 +124,7 @@ namespace vis {
         }
         return Vec(maxx*PX, maxy*PX);
     }
+
     Vec get_glyph_pos (std::string text, Font* font, uint index, Vec align, float wrap) {
         uint curx = 0;
         uint cury = 0;
@@ -164,3 +158,8 @@ HCB_BEGIN(Font)
 HCB_END(Font)
 HCB_INSTANCE(Font*)
 
+HCB_BEGIN(Text_Program)
+    name("vis::Text_Program");
+    delegate(base<core::Program>());
+    finish(&Text_Program::finish);
+HCB_END(Text_Program)
