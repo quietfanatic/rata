@@ -52,7 +52,7 @@ namespace vis {
             for (Texture* tex : ms->skin->textures) {
                 draw_frame(
                     ms->pose->frame, tex, pos,
-                    Vec(fh?-1:1, fv?-1:1)
+                    Vec(fh?-1:1, fv?-1:1), z + ss->z_offset
                 );
             }
         }

@@ -77,7 +77,7 @@ namespace vis {
         glBindTexture(GL_TEXTURE_2D, tex->id);
         glBindVertexArray(tiles->vao_id);
         glDrawArrays(GL_QUADS, 0, tiles->vao_size);
-        core::diagnose_opengl("After rendering a tilemap");
+        core::diagnose_opengl("after draw_tiles");
     }
 
 } using namespace vis;

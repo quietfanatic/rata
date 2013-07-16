@@ -66,7 +66,7 @@ namespace vis {
 
     void images_init ();
 
-    void draw_frame (Frame*, Texture*, Vec pos, Vec scale = Vec(1, 1));
+    void draw_frame (Frame*, Texture*, Vec pos, Vec scale = Vec(1, 1), float z = 0.5);
 
 }
 

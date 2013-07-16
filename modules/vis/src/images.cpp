@@ -163,13 +163,14 @@ namespace vis {
         prog = hacc::File("modules/vis/res/images.prog").data().attr("prog");
     }
 
-    void draw_frame (Frame* frame, Texture* texture, Vec pos, Vec scale) {
+    void draw_frame (Frame* frame, Texture* texture, Vec pos, Vec scale, float z) {
         prog->use();
-        glUniform2f(prog->model_pos, pos.x, pos.y);
+        glUniform3f(prog->model_pos, pos.x, pos.y, z);
         glUniform2f(prog->model_scale, scale.x, scale.y);
         glBindTexture(GL_TEXTURE_2D, texture->id);
         glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
+        core::diagnose_opengl("after draw_frame");
     }
 
 } using namespace vis;
