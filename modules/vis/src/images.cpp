@@ -24,7 +24,8 @@ namespace vis {
         if (core::diagnose_opengl("after setting PixelStore")) {
             throw std::logic_error("OpenGL error");
         }
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->data);
+        uint32* data = use_palettes ? image->processed_data : image->data;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         if (!smooth) {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -46,9 +47,12 @@ namespace vis {
 
     void Image::load () {
         int iw; int ih; int ich;
-        data = SOIL_load_image(filename.c_str(), &iw, &ih, &ich, 4);
+        data = (uint32*)SOIL_load_image(filename.c_str(), &iw, &ih, &ich, 4);
         if (!data) {
             throw hacc::X::Logic_Error("Couldn't open image \"" + filename + "\": " + SOIL_last_result());
+        }
+        if (ich != 4) {
+            throw hacc::X::Logic_Error("Tried to use an image with " + std::to_string(ich) + " channels, but we can only use images with 4 channels.");
         }
         size = Vec(iw, ih);
         for (Texture& t : textures) {
@@ -57,10 +61,58 @@ namespace vis {
              || t.offset.y + t.size.y > size.y)
                 throw hacc::X::Logic_Error("Error processing image \"" + filename + "\": Texture boundary is outside of image");
         }
+        if (!palettes.empty()) {
+            std::unordered_map<uint32, uint32> subst;
+            for (auto& p : palettes) {
+                size_t x = p.offset.x;
+                size_t y = ih - p.offset.y - 1;
+                if (p.vertical) {
+                    size_t max = p.length ? y + p.length : (size_t)-1;
+                    if (max > (size_t)ih) max = ih;
+                    while (y < max) {
+                        uint32* px = data + (y*iw) + x;
+                        uint32 left = px[0];
+                        uint32 right = px[1];
+                        fputs((std::to_string(left) + " => " + std::to_string(right) + "\n").c_str(), stderr);
+                        if (!left && !right) break;
+                        subst.emplace(left, right);
+                        y++;
+                    }
+                }
+                else {
+                    size_t max = p.length ? x + p.length : (size_t)-1;
+                    if (max > (size_t)iw) max = iw;
+                    while (x < max) {
+                        uint32* px = data + (y*iw) + x;
+                        uint32 left = px[0];
+                        uint32 right = px[iw];
+                        fputs((std::to_string(left) + " => " + std::to_string(right) + "\n").c_str(), stderr);
+                        if (!left && !right) break;
+                        subst.emplace(left, right);
+                        x++;
+                    }
+                }
+            }
+            fputs("Palette: \n", stderr);
+            for (auto& p : subst) {
+                fputs(("    " + std::to_string(p.first) + " => " + std::to_string(p.second) + "\n").c_str(), stderr);
+            }
+            processed_data = (uint32*)malloc(iw*ih*sizeof(int32));
+            for (size_t i = 0; i < (size_t)iw*ih; i++) {
+                auto iter = subst.find(data[i]);
+                if (iter != subst.end())
+                    processed_data[i] = iter->second;
+                else
+                    processed_data[i] = data[i];
+            }
+        }
+        else processed_data = data;
         for (Texture& t : textures) {
             t.load(this);
         }
+        if (processed_data != data) free(processed_data);
         free(data);
+        processed_data = data = NULL;
     }
 
     void Image::unload () {
@@ -180,12 +232,22 @@ HCB_BEGIN(Texture)
     attr("name", member(&Texture::name).optional().prepare());
     attr("offset", member(&Texture::offset).optional());
     attr("size", member(&Texture::size).optional());
+    attr("smooth", member(&Texture::smooth).optional());
+    attr("use_palettes", member(&Texture::use_palettes).optional());
 HCB_END(Texture)
+
+HCB_BEGIN(Palette)
+    name("vis::Palette");
+    attr("offset", member(&Palette::offset).optional());
+    attr("vertical", member(&Palette::vertical).optional());
+    attr("length", member(&Palette::length).optional());
+HCB_END(Palette)
 
 HCB_BEGIN(Image)
     name("vis::Image");
     attr("filename", member(&Image::filename));
     attr("textures", member(&Image::textures).optional());
+    attr("palettes", member(&Image::palettes).optional());
     attrs([](Image& image, std::string name){
         Texture* r = image.texture_named(name);
         if (r) return hacc::Reference(r);

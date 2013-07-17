@@ -23,6 +23,7 @@ namespace vis {
         Vec offset = Vec(0, 0);
         Vec size;  // defaults to entire Image
         bool smooth = false;
+        bool use_palettes = true;
 
         uint id = 0;
 
@@ -31,12 +32,21 @@ namespace vis {
         ~Texture ();
     };
 
+    struct Palette {
+        Vec offset = Vec(0, 0);
+        bool vertical = false;
+        uint length = 0;  // 0 means go until it ends
+    };
+
     struct Image {
         std::string filename;
         std::vector<Texture> textures {Texture()};
+        std::vector<Palette> palettes;
 
         Vec size;  // Set on load
-        uint8* data;  // NULL when data is not in memory
+         // These uint32s may be LE or BE.
+        uint32* data;  // NULL when data is not in memory
+        uint32* processed_data;  // After palettes are applied
 
         void load ();
         void unload ();
