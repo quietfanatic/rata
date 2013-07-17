@@ -73,7 +73,6 @@ namespace vis {
                         uint32* px = data + (y*iw) + x;
                         uint32 left = px[0];
                         uint32 right = px[1];
-                        fputs((std::to_string(left) + " => " + std::to_string(right) + "\n").c_str(), stderr);
                         if (!left && !right) break;
                         subst.emplace(left, right);
                         y++;
@@ -86,16 +85,11 @@ namespace vis {
                         uint32* px = data + (y*iw) + x;
                         uint32 left = px[0];
                         uint32 right = px[iw];
-                        fputs((std::to_string(left) + " => " + std::to_string(right) + "\n").c_str(), stderr);
                         if (!left && !right) break;
                         subst.emplace(left, right);
                         x++;
                     }
                 }
-            }
-            fputs("Palette: \n", stderr);
-            for (auto& p : subst) {
-                fputs(("    " + std::to_string(p.first) + " => " + std::to_string(p.second) + "\n").c_str(), stderr);
             }
             processed_data = (uint32*)malloc(iw*ih*sizeof(int32));
             for (size_t i = 0; i < (size_t)iw*ih; i++) {
