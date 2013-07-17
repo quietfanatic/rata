@@ -115,7 +115,13 @@ namespace geo {
 
     void Tilemap::finish () {
         apply_bdf(tilemap_bdf());
-         // Build up all the edges
+        physicalize();
+        vis_tiles.finish(width, height, tiles.data());
+    }
+
+    void Tilemap::physicalize () {
+        while (b2Fixture* fix = b2body->GetFixtureList())
+            b2body->DestroyFixture(fix);
         auto es = new TileEdge [height][width][MAX_EDGES];
         uint initial = 0;
         uint cancelled = 0;
@@ -178,8 +184,6 @@ namespace geo {
         );
          // And...we're done with the edges.
         delete[] es;
-         // Set up graphics
-        vis_tiles.finish(width, height, tiles.data());
     }
 
 } using namespace geo;

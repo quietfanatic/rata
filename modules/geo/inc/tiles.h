@@ -31,6 +31,7 @@ namespace geo {
         void Drawn_draw (vis::Map) override;
 
         Tilemap ();
+        void physicalize ();
         void finish ();
     };
 
