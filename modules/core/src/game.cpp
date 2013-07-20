@@ -17,15 +17,32 @@ namespace core {
      // Scheduled operations
     static std::vector<std::function<void ()>> ops;
     static bool to_stop = false;
-    static uint window_scale = 3;
 
-    void init () {
-        static bool initialized = false;
-        if (initialized) return;
-        initialized = true;
-        hacc::set_file_logger([](std::string s){ file_logger.log(s); });
+    Window* window = NULL;
+    Window::Window () {
+        if (window) throw hacc::X::Logic_Error("Tried to create multiple windows at once");
+        window = this;
+    }
+    void Window::open () {
         glfwInit();
-        set_video(3);
+        is_open = glfwOpenWindow(
+            width, height,
+            red, green, blue,
+            alpha, depth, stencil,
+            fullscreen ? GLFW_FULLSCREEN : GLFW_WINDOW
+        );
+        if (!is_open) {
+            throw hacc::X::Internal_Error("glfwOpenWindow failed for some reason");
+        }
+    }
+
+    void Window::close () {
+        is_open = false;
+        glfwCloseWindow();
+    }
+    Window::~Window () {
+        close();
+        window = NULL;
     }
 
     void load (std::string filename) {
@@ -44,20 +61,9 @@ namespace core {
         exit(0);
     }
 
-    void set_video (uint scale) {
-        if (scale > 8) scale = 8;
-        glfwOpenWindow(
-            320*scale, 240*scale,
-            8, 8, 8, 0,  // r g b a
-            8, 0,  // depth stencil
-            GLFW_WINDOW
-        );
-        window_scale = scale;
-    }
-    uint get_window_scale () { return window_scale; }
-    
     void start (const std::function<void ()>& render) {
-        init();
+        if (!window) new Window;
+        hacc::set_file_logger([](std::string s){ file_logger.log(s); });
         for (Phase* p : all_phases()) {
             game_logger.log("Starting phase: " + p->name);
             p->Phase_start();
@@ -99,6 +105,20 @@ namespace core {
 
 } using namespace core;
 
+ // TODO: use magic setters
+HCB_BEGIN(Window)
+    name("core::Window");
+    attr("width", member(&Window::width).optional());
+    attr("height", member(&Window::height).optional());
+    attr("red", member(&Window::red).optional());
+    attr("green", member(&Window::green).optional());
+    attr("blue", member(&Window::blue).optional());
+    attr("alpha", member(&Window::alpha).optional());
+    attr("depth", member(&Window::depth).optional());
+    attr("stencil", member(&Window::stencil).optional());
+    attr("fullscreen", member(&Window::fullscreen).optional());
+HCB_END(Window)
+
 struct LoadCommand : CommandData {
     std::string filename;
     void operator () () { load(filename); }
@@ -136,15 +156,6 @@ HCB_BEGIN(RenameCommand)
     elem(member(&RenameCommand::old_name));
     elem(member(&RenameCommand::new_name));
 HCB_END(SaveCommand)
-
-struct ScaleCommand : CommandData {
-    uint factor = 1;
-    void operator () () { set_video(factor); }
-};
-HCB_BEGIN(ScaleCommand)
-    new_command<ScaleCommand>("scale", "Scale the main window by an integer factor (1 = 320x240, 2 = 640x480)");
-    elem(member(&ScaleCommand::factor).optional());
-HCB_END(ScaleCommand)
 
 struct QuitCommand : CommandData {
     void operator() () { core::quick_exit(); }

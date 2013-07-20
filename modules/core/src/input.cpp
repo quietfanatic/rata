@@ -88,7 +88,7 @@ namespace core {
             if (!cursor_trapped || (x != 0 && y != 0)) {
                 for (auto ct : cursor_listeners()) {
                     if (ct->Cursor_Listener_active()) {
-                        ct->Cursor_Listener_motion(Vec(x+1, -(y+1))*PX / get_window_scale());
+                        ct->Cursor_Listener_motion(Vec(x+1, -(y+1))*PX);
                         break;
                     }
                 }
