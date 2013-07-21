@@ -7,7 +7,7 @@
 #include "../../hacc/src/types_internal.h"
 #include "../inc/commands.h"
 #include "../inc/input.h"
-#include "../inc/game.h"
+#include "../inc/window.h"
 
 using namespace hacc;
 

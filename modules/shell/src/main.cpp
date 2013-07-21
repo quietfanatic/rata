@@ -1,5 +1,5 @@
 
-#include "../../core/inc/game.h"
+#include "../../core/inc/window.h"
 #include "../../hacc/inc/files.h"
 #include "../../phys/inc/phys.h"
 #include "../../geo/inc/camera.h"

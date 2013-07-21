@@ -1,5 +1,5 @@
 #include <GL/glfw.h>
-#include "../inc/game.h"
+#include "../inc/window.h"
 #include "../inc/commands.h"
 #include "../inc/input.h"
 #include "../../util/inc/debug.h"
