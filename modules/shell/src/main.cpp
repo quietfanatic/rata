@@ -2,6 +2,7 @@
 #include "../../core/inc/game.h"
 #include "../../hacc/inc/files.h"
 #include "../../phys/inc/phys.h"
+#include "../../geo/inc/camera.h"
 #include "../../vis/inc/common.h"
 
 static std::string initial_state = "modules/shell/start.hacc";
@@ -10,6 +11,7 @@ static std::string main_file = "modules/shell/main.hacc";
 
 void step () {
     phys::space.run();
+    vis::camera_pos = geo::update_camera();
 }
 
 int main () {

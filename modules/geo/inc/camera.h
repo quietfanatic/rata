@@ -6,7 +6,8 @@
 namespace geo {
     using namespace util;
 
-    Vec get_camera_pos ();
+    extern Vec camera_pos;
+    Vec& update_camera ();
      // Make the camera jump straight to its ideal position.
     extern bool camera_jump;
 
