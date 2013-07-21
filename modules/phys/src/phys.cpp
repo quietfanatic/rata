@@ -80,8 +80,8 @@ namespace phys {
 
     Space space;
 
-    Space::Space () : core::Phase("D.M", "space") { }
-    void Space::Phase_start () {
+    Space::Space () { }
+    void Space::start () {
         space_logger.log("Creating the spacetime continuum.  Well, the space part anyway.");
         b2world = new b2World(
             b2Vec2(0, -30)
@@ -89,7 +89,7 @@ namespace phys {
         b2world->SetContactListener(&mycl);
         b2world->SetContactFilter(&mycf);
     }
-    void Space::Phase_run () {
+    void Space::run () {
         for (b2Body* b2b = b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
             if (Object* obj = (Object*)b2b->GetUserData())
                 if (b2b->IsActive())
@@ -104,10 +104,11 @@ namespace phys {
             }
         }
     }
-    Space::~Space () {
+    void Space::stop () {
         space_logger.log("Destroying space.");
         delete b2world;
     }
+    Space::~Space () { stop(); }
 
      // Objects
     void Object::apply_bdf (BodyDef* bdf) {

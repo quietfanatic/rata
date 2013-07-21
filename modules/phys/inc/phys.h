@@ -2,7 +2,6 @@
 #define HAVE_PHYS_PHYS_H
 
 #include <Box2D/Box2D.h>
-#include "../../core/inc/phases.h"
 #include "../../util/inc/geometry.h"
 
 namespace phys {
@@ -10,15 +9,17 @@ namespace phys {
 
     struct Object;
 
-    struct Space : core::Phase {
+    struct Space {
         b2World* b2world;
         Space ();
 
         Vec get_gravity () const { return b2world->GetGravity(); }
         void set_gravity (Vec g) { b2world->SetGravity(g); }
 
-        void Phase_start () override;
-        void Phase_run () override;
+        void start ();
+        void run ();
+        void stop ();
+
         ~Space ();
     };
     extern Space space;
