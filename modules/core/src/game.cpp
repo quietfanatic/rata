@@ -11,13 +11,6 @@ namespace core {
     Logger file_logger ("files");
     Logger game_logger ("game");
 
-     // Game data
-    uint64 frames_simulated = 0;
-    uint64 frames_drawn = 0;
-     // Scheduled operations
-    static std::vector<std::function<void ()>> ops;
-    static bool to_stop = false;
-
     Window* window = NULL;
     Window::Window () {
         if (window) throw hacc::X::Logic_Error("Tried to create multiple windows at once");
@@ -45,24 +38,8 @@ namespace core {
         window = NULL;
     }
 
-    void load (std::string filename) {
-        ops.emplace_back([=](){ hacc::load(filename); });
-    }
-    void unload (std::string filename) {
-        ops.emplace_back([=](){ hacc::unload(filename); });
-    }
-    void save (std::string filename) {
-        ops.emplace_back([=](){ hacc::save(filename); });
-    }
-    void stop () { to_stop = true; }
-
-    void quick_exit () {
-        glfwTerminate();
-        exit(0);
-    }
-
-    void start (const std::function<void ()>& render) {
-        if (!window) new Window;
+    void Window::start () {
+        if (!is_open) open();
         hacc::set_file_logger([](std::string s){ file_logger.log(s); });
         for (Phase* p : all_phases()) {
             game_logger.log("Starting phase: " + p->name);
@@ -71,15 +48,18 @@ namespace core {
         try {
             for (;;) {
                  // Run queued operations
-                if (!ops.empty()) {
+                if (!pending_ops.empty()) {
                     try {
-                        hacc::file_transaction([](){
-                            for (auto& o : ops) o();
+                        hacc::file_transaction([this](){
+                             // Allow ops to be expanded while executing
+                            for (size_t i = 0; i < pending_ops.size(); i++) {
+                                pending_ops[i]();
+                            }
                         });
                     } catch (std::exception& e) {
                         fprintf(stderr, "Exception: %s\n", e.what());
                     }
-                    ops.clear();
+                    pending_ops.clear();
                 }
                  // Then check for stop
                 if (to_stop) {
@@ -89,8 +69,9 @@ namespace core {
                  // Run all_phases and all_layers
                  // TODO: real timing and allow frame-skipping the all_layers
                 for (Phase* p : all_phases()) p->run_if_on();
+                if (step) step();
                 frames_simulated++;
-                render();
+                if (render) render();
                 frames_drawn++;
                 glfwSwapBuffers();
                 glfwSleep(1/60.0);
@@ -101,6 +82,12 @@ namespace core {
             for (Phase* p : all_phases()) p->Phase_stop();
             throw;
         }
+    }
+    void Window::stop () { to_stop = true; }
+
+    void quick_exit () {
+        glfwTerminate();
+        exit(0);
     }
 
 } using namespace core;
@@ -121,7 +108,7 @@ HCB_END(Window)
 
 struct LoadCommand : CommandData {
     std::string filename;
-    void operator () () { load(filename); }
+    void operator () () { window->before_next_frame([=](){ hacc::load(filename); }); }
 };
 HCB_BEGIN(LoadCommand)
     new_command<LoadCommand>("load", "Manually load a file by its filename");
@@ -130,7 +117,7 @@ HCB_END(LoadCommand)
 
 struct SaveCommand : CommandData {
     std::string filename;
-    void operator () () { save(filename); }
+    void operator () () { window->before_next_frame([=](){ hacc::save(filename); }); }
 };
 HCB_BEGIN(SaveCommand)
     new_command<SaveCommand>("save", "Save the file object with the given filename");
@@ -139,12 +126,12 @@ HCB_END(SaveCommand)
 
 struct UnloadCommand : CommandData {
     std::string filename;
-    void operator () () { unload(filename); }
+    void operator () () { window->before_next_frame([=](){ hacc::unload(filename); }); }
 };
 HCB_BEGIN(UnloadCommand)
     new_command<UnloadCommand>("unload", "Unload the file object with the given filename.  Fails if there are outside references to it.");
     elem(member(&UnloadCommand::filename));
-HCB_END(SaveCommand)
+HCB_END(UnloadCommand)
 
 struct RenameCommand : CommandData {
     std::string old_name;
@@ -165,7 +152,7 @@ HCB_BEGIN(QuitCommand)
 HCB_END(QuitCommand)
 
 struct StopCommand : CommandData {
-    void operator() () { core::stop(); }
+    void operator() () { window->stop(); }
 };
 HCB_BEGIN(StopCommand)
     new_command<StopCommand>("stop", "Stop the game (probably saving its state to somewhere)");

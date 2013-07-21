@@ -8,12 +8,19 @@ static std::string stop_state = "save/last_stop.hacc";
 static std::string main_file = "modules/shell/main.hacc";
 
 int main () {
-    hacc::load(hacc::File(main_file));
-    core::window->open();
-    core::load(initial_state);
-    core::start(vis::render);
-    hacc::File(initial_state).rename(stop_state);
-    hacc::save(hacc::File(stop_state));
+    using namespace core;
+    using namespace hacc;
+     // Set up window
+    load(File(main_file));
+    window->render = vis::render;
+    window->before_next_frame([](){
+        load(File(initial_state));
+    });
+     // Run
+    window->start();
+     // After window closes
+    File(initial_state).rename(stop_state);
+    save(File(stop_state));
     fprintf(stderr, "Quit successfully\n");
 }
 

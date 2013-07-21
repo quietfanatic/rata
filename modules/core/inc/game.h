@@ -2,9 +2,12 @@
 #define HAVE_CORE_GAME_H
 
 #include <functional>
+#include <vector>
 #include "../../util/inc/honestly.h"
 
 namespace core {
+
+    typedef std::function<void ()> Callback;
 
     extern uint64 frames_simulated;
     extern uint64 frames_drawn;
@@ -21,7 +24,15 @@ namespace core {
         uint8 stencil = 0;
         bool fullscreen = false;
 
+        Callback step;
+        Callback render;
+
+        uint64 frames_simulated = 0;
+        uint64 frames_drawn = 0;
+
         bool is_open = false;
+        bool to_stop = false;
+        std::vector<std::function<void ()>> pending_ops;
 
          // Shortcuts.  If you're gonna do multiple of these at once, just
          //  set the parameters and call open() yourself
@@ -44,19 +55,21 @@ namespace core {
         void open ();
         void close ();
         ~Window ();
+
+         // Run the event loop
+        void start ();
+        void stop ();
+
+         // Run an operation once at the next break between frames, when it
+         //  is safe to do things like IO.  Efficiency is not guaranteed.
+         // This can be called before start() or even open(), and the op
+         //  will be run when the window loop is started.
+         // All ops in one frame will be run in one hacc file transaction,
+         //  and an exception will abort all ops.
+        void before_next_frame (const Callback& f) { pending_ops.emplace_back(f); }
     };
     extern Window* window;
 
-     // These can be called at any time, and they will
-     //  schedule an operation at the next frame break.
-     // Loading a new file does not unload any old files.
-     //  To do that you must keep track and do it yourself.
-    void load (std::string filename);
-    void unload (std::string filename);
-    void save (std::string filename);
-
-    void start (const std::function<void ()>& render);
-    void stop ();
      // Immediately close the window and exit the program.  Does not return.
     void quick_exit ();
 

@@ -30,7 +30,7 @@ namespace core {
                     break;
                 }
                 case GLFW_KEY_ESC: {
-                    stop();
+                    window->stop();
                     break;
                 }
                 default: break;

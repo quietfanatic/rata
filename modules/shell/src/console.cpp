@@ -180,7 +180,7 @@ namespace shell {
              // Draw text
             Vec cli_size = draw_text(cli + " ", font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, 20);
             Vec cursor_pos = get_glyph_pos(cli, font, cli_pos, Vec(1, -1), 20);
-            if (core::frames_drawn % 40 < 20) {
+            if (window->frames_drawn % 40 < 20) {
                 draw_text("_", font, Vec(1*PX + cursor_pos.x, cli_size.y - cursor_pos.y - font->line_height*PX - 2*PX), Vec(1, -1), 0xffffffff);
             }
             draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, 20);
