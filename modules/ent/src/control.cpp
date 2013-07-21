@@ -63,20 +63,17 @@ namespace ent {
         appear();
     }
 
-    INIT_SAFE(Links<Mind>, minds);
+    static INIT_SAFE(Links<Mind>, minds);
     void Mind::wake () { link(minds()); }
     void Mind::sleep () { unlink(); }
     Mind::Mind () { wake(); }
     Mind::~Mind () { }
 
-    struct Mind_Phase : core::Phase {
-        Mind_Phase () : core::Phase("B.M", "minds") { }
-        void Phase_run () {
-            for (auto& m : minds()) {
-                m.Mind_think();
-            }
+    void run_minds () {
+        for (auto& m : minds()) {
+            m.Mind_think();
         }
-    } mind_phase;
+    }
 
 } using namespace ent;
 

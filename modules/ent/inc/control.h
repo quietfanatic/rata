@@ -83,6 +83,8 @@ namespace ent {
         void wake ();
         void sleep ();
     };
+     // Call think on all minds
+    void run_minds ();
 
      // We're querying key state instead of going through Key_Listener
     struct Player : vis::Drawn<vis::Overlay>, Mind, core::Cursor_Listener {
