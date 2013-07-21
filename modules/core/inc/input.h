@@ -44,6 +44,11 @@ namespace core {
         Cursor_Listener (std::string order = "Z") : Ordered(order) { }
     };
 
+    int GLFWCALL close_cb ();
+    void GLFWCALL key_cb (int, int);
+    void GLFWCALL char_cb (int, int);
+    void run_input ();
+
 }
 
 #endif

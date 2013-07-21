@@ -14,7 +14,6 @@ workflow {
         ../core/tmp/commands.o
         ../core/tmp/game.o
         ../core/tmp/input.o
-        ../core/tmp/phases.o
         ../core/tmp/opengl.o
         ../ent/tmp/bipeds.o
         ../ent/tmp/control.o

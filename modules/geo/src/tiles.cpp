@@ -5,7 +5,6 @@
 #include "../../util/inc/geometry.h"
 #include "../../util/inc/debug.h"
 #include "../../core/inc/opengl.h"
-#include "../../core/inc/phases.h"
 
 namespace geo {
     using namespace util;

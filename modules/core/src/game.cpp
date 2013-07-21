@@ -1,7 +1,7 @@
 #include <GL/glfw.h>
 #include "../inc/game.h"
-#include "../inc/phases.h"
 #include "../inc/commands.h"
+#include "../inc/input.h"
 #include "../../util/inc/debug.h"
 #include "../../hacc/inc/files.h"
 #include "../../hacc/inc/strings.h"
@@ -38,13 +38,22 @@ namespace core {
         window = NULL;
     }
 
+    void really_stop_window () {
+        glfwSetKeyCallback(NULL);
+        glfwSetCharCallback(NULL);
+        glfwSetWindowCloseCallback(NULL);
+    }
+
     void Window::start () {
         if (!is_open) open();
+         // Set all the window calbacks.  The reason these aren't set on open
+         //  is because the input system may crash if the callbacks are called
+         //  while the program is exiting and things are being destructed.
+        glfwSetKeyCallback(key_cb);
+        glfwSetCharCallback(char_cb);
+        glfwSetWindowCloseCallback(close_cb);
+        glfwDisable(GLFW_AUTO_POLL_EVENTS);
         hacc::set_file_logger([](std::string s){ file_logger.log(s); });
-        for (Phase* p : all_phases()) {
-            game_logger.log("Starting phase: " + p->name);
-            p->Phase_start();
-        }
         try {
             for (;;) {
                  // Run queued operations
@@ -66,9 +75,9 @@ namespace core {
                     to_stop = false;
                     break;
                 }
-                 // Run all_phases and all_layers
+                run_input();
+                 // Run step and render
                  // TODO: real timing and allow frame-skipping the all_layers
-                for (Phase* p : all_phases()) p->run_if_on();
                 if (step) step();
                 frames_simulated++;
                 if (render) render();
@@ -76,12 +85,12 @@ namespace core {
                 glfwSwapBuffers();
                 glfwSleep(1/60.0);
             }
-            for (Phase* p : all_phases()) p->Phase_stop();
         }
         catch (...) {
-            for (Phase* p : all_phases()) p->Phase_stop();
+            really_stop_window();
             throw;
         }
+        really_stop_window();
     }
     void Window::stop () { to_stop = true; }
 

@@ -2,7 +2,6 @@
 #include "../inc/common.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/opengl.h"
-#include "../../core/inc/phases.h"
 #include "../../core/inc/game.h"
 
 namespace vis {
