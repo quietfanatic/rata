@@ -35,12 +35,7 @@ namespace ent {
             bit <<= 1;
         }
         character->Controllable_buttons(ButtonBits(buttons));
-    }
-    bool Player::Cursor_Listener_active () { return character; }
-    bool Player::Cursor_Listener_trap () { return true; }
-    void Player::Cursor_Listener_motion (Vec rel) {
-        if (!character) return;
-        character->Controllable_move_focus(rel);
+        character->Controllable_move_focus(core::cursor_motion);
     }
 
     Player::Player () {

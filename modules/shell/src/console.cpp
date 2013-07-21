@@ -11,7 +11,7 @@ namespace shell {
     using namespace core;
     using namespace vis;
 
-    struct Console : Key_Listener, Char_Listener, Cursor_Listener, core::Console, Drawn<Hud> {
+    struct Console : Key_Listener, Char_Listener, core::Console, Drawn<Hud> {
         bool is_active = false;
         std::string contents = console_help();
         std::string cli = "";
@@ -25,7 +25,7 @@ namespace shell {
         Font* font = NULL;
         char trigger = '`';
 
-        Console () : Key_Listener("A"), Char_Listener("A"), Cursor_Listener("A") { }
+        Console () : Key_Listener("A"), Char_Listener("A") { }
 
         void Console_print (std::string message) {
             contents += message;
@@ -152,17 +152,14 @@ namespace shell {
             }
             return true;
         }
-         // We only implement Cursor_Listener in order to cancel any cursor
-         //  trap that might be happening.
-        bool Cursor_Listener_active () override { return is_active; }
-        bool Cursor_Listener_trap () override { return false; }
-        void Cursor_Listener_motion (Vec p) override { }
         void enter_console () {
             is_active = true;
+            core::trap_cursor = false;
             appear();
         }
         void exit_console () {
             is_active = false;
+            core::trap_cursor = true;
             disappear();
         }
         void Drawn_draw (Hud r) {

@@ -1,5 +1,6 @@
 
 #include "../../core/inc/window.h"
+#include "../../core/inc/input.h"
 #include "../../hacc/inc/files.h"
 #include "../../phys/inc/phys.h"
 #include "../../geo/inc/camera.h"
@@ -26,6 +27,7 @@ int main () {
     window->before_next_frame([](){
         load(File(initial_state));
     });
+    core::trap_cursor = true;
      // Run
     phys::space.start();
     window->start();

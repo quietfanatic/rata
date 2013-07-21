@@ -2,7 +2,6 @@
 #define HAVE_ENT_CONTROL_H
 
 #include "../../util/inc/geometry.h"
-#include "../../core/inc/input.h"
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/images.h"
 
@@ -87,7 +86,7 @@ namespace ent {
     void run_minds ();
 
      // We're querying key state instead of going through Key_Listener
-    struct Player : vis::Drawn<vis::Overlay>, Mind, core::Cursor_Listener {
+    struct Player : vis::Drawn<vis::Overlay>, Mind {
         Mappings mappings;
         Controllable* character = NULL;
         vis::Texture* cursor_tex = NULL;
@@ -95,9 +94,6 @@ namespace ent {
 
         void Drawn_draw (vis::Overlay) override;  // Draws the cursor
         void Mind_think () override;  // Read input and send control to character
-        bool Cursor_Listener_active () override;
-        bool Cursor_Listener_trap () override;
-        void Cursor_Listener_motion (Vec) override;
 
         Player ();
         void finish ();
