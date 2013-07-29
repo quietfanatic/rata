@@ -1,10 +1,10 @@
 {Settings:{
     window:{
-        width: 640
-        height: 480
+        width: 1280
+        height: 960
         depth: 8
     }
     vis:{
-        camera_size:[10 7.5]
+        camera_size:[20 15]
     }
 }}
