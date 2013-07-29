@@ -56,6 +56,7 @@ namespace vis {
             i.Drawn_draw(Hud());
          // Turn off camera scaling
         global_camera_size = Vec(core::window->width, core::window->height)*PX;
+        global_camera_pos = global_camera_size / 2;
         Program::unuse();
         for (auto& i : Dev::items)
             i.Drawn_draw(Dev());

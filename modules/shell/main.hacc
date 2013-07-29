@@ -5,6 +5,6 @@
         depth: 8
     }
     vis:{
-        camera_size:[20 15]
+        camera_size:[40 30]
     }
 }}

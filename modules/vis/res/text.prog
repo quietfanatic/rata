@@ -23,7 +23,7 @@
             const float PX = 1.0/16.0;
 
             void main () {
-                gl_Position.xy = (model_pos - camera_pos + vert_pos * vec2(PX, -PX)) / camera_size;
+                gl_Position.xy = (model_pos - camera_pos + vert_pos * vec2(PX, -PX)) / (camera_size / 2.0);
                 gl_Position.zw = vec2(0.0, 1.0);
                 tex_coords = vert_tex / 16.0;
             }

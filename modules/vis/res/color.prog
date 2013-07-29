@@ -15,7 +15,7 @@
             attribute vec2 vert_pos;
 
             void main () {
-                gl_Position.xy = (model_pos - camera_pos + vert_pos) / camera_size;
+                gl_Position.xy = (model_pos - camera_pos + vert_pos) / (camera_size / 2.0);
                 gl_Position.zw = vec2(0.0, 1.0);
             }
             END

@@ -22,7 +22,7 @@
             varying vec2 tex_coords;
 
             void main () {
-                gl_Position.xy = (model_pos.xy - camera_pos + vert_pos * model_scale) / camera_size;
+                gl_Position.xy = (model_pos.xy - camera_pos + vert_pos * model_scale) / (camera_size / 2.0);
                 gl_Position.zw = vec2(model_pos.z, 1.0);
                 tex_coords = vert_tex;
             }
