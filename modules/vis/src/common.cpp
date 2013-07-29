@@ -56,6 +56,9 @@ namespace vis {
             i.Drawn_draw(Hud());
          // Turn off camera scaling
         global_camera_size = Vec(core::window->width, core::window->height)*PX;
+        Program::unuse();
+        for (auto& i : Dev::items)
+            i.Drawn_draw(Dev());
     }
 
     Links<Drawn<Map>> Map::items;
