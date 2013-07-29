@@ -26,11 +26,6 @@ namespace core {
     }
     void Program::Program_begin () {
         glUseProgram(glid);
-         // Change attribute vertex enabledness
-        for (size_t i = attributes.size(); i < current_attr_count; i++)
-            glDisableVertexAttribArray(i);
-        for (size_t i = current_attr_count; i < attributes.size(); i++)
-            glEnableVertexAttribArray(i);
         current_attr_count = attributes.size();
     }
     void Program::Program_end () { }  // No default behavior

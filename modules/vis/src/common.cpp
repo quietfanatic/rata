@@ -25,6 +25,8 @@ namespace vis {
             tiles_init();
             initted = true;
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnableVertexAttribArray(0);
+            glEnableVertexAttribArray(1);
         }
     }
     void render () {
