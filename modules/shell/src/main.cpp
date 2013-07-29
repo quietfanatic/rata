@@ -11,6 +11,12 @@ static std::string initial_state = "modules/shell/start.hacc";
 static std::string stop_state = "save/last_stop.hacc";
 static std::string main_file = "modules/shell/main.hacc";
 
+struct Settings {
+    core::Window window;
+    vis::Settings vis;
+};
+static Settings* settings = NULL;
+
 void step () {
     ent::run_minds();
     phys::space.run();
@@ -18,25 +24,28 @@ void step () {
 }
 
 int main () {
-    using namespace core;
     using namespace hacc;
-     // Set up window
-    load(File(main_file));
-    window->step = step;
-    window->render = vis::render;
-    window->before_next_frame([](){
+
+    settings = File(main_file).data();
+    settings->window.step = step;
+    settings->window.render = vis::render;
+    settings->window.before_next_frame([](){
         load(File(initial_state));
     });
     core::trap_cursor = true;
      // Run
     phys::space.start();
-    window->start();
+    settings->window.start();
      // After window closes
     File(initial_state).rename(stop_state);
     save(File(stop_state));
     fprintf(stderr, "Quit successfully\n");
 }
 
-
+HCB_BEGIN(Settings)
+    name("Settings");
+    attr("window", member(&Settings::window).optional());
+    attr("vis", member(&Settings::vis).optional());
+HCB_END(Settings)
 
 
