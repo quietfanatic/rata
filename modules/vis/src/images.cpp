@@ -199,9 +199,6 @@ namespace vis {
             tex = require_uniform("tex");
             glUniform1i(tex, 0);
         }
-        void Program_begin () override {
-            Cameraed_Program::Program_begin();
-        }
     };
 
     static Images_Program* prog = NULL;

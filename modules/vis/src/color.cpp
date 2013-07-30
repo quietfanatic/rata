@@ -16,6 +16,7 @@ namespace vis {
             Cameraed_Program::Program_begin();
              // No VAOs
             glBindVertexArray(0);
+            glEnableVertexAttribArray(0);
         }
     };
 
