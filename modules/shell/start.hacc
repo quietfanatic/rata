@@ -14,6 +14,6 @@
         cursor_frame:$("modules/ent/res/cursor.hacc").layout.normal
     }}
     console:{"shell::Console":{
-        font:$("modules/shell/res/font-small.hacc").font
+        font:$("modules/shell/res/monospace.hacc").font
     }}
 }}
