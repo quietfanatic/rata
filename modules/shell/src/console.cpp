@@ -25,7 +25,11 @@ namespace shell {
         Font* font = NULL;
         char trigger = '`';
 
-        Console () : Key_Listener("A"), Char_Listener("A") { }
+        static CE size_t max_size = 2<<15;
+
+        Console () : Key_Listener("A"), Char_Listener("A") {
+            contents.reserve(max_size);
+        }
 
         void Console_print (std::string message) override {
             contents += message;
@@ -174,12 +178,12 @@ namespace shell {
             pts[3] = Vec(0, core::window->height*PX);
             draw_primitive(GL_QUADS, 4, pts);
              // Draw text
-            Vec cli_size = draw_text(cli + " ", font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, 20);
-            Vec cursor_pos = get_glyph_pos(cli, font, cli_pos, Vec(1, -1), 20);
+            Vec cli_size = draw_text(cli + " ", font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, core::window->width*PX);
+            Vec cursor_pos = get_glyph_pos(cli, font, cli_pos, Vec(1, -1), core::window->width*PX);
             if (window->frames_drawn % 40 < 20) {
                 draw_text("_", font, Vec(1*PX + cursor_pos.x, cli_size.y - cursor_pos.y - font->line_height*PX - 2*PX), Vec(1, -1), 0xffffffff);
             }
-            draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, 20);
+            draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, core::window->width*PX);
         }
     };
 } using namespace shell;
