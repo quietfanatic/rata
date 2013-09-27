@@ -137,7 +137,7 @@ namespace vis {
         for (Frame& f : frames)
             f.parent = this;
          // Create OpenGL VBO
-        Layout_VBO_Data data [frames.size()];
+        auto data = new Layout_VBO_Data [frames.size()];
         for (uint i = 0; i < frames.size(); i++) {
             data[i].lbp = frames[i].box.lb() * PX;
             data[i].lbt = frames[i].offset + frames[i].box.lb();
@@ -173,7 +173,7 @@ namespace vis {
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbt));
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         core::diagnose_opengl("after creating a layout vao");
-
+        delete[] data;
     }
 
     Layout::~Layout () {

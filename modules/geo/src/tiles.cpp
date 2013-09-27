@@ -121,7 +121,7 @@ namespace geo {
     void Tilemap::physicalize () {
         while (b2Fixture* fix = b2body->GetFixtureList())
             b2body->DestroyFixture(fix);
-        auto es = new TileEdge [height][width][MAX_EDGES];
+        auto es = new TileEdge [height * width][MAX_EDGES];
         uint initial = 0;
         uint cancelled = 0;
         uint merged = 0;
@@ -143,21 +143,21 @@ namespace geo {
                 uint n_edges = def->vertices.size();
                  // Create the edges for this tile
                 for (uint e = 0; e < n_edges; e++) {
-                    es[y][x][e].v1 = def->vertices[e] + Vec(x, height - y - 1);
-                    es[y][x][e].v2 = def->vertices[e+1 == n_edges ? 0 : e+1] + Vec(x, height - y - 1);
-                    es[y][x][e].next = &es[y][x][e+1 == n_edges ? 0 : e+1];
-                    es[y][x][e].prev = &es[y][x][e == 0 ? n_edges-1 : e-1];
-                    es[y][x][e].def = def;
+                    es[y * width + x][e].v1 = def->vertices[e] + Vec(x, height - y - 1);
+                    es[y * width + x][e].v2 = def->vertices[e+1 == n_edges ? 0 : e+1] + Vec(x, height - y - 1);
+                    es[y * width + x][e].next = &es[y * width + x][e+1 == n_edges ? 0 : e+1];
+                    es[y * width + x][e].prev = &es[y * width + x][e == 0 ? n_edges-1 : e-1];
+                    es[y * width + x][e].def = def;
                     initial++;
                      // Connect edges
                     if (x > 0)
                         for (uint pe = 0; pe < MAX_EDGES; pe++)
-                            if (es[y][x-1][pe].def)
-                                connect_edges(&es[y][x][e], &es[y][x-1][pe], &cancelled);
+                            if (es[y * width + x-1][pe].def)
+                                connect_edges(&es[y * width + x][e], &es[y * width + x-1][pe], &cancelled);
                     if (y > 0)
                         for (uint pe = 0; pe < MAX_EDGES; pe++)
-                            if (es[y-1][x][pe].def)
-                                connect_edges(&es[y][x][e], &es[y-1][x][pe], &cancelled);
+                            if (es[(y-1) * width + x][pe].def)
+                                connect_edges(&es[y * width + x][e], &es[(y-1) * width + x][pe], &cancelled);
                 }
             }
         }
@@ -165,8 +165,8 @@ namespace geo {
         for (uint y = 0; y < height; y++)
         for (uint x = 0; x < width; x++)
         for (uint e = 0; e < MAX_EDGES; e++) {
-            if (es[y][x][e].def) {
-                while(merge_edges(&es[y][x][e], &merged, &eaten));
+            if (es[y * width + x][e].def) {
+                while(merge_edges(&es[y * width + x][e], &merged, &eaten));
             }
         }
          // The bodydef has already been manifested through phys::Object
@@ -174,8 +174,8 @@ namespace geo {
         for (uint y = 0; y < height; y++)
         for (uint x = 0; x < width; x++)
         for (uint e = 0; e < MAX_EDGES; e++) {
-            if (es[y][x][e].def) {
-                create_edge(b2body, &es[y][x][e], &final);
+            if (es[y * width + x][e].def) {
+                create_edge(b2body, &es[y * width + x][e], &final);
             }
         }
         tilemap_logger.log("Optimized tilemap edges.  initial:%u cancelled:%u merged:%u eaten:%u final:%u",

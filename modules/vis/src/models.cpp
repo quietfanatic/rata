@@ -35,7 +35,7 @@ namespace vis {
 
     uint Skel::seg_index (Seg* p) {
         uint r = p - segs.data();
-        if (r < 0 || r >= segs.size()) {
+        if (r >= segs.size()) {
             throw std::logic_error("A Segment was used with a Skeleton it doesn't belong to.");
         }
         return r;

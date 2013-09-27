@@ -148,7 +148,7 @@ namespace hacc {
 
     namespace X {
         Corrupted_Tree::Corrupted_Tree (Tree tree) :
-            Corrupted("Corrupted tree: nonsensical form number " + tree.form()),
+            Corrupted("Corrupted tree: nonsensical form number " + std::to_string(tree.form())),
             tree(tree)
         { }
         Wrong_Form::Wrong_Form (Form form, Tree tree) :
@@ -158,7 +158,7 @@ namespace hacc {
             ), form(form), tree(tree)
         { }
         Corrupted_Path::Corrupted_Path (Path path) :
-            Corrupted("Corrupted path: nonsensical path type number " + path->type()),
+            Corrupted("Corrupted path: nonsensical path type number " + std::to_string(path->type())),
             path(path)
         { }
     }

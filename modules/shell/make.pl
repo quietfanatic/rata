@@ -42,7 +42,7 @@ workflow {
         ../util/tmp/geometry.o
         ../../lib/libBox2D.a
     >;
-    our @libs = qw(-lgc -lGL -lglfw -lSOIL);
+    our @libs = qw(-lstdc++ -lm -lgc -lGL -lglfw -lSOIL);
 
     include '../..';
 

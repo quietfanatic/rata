@@ -16,7 +16,7 @@ namespace util {
     struct Vec {
         float x;
         float y;
-        CE Vec () :x(0/0.0), y(0/0.0) { }
+        Vec () :x(0/0.0), y(0/0.0) { }
         CE Vec (float x, float y) :x(x), y(y) { }
         Vec (b2Vec2 bv) :x(bv.x), y(bv.y) { }
         operator b2Vec2& () { return reinterpret_cast<b2Vec2&>(*this); }
@@ -28,12 +28,12 @@ namespace util {
 
         CE bool is_defined () const { return x==x || y==y; }
         CE float mag2 () const { return x*x + y*y; }
-        CE float mag () const { return sqrt(mag2()); }
-        CE float ang () const { return atan2(y, x); }
+        float mag () const { return sqrt(mag2()); }
+        float ang () const { return atan2(y, x); }
         CE float slope () const { return y/x; }
         CE Vec rotcw () const { return Vec(y, -x); }
         CE Vec rotccw () const { return Vec(-y, x); }
-        CE Vec norm () const;  
+        Vec norm () const;  
     };
 
     CE inline Vec operator - (Vec a) { return Vec(-a.x, -a.y); }
@@ -50,8 +50,8 @@ namespace util {
     CE inline bool operator != (Vec a, Vec b) { return a.x!=b.x || a.y!=b.y; }
     CE inline float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
 
-    CE inline Vec Vec::norm () const { return *this / mag(); }
-    CE inline Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
+    inline Vec Vec::norm () const { return *this / mag(); }
+    inline Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
 
     // RECTANGLES
     struct Rect {
@@ -59,7 +59,7 @@ namespace util {
         float b;
         float r;
         float t;
-        CE Rect () :
+        Rect () :
             l(0/0.0), b(0/0.0), r(0/0.0), t(0/0.0)
         { }
         CE Rect (float l, float b, float r, float t) :

@@ -18,10 +18,10 @@ workflow {
      # we require advanced C++11 features.  All modules' make.pls should include
      # this file.
     sub cppc {
-        run "$here/tool/filter_errors.pl", qw<g++-4.7 -std=c++11 -fmax-errors=10 -c -Wall -Wno-format-security -Wno-unused-function -ggdb>, "-I$here/lib/Box2D", @_;
+        run qw<clang -std=c++11 -c -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security -ggdb>, "-I$here/lib/Box2D", @_;
     }
     sub ld {
-        run qw<g++-4.7>, @_;
+        run qw<clang>, @_;
     }
     sub output { '-o', $_[0]; }
 

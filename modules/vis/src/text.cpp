@@ -60,7 +60,7 @@ namespace vis {
                 uint16 nextx = curx + (font->widths.empty() ? font->width : font->widths[text[i]]);
                 if (wrap && nextx > wrap/PX) {
                     curx = 0;
-                    nextx = curx + font->widths.empty() ? font->width : font->widths[text[i]];
+                    nextx = curx + (font->widths.empty() ? font->width : font->widths[text[i]]);
                     cury += font->line_height;
                 }
                 uint16 tx = text[i] % 16;
@@ -114,7 +114,7 @@ namespace vis {
                 uint16 nextx = curx + (font->widths.empty() ? font->width : font->widths[text[i]]);
                 if (wrap && nextx > wrap/PX) {
                     curx = 0;
-                    nextx = curx + font->widths.empty() ? font->width : font->widths[text[i]];
+                    nextx = curx + (font->widths.empty() ? font->width : font->widths[text[i]]);
                     cury += font->line_height;
                 }
                 curx = nextx;
@@ -137,7 +137,7 @@ namespace vis {
                 uint16 nextx = curx + (font->widths.empty() ? font->width : font->widths[text[i]]);
                 if (wrap && nextx > wrap/PX) {
                     curx = 0;
-                    nextx = curx + font->widths.empty() ? font->width : font->widths[text[i]];
+                    nextx = curx + (font->widths.empty() ? font->width : font->widths[text[i]]);
                     cury += font->line_height;
                 }
                 curx = nextx;
