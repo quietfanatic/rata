@@ -10,18 +10,39 @@ use File::Path qw<remove_tree>;
 use File::Spec::Functions qw(:ALL);
 
 my $here;
+my @compilers = qw(clang g++);
+my $compiler = 'clang';
 
 workflow {
     $here = Cwd::cwd;
+
+    option 'compiler', sub {
+        grep $_ eq $_[0], @compilers
+            or die "Unrecognized compiler: $_[0]; recognized are: @compilers\n";
+        $compiler = $_[0];
+    }, "--compiler=[clang|g++] - Use this to compile and link.  Default: clang";
     
      # Arch specific stuff.  Currently only g++-4.7 is nominally supported, because
      # we require advanced C++11 features.  All modules' make.pls should include
      # this file.
     sub cppc {
-        run qw<clang -std=c++11 -c -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security -ggdb>, "-I$here/lib/Box2D", @_;
+        if ($compiler eq 'clang') {
+            run qw<clang -std=c++11 -c -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security -ggdb>, "-I$here/lib/Box2D", @_;
+        }
+        elsif ($compiler eq 'g++') {
+            run qw<g++ -std=c++11 -c -Wall -Wno-unused-function -Wno-format-security -ggdb>, "-I$here/lib/Box2D", @_;
+        }
     }
     sub ld {
-        run qw<clang>, @_;
+        if ($compiler eq 'clang') {
+            run qw<clang>, @_;
+        }
+        elsif ($compiler eq 'g++') {
+            run qw<g++>, @_;
+        }
+        else {
+            die "Unrecognized compiler name: $compiler; recognized are: clang g++\n";
+        }
     }
     sub output { '-o', $_[0]; }
 

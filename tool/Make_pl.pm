@@ -40,7 +40,7 @@ use Carp qw(croak);
 use Cwd qw(cwd realpath);
 use File::Spec::Functions qw(:ALL);
 
-our @EXPORT = qw(workflow rule rules phony subdep defaults include chdir targetmatch run);
+our @EXPORT = qw(workflow rule rules phony subdep defaults include option chdir targetmatch run);
 our %EXPORT_TAGS = ('all' => \@EXPORT);
 
  # This variable is only defined inside a workflow definition.
@@ -71,6 +71,7 @@ sub workflow (&) {
         autoed_subdeps => {},
         phonies => {},
         defaults => undef,
+        options => {},  # HASH of CODE or SCALAR
     );
      # Get directory of the calling file, which may not be cwd
     my @vdf = splitpath(rel2abs($file));
@@ -207,7 +208,23 @@ sub include {
         for (keys %{$workflow{subdeps}}) {
             push @{$this_workflow->{subdeps}{$_}}, @{$workflow{subdeps}{$_}};
         }
+         # Our options override included options
+        $this_workflow->{options} = {%{$workflow{options}}, %{$this_workflow->{options}}};
         push @{$this_workflow->{auto_subdeps}}, @{$workflow{auto_subdeps}};
+    }
+}
+
+sub option ($$;$) {
+    %workflow or croak "option was called outside of a workflow";
+    my ($name, $ref, $desc) = @_;
+    if (ref $name eq 'ARRAY') {
+        &option($_, $ref, $desc) for @$name;
+    }
+    elsif (ref $ref eq 'SCALAR' or ref $ref eq 'CODE') {
+        $workflow{options}{$name} = [$ref, $desc];
+    }
+    else {
+        croak "Second argument to option is not a SCALAR or CODE ref";
     }
 }
 
@@ -255,6 +272,42 @@ sub realpaths (@) {
         }
         $r;
     } @_;
+}
+
+sub target_is_final ($) {
+    my $old_cwd = cwd;
+    for (@{$workflow{rules}}) {
+        Cwd::chdir $_->{base};
+        for (delazify($_->{from}, $_->{to})) {
+            if (realpath($_) eq $_[0]) {
+                Cwd::chdir $old_cwd;
+                return 0;
+            }
+        }
+    }
+    Cwd::chdir $old_cwd;
+    return 1;
+}
+
+sub target_is_default ($) {
+    if (defined $workflow{defaults}) {
+        my $is = grep $_ eq $_[0], @{$workflow{defaults}};
+        return $is;
+    }
+    else {
+        my $rule = $workflow{rules}[0];
+        defined $rule or return 0;
+        my $old_cwd = cwd;
+        Cwd::chdir $rule->{base};
+        for (@{$rule->{to}}) {
+            if (realpath($_) eq $_[0]) {
+                Cwd::chdir $old_cwd;
+                return 1;
+            }
+        }
+        Cwd::chdir $old_cwd;
+        return 0;
+    }
 }
 
 ##### PRINTING ETC.
@@ -406,7 +459,74 @@ sub plan_workflow(@) {
 ##### RUNNING
 
 sub run_workflow {
-    my (@args) = @_;
+    my $double_minus = 0;
+    my @args;
+    eval {
+        for (@_) {
+            if ($double_minus) {
+                push @args, $_;
+            }
+            elsif ($_ eq '--') {
+                $double_minus = 1;
+            }
+            elsif (/^--([^=]*)(?:=(.*))?$/) {
+                my ($name, $val) = ($1, $2);
+                my $optop = $workflow{options}{$name};
+                if (not defined $optop) {
+                    if ($name eq 'help') {
+                        if (%{$workflow{options}}) {
+                            say "\e[31m✗\e[0m Usage: $0 <options> <targets>";
+                            say "Available options are:";
+                            for (keys %{$workflow{options}}) {
+                                if (defined $workflow{options}{$_}[1]) {
+                                    say "    $workflow{options}{$_}[1]";
+                                }
+                                else {
+                                    say "    --$_";
+                                }
+                            }
+                            say "Final targets (use --list-targets to see all targets):";
+                            for (sort grep target_is_final($_), keys %{$workflow{targets}}) {
+                                say "    ", abs2rel($_), target_is_default($_) ? " (default)" : "";
+                            }
+                        }
+                        else {
+                            say "\e[31m✗\e[0m Usage: $0 <targets>";
+                        }
+                        exit 1;
+                    }
+                    elsif ($name eq 'list-targets') {
+                        say "\e[31m✗\e[0m All targets:";
+                        for (sort keys %{$workflow{targets}}) {
+                            say "    ", abs2rel($_), target_is_default($_) ? " (default)" : "";
+                        }
+                        exit 1;
+                    }
+                    if (%{$workflow{options}}) {
+                        say "\e[31m✗\e[0m Unrecognized option --$name.  Try --help to see available options.";
+                    }
+                    else {
+                        say "\e[31m✗\e[0m Unrecognized option --$name.  This script takes no options.";
+                    }
+                    exit 1;
+                }
+                elsif (ref $optop->[0] eq 'SCALAR') {
+                    ${$optop->[0]} = $val;
+                }
+                else {  # CODE
+                    $optop->[0]($val);
+                }
+            }
+            else {
+                push @args, $_;
+            }
+        }
+    };
+    if ($@) {
+        warn $@ unless "$@" eq "\n";
+        say "\e[31m✗\e[0m Nothing was done due to command-line error.";
+        return 0;
+    }
     if (not @{$workflow{rules}}) {
         say "\e[32m✓\e[0m Nothing was done because no rules have been declared.";
         return 1;
@@ -442,6 +562,10 @@ sub run_workflow {
 ##### Generate a make.pl scaffold
 
 if ($^S == 0) {  # We've been called directly
+    if (@ARGV != 1 or $ARGV[0] eq '--help') {
+        say "\e[31m✗\e[0m Usage: perl $0 <directory (default: .)>";
+        exit 1;
+    }
     my $loc = $ARGV[0];
     defined $loc or $loc = cwd;
     my $dir;
