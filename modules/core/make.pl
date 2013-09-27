@@ -3,19 +3,13 @@
 use strict;
 use warnings;
 use FindBin;
-use if !$^S, lib => "$FindBin::Bin/../../tool";
-use Make_pl;
+use lib "$FindBin::Bin/../../tool";
+use MakePl;
 
+include '../..';
 
-workflow {
+objects(qw(commands input opengl window));
 
-    include '../..';
+clean_rule(glob 'tmp/*');
 
-    objects(qw(commands input opengl window));
-
-    clean_rule(glob 'tmp/*');
-
-};
-
-
-
+make;

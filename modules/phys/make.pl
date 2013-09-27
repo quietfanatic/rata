@@ -3,18 +3,13 @@
 use strict;
 use warnings;
 use FindBin;
-use if !$^S, lib => "$FindBin::Bin/../../tool";
-use Make_pl;
+use lib "$FindBin::Bin/../../tool";
+use MakePl;
 
-workflow {
+include '../..';
 
-    include '../..';
+objects(qw(phys ground));
 
-    objects(qw(phys ground));
+clean_rule(glob 'tmp/*');
 
-    clean_rule(glob 'tmp/*');
-
-};
-
-
-
+make;

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
- # Make_pl - Portable drop-in build system
+ # MakePl - Portable drop-in build system
  # https://github.com/quietfanatic/make-pl
  # (Just copy this into your project directory somewhere)
 
@@ -28,21 +28,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 =cut
 
-package Make_pl;
+package MakePl;
 
 use strict;
 use warnings; no warnings 'once';
 use feature qw(switch say);
 use autodie;
 no autodie 'chdir';
-use Exporter qw(import);
+use Exporter;
 use Carp qw(croak);
-use Cwd qw(cwd realpath);
+use Cwd qw(realpath);
+use subs qw(cwd chdir);
 use File::Spec::Functions qw(:ALL);
 
-our @EXPORT = qw(workflow rule rules phony subdep defaults include option chdir targetmatch run);
+our @ISA = 'Exporter';
+our @EXPORT = qw(make rule rules phony subdep defaults include option cwd chdir targetmatch run);
 our %EXPORT_TAGS = ('all' => \@EXPORT);
 
+
+##### GLOBALS
+ # Caches the current working directory
+our $cwd = Cwd::cwd();
  # This variable is only defined inside a workflow definition.
 our %workflow;
  # This is set to 0 when recursing.
@@ -53,12 +59,13 @@ our $original_base = cwd;
 our @included = realpath($0);
  # A cache of file modification times.  It's probably safe to keep until exit.
 my %modtimes;
-
+ # For preventing false error messages
+my $died_from_no_make = 0;
 ##### DEFINING WORKFLOWS
 
-sub workflow (&) {
+
+sub import {
     %workflow and croak "workflow was called inside a workflow (did you use 'do' instead of 'include'?)";
-    my ($definition) = @_;
     my ($package, $file, $line) = caller;
     %workflow = (
         caller_package => $package,
@@ -72,19 +79,29 @@ sub workflow (&) {
         phonies => {},
         defaults => undef,
         options => {},  # HASH of CODE or SCALAR
+        made => 0,
     );
      # Get directory of the calling file, which may not be cwd
     my @vdf = splitpath(rel2abs($file));
     my $base = catpath($vdf[0], $vdf[1], '');
     my $old_cwd = cwd;
-    Cwd::chdir $base;
-        $definition->();
-    Cwd::chdir $old_cwd;
+    chdir $base;
+    MakePl->export_to_level(1, @_);
+}
+
+sub make () {
+    $workflow{made} = 1;
     if ($this_is_root) {
         exit(!run_workflow(@ARGV));
     }
+    1;
 }
 
+END {
+    if (!$died_from_no_make and !$workflow{made}) {
+        warn "\e[31m✗\e[0m $workflow{caller_file} did not end with 'make;'\n";
+    }
+}
 
 ### DECLARING RULES
 
@@ -179,7 +196,7 @@ sub defaults {
 sub include {
     for (@_) {
         my $file = $_;
-        -e $file or croak "Cannot include $file because it doesn't exist.";
+        -e $file or croak "Cannot include $file because it doesn't exist";
         if (-d $file) {
             my $makepl = catfile($file, 'make.pl');
             next unless -e $makepl;
@@ -195,9 +212,15 @@ sub include {
         local %workflow;
         do {
             package main;
+            my $old_cwd = MakePl::cwd;
             do $file;
+            MakePl::chdir $old_cwd;
             $@ and die_status $@;
         };
+        if (!$workflow{made}) {
+            $died_from_no_make = 1;
+            die "\e[31m✗\e[0m $workflow{caller_file} did not end with 'make;'\n";
+        }
         return unless %workflow;  # Oops, it wasn't a make.pl, but we did it anyway
          # merge workflows
         push @{$this_workflow->{rules}}, @{$workflow{rules}};
@@ -228,8 +251,13 @@ sub option ($$;$) {
     }
 }
 
-sub chdir (;$) {
-    goto &Cwd::chdir;  # Re-export, basically
+##### DIRECTORY HANDLING
+ # Cwd::cwd is super slow, so we should do it as little as possible.
+sub cwd () {
+    return $cwd;
+}
+sub chdir ($) {
+    $cwd eq $_[0] or Cwd::chdir($cwd = $_[0]);
 }
 
 ##### UTILITIES
@@ -277,15 +305,15 @@ sub realpaths (@) {
 sub target_is_final ($) {
     my $old_cwd = cwd;
     for (@{$workflow{rules}}) {
-        Cwd::chdir $_->{base};
+        chdir $_->{base};
         for (delazify($_->{from}, $_->{to})) {
             if (realpath($_) eq $_[0]) {
-                Cwd::chdir $old_cwd;
+                chdir $old_cwd;
                 return 0;
             }
         }
     }
-    Cwd::chdir $old_cwd;
+    chdir $old_cwd;
     return 1;
 }
 
@@ -298,14 +326,14 @@ sub target_is_default ($) {
         my $rule = $workflow{rules}[0];
         defined $rule or return 0;
         my $old_cwd = cwd;
-        Cwd::chdir $rule->{base};
+        chdir $rule->{base};
         for (@{$rule->{to}}) {
             if (realpath($_) eq $_[0]) {
-                Cwd::chdir $old_cwd;
+                chdir $old_cwd;
                 return 1;
             }
         }
-        Cwd::chdir $old_cwd;
+        chdir $old_cwd;
         return 0;
     }
 }
@@ -375,12 +403,12 @@ sub get_auto_subdeps {
         my $target = $_;
         @{$workflow{autoed_subdeps}{$target} //= [
             map {
-                Cwd::chdir $_->{base};
+                chdir $_->{base};
                 realpaths($_->{code}($target));
             } @{$workflow{auto_subdeps}}
         ]}
     } @_;
-    Cwd::chdir $old_cwd;
+    chdir $old_cwd;
     return @r;
 }
 
@@ -391,26 +419,26 @@ sub add_subdeps {
     for (my $i = 0; $i < @deps; $i++) {
         push @deps, grep { my $d = $_; not grep $d eq $_, @deps } get_auto_subdeps($deps[$i]);
         for my $subdep (@{$workflow{subdeps}{$deps[$i]}}) {
-            Cwd::chdir $subdep->{base};
+            chdir $subdep->{base};
             $subdep->{from} = [delazify($subdep->{from}, $subdep->{to})];
             push @deps, grep { my $d = $_; not grep $d eq $_, @deps } realpaths(@{$subdep->{from}});
         }
     }
-    Cwd::chdir $old_cwd;
+    chdir $old_cwd;
     return @deps;
 }
 
 sub resolve_deps {
     my ($rule) = @_;
      # Get the realpaths of all dependencies and their subdeps
-    Cwd::chdir $rule->{base};
+    chdir $rule->{base};
     $rule->{from} = [delazify($rule->{from}, $rule->{to})];
     return add_subdeps(realpaths(@{$rule->{from}}));
 }
 
 sub plan_rule {
     my ($plan, $rule) = @_;
-    Cwd::chdir $rule->{base};
+    chdir $rule->{base};
      # detect loops
     if (not defined $rule->{planned}) {
         my $mess = "☢ Dependency loop\n";
@@ -543,18 +571,18 @@ sub run_workflow {
     }
     my $old_cwd = cwd;
     for my $rule (@program) {
-        Cwd::chdir rel2abs($rule->{base});
+        chdir rel2abs($rule->{base});
         status "⚙ ", show_rule($rule);
         eval { $rule->{recipe}->($rule->{to}, $rule->{from}) };
         if ($@) {
             warn $@ unless "$@" eq "\n";
             say "\e[31m✗\e[0m Did not finish due to error.";
-            Cwd::chdir $old_cwd;
+            chdir $old_cwd;
             return 0;
         }
     }
     say "\e[32m✓\e[0m Done.";
-    Cwd::chdir $old_cwd;
+    chdir $old_cwd;
     return 1;
 }
 
@@ -591,16 +619,16 @@ if ($^S == 0) {  # We've been called directly
 use strict;
 use warnings;
 use FindBin;
-use if !\$^S, lib => "\$FindBin::Bin/$path_to_pm";
-use Make_pl;
+use lib "\$FindBin::Bin/$path_to_pm";
+use MakePl;
 
-workflow {
-     # Sample rules
-    rule \$program, \$main, sub {
-        run "gcc -Wall \\Q\$main\\E -o \\Q\$program\\E";
-    };
-    rule 'clean', [], sub { unlink \$program; };
+ # Sample rules
+rule \$program, \$main, sub {
+    run "gcc -Wall \\Q\$main\\E -o \\Q\$program\\E";
 };
+rule 'clean', [], sub { unlink \$program; };
+
+make;
 END
     chmod 0755, $MAKEPL;
     close $MAKEPL;
