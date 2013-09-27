@@ -1,22 +1,37 @@
 #!/usr/bin/perl
 
- #####
- #
  # Make_pl - Portable drop-in build system
  # https://github.com/quietfanatic/make-pl
- #
- # Use, copy, distribute, or hack all you want.  If you publish a modified
- #  version, record that you've modified it in this header.  Don't remove
- #  or change anything from this header that wasn't written by yourself.
- #
- # Version 2013-07-01
- #
- ##### (end of 'this header')
+ # (Just copy this into your project directory somewhere)
+
+=cut
+The MIT License (MIT)
+
+Copyright (c) 2013 Lewis Wall
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+=cut
 
 package Make_pl;
 
 use strict;
-use warnings;
+use warnings; no warnings 'once';
 use feature qw(switch say);
 use autodie;
 no autodie 'chdir';
@@ -427,16 +442,26 @@ sub run_workflow {
 ##### Generate a make.pl scaffold
 
 if ($^S == 0) {  # We've been called directly
-    my $dir = $ARGV[0];
-    defined $dir or $dir = cwd;
-    -d $dir or die "\e[31m✗\e[0m $dir doesn't seem to be a directory.";
-    require FindBin;
-    my $path_to_pm = abs2rel($FindBin::Bin, $dir);
-    if (-e "$dir/make.pl") {
-        say "\e[31m✗\e[0m Did not generate $dir/make.pl because it already exists.";
+    my $loc = $ARGV[0];
+    defined $loc or $loc = cwd;
+    my $dir;
+    if (-d $loc) {
+        $loc = "$loc/make.pl";
+        $dir = $loc;
+    }
+    elsif (-e $loc) {
+        say "\e[31m✗\e[0m Did not generate $loc because it already exists.";
         exit 1;
     }
-    open my $MAKEPL, '>', "$dir/make.pl";
+    elsif ($loc =~ /^(.*)\/[^\/]*$/) {
+        $dir = $1;
+    }
+    else {
+        $dir = cwd;
+    }
+    require FindBin;
+    my $path_to_pm = abs2rel($FindBin::Bin, $dir);
+    open my $MAKEPL, '>', "$loc";
     print $MAKEPL <<"END";
 #!/usr/bin/perl
 use strict;
@@ -449,13 +474,13 @@ workflow {
      # Sample rules
     rule \$program, \$main, sub {
         run "gcc -Wall \\Q\$main\\E -o \\Q\$program\\E";
-    }
+    };
     rule 'clean', [], sub { unlink \$program; };
 };
 END
     chmod 0755, $MAKEPL;
     close $MAKEPL;
-    say "\e[32m✓\e[0m Generated $dir/make.pl.";
+    say "\e[32m✓\e[0m Generated $loc.";
 }
 
 1;
