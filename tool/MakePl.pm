@@ -70,6 +70,9 @@ my %modtimes;
 my %builtin_options;
  # Taken as needed from the command line.
 our %options;
+my $force = 0;
+my $verbose = 0;
+my $simulate = 0;
 
 ##### STARTING
 
@@ -343,6 +346,7 @@ sub config {
         caller_line => $line,
         config => 1,
         planned => 0,
+        stale => 0,
     };
     push @{$project{rules}}, $rule;
     push @{$project{targets}{realpath($filename)}}, $rule;
@@ -428,6 +432,21 @@ sub gen_config ($$$) {
         desc => "--list-targets - list all declared targets",
         custom => 0
     },
+    force => {
+        ref => \$force,
+        desc => '--force - Skip modification time checks',
+        custom => 0
+    },
+    verbose => {
+        ref => \$verbose,
+        desc => '--verbose - Show sub-dependencies and shell commands',
+        custom => 0
+    },
+    simulate => {
+        ref => \$simulate,
+        desc => '--simulate - Show rules that would be run but don\'t run them',
+        custom => 0
+    },
 );
 
 sub option ($$;$) {
@@ -487,16 +506,23 @@ sub targetmatch {
     return grep $_ =~ $rx, map abs2rel($_), keys %{$project{targets}};
 }
 
+sub show_command (@) {
+    my (@command) = @_;
+    for (@command) {
+        if (/\s/) {
+            $_ =~ s/'/'\\''/g;
+            $_ = "'$_'";
+        }
+    }
+    return join ' ', @command;
+}
+
 sub run (@) {
+    if ($verbose) {
+        say show_command(@_);
+    }
     system(@_) == 0 or do {
         my @command = @_;
-        ref $_[0] eq 'ARRAY' and shift @command;
-        for (@command) {
-            if (/\s/) {
-                $_ =~ s/'/'\\''/g;
-                $_ = "'$_'";
-            }
-        }
          # As per perldoc -f system
         if ($? == -1) {
             status("☢ Couldn't start command: $!");
@@ -508,7 +534,7 @@ sub run (@) {
         else {
             status(sprintf "☢ Command exited with value %d", $? >> 8);
         }
-        die_status("☢ Failed command: @command");
+        die_status("☢ Failed command: " . show_command(@_));
     }
 }
 
@@ -593,14 +619,24 @@ sub directory_prefix {
         : '[' . abs2rel($d, $base) . '/] ';
 }
 sub status {
-    say directory_prefix(), @_;
+    if ($verbose) {
+        say "\e[36m", directory_prefix(), @_, "\e[0m";
+    }
+    else {
+        say directory_prefix(), @_;
+    }
 }
 sub die_status {
     status @_;
     die "\n";
 }
 sub show_rule ($) {
-    return "@{$_[0]{to}} ← " . join ' ', @{$_[0]{from}};
+    if ($verbose) {
+        return "@{$_[0]{to}} ← " . join ' ', map abs2rel($_), resolve_deps($_[0]);
+    }
+    else {
+        return "@{$_[0]{to}} ← " . join ' ', @{$_[0]{from}};
+    }
 }
 sub debug_rule ($) {
     return "$_[0]{caller_file}:$_[0]{caller_line}: " . directory_prefix($_[0]{base}) . show_rule($_[0]);
@@ -693,7 +729,7 @@ sub plan_rule {
         Carp::confess $mess . "\t...oh wait, false alarm.  Which means there's a bug in make.pm.\nDetected";
     }
     elsif ($rule->{planned}) {
-        return 1;  # Already planned, but we'll still cause updates
+        return $rule->{stale};  # Already planned
     }
     push @{$plan->{stack}}, $rule;
     $rule->{planned} = undef;  # Mark that we're currently planning this
@@ -702,6 +738,7 @@ sub plan_rule {
     my @deps = resolve_deps($rule);
      # always recurse to plan_target
     my $stale = grep plan_target($plan, $_), @deps;
+    $stale ||= $force;
     $stale ||= $rule->{check_stale}() if defined $rule->{check_stale};
     $stale ||= grep {
         my $abs = realpath(rel2abs($_, $rule->{base}));
@@ -710,6 +747,7 @@ sub plan_rule {
     push @{$plan->{program}}, $rule if $stale;
      # Done planning this rule
     $rule->{planned} = 1;
+    $rule->{stale} = $stale;
     pop @{$plan->{stack}};
     return $stale;
 }
@@ -755,7 +793,12 @@ sub make_cmdline (@) {
                     exit 1;
                 }
                 elsif (defined $opt and not $opt->{custom}) {
-                    $opt->{ref}($val);
+                    if (ref $opt->{ref} eq 'SCALAR') {
+                        ${$opt->{ref}} = $val // 1;
+                    }
+                    else {
+                        $opt->{ref}($val);
+                    }
                 }
                  # We already processed custom options.
             }
@@ -809,15 +852,22 @@ sub make_execute (@) {
             chdir rel2abs($rule->{base});
             status $rule->{config} ? "⚒ " : "⚙ ", show_rule($rule);
             delazify($rule);
-            eval { $rule->{recipe}->($rule->{to}, $rule->{from}) };
-            if ($@) {
-                warn $@ unless "$@" eq "\n";
-                say "\e[31m✗\e[0m Did not finish due to error.";
-                chdir $old_cwd;
-                exit 1;
+            unless ($simulate) {
+                eval { $rule->{recipe}->($rule->{to}, $rule->{from}) };
+                if ($@) {
+                    warn $@ unless "$@" eq "\n";
+                    say "\e[31m✗\e[0m Did not finish due to error.";
+                    chdir $old_cwd;
+                    exit 1;
+                }
             }
         }
-        say "\e[32m✓\e[0m Done.";
+        if ($simulate) {
+            say "\e[32m✓\e[0m Simulation finished.";
+        }
+        else {
+            say "\e[32m✓\e[0m Done.";
+        }
         chdir $old_cwd;
     }
 }

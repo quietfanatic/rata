@@ -11,7 +11,7 @@ use File::Spec::Functions qw(:ALL);
 
 my $here = cwd;
 
-##### COMMAND LINES
+##### COMMAND LINE FLAGS
 my %flags = (
     clang => {
         compile => [qw(-std=c++11 -c), "-I$here/lib/Box2D"],
@@ -23,13 +23,13 @@ my %flags = (
     'g++' => {
         compile => [qw(-std=c++11 -c), "-I$here/lib/Box2D"],
         link => [qw(-std=c++11)],
-        release => ['-O3'],
+        release => ['-O3 -Wno-format-security'],
         debug => [qw(-ggdb -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security)],
         profile => ['-pg'],
     },
 );
 
-##### CONFIGURATION
+##### DEFAULT CONFIG
 my %config = (
     compiler => undef,
     'with-clang' => 'clang',
@@ -39,6 +39,7 @@ my %config = (
     'compiler-opts' => [],
     'linker-opts' => []
 );
+##### AUTO CONFIG
 config('build-config', \%config, sub {
     my $have_clang = (`$config{'with-clang'} -v 2>&1` // '' =~ /clang version (\d+)\.(\d+)/);
     my $have_gpp = (`$config{'with-g++'} -v 2>&1` // '' =~ /gcc version (\d+)\.(\d+)/);
@@ -47,14 +48,17 @@ config('build-config', \%config, sub {
     }
     unless (defined $config{compiler}) {
         if ($have_clang) {
+            print "Selecting --compiler=clang\n";
             $config{compiler} = 'clang';
         }
         elsif ($have_gpp) {
+            print "Selecting --compiler=g++\n";
             $config{compiler} = 'g++';
         }
     }
 });
-
+$config{profile} = 0;  # Do not preserve this between invokations.
+##### MANUAL CONFIG
 option 'compiler', sub {
     grep $_ eq $_[0], keys %flags
         or die "Unrecognized compiler: $_[0]; recognized are: " . keys(%flags) . "\n";
@@ -91,7 +95,7 @@ sub ld {
 }
 sub output { '-o', $_[0]; }
 
-###### STANDARD RULES
+##### STANDARD RULES
 sub cppc_rule {
     rule $_[0], $_[1], sub { cppc((grep /.cpp$/, @{$_[1]}), output($_[0][0])); }
 }
@@ -115,7 +119,7 @@ sub objects {
 
  # All compilation and linking steps rely implicitly on build-config
 subdep sub {
-    $_[0] =~ /\.o$|^rata$/ or return ();
+    $_[0] =~ /\.(?:c(?:pp)?|o)$/ or return ();
     return 'build-config';
 };
 
@@ -130,8 +134,10 @@ subdep sub {
     return map rel2abs($_, $base), @includes;
 };
 
+ # Let modules do their own declarations
 include glob 'modules/*';
 
+ # Miscellaneous stuff
 phony 'test', sub { targetmatch qr/^modules\/.*\/test/ }, sub { };
 
 phony 'clean', sub { targetmatch qr/^modules\/.*\/clean/ }, sub {
