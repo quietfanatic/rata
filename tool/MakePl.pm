@@ -1,10 +1,14 @@
 #!/usr/bin/perl
-
- # MakePl - Portable drop-in build system
- # https://github.com/quietfanatic/make-pl
- # (Just copy this into your project directory somewhere)
-
 =cut
+
+MakePl - Portable drop-in build system
+https://github.com/quietfanatic/make-pl
+2013-09-27
+
+USAGE: See the README in the above repo.
+
+=====LICENSE=====
+
 The MIT License (MIT)
 
 Copyright (c) 2013 Lewis Wall
@@ -26,6 +30,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+=================
+
 =cut
 
 package MakePl;
@@ -42,7 +49,7 @@ use subs qw(cwd chdir);
 use File::Spec::Functions qw(:ALL);
 
 our @ISA = 'Exporter';
-our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir targetmatch run);
+our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir targetmatch run slurp splat);
 our %EXPORT_TAGS = ('all' => \@EXPORT);
 
 
@@ -80,7 +87,6 @@ sub import {
             autoed_subdeps => {},
             phonies => {},
             defaults => undef,
-            configs => [],
             options => {%builtin_options},
             made => 0,
         );
@@ -114,6 +120,8 @@ sub rule_with_caller ($$$$$$) {
         recipe => $recipe,
         caller_file => $file,
         caller_line => $line,
+        check_stale => undef,
+        config => 0,
         planned => 0,  # Intrusive state for the planning phase
     };
     push @{$project{rules}}, $rule;
@@ -323,12 +331,21 @@ sub config {
         or croak "config's second argument is not a SCALAR, ARRAY, or HASH ref (It's a " . ref($var) . " ref)";
     !defined $routine or ref $routine eq 'CODE'
         or croak "config's third argument is not a CODE ref";
-    push $project{configs}, {
+    my ($package, $file, $line) = caller;
+    my $rule = {
         base => cwd,
-        filename => $filename,
-        var => $var,
-        routine => $routine
+        to => [$filename],
+        pre_from => [],
+        from => undef,
+        check_stale => sub { stale_config($filename, $var); },
+        recipe => sub { gen_config($filename, $var, $routine); },
+        caller_file => $file,
+        caller_line => $line,
+        config => 1,
+        planned => 0,
     };
+    push @{$project{rules}}, $rule;
+    push @{$project{targets}{realpath($filename)}}, $rule;
      # Read into $var immediately
     if (-e $filename) {
         my $str = slurp($filename);
@@ -346,6 +363,26 @@ sub config {
             %$var = %$val;
         }
     }
+}
+
+sub stale_config ($$) {
+    my ($filename, $var) = @_;
+    my ($old, $new);
+    my $stale = 1;
+    if (-e $filename) {
+        my $old = slurp($filename);
+        chomp $old;
+        $new = show_thing(ref $var eq 'SCALAR' ? $$var : $var);
+        $stale = 0 if $new eq $old;
+    }
+    return $stale;
+}
+
+sub gen_config ($$$) {
+    my ($filename, $var, $routine) = @_;
+    $routine->() if defined $routine;
+    my $new = show_thing(ref $var eq 'SCALAR' ? $$var : $var);
+    splat($filename, "$new\n");
 }
 
 %builtin_options = (
@@ -524,15 +561,22 @@ sub target_is_default ($) {
 }
 
 sub slurp {
-    open my $F, '<', $_[0];
-    local $/;
-    my $r = <$F>;
+    my ($file, $bytes) = @_;
+    open my $F, '<', $file;
+    my $r;
+    if (defined $bytes) {
+        read $F, $r, $bytes;
+    }
+    else {
+        local $/; $r = <$F>;
+    }
     close $F;
     return $r;
 }
 sub splat {
-    open my $F, '>', $_[0];
-    print $F $_[1];
+    my ($file, $string) = @_;
+    open my $F, '>', $file;
+    print $F $string;
     close $F;
 }
 
@@ -658,6 +702,7 @@ sub plan_rule {
     my @deps = resolve_deps($rule);
      # always recurse to plan_target
     my $stale = grep plan_target($plan, $_), @deps;
+    $stale ||= $rule->{check_stale}() if defined $rule->{check_stale};
     $stale ||= grep {
         my $abs = realpath(rel2abs($_, $rule->{base}));
         !fexists($abs) or grep modtime($abs) < modtime($_), @deps;
@@ -679,7 +724,6 @@ sub make () {
     $project{made} = 1;
     if ($this_is_root) {
         my @args = make_cmdline(@ARGV);
-        make_config();
         my @program = make_plan(@args);
         make_execute(@program);
         exit 0;
@@ -728,34 +772,6 @@ sub make_cmdline (@) {
     return @args;
 }
 
-sub make_config () {
-    eval {
-        for (@{$project{configs}}) {
-            chdir $_->{base};
-            my ($old, $new);
-            my $generate = 1;
-            if (-e $_->{filename}) {
-                my $old = slurp($_->{filename});
-                chomp $old;
-                $new = show_thing(ref $_->{var} eq 'SCALAR' ? ${$_->{var}} : $_->{var});
-                $generate = 0 if $new eq $old;
-            }
-            if ($generate) {
-                status "⚒ $_->{filename}";
-                if (defined ($_->{routine})) {
-                    $_->{routine}();
-                    $new = show_thing(ref $_->{var} eq 'SCALAR' ? ${$_->{var}} : $_->{var});
-                }
-                splat($_->{filename}, "$new\n");
-            }
-        }
-    };
-    if ($@) {
-        warn $@ unless "$@" eq "\n";
-        say "\e[31m✗\e[0m Nothing was done due to error.";
-        exit 1;
-    }
-}
 
 sub make_plan (@) {
     my (@args) = @_;
@@ -791,7 +807,7 @@ sub make_execute (@) {
         my $old_cwd = cwd;
         for my $rule (@program) {
             chdir rel2abs($rule->{base});
-            status "⚙ ", show_rule($rule);
+            status $rule->{config} ? "⚒ " : "⚙ ", show_rule($rule);
             delazify($rule);
             eval { $rule->{recipe}->($rule->{to}, $rule->{from}) };
             if ($@) {
