@@ -12,6 +12,7 @@ tmp
 
 # misc
 gmon.out
+build-config
 
 # vim
 .*.swp
