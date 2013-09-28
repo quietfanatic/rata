@@ -15,17 +15,17 @@ namespace hacc {
     };
 }
 
- // I'll be thrilled if this works
+ // Heh, this actually works.
 HCB_TEMPLATE_BEGIN(<class C HCB_COMMA size_t n>, C[n])
     using namespace hacc;
     name([](){
         return Type::CppType<C>().name() + "[" + std::to_string(n) + "]";
     });
     array();
-    length(hcb::template ref_funcs<size_t>(
+    length(hcb::template value_funcs<size_t>(
         [](const CArray<C, n>&){ return n; },
         [](CArray<C, n>&, size_t size){
-            if (size > n)
+            if (size != n)
                 throw hacc::X::Wrong_Size(Type::CppType<C[n]>(), size, n);
         }
     ));

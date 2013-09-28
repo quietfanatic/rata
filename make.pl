@@ -16,7 +16,7 @@ my %flags = (
     clang => {
         compile => [qw(-std=c++11 -c), "-I$here/lib/Box2D"],
         link => [qw(-std=c++11 -lstdc++ -lm)],
-        release => [qw(-O3 -Wno-null-conversion -Wno-format-security)],
+        release => [qw(-O4 -Wno-null-conversion -Wno-format-security)],
         debug => [qw(-ggdb -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security)],
         profile => ['-pg'],
     },
@@ -76,32 +76,42 @@ option 'build', sub {
 option 'profile', \$config{profile},
     "--profile - Add profiling code to the binary (once only)";
 option 'compiler-opts', sub {
-    $config{'compiler-opts'} = split /\s+/, $_[0];
+    $config{'compiler-opts'} = [split /\s+/, $_[0]];
 }, "--compiler-opts=<options> - Give extra options to the compiler (once only)";
 option 'linker-opts', sub {
-    $config{'linker-opts'} = split /\s+/, $_[0];
+    $config{'linker-opts'} = [split /\s+/, $_[0]];
 }, "--linker-opts=<options> - Give extra options to the linker (once only)";
 
 ##### STANDARD COMMANDS
 sub cppc {
     my $fs = $flags{$config{compiler}};
     run $config{'with-' . $config{compiler}}, @{$fs->{compile}}, @{$fs->{$config{build}}},
-        $config{profile} ? @{$fs->{profile}} : (), @_;
+        $config{profile} ? @{$fs->{profile}} : (), @{$config{'compiler-opts'}}, @_;
 }
 sub ld {
     my $fs = $flags{$config{compiler}};
     run $config{'with-' . $config{compiler}}, @{$fs->{link}}, @{$fs->{$config{build}}},
-        $config{profile} ? @{$fs->{profile}} : (), @_;
+        $config{profile} ? @{$fs->{profile}} : (), @{$config{'compiler-opts'}}, @_;
 }
 sub output { '-o', $_[0]; }
 
 ##### STANDARD RULES
 sub cppc_rule {
-    rule $_[0], $_[1], sub { cppc((grep /.cpp$/, @{$_[1]}), output($_[0][0])); }
+    my ($to, $from) = @_;
+    my @from = ref $from eq 'ARRAY' ? @$from : $from;
+    my $conf = abs2rel(rel2abs('build-config', $here));
+    rule $to, [@from, $conf], sub {
+        cppc((grep /.cpp$/, @from), output($_[0][0]));
+    }
 }
 sub ld_rule {
-    my @libs = defined $_[2] ? ref($_[2]) eq 'ARRAY' ? @{$_[2]} : $_[2] : ();
-    rule $_[0], $_[1], sub { ld @{$_[1]}, @libs, output($_[0][0]); }
+    my ($to, $from, $libs) = @_;
+    my @from = ref $from eq 'ARRAY' ? @$from : $from;
+    my @libs = defined $libs ? (ref $libs eq 'ARRAY' ? @$libs : $libs) : ();
+    my $conf = abs2rel(rel2abs('build-config', $here));
+    rule $to, [@from, $conf], sub {
+        ld @from, @libs, output($_[0][0]);
+    }
 }
 sub test_rule {
     phony 'test', $_[0], sub { run "./$_[1][0] --test | prove -e '' -"; };
@@ -116,12 +126,6 @@ sub objects {
         cppc_rule("tmp/$_.o", "src/$_.cpp");
     }
 }
-
- # All compilation and linking steps rely implicitly on build-config
-subdep sub {
-    $_[0] =~ /\.(?:c(?:pp)?|o)$/ or return ();
-    return 'build-config';
-};
 
  # Automatically glean subdeps from #includes
 subdep sub {

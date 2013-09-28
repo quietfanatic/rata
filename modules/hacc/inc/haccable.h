@@ -55,6 +55,7 @@ namespace hacc {
         }
         template <class M>
         static GetSet2<C, M> ref_funcs (const Func<const M& (const C&)>& g, const Func<void (C&, const M&)>& s) {
+            printf("Called ref_funcs on %s (%s)\n", typeid(C).name(), typeid(M).name());
             return static_cast<GetSet2<C, M>&&>(_ref_funcs(
                 Type::CppType<M>(), Type::CppType<C>(),
                 reinterpret_cast<const UnknownF1&>(g),
