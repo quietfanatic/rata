@@ -12,10 +12,12 @@ namespace core {
     extern uint64 frames_simulated;
     extern uint64 frames_drawn;
 
-     // Window is unfortunately a singleton type
+     // Window is unfortunately a singleton type.  If we ever support
+     //  GLFW 3, we can fix that.
     struct Window {
         uint16 width = 640;
         uint16 height = 480;
+         // Bit depths
         uint8 red = 8;
         uint8 green = 8;
         uint8 blue = 8;
@@ -34,21 +36,13 @@ namespace core {
         bool to_stop = false;
         std::vector<std::function<void ()>> pending_ops;
 
-         // Shortcuts.  If you're gonna do multiple of these at once, just
-         //  set the parameters and call open() yourself
+         // Shortcuts.  If you want to set any other fields, do it manually and
+         //  then call open().
         void set_size (uint16 w, uint16 h) {
             width = w;
             height = h;
             if (is_open) open();
         }
-        void set_width (uint16 w) { width = w; if (is_open) open(); }
-        void set_height (uint16 h) { height = h; if (is_open) open(); }
-        void set_red (uint8 r) { red = r; if (is_open) open(); }
-        void set_green (uint8 g) { green = g; if (is_open) open(); }
-        void set_blue (uint8 b) { blue = b; if (is_open) open(); }
-        void set_alpha (uint8 a) { alpha = a; if (is_open) open(); }
-        void set_depth (uint8 d) { depth = d; if (is_open) open(); }
-        void set_stencil (uint8 s) { stencil = s; if (is_open) open(); }
         void set_fullscreen (bool f) { fullscreen = f; if (is_open) open(); }
 
         Window ();  // Does not open desktop window yet.

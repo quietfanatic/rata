@@ -25,8 +25,11 @@ namespace ent {
         float jump_speed;
         float jump_delay;
     };
+     // Enumerates all possible poses for a Biped.
     struct BipedPoses;
+     // All the fixdefs for a given Biped.
     struct BipedFixdefs;
+     // Various bits of static info.
     struct BipedDef;
 
     struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Drawn<vis::Sprites>, Controllable {

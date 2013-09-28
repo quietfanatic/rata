@@ -50,7 +50,7 @@ namespace vis {
             Skel::Seg* target;
             std::vector<vis::Texture*> textures;
         };
-        
+
         std::vector<Skin::App> apps;
     };
 

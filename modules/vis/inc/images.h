@@ -17,6 +17,8 @@ namespace vis {
     struct Layout;
      // Represents one drawable region of a texture
     struct Frame;
+     // A Palette can do color substitution before a Texture is loaded.
+    struct Palette;
 
     struct Texture {
         std::string name = "ALL";

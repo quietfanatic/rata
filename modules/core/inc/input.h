@@ -6,6 +6,9 @@
 #include "../../util/inc/geometry.h"
 #include "../../util/inc/organization.h"
 
+ // TODO: make up our mind about whether our input system should be
+ //  event-based or poll-based.
+
 namespace core {
     using namespace util;
 
@@ -40,7 +43,6 @@ namespace core {
     void GLFWCALL key_cb (int, int);
     void GLFWCALL char_cb (int, int);
     void run_input ();
-
 }
 
 #endif

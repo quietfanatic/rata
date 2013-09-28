@@ -6,6 +6,8 @@
 #include "../../vis/inc/color.h"
 #include "../../vis/inc/text.h"
 
+ // This is a fullscreen console for quick command entry.
+
 namespace shell {
 
     using namespace core;

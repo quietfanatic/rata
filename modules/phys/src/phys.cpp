@@ -163,7 +163,7 @@ namespace phys {
     void Object::dematerialize () { b2body->SetActive(false); }
 
      // Debug fixture drawing
-    
+
     struct Phys_Debug_Layer : vis::Drawn<vis::Overlay> {
         void Drawn_draw (vis::Overlay) override {
             using namespace vis;

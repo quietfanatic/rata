@@ -40,6 +40,8 @@ namespace vis {
         bool visible () { return Link<Drawn<C>>::linked(); }
     };
 
+     // These are the layers you can render to.
+
      // Uses depth, materials
     struct Map { static Links<Drawn<Map>> items; };
      // Uses depth, materials
@@ -56,6 +58,9 @@ namespace vis {
     extern Vec global_camera_pos;
     extern Vec global_camera_size;
 
+     // Programs that inherit from this will be well-behaved regarding
+     //  the game's camera.  The program must have two uniforms: camera_pos
+     //   and camera_size, both vec2s.
     struct Cameraed_Program : core::Program {
         GLint camera_pos = 0;
         GLint camera_size = 0;

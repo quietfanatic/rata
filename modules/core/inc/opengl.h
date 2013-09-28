@@ -9,17 +9,20 @@
 
 namespace core {
 
+     // Queries glError
     GLenum diagnose_opengl (std::string when = "");
 
     struct Shader {
         uint glid = 0;
         GLenum type;
         std::string source;
-    
+
         void compile ();
         ~Shader ();
     };
 
+     // This class keeps track of the currently-running program and
+     //  only switches if it needs to.
     struct Program {
         static Program* current;
         static size_t current_attr_count;

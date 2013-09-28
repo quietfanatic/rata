@@ -5,6 +5,8 @@
 #include <string>
 #include <unordered_map>
 
+ // This provides a tag-based logging system.
+
 extern int logging_frame;
 
 struct Logger {

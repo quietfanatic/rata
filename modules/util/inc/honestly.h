@@ -5,6 +5,9 @@
 #include <string>
 #include <math.h>
 
+ // These are things that I couldn't fit elsewhere.  Many of these are things
+ //  that the language really ought to have built in.
+
 typedef std::string Str;
 template <class T> using Hash = std::unordered_map<std::string, T>;
 template <class T> using Init_Safe = T& ();
@@ -35,6 +38,7 @@ CE float FPS = 60.0;
 CE float FR = 1/60.0;
 CE float PX = 1/16.0;
 CE float PI = M_PI;
+ // Can't be CEs because apparently division by 0 is not constant?
 #ifndef INF
 static const float INF = 1.f/0.f;
 #endif

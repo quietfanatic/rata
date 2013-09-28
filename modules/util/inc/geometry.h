@@ -16,7 +16,7 @@ namespace util {
     struct Vec {
         float x;
         float y;
-        Vec () :x(0/0.0), y(0/0.0) { }
+        Vec () :x(0/0.0), y(0/0.0) { }  // Can't be CE because of NaNs. :[
         CE Vec (float x, float y) :x(x), y(y) { }
         Vec (b2Vec2 bv) :x(bv.x), y(bv.y) { }
         operator b2Vec2& () { return reinterpret_cast<b2Vec2&>(*this); }

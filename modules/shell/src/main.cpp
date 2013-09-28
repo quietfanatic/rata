@@ -11,6 +11,8 @@ static std::string initial_state = "modules/shell/start.hacc";
 static std::string stop_state = "save/last_stop.hacc";
 static std::string main_file = "modules/shell/main.hacc";
 
+ // Global game settings.  Eventually, all modules with configurable settings
+ //  are expected to reserve a member of this struct.
 struct Settings {
     core::Window window;
     vis::Settings vis;

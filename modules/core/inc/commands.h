@@ -23,18 +23,17 @@ namespace core {
     void command_from_terminal ();
     extern std::vector<std::string> command_history;
 
+     // TODO: consider whether we really need core::Console
     std::string console_help ();
-
     void print_to_console (std::string);
-
     struct Console;
     EXTERN_INIT_SAFE(Links<Console>, consoles);
     struct Console : Linked<Console, consoles> {
         virtual void Console_print (std::string) = 0;
     };
 
+     // Default help message
     std::string no_description_available ();
-
 }
 
 struct Command_Description {

@@ -3,6 +3,8 @@
 
 #include "../../util/inc/geometry.h"
 
+ // This draws lines and shapes of alpha-blended color.
+
 namespace vis {
     using namespace util;
 

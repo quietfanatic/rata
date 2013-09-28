@@ -8,15 +8,19 @@
 
 namespace geo {
 
+     // Specifies the properties of one type of tile.
     struct TileDef {
         phys::FixtureDef nature;  // No shape
         std::vector<Vec> vertices;  // The shape is made by merging vertices
     };
 
+     // A set of TileDefs with integer indexes.
     struct Tileset {
         std::vector<TileDef*> tiles;  // TileDefs can be provided with local()
     };
 
+     // A visible, tangible object that uses a matrix of tiles to create
+     //  level geometry.
     struct Tilemap : Resident, phys::Object, vis::Drawn<vis::Map> {
         Tileset* tileset;
         vis::Texture* texture;

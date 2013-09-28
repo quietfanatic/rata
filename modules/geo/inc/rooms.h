@@ -24,16 +24,24 @@ namespace geo {
 
     struct Resident : Link<Resident> {
         Room* room = NULL;
+         // Called when the room is loaded
         virtual void Resident_emerge () = 0;
+         // Called when the room is unloaded
         virtual void Resident_reclude () = 0;
+         // Communicates to Resident where the actor actually is.
         virtual Vec Resident_pos ();  // Default: center of room
         virtual ~Resident () { }
         void finish ();
+         // Checks if the Resident's position, as reported by Resident_pos,
+         //  has left its current room, and changes rooms if so.  Call this if
+         //  the position changes at all.
         void reroom ();
+         // Remove the Resident from all rooms.
         void deroom ();
     };
 
     extern Room* current_room;
+     // Where things go that got lost.
     extern Room tumbolia;
 
     void enter (Room*);

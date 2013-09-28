@@ -3,6 +3,8 @@
 
 #include "../../util/inc/geometry.h"
 
+ // TODO: port the constraint-satisfaction camera control from the old branch.
+
 namespace geo {
     using namespace util;
 

@@ -46,6 +46,7 @@ namespace core {
         }
     }
 
+     // The ordering of all of these operations is fairly delicate.
     void run_input () {
         if (trap_cursor != cursor_trapped) {
             if (trap_cursor) {
