@@ -29,7 +29,7 @@ my %config = (
     compiler => undef,
     'with-clang' => 'clang',
     'with-g++' => 'g++',
-    build => 'release',
+    build => undef,
     profile => 0,
     'compiler-opts' => [],
     'linker-opts' => []
@@ -41,16 +41,21 @@ config('build-config', \%config, sub {
     if (!$have_clang and !$have_gpp) {
         die "Neither clang nor g++ were detected.  Please install one or, if one is already installed, point to its location with --with-clang=<command> or --with-g++=<command>\n";
     }
+    my @auto_opts;
     unless (defined $config{compiler}) {
         if ($have_clang) {
-            print "Selecting --compiler=clang\n";
-            $config{compiler} = 'clang';
+            push @auto_opts, [qw(compiler clang)];
         }
         elsif ($have_gpp) {
-            print "Selecting --compiler=g++\n";
-            $config{compiler} = 'g++';
+            push @auto_opts, [qw(compiler g++)];
         }
     }
+    defined $config{build} or push @auto_opts, [qw(build release)];
+    for (@auto_opts) {
+        $config{$_->[0]} = $_->[1];
+    }
+    print 'build-config: setting', map(" --$_->[0]=$_->[1]", @auto_opts), "\n"
+        if @auto_opts;
 });
 $config{profile} = 0;  # Do not preserve this between invokations.
 ##### MANUAL CONFIG
@@ -67,7 +72,7 @@ option 'build', sub {
     $_[0] eq 'release' or $_[0] eq 'debug'
         or die "Invalid build type: $_[0]; recognized are: release debug\n";
     $config{build} = $_[0];
-}, "--build=[release|debug] - Select build type (current: " . $config{build} . ')';
+}, "--build=[release|debug] - Select build type (current: " . ($config{build} // 'release') . ')';
 option 'profile', \$config{profile},
     "--profile - Add profiling code to the binary (once only)";
 option 'compiler-opts', sub {

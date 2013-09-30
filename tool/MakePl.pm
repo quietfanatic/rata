@@ -50,6 +50,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
 # GLOBALS
     our $this_is_root = 1;  # This is set to 0 when recursing.
     our $current_file;  # Which make.pl we're processing
+    my $this_file = realpath(__FILE__);
     my $make_was_called = 0;
 # RULES AND STUFF
     my @rules;  # All registered rules
@@ -77,7 +78,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
     sub import {
         my $self = shift;
         my ($package, $file, $line) = caller;
-        $current_file = $file;
+        $current_file = realpath($file);
          # Export symbols
         my @args = (@_ == 0 or grep $_ =! /:all/i, @_)
             ? @EXPORT
@@ -105,8 +106,10 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                 next unless -e $makepl;
                 $file = $makepl;
             }
-             # Skip already-included files
             my $real = realpath($file);
+             # Just like a C include, a subdep is warranted.
+            push @{$subdeps{$real}}, { base => MakePl::cwd, to => [$real], from => [$current_file] };
+             # Skip already-included files
             next if $included{$real};
             $included{real} = 1;
              # Make new project.
@@ -117,10 +120,10 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                 my $old_cwd = MakePl::cwd;
                 do $file;  # This file will do its own chdir
                 MakePl::chdir $old_cwd;
-                $@ and die_status $@;
+                $@ and die status $@;
             };
             if (!$make_was_called) {
-                die "\e[31m✗\e[0m $current_file did not end with 'make;'\n";
+                die "\e[31m✗\e[0m $file did not end with 'make;'\n";
             }
             $make_was_called = 0;
             $defaults = undef;
@@ -138,17 +141,8 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             : '[' . abs2rel($d, $base) . '/] ';
     }
     sub status {
-        if ($verbose) {
-            say "\e[36m", directory_prefix(), @_, "\e[0m";
-        }
-        else {
-            say directory_prefix(), @_;
-        }
+        say directory_prefix(), @_;
         return "\n";  # Marker to hand to die
-    }
-    sub die_status {
-        status @_;
-        die "\n";
     }
 
     sub make () {
@@ -254,7 +248,8 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
      # Fuss if make wasn't called
     END {
         if ($? == 0 and !$make_was_called) {
-            warn "\e[31m✗\e[0m $current_file did not end with 'make;'\n";
+            my $file = abs2rel($current_file, $original_base);
+            warn "\e[31m✗\e[0m $file did not end with 'make;'\n";
         }
     }
 
@@ -264,7 +259,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
         my ($to, $from, $recipe, $package, $file, $line) = @_;
         ref $recipe eq 'CODE' or croak "Non-code recipe given to rule";
         my $rule = {
-            caller_file => $file,
+            caller_file => realpath($file),
             caller_line => $line,
             base => cwd,
             to => [arrayify($to)],
@@ -363,7 +358,8 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
          # Get the realpaths of all dependencies and their subdeps
         chdir $rule->{base};
         delazify($rule);
-        my @deps = realpaths(@{$rule->{from}});
+         # Depend on the build script and this module too.
+        my @deps = (realpaths(@{$rule->{from}}), $rule->{caller_file}, $this_file);
          # Using this style of loop because @deps will keep expanding.
         for (my $i = 0; $i < @deps; $i++) {
             push_new(\@deps, get_auto_subdeps($deps[$i]));
@@ -380,7 +376,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
     sub show_rule ($) {
         if ($verbose) {
             resolve_deps($_[0]);
-            return "@{$_[0]{to}} ← " . join ' ', map abs2rel($_), $_[0]{deps};
+            return "@{$_[0]{to}} ← " . join ' ', map abs2rel($_), @{$_[0]{deps}};
         }
         else {
             my @froms = grep !$configs{realpath($_)}, @{$_[0]{from}};
@@ -506,10 +502,10 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             base => cwd,
             to => [$filename],
             from => [],
-            deps => [],
+            deps => undef,
             check_stale => sub { stale_config($filename, $var); },
             recipe => sub { gen_config($filename, $var, $routine); },
-            caller_file => $file,
+            caller_file => realpath($file),
             caller_line => $line,
             config => 1,
             planned => 0,
@@ -688,7 +684,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                 $_ = "'$_'";
             }
         }
-        return join ' ', @command;
+        return "\e[96m" . (join ' ', @command) . "\e[0m";
     }
 
     sub run (@) {
@@ -708,7 +704,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             else {
                 status(sprintf "☢ Command exited with value %d", $? >> 8);
             }
-            die_status("☢ Failed command: " . show_command(@_));
+            die status("☢ Failed command: " . show_command(@_));
         }
     }
 
@@ -776,7 +772,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             for my $rule (reverse @{$plan->{stack}}) {
                 $mess .= "\t" . debug_rule($rule) . "\n";
             }
-            die_status $mess;
+            die status $mess;
         }
          # In general, there should be only rule per target, but there can be more.
         return grep plan_rule($plan, $_), @{$targets{$target}};
@@ -789,7 +785,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             my $mess = "☢ Dependency loop\n";
             for my $old (reverse @{$plan->{stack}}) {
                 $mess .= "\t" . debug_rule($old) . "\n";
-                die_status $mess if $rule eq $old;  # reference compare
+                die status $mess if $rule eq $old;  # reference compare
             }
             Carp::confess $mess . "\t...oh wait, false alarm.  Which means there's a bug in make.pm.\nDetected";
         }
