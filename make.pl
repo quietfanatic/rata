@@ -115,9 +115,13 @@ sub clean_rule {
     phony 'clean', [], sub { remove_tree @tmps; }
 }
 sub objects {
-    my @objs = @_;
-    for (@objs) {
+    for (@_) {
         cppc_rule("tmp/$_.o", "src/$_.cpp");
+    }
+}
+sub tests {
+    for (@_) {
+        cppc_rule("tmp/$_.t.o", "test/$_.t.cpp");
     }
 }
 

@@ -716,7 +716,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
         return map {
             my $r = realpath($_);
             unless (defined $r) {
-                my $abs = rel2abs($_);
+                my $abs = File::Spec::Functions::rel2abs($_) // $_;
                 croak "\"$abs\" doesn't seem to be a real path";
             }
             $r;

@@ -5,8 +5,8 @@ use MakePl;
 include '../..';
 
 objects(qw(tap main));
-cppc_rule('tmp/t.o', 'src/tap.t.cpp');
-ld_rule('tmp/t', ['tmp/tap.o', 'tmp/t.o', 'tmp/main.o']);
+cppc_rule('tmp/tap.t.o', 'src/tap.t.cpp');
+ld_rule('tmp/t', ['tmp/tap.o', 'tmp/tap.t.o', 'tmp/main.o']);
 
 test_rule('tmp/t');
 clean_rule(glob 'tmp/*');

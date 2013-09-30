@@ -5,12 +5,7 @@ use MakePl;
 include '../..';
 
 objects(qw(common tree strings types dynamicism haccable files haccable_standard documents));
-
-cppc_rule('tmp/tree.t.o', 'test/tree.t.cpp');
-cppc_rule('tmp/strings.t.o', 'test/strings.t.cpp');
-cppc_rule('tmp/haccable.t.o', 'test/haccable.t.cpp');
-cppc_rule('tmp/files.t.o', 'test/files.t.cpp');
-cppc_rule('tmp/documents.t.o', 'test/documents.t.cpp');
+tests(qw(tree strings haccable files documents));
 
 ld_rule('tmp/t', [qw[
     tmp/common.o
