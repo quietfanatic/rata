@@ -38,6 +38,7 @@ namespace vis {
         Vec offset = Vec(0, 0);
         bool vertical = false;
         uint length = 0;  // 0 means go until it ends
+        uint32 mask = 0xffffffff;  // Bits the palette affects
     };
 
     struct Image {

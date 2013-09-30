@@ -8,5 +8,8 @@
     }}
     img:{"vis::Image":{
         filename:"modules/world/res/test-tiles.png"
+        palettes:[
+            { offset:[2 493] length:3 mask:0x000000ff }
+        ]
     }}
 }}

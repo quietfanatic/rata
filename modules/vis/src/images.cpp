@@ -62,8 +62,11 @@ namespace vis {
                 throw hacc::X::Logic_Error("Error processing image \"" + filename + "\": Texture boundary is outside of image");
         }
         if (!palettes.empty()) {
-            std::unordered_map<uint32, uint32> subst;
-            for (auto& p : palettes) {
+             // Read palettes into a hash for quick lookup
+            typedef std::unordered_map<uint32, uint32> Palette_Hash;
+            std::vector<Palette_Hash> substs (palettes.size());
+            for (size_t i = 0; i < palettes.size(); i++) {
+                auto& p = palettes[i];
                 size_t x = p.offset.x;
                 size_t y = ih - p.offset.y - 1;
                 if (p.vertical) {
@@ -71,10 +74,11 @@ namespace vis {
                     if (max > (size_t)ih) max = ih;
                     while (y < max) {
                         uint32* px = data + (y*iw) + x;
-                        uint32 left = px[0];
-                        uint32 right = px[1];
+                        uint32 left = px[0] & p.mask;
+                        uint32 right = px[1] & p.mask;
+                        printf("%x -> %x\n", left, right);
                         if (!left && !right) break;
-                        subst.emplace(left, right);
+                        substs[i].emplace(left, right);
                         y++;
                     }
                 }
@@ -83,21 +87,29 @@ namespace vis {
                     if (max > (size_t)iw) max = iw;
                     while (x < max) {
                         uint32* px = data + (y*iw) + x;
-                        uint32 left = px[0];
-                        uint32 right = px[iw];
+                        uint32 left = px[0] & p.mask;
+                        uint32 right = px[iw] & p.mask;
+                        printf("%x -> %x\n", left, right);
                         if (!left && !right) break;
-                        subst.emplace(left, right);
+                        substs[i].emplace(left, right);
                         x++;
                     }
                 }
             }
             processed_data = (uint32*)malloc(iw*ih*sizeof(int32));
             for (size_t i = 0; i < (size_t)iw*ih; i++) {
-                auto iter = subst.find(data[i]);
-                if (iter != subst.end())
-                    processed_data[i] = iter->second;
-                else
-                    processed_data[i] = data[i];
+                for (size_t pi = 0; pi < palettes.size(); pi++) {
+                    auto iter = substs[pi].find(data[i] & palettes[pi].mask);
+                    if (iter != substs[pi].end()) {
+                        uint32 new_val = (iter->second & palettes[pi].mask)
+                                       | (data[i] & ~palettes[pi].mask);
+                        processed_data[i] = new_val;
+                        break;
+                    }
+                    else {
+                        processed_data[i] = data[i];
+                    }
+                }
             }
         }
         else processed_data = data;
@@ -229,9 +241,10 @@ HCB_END(Texture)
 
 HCB_BEGIN(Palette)
     name("vis::Palette");
-    attr("offset", member(&Palette::offset).optional());
+    attr("offset", member(&Palette::offset));
     attr("vertical", member(&Palette::vertical).optional());
     attr("length", member(&Palette::length).optional());
+    attr("mask", member(&Palette::mask).optional());
 HCB_END(Palette)
 
 HCB_BEGIN(Image)
