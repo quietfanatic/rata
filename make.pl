@@ -1,13 +1,8 @@
 #!/usr/bin/perl
-
-use strict;
-use warnings;
-use FindBin;
-use lib "$FindBin::Bin/tool";
+use lib do {__FILE__ =~ /^(.*)[\/\\]/; ($1||'.').'/tool'};
 use MakePl;
-use autodie;
+use Cwd 'realpath';
 use File::Path qw<remove_tree>;
-use File::Spec::Functions qw(:ALL);
 
 my $here = cwd;
 
@@ -16,7 +11,7 @@ my %flags = (
     clang => {
         compile => [qw(-std=c++11 -c), "-I$here/lib/Box2D"],
         link => [qw(-std=c++11 -lstdc++ -lm)],
-        release => [qw(-O4 -Wno-null-conversion -Wno-format-security)],
+        release => [qw(-O3 -Wno-null-conversion -Wno-format-security)],
         debug => [qw(-ggdb -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security)],
         profile => ['-pg'],
     },
@@ -96,10 +91,10 @@ sub ld {
 sub output { '-o', $_[0]; }
 
 ##### STANDARD RULES
+my $conf = realpath 'build-config';
 sub cppc_rule {
     my ($to, $from) = @_;
     my @from = ref $from eq 'ARRAY' ? @$from : $from;
-    my $conf = abs2rel(rel2abs('build-config', $here));
     rule $to, [@from, $conf], sub {
         cppc((grep /.cpp$/, @from), output($_[0][0]));
     }
@@ -108,7 +103,6 @@ sub ld_rule {
     my ($to, $from, $libs) = @_;
     my @from = ref $from eq 'ARRAY' ? @$from : $from;
     my @libs = defined $libs ? (ref $libs eq 'ARRAY' ? @$libs : $libs) : ();
-    my $conf = abs2rel(rel2abs('build-config', $here));
     rule $to, [@from, $conf], sub {
         ld @from, @libs, output($_[0][0]);
     }
@@ -118,7 +112,7 @@ sub test_rule {
 }
 sub clean_rule {
     my @tmps = @_;
-    phony 'clean', [], sub { no autodie; remove_tree @tmps; }
+    phony 'clean', [], sub { remove_tree @tmps; }
 }
 sub objects {
     my @objs = @_;
@@ -133,19 +127,22 @@ subdep sub {
      # Select only C++ files
     $file =~ /\.(?:c(?:pp)?|h)$/ or return ();
 
-    my $base = catpath((splitpath $file)[0, 1], '');
+    my $base = ($file =~ /(.*?)[^\\\/]*$/ and $1);
     my @includes = (slurp $file, 2048) =~ /^\s*#include\s*"([^"]*)"/gmi;
-    return map rel2abs($_, $base), @includes;
+    my $old_cwd = cwd;
+    chdir $base;
+    my @r = map realpath($_), @includes;
+    chdir $old_cwd;
+    return @r;
 };
 
  # Let modules do their own declarations
 include glob 'modules/*';
 
  # Miscellaneous stuff
-phony 'test', sub { targetmatch qr/^modules\/.*\/test/ }, sub { };
+phony 'test', sub { grep /modules\/.*\/test$/, targets }, sub { };
 
-phony 'clean', sub { targetmatch qr/^modules\/.*\/clean/ }, sub {
-    no autodie;
+phony 'clean', sub { grep /modules\/.*\/clean$/, targets }, sub {
     unlink 'build-config';
 };
 

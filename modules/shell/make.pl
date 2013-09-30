@@ -1,9 +1,5 @@
 #!/usr/bin/perl
-
-use strict;
-use warnings;
-use FindBin;
-use lib "$FindBin::Bin/../../tool";
+use lib do {__FILE__ =~ /^(.*)[\/\\]/; ($1||'.').'/tool'};
 use MakePl;
 
 my @objects = qw<
