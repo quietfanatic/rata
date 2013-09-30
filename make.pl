@@ -36,8 +36,8 @@ my %config = (
 );
 ##### AUTO CONFIG
 config('build-config', \%config, sub {
-    my $have_clang = (`$config{'with-clang'} -v 2>&1` // '' =~ /clang version (\d+)\.(\d+)/);
-    my $have_gpp = (`$config{'with-g++'} -v 2>&1` // '' =~ /gcc version (\d+)\.(\d+)/);
+    my $have_clang = which 'clang';
+    my $have_gpp = which 'g++';
     if (!$have_clang and !$have_gpp) {
         die "Neither clang nor g++ were detected.  Please install one or, if one is already installed, point to its location with --with-clang=<command> or --with-g++=<command>\n";
     }
