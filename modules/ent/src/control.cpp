@@ -13,6 +13,7 @@ namespace ent {
         }
     }
     void Player::Mind_think () {
+        if (!player_controllable) return;
         if (!character) return;
         size_t buttons = 0;
         size_t bit = 1;
@@ -56,6 +57,8 @@ namespace ent {
     void Player::finish () {
         appear();
     }
+
+    bool player_controllable = true;
 
     static INIT_SAFE(Links<Mind>, minds);
     void Mind::wake () { link(minds()); }

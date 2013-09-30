@@ -2,6 +2,7 @@
 #include "../../core/inc/input.h"
 #include "../../core/inc/commands.h"
 #include "../../core/inc/window.h"
+#include "../../ent/inc/control.h"
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/color.h"
 #include "../../vis/inc/text.h"
@@ -159,11 +160,13 @@ namespace shell {
         void enter_console () {
             is_active = true;
             core::trap_cursor = false;
+            ent::player_controllable = false;
             appear();
         }
         void exit_console () {
             is_active = false;
             core::trap_cursor = true;
+            ent::player_controllable = true;
             disappear();
         }
         void Drawn_draw (Dev r) override {

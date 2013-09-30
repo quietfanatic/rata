@@ -99,6 +99,8 @@ namespace ent {
         void finish ();
     };
 
+    extern bool player_controllable;
+
 }
 
 #endif
