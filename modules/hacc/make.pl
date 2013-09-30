@@ -22,7 +22,7 @@ ld_rule('tmp/t', [qw[
     tmp/haccable_standard.o
     tmp/files.o tmp/files.t.o
     tmp/documents.o tmp/documents.t.o
-    ../tap/tmp/tap.o ../tap/tmp/tap_make_test_main.o
+    ../tap/tmp/tap.o ../tap/tmp/main.o
 ]]);
 
 test_rule('tmp/t');
