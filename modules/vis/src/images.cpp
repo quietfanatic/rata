@@ -76,7 +76,6 @@ namespace vis {
                         uint32* px = data + (y*iw) + x;
                         uint32 left = px[0] & p.mask;
                         uint32 right = px[1] & p.mask;
-                        printf("%x -> %x\n", left, right);
                         if (!left && !right) break;
                         substs[i].emplace(left, right);
                         y++;
@@ -89,7 +88,6 @@ namespace vis {
                         uint32* px = data + (y*iw) + x;
                         uint32 left = px[0] & p.mask;
                         uint32 right = px[iw] & p.mask;
-                        printf("%x -> %x\n", left, right);
                         if (!left && !right) break;
                         substs[i].emplace(left, right);
                         x++;
