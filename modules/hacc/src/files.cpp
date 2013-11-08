@@ -250,11 +250,9 @@ namespace hacc {
         std::vector<Update> updates;
         void reload_verify () {
             reload_verify_scheduled = false;
-            printf("reload_verify...\n");
              // Check for any pointers we'll need to update
             for (auto& p : files_by_filename) {
                 File f = p.second;
-                printf("Scanning %s...\n", f.filename().c_str());
                 try {
                     switch (f.p->state) {
                          // Files with these states either already point to new data
@@ -305,11 +303,9 @@ namespace hacc {
                     f.p->state = RELOAD_COMMITTING;
                 }
             }
-            printf("done\n");
             new Action(COMMIT, [=](){ reload_commit(); });
         }
         void reload_commit () {
-            printf("reload_commit...\n");
              // Update all references
             for (auto& p : updates) {
                 p.first.write([&](void* pp){
@@ -325,7 +321,6 @@ namespace hacc {
                     f.p->state = LOADED;
                 }
             }
-            printf("done\n");
         }
 
          // UNLOADING
