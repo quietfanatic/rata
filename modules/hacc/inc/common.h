@@ -1,6 +1,8 @@
 #ifndef HAVE_HACC_COMMON_H
 #define HAVE_HACC_COMMON_H
 
+ // This contains various types and exceptions that are used throughout Hacc
+
 #include <stdint.h>
 #include <stddef.h>
 #include <string>
@@ -22,9 +24,6 @@ namespace hacc {
 
     template <class F>
     using Func = std::function<F>;
-    typedef Func<void (void*)> Cont;
-    template <class C, size_t n>
-    using CArray = C[n];
 
     struct Unknown { };
     struct Tree;
@@ -34,6 +33,8 @@ namespace hacc {
     typedef std::pair<std::string, Tree> Pair;
     typedef std::vector<Pair> Object;
 
+     // Implementing an intrusive-reference-counted pointer.  This
+     //  is a way to achieve a minimal API.
     struct DPtee {
         virtual ~DPtee () { }  // necessary for easy opacity
         mutable size_t ref_count = 0;

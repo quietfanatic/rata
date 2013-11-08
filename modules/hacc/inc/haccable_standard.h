@@ -1,6 +1,15 @@
 #ifndef HAVE_HACC_HACCABLE_STANDARD_H
 #define HAVE_HACC_HACCABLE_STANDARD_H
 
+ // This contains some predefined Haccables for builtin types:
+ //  - C pointers
+ //  - C arrays
+ //  - std::vector
+ //  - hacc::named_vector (thin wrapper around std::vector where each object has a .name)
+ //  - std::unordered_map
+ //  - std::pair
+ // You can override individual types if you want
+
 #include "haccable.h"
 
 namespace hacc {
@@ -15,6 +24,7 @@ namespace hacc {
     };
 }
 
+template <class C, size_t n> using CArray = C[n];
  // Heh, this actually works.
 HCB_TEMPLATE_BEGIN(<class C HCB_COMMA size_t n>, C[n])
     using namespace hacc;

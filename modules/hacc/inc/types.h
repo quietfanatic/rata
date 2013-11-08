@@ -1,6 +1,9 @@
 #ifndef HAVE_HACC_TYPES_H
 #define HAVE_HACC_TYPES_H
 
+ // This provides a class that can represent complex information about
+ //  C++ types at runtime.
+
 #include <typeinfo>
 #include <typeindex>
 #include "common.h"

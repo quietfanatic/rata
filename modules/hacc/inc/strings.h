@@ -1,6 +1,9 @@
 #ifndef HAVE_HACC_STRINGS_H
 #define HAVE_HACC_STRINGS_H
 
+ // This defines translations between Trees and strings.
+ // It also provides very simple file IO to go along.
+
 #include "tree.h"
 
 namespace hacc {
