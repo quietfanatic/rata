@@ -60,10 +60,10 @@ namespace hacc {
     void load (File);
     void load (const std::vector<File>&);
      // Unload these files, and then call trim.  If there are references
-     //  to the unloaded objects, they will not be fixed!
+     //  elsewhere to the unloaded objects, this transaction wlil fail.
     void unload (File);
     void unload (const std::vector<File>&);
-     // Reload some files.  This will scan all other file-objects for references
+     // (NYI) Reload some files.  This will scan all other file-objects for references
      //  to this one and update them accordingly.  It will throw if there
      //  are any references that are valid for the old version but invalid for
      //  the new version of this file.
@@ -94,7 +94,9 @@ namespace hacc {
      //  single file-object.  Returns null if the address isn't found.
      // If you run address_to_path inside a file_transaction, the address
      //  scan results will be cached between calls.
-    Path address_to_path (Pointer, Path prefix = Path(null));
+     // The use_old flag is for internal use during reloading, to make the search
+     //  consider old file contents instead of new.
+    Path address_to_path (Pointer, Path prefix = Path(null), bool use_old = false);
 
      // Performs an operation for each pointer found in the given root, or in
      //  every file-object if root is null.  The callback will be always be
@@ -117,6 +119,20 @@ namespace hacc {
             Path ref;
             Path target;
             Unload_Would_Break (String, Path, Path);
+        };
+        struct Reload_Would_Break : Logic_Error {
+            String filename;
+            Path ref;
+            Path target;
+            Reload_Would_Break (String, Path, Path);
+        };
+        struct Reload_Would_Break_Type : Logic_Error {
+            String filename;
+            Path ref;
+            Path target;
+            Type ot;
+            Type nt;
+            Reload_Would_Break_Type (String, Path, Path, Type, Type);
         };
     }
 

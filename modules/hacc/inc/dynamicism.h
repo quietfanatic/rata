@@ -60,9 +60,10 @@ namespace hacc {
     static bool operator == (const Pointer& a, const Pointer& b) {
         return a.type == b.type && a.address == b.address;
     }
-    
+
      // A Reference implements a dynamically-typed object that
      //  might not be addressable but can still be got or set.
+     // This class has reference semantics, so copy all you want.
     struct Reference {
         void* c;
         GetSet0 gs;
@@ -112,7 +113,7 @@ namespace hacc {
     };
 
      // This is a dynamically typed object with value-semantics.
-     // Or, if you prefer, a dynamically type auto_ptr
+     // Or, if you prefer, a dynamically typed auto_ptr
     struct Dynamic {
         Type type;
         void* addr;

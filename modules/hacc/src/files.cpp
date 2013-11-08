@@ -30,7 +30,7 @@ namespace hacc {
         FileState state = UNLOADED;
         String filename;
         Dynamic data = null;  // null if not loaded
-        Dynamic new_data = null;  // For when reloading
+        Dynamic old_data = null;  // For when reloading
         bool requested = false;
         bool addresses_scanned = false;
 
@@ -209,7 +209,8 @@ namespace hacc {
             Tree t;
             try {
                 t = tree_from_file(f.p->filename);
-                Reference(&f.p->new_data).prepare(t);
+                f.p->old_data = std::move(f.p->data);
+                Reference(&f.p->data).prepare(t);
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
@@ -220,7 +221,7 @@ namespace hacc {
         }
         void reload_fill (File f, Tree t) {
             try {
-                Reference(&f.p->new_data).fill(t);
+                Reference(&f.p->data).fill(t);
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
@@ -232,7 +233,7 @@ namespace hacc {
         bool reload_verify_scheduled = false;
         void reload_finish (File f) {
             try {
-                Reference(&f.p->new_data).finish();
+                Reference(&f.p->data).finish();
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
@@ -244,12 +245,74 @@ namespace hacc {
                 new Action(VERIFY, [=](){ reload_verify(); });
             }
         }
+        typedef std::pair<Reference, void*> Update;
         void reload_verify () {
             reload_verify_scheduled = false;
-            throw X::Reload_NYI();
-            new Action(COMMIT, [=](){ reload_commit(); });
+             // Check for any pointers we'll need to update
+            std::vector<Update> updates;
+            for (auto& p : files_by_filename) {
+                File f = p.second;
+                try {
+                    switch (f.p->state) {
+                         // Files with these states either already point to new data
+                         //  or will be unloaded.
+                        case RELOAD_VERIFYING:
+                        case LOAD_COMMITTING:
+                        case UNLOAD_VERIFYING:
+                        case UNLOAD_COMMITTING:
+                        case UNLOADED:
+                            break;
+                        default: {
+                            Reference(f.p->data.address()).foreach_pointer([&](Reference rp, Path path){
+                                rp.read([&](void* pp){
+                                    Path target = address_to_path(
+                                        Pointer(rp.type().data->pointee_type, *(void**)pp),
+                                        Path(null), true
+                                    );
+                                    if (target && File(target->root()).p->state == RELOAD_VERIFYING) {
+                                        Pointer new_addr = path_to_reference(target);
+                                        if (!new_addr) {
+                                            try { throw X::Reload_Would_Break(f.p->filename, path, target); }
+                                            catch (...) { delayed_errors.push_back(std::current_exception()); }
+                                        }
+                                        else if (new_addr.type != rp.type()) {
+                                            try { throw X::Reload_Would_Break_Type(f.p->filename, path, target, new_addr.type, rp.type()); }
+                                            catch (...) { delayed_errors.push_back(std::current_exception()); }
+                                        }
+                                        else {
+                                            updates.push_back(Update(rp, new_addr.address));
+                                        }
+                                    }
+                                });
+                                return false;
+                            }, Path(f.p->filename));
+                            break;
+                        }
+                    }
+                }
+                 // Only catch exceptions so we can attach a filename to them.
+                catch (X::Error& e) {
+                    if (e.filename.empty()) e.filename = f.filename();
+                    throw;
+                }
+            }
+            new Action(COMMIT, [&](){ reload_commit(std::move(updates)); });
         }
-        void reload_commit () {
+        void reload_commit (std::vector<std::pair<Reference, void*>>&& updates) {
+             // Update all references
+            for (auto& p : updates) {
+                p.first.write([&](void* pp){
+                    *(void**)pp = p.second;
+                });
+            }
+             // delete old_data for all reloaded files
+            for (auto& p : files_by_filename) {
+                File f = p.second;
+                if (f.p->state == RELOAD_VERIFYING) {
+                    f.p->old_data = null;
+                    f.p->state = LOADED;
+                }
+            }
         }
 
          // UNLOADING
@@ -264,11 +327,13 @@ namespace hacc {
         }
         void unload_verify () {
             unload_verify_scheduled = false;
+             // Fail if there are any references in any other file to this file.
             for (auto& p : files_by_filename) {
                 File f = p.second;
                 try {
-                    if (f.p->state != UNLOAD_VERIFYING) {
-                        Reference(f.data()).foreach_pointer([&](Reference rp, Path path){
+                     // But it's okay if the referencing file is also being unloaded.
+                    if (f.p->state != UNLOAD_VERIFYING && f.p->state != UNLOADED) {
+                        Reference(f.p->data.address()).foreach_pointer([&](Reference rp, Path path){
                             rp.read([&](void* pp){
                                 Path target = address_to_path(
                                     Pointer(rp.type().data->pointee_type, *(void**)pp)
@@ -282,6 +347,7 @@ namespace hacc {
                         }, Path(f.p->filename));
                     }
                 }
+                 // Only catch exceptions so we can attach a filename to them.
                 catch (X::Error& e) {
                     if (e.filename.empty()) e.filename = f.filename();
                     throw;
@@ -341,7 +407,7 @@ namespace hacc {
                     case RELOAD_FINISHING:
                     case RELOAD_VERIFYING:
                     case RELOAD_COMMITTING: {
-                        f.p->new_data = null;
+                        f.p->data = std::move(f.p->old_data);
                         f.p->state = LOADED;
                         break;
                     }
@@ -421,7 +487,7 @@ namespace hacc {
     Reference path_to_reference (Path path, Pointer root) {
         return path->to_reference(root);
     }
-    Path address_to_path (Pointer ptr, Path prefix) {
+    Path address_to_path (Pointer ptr, Path prefix, bool use_old) {
         if (prefix != Path(null)) {
             Path found = Path(null);
             Reference start = path_to_reference(prefix);
@@ -447,7 +513,7 @@ namespace hacc {
             Path found = Path(null);
             if (Transaction::current) {
                 for (auto f : scannable_files) {
-                    Reference(f.data()).foreach_address(
+                    (use_old ? Reference(f.p->old_data.address()) : f.data()).foreach_address(
                         [&](Pointer p, Path path){
                             Transaction::current->address_cache.emplace(p, path);
                             if (p == ptr) found = path;
@@ -464,7 +530,7 @@ namespace hacc {
                  // With no transaction and no prefix, we just gotta scan
                  //  the whole haystack every time.
                 for (auto f : scannable_files) {
-                    Reference(f.data()).foreach_address(
+                    (use_old ? Reference(f.p->old_data.address()) : f.data()).foreach_address(
                         [&](Pointer p, Path path){
                             if (p == ptr) found = path;
                             return true;
@@ -495,6 +561,22 @@ namespace hacc {
               + "\" because it would break the pointer at " + path_to_string(ref)
               + " pointing to " + path_to_string(target)
             ), filename(filename), ref(ref), target(target)
+        { }
+        Reload_Would_Break::Reload_Would_Break (String filename, Path ref, Path target) :
+            Logic_Error(
+                "Cannot reload file \"" + filename
+              + "\" because it would break the pointer at " + path_to_string(ref)
+              + " pointing to " + path_to_string(target)
+            ), filename(filename), ref(ref), target(target)
+        { }
+        Reload_Would_Break_Type::Reload_Would_Break_Type (String filename, Path ref, Path target, Type ot, Type nt) :
+            Logic_Error(
+                "Cannot reload file \"" + filename
+              + "\" because it would break the pointer at " + path_to_string(ref)
+              + " pointing to " + path_to_string(target)
+              + ", which had an old type of " + ot.name()
+              + " and has a new type of " + nt.name()
+            ), filename(filename), ref(ref), target(target), ot(ot), nt(nt)
         { }
         Reload_NYI::Reload_NYI () : Internal_Error("Reload NYI, sorry") { }
     }
