@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../inc/files.h"
+#include "../inc/strings.h"
 #include "../inc/haccable_standard.h"
 #include "../../tap/inc/tap.h"
 
@@ -43,7 +44,7 @@ static void clobber (const char* filename) {
 
 
 tap::Tester files_tester ("hacc/files", [](){
-    plan(21);
+    plan(26);
 
     remove("../test/eight.hacc");
     remove("../test/pointer2.hacc");
@@ -98,6 +99,26 @@ tap::Tester files_tester ("hacc/files", [](){
         load(File("../test/pointer.hacc"));
     }, "Can load a file that was unloaded");
     ok(File("../test/seven.hacc").loaded(), "Depended-upon files are automatically loaded");
+    string_to_file("{ float:9.0 }", "../test/eight.hacc");
+    doesnt_throw([](){
+        reload(File("../test/eight.hacc"));
+    }, "Can reload a file that is loaded");
+    is(*(float*)File("../test/eight.hacc").data().address(), 9.0f, "Data was updated during reload");
+    is(
+        *(void**)File("../test/pointer2.hacc").data().address(),
+        File("../test/eight.hacc").data().address(),
+        "External pointer to reloaded file was updated"
+    );
+    string_to_file("{ uint32:9 }", "../test/eight.hacc");
+    throws<X::Reload_Would_Break_Type>([](){
+        reload(File("../test/eight.hacc"));
+    }, "Refuse to reload file if a path whose type has changed has an external reference");
+    doesnt_throw([](){
+        file_transaction([](){
+            reload(File("../test/eight.hacc"));
+            unload(File("../test/pointer2.hacc"));
+        });
+    }, "Can reload if the external pointer's file is being unloaded");
 
 
     remove("../test/eight.hacc");

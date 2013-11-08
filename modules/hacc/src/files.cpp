@@ -202,6 +202,7 @@ namespace hacc {
          // RELOADING
         void request_reload (File f) {
             if (f.p->state != LOADED) return;
+            f.p->old_data = std::move(f.p->data);
             f.p->state = RELOAD_PREPARING;
             reload_prepare(f);
         }
@@ -209,7 +210,6 @@ namespace hacc {
             Tree t;
             try {
                 t = tree_from_file(f.p->filename);
-                f.p->old_data = std::move(f.p->data);
                 Reference(&f.p->data).prepare(t);
             }
             catch (X::Error& e) {
@@ -246,10 +246,11 @@ namespace hacc {
             }
         }
         typedef std::pair<Reference, void*> Update;
+         // Working around lack of rvalue lambda captures.
+        std::vector<Update> updates;
         void reload_verify () {
             reload_verify_scheduled = false;
              // Check for any pointers we'll need to update
-            std::vector<Update> updates;
             for (auto& p : files_by_filename) {
                 File f = p.second;
                 try {
@@ -275,8 +276,8 @@ namespace hacc {
                                             try { throw X::Reload_Would_Break(f.p->filename, path, target); }
                                             catch (...) { delayed_errors.push_back(std::current_exception()); }
                                         }
-                                        else if (new_addr.type != rp.type()) {
-                                            try { throw X::Reload_Would_Break_Type(f.p->filename, path, target, new_addr.type, rp.type()); }
+                                        else if (new_addr.type != rp.type().data->pointee_type) {
+                                            try { throw X::Reload_Would_Break_Type(f.p->filename, path, target, new_addr.type, rp.type().data->pointee_type); }
                                             catch (...) { delayed_errors.push_back(std::current_exception()); }
                                         }
                                         else {
@@ -296,19 +297,26 @@ namespace hacc {
                     throw;
                 }
             }
-            new Action(COMMIT, [&](){ reload_commit(std::move(updates)); });
+            for (auto& p : files_by_filename) {
+                File f = p.second;
+                if (f.p->state == RELOAD_VERIFYING) {
+                    f.p->state = RELOAD_COMMITTING;
+                }
+            }
+            new Action(COMMIT, [=](){ reload_commit(); });
         }
-        void reload_commit (std::vector<std::pair<Reference, void*>>&& updates) {
+        void reload_commit () {
              // Update all references
             for (auto& p : updates) {
                 p.first.write([&](void* pp){
                     *(void**)pp = p.second;
                 });
             }
+            updates.clear();
              // delete old_data for all reloaded files
             for (auto& p : files_by_filename) {
                 File f = p.second;
-                if (f.p->state == RELOAD_VERIFYING) {
+                if (f.p->state == RELOAD_COMMITTING) {
                     f.p->old_data = null;
                     f.p->state = LOADED;
                 }
@@ -513,7 +521,10 @@ namespace hacc {
             Path found = Path(null);
             if (Transaction::current) {
                 for (auto f : scannable_files) {
-                    (use_old ? Reference(f.p->old_data.address()) : f.data()).foreach_address(
+                    Reference ref = use_old && f.p->old_data.address()
+                        ? Reference(f.p->old_data.address())
+                        : f.data();
+                    ref.foreach_address(
                         [&](Pointer p, Path path){
                             Transaction::current->address_cache.emplace(p, path);
                             if (p == ptr) found = path;
@@ -530,7 +541,10 @@ namespace hacc {
                  // With no transaction and no prefix, we just gotta scan
                  //  the whole haystack every time.
                 for (auto f : scannable_files) {
-                    (use_old ? Reference(f.p->old_data.address()) : f.data()).foreach_address(
+                    Reference ref = use_old && f.p->old_data.address()
+                        ? Reference(f.p->old_data.address())
+                        : f.data();
+                    ref.foreach_address(
                         [&](Pointer p, Path path){
                             if (p == ptr) found = path;
                             return true;
