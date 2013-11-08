@@ -117,7 +117,10 @@ HCB_END(Window)
 
 struct LoadCommand : CommandData {
     std::string filename;
-    void operator () () { window->before_next_frame([=](){ hacc::load(filename); }); }
+    void operator () () {
+        auto f = filename;  // *this is deallocated before this lambda is run
+        window->before_next_frame([f](){ hacc::load(f); });
+    }
 };
 HCB_BEGIN(LoadCommand)
     new_command<LoadCommand>("load", "Manually load a file by its filename");
@@ -126,16 +129,34 @@ HCB_END(LoadCommand)
 
 struct SaveCommand : CommandData {
     std::string filename;
-    void operator () () { window->before_next_frame([=](){ hacc::save(filename); }); }
+    void operator () () {
+        auto f = filename;
+        window->before_next_frame([f](){ hacc::save(f); });
+    }
 };
 HCB_BEGIN(SaveCommand)
     new_command<SaveCommand>("save", "Save the file object with the given filename");
     elem(member(&SaveCommand::filename));
 HCB_END(SaveCommand)
 
+struct ReloadCommand : CommandData {
+    std::string filename;
+    void operator () () {
+        auto f = filename;
+        window->before_next_frame([f](){ hacc::reload(f); });
+    }
+};
+HCB_BEGIN(ReloadCommand)
+    new_command<ReloadCommand>("reload", "Reload the file with the given filename");
+    elem(member(&ReloadCommand::filename));
+HCB_END(ReloadCommand);
+
 struct UnloadCommand : CommandData {
     std::string filename;
-    void operator () () { window->before_next_frame([=](){ hacc::unload(filename); }); }
+    void operator () () {
+        auto f = filename;
+        window->before_next_frame([f](){ hacc::unload(f); });
+    }
 };
 HCB_BEGIN(UnloadCommand)
     new_command<UnloadCommand>("unload", "Unload the file object with the given filename.  Fails if there are outside references to it.");
