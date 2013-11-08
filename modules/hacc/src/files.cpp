@@ -301,6 +301,7 @@ namespace hacc {
                 File f = p.second;
                 if (f.p->state == RELOAD_VERIFYING) {
                     f.p->state = RELOAD_COMMITTING;
+                    if (logger) logger("Reloaded \"" + f.filename() + "\"");
                 }
             }
             new Action(COMMIT, [=](){ reload_commit(); });
