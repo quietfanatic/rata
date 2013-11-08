@@ -142,13 +142,24 @@ HCB_END(SaveCommand)
 struct ReloadCommand : CommandData {
     std::string filename;
     void operator () () {
-        auto f = filename;
-        window->before_next_frame([f](){ hacc::reload(f); });
+        if (filename.empty()) {
+            window->before_next_frame([](){
+                for (auto f : hacc::loaded_files()) {
+                    if (f.filename().find("/res/") != std::string::npos) {
+                        hacc::reload(f);
+                    }
+                }
+            });
+        }
+        else {
+            auto f = filename;
+            window->before_next_frame([f](){ hacc::reload(f); });
+        }
     }
 };
 HCB_BEGIN(ReloadCommand)
-    new_command<ReloadCommand>("reload", "Reload the file with the given filename");
-    elem(member(&ReloadCommand::filename));
+    new_command<ReloadCommand>("reload", "Reload the file with the given filename, or if none given all files containing '/res/'");
+    elem(member(&ReloadCommand::filename).optional());
 HCB_END(ReloadCommand);
 
 struct UnloadCommand : CommandData {
