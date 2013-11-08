@@ -250,9 +250,11 @@ namespace hacc {
         std::vector<Update> updates;
         void reload_verify () {
             reload_verify_scheduled = false;
+            printf("reload_verify...\n");
              // Check for any pointers we'll need to update
             for (auto& p : files_by_filename) {
                 File f = p.second;
+                printf("Scanning %s...\n", f.filename().c_str());
                 try {
                     switch (f.p->state) {
                          // Files with these states either already point to new data
@@ -303,9 +305,11 @@ namespace hacc {
                     f.p->state = RELOAD_COMMITTING;
                 }
             }
+            printf("done\n");
             new Action(COMMIT, [=](){ reload_commit(); });
         }
         void reload_commit () {
+            printf("reload_commit...\n");
              // Update all references
             for (auto& p : updates) {
                 p.first.write([&](void* pp){
@@ -321,6 +325,7 @@ namespace hacc {
                     f.p->state = LOADED;
                 }
             }
+            printf("done\n");
         }
 
          // UNLOADING
@@ -495,7 +500,7 @@ namespace hacc {
     Reference path_to_reference (Path path, Pointer root) {
         return path->to_reference(root);
     }
-    Path address_to_path (Pointer ptr, Path prefix, bool use_old) {
+    Path address_to_path (Pointer ptr, Path prefix, bool reload_verify) {
         if (prefix != Path(null)) {
             Path found = Path(null);
             Reference start = path_to_reference(prefix);
@@ -513,20 +518,26 @@ namespace hacc {
              //  if a new file is inserted it'll invalidate the iterators
             std::vector<File> scannable_files;
             for (auto& p : files_by_filename) {
-                if (p.second->state != UNLOADED
-                 && p.second->state != UNLOAD_COMMITTING) {
-                    scannable_files.push_back(p.second);
+                 // TODO: There is probably some more optimization that can be done here.
+                if (reload_verify) {
+                    if (p.second->state == RELOAD_VERIFYING)
+                        scannable_files.push_back(p.second);
+                }
+                else {
+                    if (p.second->state != UNLOADED
+                     && p.second->state != UNLOAD_COMMITTING) {
+                        scannable_files.push_back(p.second);
+                    }
                 }
             }
             Path found = Path(null);
             if (Transaction::current) {
                 for (auto f : scannable_files) {
-                    Reference ref = use_old && f.p->old_data.address()
+                    Reference ref = reload_verify && f.p->old_data.address()
                         ? Reference(f.p->old_data.address())
                         : f.data();
                     ref.foreach_address(
                         [&](Pointer p, Path path){
-                            Transaction::current->address_cache.emplace(p, path);
                             if (p == ptr) found = path;
                             return false;
                         },
@@ -541,7 +552,7 @@ namespace hacc {
                  // With no transaction and no prefix, we just gotta scan
                  //  the whole haystack every time.
                 for (auto f : scannable_files) {
-                    Reference ref = use_old && f.p->old_data.address()
+                    Reference ref = reload_verify && f.p->old_data.address()
                         ? Reference(f.p->old_data.address())
                         : f.data();
                     ref.foreach_address(

@@ -94,9 +94,8 @@ namespace hacc {
      //  single file-object.  Returns null if the address isn't found.
      // If you run address_to_path inside a file_transaction, the address
      //  scan results will be cached between calls.
-     // The use_old flag is for internal use during reloading, to make the search
-     //  consider old file contents instead of new.
-    Path address_to_path (Pointer, Path prefix = Path(null), bool use_old = false);
+     // The reload_verify flag is for internal optimization use.
+    Path address_to_path (Pointer, Path prefix = Path(null), bool reload_verify = false);
 
      // Performs an operation for each pointer found in the given root, or in
      //  every file-object if root is null.  The callback will be always be
