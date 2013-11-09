@@ -203,3 +203,14 @@ struct HistoryCommand : CommandData {
 HCB_BEGIN(HistoryCommand)
     new_command<HistoryCommand>("history", "Show previously entered commands");
 HCB_END(HistoryCommand)
+
+struct GetCommand : CommandData {
+    Reference ref;
+    void operator () () {
+        print_to_console(hacc::tree_to_string(ref.to_tree(), "", 1) + "\n");
+    }
+};
+HCB_BEGIN(GetCommand)
+    new_command<GetCommand>("get", "Print the data at a path");
+    elem(member(&GetCommand::ref));
+HCB_END(GetCommand)

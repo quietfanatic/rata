@@ -9,6 +9,7 @@ namespace vis {
     Logger model_logger ("models", false);
 
     void Skel::finish () {
+        printf("Skel::finish()\n");
         for (auto& seg : segs) {
             auto n_branches = seg.branches.size();
             for (auto& frame : seg.layout->frames) {

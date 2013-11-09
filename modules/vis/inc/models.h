@@ -19,10 +19,11 @@ namespace vis {
     struct Skel {
         struct Seg {
             std::string name;
-            Skel::Seg* parent = NULL;  // Null if root, set after creation
             std::vector<Skel::Seg*> branches;
             Layout* layout;
             float z_offset;
+
+            Skel::Seg* parent = NULL;  // Null if root, set after creation
         };
 
         hacc::named_vector<Skel::Seg> segs;

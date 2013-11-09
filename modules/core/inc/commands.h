@@ -8,6 +8,7 @@
 #include "../../util/inc/organization.h"
 
 struct CommandData : hacc::DPtee {
+    static constexpr bool isa_CommandData = true;
     virtual void operator () () = 0;
 };
 
@@ -47,6 +48,7 @@ EXTERN_INIT_SAFE(std::unordered_map<std::string _COMMA Command_Description*>, co
 
 template <class Cmd>
 void new_command (std::string name, std::string desc = core::no_description_available()) {
+    static_assert(Cmd::isa_CommandData, "isa_CommandData");
     auto cd = new Command_Description{hacc::Type::CppType<Cmd>(), name, desc};
     commands_by_type().emplace(cd->type.data, cd);
     commands_by_name().emplace(cd->name, cd);

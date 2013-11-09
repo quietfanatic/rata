@@ -650,13 +650,25 @@ namespace hacc {
 
 } using namespace hacc;
 
-HCB_BEGIN(hacc::Dynamic)
+HCB_BEGIN(Reference)
+    name("hacc::Reference");
+    prepare([](Reference& r, Tree t){
+        Path p = t.as<Path>();
+        String filename = p.root();
+        load(File(filename));
+    });
+    fill([](Reference& r, Tree t){
+        r = path_to_reference(t.as<Path>());
+    });
+HCB_END(Reference)
+
+HCB_BEGIN(Dynamic)
     name("hacc::Dynamic");
     keys(mixed_funcs<std::vector<String>>(
-        [](const hacc::Dynamic& dyn){
+        [](const Dynamic& dyn){
             return std::vector<String>(1, dyn.type.name());
         },
-        [](hacc::Dynamic& dyn, const std::vector<String>& keys){
+        [](Dynamic& dyn, const std::vector<String>& keys){
             if (keys.size() != 1) {
                 throw X::Logic_Error("A Dynamic must have one key representing its type");
             }
@@ -672,5 +684,5 @@ HCB_BEGIN(hacc::Dynamic)
     elems([](Dynamic& dyn, size_t index)->Reference{
         return Reference(dyn.address()).elem(index);
     });
-HCB_END(hacc::Dynamic)
+HCB_END(Dynamic)
 
