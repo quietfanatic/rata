@@ -166,7 +166,21 @@ namespace hacc {
             if (void* addr = address()) {
                 return f(addr, name);
             }
-            else throw X::Unaddressable(*this, "get custom attrs from");
+            else {
+                 // We're casting all hopes of efficiency under the
+                 //  Do What The User Asks bus.
+                 // i.e. we may end up generating large objects over and over
+                 //  again only to access one member each time.
+                Reference ref_for_type;
+                read([&](void* p){
+                    ref_for_type = f(p, name);
+                });
+                return chain(*this, GetSet0(new GS_ReferenceFunc(
+                    ref_for_type.type(),
+                    type(),
+                    [=](void* p){ return f(p, name); }
+                )));
+            }
         }
          // Then delegation
         else if (auto& gs = type().data->delegate) {
@@ -231,7 +245,17 @@ namespace hacc {
             if (void* addr = address()) {
                 return f(addr, index);
             }
-            else throw X::Unaddressable(*this, "get custom elems from");
+            else {
+                Reference ref_for_type;
+                read([&](void* p){
+                    ref_for_type = f(p, index);
+                });
+                return chain(*this, GetSet0(new GS_ReferenceFunc(
+                    ref_for_type.type(),
+                    type(),
+                    [=](void* p){ return f(p, index); }
+                )));
+            }
         }
          // Then delegation
         else if (auto& gs = type().data->delegate) {

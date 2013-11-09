@@ -62,6 +62,27 @@ namespace hacc {
         }
     };
 
+     // We're *really* going to lengths to make this system work at all costs.
+    struct GS_ReferenceFunc : GetSetData {
+        Func<Reference (void*)> f;
+        GS_ReferenceFunc (Type t, Type ht, Func<Reference (void*)> f) :
+            GetSetData(t, ht), f(f)
+        { }
+        String description () const { return "<A reference generating function>"; }
+        void* address (void* c) const {
+            return f(c).address();
+        }
+        void* ro_address (void* c) const {
+            return f(c).ro_address();
+        }
+        void get (void* c, void* m) const {
+            f(c).get(m);
+        }
+        void set (void* c, void* m) const {
+            f(c).set(m);
+        }
+    };
+
     std::vector<TypeData*>& types_to_init ();
     std::unordered_map<std::type_index, TypeData*>& types_by_cpptype ();
     std::unordered_map<String, TypeData*>& types_by_name ();
