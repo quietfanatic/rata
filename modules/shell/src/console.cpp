@@ -45,7 +45,7 @@ namespace shell {
                             break;
                         }
                         case GLFW_KEY_LEFT: {
-                            if (cli_pos) cli_pos--;
+                            if (cli_pos > 0) cli_pos--;
                             break;
                         }
                         case GLFW_KEY_RIGHT: {
@@ -79,7 +79,7 @@ namespace shell {
                             break;
                         }
                         case GLFW_KEY_END: {
-                            cli_pos = contents.size();
+                            cli_pos = cli.size();
                             break;
                         }
                         case GLFW_KEY_ENTER: {
