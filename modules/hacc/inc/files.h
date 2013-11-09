@@ -114,24 +114,21 @@ namespace hacc {
             Reload_NYI ();
         };
         struct Unload_Would_Break : Logic_Error {
-            String filename;
             Path ref;
             Path target;
-            Unload_Would_Break (String, Path, Path);
+            Unload_Would_Break (Path, Path);
         };
         struct Reload_Would_Break : Logic_Error {
-            String filename;
             Path ref;
             Path target;
-            Reload_Would_Break (String, Path, Path);
+            Reload_Would_Break (Path, Path);
         };
         struct Reload_Would_Break_Type : Logic_Error {
-            String filename;
             Path ref;
             Path target;
             Type ot;
             Type nt;
-            Reload_Would_Break_Type (String, Path, Path, Type, Type);
+            Reload_Would_Break_Type (Path, Path, Type, Type);
         };
     }
 

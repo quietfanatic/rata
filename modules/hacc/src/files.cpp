@@ -273,11 +273,11 @@ namespace hacc {
                                     if (target && File(target->root()).p->state == RELOAD_VERIFYING) {
                                         Pointer new_addr = path_to_reference(target);
                                         if (!new_addr) {
-                                            try { throw X::Reload_Would_Break(f.p->filename, path, target); }
+                                            try { throw X::Reload_Would_Break(path, target); }
                                             catch (...) { delayed_errors.push_back(std::current_exception()); }
                                         }
                                         else if (new_addr.type != rp.type().data->pointee_type) {
-                                            try { throw X::Reload_Would_Break_Type(f.p->filename, path, target, new_addr.type, rp.type().data->pointee_type); }
+                                            try { throw X::Reload_Would_Break_Type(path, target, new_addr.type, rp.type().data->pointee_type); }
                                             catch (...) { delayed_errors.push_back(std::current_exception()); }
                                         }
                                         else {
@@ -348,7 +348,7 @@ namespace hacc {
                                     Pointer(rp.type().data->pointee_type, *(void**)pp)
                                 );
                                 if (target && File(target->root()).p->state == UNLOAD_VERIFYING) {
-                                    try { throw X::Unload_Would_Break(f.p->filename, path, target); }
+                                    try { throw X::Unload_Would_Break(path, target); }
                                     catch (...) { delayed_errors.push_back(std::current_exception()); }
                                 }
                             });
@@ -576,28 +576,25 @@ namespace hacc {
             Logic_Error("Cannot create file \"" + filename + "\" because that filename is already loaded."),
             filename(filename)
         { }
-        Unload_Would_Break::Unload_Would_Break (String filename, Path ref, Path target) :
+        Unload_Would_Break::Unload_Would_Break (Path ref, Path target) :
             Logic_Error(
-                "Cannot unload file \"" + filename
-              + "\" because it would break the pointer at " + path_to_string(ref)
+                "Reload would break the pointer at " + path_to_string(ref)
               + " pointing to " + path_to_string(target)
-            ), filename(filename), ref(ref), target(target)
+            ), ref(ref), target(target)
         { }
-        Reload_Would_Break::Reload_Would_Break (String filename, Path ref, Path target) :
+        Reload_Would_Break::Reload_Would_Break (Path ref, Path target) :
             Logic_Error(
-                "Cannot reload file \"" + filename
-              + "\" because it would break the pointer at " + path_to_string(ref)
+                "Reload would break the pointer at " + path_to_string(ref)
               + " pointing to " + path_to_string(target)
-            ), filename(filename), ref(ref), target(target)
+            ), ref(ref), target(target)
         { }
-        Reload_Would_Break_Type::Reload_Would_Break_Type (String filename, Path ref, Path target, Type ot, Type nt) :
+        Reload_Would_Break_Type::Reload_Would_Break_Type (Path ref, Path target, Type ot, Type nt) :
             Logic_Error(
-                "Cannot reload file \"" + filename
-              + "\" because it would break the pointer at " + path_to_string(ref)
+                "Reload would break the pointer at " + path_to_string(ref)
               + " pointing to " + path_to_string(target)
               + ", which had an old type of " + ot.name()
               + " and has a new type of " + nt.name()
-            ), filename(filename), ref(ref), target(target), ot(ot), nt(nt)
+            ), ref(ref), target(target), ot(ot), nt(nt)
         { }
         Reload_NYI::Reload_NYI () : Internal_Error("Reload NYI, sorry") { }
     }
