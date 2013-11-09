@@ -1,6 +1,7 @@
 
  // #giveupandusethestl for getline
 #include <string>
+#include <sstream>
 #include <stdexcept>
 #include <iostream>
 #include "../../hacc/inc/everything.h"
@@ -207,6 +208,7 @@ HCB_END(HistoryCommand)
 struct GetCommand : CommandData {
     Reference ref;
     void operator () () {
+        print_to_console(ref.show() + "\n");
         print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");
     }
 };
@@ -237,3 +239,4 @@ HCB_BEGIN(LengthCommand)
     new_command<LengthCommand>("length", "Print the length of an array");
     elem(member(&LengthCommand::ref));
 HCB_END(LengthCommand)
+

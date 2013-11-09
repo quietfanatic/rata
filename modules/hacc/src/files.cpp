@@ -527,41 +527,25 @@ namespace hacc {
                 }
             }
             Path found = Path(null);
-            if (Transaction::current) {
-                for (auto f : scannable_files) {
-                    Reference ref = reload_verify && f.p->old_data.address()
-                        ? Reference(f.p->old_data.address())
-                        : f.data();
-                    ref.foreach_address(
-                        [&](Pointer p, Path path){
-                            if (p == ptr) found = path;
-                            return false;
-                        },
-                        Path(f.filename())
-                    );
-                    f.p->addresses_scanned = true;
-                    if (found) return found;
-                }
-                return Path(null);
-            }
-            else {
-                 // With no transaction and no prefix, we just gotta scan
-                 //  the whole haystack every time.
-                for (auto f : scannable_files) {
-                    Reference ref = reload_verify && f.p->old_data.address()
-                        ? Reference(f.p->old_data.address())
-                        : f.data();
-                    ref.foreach_address(
-                        [&](Pointer p, Path path){
-                            if (p == ptr) found = path;
+            for (auto f : scannable_files) {
+                Reference ref = reload_verify && f.p->old_data.address()
+                    ? Reference(f.p->old_data.address())
+                    : f.data();
+                ref.foreach_address(
+                    [&](Pointer p, Path path){
+                        if (p == ptr) {
+                            found = path;
                             return true;
-                        },
-                        Path(f.filename())
-                    );
-                    if (found) return found;
-                }
-                return Path(null);
+                        }
+                        else {
+                            return false;
+                        }
+                    },
+                    Path(f.filename())
+                );
+                if (found) return found;
             }
+            return Path(null);
         }
     }
     void foreach_pointer (const Func<void (Reference)>&, Pointer root) {
