@@ -49,7 +49,7 @@ namespace shell {
                             break;
                         }
                         case GLFW_KEY_RIGHT: {
-                            if (cli_pos < contents.size()) cli_pos++;
+                            if (cli_pos < cli.size()) cli_pos++;
                             break;
                         }
                         case GLFW_KEY_UP: {
