@@ -66,7 +66,7 @@ namespace core {
                             }
                         });
                     } catch (std::exception& e) {
-                        fprintf(stderr, "Exception: %s\n", e.what());
+                        print_to_console("Exception: " + std::string(e.what()) + "\n");
                     }
                     pending_ops.clear();
                 }
