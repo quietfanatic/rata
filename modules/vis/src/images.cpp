@@ -253,7 +253,7 @@ HCB_BEGIN(Image)
     attrs([](Image& image, std::string name){
         Texture* r = image.texture_named(name);
         if (r) return hacc::Reference(r);
-        else throw hacc::X::No_Attr(hacc::Type::CppType<Image>(), name);
+        else throw hacc::X::No_Attr(hacc::Pointer(&image), name);
     });
     finish([](Image& i){ i.load(); });
 HCB_END(Image)
@@ -265,7 +265,7 @@ HCB_BEGIN(Layout)
     attrs([](Layout& layout, std::string name){
         Frame* r = layout.frame_named(name);
         if (r) return hacc::Reference(r);
-        else throw hacc::X::No_Attr(hacc::Type::CppType<Layout>(), name);
+        else throw hacc::X::No_Attr(hacc::Pointer(&layout), name);
     });
     finish([](Layout& layout){ layout.finish(); });
 HCB_END(Layout)

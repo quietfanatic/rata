@@ -34,16 +34,16 @@ HCB_TEMPLATE_BEGIN(<class C HCB_COMMA size_t n>, C[n])
     array();
     length(hcb::template value_funcs<size_t>(
         [](const CArray<C, n>&){ return n; },
-        [](CArray<C, n>&, size_t size){
+        [](CArray<C, n>& v, size_t size){
             if (size != n)
-                throw hacc::X::Wrong_Size(Type::CppType<C[n]>(), size, n);
+                throw hacc::X::Wrong_Size(Pointer(&v), size, n);
         }
     ));
     elems([](CArray<C, n>& v, size_t index){
         if (index <= n)
             return Reference(v + index);
         else
-            throw hacc::X::Out_Of_Range(Type::CppType<C[n]>(), index, n);
+            throw hacc::X::Out_Of_Range(Pointer(&v), index, n);
     });
 HCB_TEMPLATE_END(<class C HCB_COMMA size_t n>, C[n])
 
@@ -75,7 +75,7 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::named_vector<C>)
     attrs([](named_vector<C>& v, std::string name){
         C* r = v.named(name);
         if (r) return Reference(r);
-        else throw X::No_Attr(Type::CppType<hacc::named_vector<C>>(), name);
+        else throw X::No_Attr(Pointer(&v), name);
     });
 HCB_TEMPLATE_END(<class C>, hacc::named_vector<C>)
 

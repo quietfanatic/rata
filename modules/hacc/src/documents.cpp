@@ -191,7 +191,7 @@ HCB_BEGIN(DocumentData)
     attrs([](DocumentData& d, String name){
         Pointer p = _get(&d, name);
         if (p) return p;
-        else throw X::No_Attr(Type::CppType<Document>(), name);
+        else throw X::No_Attr(Pointer(&d), name);
     });
     finish([](DocumentData& d){
         for (DocLink* link = d.next; link != &d; link = link->next) {

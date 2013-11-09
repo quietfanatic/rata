@@ -193,47 +193,48 @@ namespace hacc {
             Unaddressable (Reference, String);
         };
         struct Missing_Attr : Logic_Error {
-            Type type;
+            Reference r;
             String name;
-            Missing_Attr (Type, String);
+            Missing_Attr (Reference, String);
         };
         struct Missing_Elem : Logic_Error {
-            Type type;
+            Reference r;
             size_t index;
-            Missing_Elem (Type, size_t);
+            Missing_Elem (Reference, size_t);
         };
         struct Wrong_Size : Logic_Error {
-            Type type;
+            Reference r;
             size_t got;
             size_t expected;
-            Wrong_Size (Type, size_t, size_t);
+            Wrong_Size (Reference, size_t, size_t);
         };
         struct No_Attr : Logic_Error {
-            Type type;
+            Reference r;
             String name;
-            No_Attr (Type, String);
+            No_Attr (Reference, String);
         };
         struct Out_Of_Range : Logic_Error {
-            Type type;
+            Reference r;
             size_t index;
             size_t length;
-            Out_Of_Range (Type, size_t, size_t);
+            Out_Of_Range (Reference, size_t, size_t);
         };
         struct No_Attrs : Logic_Error {
-            Type type;
+            Reference r;
             String name;
-            No_Attrs (Type);
-            No_Attrs (Type, String);
+            No_Attrs (Reference);
+            No_Attrs (Reference, String);
         };
         struct No_Elems : Logic_Error {
-            Type type;
+            Reference r;
             size_t index = 0;
-            No_Elems (Type);
-            No_Elems (Type, size_t);
+            No_Elems (Reference);
+            No_Elems (Reference, size_t);
         };
         struct Address_Not_Found : Logic_Error {
+            Reference r;
             Pointer pointer;
-            Address_Not_Found (Pointer);
+            Address_Not_Found (Reference, Pointer);
         };
         struct Null_Pointer : Logic_Error {
             Pointer pointer;

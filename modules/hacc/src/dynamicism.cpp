@@ -34,7 +34,7 @@ namespace hacc {
         if (void* r = address_of_type_internal(*this, t)) {
             return r;
         }
-        else throw X::Type_Mismatch(t, type, "when converting Pointer to " + t.name() + "*");
+        else throw X::Type_Mismatch(t, type, "when converting " + show() + " to " + t.name() + "*");
     }
     std::string Pointer::show () const {
         std::ostringstream ss;
@@ -142,13 +142,13 @@ namespace hacc {
                         goto next;
                 }
                 if (!a.second->optional && !a.second->readonly) {
-                    throw X::Missing_Attr(type(), a.first);
+                    throw X::Missing_Attr(*this, a.first);
                 }
                 next: { }
             }
         }
         else if (!keys.empty()) {
-            throw X::No_Attrs(type());
+            throw X::No_Attrs(*this);
         }
     }
 
@@ -173,9 +173,9 @@ namespace hacc {
             return chain(*this, gs).attr(name);
         }
         else if (!type().data->attr_list.empty())
-            throw X::No_Attr(type(), name);
+            throw X::No_Attr(*this, name);
         else
-            throw X::No_Attrs(type(), name);
+            throw X::No_Attrs(*this, name);
     }
 
     size_t Reference::length () const {
@@ -206,16 +206,16 @@ namespace hacc {
         else if (!type().data->elem_list.empty()) {
             size_t n = type().data->elem_list.size();
             if (length > n) {
-                throw X::Wrong_Size(type(), length, n);
+                throw X::Wrong_Size(*this, length, n);
             }
             else for (size_t i = length; i < n; i++) {
                 if (!type().data->elem_list[i]->optional) {
-                    throw X::Missing_Elem(type(), i);
+                    throw X::Missing_Elem(*this, i);
                 }
             }
         }
         else if (length != 0) {
-            throw X::No_Elems(type());
+            throw X::No_Elems(*this);
         }
     }
 
@@ -238,9 +238,9 @@ namespace hacc {
             return chain(*this, gs).elem(index);
         }
         else if (!type().data->elem_list.empty())
-            throw X::Out_Of_Range(type(), index, type().data->elem_list.size());
+            throw X::Out_Of_Range(*this, index, type().data->elem_list.size());
         else
-            throw X::No_Elems(type(), index);
+            throw X::No_Elems(*this, index);
     }
 
     Tree Reference::to_tree () const {
@@ -282,7 +282,7 @@ namespace hacc {
                 Pointer pp (type().data->pointee_type, *(void**)addr);
                 if (pp) {
                     Path path = address_to_path(pp);
-                    if (!path) throw X::Address_Not_Found(pp);
+                    if (!path) throw X::Address_Not_Found(*this, pp);
                     r = Tree(path);
                 }
                 else r = Tree(null);
@@ -575,72 +575,71 @@ namespace hacc {
                 "Cannot " + goal + " unaddressable " + r.show()
             ), r(r), goal(goal)
         { }
-        Missing_Attr::Missing_Attr (Type type, String name) :
+        Missing_Attr::Missing_Attr (Reference r, String name) :
             Logic_Error(
-                "Missing required attribute \"" + name + "\" of type " + type.name()
-            ), type(type), name(name)
+                "Missing required attribute \"" + name + "\" of " + r.show()
+            ), r(r), name(name)
         { }
-        Missing_Elem::Missing_Elem (Type type, size_t i) :
+        Missing_Elem::Missing_Elem (Reference r, size_t i) :
             Logic_Error(
-                "Missing required element " + std::to_string(i)
-              + " of type " + type.name()
-            ), type(type), index(i)
+                "Missing required element " + std::to_string(i) + " of " + r.show()
+            ), r(r), index(i)
         { }
-        Wrong_Size::Wrong_Size (Type type, size_t got, size_t expected) :
+        Wrong_Size::Wrong_Size (Reference r, size_t got, size_t expected) :
             Logic_Error( got > expected ? (
                     "Provided length " + std::to_string(got)
-                  + " is too long for type " + type.name()
+                  + " is too long for " + r.show()
                   + " with maximum size " + std::to_string(expected)
             ) : got < expected ? (
                     "Provided length " + std::to_string(got)
-                  + " is too short for type " + type.name()
+                  + " is too short for " + r.show()
                   + " with minimum size " + std::to_string(expected)
             ) : (
                 "Somebody threw a Wrong_Size error with equal got and expected values "
               + std::to_string(got) + " >_>")
-            ), type(type), got(got), expected(expected)
+            ), r(r), got(got), expected(expected)
         { }
-        No_Attr::No_Attr (Type type, String n) :
+        No_Attr::No_Attr (Reference r, String n) :
             Logic_Error(
-                "Attribute \"" + n + "\" does not exist in instance of type " + type.name()
-            ), type(type), name(n)
+                "Attribute \"" + n + "\" does not exist in " + r.show()
+            ), r(r), name(n)
         { }
-        Out_Of_Range::Out_Of_Range (Type type, size_t i, size_t len) :
+        Out_Of_Range::Out_Of_Range (Reference r, size_t i, size_t len) :
             Logic_Error(
                 "Index " + std::to_string(i)
-              + " is out of range for instance of type " + type.name()
+              + " is out of range for " + r.show()
               + " with length " + std::to_string(len)
-            ), type(type), index(i), length(len)
+            ), r(r), index(i), length(len)
         { }
-        No_Attrs::No_Attrs (Type type) :
+        No_Attrs::No_Attrs (Reference r) :
             Logic_Error(
-                "Cannot set the keys of instance of type " + type.name()
+                "Cannot set the keys of " + r.show()
               + " because it has no attributes"
-            ), type(type)
+            ), r(r)
         { }
-        No_Attrs::No_Attrs (Type type, String n) :
+        No_Attrs::No_Attrs (Reference r, String n) :
             Logic_Error(
-                "Cannot get attribute \"" + n + "\" from instance of type " + type.name()
+                "Cannot get attribute \"" + n + "\" from " + r.show()
               + " because it has no attributes"
-            ), type(type), name(n)
+            ), r(r), name(n)
         { }
-        No_Elems::No_Elems (Type type) :
+        No_Elems::No_Elems (Reference r) :
             Logic_Error(
-                "Cannot set the length of instance of type " + type.name()
+                "Cannot set the length of " + r.show()
               + " because it has no elements"
-            ), type(type)
+            ), r(r)
         { }
-        No_Elems::No_Elems (Type type, size_t i) :
+        No_Elems::No_Elems (Reference r, size_t i) :
             Logic_Error(
                 "Cannot get element " + std::to_string(i)
-              + " from instance of type " + type.name()
+              + " from " + r.show()
               + " because it has no elements"
-            ), type(type), index(i)
+            ), r(r), index(i)
         { }
-        Address_Not_Found::Address_Not_Found (Pointer p) :
+        Address_Not_Found::Address_Not_Found (Reference r, Pointer p) :
             Logic_Error(
-                "Could not find the path of " + p.show()
-            ), pointer(p)
+                "Could not find the path of " + p.show() + " at " + r.show()
+            ), r(r), pointer(p)
         { }
         Null_Pointer::Null_Pointer (Pointer p) :
             Logic_Error(
