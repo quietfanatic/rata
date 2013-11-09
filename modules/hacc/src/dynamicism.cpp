@@ -541,7 +541,7 @@ namespace hacc {
             }
         }
         else if (auto path = address_to_path(Pointer(host_type(), c))) {
-            ss << " " << path_to_string(path) << ".<unknown>";
+            ss << " " << path_to_string(path) << ".<unknown " << gs.description() << ">";
         }
         else {
             ss << "unknown address hosted by " << host_type().name()
@@ -559,11 +559,8 @@ namespace hacc {
         { }
         Unhaccable_Reference::Unhaccable_Reference (Reference r, String goal) :
             Logic_Error(
-                "Cannot " + goal + " a Reference of unhaccable type "
-              + r.type().name()
-              + " hosted by object of type "
-              + r.host_type().name()
-              + " through " + r.gs->description()
+                "Cannot " + goal
+              + " a Reference of unhaccable type, " + r.show()
             ), r(r), goal(goal)
         { }
         Form_Mismatch::Form_Mismatch (Type t, Tree tree) :
@@ -575,11 +572,7 @@ namespace hacc {
         { }
         Unaddressable::Unaddressable (Reference r, String goal) :
             Logic_Error(
-                "Cannot " + goal + " an unaddressable Reference of type "
-              + r.type().name()
-              + " hosted by object of type "
-              + r.host_type().name()
-              + " through " + r.gs->description()
+                "Cannot " + goal + " unaddressable " + r.show()
             ), r(r), goal(goal)
         { }
         Missing_Attr::Missing_Attr (Type type, String name) :
@@ -646,14 +639,12 @@ namespace hacc {
         { }
         Address_Not_Found::Address_Not_Found (Pointer p) :
             Logic_Error(
-                "Could not find the path of " + p.type.name()
-              + " at " + std::to_string((size_t)p.address)
+                "Could not find the path of " + p.show()
             ), pointer(p)
         { }
         Null_Pointer::Null_Pointer (Pointer p) :
             Logic_Error(
-                "Cannot convert to Reference null pointer of type "
-              + p.type.name()
+                "Cannot convert to Reference null " + p.show()
             ), pointer(p)
         { }
     }
