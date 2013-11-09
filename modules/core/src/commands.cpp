@@ -214,3 +214,26 @@ HCB_BEGIN(GetCommand)
     new_command<GetCommand>("get", "Print the data at a path");
     elem(member(&GetCommand::ref));
 HCB_END(GetCommand)
+
+struct KeysCommand : CommandData {
+    Reference ref;
+    void operator () () {
+        auto keys = ref.keys();
+        print_to_console(hacc::tree_to_string(Reference(&keys).to_tree()) + "\n");
+    }
+};
+HCB_BEGIN(KeysCommand)
+    new_command<KeysCommand>("keys", "Print the attribute keys of an object");
+    elem(member(&KeysCommand::ref));
+HCB_END(KeysCommand)
+
+struct LengthCommand : CommandData {
+    Reference ref;
+    void operator () () {
+        print_to_console(std::to_string(ref.length()) + "\n");
+    }
+};
+HCB_BEGIN(LengthCommand)
+    new_command<LengthCommand>("length", "Print the length of an array");
+    elem(member(&LengthCommand::ref));
+HCB_END(LengthCommand)
