@@ -56,6 +56,7 @@ namespace hacc {
         void* address_of_type (Type) const;
         template <class C>
         operator C* () const { return (C*)address_of_type(Type::CppType<C>()); }
+        std::string show () const;
     };
     static bool operator == (const Pointer& a, const Pointer& b) {
         return a.type == b.type && a.address == b.address;

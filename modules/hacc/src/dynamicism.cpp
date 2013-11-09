@@ -1,3 +1,4 @@
+#include <sstream>
 #include "../inc/tree.h"
 #include "../inc/strings.h"  // for path_to_string for diagnostics
 #include "../inc/files.h"
@@ -34,6 +35,15 @@ namespace hacc {
             return r;
         }
         else throw X::Type_Mismatch(t, type, "when converting Pointer to " + t.name() + "*");
+    }
+    std::string Pointer::show () const {
+        std::ostringstream ss;
+        ss << "Pointer(" << type.name() << " at 0x" << std::hex << address;
+        if (auto path = address_to_path(*this)) {
+            ss << " " << path_to_string(path);
+        }
+        ss << ")";
+        return ss.str();
     }
 
     Reference::Reference (Type type, void* p) :
