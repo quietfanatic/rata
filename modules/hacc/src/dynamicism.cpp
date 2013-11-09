@@ -231,7 +231,7 @@ namespace hacc {
             if (void* addr = address()) {
                 return f(addr, index);
             }
-            else throw X::Unaddressable(*this, "get custom attrs from");
+            else throw X::Unaddressable(*this, "get custom elems from");
         }
          // Then delegation
         else if (auto& gs = type().data->delegate) {

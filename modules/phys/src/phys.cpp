@@ -267,7 +267,6 @@ HCB_BEGIN(Hack_b2PolygonShape_Verts)
         },
         [](Hack_b2PolygonShape_Verts& v, size_t size){
             if (size >= 3 && size <= b2_maxPolygonVertices) {
-                printf("%lu's vertices are at %lu\n", (size_t)&v, (size_t)v.m_vertices);
                 v.m_count = size;
             }
             else
@@ -275,14 +274,19 @@ HCB_BEGIN(Hack_b2PolygonShape_Verts)
         }
     ));
     elems([](Hack_b2PolygonShape_Verts& v, size_t index){
-        printf("Referencing vertex of %lu at %lu\n", (size_t)&v, (size_t)(v.m_vertices + index));
         if (index <= v.m_count)
             return hacc::Reference(v.m_vertices + index);
         else
             throw hacc::X::Out_Of_Range(hacc::Pointer(&v), index, v.m_count);
     });
-    finish([](Hack_b2PolygonShape_Verts& v){
-        v.Set(v.m_vertices, v.m_count);
+     // We have to call Set during fill and not finish, because another object's
+     //  finish relies on this object having Set called.
+    fill([](Hack_b2PolygonShape_Verts& v, hacc::Tree t){
+        auto a = t.as<hacc::Array>();
+        b2Vec2 tmp_verts [b2_maxPolygonVertices];
+        for (uint i = 0; i < a.size(); i++)
+            hacc::Reference(&tmp_verts[i]).fill(a[i]);
+        v.Set(tmp_verts, a.size());
     });
 HCB_END(Hack_b2PolygonShape_Verts)
 
