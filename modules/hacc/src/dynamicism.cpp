@@ -38,7 +38,7 @@ namespace hacc {
     }
     std::string Pointer::show () const {
         std::ostringstream ss;
-        ss << "Pointer(" << type.name() << " at 0x" << std::hex << address;
+        ss << "Pointer(" << type.name() << " at " << address;
         if (auto path = address_to_path(*this)) {
             ss << " " << path_to_string(path);
         }
@@ -535,7 +535,7 @@ namespace hacc {
         std::ostringstream ss;
         ss << "Reference(" << type().name() << " at ";
         if (void* addr = ro_address()) {
-            ss << "0x" << std::hex << addr;
+            ss << addr;
             if (auto path = address_to_path(Pointer(type(), addr))) {
                 ss << " " << path_to_string(path);
             }
@@ -545,7 +545,7 @@ namespace hacc {
         }
         else {
             ss << "unknown address hosted by " << host_type().name()
-               << " at 0x" << std::hex << c;
+               << " at " << c;
         }
         ss << ")";
         return ss.str();

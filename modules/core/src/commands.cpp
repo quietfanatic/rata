@@ -207,7 +207,7 @@ HCB_END(HistoryCommand)
 struct GetCommand : CommandData {
     Reference ref;
     void operator () () {
-        print_to_console(hacc::tree_to_string(ref.to_tree(), "", 1) + "\n");
+        print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");
     }
 };
 HCB_BEGIN(GetCommand)
