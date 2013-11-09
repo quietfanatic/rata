@@ -531,6 +531,26 @@ namespace hacc {
         return false;
     }
 
+    std::string Reference::show () const {
+        std::ostringstream ss;
+        ss << "Reference(" << type().name() << " at ";
+        if (void* addr = ro_address()) {
+            ss << "0x" << std::hex << addr;
+            if (auto path = address_to_path(Pointer(type(), addr))) {
+                ss << " " << path_to_string(path);
+            }
+        }
+        else if (auto path = address_to_path(Pointer(host_type(), c))) {
+            ss << " " << path_to_string(path) << ".<unknown>";
+        }
+        else {
+            ss << "unknown address hosted by " << host_type().name()
+               << " at 0x" << std::hex << c;
+        }
+        ss << ")";
+        return ss.str();
+    }
+
     namespace X {
         Unhaccable_Type::Unhaccable_Type (Type t) :
             Logic_Error(
