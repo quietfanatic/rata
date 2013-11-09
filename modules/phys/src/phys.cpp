@@ -250,19 +250,41 @@ HCB_BEGIN(b2CircleShape)
     attr("r", member((float b2CircleShape::*)&b2CircleShape::m_radius));
 HCB_END(b2CircleShape)
 
+struct Hack_b2PolygonShape_Verts : b2PolygonShape { };
+
 HCB_BEGIN(b2PolygonShape)
     name("b2PolygonShape");
     attr("b2Shape", base<b2Shape>().optional());
     attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius).optional());
-    attr("verts", mixed_funcs<std::vector<b2Vec2>>(
-        [](const b2PolygonShape& ps){
-            return std::vector<b2Vec2>(ps.m_vertices, ps.m_vertices + ps.m_count);
-        },
-        [](b2PolygonShape& ps, const std::vector<b2Vec2>& v){
-            ps.Set(v.data(), v.size());
-        }
-    ).narrow());
+    attr("verts", base<Hack_b2PolygonShape_Verts>());
 HCB_END(b2PolygonShape)
+HCB_BEGIN(Hack_b2PolygonShape_Verts)
+    name("Hack_b2PolygonShape_Verts");
+    array();
+    length(value_funcs<size_t>(
+        [](const Hack_b2PolygonShape_Verts& v)->size_t{
+            return v.m_count;
+        },
+        [](Hack_b2PolygonShape_Verts& v, size_t size){
+            if (size >= 3 && size <= b2_maxPolygonVertices) {
+                printf("%lu's vertices are at %lu\n", (size_t)&v, (size_t)v.m_vertices);
+                v.m_count = size;
+            }
+            else
+                throw hacc::X::Wrong_Size(hacc::Pointer(&v), size, b2_maxPolygonVertices);
+        }
+    ));
+    elems([](Hack_b2PolygonShape_Verts& v, size_t index){
+        printf("Referencing vertex of %lu at %lu\n", (size_t)&v, (size_t)(v.m_vertices + index));
+        if (index <= v.m_count)
+            return hacc::Reference(v.m_vertices + index);
+        else
+            throw hacc::X::Out_Of_Range(hacc::Pointer(&v), index, v.m_count);
+    });
+    finish([](Hack_b2PolygonShape_Verts& v){
+        v.Set(v.m_vertices, v.m_count);
+    });
+HCB_END(Hack_b2PolygonShape_Verts)
 
 HCB_BEGIN(b2EdgeShape)
     name("b2EdgeShape");
