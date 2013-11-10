@@ -16,8 +16,8 @@ namespace hacc {
             list->next = this;
         }
         ~DocLink () {
-            prev->next = prev;
-            next->prev = next;
+            prev->next = next;
+            next->prev = prev;
         }
     };
 
@@ -47,7 +47,9 @@ namespace hacc {
             dealloc(obj);
         }
         ~DocumentData () {
-            while (prev != this) destroy(static_cast<DocObj*>(prev));
+            while (prev != this) {
+                destroy(static_cast<DocObj*>(prev));
+            }
         }
     };
 
