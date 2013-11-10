@@ -163,4 +163,10 @@ namespace hacc {
         { }
     }
 
-}
+} using namespace hacc;
+
+HCB_BEGIN(Tree)
+    name("hacc::Tree");
+    to_tree([](const Tree& t){ return t; });
+    fill([](Tree& t, Tree tt){ t = tt; });
+HCB_END(Tree)
