@@ -110,16 +110,24 @@ namespace phys {
     Space::~Space () { stop(); }
 
      // Objects
-    void Object::apply_bdf (BodyDef* bdf) {
-        b2body->SetType(bdf->type);
-        b2body->SetLinearDamping(bdf->damping);
-        b2body->SetGravityScale(bdf->gravity_scale);
-        if (bdf->mass == bdf->mass) {
-            b2MassData md {bdf->mass, Vec(0, 0), 0};
+    void Object::set_def (BodyDef* new_def) {
+        if (new_def != def) {
+            b2body->SetType(new_def->type);
+            b2body->SetLinearDamping(new_def->damping);
+            b2body->SetGravityScale(new_def->gravity_scale);
+            b2MassData md {new_def->mass, Vec(0, 0), 0};
             b2body->SetMassData(&md);
-        }
-        for (auto fix : bdf->fixtures) {
-            add_fixture(fix);
+             // Remove old fixtures
+            if (def) {
+                for (auto fix : def->fixtures) {
+                    b2body->DestroyFixture(get_fixture(fix));
+                }
+            }
+             // Add new fixtures
+            for (auto fix : new_def->fixtures) {
+                add_fixture(fix);
+            }
+            def = new_def;
         }
     }
     b2Fixture* Object::add_fixture (FixtureDef* fdf) {
@@ -372,6 +380,7 @@ HCB_END(BodyDef)
 
 HCB_BEGIN(Object)
     name("phys::Object");
+    attr("def", value_methods(&Object::get_def, &Object::set_def).optional());
     attr("pos", value_methods(&Object::pos, &Object::set_pos));
     attr("vel", value_methods(&Object::vel, &Object::set_vel).optional());
 HCB_END(Object)

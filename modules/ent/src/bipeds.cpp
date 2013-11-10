@@ -8,7 +8,6 @@ namespace ent {
      // Definitions
     void Biped::set_def (BipedDef* _def) {
         def = _def;
-        apply_bdf(def->body_def);
         model.apply_skel(def->skel);
         stats = *def->stats;
     }
@@ -273,7 +272,6 @@ HCB_END(BipedStats)
 
 HCB_BEGIN(BipedDef)
     name("ent::BipedDef");
-    attr("body_def", member(&BipedDef::body_def));
     attr("fixdefs", member(&BipedDef::fixdefs));
     attr("stats", member(&BipedDef::stats));
     attr("skel", member(&BipedDef::skel));

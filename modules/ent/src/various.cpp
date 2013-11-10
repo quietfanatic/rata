@@ -19,7 +19,7 @@ struct Test_Actor : phys::Object, vis::Drawn<vis::Sprites> {
 
     Test_Actor () : Object() { test_bdf(); }
     void finish () {
-        apply_bdf(test_bdf());
+        set_def(test_bdf());
         materialize();
         appear();
     }
@@ -41,7 +41,7 @@ static phys::BodyDef*& boundary_bdf () {
 struct Boundary : phys::Object {
     Boundary () : Object() { boundary_bdf(); }
     void finish () {
-        apply_bdf(boundary_bdf());
+        set_def(boundary_bdf());
         materialize();
     }
 };

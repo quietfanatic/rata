@@ -61,7 +61,11 @@ namespace phys {
      // The dynamic thing
      // Every class that wants to have a physical presence should inherit from this.
     struct Object {
+        BodyDef* def = NULL;
         b2Body* b2body = NULL;
+
+        BodyDef* get_def () const { return def; }
+        void set_def (BodyDef* def);
 
          // A paltry amount of wrapper methods.
         Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }
@@ -71,7 +75,6 @@ namespace phys {
         void impulse (Vec i) { b2body->ApplyLinearImpulse(b2Vec2(i.x, i.y), b2Vec2(0, 0), true); }
         void force (Vec f) { b2body->ApplyForceToCenter(b2Vec2(f.x, f.y), true); }
 
-        void apply_bdf (BodyDef*);
         b2Fixture* add_fixture (FixtureDef*);
 
         b2Fixture* get_fixture (FixtureDef* fd);
@@ -89,7 +92,6 @@ namespace phys {
         virtual void after_move () { }
          // Called every frame after space simulation, only if not tangible
         virtual void while_intangible () { }
-
 
         Object ();
         virtual ~Object ();

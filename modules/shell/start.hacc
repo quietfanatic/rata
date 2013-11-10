@@ -1,7 +1,7 @@
 {"hacc::Document":{
     rata:{"ent::Biped":{
         def:$("world/res/rata.hacc").def
-        Object:{ pos:[1 22] }
+        Object:{ def:$("ent/res/small.hacc").bdf pos:[1 22] }
         Resident:{ room:$("world/res/test.room").room }
         direction:1
     }}

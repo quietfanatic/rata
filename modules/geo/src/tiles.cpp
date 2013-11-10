@@ -114,7 +114,7 @@ namespace geo {
     }
 
     void Tilemap::finish () {
-        apply_bdf(tilemap_bdf());
+        set_def(tilemap_bdf());
         physicalize();
         vis_tiles.finish(width, height, tiles.data());
     }
