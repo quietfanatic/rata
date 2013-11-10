@@ -494,7 +494,14 @@ namespace hacc {
         }
     }
 
+    bool currently_constructing = false;
+    struct CCSet {
+        CCSet () { currently_constructing = true; }
+        ~CCSet () { currently_constructing = false; }
+    };
+
     void Reference::from_tree (Tree t) const {
+        CCSet();
         prepare(t);
         fill(t);
         finish();

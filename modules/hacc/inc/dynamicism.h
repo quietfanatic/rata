@@ -6,6 +6,12 @@
 
 namespace hacc {
 
+     // This is set during Reference::from_tree.  It is not set when updating
+     //  pointers due to a reload.  You can query this in your object mutator
+     //  methods to see whether you should wait for the finish step to do
+     //  processing or do it immediately.
+    extern bool currently_constructing;
+
      // GetSets represent a way of getting and setting a value that
      //  belongs to another value.  GetSet0, GetSet1, and GetSet2
      //  all represent the same type, but with different numbers
