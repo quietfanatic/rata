@@ -85,6 +85,8 @@ namespace core {
         if (s.empty()) return;
         Command cmd;
         bool success = false;
+        if (command_history.empty() || s != command_history.back())
+            command_history.push_back(s);
         try {
             Reference(&cmd).from_tree(tree_from_string("[" + s + "]"));
             success = true;
@@ -95,8 +97,6 @@ namespace core {
         }
         if (success) {
             try {
-                if (command_history.empty() || s != command_history.back())
-                    command_history.push_back(s);
                 cmd();
             } catch (std::exception& e) {
                 print_to_console("Error: The command threw an exception: " + std::string(e.what()) + "\n");
