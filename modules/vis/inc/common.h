@@ -33,11 +33,14 @@ namespace vis {
     template <class C>
     struct Drawn : Link<Drawn<C>> {
         virtual void Drawn_draw (C) = 0;
-        Drawn () { }
+
         Drawn (bool visible) { if (visible) link(C::items); }
         void appear () { Link<Drawn<C>>::link(C::items); }
         void disappear () { Link<Drawn<C>>::unlink(); }
         bool visible () { return Link<Drawn<C>>::linked(); }
+
+        Drawn () { }
+        virtual ~Drawn () { disappear(); }
     };
 
      // These are the layers you can render to.
