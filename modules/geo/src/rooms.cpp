@@ -7,7 +7,6 @@ namespace geo {
 
     Logger geo_logger ("geo");
     Room* current_room = NULL;
-    Room tumbolia;
     Links<Beholder> beholders;
 
     void Room::activate () {
@@ -31,7 +30,7 @@ namespace geo {
         geo_logger.log("Entering room @%lx", (unsigned long)r);
         if (!r) {
             geo_logger.log("Oops, tried to enter the NULL pointer.\n");
-            r = &tumbolia;
+            return;
         }
          // Mark activating
         r->activating = true;
@@ -76,11 +75,8 @@ namespace geo {
     void Resident::reroom () {
         if (!room) room = current_room;
         Vec pos = Resident_pos();
-        Room* origin =
-            room == &tumbolia
-                ? current_room : room;
-        if (!origin->boundary.covers(pos)) {
-            for (auto n : origin->neighbors) {
+        if (!room->boundary.covers(pos)) {
+            for (auto n : room->neighbors) {
                 if (n->boundary.covers(pos)) {
                     room = n;
                     link(n->residents);
@@ -91,15 +87,11 @@ namespace geo {
                     return;
                 }
             }
-            if (room != &tumbolia) {
-                if (beholding() != this)
-                    geo_logger.log("Resident @%lx ended up in tumbolia.", this);
-                else
-                    geo_logger.log("The Beholder has left the building.  Party's over.", this);
-                room = &tumbolia;
-                link(tumbolia.residents);
-                Resident_reclude();
-            }
+            if (beholding() != this)
+                geo_logger.log("Resident @%lx ended up in tumbolia.", this);
+            else
+                geo_logger.log("The Beholder has left the building.  Party's over.", this);
+            deroom();
         }
     }
     void Resident::deroom () {

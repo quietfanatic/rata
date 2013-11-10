@@ -41,8 +41,6 @@ namespace geo {
     };
 
     extern Room* current_room;
-     // Where things go that got lost.
-    extern Room tumbolia;
 
     void enter (Room*);
 
