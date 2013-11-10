@@ -74,6 +74,8 @@ namespace hacc {
         Reference (void* c, const GetSet0& gs) : c(c), gs(gs) { }
         Reference (Type type, void* p);
         Reference (Pointer p) : Reference(p.type, p.address) { }
+        template <class C>
+        Reference (C* p) : Reference(Pointer(p)) { }
 
          // If the data is not addressable, this returns null.
         void* address () const { return gs.address(c); }

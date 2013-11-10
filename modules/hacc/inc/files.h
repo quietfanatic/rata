@@ -102,6 +102,12 @@ namespace hacc {
      //  provided with a Reference to Pointer.
     void foreach_pointer (const Func<void (Reference)>&, Pointer root = null);
 
+     // MISC
+
+     // Let this object be scanned and managed by the hacc system.
+     //  This can reference file objects, but file objects cannot reference it.
+    void manage (Reference);
+
     namespace X {
         struct File_Already_Loaded : Logic_Error {
             String filename;
