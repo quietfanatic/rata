@@ -1,4 +1,4 @@
-
+#include <sstream>
 #include "../inc/models.h"
 #include "../inc/common.h"
 #include "../../hacc/inc/everything.h"
@@ -36,7 +36,9 @@ namespace vis {
     uint Skel::seg_index (Seg* p) {
         uint r = p - segs.data();
         if (r >= segs.size()) {
-            throw std::logic_error("A Segment was used with a Skeleton it doesn't belong to.");
+            std::ostringstream ss;
+            ss << "Segment " << p << " doesn't belong to Skel " << this;
+            throw std::logic_error(ss.str());
         }
         return r;
     }

@@ -1,3 +1,4 @@
+#include <sstream>
 #include <unordered_map>
 #include "../inc/files.h"
 #include "../inc/strings.h"
@@ -309,6 +310,11 @@ namespace hacc {
         void reload_commit () {
              // Update all references
             for (auto& p : updates) {
+                if (logger) {
+                    std::ostringstream ss;
+                    ss << "Updating " << p.first.show() << " to " << p.second;
+                    logger(ss.str());
+                }
                 p.first.write([&](void* pp){
                     *(void**)pp = p.second;
                 });
