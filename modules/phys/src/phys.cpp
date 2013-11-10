@@ -134,6 +134,7 @@ namespace phys {
         fdf->b2.filter = fdf->filter;
         b2Fixture* b2f = b2body->CreateFixture(&fdf->b2);
         b2f->SetUserData(fdf);
+        space_logger.log("Adding fixture @%lu to @%lu", (size_t)fdf, (size_t)this);
         return b2f;
     }
     b2Fixture* Object::get_fixture (FixtureDef* fd) {
@@ -169,6 +170,7 @@ namespace phys {
     Object::~Object () {
         if (b2body) {
             space.b2world->DestroyBody(b2body);
+            space_logger.log("%d objects in space.", space.b2world->GetBodyCount());
         }
     }
 
