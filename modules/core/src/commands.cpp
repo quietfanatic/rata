@@ -252,3 +252,18 @@ HCB_BEGIN(SetCommand)
     elem(member(&SetCommand::ref));
     elem(member(&SetCommand::value));
 HCB_END(SetCommand)
+
+struct PeekCommand : CommandData {
+    String type;
+    size_t address;
+    void operator () () {
+        Reference ref (Type(type), (void*)address);
+        print_to_console(ref.show() + "\n");
+        print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");
+    }
+};
+HCB_BEGIN(PeekCommand)
+    new_command<PeekCommand>("peek", "Get the value of a type at an address");
+    elem(member(&PeekCommand::type));
+    elem(member(&PeekCommand::address));
+HCB_END(PeekCommand)
