@@ -158,6 +158,11 @@ namespace phys {
         b2body = space.b2world->CreateBody(&b2bd);
         space_logger.log("%d objects in space.", space.b2world->GetBodyCount());
     }
+    Object::~Object () {
+        if (b2body) {
+            space.b2world->DestroyBody(b2body);
+        }
+    }
 
     void Object::materialize () { b2body->SetActive(true); }
     void Object::dematerialize () { b2body->SetActive(false); }

@@ -90,9 +90,9 @@ namespace phys {
          // Called every frame after space simulation, only if not tangible
         virtual void while_intangible () { }
 
-        virtual ~Object () { if (b2body) space.b2world->DestroyBody(b2body); }
 
         Object ();
+        virtual ~Object ();
     };
 
      // Collision handling is done through registered collision rules.
