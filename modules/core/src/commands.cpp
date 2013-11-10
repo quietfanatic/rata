@@ -240,3 +240,15 @@ HCB_BEGIN(LengthCommand)
     elem(member(&LengthCommand::ref));
 HCB_END(LengthCommand)
 
+struct SetCommand : CommandData {
+    Reference ref;
+    hacc::Tree value;
+    void operator () () {
+        ref.from_tree(value);
+    }
+};
+HCB_BEGIN(SetCommand)
+    new_command<SetCommand>("set", "Set the data at a path to a value");
+    elem(member(&SetCommand::ref));
+    elem(member(&SetCommand::value));
+HCB_END(SetCommand)
