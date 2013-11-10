@@ -134,7 +134,7 @@ namespace phys {
         fdf->b2.filter = fdf->filter;
         b2Fixture* b2f = b2body->CreateFixture(&fdf->b2);
         b2f->SetUserData(fdf);
-        space_logger.log("Adding fixture @%lu to @%lu", (size_t)fdf, (size_t)this);
+        space_logger.log("Adding fixture @%lx to @%lx", (size_t)fdf, (size_t)this);
         return b2f;
     }
     b2Fixture* Object::get_fixture (FixtureDef* fd) {
@@ -165,12 +165,12 @@ namespace phys {
         b2bd.type = b2_dynamicBody;
         b2bd.userData = this;
         b2body = space.b2world->CreateBody(&b2bd);
-        space_logger.log("%d objects in space.", space.b2world->GetBodyCount());
+        space_logger.log("Added @%lx; %d objects in space.", (size_t)this, space.b2world->GetBodyCount());
     }
     Object::~Object () {
         if (b2body) {
             space.b2world->DestroyBody(b2body);
-            space_logger.log("%d objects in space.", space.b2world->GetBodyCount());
+            space_logger.log("Removed @%lx; %d objects in space.", (size_t)this, space.b2world->GetBodyCount());
         }
     }
 
@@ -236,6 +236,7 @@ namespace phys {
                     }
                 }
             }
+            color_offset(Vec(0, 0));
         }
     } phys_debug_layer;
 
@@ -389,5 +390,8 @@ HCB_END(Object)
 
 HCB_BEGIN(Phys_Debug_Layer)
     name("phys::Phys_Debug_Layer");
+    finish([](Phys_Debug_Layer& pdb){
+        pdb.appear();
+    });
 HCB_END(Phys_Debug_Layer)
 
