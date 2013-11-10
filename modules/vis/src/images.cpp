@@ -214,6 +214,7 @@ namespace vis {
     static Images_Program* prog = NULL;
     void images_init () {
         prog = hacc::File("vis/res/images.prog").data().attr("prog");
+        hacc::manage(&prog);
     }
 
     void draw_frame (Frame* frame, Texture* texture, Vec pos, Vec scale, float z) {

@@ -11,6 +11,7 @@ namespace geo {
 
     static phys::BodyDef*& tilemap_bdf () {
         static phys::BodyDef* r = hacc::File("geo/res/tilemap.bdf").data();
+        hacc::manage(&r);
         return r;
     }
 

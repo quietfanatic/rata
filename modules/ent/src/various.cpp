@@ -6,6 +6,7 @@
 
 static phys::BodyDef*& test_bdf () {
     static phys::BodyDef* test_bdf = hacc::File("ent/res/test_actor.bdf").data().attr("bdf");
+    hacc::manage(&test_bdf);
     return test_bdf;
 }
 struct Test_Actor : phys::Object, vis::Drawn<vis::Sprites> {
@@ -34,6 +35,7 @@ HCB_END(Test_Actor)
 
 static phys::BodyDef*& boundary_bdf () {
     static phys::BodyDef* boundary_bdf = hacc::File("ent/res/boundary.bdf").data().attr("bdf");
+    hacc::manage(&boundary_bdf);
     return boundary_bdf;
 }
 struct Boundary : phys::Object {

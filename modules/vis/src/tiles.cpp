@@ -67,6 +67,7 @@ namespace vis {
     static Tiles_Program* prog = NULL;
     void tiles_init () {
         prog = hacc::File("vis/res/tiles.prog").data().attr("prog");
+        hacc::manage(&prog);
     }
 
     void draw_tiles (Tiles* tiles, Texture* tex, Vec pos) {
