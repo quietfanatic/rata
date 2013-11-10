@@ -1,4 +1,4 @@
-
+#include <unistd.h>
 #include "../../core/inc/window.h"
 #include "../../core/inc/input.h"
 #include "../../hacc/inc/files.h"
@@ -7,9 +7,9 @@
 #include "../../ent/inc/control.h"
 #include "../../vis/inc/common.h"
 
-static std::string initial_state = "modules/shell/start.hacc";
-static std::string stop_state = "save/last_stop.hacc";
-static std::string main_file = "modules/shell/main.hacc";
+static std::string initial_state = "shell/start.hacc";
+static std::string stop_state = "../save/last_stop.hacc";
+static std::string main_file = "shell/main.hacc";
 
  // Global game settings.  Eventually, all modules with configurable settings
  //  are expected to reserve a member of this struct.
@@ -25,7 +25,20 @@ void step () {
     vis::camera_pos = geo::update_camera();
 }
 
-int main () {
+int main (int argc, char** argv) {
+     // Find program's directory, chdir to modules
+    if (argc < 1) {
+        fprintf(stderr, "Program called with no argv[0]!?\n");
+    }
+    std::string me = (const char*)argv[0];
+    auto lastslash = me.rfind('/');
+    if (lastslash != std::string::npos) {
+        auto modules_dir = me.substr(0, lastslash) + "/modules";
+        if (chdir(modules_dir.c_str()) == -1) {
+            fprintf(stderr, "Could not chdir(\"%s\"): %d (%s)\n", modules_dir.c_str(), errno, strerror(errno));
+        }
+    }
+
     using namespace hacc;
 
     settings = File(main_file).data();

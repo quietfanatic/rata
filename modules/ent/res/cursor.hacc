@@ -1,6 +1,6 @@
 {"hacc::Document":{
     img:{"vis::Image":{
-        filename:"modules/ent/res/cursor.png"
+        filename:"ent/res/cursor.png"
     }}
     layout:{"vis::Layout":{
         size:[9 9]

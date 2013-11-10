@@ -5,7 +5,7 @@
 #include "../../vis/inc/images.h"
 
 static phys::BodyDef*& test_bdf () {
-    static phys::BodyDef* test_bdf = hacc::File("modules/ent/res/test_actor.bdf").data().attr("bdf");
+    static phys::BodyDef* test_bdf = hacc::File("ent/res/test_actor.bdf").data().attr("bdf");
     return test_bdf;
 }
 struct Test_Actor : phys::Object, vis::Drawn<vis::Sprites> {
@@ -33,7 +33,7 @@ HCB_BEGIN(Test_Actor)
 HCB_END(Test_Actor)
 
 static phys::BodyDef*& boundary_bdf () {
-    static phys::BodyDef* boundary_bdf = hacc::File("modules/ent/res/boundary.bdf").data().attr("bdf");
+    static phys::BodyDef* boundary_bdf = hacc::File("ent/res/boundary.bdf").data().attr("bdf");
     return boundary_bdf;
 }
 struct Boundary : phys::Object {

@@ -23,6 +23,6 @@
         ]
     }}
     img:{"vis::Image":{
-        filename:"modules/shell/res/font-small.png"
+        filename:"shell/res/font-small.png"
     }}
 }}

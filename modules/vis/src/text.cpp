@@ -37,7 +37,7 @@ namespace vis {
     };
     static Text_Program* prog = NULL;
     void text_init () {
-        prog = hacc::File("modules/vis/res/text.prog").data().attr("prog");
+        prog = hacc::File("vis/res/text.prog").data().attr("prog");
     }
 
      // TODO: Make align.x affect each line individually

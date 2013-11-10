@@ -10,7 +10,7 @@ namespace geo {
     using namespace util;
 
     static phys::BodyDef*& tilemap_bdf () {
-        static phys::BodyDef* r = hacc::File("modules/geo/res/tilemap.bdf").data();
+        static phys::BodyDef* r = hacc::File("geo/res/tilemap.bdf").data();
         return r;
     }
 

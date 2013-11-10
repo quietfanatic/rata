@@ -213,7 +213,7 @@ namespace vis {
 
     static Images_Program* prog = NULL;
     void images_init () {
-        prog = hacc::File("modules/vis/res/images.prog").data().attr("prog");
+        prog = hacc::File("vis/res/images.prog").data().attr("prog");
     }
 
     void draw_frame (Frame* frame, Texture* texture, Vec pos, Vec scale, float z) {

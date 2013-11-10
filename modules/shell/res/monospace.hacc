@@ -4,6 +4,6 @@
         width:6 height:12 line_height:12
     }}
     img:{"vis::Image":{
-        filename:"modules/shell/res/monospace.png"
+        filename:"shell/res/monospace.png"
     }}
 }}

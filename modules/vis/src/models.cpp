@@ -95,12 +95,12 @@ namespace vis {
 
     struct Model_Tester : Drawn<Sprites> {
         bool flip = false;
-        Model model = Model(hacc::File("modules/ent/res/small.skel").data());
+        Model model = Model(hacc::File("ent/res/small.skel").data());
 
         Model_Tester () { }
         void finish () {
-            model.apply_skin(hacc::File("modules/rata/res/rata-base.hacc").data().attr("skin"));
-            model.apply_pose(hacc::File("modules/ent/res/small.hacc").data().attr("poses").attr("stand"));
+            model.apply_skin(hacc::File("rata/res/rata-base.hacc").data().attr("skin"));
+            model.apply_pose(hacc::File("ent/res/small.hacc").data().attr("poses").attr("stand"));
             appear();
         }
         void Drawn_draw (Sprites) override {

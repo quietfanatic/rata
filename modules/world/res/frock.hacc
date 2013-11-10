@@ -1,6 +1,6 @@
 {"hacc::Document":{
     img:{"vis::Image":{
-        filename: "modules/world/res/frock.png"
+        filename: "world/res/frock.png"
         textures: [
             {name:body    offset:[  0   0] size:[ 85 64]}
             {name:arm     offset:[  0  95] size:[100 16]}
@@ -9,9 +9,9 @@
     }}
     skin:{"vis::Skin":{
         apps: [
-            [($s=$("modules/ent/res/small.hacc").skel.segs).body [$.img.body]]
+            [($s=$("ent/res/small.hacc").skel.segs).body [$.img.body]]
              // TODO: make this not necessary
-            [$s.head [$("modules/world/res/rata-base.hacc").img.head]]
+            [$s.head [$("world/res/rata-base.hacc").img.head]]
             [$s.arm1 [$.img.arm]]
             [$s.forearm1 [$.img.forearm]]
             [$s.arm2 [$.img.arm]]
