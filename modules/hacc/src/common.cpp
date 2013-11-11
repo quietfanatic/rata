@@ -45,6 +45,6 @@ namespace hacc {
 
 }
 
-HCB_BEGIN(hacc::Unknown)
+HACCABLE(hacc::Unknown) {
     name("hacc::Unknown");
-HCB_END(hacc::Unknown)
+}

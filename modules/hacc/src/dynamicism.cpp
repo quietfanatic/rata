@@ -681,7 +681,7 @@ namespace hacc {
 
 } using namespace hacc;
 
-HCB_BEGIN(Reference)
+HACCABLE(Reference) {
     name("hacc::Reference");
     prepare([](Reference& r, Tree t){
         Path p = t.as<Path>();
@@ -691,9 +691,9 @@ HCB_BEGIN(Reference)
     fill([](Reference& r, Tree t){
         r = path_to_reference(t.as<Path>());
     });
-HCB_END(Reference)
+}
 
-HCB_BEGIN(Dynamic)
+HACCABLE(Dynamic) {
     name("hacc::Dynamic");
     keys(mixed_funcs<std::vector<String>>(
         [](const Dynamic& dyn){
@@ -715,5 +715,5 @@ HCB_BEGIN(Dynamic)
     elems([](Dynamic& dyn, size_t index)->Reference{
         return Reference(dyn.address()).elem(index);
     });
-HCB_END(Dynamic)
+}
 

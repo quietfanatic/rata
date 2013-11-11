@@ -26,7 +26,7 @@ namespace hacc {
 
 template <class C, size_t n> using CArray = C[n];
  // Heh, this actually works.
-HCB_TEMPLATE_BEGIN(<class C HCB_COMMA size_t n>, C[n])
+HACCABLE_TEMPLATE(<class C HCB_COMMA size_t n>, C[n]) {
     using namespace hacc;
     name([](){
         return Type::CppType<C>().name() + "[" + std::to_string(n) + "]";
@@ -45,9 +45,9 @@ HCB_TEMPLATE_BEGIN(<class C HCB_COMMA size_t n>, C[n])
         else
             throw hacc::X::Out_Of_Range(Pointer(&v), index, n);
     });
-HCB_TEMPLATE_END(<class C HCB_COMMA size_t n>, C[n])
+}
 
-HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
+HACCABLE_TEMPLATE(<class C>, std::vector<C>) {
     using namespace hacc;
     name([](){
         return "std::vector<" + Type::CppType<C>().name() + ">";
@@ -64,9 +64,9 @@ HCB_TEMPLATE_BEGIN(<class C>, std::vector<C>)
     elems([](std::vector<C>& v, size_t index){
         return Reference(&v.at(index));
     });
-HCB_TEMPLATE_END(<class C>, std::vector<C>)
+}
 
-HCB_TEMPLATE_BEGIN(<class C>, hacc::named_vector<C>)
+HACCABLE_TEMPLATE(<class C>, hacc::named_vector<C>) {
     using namespace hacc;
     name([](){
         return "hacc::named_vector<" + Type::CppType<C>().name() + ">";
@@ -77,9 +77,9 @@ HCB_TEMPLATE_BEGIN(<class C>, hacc::named_vector<C>)
         if (r) return Reference(r);
         else throw X::No_Attr(Pointer(&v), name);
     });
-HCB_TEMPLATE_END(<class C>, hacc::named_vector<C>)
+}
 
-HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
+HACCABLE_TEMPLATE(<class C>, std::unordered_map<std::string HCB_COMMA C>) {
     using namespace hacc;
     name([](){
         return "std::unordered_map<std::string, " + Type::CppType<C>().name() + ">";
@@ -100,26 +100,25 @@ HCB_TEMPLATE_BEGIN(<class C>, std::unordered_map<std::string HCB_COMMA C>)
     attrs([](std::unordered_map<std::string, C>& m, std::string k){
         return Reference(&m.at(k));
     });
-HCB_TEMPLATE_END(<class C>, std::unordered_map<std::string HCB_COMMA C>)
+}
 
-HCB_TEMPLATE_BEGIN(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
+HACCABLE_TEMPLATE(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>) {
     using namespace hacc;
     name([](){
         return "std::pair<" + Type::CppType<A>().name() + ", " + Type::CppType<B>().name() + ">";
     });
     elem(member(&std::pair<A, B>::first));
     elem(member(&std::pair<A, B>::second));
-HCB_TEMPLATE_END(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>)
-
+}
 
  // This is the default haccability for pointers.
-HCB_TEMPLATE_BEGIN(<class C>, C*)
+HACCABLE_TEMPLATE(<class C>, C*) {
     using namespace hacc;
     name([](){
         return Type::CppType<C>().name() + "*";
     });
     is_raw_pointer(Type::CppType<C>());
-HCB_TEMPLATE_END(<class C>, C*)
+}
 
  // Alternatively, you can override that and call this.
 

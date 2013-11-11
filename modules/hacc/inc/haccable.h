@@ -226,6 +226,12 @@ namespace hacc {
 #define HCB_INSTANCE(type) static hacc::Type HACC_ANON __attribute__ ((unused)) = Hacc_TypeDecl<type>::get_type();
 #define HCB_BEGIN(type) template <> struct Hacc_TypeDecl<type> : hacc::Haccability<type> { static void describe () {
 #define HCB_END(type) } }; static hacc::Type HACC_ANON __attribute__ ((unused)) = Hacc_TypeDecl<type>::get_type();
+#define HACCABLE(type) \
+    template <> struct Hacc_TypeDecl<type> : hacc::Haccability<type> { \
+        static void describe (); \
+    }; \
+    static hacc::Type HACC_ANON __attribute__ ((unused)) = Hacc_TypeDecl<type>::get_type(); \
+    void Hacc_TypeDecl<type>::describe ()
 #define HCB_PARAMS(...) __VA_ARGS__
 #define HCB_COMMA ,
 #define HCB_TEMPLATE_BEGIN(params, type) template params struct Hacc_TypeDecl<type> : hacc::Haccability<type> { \
@@ -255,5 +261,34 @@ namespace hacc {
     using hcb::assignable; \
     static void describe () {
 #define HCB_TEMPLATE_END(params, type) } };  // Reserved in case we need to do some magic static-var wrangling
+#define HACCABLE_TEMPLATE(params, type) \
+    template params struct Hacc_TypeDecl<type> : hacc::Haccability<type> { \
+        using hcb = hacc::Haccability<type>; \
+        using hcb::name; \
+        using hcb::keys; \
+        using hcb::attrs; \
+        using hcb::attr; \
+        using hcb::length; \
+        using hcb::elems; \
+        using hcb::elem; \
+        using hcb::array; \
+        using hcb::to_tree; \
+        using hcb::prepare; \
+        using hcb::fill; \
+        using hcb::finish; \
+        using hcb::delegate; \
+        using hcb::is_raw_pointer; \
+        using hcb::member; \
+        using hcb::value_funcs; \
+        using hcb::ref_funcs; \
+        using hcb::ref_func; \
+        using hcb::value_methods; \
+        using hcb::ref_methods; \
+        using hcb::ref_method; \
+        using hcb::base; \
+        using hcb::assignable; \
+        static void describe (); \
+    }; \
+    template params void Hacc_TypeDecl<type>::describe ()
 
 #endif

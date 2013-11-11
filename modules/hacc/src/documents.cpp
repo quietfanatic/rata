@@ -116,12 +116,12 @@ namespace hacc {
 
 } using namespace hacc;
 
-HCB_BEGIN(Document)
+HACCABLE(Document) {
     name("hacc::Document");
     delegate(ref_func<DocumentData>([](Document& d)->DocumentData&{ return *d.data; }));
-HCB_END(Document)
+}
 
-HCB_BEGIN(DocumentData)
+HACCABLE(DocumentData) {
     name("hacc::DocumentData");
     prepare([](DocumentData& d, Tree t){
         if (t.form() != OBJECT)
@@ -212,4 +212,4 @@ HCB_BEGIN(DocumentData)
         }
         return Tree(std::move(o));
     });
-HCB_END(DocumentData)
+}

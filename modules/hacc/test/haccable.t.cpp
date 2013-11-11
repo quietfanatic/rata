@@ -12,7 +12,7 @@ struct Vectorly {
 Vectorly vy1 { 1, 2 };
 Vectorly vy2 { 3, 4 };
 
-HCB_BEGIN(Vectorly*)
+HACCABLE(Vectorly*) {
     to_tree([](Vectorly* const& vy){
         if (vy == &vy1) return Tree("vy1");
         else if (vy == &vy2) return Tree("vy2");
@@ -27,13 +27,13 @@ HCB_BEGIN(Vectorly*)
         }
         else throw X::Error("Expected string hacc but got " + form_name(t.form()) + " hacc");
     });
-HCB_END(Vectorly*)
-HCB_BEGIN(Vectorly)
+}
+HACCABLE(Vectorly) {
     attr("x", member(&Vectorly::x));
     attr("y", member(&Vectorly::y));
     elem(member(&Vectorly::x));
     elem(member(&Vectorly::y));
-HCB_END(Vectorly)
+}
 
 struct MyFloat {
     float val;
@@ -43,9 +43,9 @@ struct MyFloat {
     bool operator == (MyFloat o) const { return val==o.val; }
 };
 
-HCB_BEGIN(MyFloat)
+HACCABLE(MyFloat) {
     delegate(member(&MyFloat::val));
-HCB_END(MyFloat)
+}
 
 template <class C>
 struct MyWrapper {
@@ -54,9 +54,9 @@ struct MyWrapper {
 template <class C>
 bool operator == (MyWrapper<C> a, MyWrapper<C> b) { return a.val==b.val; }
 
-HCB_TEMPLATE_BEGIN(<class C>, MyWrapper<C>)
+HACCABLE_TEMPLATE(<class C>, MyWrapper<C>) {
     delegate(member(&MyWrapper<C>::val));
-HCB_TEMPLATE_END(<class C>, MyWrapper<C>)
+}
 
 MyWrapper<int32> wi {0};
 
@@ -83,7 +83,7 @@ union MyUnion {
     float get_f () const { return f.f; }
 };
 
-HCB_BEGIN(MyUnion)
+HACCABLE(MyUnion) {
     keys(value_funcs<std::vector<String>>([](const MyUnion& u)->std::vector<String>{
         switch (u.type) {
             case MyUnion::INT: return std::vector<String>(1, "i");
@@ -99,19 +99,19 @@ HCB_BEGIN(MyUnion)
     }));
     attr("i", value_methods(&MyUnion::get_i, &MyUnion::set_i));
     attr("f", value_methods(&MyUnion::get_f, &MyUnion::set_f));
-HCB_END(MyUnion)
+}
 
 enum MyEnum {
     VALUE1,
     VALUE2,
     VALUE3
 };
-HCB_BEGIN(MyEnum)
+HACCABLE(MyEnum) {
     name("MyEnum");
     value("value1", VALUE1);
     value("value2", VALUE2);
     value("value3", VALUE3);
-HCB_END(MyEnum)
+}
 
 struct MyNamed {
     std::string name;
@@ -122,10 +122,10 @@ MyNamed mn2 ("fdsa");
 
 std::vector<MyNamed*> mns {&mn1, &mn2};
 
-HCB_BEGIN(MyNamed*)
+HACCABLE(MyNamed*) {
     name("MyNamed*");
     hacc_pointer_by_member(&MyNamed::name, mns, true);
-HCB_END(MyNamed*)
+}
 
 template <class C>
 Tree to_tree (C* p) { return Reference(p).to_tree(); }

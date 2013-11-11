@@ -2,19 +2,19 @@
 
  // This defines haccabilities for most builtin scalar types.
 #define HCB_LIT(cpptype, form) \
-HCB_BEGIN(cpptype) \
+HACCABLE(cpptype) { \
     name(#cpptype); \
     to_tree([](const cpptype& x){ return Tree(x); }); \
     fill([](cpptype& x, Tree t){ x = t.as<cpptype>(); }); \
-HCB_END(cpptype)
+}
 
 using namespace hacc;
 
-HCB_BEGIN(std::nullptr_t)
+HACCABLE(std::nullptr_t) {
     name("std::nullptr_t");
     to_tree([](const std::nullptr_t& x){ return Tree(x); });
     fill([](std::nullptr_t& x, Tree t){ });
-HCB_END(std::nullptr_t)
+}
 
 HCB_LIT(bool, bool)
 HCB_LIT(char, integer)
