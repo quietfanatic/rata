@@ -19,12 +19,15 @@ struct Settings {
     core::Window window;
     vis::Settings vis;
     std::vector<std::pair<int, Command>> hotkeys;
+    bool paused = false;
 };
 static Settings* settings = NULL;
 
 void step () {
-    ent::run_minds();
-    phys::space.run();
+    if (!settings->paused) {
+        ent::run_minds();
+        phys::space.run();
+    }
     vis::camera_pos = geo::update_camera();
 }
 
@@ -78,6 +81,15 @@ HACCABLE(Settings) {
     attr("window", member(&Settings::window).optional());
     attr("vis", member(&Settings::vis).optional());
     attr("hotkeys", member(&Settings::hotkeys).optional());
+    attr("paused", member(&Settings::paused).optional());
+}
+
+struct PauseCommand : CommandData {
+    void operator () () { settings->paused = !settings->paused; }
+};
+HACCABLE(PauseCommand) {
+    name("PauseCommand");
+    new_command<PauseCommand>("pause", "Toggle whether game activity occurs.");
 }
 
 

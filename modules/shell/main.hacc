@@ -8,6 +8,7 @@
         camera_size:[40 30]
     }
     hotkeys:[
-        [96 [open_console]]
+        [96 [open_console]]  // `
+        [80 [pause]]  // P
     ]
 }}
