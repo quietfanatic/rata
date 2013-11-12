@@ -3,7 +3,7 @@
 
 MakePl - Portable drop-in build system
 https://github.com/quietfanatic/make-pl
-2013-09-27
+2013-10-05
 
 USAGE: See the README in the above repo.
 
@@ -40,12 +40,14 @@ package MakePl;
 use v5.10;
 use strict qw(subs vars);
 use warnings; no warnings 'once';
+use utf8;
+binmode STDOUT, ':utf8';
 use Carp 'croak';
 use Cwd 'realpath';
 use subs qw(cwd chdir);
 use File::Spec::Functions qw(catfile catpath splitpath abs2rel);
 
-our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir targets run slurp splat which);
+our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir targets exists_or_target run slurp splat slurp_utf8 splat_utf8 which);
 
 # GLOBALS
     our $this_is_root = 1;  # This is set to 0 when recursing.
@@ -88,7 +90,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             *{$package.'::'.$f} = \&{$f};
         }
          # Change to directory of the calling file
-        chdir catpath((splitpath realpath $file)[0,1], '');
+        chdir catpath((splitpath $current_file)[0,1], '');
          # Also import strict and warnings.
         strict->import();
         warnings->import();
@@ -196,7 +198,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             my $plan = init_plan();
             eval {
                 if (@args) {
-                    grep plan_target($plan, realpath($_)), @args;
+                    grep plan_target($plan, rel2abs($_, $original_base)), @args;
                 }
                 elsif ($defaults) {
                     grep plan_target($plan, $_), @$defaults;
@@ -215,7 +217,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             if (not @rules) {
                 say "\e[32m✓\e[0m Nothing was done because no rules have been declared.";
             }
-            elsif (not @program) {
+            elsif (not grep defined($_->{recipe}), @program) {
                 say "\e[32m✓\e[0m All up to date.";
             }
             else {
@@ -225,10 +227,14 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                         status $rule->{config} ? "⚒ " : "⚙ ", show_rule($rule);
                         delazify($rule);
                         $rule->{recipe}->($rule->{to}, $rule->{from})
-                            unless $simulate;
+                            unless $simulate or not defined $rule->{recipe};
                     }
                 };
-                if ($@) {
+                if ("$@" eq "interrupted\n") {
+                    say "\e[31m✗\e[0m Interrupted.";
+                    exit 1;
+                }
+                elsif ($@) {
                     warn $@ unless "$@" eq "\n";
                     say "\e[31m✗\e[0m Did not finish due to error.";
                     exit 1;
@@ -257,9 +263,9 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
 
     sub create_rule {
         my ($to, $from, $recipe, $package, $file, $line) = @_;
-        ref $recipe eq 'CODE' or croak "Non-code recipe given to rule";
+        ref $recipe eq 'CODE' or !defined $recipe or croak "Non-code recipe given to rule";
         my $rule = {
-            caller_file => realpath($file),
+            caller_file => $current_file,
             caller_line => $line,
             base => cwd,
             to => [arrayify($to)],
@@ -272,7 +278,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
         };
         push @rules, $rule;
         for (@{$rule->{to}}) {
-            push @{$targets{realpath($_)}}, $rule;
+            push @{$targets{realpath($_) // rel2abs($_)}}, $rule;
         }
     }
 
@@ -281,11 +287,11 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
     }
 
     sub phony ($;$$) {
-        @_ == 2 and croak "phony was given 2 arguments, but it must have either 1 or 3";
-        for (arrayify($_[0])) {
-            $phonies{realpath($_)} = 1;
+        my ($to, $from, $recipe) = @_;
+        for (arrayify($to)) {
+            $phonies{realpath($_) // rel2abs($_)} = 1;
         }
-        create_rule(@_, caller) if @_ > 1;
+        create_rule($to, $from, $recipe, caller) if defined $from;
     }
 
     sub subdep ($;$) {
@@ -303,7 +309,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                 from => lazify($from),
             };
             for (@{$subdep->{to}}) {
-                push @{$subdeps{realpath($_)}}, $subdep;
+                push @{$subdeps{realpath($_) // rel2abs($_)}}, $subdep;
             }
         }
         else {
@@ -312,11 +318,15 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
     }
 
     sub defaults {
-        push @$defaults, map realpath($_), @_;
+        push @$defaults, map realpath($_) // rel2abs($_), @_;
     }
 
     sub targets {
         return keys %targets;
+    }
+
+    sub exists_or_target {
+        return -e $_[0] or exists $targets{realpath($_[0]) // rel2abs($_)};
     }
 
     sub arrayify {
@@ -362,6 +372,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
         my @deps = (realpaths(@{$rule->{from}}), $rule->{caller_file}, $this_file);
          # Using this style of loop because @deps will keep expanding.
         for (my $i = 0; $i < @deps; $i++) {
+            defined $deps[$i] or die "Undef dependency given to rule at $rule->{caller_file} line $rule->{caller_line}\n";
             push_new(\@deps, get_auto_subdeps($deps[$i]));
             for my $subdep (@{$subdeps{$deps[$i]}}) {
                 chdir $subdep->{base};
@@ -505,7 +516,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             deps => undef,
             check_stale => sub { stale_config($filename, $var); },
             recipe => sub { gen_config($filename, $var, $routine); },
-            caller_file => realpath($file),
+            caller_file => $current_file,
             caller_line => $line,
             config => 1,
             planned => 0,
@@ -516,7 +527,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
         $configs{realpath($filename)} = 1;
          # Read into $var immediately
         if (-e $filename) {
-            my $str = slurp($filename);
+            my $str = slurp_utf8($filename);
             chomp $str;
             my $val = read_config($filename, $str);
             if (ref $var eq 'SCALAR') {
@@ -536,7 +547,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
     sub stale_config ($$) {
         my ($filename, $var) = @_;
         return 1 unless -e $filename;
-        my $old = slurp($filename);
+        my $old = slurp_utf8($filename);
         chomp $old;
         my $new = show_thing(ref $var eq 'SCALAR' ? $$var : $var);
         return $new ne $old;
@@ -546,7 +557,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
         my ($filename, $var, $routine) = @_;
         $routine->() if defined $routine;
         my $new = show_thing(ref $var eq 'SCALAR' ? $$var : $var);
-        splat($filename, "$new\n");
+        splat_utf8($filename, "$new\n");
     }
 
     sub option ($$;$) {
@@ -655,18 +666,6 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
         my $new = realpath($_[0]);
         $cwd eq $new or Cwd::chdir($cwd = $new) or die "Failed to chdir to $new: $!\n";
     }
-    sub rel2abs ($;$) {
-        if (defined $_[1]) {
-            my $old_cwd = cwd;
-            chdir $_[1];
-            my $r = realpath($_[0]);
-            chdir $old_cwd;
-            return $r;
-        }
-        else {
-            return realpath($_[0]);
-        }
-    }
     sub fexists {
         defined $_[0] or Carp::confess "Undefined argument passed to fexists.";
         return 0 if $phonies{$_[0]};
@@ -697,6 +696,9 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             if ($? == -1) {
                 status("☢ Couldn't start command: $!");
             }
+            elsif (($? & 127) == 2) {
+                die "interrupted\n";
+            }
             elsif ($? & 127) {
                 status(sprintf "☢ Command died with signal %d, %s coredump",
                    ($? & 127),  ($? & 128) ? 'with' : 'without');
@@ -709,14 +711,20 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
     }
 
     sub realpaths (@) {
-        return map {
-            my $r = realpath($_);
-            unless (defined $r) {
-                my $abs = File::Spec::Functions::rel2abs($_) // $_;
-                croak "\"$abs\" doesn't seem to be a real path";
-            }
-            $r;
-        } @_;
+        return map realpath($_) // rel2abs($_), @_;
+    }
+
+    sub rel2abs ($;$) {
+        if (defined $_[1]) {
+            my $old_cwd = cwd;
+            chdir $_[1];
+            my $r = realpath($_[0]) // File::Spec::Functions::rel2abs($_[0]);
+            chdir $old_cwd;
+            return $r;
+        }
+        else {
+            return realpath($_[0]) // File::Spec::Functions::rel2abs($_[0]);
+        }
     }
 
     sub slurp {
@@ -734,9 +742,18 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
     }
     sub splat {
         my ($file, $string) = @_;
+        defined $string or croak "Cannot splat undef to $file";
         open my $F, '>', $file or croak "Failed to open $file for writing: $! in call to splat";
         print $F $string or croak "Failed to write to $file: $! in call to splat";
         close $F or croak "Failed to close $file: $! in call to close";
+    }
+    sub slurp_utf8 {
+        require Encode;
+        return Encode::decode_utf8(slurp(@_));
+    }
+    sub splat_utf8 {
+        require Encode;
+        splat($_[0], Encode::encode_utf8($_[1]));
     }
 
     sub which {
@@ -768,7 +785,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
          # Make sure the file exists or there's a rule for it
         unless ($targets{$target} or fexists($target)) {
             my $rel = abs2rel($target, $original_base);
-            my $mess = "☢ Cannot find or make $rel" . (@{$plan->{stack}} ? ", required by\n" : "\n");
+            my $mess = "☢ Cannot find or make $rel ($target)" . (@{$plan->{stack}} ? ", required by\n" : "\n");
             for my $rule (reverse @{$plan->{stack}}) {
                 $mess .= "\t" . debug_rule($rule) . "\n";
             }
@@ -803,7 +820,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
         $stale ||= $force;
         $stale ||= $rule->{check_stale}() if defined $rule->{check_stale};
         $stale ||= grep {
-            my $abs = realpath($_);
+            my $abs = realpath($_) // rel2abs($_);
             !fexists($abs) or grep modtime($abs) < modtime($_), @{$rule->{deps}};
         } @{$rule->{to}};
         push @{$plan->{program}}, $rule if $stale;
@@ -819,7 +836,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
  # Generate a make.pl scaffold.
 if ($^S == 0) {  # We've been called directly
     $make_was_called = 1;  # Not really but supresses warning
-    if (@ARGV != 1 or $ARGV[0] eq '--help') {
+    if (@ARGV > 1 or (defined $ARGV[0] and $ARGV[0] eq '--help')) {
         say "\e[31m✗\e[0m Usage: perl $0 <directory (default: .)>";
         exit 1;
     }
@@ -830,7 +847,7 @@ if ($^S == 0) {  # We've been called directly
         $loc = "$loc/make.pl";
         $dir = $loc;
     }
-    elsif (-e $loc) {
+    if (-e $loc) {
         say "\e[31m✗\e[0m Did not generate $loc because it already exists.";
         exit 1;
     }
@@ -841,15 +858,15 @@ if ($^S == 0) {  # We've been called directly
         $dir = cwd;
     }
     my $path_to_pm = abs2rel(realpath(__FILE__), $dir);
-    $path_to_pm =~ s/\/MakePl\.pm$//;
+    $path_to_pm =~ s/\/?MakePl\.pm$//;
     $path_to_pm =~ s/'/\\'/g;
-    my $pathext = $path_to_pm eq '.'
+    my $pathext = $path_to_pm eq ''
         ? ''
         : ".'/$path_to_pm'";
     local $/;
     my $out = <DATA>;
     $out =~ s/◀PATHEXT▶/$pathext/;
-    open my $MAKEPL, '>', $loc or die "Failed to open $loc for writing: $!\n";
+    open my $MAKEPL, '>:utf8', $loc or die "Failed to open $loc for writing: $!\n";
     print $MAKEPL $out or die "Failed to write to $loc: $!\n";
     chmod 0755, $MAKEPL or warn "Failed to chmod $loc: $!\n";
     close $MAKEPL or die "Failed to close $loc: $!\n";
