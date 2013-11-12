@@ -86,7 +86,7 @@ HACCABLE(Command2) {
         auto& less = inner.as<const Array&>();
         Array more;
         more.reserve(less.size() + 1);
-        more.push_back(Tree(cmd->name));
+        more.push_back(Tree(cmd->info->name));
         for (auto& t : less)
             more.emplace_back(t);
         return Tree(std::move(more));
@@ -104,6 +104,7 @@ HACCABLE(Command2) {
             void* dat = operator new (desc->type.size());
             desc->type.construct(dat);
             cmd = Command2((CommandData2*)dat);
+            cmd->info = desc;
             Array less;
             less.reserve(more.size() - 1);
             for (size_t i = 1; i < more.size(); i++)
@@ -144,7 +145,7 @@ namespace core {
 
     void command_from_string (std::string s) {
         if (s.empty()) return;
-        Command cmd;
+        Command2 cmd;
         bool success = false;
         if (command_history.empty() || s != command_history.back())
             command_history.push_back(s);

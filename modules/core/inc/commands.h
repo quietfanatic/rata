@@ -52,7 +52,7 @@ namespace core {
 
      // Internal command implementation
     struct CommandData2 : hacc::DPtee {
-        std::string name;
+        New_Command* info;
         virtual void operator () () = 0;
     };
     struct Command2 final : hacc::DPtr<CommandData2> {
@@ -69,7 +69,6 @@ namespace core {
 
     template <class... Args>
     struct CommandDataT : CommandData2 {
-        New_Command* info;
         std::tuple<typename std::remove_reference<Args>::type...> args;
         template <size_t... inds>
         void unpack (_Seq<inds...>) {
@@ -103,7 +102,9 @@ namespace core {
         min_args(min_args),
         type(hacc::Type::CppType<CommandDataT<Args...>>()),
         func((void*)func)
-    { }
+    {
+        commands_by_name2().emplace(name, this);
+    }
 }
 
 struct Command_Description {
