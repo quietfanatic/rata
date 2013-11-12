@@ -207,23 +207,10 @@ INIT_SAFE(std::unordered_map<std::string _COMMA Command_Description*>, commands_
 void _echo (std::string s) { print_to_console(s + "\n"); }
 New_Command _echo_cmd ("echo", "Print a string to all console-like places.", 1, _echo);
 
-struct EchoCommand : CommandData {
-    std::string s;
-    void operator() () { print_to_console(s + "\n"); }
-};
-HACCABLE(EchoCommand) {
-    new_command<EchoCommand>("echo", "Print the given string to all console-like places.");
-    elem(member(&EchoCommand::s));
+void _seq (const std::vector<Command2>& seq) {
+    for (auto& c : seq) c();
 }
-
-struct SeqCommand : CommandData {
-    std::vector<Command> seq;
-    void operator() () { for (auto& c : seq) c(); }
-};
-HACCABLE(SeqCommand) {
-    new_command<SeqCommand>("seq", "Perform a sequence of commands.  Usage: seq [[command1 args...] [command2 args...]...]");
-    delegate(member(&SeqCommand::seq));
-}
+New_Command _seq_cmd ("seq", "Perform a sequence of commands.  Usage: seq [[command1 args...] [command2 args...]...]", 1, _seq);
 
 void _help (std::string about) {
     if (about.empty()) {
@@ -248,68 +235,40 @@ void _help (std::string about) {
         }
     }
 }
-New_Command _help_cmd ("help", "Show information about the in-game console or about a command", 0, _help);
+New_Command _help_cmd ("help", "Show information about the in-game console or about a command.", 0, _help);
 
 void _history () {
     for (uint i = 0; i < command_history.size(); i++) {
         print_to_console(std::to_string(i) + ": " + command_history[i] + "\n");
     }
 }
-New_Command _history_cmd ("history", "Show previously entered commands", 0, _history);
+New_Command _history_cmd ("history", "Show previously entered commands.", 0, _history);
 
 void _get (const Reference& ref) {
     print_to_console(ref.show() + "\n");
     print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");
 }
-New_Command _get_cmd ("get", "Print the data at a path", 1, _get);
+New_Command _get_cmd ("get", "Print the data at a path.", 1, _get);
 
-struct KeysCommand : CommandData {
-    Reference ref;
-    void operator () () {
-        auto keys = ref.keys();
-        print_to_console(hacc::tree_to_string(Reference(&keys).to_tree()) + "\n");
-    }
-};
-HACCABLE(KeysCommand) {
-    new_command<KeysCommand>("keys", "Print the attribute keys of an object");
-    elem(member(&KeysCommand::ref));
+void __keys (const Reference& ref) {
+    auto keys = ref.keys();
+    print_to_console(hacc::tree_to_string(Reference(&keys).to_tree()) + "\n");
 }
+New_Command _keys_cmd ("keys", "Print the attribute keys of an object.", 1, __keys);
 
-struct LengthCommand : CommandData {
-    Reference ref;
-    void operator () () {
-        print_to_console(std::to_string(ref.length()) + "\n");
-    }
-};
-HACCABLE(LengthCommand) {
-    new_command<LengthCommand>("length", "Print the length of an array");
-    elem(member(&LengthCommand::ref));
+void __length (const Reference& ref) {
+    print_to_console(std::to_string(ref.length()) + "\n");
 }
+New_Command _length_cmd ("length", "Print the length of an array.", 1, __length);
 
-struct SetCommand : CommandData {
-    Reference ref;
-    hacc::Tree value;
-    void operator () () {
-        ref.from_tree(value);
-    }
-};
-HACCABLE(SetCommand) {
-    new_command<SetCommand>("set", "Set the data at a path to a value");
-    elem(member(&SetCommand::ref));
-    elem(member(&SetCommand::value));
+void _set (const Reference& ref, hacc::Tree val) {
+    ref.from_tree(val);
 }
+New_Command _set_cmd ("set", "Set the data at a path to a value.", 2, _set);
 
-struct PeekCommand : CommandData {
-    String type;
-    size_t address;
-    void operator () () {
-        Reference ref (Type(type), (void*)address);
-        print_to_console(ref.show() + "\n");
-        print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");
-    }
+void _peek (String type, size_t address) {
+    Reference ref (Type(type), (void*)address);
+    print_to_console(ref.show() + "\n");
+    print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");
 };
-HACCABLE(PeekCommand) {
-    new_command<PeekCommand>("peek", "Get the value of a type at an address");
-    elem(member(&PeekCommand::type));
-    elem(member(&PeekCommand::address));
-}
+New_Command _peek_cmd ("peek", "Get the value of a type at an address.  Please be careful!", 2, _peek);

@@ -141,98 +141,58 @@ HACCABLE(Window) {
     attr("fullscreen", member(&Window::fullscreen).optional());
 }
 
-struct LoadCommand : CommandData {
-    std::string filename;
-    void operator () () {
-        auto f = filename;  // *this is deallocated before this lambda is run
-        window->before_next_frame([f](){ hacc::load(f); });
-    }
+void _load (std::string filename) {
+    window->before_next_frame([filename](){ hacc::load(filename); });
 };
-HACCABLE(LoadCommand) {
-    new_command<LoadCommand>("load", "Manually load a file by its filename");
-    elem(member(&LoadCommand::filename));
-}
+New_Command _load_cmd ("load", "Manually load a file by its filename.", 1, _load);
 
-struct SaveCommand : CommandData {
-    std::string filename;
-    void operator () () {
-        auto f = filename;
-        window->before_next_frame([f](){ hacc::save(f); });
-    }
-};
-HACCABLE(SaveCommand) {
-    new_command<SaveCommand>("save", "Save the file object with the given filename");
-    elem(member(&SaveCommand::filename));
+void _save (std::string filename) {
+    window->before_next_frame([filename](){ hacc::save(filename); });
 }
+New_Command _save_cmd ("save", "Save the file object with the given filename.", 1, _save);
 
-struct ReloadCommand : CommandData {
-    std::string filename;
-    void operator () () {
-        if (filename.empty()) {
-            window->before_next_frame([](){
-                for (auto f : hacc::loaded_files()) {
-                    if (f.filename().find("/res/") != std::string::npos) {
-                        hacc::reload(f);
-                    }
+void _reload (std::string filename) {
+    if (filename.empty()) {
+        window->before_next_frame([](){
+            for (auto f : hacc::loaded_files()) {
+                if (f.filename().find("/res/") != std::string::npos) {
+                    hacc::reload(f);
                 }
-            });
-        }
-        else {
-            auto f = filename;
-            window->before_next_frame([f](){ hacc::reload(f); });
-        }
+            }
+        });
+    }
+    else {
+        window->before_next_frame([filename](){ hacc::reload(filename); });
     }
 };
-HACCABLE(ReloadCommand) {
-    new_command<ReloadCommand>("reload", "Reload the file with the given filename, or if none given all files containing '/res/'");
-    elem(member(&ReloadCommand::filename).optional());
-};
+New_Command _reload_cmd ("reload",
+    "Reload the file with the given filename, or if none given all files containing '/res/'.",
+    1, _reload
+);
 
-struct UnloadCommand : CommandData {
-    std::string filename;
-    void operator () () {
-        auto f = filename;
-        window->before_next_frame([f](){ hacc::unload(f); });
+void _unload (std::string filename) {
+    window->before_next_frame([filename](){ hacc::unload(filename); });
+};
+New_Command _unload_cmd ("unload",
+    "Unload the file object with the given filename.  Fails if there are outside references to it.",
+    1, _unload
+);
+
+void _rename (std::string oldn, std::string newn) {
+    hacc::File(oldn).rename(newn);
+}
+New_Command _rename_cmd ("rename", "Change the filename associated with a file object.", 2, _rename);
+
+void _quit () { core::quick_exit(); }
+New_Command _quit_cmd ("quit", "Quit the program immediately without saving anything.", 0, _quit);
+
+void _stop () { window->stop(); }
+New_Command _stop_cmd ("stop", "Stop the game (probably saving its state to somewhere)", 0, _stop);
+
+void _files () {
+    for (auto f : hacc::loaded_files()) {
+        print_to_console(hacc::escape_string(f.filename()));
+        print_to_console("\n");
     }
-};
-HACCABLE(UnloadCommand) {
-    new_command<UnloadCommand>("unload", "Unload the file object with the given filename.  Fails if there are outside references to it.");
-    elem(member(&UnloadCommand::filename));
 }
-
-struct RenameCommand : CommandData {
-    std::string old_name;
-    std::string new_name;
-    void operator () () { hacc::File(old_name).rename(new_name); }
-};
-HACCABLE(RenameCommand) {
-    new_command<RenameCommand>("rename", "Change the filename associated with a file object");
-    elem(member(&RenameCommand::old_name));
-    elem(member(&RenameCommand::new_name));
-}
-
-struct QuitCommand : CommandData {
-    void operator() () { core::quick_exit(); }
-};
-HACCABLE(QuitCommand) {
-    new_command<QuitCommand>("quit", "Quit the program without saving anything");
-}
-
-struct StopCommand : CommandData {
-    void operator() () { window->stop(); }
-};
-HACCABLE(StopCommand) {
-    new_command<StopCommand>("stop", "Stop the game (probably saving its state to somewhere)");
-}
-
-struct FilesCommand : CommandData {
-    void operator() () {
-        for (auto f : hacc::loaded_files()) {
-            print_to_console(hacc::escape_string(f.filename()));
-            print_to_console("\n");
-        }
-    }
-};
-HACCABLE(FilesCommand) {
-    new_command<FilesCommand>("files", "List all loaded files");
-}
+New_Command _files_cmd ("files", "List all loaded files", 0, _files);

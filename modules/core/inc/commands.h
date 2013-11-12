@@ -54,11 +54,11 @@ namespace core {
      // Internal command implementation
     struct CommandData2 : hacc::DPtee {
         New_Command* info;
-        virtual void operator () () = 0;
+        virtual void operator () () const = 0;
     };
     struct Command2 final : hacc::DPtr<CommandData2> {
         explicit Command2 (CommandData2* d = NULL) : DPtr(d) { }
-        void operator () () { (**this)(); }
+        void operator () () const { (**this)(); }
     };
 
      // All this is required to unpack a tuple into function arguments.
@@ -72,10 +72,10 @@ namespace core {
     struct CommandDataT : CommandData2 {
         std::tuple<typename std::decay<Args>::type...> args;
         template <size_t... inds>
-        void unpack (_Seq<inds...>) {
+        void unpack (_Seq<inds...>) const {
             (*(void(*)(Args...))info->func)(std::get<inds>(args)...);
         }
-        void operator () () {
+        void operator () () const override {
             unpack(typename _Count<sizeof...(Args)>::type());
         }
     };
