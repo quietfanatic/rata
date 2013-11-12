@@ -156,6 +156,7 @@ namespace shell {
             appear();
         }
         void exit_console () {
+            if (!visible()) return;
             core::trap_cursor = true;
             ent::player_controllable = true;
             window->key_callback = std::move(old_key_cb);
@@ -195,5 +196,12 @@ struct OpenConsoleCommand : CommandData {
 };
 HACCABLE(OpenConsoleCommand) {
     name("OpenConsoleCommand");
-    new_command<OpenConsoleCommand>("open_console", "Open the console.");
+    new_command<OpenConsoleCommand>("open_console", "Open the in-game console.");
+}
+struct ExitCommand : CommandData {
+    void operator () () { if (console) console->exit_console(); }
+};
+HACCABLE(ExitCommand) {
+    name("ExitCommand");
+    new_command<ExitCommand>("exit", "Close the in-game console.");
 }
