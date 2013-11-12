@@ -196,3 +196,8 @@ void _files () {
     }
 }
 New_Command _files_cmd ("files", "List all loaded files", 0, _files);
+
+void _create_file (std::string filename, const hacc::Dynamic& data) {
+    hacc::File(filename, data);
+}
+New_Command _create_file_cmd ("create_file", "Create a new file object.  It will not yet be saved to disk.", 2, _create_file);

@@ -49,6 +49,7 @@ namespace hacc {
          //  an error until you try to use it.
         File (std::string filename);
          // Create a new file with the given data.
+        File (std::string filename, const Dynamic& data);
         File (std::string filename, Dynamic&& data);
     };
 

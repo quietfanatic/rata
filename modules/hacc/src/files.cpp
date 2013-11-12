@@ -46,6 +46,14 @@ namespace hacc {
         if (!fd) fd = new FileData (filename);
         p = fd;
     };
+    File::File (std::string filename, const Dynamic& data) :
+        File(filename)
+    {
+        if (p->state != UNLOADED) throw X::File_Already_Loaded(filename);
+        p->data = data;
+        p->state = LOADED;
+        p->requested = true;
+    }
     File::File (std::string filename, Dynamic&& data) :
         File(filename)
     {
