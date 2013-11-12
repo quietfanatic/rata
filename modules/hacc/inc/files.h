@@ -78,7 +78,12 @@ namespace hacc {
      //  either all of the operations succeed or none of them will.
     void file_transaction (const Func<void ()>&);
 
+     // Callback for logging internal file operations.
     void set_file_logger (const Func<void (String)>&);
+
+     // Special rules for files with a specific extension.  For example,
+     //  loading a tilemap from a binary file instead of a hacc file.
+    void special_filetype (std::string ext, const Func<Dynamic (std::string filename)>);
 
      // PATHS
 

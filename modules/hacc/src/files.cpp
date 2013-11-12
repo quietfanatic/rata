@@ -10,6 +10,7 @@ namespace hacc {
     std::unordered_map<std::string, FileData*> files_by_filename;
     Func<void (String)> logger;
     std::vector<Reference> managed_objects;
+    std::vector<std::pair<std::string, Func<Dynamic (std::string)>>> extensions;
 
      // File structure's innards.  -ing states are named after
      //  the action that is next scheduled to happen to the file
@@ -79,6 +80,18 @@ namespace hacc {
         return fs;
     }
 
+     // File extension magic
+    const Func<Dynamic (std::string)>& get_ext (std::string filename) {
+        static const Func<Dynamic (std::string)> null_extf = null;
+        size_t dot = filename.rfind('.');
+        if (dot == std::string::npos) return null_extf;
+        std::string ext = filename.substr(dot + 1);
+        for (auto& p : extensions) {
+            if (ext == p.first) return p.second;
+        }
+        return null_extf;
+    }
+
      // LOADING AND UNLOADING AND STUFF
 
     struct Transaction {
@@ -127,8 +140,14 @@ namespace hacc {
          // LOADING
         void request_load (File f) {
             if (f.p->state != UNLOADED) return;
-            f.p->state = LOAD_PREPARING;
-            load_prepare(f);
+            if (auto& extf = get_ext(f.p->filename)) {
+                f.p->state = LOAD_FILLING;
+                new Action(FILL, [=](){ load_ext(f, extf); });
+            }
+            else {
+                f.p->state = LOAD_PREPARING;
+                load_prepare(f);
+            }
         }
         void load_prepare (File f) {
             Tree t;
@@ -157,6 +176,17 @@ namespace hacc {
         void load_finish (File f) {
             try {
                 Reference(&f.p->data).finish();
+            }
+            catch (X::Error& e) {
+                if (e.filename.empty()) e.filename = f.filename();
+                throw;
+            }
+            f.p->state = LOAD_COMMITTING;
+            new Action(COMMIT, [=](){ load_commit(f); });
+        }
+        void load_ext (File f, const Func<Dynamic (std::string)>& extf) {
+            try {
+                f.p->data = extf(f.p->filename);
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
@@ -205,8 +235,14 @@ namespace hacc {
         void request_reload (File f) {
             if (f.p->state != LOADED) return;
             f.p->old_data = std::move(f.p->data);
-            f.p->state = RELOAD_PREPARING;
-            reload_prepare(f);
+            if (auto& extf = get_ext(f.p->filename)) {
+                f.p->state = RELOAD_FILLING;
+                new Action(FILL, [=](){ reload_ext(f, extf); });
+            }
+            else {
+                f.p->state = RELOAD_PREPARING;
+                reload_prepare(f);
+            }
         }
         void reload_prepare (File f) {
             Tree t;
@@ -235,6 +271,21 @@ namespace hacc {
         bool reload_verify_scheduled = false;
         void reload_finish (File f) {
             try {
+                Reference(&f.p->data).finish();
+            }
+            catch (X::Error& e) {
+                if (e.filename.empty()) e.filename = f.filename();
+                throw;
+            }
+            f.p->state = RELOAD_VERIFYING;
+            if (!reload_verify_scheduled) {
+                reload_verify_scheduled = true;
+                new Action(VERIFY, [=](){ reload_verify(); });
+            }
+        }
+        void reload_ext (File f, const Func<Dynamic (std::string)>& extf) {
+            try {
+                f.p->data = extf(f.p->filename);
                 Reference(&f.p->data).finish();
             }
             catch (X::Error& e) {
