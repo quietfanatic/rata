@@ -232,7 +232,12 @@ void _help (std::string about) {
     else {
         auto iter = commands_by_name2().find(about);
         if (iter != commands_by_name2().end()) {
-            print_to_console(iter->second->description);
+            print_to_console(about);
+            for (size_t i = 0; i < iter->second->arg_types.size(); i++) {
+                print_to_console(" <" + iter->second->arg_types[i].name() + ">");
+                if (i >= iter->second->min_args) print_to_console("?");
+            }
+            print_to_console(" : " + iter->second->description + "\n");
         }
         else {
             print_to_console("Unknown command " + about + "; available are:");

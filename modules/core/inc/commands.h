@@ -24,6 +24,7 @@ namespace core {
         std::string name;
         std::string description;
         size_t min_args;
+        std::vector<hacc::Type> arg_types;
         hacc::Type type;
         void* func;
         template <class... Args>
@@ -79,27 +80,14 @@ namespace core {
         }
     };
 
-    static std::string build_desc (size_t req) { return ""; }
-    static std::string build_desc (size_t req, std::string name) {
-        return "<" + name + (req > 0 ? ">" : ">?");
-    }
-    template <class F, class... Args>
-    static std::string build_desc (size_t req, F f, Args... names) {
-        return "<" + f + (req > 0 ? "> " : ">? ")
-             + build_desc(req - 1, names...);
-    }
-
     template <class... Args>
     New_Command::New_Command (
         std::string name, std::string desc, size_t min_args,
         void (* func )(Args... args)
     ) : name(name),
-        description(
-            name + " " +
-            build_desc(min_args, hacc::Type::CppType<typename std::decay<Args>::type>().name()...)
-            + "\n" + desc + "\n"
-        ),
+        description(desc),
         min_args(min_args),
+        arg_types{hacc::Type::CppType<typename std::decay<Args>::type>()...},
         type(hacc::Type::CppType<CommandDataT<Args...>>()),
         func((void*)func)
     {
