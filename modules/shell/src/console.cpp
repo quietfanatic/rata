@@ -23,6 +23,9 @@ namespace shell {
         std::string stash_cli;
 
         Font* font = NULL;
+         // We need to skip one frame of input when the console turns on,
+         //  otherwise the hotkey that enabled it will be heard.
+        bool wait_for_draw = false;
 
          // Store the callbacks we're temporarily replacing.
         std::function<bool (int, int)> old_key_cb;
@@ -113,6 +116,7 @@ namespace shell {
             return false;
         }
         bool hear_char (int code, int action) {
+            if (wait_for_draw) return false;
             if (glfwGetKey(GLFW_KEY_LCTRL) || glfwGetKey(GLFW_KEY_RCTRL)) {
                 switch (code) {
                     case 'd': {
@@ -142,6 +146,7 @@ namespace shell {
         }
         void enter_console () {
             if (visible()) return;
+            wait_for_draw = true;
             core::trap_cursor = false;
             ent::player_controllable = false;
             old_key_cb = std::move(window->key_callback);
@@ -158,6 +163,7 @@ namespace shell {
             disappear();
         }
         void Drawn_draw (Dev r) override {
+            wait_for_draw = false;
             if (!font) return;
              // Darken background
             color_offset(Vec(0, 0));
