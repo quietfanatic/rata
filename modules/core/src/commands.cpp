@@ -11,6 +11,7 @@
 #include "../inc/window.h"
 
 using namespace hacc;
+using namespace core;
 
 HACCABLE(Command) {
     name("Command");
@@ -77,7 +78,67 @@ HACCABLE(Command) {
     });
 }
 
+ // This is large because we have to manipulate arrays and do dynamically-typed stuff
+HACCABLE(Command2) {
+    name("Command2");
+    to_tree([](const Command2& cmd){
+        Tree inner = Reference(Type(typeid(*cmd)), (void*)&*cmd).to_tree();
+        auto& less = inner.as<const Array&>();
+        Array more;
+        more.reserve(less.size() + 1);
+        more.push_back(Tree(cmd->name));
+        for (auto& t : less)
+            more.emplace_back(t);
+        return Tree(std::move(more));
+    });
+    prepare([](Command2& cmd, Tree tree){
+        auto& more = tree.as<const Array&>();
+        if (more.size() == 0)
+            throw X::Logic_Error("A command cannot be represented by an empty array");
+        if (more[0].form() != STRING)
+            throw X::Logic_Error("A command must have a string as its first element");
+        std::string name = more[0].as<std::string>();
+        auto iter = commands_by_name2().find(name);
+        if (iter != commands_by_name2().end()) {
+            auto desc = iter->second;
+            void* dat = operator new (desc->type.size());
+            desc->type.construct(dat);
+            cmd = Command2((CommandData2*)dat);
+            Array less;
+            less.reserve(more.size() - 1);
+            for (size_t i = 1; i < more.size(); i++)
+                less.push_back(more[i]);
+            Reference(desc->type, dat).prepare(Tree(std::move(less)));
+        }
+        else throw X::Logic_Error("No command found named " + name);
+    });
+    fill([](Command2& cmd, Tree tree){
+        auto& a = tree.as<const Array&>();
+        if (a.size() == 0)
+            throw X::Logic_Error("A command cannot be represented by an empty array");
+        Array less;
+        less.reserve(a.size() - 1);
+        for (size_t i = 1; i < a.size(); i++)
+            less.push_back(a[i]);
+        Reference(
+            Type(typeid(*cmd)),
+            &*cmd
+        ).fill(Tree(std::move(less)));
+    });
+    finish([](Command2& cmd){
+        Reference(
+            Type(typeid(*cmd)),
+            &*cmd
+        ).finish();
+    });
+}
+
 namespace core {
+
+    std::unordered_map<std::string, New_Command*>& commands_by_name2 () {
+        static std::unordered_map<std::string, New_Command*> r;
+        return r;
+    }
 
     std::vector<std::string> command_history;
 

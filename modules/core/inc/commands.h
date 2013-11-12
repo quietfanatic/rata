@@ -2,6 +2,7 @@
 #define HAVE_CORE_COMMANDS_H
 
 #include <typeinfo>
+#include <type_traits>
 #include <string>
 #include <vector>
 #include "../../util/inc/honestly.h"
@@ -18,6 +19,19 @@ struct Command final : hacc::DPtr<CommandData> {
 };
 
 namespace core {
+     // The API for declaring functions.
+    struct New_Command {
+        std::string name;
+        std::string description;
+        size_t min_args;
+        hacc::Type type;
+        void* func;
+        template <class... Args>
+        New_Command (std::string, std::string, size_t, void(*)(Args...));
+    };
+     // And getting them by name.
+    std::unordered_map<std::string, New_Command*>& commands_by_name2 ();
+
     using namespace util;
 
     void command_from_string (std::string s);
@@ -35,6 +49,59 @@ namespace core {
 
      // Default help message
     std::string no_description_available ();
+
+     // Internal command implementation
+    struct CommandData2 : hacc::DPtee {
+        std::string name;
+        virtual void operator () () = 0;
+    };
+    struct Command2 final : hacc::DPtr<CommandData2> {
+        explicit Command2 (CommandData2* d = NULL) : DPtr(d) { }
+        void operator () () { (**this)(); }
+    };
+
+     // All this is required to unpack a tuple into function arguments.
+    template <size_t...> struct _Seq { };
+    template <size_t size, size_t... inds>
+    struct _Count : _Count<size-1, size-1, inds...> { };
+    template <size_t... inds>
+    struct _Count<0, inds...> { typedef _Seq<inds...> type; };
+
+    template <class... Args>
+    struct CommandDataT : CommandData2 {
+        New_Command* info;
+        std::tuple<typename std::remove_reference<Args>::type...> args;
+        template <size_t... inds>
+        void unpack (_Seq<inds...>) {
+            (*(void(*)(Args...))info->func)(std::get<inds>(args)...);
+        }
+        void operator () () {
+            unpack(_Count<sizeof...(Args)>::type());
+        }
+    };
+
+    static std::string build_desc (size_t req, std::string name) {
+        return "<" + name + (req > 0 ? ">" : ">?");
+    }
+    template <class F, class... Args>
+    static std::string build_desc (size_t req, F f, Args... names) {
+        return "<" + f + (req > 0 ? "> " : ">? ")
+             + build_desc(req - 1, names...);
+    }
+
+    template <class... Args>
+    New_Command::New_Command (
+        std::string name, std::string desc, size_t min_args,
+        void (* func )(Args... args)
+    ) : name(name),
+        description(
+            build_desc(min_args, hacc::Type::CppType<std::remove_reference<Args>::type>().name()...)
+            + "\n" + desc + "\n"
+        ),
+        min_args(min_args),
+        type(hacc::Type::CppType<CommandDataT<Args...>>()),
+        func((void*)func)
+    { }
 }
 
 struct Command_Description {
@@ -52,6 +119,10 @@ void new_command (std::string name, std::string desc = core::no_description_avai
     auto cd = new Command_Description{hacc::Type::CppType<Cmd>(), name, desc};
     commands_by_type().emplace(cd->type.data, cd);
     commands_by_name().emplace(cd->name, cd);
+}
+
+HACCABLE_TEMPLATE(<class... Args>, core::CommandDataT<Args...>) {
+    delegate(elem(&core::CommandDataT<Args...>::args));
 }
 
 #endif
