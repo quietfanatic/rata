@@ -76,10 +76,11 @@ namespace core {
             (*(void(*)(Args...))info->func)(std::get<inds>(args)...);
         }
         void operator () () {
-            unpack(_Count<sizeof...(Args)>::type());
+            unpack(typename _Count<sizeof...(Args)>::type());
         }
     };
 
+    static std::string build_desc (size_t req) { return ""; }
     static std::string build_desc (size_t req, std::string name) {
         return "<" + name + (req > 0 ? ">" : ">?");
     }
@@ -95,6 +96,7 @@ namespace core {
         void (* func )(Args... args)
     ) : name(name),
         description(
+            name + " " +
             build_desc(min_args, hacc::Type::CppType<std::remove_reference<Args>::type>().name()...)
             + "\n" + desc + "\n"
         ),
@@ -122,7 +124,7 @@ void new_command (std::string name, std::string desc = core::no_description_avai
 }
 
 HACCABLE_TEMPLATE(<class... Args>, core::CommandDataT<Args...>) {
-    delegate(elem(&core::CommandDataT<Args...>::args));
+    delegate(member(&core::CommandDataT<Args...>::args));
 }
 
 #endif

@@ -254,17 +254,15 @@ HACCABLE(HelpCommand) {
     elem(member(&HelpCommand::about).optional());
 }
 
-struct HistoryCommand : CommandData {
-    void operator () () {
-        for (uint i = 0; i < command_history.size(); i++) {
-            print_to_console(std::to_string(i) + ": " + command_history[i] + "\n");
-        }
+void _history () {
+    for (uint i = 0; i < command_history.size(); i++) {
+        print_to_console(std::to_string(i) + ": " + command_history[i] + "\n");
     }
-};
-
-HACCABLE(HistoryCommand) {
-    new_command<HistoryCommand>("history", "Show previously entered commands");
 }
+New_Command _history_cmd (
+    "history", "Show previously entered commands",
+    0, _history
+);
 
 struct GetCommand : CommandData {
     Reference ref;
