@@ -260,22 +260,13 @@ void _history () {
         print_to_console(std::to_string(i) + ": " + command_history[i] + "\n");
     }
 }
-New_Command _history_cmd (
-    "history", "Show previously entered commands",
-    0, _history
-);
+New_Command _history_cmd ("history", "Show previously entered commands", 0, _history);
 
-struct GetCommand : CommandData {
-    Reference ref;
-    void operator () () {
-        print_to_console(ref.show() + "\n");
-        print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");
-    }
-};
-HACCABLE(GetCommand) {
-    new_command<GetCommand>("get", "Print the data at a path");
-    elem(member(&GetCommand::ref));
+void _get (const Reference& ref) {
+    print_to_console(ref.show() + "\n");
+    print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");
 }
+New_Command _get_cmd ("get", "Print the data at a path", 1, _get);
 
 struct KeysCommand : CommandData {
     Reference ref;

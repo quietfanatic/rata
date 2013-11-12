@@ -69,7 +69,7 @@ namespace core {
 
     template <class... Args>
     struct CommandDataT : CommandData2 {
-        std::tuple<typename std::remove_reference<Args>::type...> args;
+        std::tuple<typename std::decay<Args>::type...> args;
         template <size_t... inds>
         void unpack (_Seq<inds...>) {
             (*(void(*)(Args...))info->func)(std::get<inds>(args)...);
@@ -96,7 +96,7 @@ namespace core {
     ) : name(name),
         description(
             name + " " +
-            build_desc(min_args, hacc::Type::CppType<std::remove_reference<Args>::type>().name()...)
+            build_desc(min_args, hacc::Type::CppType<typename std::decay<Args>::type>().name()...)
             + "\n" + desc + "\n"
         ),
         min_args(min_args),
