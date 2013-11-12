@@ -106,6 +106,10 @@ namespace hacc {
 
      // Let this object be scanned and managed by the hacc system.
      //  This can reference file objects, but file objects cannot reference it.
+     //  Note: if you manage a pointer, make sure to call this on the address of
+     //  the pointer, not the pointer itself.  For example,
+     //      Program* prog = hacc::File("vis/res/color.prog").data().attr("prog");
+     //      hacc::manage(&prog);  // NOT hacc::manage(prog)
     void manage (Reference);
 
     namespace X {
