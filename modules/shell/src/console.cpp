@@ -251,17 +251,12 @@ HACCABLE(shell::Console) {
     attr("font", member(&shell::Console::font));
 }
 
-struct OpenConsoleCommand : CommandData {
-    void operator () () { if (console) console->enter_console(); }
-};
-HACCABLE(OpenConsoleCommand) {
-    name("OpenConsoleCommand");
-    new_command<OpenConsoleCommand>("open_console", "Open the in-game console.");
+void _open_console () {
+    if (console) console->enter_console();
 }
-struct ExitCommand : CommandData {
-    void operator () () { if (console) console->exit_console(); }
-};
-HACCABLE(ExitCommand) {
-    name("ExitCommand");
-    new_command<ExitCommand>("exit", "Close the in-game console.");
+core::New_Command _open_console_cmd ("open_console", "Open the in-game console.", 0, _open_console);
+
+void _exit () {
+    if (console) console->exit_console();
 }
+core::New_Command _exit_cmd ("exit", "Close the in-game console.", 0, _exit);

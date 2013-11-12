@@ -8,16 +8,6 @@
 #include "../../util/inc/honestly.h"
 #include "../../util/inc/organization.h"
 
-struct CommandData : hacc::DPtee {
-    static constexpr bool isa_CommandData = true;
-    virtual void operator () () = 0;
-};
-
-struct Command final : hacc::DPtr<CommandData> {
-    explicit Command (CommandData* d = NULL) : DPtr(d) { }
-    void operator () () { (**this)(); }
-};
-
 namespace core {
      // The API for declaring functions.
     struct New_Command {
@@ -31,7 +21,7 @@ namespace core {
         New_Command (std::string, std::string, size_t, void(*)(Args...));
     };
      // And getting them by name.
-    std::unordered_map<std::string, New_Command*>& commands_by_name2 ();
+    std::unordered_map<std::string, New_Command*>& commands_by_name ();
 
     using namespace util;
 
@@ -52,12 +42,12 @@ namespace core {
     std::string no_description_available ();
 
      // Internal command implementation
-    struct CommandData2 : hacc::DPtee {
+    struct CommandData : hacc::DPtee {
         New_Command* info;
         virtual void operator () () const = 0;
     };
-    struct Command2 final : hacc::DPtr<CommandData2> {
-        explicit Command2 (CommandData2* d = NULL) : DPtr(d) { }
+    struct Command final : hacc::DPtr<CommandData> {
+        explicit Command (CommandData* d = NULL) : DPtr(d) { }
         void operator () () const { (**this)(); }
     };
 
@@ -69,7 +59,7 @@ namespace core {
     struct _Count<0, inds...> { typedef _Seq<inds...> type; };
 
     template <class... Args>
-    struct CommandDataT : CommandData2 {
+    struct CommandDataT : CommandData {
         std::tuple<typename std::decay<Args>::type...> args;
         template <size_t... inds>
         void unpack (_Seq<inds...>) const {
@@ -91,25 +81,8 @@ namespace core {
         type(hacc::Type::CppType<CommandDataT<Args...>>()),
         func((void*)func)
     {
-        commands_by_name2().emplace(name, this);
+        commands_by_name().emplace(name, this);
     }
-}
-
-struct Command_Description {
-    hacc::Type type;
-    std::string name;
-    std::string description;
-};
-
-EXTERN_INIT_SAFE(std::unordered_map<hacc::TypeData* _COMMA Command_Description*>, commands_by_type);
-EXTERN_INIT_SAFE(std::unordered_map<std::string _COMMA Command_Description*>, commands_by_name);
-
-template <class Cmd>
-void new_command (std::string name, std::string desc = core::no_description_available()) {
-    static_assert(Cmd::isa_CommandData, "isa_CommandData");
-    auto cd = new Command_Description{hacc::Type::CppType<Cmd>(), name, desc};
-    commands_by_type().emplace(cd->type.data, cd);
-    commands_by_name().emplace(cd->name, cd);
 }
 
 HACCABLE_TEMPLATE(<class... Args>, core::CommandDataT<Args...>) {

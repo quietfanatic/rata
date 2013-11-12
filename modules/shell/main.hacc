@@ -1,6 +1,6 @@
 {Settings:{
     window:{
-        width: 1280
+        width: 1280  // Large dimensions for editing
         height: 960
         depth: 8
     }

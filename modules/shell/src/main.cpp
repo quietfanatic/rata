@@ -18,7 +18,7 @@ static std::string main_file = "shell/main.hacc";
 struct Settings {
     core::Window window;
     vis::Settings vis;
-    std::vector<std::pair<int, Command>> hotkeys;
+    std::vector<std::pair<int, core::Command>> hotkeys;
     bool paused = false;
 };
 static Settings* settings = NULL;
@@ -84,12 +84,9 @@ HACCABLE(Settings) {
     attr("paused", member(&Settings::paused).optional());
 }
 
-struct PauseCommand : CommandData {
-    void operator () () { settings->paused = !settings->paused; }
-};
-HACCABLE(PauseCommand) {
-    name("PauseCommand");
-    new_command<PauseCommand>("pause", "Toggle whether game activity occurs.");
+void _pause () {
+    settings->paused = !settings->paused;
 }
+core::New_Command _pause_cmd ("pause", "Toggle whether game activity occurs.", 0, _pause);
 
 
