@@ -26,6 +26,8 @@ namespace shell {
          // We need to skip one frame of input when the console turns on,
          //  otherwise the hotkey that enabled it will be heard.
         bool wait_for_draw = false;
+         // Tab completion FTW
+        std::vector<std::string> completion_matches;
 
          // Store the callbacks we're temporarily replacing.
         std::function<bool (int, int)> old_key_cb;
@@ -109,8 +111,65 @@ namespace shell {
                         }
                         break;
                     }
+                    case GLFW_KEY_TAB: {
+                         // Completion of a command
+                        size_t start = 0;
+                        while (start < cli_pos && cli[start] == ' ')
+                            start++;
+                        size_t end = cli_pos;
+                        bool dont_complete = false;
+                        for (size_t i = start; i < end; i++) {
+                            if (cli[i] == ' ') {
+                                dont_complete = true;
+                                break;
+                            }
+                        }
+                        if (dont_complete) break;
+                        auto cmd_part = cli.substr(start, end - start);
+                        if (!completion_matches.empty()) {
+                            Console_print(cli + "\n");
+                            for (auto s : completion_matches) {
+                                Console_print(s + " ");
+                            }
+                            Console_print("\n");
+                        }
+                        else {
+                             // Find all commands beginning with this
+                            for (auto& p : commands_by_name()) {
+                                if (p.first.size() >= cmd_part.size()) {
+                                    for (size_t i = 0; i < cmd_part.size(); i++) {
+                                        if (p.first[i] != cmd_part[i])
+                                            goto no_match;
+                                    }
+                                    completion_matches.push_back(p.first);
+                                }
+                                no_match: { }
+                            }
+                             // One match?  Complete it.
+                            if (completion_matches.size() == 1) {
+                                cli.replace(start, end - start, completion_matches[0] + " ");
+                                cli_pos = completion_matches[0].size() + 1;
+                            }
+                             // Multiple matches?  Fill as much as possible.
+                            else if (completion_matches.size() > 1) {
+                                for (;;) {
+                                    char common = completion_matches[0][cmd_part.size()];
+                                    for (auto s : completion_matches) {
+                                        if (s.size() < cmd_part.size() || s[cmd_part.size()] != common) {
+                                            goto done_adding;
+                                        }
+                                    }
+                                }
+                                done_adding:
+                                cli.replace(start, end - start, cmd_part);
+                                cli_pos = cmd_part.size();
+                            }
+                        }
+                        return true;
+                    }
                     default: break;
                 }
+                completion_matches.clear();
                 return true;
             }
             return false;
@@ -142,6 +201,7 @@ namespace shell {
                     + cli.substr(cli_pos);
                 cli_pos++;
             }
+            completion_matches.clear();
             return true;
         }
         void enter_console () {
