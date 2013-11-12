@@ -101,6 +101,8 @@ HACCABLE(Command2) {
         auto iter = commands_by_name2().find(name);
         if (iter != commands_by_name2().end()) {
             auto desc = iter->second;
+            if (more.size() - 1 < desc->min_args)
+                throw X::Logic_Error("Not enough arguments for command " + name);
             void* dat = operator new (desc->type.size());
             desc->type.construct(dat);
             cmd = Command2((CommandData2*)dat);
