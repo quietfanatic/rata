@@ -63,6 +63,7 @@ namespace ent {
 
          // For animation
         vis::Model model;  // Must be a humanlike model
+        void animate ();
         float distance_walked = 0;
         float oldxrel = 0;
         void Drawn_draw (vis::Sprites) override;

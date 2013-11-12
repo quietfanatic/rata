@@ -9,7 +9,6 @@ namespace ent {
      // Definitions
     void Biped::set_def (BipedDef* _def) {
         def = _def;
-        model.apply_skel(def->skel);
         stats = *def->stats;
     }
 
@@ -126,7 +125,7 @@ namespace ent {
             return stats.crawl_speed * mdir;
         else if (direction == mdir)
             return stats.run_speed * mdir;
-        else 
+        else
             return stats.walk_speed * mdir;
     }
     float Biped::Grounded_friction () {
@@ -173,8 +172,8 @@ namespace ent {
         geo::camera_pos = pos();
     }
 
-    void Biped::Drawn_draw (vis::Sprites) {
-        model.apply_skin(def->skin);
+    void Biped::animate () {
+        model.apply_skel(def->skel);
         uint8 look_frame = angle_frame(atan2(focus.y, focus.x));
         if (ground) {
             if (jump_timer) {
@@ -227,6 +226,10 @@ namespace ent {
             model.apply_pose(&def->poses->jump);
             model.apply_pose(&def->poses->look_walk[look_frame]);
         }
+    }
+    void Biped::Drawn_draw (vis::Sprites) {
+        animate();
+        model.apply_skin(def->skin);
         model.draw(pos(), direction < 0);
     }
 
