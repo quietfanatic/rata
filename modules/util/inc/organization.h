@@ -45,6 +45,7 @@ namespace util {
         void link (Link<C, which>* l) { link_before(l); }
         void link (Link<C, which>& l) { link_before(&l); }
 
+        ~Link () { unlink(); }
     };
 
     template <class C, uint which = 0>
