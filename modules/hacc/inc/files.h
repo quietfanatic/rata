@@ -83,7 +83,16 @@ namespace hacc {
 
      // Special rules for files with a specific extension.  For example,
      //  loading a tilemap from a binary file instead of a hacc file.
-    void special_filetype (std::string ext, const Func<Dynamic (std::string filename)>);
+    struct Special_Filetype {
+        std::string extension;
+        Func<Dynamic (std::string filename)> load;
+        Func<void (std::string filename, const Dynamic&)> save;
+        Special_Filetype (
+            std::string,
+            const Func<Dynamic (std::string)>&,
+            const Func<void (std::string, const Dynamic&)>&
+        );
+    };
 
      // PATHS
 

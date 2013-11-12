@@ -10,7 +10,6 @@ namespace hacc {
     std::unordered_map<std::string, FileData*> files_by_filename;
     Func<void (String)> logger;
     std::vector<Reference> managed_objects;
-    std::vector<std::pair<std::string, Func<Dynamic (std::string)>>> extensions;
 
      // File structure's innards.  -ing states are named after
      //  the action that is next scheduled to happen to the file
@@ -81,15 +80,29 @@ namespace hacc {
     }
 
      // File extension magic
-    const Func<Dynamic (std::string)>& get_ext (std::string filename) {
-        static const Func<Dynamic (std::string)> null_extf = null;
+
+    static std::unordered_map<std::string, Special_Filetype*>& extensions () {
+        static std::unordered_map<std::string, Special_Filetype*> r;
+        return r;
+    }
+
+    Special_Filetype::Special_Filetype (
+        std::string ext,
+        const Func<Dynamic (std::string)>& load,
+        const Func<void (std::string, const Dynamic&)>& save
+    ) : extension(ext), load(load), save(save) {
+        extensions().emplace(ext, this);
+    }
+
+    Special_Filetype* get_ext (std::string filename) {
         size_t dot = filename.rfind('.');
-        if (dot == std::string::npos) return null_extf;
+        if (dot == std::string::npos) return null;
         std::string ext = filename.substr(dot + 1);
-        for (auto& p : extensions) {
-            if (ext == p.first) return p.second;
-        }
-        return null_extf;
+        auto iter = extensions().find(ext);
+        if (iter != extensions().end())
+            return iter->second;
+        else
+            return null;
     }
 
      // LOADING AND UNLOADING AND STUFF
@@ -140,9 +153,9 @@ namespace hacc {
          // LOADING
         void request_load (File f) {
             if (f.p->state != UNLOADED) return;
-            if (auto& extf = get_ext(f.p->filename)) {
+            if (auto ext = get_ext(f.p->filename)) {
                 f.p->state = LOAD_FILLING;
-                new Action(FILL, [=](){ load_ext(f, extf); });
+                new Action(FILL, [=](){ load_ext(f, ext); });
             }
             else {
                 f.p->state = LOAD_PREPARING;
@@ -184,9 +197,9 @@ namespace hacc {
             f.p->state = LOAD_COMMITTING;
             new Action(COMMIT, [=](){ load_commit(f); });
         }
-        void load_ext (File f, const Func<Dynamic (std::string)>& extf) {
+        void load_ext (File f, Special_Filetype* ext) {
             try {
-                f.p->data = extf(f.p->filename);
+                f.p->data = ext->load(f.p->filename);
             }
             catch (X::Error& e) {
                 if (e.filename.empty()) e.filename = f.filename();
@@ -204,7 +217,12 @@ namespace hacc {
         void request_save (File f) {
              // Saving is ideally a read-only operation, so no state changes
              //  are necessary.
-            new Action(VERIFY, [=](){ save_prepare(f); });
+            if (auto ext = get_ext(f.p->filename)) {
+                new Action(SAVE_COMMIT, [=](){ save_ext(f, ext); });
+            }
+            else {
+                new Action(VERIFY, [=](){ save_prepare(f); });
+            }
         }
         void save_prepare (File f) {
             Tree t;
@@ -230,14 +248,27 @@ namespace hacc {
                 delayed_errors.push_back(std::current_exception());
             }
         }
+        void save_ext (File f, Special_Filetype* ext) {
+            try {
+                ext->save(f.p->filename, f.p->data);
+                if (logger) logger("Saved \"" + f.filename() + "\"");
+            }
+            catch (X::Error& e) {
+                if (e.filename.empty()) e.filename = f.filename();
+                delayed_errors.push_back(std::current_exception());
+            }
+            catch (...) {
+                delayed_errors.push_back(std::current_exception());
+            }
+        }
 
          // RELOADING
         void request_reload (File f) {
             if (f.p->state != LOADED) return;
             f.p->old_data = std::move(f.p->data);
-            if (auto& extf = get_ext(f.p->filename)) {
+            if (auto ext = get_ext(f.p->filename)) {
                 f.p->state = RELOAD_FILLING;
-                new Action(FILL, [=](){ reload_ext(f, extf); });
+                new Action(FILL, [=](){ reload_ext(f, ext); });
             }
             else {
                 f.p->state = RELOAD_PREPARING;
@@ -283,9 +314,9 @@ namespace hacc {
                 new Action(VERIFY, [=](){ reload_verify(); });
             }
         }
-        void reload_ext (File f, const Func<Dynamic (std::string)>& extf) {
+        void reload_ext (File f, Special_Filetype* ext) {
             try {
-                f.p->data = extf(f.p->filename);
+                f.p->data = ext->load(f.p->filename);
                 Reference(&f.p->data).finish();
             }
             catch (X::Error& e) {
