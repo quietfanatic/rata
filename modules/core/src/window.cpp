@@ -10,8 +10,8 @@ namespace core {
 
      // Input handling
     int GLFWCALL close_cb () {
-        window->close();
-        return true;
+        window->stop();
+        return false;
     }
     void GLFWCALL key_cb (int keycode, int action) {
         if (window->key_callback && window->key_callback(keycode, action))
