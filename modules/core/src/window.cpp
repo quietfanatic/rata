@@ -167,7 +167,7 @@ void _reload (std::string filename) {
 };
 New_Command _reload_cmd ("reload",
     "Reload the file with the given filename, or if none given all files containing '/res/'.",
-    1, _reload
+    0, _reload
 );
 
 void _unload (std::string filename) {
