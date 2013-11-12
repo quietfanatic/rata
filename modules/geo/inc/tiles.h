@@ -26,7 +26,7 @@ namespace geo {
         vis::Texture* texture;
         uint32 width;
         uint32 height;
-        std::vector<uint16> tiles;
+        std::vector<uint16>* tiles;
         vis::Tiles vis_tiles;
 
         void Resident_emerge () override;

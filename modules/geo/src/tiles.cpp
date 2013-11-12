@@ -116,7 +116,7 @@ namespace geo {
     void Tilemap::finish () {
         set_def(tilemap_bdf());
         physicalize();
-        vis_tiles.finish(width, height, tiles.data());
+        vis_tiles.finish(width, height, tiles->data());
     }
 
     void Tilemap::physicalize () {
@@ -128,9 +128,9 @@ namespace geo {
         uint merged = 0;
         uint eaten = 0;
         uint final = 0;
-        if (tiles.size() != width * height) {
+        if (tiles->size() != width * height) {
             throw hacc::X::Logic_Error(
-                "Tilemap has wrong number of tiles (" + std::to_string(tiles.size())
+                "Tilemap has wrong number of tiles (" + std::to_string(tiles->size())
               + " != " + std::to_string(width * height)
               + " == " + std::to_string(width)
               + " * " + std::to_string(height)
@@ -139,7 +139,7 @@ namespace geo {
         }
         for (uint y = 0; y < height; y++)
         for (uint x = 0; x < width; x++) {
-            TileDef* def = tileset->tiles.at(tiles[y*width+x] & 0x3fff);
+            TileDef* def = tileset->tiles.at((*tiles)[y*width+x] & 0x3fff);
             if (def) {
                 uint n_edges = def->vertices.size();
                  // Create the edges for this tile
