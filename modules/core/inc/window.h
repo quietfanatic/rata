@@ -7,8 +7,6 @@
 
 namespace core {
 
-    typedef std::function<void ()> Callback;
-
     extern uint64 frames_simulated;
     extern uint64 frames_drawn;
 
@@ -25,9 +23,13 @@ namespace core {
         uint8 depth = 0;
         uint8 stencil = 0;
         bool fullscreen = false;
+        bool paused = false;
 
-        Callback step;
-        Callback render;
+        std::function<void ()> step;
+        std::function<void ()> render;
+         // Return true if you've handled the key
+        std::function<bool (int, int)> key_callback;
+        std::function<bool (int, int)> char_callback;
 
         uint64 frames_simulated = 0;
         uint64 frames_drawn = 0;
@@ -60,7 +62,7 @@ namespace core {
          //  will be run when the window loop is started.
          // All ops in one frame will be run in one hacc file transaction,
          //  and an exception will abort all ops.
-        void before_next_frame (const Callback& f) { pending_ops.emplace_back(f); }
+        void before_next_frame (const std::function<void ()>& f) { pending_ops.emplace_back(f); }
     };
     extern Window* window;
 

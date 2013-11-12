@@ -1,4 +1,4 @@
-
+#include <algorithm>  // std::move
 #include "../../core/inc/input.h"
 #include "../../core/inc/commands.h"
 #include "../../core/inc/window.h"
@@ -12,8 +12,9 @@ namespace shell {
     using namespace core;
     using namespace vis;
 
-    struct Console : Key_Listener, Char_Listener, core::Console, Drawn<Dev> {
-        bool is_active = false;
+    struct Console;
+    Console* console = NULL;
+    struct Console : core::Console, Drawn<Dev> {
         std::string contents = console_help();
         std::string cli = "";
         uint cli_pos = 0;
@@ -21,115 +22,97 @@ namespace shell {
         uint history_index = core::command_history.size();
         std::string stash_cli;
 
-        bool ignore_a_trigger = false;
-
         Font* font = NULL;
-        char trigger = '`';
+
+         // Store the callbacks we're temporarily replacing.
+        std::function<bool (int, int)> old_key_cb;
+        std::function<bool (int, int)> old_char_cb;
 
         static CE size_t max_size = 2<<15;
 
-        Console () : Key_Listener("A"), Char_Listener("A") {
-            contents.reserve(max_size);
-        }
+        Console () { if (!console) console = this; }
+        ~Console () { if (console == this) console = NULL; }
 
         void Console_print (std::string message) override {
             contents += message;
         }
 
-        bool hear_key (int keycode, int action) override {
-            if (is_active) {
-                if (action == GLFW_PRESS) {
-                    switch (keycode) {
-                        case GLFW_KEY_ESC: {
-                            exit_console();
-                            break;
-                        }
-                        case GLFW_KEY_LEFT: {
-                            if (cli_pos > 0) cli_pos--;
-                            break;
-                        }
-                        case GLFW_KEY_RIGHT: {
-                            if (cli_pos < cli.size()) cli_pos++;
-                            break;
-                        }
-                        case GLFW_KEY_UP: {
-                            if (history_index > 0) {
-                                if (history_index == core::command_history.size()) {
-                                    stash_cli = cli;
-                                }
-                                history_index--;
-                                cli = core::command_history[history_index];
-                                cli_pos = cli.size();
+        bool hear_key (int keycode, int action) {
+            if (action == GLFW_PRESS) {
+                switch (keycode) {
+                    case GLFW_KEY_ESC: {
+                        exit_console();
+                        break;
+                    }
+                    case GLFW_KEY_LEFT: {
+                        if (cli_pos > 0) cli_pos--;
+                        break;
+                    }
+                    case GLFW_KEY_RIGHT: {
+                        if (cli_pos < cli.size()) cli_pos++;
+                        break;
+                    }
+                    case GLFW_KEY_UP: {
+                        if (history_index > 0) {
+                            if (history_index == core::command_history.size()) {
+                                stash_cli = cli;
                             }
-                            break;
-                        }
-                        case GLFW_KEY_DOWN: {
-                            if (history_index < core::command_history.size()) {
-                                history_index++;
-                                if (history_index == core::command_history.size())
-                                    cli = stash_cli;
-                                else
-                                    cli = core::command_history[history_index];
-                                cli_pos = cli.size();
-                            }
-                            break;
-                        }
-                        case GLFW_KEY_HOME: {
-                            cli_pos = 0;
-                            break;
-                        }
-                        case GLFW_KEY_END: {
+                            history_index--;
+                            cli = core::command_history[history_index];
                             cli_pos = cli.size();
-                            break;
                         }
-                        case GLFW_KEY_ENTER: {
-                            print_to_console(cli + "\n");
-                            command_from_string(cli);
-                            cli = "";
-                            cli_pos = 0;
-                            stash_cli = "";
-                            history_index = core::command_history.size();
-                            break;
-                        }
-                        case GLFW_KEY_BACKSPACE: {
-                            if (cli_pos) {
-                                cli = cli.substr(0, cli_pos - 1)
-                                    + cli.substr(cli_pos);
-                                cli_pos--;
-                            }
-                            break;
-                        }
-                        case GLFW_KEY_DEL: {
-                            if (cli_pos < cli.size()) {
-                                cli = cli.substr(0, cli_pos)
-                                    + cli.substr(cli_pos + 1);
-                            }
-                            break;
-                        }
-                        default: break;
+                        break;
                     }
-                    return true;
-                }
-            }
-            else {
-                if (action == GLFW_PRESS) {
-                    if (keycode == trigger) {
-                        if (font) {
-                            ignore_a_trigger = true;
-                            enter_console();
-                            return true;
+                    case GLFW_KEY_DOWN: {
+                        if (history_index < core::command_history.size()) {
+                            history_index++;
+                            if (history_index == core::command_history.size())
+                                cli = stash_cli;
+                            else
+                                cli = core::command_history[history_index];
+                            cli_pos = cli.size();
                         }
+                        break;
                     }
+                    case GLFW_KEY_HOME: {
+                        cli_pos = 0;
+                        break;
+                    }
+                    case GLFW_KEY_END: {
+                        cli_pos = cli.size();
+                        break;
+                    }
+                    case GLFW_KEY_ENTER: {
+                        print_to_console(cli + "\n");
+                        command_from_string(cli);
+                        cli = "";
+                        cli_pos = 0;
+                        stash_cli = "";
+                        history_index = core::command_history.size();
+                        break;
+                    }
+                    case GLFW_KEY_BACKSPACE: {
+                        if (cli_pos) {
+                            cli = cli.substr(0, cli_pos - 1)
+                                + cli.substr(cli_pos);
+                            cli_pos--;
+                        }
+                        break;
+                    }
+                    case GLFW_KEY_DEL: {
+                        if (cli_pos < cli.size()) {
+                            cli = cli.substr(0, cli_pos)
+                                + cli.substr(cli_pos + 1);
+                        }
+                        break;
+                    }
+                    default: break;
                 }
+                return true;
             }
             return false;
         }
-        bool hear_char (int code, int action) override {
-            if (!is_active) return false;
-            if (ignore_a_trigger && code == trigger) {
-                ignore_a_trigger = false;
-                return false;
-            }
+        bool hear_char (int code, int action) {
             if (glfwGetKey(GLFW_KEY_LCTRL) || glfwGetKey(GLFW_KEY_RCTRL)) {
                 switch (code) {
                     case 'd': {
@@ -158,19 +141,24 @@ namespace shell {
             return true;
         }
         void enter_console () {
-            is_active = true;
+            if (visible()) return;
             core::trap_cursor = false;
             ent::player_controllable = false;
+            old_key_cb = std::move(window->key_callback);
+            window->key_callback = [=](int k, int a){ return hear_key(k, a); };
+            old_char_cb = std::move(window->char_callback);
+            window->char_callback = [=](int k, int a){ return hear_char(k, a); };
             appear();
         }
         void exit_console () {
-            is_active = false;
             core::trap_cursor = true;
             ent::player_controllable = true;
+            window->key_callback = std::move(old_key_cb);
+            window->char_callback = std::move(old_char_cb);
             disappear();
         }
         void Drawn_draw (Dev r) override {
-            if (!font || !is_active) return;
+            if (!font) return;
              // Darken background
             color_offset(Vec(0, 0));
             draw_color(0x000000cf);
@@ -194,6 +182,12 @@ namespace shell {
 HACCABLE(shell::Console) {
     name("shell::Console");
     attr("font", member(&shell::Console::font));
-    attr("trigger", member(&shell::Console::trigger).optional());
 }
 
+struct OpenConsoleCommand : CommandData {
+    void operator () () { if (console) console->enter_console(); }
+};
+HACCABLE(OpenConsoleCommand) {
+    name("OpenConsoleCommand");
+    new_command<OpenConsoleCommand>("open_console", "Open the console.");
+}

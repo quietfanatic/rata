@@ -8,6 +8,32 @@
 
 namespace core {
 
+     // Input handling
+    int GLFWCALL close_cb () {
+        window->close();
+        return true;
+    }
+    void GLFWCALL key_cb (int keycode, int action) {
+        if (window->key_callback && window->key_callback(keycode, action))
+            return;
+        if (action == GLFW_PRESS) {
+            switch (keycode) {
+                case '~': {
+                    command_from_terminal();
+                    break;
+                }
+                case GLFW_KEY_ESC: {
+                    window->stop();
+                    break;
+                }
+                default: break;
+            }
+        }
+    }
+    void GLFWCALL char_cb (int charcode, int action) {
+        window->char_callback && window->char_callback(charcode, action);
+    }
+
     Logger file_logger ("files");
     Logger game_logger ("game");
 
@@ -49,9 +75,9 @@ namespace core {
          // Set all the window calbacks.  The reason these aren't set on open
          //  is because the input system may crash if the callbacks are called
          //  while the program is exiting and things are being destructed.
+        glfwSetWindowCloseCallback(close_cb);
         glfwSetKeyCallback(key_cb);
         glfwSetCharCallback(char_cb);
-        glfwSetWindowCloseCallback(close_cb);
         glfwDisable(GLFW_AUTO_POLL_EVENTS);
         hacc::set_file_logger([](std::string s){ file_logger.log(s); });
         try {

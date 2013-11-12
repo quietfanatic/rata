@@ -6,9 +6,6 @@
 
 namespace core {
 
-    INIT_SAFE(std::vector<Key_Listener*>, key_listeners);
-    INIT_SAFE(std::vector<Char_Listener*>, char_listeners);
-
     Vec window_cursor_pos = Vec(160, 120);
     Vec cursor_motion = Vec(0, 0);
     bool cursor_trapped = false;
@@ -16,35 +13,6 @@ namespace core {
 
     bool key_pressed (int code) { return glfwGetKey(code); }
     bool btn_pressed (int code) { return glfwGetMouseButton(code); }
-
-    int GLFWCALL close_cb () {
-        quick_exit();
-        return true;  // not gonna happen
-    }
-
-    void GLFWCALL key_cb (int keycode, int action) {
-        for (auto kl : key_listeners()) {
-            if (kl->hear_key(keycode, action)) return;
-        }
-        if (action == GLFW_PRESS) {
-            switch (keycode) {
-                case '~': {
-                    command_from_terminal();
-                    break;
-                }
-                case GLFW_KEY_ESC: {
-                    window->stop();
-                    break;
-                }
-                default: break;
-            }
-        }
-    }
-    void GLFWCALL char_cb (int code, int action) {
-        for (auto cl : char_listeners()) {
-            if (cl->hear_char(code, action)) return;
-        }
-    }
 
      // The ordering of all of these operations is fairly delicate.
     void run_input () {
