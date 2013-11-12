@@ -175,7 +175,7 @@ namespace core {
 
     std::string console_help () {
         std::string r = "This is the in-game console.  Available commands are:\n\n";
-        for (auto& pair : commands_by_name()) {
+        for (auto& pair : commands_by_name2()) {
             r += pair.first + " ";
         }
         return r + "\n\nFor more instructions on a particular command, type 'help <Command>'\n";
@@ -202,6 +202,9 @@ INIT_SAFE(std::unordered_map<std::string _COMMA Command_Description*>, commands_
 
  // Some trivial builtin commands
 
+void _echo (std::string s) { print_to_console(s + "\n"); }
+New_Command _echo_cmd ("echo", "Print a string to all console-like places.", 1, _echo);
+
 struct EchoCommand : CommandData {
     std::string s;
     void operator() () { print_to_console(s + "\n"); }
@@ -220,40 +223,25 @@ HACCABLE(SeqCommand) {
     delegate(member(&SeqCommand::seq));
 }
 
-struct HelpCommand : CommandData {
-    std::string about;
-    void operator() () {
-        if (about.empty()) {
-            print_to_console(console_help());
+void _help (std::string about) {
+    if (about.empty()) {
+        print_to_console(console_help());
+    }
+    else {
+        auto iter = commands_by_name2().find(about);
+        if (iter != commands_by_name2().end()) {
+            print_to_console(iter->second->description);
         }
         else {
-            auto iter = commands_by_name().find(about);
-            if (iter == commands_by_name().end()) {
-                print_to_console("Unknown command " + about + "; available are:");
-                for (auto& pair : commands_by_name()) {
-                    print_to_console(" " + pair.first);
-                }
-                print_to_console("\n");
+            print_to_console("Unknown command " + about + "; available are:");
+            for (auto& pair : commands_by_name2()) {
+                print_to_console(" " + pair.first);
             }
-            else {
-                Type type = iter->second->type;
-                print_to_console(about);
-                for (auto& gs : type.data->elem_list) {
-                    print_to_console(" <" + gs.type().name() + ">");
-                    if (gs->optional) print_to_console("?");
-                }
-                if (type.data->elems_f || type.data->delegate)
-                    print_to_console(" <...>");
-                print_to_console("\n" + iter->second->description + "\n");
-            }
+            print_to_console("\n");
         }
     }
-};
-
-HACCABLE(HelpCommand) {
-    new_command<HelpCommand>("help", "Show information about the in-game console or about a command");
-    elem(member(&HelpCommand::about).optional());
 }
+New_Command _help_cmd ("help", "Show information about the in-game console or about a command", 0, _help);
 
 void _history () {
     for (uint i = 0; i < command_history.size(); i++) {
