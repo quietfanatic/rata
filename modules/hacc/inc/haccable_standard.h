@@ -10,6 +10,7 @@
  //  - std::pair
  // You can override individual types if you want
 
+#include <tuple>
 #include "haccable.h"
 
 namespace hacc {
@@ -110,6 +111,41 @@ HACCABLE_TEMPLATE(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>) {
     elem(member(&std::pair<A, B>::first));
     elem(member(&std::pair<A, B>::second));
 }
+ // C++ variadic templates are powerful but very clunky.
+template <class... Es>
+struct Hacc_TypeDecl<std::tuple<Es...>> : hacc::Haccability<std::tuple<Es...>> {
+    using hcb = hacc::Haccability<std::tuple<Es...>>;
+    static void describe ();
+};
+
+namespace {
+    std::string _hcb_concat () { return ""; }
+    template <class F, class... Args>
+    std::string _hcb_concat (F f, Args... args) {
+        return f + ", " + _hcb_concat(args...);
+    }
+    template <size_t i, class... Es>
+    struct _HCB_Elemizer {
+        using hcb = hacc::Haccability<std::tuple<Es...>>;
+        using tup = std::tuple<Es...>;
+        template <size_t ei> using elem = typename std::tuple_element<ei, tup>::type;
+        template <size_t ei> using func = elem<i-1>& (tup&);
+        static void elemize () {
+            _HCB_Elemizer<i-1, Es...>::elemize();
+            hcb::elem(hcb::template ref_func<elem<i-1>>((func<i-1>*)&std::get<i-1, Es...>));
+        }
+    };
+    template <class... Es>
+    struct _HCB_Elemizer<0, Es...> {
+        static void elemize () { }
+    };
+}
+template <class... Es> void Hacc_TypeDecl<std::tuple<Es...>>::describe () {
+    hcb::name([](){ return "std::tuple<" + _hcb_concat(hacc::Type::CppType<Es>().name()...) + ">"; });
+    hcb::array();
+    _HCB_Elemizer<sizeof...(Es), Es...>::elemize();
+}
+ // BUT IT WORKS!
 
  // This is the default haccability for pointers.
 HACCABLE_TEMPLATE(<class C>, C*) {

@@ -121,6 +121,7 @@ MyNamed mn1 ("asdf");
 MyNamed mn2 ("fdsa");
 
 std::vector<MyNamed*> mns {&mn1, &mn2};
+std::tuple<int, float, String> tup;
 
 HACCABLE(MyNamed*) {
     name("MyNamed*");
@@ -144,7 +145,7 @@ MyNamed* mnp = mns[0];
 tap::Tester haccable_tester ("hacc/haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(39);
+    plan(45);
     is(to_tree(&i).as<int>(), 4, "to_tree on int32 works");
     doesnt_throw([](){ from_tree(&i, Tree(35)); }, "from_tree on int32");
     is(i, 35, "...works");
@@ -189,5 +190,12 @@ tap::Tester haccable_tester ("hacc/haccable", [](){
     is(to_tree(&mnp).as<String>(), String("asdf"), "hacc_pointer_by_member writes correct value");
     doesnt_throw([](){ from_tree(&mnp, Tree("fdsa")); }, "hacc_pointer_by_member can do from_tree");
     is(mnp, mns[1], "hacc_pointer_by_member sets correct value");
+    tup = std::make_tuple(5, 5.f, String("asdf"));
+    is(to_tree(&tup).form(), ARRAY, "std::tuple creates writes as right type");
+    is(to_tree(&tup).elem(0).as<int64>(), (int64)5, "std::tuple element 0 writes right");
+    is(to_tree(&tup).elem(1).as<float>(), 5.f, "std::tuple element 1 writes right");
+    is(to_tree(&tup).elem(2).as<String>(), String("asdf"), "std::tuple element 2 writes right");
+    doesnt_throw([](){ from_tree(&tup, Tree(Array{Tree(7), Tree(7.f), Tree("fdsa")})); }, "std::tuple can be read");
+    is(tup, std::make_tuple(7, 7.f, String("fdsa")), "std::tuple is read correctly");
 });
 
