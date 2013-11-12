@@ -68,7 +68,6 @@ namespace ent {
         void Drawn_draw (vis::Sprites) override;
 
 
-        Vec Resident_pos () override;
         void Resident_emerge () override;
         void Resident_reclude () override;
 

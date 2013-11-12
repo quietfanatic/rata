@@ -10,7 +10,7 @@ namespace geo {
 
     extern Vec camera_pos;
     Vec& update_camera ();
-     // Make the camera jump straight to its ideal position.
+     // Make the camera jump straight to its ideal position next frame.
     extern bool camera_jump;
 
 //    struct Conspicuous : Linkable<Conspicuous> {

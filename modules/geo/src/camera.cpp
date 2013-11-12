@@ -9,9 +9,7 @@ namespace geo {
     Vec camera_pos = Vec(10, 7.5);
 
     Vec& update_camera () {
-        if (Resident* r = beholding()) {
-            camera_pos = r->Resident_pos();
-        }
+         // TODO: do stuff
         if (!camera_pos.is_defined())
             camera_pos = Vec(10, 7.5);
         return camera_pos;

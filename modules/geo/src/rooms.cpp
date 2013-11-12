@@ -6,120 +6,113 @@
 namespace geo {
 
     Logger geo_logger ("geo");
-    Room* current_room = NULL;
-    Links<Beholder> beholders;
 
-    void Room::activate () {
-        active = true;
-        geo_logger.log("Activating room @%lx", (unsigned long)this);
-        size_t i = 0;
-        for (auto& r : residents) {
-            r.Resident_emerge();
-            i++;
+    void Room::observe () {
+        if (!observer_count++) {
+            geo_logger.log("Activating room @%lx", (unsigned long)this);
+            size_t i = 0;
+            for (auto& r : residents) {
+                if (r.finished) {
+                    r.Resident_emerge();
+                    i++;
+                 }
+            }
+            geo_logger.log("...%lu residents", i);
         }
-        geo_logger.log("...and its %lu residents", i);
     }
-    void Room::deactivate () {
-        active = false;
-        geo_logger.log("Deactivating room @%lx", (unsigned long)this);
-        for (auto& r : residents)
-            r.Resident_reclude();
+    void Room::forget () {
+        if (!observer_count) {
+            geo_logger.log("Room @%lu's reference count is corrupted!", (size_t)this);
+        }
+        else if (!--observer_count) {
+            geo_logger.log("Deactivating room @%lx", (unsigned long)this);
+            size_t i = 0;
+            for (auto& r : residents) {
+                r.Resident_reclude();
+                i++;
+            }
+            geo_logger.log("...and its %lu residents", i);
+        }
     }
 
-    void enter (Room* r) {
-        geo_logger.log("Entering room @%lx", (unsigned long)r);
-        if (!r) {
-            geo_logger.log("Oops, tried to enter the NULL pointer.\n");
-            return;
-        }
-         // Mark activating
-        r->activating = true;
-        for (auto n : r->neighbors) {
-            n->activating = true;
-        }
-         // Deactivate
-        if (current_room) {
-            for (auto crn : current_room->neighbors) {
-                if (!crn->activating) {
-                    crn->deactivate();
+    Room* Observer::get_room () const {
+        return room;
+    }
+    void Observer::set_room (Room* new_room) {
+        if (new_room) {
+            new_room->observe();
+            if (observe_neighbors) {
+                for (auto r : new_room->neighbors) {
+                    r->observe();
                 }
             }
-            if (!current_room->activating) {
-                current_room->deactivate();
+        }
+        if (room) {
+            room->forget();
+            if (observe_neighbors) {
+                for (auto r : room->neighbors) {
+                    r->forget();
+                }
             }
         }
-         // Activate
-        current_room = r;
-        if (!r->active)
-            r->activate();
-        r->activating = false;
-        for (auto n : r->neighbors) {
-            if (!n->active)
-                n->activate();
-            n->activating = false;
-        }
+        room = new_room;
     }
 
-    Room::~Room () {
-        if (current_room == this) current_room = NULL;
+    void Resident::set_room (Room* new_room) {
+        Room* old_room = room;
+        room = new_room;
+        if (room)
+            link(room->residents);
+         // Make sure only to call emerge when finished
+        if (finished) {
+            if (room && room->observer_count) {
+                if (!old_room->observer_count) {
+                    Resident_emerge();
+                }
+            }
+            else if (old_room && old_room->observer_count) {
+                Resident_reclude();
+            }
+        }
     }
 
     void Resident::finish () {
-        if (room) {
-            link(room->residents);
-            if (room->active)
+        if (!finished) {
+            if (room && room->observer_count)
                 Resident_emerge();
+            finished = true;
         }
     }
 
-    void Resident::reroom () {
-        if (!room) room = current_room;
-        Vec pos = Resident_pos();
-        if (!room->boundary.covers(pos)) {
+    void Resident::reroom (Vec pos) {
+        if (!room) {
+            geo_logger.log("reroom was called on roomless Resident @%lx", this);
+        }
+        else if (!room->boundary.covers(pos)) {
             for (auto n : room->neighbors) {
                 if (n->boundary.covers(pos)) {
-                    room = n;
-                    link(n->residents);
-                    if (beholding() == this)
-                        enter(n);
-                    else if (!n->active)
-                        Resident_reclude();
+                    set_room(n);
                     return;
                 }
             }
-            if (beholding() != this)
-                geo_logger.log("Resident @%lx ended up in tumbolia.", this);
-            else
-                geo_logger.log("The Beholder has left the building.  Party's over.", this);
-            deroom();
+            geo_logger.log("Resident @%lx ended up in tumbolia.", this);
+            set_room(NULL);
         }
     }
-    void Resident::deroom () {
-        Resident_reclude();
-        room = NULL;
-    }
-
-    Vec Resident::Resident_pos () {
-        if (room)
-            return room->boundary.center();
-        else
-            return Vec(NAN, NAN);
-    }
-
-    void Beholder::activate () {
-        link(beholders);
-        if (target && target->room) {
-            geo_logger.log("Behold: @%lx", (unsigned long)target);
-            enter(target->room);
+    void Resident::reroom (Vec& pos) {
+        if (!room) {
+            geo_logger.log("reroom was called on roomless Resident @%lx", this);
         }
-    }
-    void Beholder::deactivate () { unlink(); }
-
-    Resident* beholding () {
-        if (Beholder* b = beholders.last()) {
-            return b->target;
+        else if (!room->boundary.covers(pos)) {
+            for (auto n : room->neighbors) {
+                if (n->boundary.covers(pos)) {
+                    set_room(n);
+                    return;
+                }
+            }
+            geo_logger.log("Moving resident @%lx back into the center of the room.", this);
+            pos = room->boundary.center();
         }
-        else return NULL;
     }
 
 } using namespace geo;
@@ -132,12 +125,11 @@ HCB_END(Room)
 
 HCB_BEGIN(Resident)
     name("geo::Resident");
-    attr("room", member(&Resident::room));
+    attr("room", value_methods(&Resident::get_room, &Resident::set_room));
     finish(&Resident::finish);
 HCB_END(Resident)
 
-HCB_BEGIN(Beholder)
-    name("geo::Beholder");
-    attr("target", member(&Beholder::target));
-    finish(&Beholder::activate);
-HCB_END(Beholder)
+HCB_BEGIN(Observer)
+    name("geo::Observer");
+    attr("room", value_methods(&Observer::get_room, &Observer::set_room));
+HCB_END(Observer)

@@ -5,8 +5,8 @@
         Resident:{ room:$("world/res/test.room").room }
         direction:1
     }}
-    beholder:{"geo::Beholder":{
-        target:$.rata.Resident
+    observer:{"geo::Observer":{
+        room:$("world/res/test.room").room
     }}
     player:{"ent::Player":{
         character:$.rata.Controllable

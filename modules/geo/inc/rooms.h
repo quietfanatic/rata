@@ -12,51 +12,47 @@ namespace geo {
 
     struct Room {
         Rect boundary = Rect(-INF, -INF, INF, INF);
-        bool active = false;
-        bool activating = false;
         std::vector<Room*> neighbors;
-        Links<Resident> residents;
 
-        void activate ();
-        void deactivate ();
-        ~Room ();
+        Links<Resident> residents;
+         // The room is loaded if this is non-zero.
+        uint observer_count = 0;
+        void observe ();
+        void forget ();
+         // Rooms are not to be destructed if they have non-doomed Residents
+    };
+
+    struct Observer {
+         // This room will always be loaded (if not NULL)
+        Room* room = NULL;
+        Room* get_room () const;
+        void set_room (Room*);
+         // Also load the room's neighbors?
+        bool observe_neighbors = true;
+        void finish ();
     };
 
     struct Resident : Link<Resident> {
         Room* room = NULL;
+
+        Room* get_room () const { return room; }
+        void set_room (Room*);
+         // Kind of a compromise to avoid calling things on partially
+         //  constructed objects.
+        bool finished = false;
          // Called when the room is loaded
         virtual void Resident_emerge () = 0;
          // Called when the room is unloaded
         virtual void Resident_reclude () = 0;
-         // Communicates to Resident where the actor actually is.
-        virtual Vec Resident_pos ();  // Default: center of room
         virtual ~Resident () { }
         void finish ();
-         // Checks if the Resident's position, as reported by Resident_pos,
-         //  has left its current room, and changes rooms if so.  Call this if
-         //  the position changes at all.
-        void reroom ();
-         // Remove the Resident from all rooms.
-        void deroom ();
+         // Checks if the agent has moved to a different room.  If the agent
+         //  leaves the playable area, it's room is set to NULL.
+        void reroom (Vec pos);
+         // Like above, but if the agent leaves the playable area, it is moved
+         //  back to the center of the room.
+        void reroom (Vec& pos);
     };
-
-    extern Room* current_room;
-
-    void enter (Room*);
-
-     // The camera and the geography focus on the target of the last-created
-     //  beholder.  When it's destroyed, the previous beholder takes over.
-     //  If there are no beholders or the current beholder has no target,
-     //  the camera and geography remain stationary.  If no beholders are ever
-     //  created, no rooms will be activated.
-    struct Beholder : Link<Beholder> {
-        Resident* target = NULL;
-        void activate ();
-        void deactivate ();
-    };
-    extern Links<Beholder> beholders;
-
-    Resident* beholding ();
 
 }
 

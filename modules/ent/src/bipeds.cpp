@@ -1,5 +1,6 @@
 
 #include "../inc/bipeds.h"
+#include "../../geo/inc/camera.h"
 #include "../../hacc/inc/everything.h"
 #include "../../util/inc/debug.h"
 
@@ -12,9 +13,6 @@ namespace ent {
         stats = *def->stats;
     }
 
-    Vec Biped::Resident_pos () {
-        return pos();
-    }
     void Biped::Resident_emerge () {
         materialize();
         appear();
@@ -149,7 +147,7 @@ namespace ent {
     void Biped::after_move () {
          // Clear input before next frame
         buttons = ButtonBits(0);
-        reroom();
+        reroom(pos());
         if (ground && (!crouching || crawling)) {
             if (fabs(vel().x) < 0.01) {
                 distance_walked = 0;
@@ -169,6 +167,10 @@ namespace ent {
                 ceiling_low = true;
             }
         });
+         // Camera control
+         // TODO: This kinda belongs somewhere else maybe?
+         //  Well, it's gonna be replaced by a conspicuousity system anyway.
+        geo::camera_pos = pos();
     }
 
     void Biped::Drawn_draw (vis::Sprites) {
@@ -228,9 +230,7 @@ namespace ent {
         model.draw(pos(), direction < 0);
     }
 
-     // Kinda weird that neither of these has anything
     Biped::Biped () { }
-    void Biped::finish () { }
 
 } using namespace ent;
 
@@ -248,10 +248,6 @@ HCB_BEGIN(Biped)
     attr("jump_timer", member(&Biped::jump_timer).optional());
     attr("focus", member(&Biped::focus).optional());
     attr("distance_walked", member(&Biped::distance_walked).optional());
-    finish([](Biped& b){
-        b.Resident::finish();
-        b.finish();
-    });
 HCB_END(Biped)
 
 HCB_BEGIN(BipedStats)
