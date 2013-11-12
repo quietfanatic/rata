@@ -132,7 +132,7 @@ namespace {
         template <size_t ei> using func = elem<i-1>& (tup&);
         static void elemize () {
             _HCB_Elemizer<i-1, Es...>::elemize();
-            hcb::elem(hcb::template ref_func<elem<i-1>>((func<i-1>*)&std::get<i-1, Es...>));
+            hcb::elem(hcb::template ref_func<elem<i-1>>((func<i-1>*)&std::get<i-1, Es...>).optional());
         }
     };
     template <class... Es>
