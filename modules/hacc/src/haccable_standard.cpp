@@ -1,10 +1,14 @@
 #include "../inc/haccable_standard.h"
 
  // This defines haccabilities for most builtin scalar types.
+ // For these, we should can set them during the prepare step, since they don't
+ //  reference anything, and we'd like for other objects to be able to
+ //  reference them during the fill step.
 #define HCB_LIT(cpptype, form) \
 HACCABLE(cpptype) { \
     name(#cpptype); \
     to_tree([](const cpptype& x){ return Tree(x); }); \
+    prepare([](cpptype& x, Tree t){ x = t.as<cpptype>(); }); \
     fill([](cpptype& x, Tree t){ x = t.as<cpptype>(); }); \
 }
 
