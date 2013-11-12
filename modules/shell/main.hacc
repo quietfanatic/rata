@@ -7,4 +7,7 @@
     vis:{
         camera_size:[40 30]
     }
+    hotkeys:[
+        [96 [open_console]]
+    ]
 }}

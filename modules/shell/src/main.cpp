@@ -1,7 +1,9 @@
 #include <unistd.h>
 #include "../../core/inc/window.h"
 #include "../../core/inc/input.h"
+#include "../../core/inc/commands.h"
 #include "../../hacc/inc/files.h"
+#include "../../hacc/inc/haccable_standard.h"
 #include "../../phys/inc/phys.h"
 #include "../../geo/inc/camera.h"
 #include "../../ent/inc/control.h"
@@ -16,6 +18,7 @@ static std::string main_file = "shell/main.hacc";
 struct Settings {
     core::Window window;
     vis::Settings vis;
+    std::vector<std::pair<int, Command>> hotkeys;
 };
 static Settings* settings = NULL;
 
@@ -23,6 +26,18 @@ void step () {
     ent::run_minds();
     phys::space.run();
     vis::camera_pos = geo::update_camera();
+}
+
+bool key (int keycode, int action) {
+    if (action == GLFW_PRESS) {
+        for (auto& p : settings->hotkeys) {
+            if (keycode == p.first) {
+                p.second();
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 int main (int argc, char** argv) {
@@ -44,6 +59,7 @@ int main (int argc, char** argv) {
     settings = File(main_file).data();
     settings->window.step = step;
     settings->window.render = vis::render;
+    settings->window.key_callback = key;
     settings->window.before_next_frame([](){
         load(File(initial_state));
     });
@@ -61,6 +77,7 @@ HACCABLE(Settings) {
     name("Settings");
     attr("window", member(&Settings::window).optional());
     attr("vis", member(&Settings::vis).optional());
+    attr("hotkeys", member(&Settings::hotkeys).optional());
 }
 
 
