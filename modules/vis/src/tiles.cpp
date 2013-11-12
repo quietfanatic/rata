@@ -82,9 +82,9 @@ namespace vis {
 
 } using namespace vis;
 
-HCB_BEGIN(Tiles_Program)
+HACCABLE(Tiles_Program) {
     name("vis::Tiles_Program");
     delegate(base<core::Program>());
     finish(&Tiles_Program::finish);
-HCB_END(Tiles_Program)
+}
 

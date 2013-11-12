@@ -25,16 +25,16 @@ namespace util {
 
 
  // Let's just have Vecs and Rects be array-like, I think.
-HCB_BEGIN(Vec)
+HACCABLE(Vec) {
     name("Vec");
     elem(member(&Vec::x));
     elem(member(&Vec::y));
-HCB_END(Vec)
+}
 
-HCB_BEGIN(Rect)
+HACCABLE(Rect) {
     name("Rect");
     elem(member(&Rect::l));
     elem(member(&Rect::b));
     elem(member(&Rect::r));
     elem(member(&Rect::t));
-HCB_END(Rect)
+}

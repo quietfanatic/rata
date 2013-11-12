@@ -57,10 +57,10 @@ int main (int argc, char** argv) {
     fprintf(stderr, "Quit successfully\n");
 }
 
-HCB_BEGIN(Settings)
+HACCABLE(Settings) {
     name("Settings");
     attr("window", member(&Settings::window).optional());
     attr("vis", member(&Settings::vis).optional());
-HCB_END(Settings)
+}
 
 

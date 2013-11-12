@@ -229,24 +229,24 @@ namespace vis {
 
 } using namespace vis;
 
-HCB_BEGIN(Texture)
+HACCABLE(Texture) {
     name("vis::Texture");
     attr("name", member(&Texture::name).optional().prepare());
     attr("offset", member(&Texture::offset).optional());
     attr("size", member(&Texture::size).optional());
     attr("smooth", member(&Texture::smooth).optional());
     attr("use_palettes", member(&Texture::use_palettes).optional());
-HCB_END(Texture)
+}
 
-HCB_BEGIN(Palette)
+HACCABLE(Palette) {
     name("vis::Palette");
     attr("offset", member(&Palette::offset));
     attr("vertical", member(&Palette::vertical).optional());
     attr("length", member(&Palette::length).optional());
     attr("mask", member(&Palette::mask).optional());
-HCB_END(Palette)
+}
 
-HCB_BEGIN(Image)
+HACCABLE(Image) {
     name("vis::Image");
     attr("filename", member(&Image::filename));
     attr("textures", member(&Image::textures).optional());
@@ -257,9 +257,9 @@ HCB_BEGIN(Image)
         else throw hacc::X::No_Attr(hacc::Pointer(&image), name);
     });
     finish([](Image& i){ i.load(); });
-HCB_END(Image)
+}
 
-HCB_BEGIN(Layout)
+HACCABLE(Layout) {
     name("vis::Layout");
     attr("size", member(&Layout::size));
     attr("frames", member(&Layout::frames));
@@ -269,20 +269,20 @@ HCB_BEGIN(Layout)
         else throw hacc::X::No_Attr(hacc::Pointer(&layout), name);
     });
     finish([](Layout& layout){ layout.finish(); });
-HCB_END(Layout)
+}
  // For convenience
 HCB_INSTANCE(std::unordered_map<std::string HCB_COMMA Layout>)
 
-HCB_BEGIN(Frame)
+HACCABLE(Frame) {
     name("vis::Frame");
     attr("name", member(&Frame::name).prepare());
     attr("offset", member(&Frame::offset));
     attr("box", member(&Frame::box));
     attr("points", member(&Frame::points).optional());
-HCB_END(Frame)
+}
 
-HCB_BEGIN(Images_Program)
+HACCABLE(Images_Program) {
     name("vis::Images_Program");
     delegate(base<core::Program>());
     finish(&Images_Program::finish);
-HCB_END(Images_Program)
+}

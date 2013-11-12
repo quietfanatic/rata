@@ -62,8 +62,8 @@ namespace vis {
 
 } using namespace vis;
 
-HCB_BEGIN(Color_Program)
+HACCABLE(Color_Program) {
     name("vis::Color_Program");
     delegate(base<core::Program>());
     finish(&Color_Program::finish);
-HCB_END(Color_Program)
+}

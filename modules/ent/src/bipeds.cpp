@@ -234,7 +234,7 @@ namespace ent {
 
 } using namespace ent;
 
-HCB_BEGIN(Biped)
+HACCABLE(Biped) {
     name("ent::Biped");
     attr("def", value_methods(&Biped::get_def, &Biped::set_def));
     attr("Object", base<phys::Object>());
@@ -248,9 +248,9 @@ HCB_BEGIN(Biped)
     attr("jump_timer", member(&Biped::jump_timer).optional());
     attr("focus", member(&Biped::focus).optional());
     attr("distance_walked", member(&Biped::distance_walked).optional());
-HCB_END(Biped)
+}
 
-HCB_BEGIN(BipedStats)
+HACCABLE(BipedStats) {
     name("ent::BipedStats");
     attr("walk_friction", member(&BipedStats::walk_friction).optional());
     attr("walk_speed", member(&BipedStats::walk_speed).optional());
@@ -264,9 +264,9 @@ HCB_BEGIN(BipedStats)
     attr("air_speed", member(&BipedStats::air_speed).optional());
     attr("jump_speed", member(&BipedStats::jump_speed).optional());
     attr("jump_delay", member(&BipedStats::jump_delay).optional());
-HCB_END(BipedStats)
+}
 
-HCB_BEGIN(BipedDef)
+HACCABLE(BipedDef) {
     name("ent::BipedDef");
     attr("fixdefs", member(&BipedDef::fixdefs));
     attr("stats", member(&BipedDef::stats));
@@ -274,9 +274,9 @@ HCB_BEGIN(BipedDef)
     attr("poses", member(&BipedDef::poses));
     attr("skin", member(&BipedDef::skin));
     attr("focus_offset", member(&BipedDef::focus_offset));
-HCB_END(BipedDef)
+}
 
-HCB_BEGIN(BipedPoses)
+HACCABLE(BipedPoses) {
     name("ent::BipedPoses");
     attr("stand", member(&BipedPoses::stand));
     attr("walk", member(&BipedPoses::walk));
@@ -289,9 +289,9 @@ HCB_BEGIN(BipedPoses)
     attr("laybk", member(&BipedPoses::laybk));
     attr("look_stand", member(&BipedPoses::look_stand));
     attr("look_walk", member(&BipedPoses::look_walk));
-HCB_END(BipedPoses)
+}
 
-HCB_BEGIN(BipedFixdefs)
+HACCABLE(BipedFixdefs) {
     name("ent::BipedFixdefs");
     attr("feet", member(&BipedFixdefs::feet));
     attr("stand", member(&BipedFixdefs::stand));
@@ -300,4 +300,4 @@ HCB_BEGIN(BipedFixdefs)
     attr("crawl_l", member(&BipedFixdefs::crawl_l));
     attr("crawl_r", member(&BipedFixdefs::crawl_r));
     attr("ceiling_low", member(&BipedFixdefs::ceiling_low));
-HCB_END(BipedFixdefs)
+}

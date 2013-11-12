@@ -102,7 +102,7 @@ namespace core {
 } using namespace core;
 
  // TODO: use magic setters
-HCB_BEGIN(Window)
+HACCABLE(Window) {
     name("core::Window");
     attr("width", member(&Window::width).optional());
     attr("height", member(&Window::height).optional());
@@ -113,7 +113,7 @@ HCB_BEGIN(Window)
     attr("depth", member(&Window::depth).optional());
     attr("stencil", member(&Window::stencil).optional());
     attr("fullscreen", member(&Window::fullscreen).optional());
-HCB_END(Window)
+}
 
 struct LoadCommand : CommandData {
     std::string filename;
@@ -122,10 +122,10 @@ struct LoadCommand : CommandData {
         window->before_next_frame([f](){ hacc::load(f); });
     }
 };
-HCB_BEGIN(LoadCommand)
+HACCABLE(LoadCommand) {
     new_command<LoadCommand>("load", "Manually load a file by its filename");
     elem(member(&LoadCommand::filename));
-HCB_END(LoadCommand)
+}
 
 struct SaveCommand : CommandData {
     std::string filename;
@@ -134,10 +134,10 @@ struct SaveCommand : CommandData {
         window->before_next_frame([f](){ hacc::save(f); });
     }
 };
-HCB_BEGIN(SaveCommand)
+HACCABLE(SaveCommand) {
     new_command<SaveCommand>("save", "Save the file object with the given filename");
     elem(member(&SaveCommand::filename));
-HCB_END(SaveCommand)
+}
 
 struct ReloadCommand : CommandData {
     std::string filename;
@@ -157,10 +157,10 @@ struct ReloadCommand : CommandData {
         }
     }
 };
-HCB_BEGIN(ReloadCommand)
+HACCABLE(ReloadCommand) {
     new_command<ReloadCommand>("reload", "Reload the file with the given filename, or if none given all files containing '/res/'");
     elem(member(&ReloadCommand::filename).optional());
-HCB_END(ReloadCommand);
+};
 
 struct UnloadCommand : CommandData {
     std::string filename;
@@ -169,35 +169,35 @@ struct UnloadCommand : CommandData {
         window->before_next_frame([f](){ hacc::unload(f); });
     }
 };
-HCB_BEGIN(UnloadCommand)
+HACCABLE(UnloadCommand) {
     new_command<UnloadCommand>("unload", "Unload the file object with the given filename.  Fails if there are outside references to it.");
     elem(member(&UnloadCommand::filename));
-HCB_END(UnloadCommand)
+}
 
 struct RenameCommand : CommandData {
     std::string old_name;
     std::string new_name;
     void operator () () { hacc::File(old_name).rename(new_name); }
 };
-HCB_BEGIN(RenameCommand)
+HACCABLE(RenameCommand) {
     new_command<RenameCommand>("rename", "Change the filename associated with a file object");
     elem(member(&RenameCommand::old_name));
     elem(member(&RenameCommand::new_name));
-HCB_END(SaveCommand)
+}
 
 struct QuitCommand : CommandData {
     void operator() () { core::quick_exit(); }
 };
-HCB_BEGIN(QuitCommand)
+HACCABLE(QuitCommand) {
     new_command<QuitCommand>("quit", "Quit the program without saving anything");
-HCB_END(QuitCommand)
+}
 
 struct StopCommand : CommandData {
     void operator() () { window->stop(); }
 };
-HCB_BEGIN(StopCommand)
+HACCABLE(StopCommand) {
     new_command<StopCommand>("stop", "Stop the game (probably saving its state to somewhere)");
-HCB_END(StopCommand)
+}
 
 struct FilesCommand : CommandData {
     void operator() () {
@@ -207,6 +207,6 @@ struct FilesCommand : CommandData {
         }
     }
 };
-HCB_BEGIN(FilesCommand)
+HACCABLE(FilesCommand) {
     new_command<FilesCommand>("files", "List all loaded files");
-HCB_END(FilesCommand)
+}

@@ -25,13 +25,13 @@ struct Test_Actor : phys::Object, vis::Drawn<vis::Sprites> {
     }
 };
 
-HCB_BEGIN(Test_Actor)
+HACCABLE(Test_Actor) {
     name("ent::Test_Actor");
     attr("Object", base<phys::Object>());
     attr("texture", member(&Test_Actor::texture));
     attr("frame", member(&Test_Actor::frame));
     finish([](Test_Actor& ta){ ta.finish(); });
-HCB_END(Test_Actor)
+}
 
 static phys::BodyDef*& boundary_bdf () {
     static phys::BodyDef* boundary_bdf = hacc::File("ent/res/boundary.bdf").data().attr("bdf");
@@ -46,9 +46,9 @@ struct Boundary : phys::Object {
     }
 };
 
-HCB_BEGIN(Boundary)
+HACCABLE(Boundary) {
     name("ent::Boundary");
     attr("Object", base<phys::Object>());
     finish([](Boundary& b){ b.finish(); });
-HCB_END(Boundary)
+}
 

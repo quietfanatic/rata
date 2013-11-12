@@ -12,7 +12,7 @@
 
 using namespace hacc;
 
-HCB_BEGIN(Command)
+HACCABLE(Command) {
     name("Command");
     to_tree([](const Command& cmd){
         Tree less = Reference(Type(typeid(*cmd)), (void*)&*cmd).to_tree();
@@ -75,7 +75,7 @@ HCB_BEGIN(Command)
             &*cmd
         ).finish();
     });
-HCB_END(Command)
+}
 
 namespace core {
 
@@ -144,19 +144,19 @@ struct EchoCommand : CommandData {
     std::string s;
     void operator() () { print_to_console(s + "\n"); }
 };
-HCB_BEGIN(EchoCommand)
+HACCABLE(EchoCommand) {
     new_command<EchoCommand>("echo", "Print the given string to all console-like places.");
     elem(member(&EchoCommand::s));
-HCB_END(EchoCommand)
+}
 
 struct SeqCommand : CommandData {
     std::vector<Command> seq;
     void operator() () { for (auto& c : seq) c(); }
 };
-HCB_BEGIN(SeqCommand)
+HACCABLE(SeqCommand) {
     new_command<SeqCommand>("seq", "Perform a sequence of commands.  Usage: seq [[command1 args...] [command2 args...]...]");
     delegate(member(&SeqCommand::seq));
-HCB_END(SeqCommand)
+}
 
 struct HelpCommand : CommandData {
     std::string about;
@@ -188,10 +188,10 @@ struct HelpCommand : CommandData {
     }
 };
 
-HCB_BEGIN(HelpCommand)
+HACCABLE(HelpCommand) {
     new_command<HelpCommand>("help", "Show information about the in-game console or about a command");
     elem(member(&HelpCommand::about).optional());
-HCB_END(HelpCommand)
+}
 
 struct HistoryCommand : CommandData {
     void operator () () {
@@ -201,9 +201,9 @@ struct HistoryCommand : CommandData {
     }
 };
 
-HCB_BEGIN(HistoryCommand)
+HACCABLE(HistoryCommand) {
     new_command<HistoryCommand>("history", "Show previously entered commands");
-HCB_END(HistoryCommand)
+}
 
 struct GetCommand : CommandData {
     Reference ref;
@@ -212,10 +212,10 @@ struct GetCommand : CommandData {
         print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");
     }
 };
-HCB_BEGIN(GetCommand)
+HACCABLE(GetCommand) {
     new_command<GetCommand>("get", "Print the data at a path");
     elem(member(&GetCommand::ref));
-HCB_END(GetCommand)
+}
 
 struct KeysCommand : CommandData {
     Reference ref;
@@ -224,10 +224,10 @@ struct KeysCommand : CommandData {
         print_to_console(hacc::tree_to_string(Reference(&keys).to_tree()) + "\n");
     }
 };
-HCB_BEGIN(KeysCommand)
+HACCABLE(KeysCommand) {
     new_command<KeysCommand>("keys", "Print the attribute keys of an object");
     elem(member(&KeysCommand::ref));
-HCB_END(KeysCommand)
+}
 
 struct LengthCommand : CommandData {
     Reference ref;
@@ -235,10 +235,10 @@ struct LengthCommand : CommandData {
         print_to_console(std::to_string(ref.length()) + "\n");
     }
 };
-HCB_BEGIN(LengthCommand)
+HACCABLE(LengthCommand) {
     new_command<LengthCommand>("length", "Print the length of an array");
     elem(member(&LengthCommand::ref));
-HCB_END(LengthCommand)
+}
 
 struct SetCommand : CommandData {
     Reference ref;
@@ -247,11 +247,11 @@ struct SetCommand : CommandData {
         ref.from_tree(value);
     }
 };
-HCB_BEGIN(SetCommand)
+HACCABLE(SetCommand) {
     new_command<SetCommand>("set", "Set the data at a path to a value");
     elem(member(&SetCommand::ref));
     elem(member(&SetCommand::value));
-HCB_END(SetCommand)
+}
 
 struct PeekCommand : CommandData {
     String type;
@@ -262,8 +262,8 @@ struct PeekCommand : CommandData {
         print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");
     }
 };
-HCB_BEGIN(PeekCommand)
+HACCABLE(PeekCommand) {
     new_command<PeekCommand>("peek", "Get the value of a type at an address");
     elem(member(&PeekCommand::type));
     elem(member(&PeekCommand::address));
-HCB_END(PeekCommand)
+}

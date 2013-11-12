@@ -191,9 +191,9 @@ namespace shell {
     };
 } using namespace shell;
 
-HCB_BEGIN(shell::Console)
+HACCABLE(shell::Console) {
     name("shell::Console");
     attr("font", member(&shell::Console::font));
     attr("trigger", member(&shell::Console::trigger).optional());
-HCB_END(shell::Console)
+}
 

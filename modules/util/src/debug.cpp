@@ -10,7 +10,7 @@ std::unordered_map<std::string, Logger*>& Logger::all () {
     return all;
 }
 
-HCB_BEGIN(Logger*)
+HACCABLE(Logger*) {
     name("Logger*");
     delegate(value_funcs<std::string>(
         [](Logger* const& l){ return l->name; },
@@ -23,4 +23,4 @@ HCB_BEGIN(Logger*)
                 l = NULL;
         }
     ));
-HCB_END(Logger*)
+}

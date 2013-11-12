@@ -89,7 +89,7 @@ namespace vis {
 
 } using namespace vis;
 
-HCB_BEGIN(Settings)
+HACCABLE(Settings) {
     name("vis::Settings");
     attr("camera_size", member(&Settings::camera_size).optional());
-HCB_END(Settings)
+}

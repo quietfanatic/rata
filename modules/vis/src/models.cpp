@@ -110,47 +110,47 @@ namespace vis {
 
 } using namespace vis;
 
-HCB_BEGIN(Skel)
+HACCABLE(Skel) {
     name("vis::Skel");
     attr("segs", member(&Skel::segs));
     attr("root", member(&Skel::root));
     attr("root_offset", member(&Skel::root_offset));
     finish([](Skel& skel){ skel.finish(); });
-HCB_END(Skel)
+}
 
-HCB_BEGIN(Skel::Seg)
+HACCABLE(Skel::Seg) {
     name("vis::Skel::Seg");
     attr("name", member(&Skel::Seg::name));
     attr("branches", member(&Skel::Seg::branches).optional());
     attr("layout", member(&Skel::Seg::layout));
     attr("z_offset", member(&Skel::Seg::z_offset).optional());
-HCB_END(Skel::Seg)
+}
 
-HCB_BEGIN(Pose)
+HACCABLE(Pose) {
     name("vis::Pose");
     delegate(member(&Pose::apps));
-HCB_END(Pose)
+}
 
-HCB_BEGIN(Pose::App)
+HACCABLE(Pose::App) {
     name("vis::Pose");
     elem(member(&Pose::App::target));
     elem(member(&Pose::App::frame));
     elem(member(&Pose::App::fliph).optional());
     elem(member(&Pose::App::flipv).optional());
-HCB_END(Pose::App)
+}
 
-HCB_BEGIN(Skin)
+HACCABLE(Skin) {
     name("vis::Skin");
     attr("apps", member(&Skin::apps));
-HCB_END(Skin)
+}
 
-HCB_BEGIN(Skin::App)
+HACCABLE(Skin::App) {
     name("vis::Skin::App");
     elem(member(&Skin::App::target));
     elem(member(&Skin::App::textures));
-HCB_END(Skin::App)
+}
 
-HCB_BEGIN(Model_Tester)
+HACCABLE(Model_Tester) {
     name("vis::Model_Tester");
     finish([](Model_Tester& mt){ mt.finish(); });
-HCB_END(Model_Tester)
+}

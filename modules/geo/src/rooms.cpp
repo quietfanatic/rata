@@ -117,19 +117,19 @@ namespace geo {
 
 } using namespace geo;
 
-HCB_BEGIN(Room)
+HACCABLE(Room) {
     name("geo::Room");
     attr("boundary", member(&Room::boundary));
     attr("neighbors", member(&Room::neighbors));
-HCB_END(Room)
+}
 
-HCB_BEGIN(Resident)
+HACCABLE(Resident) {
     name("geo::Resident");
     attr("room", value_methods(&Resident::get_room, &Resident::set_room));
     finish(&Resident::finish);
-HCB_END(Resident)
+}
 
-HCB_BEGIN(Observer)
+HACCABLE(Observer) {
     name("geo::Observer");
     attr("room", value_methods(&Observer::get_room, &Observer::set_room));
-HCB_END(Observer)
+}

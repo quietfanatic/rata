@@ -74,23 +74,23 @@ namespace ent {
 
 } using namespace ent;
 
-HCB_BEGIN(Controllable)
+HACCABLE(Controllable) {
     name("ent::Controllable");
-HCB_END(Controllable)
+}
 
-HCB_BEGIN(MappingType)
+HACCABLE(MappingType) {
     name("ent::MappingType");
     value("key", KEY);
     value("btn", BTN);
-HCB_END(MappingType)
+}
 
-HCB_BEGIN(Mapping)
+HACCABLE(Mapping) {
     name("ent::Mapping");
     elem(member(&Mapping::type));
     elem(member(&Mapping::code));
-HCB_END(Mapping)
+}
 
-HCB_BEGIN(Mappings)
+HACCABLE(Mappings) {
     name("ent::Mappings");
     attr("left", member(&Mappings::left).optional());
     attr("right", member(&Mappings::right).optional());
@@ -102,14 +102,14 @@ HCB_BEGIN(Mappings)
     attr("examine", member(&Mappings::up).optional());
     attr("aim", member(&Mappings::aim).optional());
     attr("attack", member(&Mappings::up).optional());
-HCB_END(Mappings)
+}
 
-HCB_BEGIN(Player)
+HACCABLE(Player) {
     name("ent::Player");
     attr("character", member(&Player::character));
     attr("cursor_tex", member(&Player::cursor_tex).optional());
     attr("cursor_frame", member(&Player::cursor_frame).optional());
     attr("mappings", member(&Player::mappings).optional());
     finish(&Player::finish);
-HCB_END(Player)
+}
 

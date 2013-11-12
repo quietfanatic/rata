@@ -42,9 +42,9 @@ namespace phys {
 
 } using namespace phys;
 
-HCB_BEGIN(Grounded)
+HACCABLE(Grounded) {
     name("phys::Grounded");
     attr("ground", member(&Grounded::ground).optional());
     attr("ground_fixdef", member(&Grounded::ground_fixdef).optional());
-HCB_END(Grounded)
+}
 

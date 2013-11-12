@@ -244,37 +244,37 @@ namespace phys {
 
  // This is so satisfying
 
-HCB_BEGIN(Collision_Rule*)
+HACCABLE(Collision_Rule*) {
     name("phys::Collision_Rule*");
     hacc::hacc_pointer_by_method(&Collision_Rule::name, coll_rules(), true);
-HCB_END(Collision_Rule*)
+}
 
-HCB_BEGIN(b2Vec2)
+HACCABLE(b2Vec2) {
     name("b2Vec2");
     elem(member(&b2Vec2::x));
     elem(member(&b2Vec2::y));
-HCB_END(b2Vec2)
+}
 
-HCB_BEGIN(b2Shape)
+HACCABLE(b2Shape) {
     name("b2Shape");
-HCB_END(b2Shape)
+}
 
-HCB_BEGIN(b2CircleShape)
+HACCABLE(b2CircleShape) {
     name("b2CircleShape");
     attr("b2Shape", base<b2Shape>().optional());
     attr("c", member(&b2CircleShape::m_p));
     attr("r", member((float b2CircleShape::*)&b2CircleShape::m_radius));
-HCB_END(b2CircleShape)
+}
 
 struct Hack_b2PolygonShape_Verts : b2PolygonShape { };
 
-HCB_BEGIN(b2PolygonShape)
+HACCABLE(b2PolygonShape) {
     name("b2PolygonShape");
     attr("b2Shape", base<b2Shape>().optional());
     attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius).optional());
     attr("verts", base<Hack_b2PolygonShape_Verts>());
-HCB_END(b2PolygonShape)
-HCB_BEGIN(Hack_b2PolygonShape_Verts)
+}
+HACCABLE(Hack_b2PolygonShape_Verts) {
     name("Hack_b2PolygonShape_Verts");
     array();
     length(value_funcs<size_t>(
@@ -304,25 +304,25 @@ HCB_BEGIN(Hack_b2PolygonShape_Verts)
             hacc::Reference(&tmp_verts[i]).fill(a[i]);
         v.Set(tmp_verts, a.size());
     });
-HCB_END(Hack_b2PolygonShape_Verts)
+}
 
-HCB_BEGIN(b2EdgeShape)
+HACCABLE(b2EdgeShape) {
     name("b2EdgeShape");
     attr("b2Shape", base<b2Shape>().optional());
     attr("v1", member(&b2EdgeShape::m_vertex1));
     attr("v2", member(&b2EdgeShape::m_vertex2));
     elem(member(&b2EdgeShape::m_vertex1));
     elem(member(&b2EdgeShape::m_vertex2));
-HCB_END(b2EdgeShape)
+}
 
-HCB_BEGIN(b2FixtureDef)
+HACCABLE(b2FixtureDef) {
     name("b2FixtureDef");
     attr("shape", member(&b2FixtureDef::shape).optional());
     attr("friction", member(&b2FixtureDef::friction).optional());
     attr("restitution", member(&b2FixtureDef::restitution).optional());
     attr("density", member(&b2FixtureDef::density).optional());
     attr("is_sensor", member(&b2FixtureDef::isSensor).optional());
-HCB_END(b2FixtureDef)
+}
 
 static std::vector<Collision_Rule*> coll_b2v (uint64 b) {
     std::vector<Collision_Rule*> v;
@@ -340,7 +340,7 @@ static uint64 coll_v2b (const std::vector<Collision_Rule*>& v) {
     return b;
 }
 
-HCB_BEGIN(FixtureDef)
+HACCABLE(FixtureDef) {
     name("phys::FixtureDef");
     attr("b2", member(&FixtureDef::b2));
     attr("coll_a", value_funcs<std::vector<Collision_Rule*>>(
@@ -356,42 +356,42 @@ HCB_BEGIN(FixtureDef)
         }
     ).optional().narrow());
     attr("filter", member(&FixtureDef::filter).optional());
-HCB_END(FixtureDef)
+}
 
-HCB_BEGIN(Filter)
+HACCABLE(Filter) {
     name("phys::Filter");
     attr("mask", member(&Filter::mask).optional());
     attr("unmask", member(&Filter::unmask).optional());
     attr("active", member(&Filter::active).optional());
-HCB_END(Filter)
+}
 
-HCB_BEGIN(b2BodyType)
+HACCABLE(b2BodyType) {
     name("b2BodyType");
     value("static", b2_staticBody);
     value("dynamic", b2_dynamicBody);
     value("kinematic", b2_kinematicBody);
-HCB_END(b2BodyType)
+}
 
-HCB_BEGIN(BodyDef)
+HACCABLE(BodyDef) {
     name("phys::BodyDef");
     attr("type", member(&BodyDef::type).optional());
     attr("mass", member(&BodyDef::mass).optional());
     attr("damping", member(&BodyDef::damping).optional());
     attr("gravity_scale", member(&BodyDef::gravity_scale).optional());
     attr("fixtures", member(&BodyDef::fixtures));
-HCB_END(BodyDef)
+}
 
-HCB_BEGIN(Object)
+HACCABLE(Object) {
     name("phys::Object");
     attr("def", value_methods(&Object::get_def, &Object::set_def).optional());
     attr("pos", value_methods(&Object::pos, &Object::set_pos));
     attr("vel", value_methods(&Object::vel, &Object::set_vel).optional());
-HCB_END(Object)
+}
 
-HCB_BEGIN(Phys_Debug_Layer)
+HACCABLE(Phys_Debug_Layer) {
     name("phys::Phys_Debug_Layer");
     finish([](Phys_Debug_Layer& pdb){
         pdb.appear();
     });
-HCB_END(Phys_Debug_Layer)
+}
 

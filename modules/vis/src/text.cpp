@@ -149,18 +149,18 @@ namespace vis {
 
 } using namespace vis;
 
-HCB_BEGIN(Font)
+HACCABLE(Font) {
     name("vis::Font");
     attr("texture", member(&Font::texture));
     attr("width", member(&Font::width));
     attr("height", member(&Font::height));
     attr("line_height", member(&Font::line_height));
     attr("widths", member(&Font::widths).optional());
-HCB_END(Font)
+}
 HCB_INSTANCE(Font*)
 
-HCB_BEGIN(Text_Program)
+HACCABLE(Text_Program) {
     name("vis::Text_Program");
     delegate(base<core::Program>());
     finish(&Text_Program::finish);
-HCB_END(Text_Program)
+}

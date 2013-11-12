@@ -188,18 +188,18 @@ namespace geo {
 
 } using namespace geo;
 
-HCB_BEGIN(TileDef)
+HACCABLE(TileDef) {
     name("geo::TileDef");
     attr("nature", member(&TileDef::nature));
     attr("vertices", member(&TileDef::vertices));
-HCB_END(TileDef)
+}
 
-HCB_BEGIN(Tileset)
+HACCABLE(Tileset) {
     name("geo::Tileset");
     attr("tiles", member(&Tileset::tiles));
-HCB_END(Tileset)
+}
 
-HCB_BEGIN(Tilemap)
+HACCABLE(Tilemap) {
     name("geo::Tilemap");
     attr("Resident", base<Resident>());
     attr("Object", base<phys::Object>().optional());
@@ -212,7 +212,7 @@ HCB_BEGIN(Tilemap)
         t.Resident::finish();
         t.finish();
     });
-HCB_END(Tilemap)
+}
 
 
 
