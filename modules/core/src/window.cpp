@@ -115,7 +115,8 @@ namespace core {
                  // Input handling!
                 bool trap_cursor = false;
                 Listener* next_l = NULL;
-                for (Listener* l = window->listener; l; l = next_l) {
+                Listener* l = NULL;
+                for (l = window->listener; l; l = next_l) {
                     next_l = l->next;
                     int trap = l->Listener_trap_cursor();
                     if (trap != -1) {
@@ -123,6 +124,7 @@ namespace core {
                         break;
                     }
                 }
+                if (l == NULL) trap_cursor = false;
                 static bool cursor_trapped = false;
                 if (trap_cursor != cursor_trapped) {
                     if (trap_cursor) {
@@ -142,12 +144,12 @@ namespace core {
                 glfwPollEvents();
                 int x, y;
                 glfwGetMousePos(&x, &y);
-                if (cursor_trapped) {
+                if (cursor_trapped && l) {
                      // Something's odd about glfw's trapped cursor positioning.
                     if (x != 0 || y != 0)
-                        trapped_cursor_motion = Vec(x+1, -(y+1))*PX;
+                        l->Listener_trapped_motion(Vec(x+1, -(y+1))*PX);
                     else
-                        trapped_cursor_motion = Vec(0, 0);
+                        l->Listener_trapped_motion(Vec(0, 0));
                 }
                 else {
                     cursor_pos = Vec(x, y)*PX;

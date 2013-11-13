@@ -35,7 +35,9 @@ namespace ent {
             bit <<= 1;
         }
         character->Controllable_buttons(ButtonBits(buttons));
-        character->Controllable_move_focus(core::window->trapped_cursor_motion);
+    }
+    void Player::Listener_trapped_motion (Vec motion) {
+        character->Controllable_move_focus(motion);
     }
 
     Player::Player () {

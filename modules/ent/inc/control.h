@@ -97,6 +97,7 @@ namespace ent {
         void Mind_think () override;  // Read input and send control to character
 
         int Listener_trap_cursor () override { return true; }
+        void Listener_trapped_motion (Vec v) override;
 
         Player ();
         void finish ();

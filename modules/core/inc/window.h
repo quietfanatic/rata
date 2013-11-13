@@ -36,8 +36,6 @@ namespace core {
         bool btn_pressed (int code);
          // Not updated when trapped.
         util::Vec cursor_pos = util::Vec(160, 120);  // TODO: better value?
-         // Motion this frame, 0,0 if not trapped.
-        util::Vec trapped_cursor_motion = util::Vec(0, 0);
 
         uint64 frames_simulated = 0;
         uint64 frames_drawn = 0;
@@ -81,6 +79,8 @@ namespace core {
         virtual bool Listener_char (int, int) { return false; }
          // false = don't trap, true = do trap, -1 = pass
         virtual int Listener_trap_cursor () { return false; }
+         // Read cursor motion; called if above returned true
+        virtual void Listener_trapped_motion (util::Vec) { }
 
         bool active = false;
         Listener* next = NULL;
