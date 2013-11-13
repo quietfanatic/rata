@@ -134,7 +134,6 @@ namespace core {
                     }
                 }
                 if (l == NULL) trap_cursor = false;
-                static bool cursor_trapped = false;
                 if (trap_cursor != cursor_trapped) {
                     if (trap_cursor) {
                         int x, y;

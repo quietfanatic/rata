@@ -9,9 +9,13 @@ namespace geo {
     using namespace util;
 
     extern Vec camera_pos;
+    void set_camera_pos (Vec);
     Vec& update_camera ();
      // Make the camera jump straight to its ideal position next frame.
     extern bool camera_jump;
+     // While this is true, the camera stays still unless the window cursor
+     //  moves
+    extern bool free_camera;
 
 //    struct Conspicuous : Linkable<Conspicuous> {
 //         // The camera will try to show at least some of this rectangle.

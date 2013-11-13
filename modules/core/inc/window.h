@@ -31,6 +31,7 @@ namespace core {
         std::function<void ()> render;
 
         Listener* listener = NULL;
+        bool cursor_trapped = false;
          // Not updated when trapped.
         util::Vec cursor_pos = util::Vec(160, 120);  // TODO: better value?
 

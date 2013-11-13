@@ -104,11 +104,13 @@ namespace geo {
         logger.log("Activating editor.");
         Listener::activate();
         appear();
+        geo::free_camera = true;
     }
     void Resident_Editor::deactivate () {
         logger.log("Deactivating editor.");
         Listener::deactivate();
         disappear();
+        geo::free_camera = false;
     }
 
 } using namespace geo;
