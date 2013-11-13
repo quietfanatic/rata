@@ -17,6 +17,9 @@ namespace geo {
     void Resident_Editor::Drawn_draw (Overlay) {
         size_t unpositioned_residents = 0;
         for (auto& room : all_rooms()) {
+            color_offset(Vec(0, 0));
+            draw_color(0xff00ffff);
+            draw_rect(room.boundary);
             if (room.observer_count) {
                 for (auto& res : room.residents) {
                     Vec pos = res.Resident_get_pos();
@@ -26,13 +29,8 @@ namespace geo {
                     }
                     const Rect& boundary = res.Resident_boundary();
                     color_offset(pos);
-                    draw_color(0xffffffff);
-                    Vec corners [4];
-                    corners[0] = boundary.lb();
-                    corners[1] = boundary.rb();
-                    corners[2] = boundary.rt();
-                    corners[3] = boundary.lt();
-                    draw_loop(4, corners);
+                    draw_color(0x00ff00ff);
+                    draw_rect(boundary);
                 }
             }
         }
