@@ -15,8 +15,13 @@ namespace core {
         return false;
     }
     void GLFWCALL key_cb (int keycode, int action) {
-        if (window->key_callback && window->key_callback(keycode, action))
-            return;
+        Listener* next_l = NULL;
+        for (Listener* l = window->listener; l; l = next_l) {
+             // In case a listener disables itself.
+            next_l = l->next;
+            if (l->Listener_key(keycode, action))
+                return;
+        }
         if (action == GLFW_PRESS) {
             switch (keycode) {
                 case '~': {
@@ -32,7 +37,13 @@ namespace core {
         }
     }
     void GLFWCALL char_cb (int charcode, int action) {
-        window->char_callback && window->char_callback(charcode, action);
+        Listener* next_l = NULL;
+        for (Listener* l = window->listener; l; l = next_l) {
+             // In case a listener disables itself.
+            next_l = l->next;
+            if (l->Listener_char(charcode, action))
+                return;
+        }
     }
 
     Logger file_logger ("files");

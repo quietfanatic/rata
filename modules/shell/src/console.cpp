@@ -14,7 +14,7 @@ namespace shell {
 
     struct Console;
     Console* console = NULL;
-    struct Console : core::Console, Drawn<Dev> {
+    struct Console : core::Console, Drawn<Dev>, core::Listener {
         std::string contents = console_help();
         std::string cli = "";
         uint cli_pos = 0;
@@ -29,10 +29,6 @@ namespace shell {
          // Tab completion FTW
         std::vector<std::string> completion_matches;
 
-         // Store the callbacks we're temporarily replacing.
-        std::function<bool (int, int)> old_key_cb;
-        std::function<bool (int, int)> old_char_cb;
-
         static CE size_t max_size = 2<<15;
 
         Console () { if (!console) console = this; }
@@ -42,7 +38,7 @@ namespace shell {
             contents += message;
         }
 
-        bool hear_key (int keycode, int action) {
+        bool Listener_key (int keycode, int action) override {
             if (action == GLFW_PRESS) {
                 switch (keycode) {
                     case GLFW_KEY_ESC: {
@@ -174,7 +170,7 @@ namespace shell {
             }
             return false;
         }
-        bool hear_char (int code, int action) {
+        bool Listener_char (int code, int action) override {
             if (wait_for_draw) return false;
             if (glfwGetKey(GLFW_KEY_LCTRL) || glfwGetKey(GLFW_KEY_RCTRL)) {
                 switch (code) {
@@ -205,22 +201,16 @@ namespace shell {
             return true;
         }
         void enter_console () {
-            if (visible()) return;
+            if (active) return;
             wait_for_draw = true;
-            core::trap_cursor = false;
             ent::player_controllable = false;
-            old_key_cb = std::move(window->key_callback);
-            window->key_callback = [=](int k, int a){ return hear_key(k, a); };
-            old_char_cb = std::move(window->char_callback);
-            window->char_callback = [=](int k, int a){ return hear_char(k, a); };
+            Listener::activate();
             appear();
         }
         void exit_console () {
-            if (!visible()) return;
-            core::trap_cursor = true;
+            if (!active) return;
             ent::player_controllable = true;
-            window->key_callback = std::move(old_key_cb);
-            window->char_callback = std::move(old_char_cb);
+            Listener::deactivate();
             disappear();
         }
         void Drawn_draw (Dev r) override {

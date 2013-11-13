@@ -9,13 +9,22 @@ namespace core {
     Vec window_cursor_pos = Vec(160, 120);
     Vec cursor_motion = Vec(0, 0);
     bool cursor_trapped = false;
-    bool trap_cursor = false;
 
     bool key_pressed (int code) { return glfwGetKey(code); }
     bool btn_pressed (int code) { return glfwGetMouseButton(code); }
 
      // The ordering of all of these operations is fairly delicate.
     void run_input () {
+        bool trap_cursor = false;
+        Listener* next_l = NULL;
+        for (Listener* l = window->listener; l; l = next_l) {
+            next_l = l->next;
+            int trap = l->Listener_trap_cursor();
+            if (trap != -1) {
+                trap_cursor = trap;
+                break;
+            }
+        }
         if (trap_cursor != cursor_trapped) {
             if (trap_cursor) {
                 int x, y;

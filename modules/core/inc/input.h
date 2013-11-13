@@ -14,8 +14,6 @@ namespace core {
 
     bool key_pressed (int keycode);
     bool btn_pressed (int code);
-     // If true, hide desktop pointer and commandeer the cursor.
-    extern bool trap_cursor;
      // This is only updated when the cursor is not trapped.
     extern Vec window_cursor_pos;
      // Motion this frame.  This is 0,0 if the cursor is not trapped.

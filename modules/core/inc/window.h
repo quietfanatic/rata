@@ -10,6 +10,8 @@ namespace core {
     extern uint64 frames_simulated;
     extern uint64 frames_drawn;
 
+    struct Listener;
+
      // Window is unfortunately a singleton type.  If we ever support
      //  GLFW 3, we can fix that.
     struct Window {
@@ -26,9 +28,8 @@ namespace core {
 
         std::function<void ()> step;
         std::function<void ()> render;
-         // Return true if you've handled the key
-        std::function<bool (int, int)> key_callback;
-        std::function<bool (int, int)> char_callback;
+
+        Listener* listener = NULL;
 
         uint64 frames_simulated = 0;
         uint64 frames_drawn = 0;
@@ -64,6 +65,34 @@ namespace core {
         void before_next_frame (const std::function<void ()>& f) { pending_ops.emplace_back(f); }
     };
     extern Window* window;
+
+     // Interface for input handling.  More recently activated listeners take priority.
+    struct Listener {
+         // Return true if you've handled the input.
+        virtual bool Listener_key (int, int) { return false; }
+        virtual bool Listener_char (int, int) { return false; }
+         // false = don't trap, true = do trap, -1 = pass
+        virtual int Listener_trap_cursor () { return false; }
+
+        bool active = false;
+        Listener* next = NULL;
+        void deactivate () {
+            for (Listener** l = &window->listener; *l; l = &(*l)->next) {
+                if (*l == this) {
+                    *l = next;
+                    break;
+                }
+            }
+            next = NULL;
+            active = false;
+        }
+        void activate () {
+            if (active) deactivate();
+            active = true;
+            next = window->listener;
+            window->listener = this;
+        }
+    };
 
      // Immediately close the window and exit the program.  Does not return.
     void quick_exit ();

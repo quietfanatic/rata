@@ -55,6 +55,7 @@ namespace ent {
     }
 
     void Player::finish () {
+        Listener::activate();
         appear();
     }
 

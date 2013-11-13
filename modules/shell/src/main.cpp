@@ -13,12 +13,28 @@ static std::string initial_state = "shell/start.hacc";
 static std::string stop_state = "../save/last_stop.hacc";
 static std::string main_file = "shell/main.hacc";
 
+struct Hotkeys : core::Listener {
+    std::vector<std::pair<int, core::Command>> hotkeys;
+    bool Listener_key (int keycode, int action) override {
+        if (action == GLFW_PRESS) {
+            for (auto& p : hotkeys) {
+                if (keycode == p.first) {
+                    p.second();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    int Listener_trap_cursor () override { return -1; }
+};
+
  // Global game settings.  Eventually, all modules with configurable settings
  //  are expected to reserve a member of this struct.
 struct Settings {
     core::Window window;
     vis::Settings vis;
-    std::vector<std::pair<int, core::Command>> hotkeys;
+    Hotkeys hotkeys;
     bool paused = false;
 };
 static Settings* settings = NULL;
@@ -29,18 +45,6 @@ void step () {
         phys::space.run();
     }
     vis::camera_pos = geo::update_camera();
-}
-
-bool key (int keycode, int action) {
-    if (action == GLFW_PRESS) {
-        for (auto& p : settings->hotkeys) {
-            if (keycode == p.first) {
-                p.second();
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 int main (int argc, char** argv) {
@@ -62,11 +66,10 @@ int main (int argc, char** argv) {
     settings = File(main_file).data();
     settings->window.step = step;
     settings->window.render = vis::render;
-    settings->window.key_callback = key;
     settings->window.before_next_frame([](){
         load(File(initial_state));
     });
-    core::trap_cursor = true;
+    settings->hotkeys.activate();
      // Run
     phys::space.start();
     settings->window.start();
@@ -82,6 +85,10 @@ HACCABLE(Settings) {
     attr("vis", member(&Settings::vis).optional());
     attr("hotkeys", member(&Settings::hotkeys).optional());
     attr("paused", member(&Settings::paused).optional());
+}
+HACCABLE(Hotkeys) {
+    name("Hotkeys");
+    delegate(member(&Hotkeys::hotkeys));
 }
 
 void _pause () {
