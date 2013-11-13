@@ -5,6 +5,7 @@
 #include "../../util/inc/debug.h"
 #include "../../hacc/inc/files.h"
 #include "../../hacc/inc/strings.h"
+#include "../../hacc/inc/documents.h"
 
 namespace core {
 
@@ -200,4 +201,41 @@ New_Command _files_cmd ("files", "List all loaded files", 0, _files);
 void _create_file (std::string filename, const hacc::Dynamic& data) {
     hacc::File(filename, data);
 }
-New_Command _create_file_cmd ("create_file", "Create a new file object.  It will not yet be saved to disk.", 2, _create_file);
+New_Command _create_file_cmd (
+    "create_file", "Create a new file object.  It will not yet be saved to disk.",
+    2, _create_file
+);
+
+void _add (hacc::Document* doc, const hacc::Dynamic& data) {
+    void* p = doc->alloc(data.type);
+    data.type.construct(p);
+    data.type.copy_assign(p, data.addr);
+}
+New_Command _add_cmd ("add", "Create a new object inside a document.", 2, _add);
+void _add_id (hacc::Document* doc, std::string id, const hacc::Dynamic& data) {
+    void* p = doc->alloc_id(id, data.type);
+    data.type.construct(p);
+    data.type.copy_assign(p, data.addr);
+}
+New_Command _add_id_cmd ("add_id", "Create a new object inside a document with a given ID.", 3, _add_id);
+
+void _change_id (hacc::Document* doc, std::string old, std::string new_id) {
+    void* p = doc->get(old).address;
+    if (!p) throw hacc::X::Logic_Error("This document has no object with ID " + old);
+    doc->change_id(p, new_id);
+}
+New_Command _change_id_cmd (
+    "change_id", "Change the ID of an object in a document.  This may break references in unloaded files.",
+    3, _change_id
+);
+
+void _remove (hacc::Document* doc, std::string id) {
+    hacc::Pointer p = doc->get(id);
+    if (!p) throw hacc::X::Logic_Error("This document has no object with ID " + id);
+    p.type.destruct(p.address);
+    doc->dealloc(p.address);
+}
+New_Command _remove_cmd (
+    "remove", "Destroy an object from a document.  This will break any pointers to the object!",
+    2, _remove
+);
