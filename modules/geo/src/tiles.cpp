@@ -214,6 +214,31 @@ HACCABLE(Tilemap) {
     });
 }
 
+hacc::Special_Filetype _u16_ft ("u16",
+    [] (std::string filename) -> hacc::Dynamic {
+        std::string s = hacc::string_from_file(filename);
+        if (s.size() % 2) {
+            throw hacc::X::Logic_Error(
+                "\"" + filename + "\" is not of even size (its size is " + std::to_string(s.size()) + ")"
+            );
+        }
+        std::vector<uint16> r (s.size() / 2);
+        for (uint i = 0; i < r.size(); i++) {
+            r[i] = (s[i*2] << 8) | (s[i*2 + 1]);
+        }
+        return hacc::Dynamic(std::move(r));
+    },
+    [] (std::string filename, const hacc::Dynamic& dyn) {
+        std::vector<uint16>* val = dyn.address();
+        std::string s;
+        s.resize(val->size() * 2);
+        for (uint i = 0; i < val->size(); i++) {
+            s[i*2] = (*val)[i] >> 8;
+            s[i*2 + 1] = (*val)[i] & 0xff;
+        }
+        hacc::string_to_file(s, filename);
+    }
+);
 
 
 

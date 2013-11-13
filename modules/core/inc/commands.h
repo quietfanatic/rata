@@ -7,6 +7,7 @@
 #include <vector>
 #include "../../util/inc/honestly.h"
 #include "../../util/inc/organization.h"
+#include "../../hacc/inc/haccable_standard.h"
 
 namespace core {
      // The API for declaring functions.
