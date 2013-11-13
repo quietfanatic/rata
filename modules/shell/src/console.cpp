@@ -1,7 +1,6 @@
 #include <algorithm>  // std::move
 #include "../../core/inc/commands.h"
 #include "../../core/inc/window.h"
-#include "../../ent/inc/control.h"
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/color.h"
 #include "../../vis/inc/text.h"
@@ -202,13 +201,11 @@ namespace shell {
         void enter_console () {
             if (active) return;
             wait_for_draw = true;
-            ent::player_controllable = false;
             Listener::activate();
             appear();
         }
         void exit_console () {
             if (!active) return;
-            ent::player_controllable = true;
             Listener::deactivate();
             disappear();
         }

@@ -12,7 +12,7 @@ namespace ent {
         }
     }
     void Player::Mind_think () {
-        if (!player_controllable) return;
+        if (!can_poll_input()) return;
         if (!character) return;
         size_t buttons = 0;
         size_t bit = 1;
@@ -20,12 +20,12 @@ namespace ent {
             for (auto& m : mappings[Button(i)]) {
                 switch (m.type) {
                     case KEY: {
-                        if (core::window->key_pressed(m.code))
+                        if (key_pressed(m.code))
                             buttons |= bit;
                         break;
                     }
                     case BTN: {
-                        if (core::window->btn_pressed(m.code))
+                        if (btn_pressed(m.code))
                             buttons |= bit;
                         break;
                     }

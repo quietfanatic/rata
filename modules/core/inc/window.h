@@ -30,10 +30,7 @@ namespace core {
         std::function<void ()> step;
         std::function<void ()> render;
 
-         // Input handling
         Listener* listener = NULL;
-        bool key_pressed (int keycode);
-        bool btn_pressed (int code);
          // Not updated when trapped.
         util::Vec cursor_pos = util::Vec(160, 120);  // TODO: better value?
 
@@ -81,6 +78,8 @@ namespace core {
         virtual int Listener_trap_cursor () { return false; }
          // Read cursor motion; called if above returned true
         virtual void Listener_trapped_motion (util::Vec) { }
+         // Prevent lower levels from using key_pressed etc.
+        virtual bool Listener_blocks_input_polling () { return true; }
 
         bool active = false;
         Listener* next = NULL;
@@ -100,6 +99,11 @@ namespace core {
             next = window->listener;
             window->listener = this;
         }
+
+        bool can_poll_input ();
+         // Only call these if the above is true.
+        bool key_pressed (int keycode);
+        bool btn_pressed (int code);
     };
 
      // Immediately close the window and exit the program.  Does not return.

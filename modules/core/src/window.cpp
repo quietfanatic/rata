@@ -172,8 +172,18 @@ namespace core {
     }
     void Window::stop () { to_stop = true; }
 
-    bool Window::key_pressed (int code) { return glfwGetKey(code); }
-    bool Window::btn_pressed (int code) { return glfwGetMouseButton(code); }
+    bool Listener::can_poll_input () {
+        if (!active) return false;
+        Listener* next_l = NULL;
+        for (Listener* l = window->listener; l; l = next_l) {
+            next_l = l->next;
+            if (l == this) return true;
+            if (l->Listener_blocks_input_polling()) return false;
+        }
+        return false;
+    }
+    bool Listener::key_pressed (int code) { return glfwGetKey(code); }
+    bool Listener::btn_pressed (int code) { return glfwGetMouseButton(code); }
 
     void quick_exit () {
         glfwTerminate();
