@@ -44,13 +44,13 @@ namespace geo {
 
     void Resident_Editor::activate () {
         logger.log("Activating editor.");
+        Listener::activate();
         appear();
-        active = true;
     }
     void Resident_Editor::deactivate () {
         logger.log("Deactivating editor.");
+        Listener::deactivate();
         disappear();
-        active = false;
     }
 
 } using namespace geo;
