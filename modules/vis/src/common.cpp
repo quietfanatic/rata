@@ -12,8 +12,9 @@ namespace vis {
     using namespace core;
 
     Vec camera_pos = Vec(10, 7.5);
+    Vec camera_size = Vec(10, 7.5);
     Vec global_camera_pos = camera_pos;
-    Vec global_camera_size = Vec(10, 7.5);
+    Vec global_camera_size = camera_size;
 
     bool initted = false;
 
@@ -38,7 +39,7 @@ namespace vis {
         glDepthFunc(GL_LEQUAL);
          // Use camera
         global_camera_pos = camera_pos;
-        global_camera_size = settings->camera_size;
+        global_camera_size = camera_size;
         Program::unuse();
         for (auto& i : Map::items)
             i.Drawn_draw(Map());
@@ -55,7 +56,7 @@ namespace vis {
         for (auto& i : Hud::items)
             i.Drawn_draw(Hud());
          // Draw normal camera boundaries if camera_size is too big
-        if (settings->camera_size != Vec(20, 15)) {
+        if (camera_size != Vec(20, 15)) {
             Vec pts [4];
             float h = 10 + 0.5*PX;
             float v = 7.5 + 0.5*PX;
@@ -80,16 +81,5 @@ namespace vis {
     Links<Drawn<Hud>> Hud::items;
     Links<Drawn<Dev>> Dev::items;
 
-    Settings* settings = NULL;
-    Settings::Settings () {
-        if (settings) throw hacc::X::Logic_Error("Tried to create two vis::Settings objects");
-        settings = this;
-    }
-    Settings::~Settings () { if (settings == this) settings = NULL; }
-
 } using namespace vis;
 
-HACCABLE(Settings) {
-    name("vis::Settings");
-    attr("camera_size", member(&Settings::camera_size).optional());
-}

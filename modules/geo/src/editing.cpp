@@ -45,7 +45,7 @@ namespace geo {
         if (code == GLFW_MOUSE_BUTTON_LEFT) {
             Vec relpos = window->cursor_pos
                        - Vec(window->width, window->height)/2*PX
-                       + geo::camera_pos;
+                       + geo::camera->pos;
             if (action == GLFW_PRESS) {
                 dragging = NULL;
                 std::vector<std::pair<float, Resident*>> matches;
@@ -89,7 +89,7 @@ namespace geo {
         if (dragging) {
             Vec relpos = window->cursor_pos
                        - Vec(window->width, window->height)/2*PX
-                       + geo::camera_pos;
+                       + geo::camera->pos;
             dragging->Resident_set_pos(relpos - dragging_offset);
         }
     }
@@ -104,13 +104,13 @@ namespace geo {
         logger.log("Activating editor.");
         Listener::activate();
         appear();
-        geo::free_camera = true;
+        geo::camera->free = true;
     }
     void Resident_Editor::deactivate () {
         logger.log("Deactivating editor.");
         Listener::deactivate();
         disappear();
-        geo::free_camera = false;
+        geo::camera->free = false;
     }
 
 } using namespace geo;

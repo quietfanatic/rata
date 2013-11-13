@@ -8,22 +8,25 @@
 namespace geo {
     using namespace util;
 
-    extern Vec camera_pos;
-    void set_camera_pos (Vec);
-    Vec& update_camera ();
-     // Make the camera jump straight to its ideal position next frame.
-    extern bool camera_jump;
-     // While this is true, the camera stays still unless the window cursor
-     //  moves
-    extern bool free_camera;
-
-//    struct Conspicuous : Linkable<Conspicuous> {
-//         // The camera will try to show at least some of this rectangle.
-//        virtual Rect conspicuous_area () = 0;
-//         // Basically, a priority.
-//        virtual float conspicuousity () { return 0; }
-//        virtual bool as_close_as_possible () { return false; }
-//    };
+    struct Camera {
+        Vec pos = Vec(10, 7.5);
+        Vec size = Vec(20, 15);
+        Vec& update ();
+         // Make the camera jump straight to its ideal position next frame.
+        bool jump = false;
+         // While this is true, the camera stays still unless the
+         //  window cursor moves near the edge.
+        bool free = false;
+         // TODO: this isn't the best.
+        void set_pos (Vec);
+         // Chained like core::Listener
+        Camera* prev = NULL;
+        void activate ();
+        void deactivate ();
+        void finish () { activate(); }
+        ~Camera ();
+    };
+    extern Camera* camera;
 
 }
 

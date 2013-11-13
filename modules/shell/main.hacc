@@ -1,13 +1,13 @@
 {"hacc::Document":{
     game:{Game:{
-        window:{
-            width: 1280  // Large dimensions for editing
-            height: 960
-            depth: 8
-        }
-        vis:{
-            camera_size:[40 30]
-        }
+    }}
+    window:{"core::Window":{
+        width: 1280  // Large dimensions for editing
+        height: 960
+        depth: 8
+    }}
+    camera:{"geo::Camera":{
+        size:[40 30]
     }}
     hotkeys:{Hotkeys:[
         [96 [open_console]]  // `

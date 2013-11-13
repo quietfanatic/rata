@@ -13,19 +13,11 @@ namespace vis {
 
      // Setting this alters rendering until the Hud step.
     extern Vec camera_pos;
+    extern Vec camera_size;
 
      // This can be called automatically, but it's better to do it manually,
      //  to avoid first-frame lag.
     void init ();
-
-    struct Settings {
-         // The canonical camera size is (10, 7.5), but it can
-         //  be expanded for development purposes.
-        Vec camera_size = Vec(10, 7.5);
-        Settings ();
-        ~Settings ();
-    };
-    extern Settings* settings;
 
      // Do it.
     void render ();

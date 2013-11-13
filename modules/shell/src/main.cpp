@@ -32,8 +32,6 @@ struct Hotkeys : core::Listener {
  // Global game settings.  Eventually, all modules with configurable settings
  //  are expected to reserve a member of this struct.
 struct Game {
-    core::Window window;
-    vis::Settings vis;
     bool paused = false;
 };
 static Game* game = NULL;
@@ -43,7 +41,8 @@ void step () {
         ent::run_minds();
         phys::space.run();
     }
-    vis::camera_pos = geo::update_camera();
+    vis::camera_pos = geo::camera->update();
+    vis::camera_size = geo::camera->size;
 }
 
 int main (int argc, char** argv) {
@@ -61,16 +60,17 @@ int main (int argc, char** argv) {
     }
 
     using namespace hacc;
+    using namespace core;
 
     game = File(main_file).data().attr("game");
-    game->window.step = step;
-    game->window.render = vis::render;
-    game->window.before_next_frame([](){
+    window->step = step;
+    window->render = vis::render;
+    window->before_next_frame([](){
         load(File(initial_state));
     });
      // Run
     phys::space.start();
-    game->window.start();
+    window->start();
      // After window closes
     File(initial_state).rename(stop_state);
     save(File(stop_state));
@@ -79,8 +79,6 @@ int main (int argc, char** argv) {
 
 HACCABLE(Game) {
     name("Game");
-    attr("window", member(&Game::window).optional());
-    attr("vis", member(&Game::vis).optional());
     attr("paused", member(&Game::paused).optional());
 }
 HACCABLE(Hotkeys) {
