@@ -38,9 +38,16 @@ namespace core {
     void GLFWCALL char_cb (int charcode, int action) {
         Listener* next_l = NULL;
         for (Listener* l = window->listener; l; l = next_l) {
-             // In case a listener disables itself.
             next_l = l->next;
             if (l->Listener_char(charcode, action))
+                return;
+        }
+    }
+    void GLFWCALL button_cb (int code, int action) {
+        Listener* next_l = NULL;
+        for (Listener* l = window->listener; l; l = next_l) {
+            next_l = l->next;
+            if (l->Listener_button(code, action))
                 return;
         }
     }
@@ -78,6 +85,7 @@ namespace core {
     void really_stop_window () {
         glfwSetKeyCallback(NULL);
         glfwSetCharCallback(NULL);
+        glfwSetMouseButtonCallback(NULL);
         glfwSetWindowCloseCallback(NULL);
     }
 
@@ -88,6 +96,7 @@ namespace core {
          //  while the program is exiting and things are being destructed.
         glfwSetWindowCloseCallback(close_cb);
         glfwSetKeyCallback(key_cb);
+        glfwSetMouseButtonCallback(button_cb);
         glfwSetCharCallback(char_cb);
         glfwDisable(GLFW_AUTO_POLL_EVENTS);
         hacc::set_file_logger([](std::string s){ file_logger.log(s); });
@@ -144,15 +153,20 @@ namespace core {
                 glfwPollEvents();
                 int x, y;
                 glfwGetMousePos(&x, &y);
-                if (cursor_trapped && l) {
-                     // Something's odd about glfw's trapped cursor positioning.
-                    if (x != 0 || y != 0)
-                        l->Listener_trapped_motion(Vec(x+1, -(y+1))*PX);
-                    else
-                        l->Listener_trapped_motion(Vec(0, 0));
+                if (cursor_trapped) {
+                    if (l) {
+                         // Something's odd about glfw's trapped cursor positioning.
+                        if (x != 0 || y != 0)
+                            l->Listener_trapped_motion(Vec(x+1, -(y+1))*PX);
+                        else
+                            l->Listener_trapped_motion(Vec(0, 0));
+                    }
                 }
                 else {
                     cursor_pos = Vec(x, y)*PX;
+                    if (l) {
+                        l->Listener_cursor_pos(cursor_pos);
+                    }
                 }
                  // Run step and render
                  // TODO: real timing and allow frame-skipping display

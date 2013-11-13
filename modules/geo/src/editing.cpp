@@ -1,5 +1,6 @@
 #include "../inc/editing.h"
 #include "../inc/rooms.h"
+#include "../inc/camera.h"
 #include "../../core/inc/commands.h"
 #include "../../vis/inc/color.h"
 #include "../../util/inc/debug.h"
@@ -36,6 +37,63 @@ namespace geo {
         }
         color_offset(Vec(0, 0));
     }
+
+    Resident* dragging = NULL;
+    Vec dragging_offset;
+
+    bool Resident_Editor::Listener_button (int code, int action) {
+        if (code == GLFW_MOUSE_BUTTON_LEFT) {
+            Vec relpos = window->cursor_pos
+                       - Vec(window->width, window->height)/2*PX
+                       + geo::camera_pos;
+            if (action == GLFW_PRESS) {
+                dragging = NULL;
+                std::vector<std::pair<float, Resident*>> matches;
+                 // Search for cursor overlap
+                for (auto& room : all_rooms()) {
+                    if (room.observer_count) {
+                        for (auto& res : room.residents) {
+                            Vec pos = res.Resident_get_pos();
+                            if (!pos.is_defined()) continue;
+                            const Rect& boundary = res.Resident_boundary();
+                            if (boundary.covers(relpos - pos)) {
+                                matches.emplace_back(boundary.t, &res);
+                            }
+                        }
+                    }
+                }
+                 // Resident with lowest top gets priority
+                float lowest = INF;
+                Resident* picked = NULL;
+                for (auto& p : matches) {
+                    if (p.first < lowest) {
+                        lowest = p.first;
+                        picked = p.second;
+                    }
+                }
+                if (!picked) return false;
+                Vec pos = picked->Resident_get_pos();
+                dragging = picked;
+                dragging_offset = relpos - pos;
+                logger.log("Dragging @%lx", (size_t)picked);
+                return true;
+            }
+            else {
+                dragging = NULL;
+                return true;
+            }
+        }
+        return false;
+    }
+    void Resident_Editor::Listener_cursor_pos (Vec cursor_pos) {
+        if (dragging) {
+            Vec relpos = window->cursor_pos
+                       - Vec(window->width, window->height)/2*PX
+                       + geo::camera_pos;
+            dragging->Resident_set_pos(relpos - dragging_offset);
+        }
+    }
+
     Resident_Editor::Resident_Editor () { resident_editor = this; }
     Resident_Editor::~Resident_Editor () {
         if (resident_editor == this)

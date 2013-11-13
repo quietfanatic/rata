@@ -74,9 +74,12 @@ namespace core {
          // Return true if you've handled the input.
         virtual bool Listener_key (int, int) { return false; }
         virtual bool Listener_char (int, int) { return false; }
+        virtual bool Listener_button (int, int) { return false; }
          // false = don't trap, true = do trap, -1 = pass
         virtual int Listener_trap_cursor () { return false; }
-         // Read cursor motion; called if above returned true
+         // Read cursor position; called if trap_cursor returns false
+        virtual void Listener_cursor_pos (util::Vec) { }
+         // Read cursor motion; called if trap_cursor returns true
         virtual void Listener_trapped_motion (util::Vec) { }
          // Prevent lower levels from using key_pressed etc.
         virtual bool Listener_blocks_input_polling () { return true; }

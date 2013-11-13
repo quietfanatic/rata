@@ -13,6 +13,8 @@ namespace geo {
         ~Resident_Editor ();
 
         void Drawn_draw (vis::Overlay) override;
+        bool Listener_button (int, int) override;
+        void Listener_cursor_pos (util::Vec) override;
     };
     extern Resident_Editor* resident_editor;
 
