@@ -65,7 +65,7 @@ namespace hacc {
         }
     }
 
-    String tree_to_string (Tree t, String filename, uint ind, uint prior_ind) {
+    String tree_to_string_i (Tree t, String filename, uint ind, uint prior_ind) {
         switch (t.form()) {
             case NULLFORM: return "null";
             case BOOL: return t.as<bool>() ? "true" : "false";
@@ -91,12 +91,12 @@ namespace hacc {
                     r += "\n" + indent(prior_ind + 1);
                 for (auto& e : a) {
                     if (ind)
-                        r += tree_to_string(
+                        r += tree_to_string_i(
                             e, filename,
                             ind - 1, prior_ind + (a.size() > 1)
                         );
                     else
-                        r += tree_to_string(e, filename);
+                        r += tree_to_string_i(e, filename, 0, 0);
                     if (&e != &a.back()) {
                         if (ind && a.size() > 1)
                             r += "\n" + indent(prior_ind + 1);
@@ -120,12 +120,12 @@ namespace hacc {
                     r += escape_ident(i->first);
                     r += ":";
                     if (ind)
-                        r += tree_to_string(
+                        r += tree_to_string_i(
                             i->second, filename,
                             ind - 1, prior_ind + (o.size() > 1)
                         );
                     else
-                        r += tree_to_string(i->second, filename, 0, 0);
+                        r += tree_to_string_i(i->second, filename, 0, 0);
                     nexti++;
                     if (nexti != o.end()) {
                         if (ind) r += "\n" + indent(prior_ind + 1);
@@ -144,6 +144,13 @@ namespace hacc {
             default: throw X::Corrupted_Tree(t);
         }
     }
+
+    String tree_to_string (Tree t, String filename, uint ind) {
+        String r = tree_to_string_i(t, filename, ind, 0);
+        if (ind) r += "\n";
+        return r;
+    }
+
 
      // Parsing is simple enough that we don't need a separate lexer step (yet)
     struct Parser {
@@ -531,8 +538,6 @@ namespace hacc {
     void string_to_file (String str, String filename) {
         with_file(filename, "wb", [&](FILE* f){
             fwrite(str.data(), 1, str.size(), f);
-            if (str[str.size()-1] != '\n')
-                fputc('\n', f);
         });
     }
     String string_from_file (String filename) {
