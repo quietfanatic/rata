@@ -13,7 +13,4 @@
         cursor_tex:$("ent/res/cursor.hacc").img.ALL
         cursor_frame:$("ent/res/cursor.hacc").layout.normal
     }}
-    console:{"shell::Console":{
-        font:$("shell/res/monospace.hacc").font
-    }}
 }}

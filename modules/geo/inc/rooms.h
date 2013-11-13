@@ -10,8 +10,8 @@ namespace geo {
      // A resident is something that belongs to a room.
     struct Resident;
 
-    struct Room {
-        Rect boundary = Rect(-INF, -INF, INF, INF);
+    struct Room : Link<Room> {
+        Rect boundary = Rect(0, 0, 20, 15);
         std::vector<Room*> neighbors;
 
         Links<Resident> residents;
@@ -20,7 +20,10 @@ namespace geo {
         void observe ();
         void forget ();
          // Rooms are not to be destructed if they have non-doomed Residents
+        Room ();
+        ~Room ();
     };
+    Links<Room>& all_rooms ();
 
     struct Observer {
          // This room will always be loaded (if not NULL)
@@ -44,6 +47,9 @@ namespace geo {
         virtual void Resident_emerge () = 0;
          // Called when the room is unloaded
         virtual void Resident_reclude () = 0;
+        virtual Vec Resident_get_pos () { return Vec(NAN, NAN); }
+        virtual void Resident_set_pos (Vec p) { }
+        virtual Rect Resident_boundary () { return Rect(-0.25, -0.25, 0.25, 0.25); }
         virtual ~Resident () { }
         void finish ();
          // Checks if the agent has moved to a different room.  If the agent

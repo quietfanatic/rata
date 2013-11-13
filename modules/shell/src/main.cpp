@@ -26,20 +26,20 @@ struct Hotkeys : core::Listener {
         return false;
     }
     int Listener_trap_cursor () override { return -1; }
+    void finish () { activate(); }
 };
 
  // Global game settings.  Eventually, all modules with configurable settings
  //  are expected to reserve a member of this struct.
-struct Settings {
+struct Game {
     core::Window window;
     vis::Settings vis;
-    Hotkeys hotkeys;
     bool paused = false;
 };
-static Settings* settings = NULL;
+static Game* game = NULL;
 
 void step () {
-    if (!settings->paused) {
+    if (!game->paused) {
         ent::run_minds();
         phys::space.run();
     }
@@ -62,36 +62,35 @@ int main (int argc, char** argv) {
 
     using namespace hacc;
 
-    settings = File(main_file).data();
-    settings->window.step = step;
-    settings->window.render = vis::render;
-    settings->window.before_next_frame([](){
+    game = File(main_file).data().attr("game");
+    game->window.step = step;
+    game->window.render = vis::render;
+    game->window.before_next_frame([](){
         load(File(initial_state));
     });
-    settings->hotkeys.activate();
      // Run
     phys::space.start();
-    settings->window.start();
+    game->window.start();
      // After window closes
     File(initial_state).rename(stop_state);
     save(File(stop_state));
     fprintf(stderr, "Quit successfully\n");
 }
 
-HACCABLE(Settings) {
-    name("Settings");
-    attr("window", member(&Settings::window).optional());
-    attr("vis", member(&Settings::vis).optional());
-    attr("hotkeys", member(&Settings::hotkeys).optional());
-    attr("paused", member(&Settings::paused).optional());
+HACCABLE(Game) {
+    name("Game");
+    attr("window", member(&Game::window).optional());
+    attr("vis", member(&Game::vis).optional());
+    attr("paused", member(&Game::paused).optional());
 }
 HACCABLE(Hotkeys) {
     name("Hotkeys");
     delegate(member(&Hotkeys::hotkeys));
+    finish([](Hotkeys& v){ v.finish(); });
 }
 
 void _pause () {
-    settings->paused = !settings->paused;
+    game->paused = !game->paused;
 }
 core::New_Command _pause_cmd ("pause", "Toggle whether game activity occurs.", 0, _pause);
 

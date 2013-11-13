@@ -1,14 +1,21 @@
-{Settings:{
-    window:{
-        width: 1280  // Large dimensions for editing
-        height: 960
-        depth: 8
-    }
-    vis:{
-        camera_size:[40 30]
-    }
-    hotkeys:[
+{"hacc::Document":{
+    game:{Game:{
+        window:{
+            width: 1280  // Large dimensions for editing
+            height: 960
+            depth: 8
+        }
+        vis:{
+            camera_size:[40 30]
+        }
+    }}
+    hotkeys:{Hotkeys:[
         [96 [open_console]]  // `
         [80 [pause]]  // P
-    ]
+        [48 [resident_editor]]  // 0
+    ]}
+    console:{"shell::Console":{
+        font:$("shell/res/monospace.hacc").font
+    }}
+    resed:{"geo::Resident_Editor":{ }}
 }}

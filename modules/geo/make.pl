@@ -4,7 +4,7 @@ use MakePl;
 
 include '../..';
 
-objects(qw(rooms tiles camera));
+objects(qw(camera editing rooms tiles));
 
 clean_rule(glob 'tmp/*');
 

@@ -68,9 +68,10 @@ namespace ent {
         float oldxrel = 0;
         void Drawn_draw (vis::Sprites) override;
 
-
         void Resident_emerge () override;
         void Resident_reclude () override;
+        Vec Resident_get_pos () override { return Object::pos(); }
+        void Resident_set_pos (Vec p) override { Object::set_pos(p); }
 
         Biped ();
         void finish ();

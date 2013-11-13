@@ -7,6 +7,14 @@ namespace geo {
 
     Logger geo_logger ("geo");
 
+    Room::Room () { link(&all_rooms()); }
+    Room::~Room () { unlink(); }
+
+    Links<Room>& all_rooms () {
+        static Links<Room> r;
+        return r;
+    }
+
     void Room::observe () {
         if (!observer_count++) {
             geo_logger.log("Activating room @%lx", (unsigned long)this);
