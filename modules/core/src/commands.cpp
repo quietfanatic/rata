@@ -202,3 +202,33 @@ void _peek (String type, size_t address) {
     print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");
 };
 New_Command _peek_cmd ("peek", "Get the value of a type at an address.  Please be careful!", 2, _peek);
+
+void _copy (const Reference& a, std::string dir, const Reference& b) {
+    if (a.type() != b.type()) {
+        throw hacc::X::Logic_Error(
+            "Arguments to from are of opposing types "
+          + a.type().name() + " and " + b.type().name()
+        );
+    }
+    if (dir == "to") {
+        a.read([&](void* tp){
+            b.write([&](void* fp){
+                b.type().copy_assign(b, a);
+            });
+        });
+    }
+    else if (dir == "from") {
+        b.read([&](void* tp){
+            a.write([&](void* fp){
+                a.type().copy_assign(a, b);
+            });
+        });
+    }
+    else {
+        throw hacc::X::Logic_Error("Second argument \"" + dir + "\" to copy is neither \"to\" nor \"from\".");
+    }
+}
+New_Command _copy_cmd (
+    "copy", "Copy data from one location to another.  The second argument is either \"to\" or \"from\".",
+    3, _copy
+);
