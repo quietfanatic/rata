@@ -10,64 +10,6 @@
 using namespace hacc;
 using namespace core;
 
- // This is large because we have to manipulate arrays and do dynamically-typed stuff
-HACCABLE(Command) {
-    name("core::Command");
-    to_tree([](const Command& cmd){
-        Tree inner = Reference(Type(typeid(*cmd)), (void*)&*cmd).to_tree();
-        auto& less = inner.as<const Array&>();
-        Array more;
-        more.reserve(less.size() + 1);
-        more.push_back(Tree(cmd->info->name));
-        for (auto& t : less)
-            more.emplace_back(t);
-        return Tree(std::move(more));
-    });
-    prepare([](Command& cmd, Tree tree){
-        auto& more = tree.as<const Array&>();
-        if (more.size() == 0)
-            throw X::Logic_Error("A command cannot be represented by an empty array");
-        if (more[0].form() != STRING)
-            throw X::Logic_Error("A command must have a string as its first element");
-        std::string name = more[0].as<std::string>();
-        auto iter = commands_by_name().find(name);
-        if (iter != commands_by_name().end()) {
-            auto desc = iter->second;
-            if (more.size() - 1 < desc->min_args)
-                throw X::Logic_Error("Not enough arguments for command " + name);
-            void* dat = operator new (desc->type.size());
-            desc->type.construct(dat);
-            cmd = Command((CommandData*)dat);
-            cmd->info = desc;
-            Array less;
-            less.reserve(more.size() - 1);
-            for (size_t i = 1; i < more.size(); i++)
-                less.push_back(more[i]);
-            Reference(desc->type, dat).prepare(Tree(std::move(less)));
-        }
-        else throw X::Logic_Error("No command found named " + name);
-    });
-    fill([](Command& cmd, Tree tree){
-        auto& a = tree.as<const Array&>();
-        if (a.size() == 0)
-            throw X::Logic_Error("A command cannot be represented by an empty array");
-        Array less;
-        less.reserve(a.size() - 1);
-        for (size_t i = 1; i < a.size(); i++)
-            less.push_back(a[i]);
-        Reference(
-            Type(typeid(*cmd)),
-            &*cmd
-        ).fill(Tree(std::move(less)));
-    });
-    finish([](Command& cmd){
-        Reference(
-            Type(typeid(*cmd)),
-            &*cmd
-        ).finish();
-    });
-}
-
 namespace core {
 
     std::unordered_map<std::string, New_Command*>& commands_by_name () {
@@ -190,8 +132,16 @@ void __length (const Reference& ref) {
 }
 New_Command _length_cmd ("length", "Print the length of an array.", 1, __length);
 
-void _set (const Reference& ref, hacc::Tree val) {
-    ref.from_tree(val);
+void _set (const Reference& ref, const Dynamic& val) {
+    if (val.type != ref.type()) {
+        throw hacc::X::Logic_Error(
+            "Arguments to set are of different types "
+          + ref.type().name() + " and " + val.type.name()
+        );
+    }
+    ref.write([&](void* p){
+        ref.type().copy_assign(p, val.address());
+    });
 }
 New_Command _set_cmd ("set", "Set the data at a path to a value.", 2, _set);
 
@@ -202,32 +152,96 @@ void _peek (String type, size_t address) {
 };
 New_Command _peek_cmd ("peek", "Get the value of a type at an address.  Please be careful!", 2, _peek);
 
-void _copy (const Reference& a, std::string dir, const Reference& b) {
+struct Copy_Direction {
+    bool to;
+    bool operator == (Copy_Direction o) { return to == o.to; }
+};
+HACCABLE(Copy_Direction) {
+    value("to", Copy_Direction{true});
+    value("from", Copy_Direction{false});
+};
+
+void _copy (const Reference& a, Copy_Direction dir, const Reference& b) {
     if (a.type() != b.type()) {
         throw hacc::X::Logic_Error(
-            "Arguments to from are of opposing types "
+            "Arguments to from are of different types "
           + a.type().name() + " and " + b.type().name()
         );
     }
-    if (dir == "to") {
+    if (dir.to) {
         a.read([&](void* tp){
             b.write([&](void* fp){
                 b.type().copy_assign(b, a);
             });
         });
     }
-    else if (dir == "from") {
+    else {
         b.read([&](void* tp){
             a.write([&](void* fp){
                 a.type().copy_assign(a, b);
             });
         });
     }
-    else {
-        throw hacc::X::Logic_Error("Second argument \"" + dir + "\" to copy is neither \"to\" nor \"from\".");
-    }
 }
 New_Command _copy_cmd (
     "copy", "Copy data from one location to another.  The second argument is either \"to\" or \"from\".",
     3, _copy
 );
+
+ // This is large because we have to manipulate arrays and do dynamically-typed stuff
+HACCABLE(Command) {
+    name("core::Command");
+    to_tree([](const Command& cmd){
+        Tree inner = Reference(Type(typeid(*cmd)), (void*)&*cmd).to_tree();
+        auto& less = inner.as<const Array&>();
+        Array more;
+        more.reserve(less.size() + 1);
+        more.push_back(Tree(cmd->info->name));
+        for (auto& t : less)
+            more.emplace_back(t);
+        return Tree(std::move(more));
+    });
+    prepare([](Command& cmd, Tree tree){
+        auto& more = tree.as<const Array&>();
+        if (more.size() == 0)
+            throw X::Logic_Error("A command cannot be represented by an empty array");
+        if (more[0].form() != STRING)
+            throw X::Logic_Error("A command must have a string as its first element");
+        std::string name = more[0].as<std::string>();
+        auto iter = commands_by_name().find(name);
+        if (iter != commands_by_name().end()) {
+            auto desc = iter->second;
+            if (more.size() - 1 < desc->min_args)
+                throw X::Logic_Error("Not enough arguments for command " + name);
+            void* dat = operator new (desc->type.size());
+            desc->type.construct(dat);
+            cmd = Command((CommandData*)dat);
+            cmd->info = desc;
+            Array less;
+            less.reserve(more.size() - 1);
+            for (size_t i = 1; i < more.size(); i++)
+                less.push_back(more[i]);
+            Reference(desc->type, dat).prepare(Tree(std::move(less)));
+        }
+        else throw X::Logic_Error("No command found named " + name);
+    });
+    fill([](Command& cmd, Tree tree){
+        auto& a = tree.as<const Array&>();
+        if (a.size() == 0)
+            throw X::Logic_Error("A command cannot be represented by an empty array");
+        Array less;
+        less.reserve(a.size() - 1);
+        for (size_t i = 1; i < a.size(); i++)
+            less.push_back(a[i]);
+        Reference(
+            Type(typeid(*cmd)),
+            &*cmd
+        ).fill(Tree(std::move(less)));
+    });
+    finish([](Command& cmd){
+        Reference(
+            Type(typeid(*cmd)),
+            &*cmd
+        ).finish();
+    });
+}
