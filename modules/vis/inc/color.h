@@ -14,6 +14,7 @@ namespace vis {
     void draw_color (uint32);
     void line_width (uint width = 1);
     void draw_line (Vec, Vec);
+    void draw_rect (const Rect&);
     void draw_chain (size_t, Vec*);
     void draw_loop (size_t, Vec*);
     void draw_primitive (uint type, size_t, Vec*);

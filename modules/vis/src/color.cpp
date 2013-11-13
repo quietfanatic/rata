@@ -42,6 +42,14 @@ namespace vis {
         pts[1] = b;
         draw_chain(2, pts);
     }
+    void draw_rect (const Rect& r) {
+        Vec pts [4];
+        pts[0] = r.lb();
+        pts[1] = r.rb();
+        pts[2] = r.rt();
+        pts[3] = r.lt();
+        draw_loop(4, pts);
+    }
     void draw_chain (size_t n, Vec* pts) {
         draw_primitive(GL_LINE_STRIP, n, pts);
     }
