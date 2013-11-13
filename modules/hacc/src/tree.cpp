@@ -168,5 +168,7 @@ namespace hacc {
 HACCABLE(Tree) {
     name("hacc::Tree");
     to_tree([](const Tree& t){ return t; });
-    fill([](Tree& t, Tree tt){ t = tt; });
+    prepare([](Tree& t, Tree tt){ t = tt; });
+    fill([](Tree& t, Tree tt){ });
+    finish ([](Tree& t){ });
 }
