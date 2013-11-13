@@ -1,5 +1,4 @@
 #include "../inc/control.h"
-#include "../../core/inc/input.h"
 #include "../../hacc/inc/haccable_standard.h"
 #include <GL/glfw.h>
 
@@ -21,12 +20,12 @@ namespace ent {
             for (auto& m : mappings[Button(i)]) {
                 switch (m.type) {
                     case KEY: {
-                        if (core::key_pressed(m.code))
+                        if (core::window->key_pressed(m.code))
                             buttons |= bit;
                         break;
                     }
                     case BTN: {
-                        if (core::btn_pressed(m.code))
+                        if (core::window->btn_pressed(m.code))
                             buttons |= bit;
                         break;
                     }
@@ -36,7 +35,7 @@ namespace ent {
             bit <<= 1;
         }
         character->Controllable_buttons(ButtonBits(buttons));
-        character->Controllable_move_focus(core::cursor_motion);
+        character->Controllable_move_focus(core::window->trapped_cursor_motion);
     }
 
     Player::Player () {

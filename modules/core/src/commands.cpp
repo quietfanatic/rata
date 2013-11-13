@@ -5,7 +5,6 @@
 #include "../../hacc/inc/everything.h"
 #include "../../hacc/src/types_internal.h"
 #include "../inc/commands.h"
-#include "../inc/input.h"
 #include "../inc/window.h"
 
 using namespace hacc;

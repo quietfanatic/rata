@@ -4,6 +4,7 @@
 #include <functional>
 #include <vector>
 #include "../../util/inc/honestly.h"
+#include "../../util/inc/geometry.h"
 
 namespace core {
 
@@ -29,7 +30,14 @@ namespace core {
         std::function<void ()> step;
         std::function<void ()> render;
 
+         // Input handling
         Listener* listener = NULL;
+        bool key_pressed (int keycode);
+        bool btn_pressed (int code);
+         // Not updated when trapped.
+        util::Vec cursor_pos = util::Vec(160, 120);  // TODO: better value?
+         // Motion this frame, 0,0 if not trapped.
+        util::Vec trapped_cursor_motion = util::Vec(0, 0);
 
         uint64 frames_simulated = 0;
         uint64 frames_drawn = 0;

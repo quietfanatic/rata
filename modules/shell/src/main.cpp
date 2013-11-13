@@ -1,6 +1,5 @@
 #include <unistd.h>
 #include "../../core/inc/window.h"
-#include "../../core/inc/input.h"
 #include "../../core/inc/commands.h"
 #include "../../hacc/inc/files.h"
 #include "../../hacc/inc/haccable_standard.h"

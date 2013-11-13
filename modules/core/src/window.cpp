@@ -1,7 +1,6 @@
 #include <GL/glfw.h>
 #include "../inc/window.h"
 #include "../inc/commands.h"
-#include "../inc/input.h"
 #include "../../util/inc/debug.h"
 #include "../../hacc/inc/files.h"
 #include "../../hacc/inc/strings.h"
@@ -113,9 +112,48 @@ namespace core {
                     to_stop = false;
                     break;
                 }
-                run_input();
+                 // Input handling!
+                bool trap_cursor = false;
+                Listener* next_l = NULL;
+                for (Listener* l = window->listener; l; l = next_l) {
+                    next_l = l->next;
+                    int trap = l->Listener_trap_cursor();
+                    if (trap != -1) {
+                        trap_cursor = trap;
+                        break;
+                    }
+                }
+                static bool cursor_trapped = false;
+                if (trap_cursor != cursor_trapped) {
+                    if (trap_cursor) {
+                        int x, y;
+                        glfwGetMousePos(&x, &y);
+                        cursor_pos = Vec(x, y);
+                        glfwDisable(GLFW_MOUSE_CURSOR);
+                    }
+                    else {
+                        glfwEnable(GLFW_MOUSE_CURSOR);
+                        glfwSetMousePos(cursor_pos.x, cursor_pos.y);
+                    }
+                }
+                cursor_trapped = trap_cursor;
+                if (cursor_trapped)
+                    glfwSetMousePos(0, 0);
+                glfwPollEvents();
+                int x, y;
+                glfwGetMousePos(&x, &y);
+                if (cursor_trapped) {
+                     // Something's odd about glfw's trapped cursor positioning.
+                    if (x != 0 || y != 0)
+                        trapped_cursor_motion = Vec(x+1, -(y+1))*PX;
+                    else
+                        trapped_cursor_motion = Vec(0, 0);
+                }
+                else {
+                    cursor_pos = Vec(x, y)*PX;
+                }
                  // Run step and render
-                 // TODO: real timing and allow frame-skipping the all_layers
+                 // TODO: real timing and allow frame-skipping display
                 if (step) step();
                 frames_simulated++;
                 if (render) render();
@@ -131,6 +169,9 @@ namespace core {
         really_stop_window();
     }
     void Window::stop () { to_stop = true; }
+
+    bool Window::key_pressed (int code) { return glfwGetKey(code); }
+    bool Window::btn_pressed (int code) { return glfwGetMouseButton(code); }
 
     void quick_exit () {
         glfwTerminate();

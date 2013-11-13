@@ -4,7 +4,7 @@ use MakePl;
 
 include '../..';
 
-objects(qw(commands input opengl window));
+objects(qw(commands opengl window));
 
 clean_rule(glob 'tmp/*');
 
