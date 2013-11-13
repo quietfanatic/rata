@@ -16,19 +16,33 @@ namespace core {
     void Program::use () {
         if (current != this) {
             if (current) current->Program_end();
+            if (!uses_vaos) {
+                glBindVertexArray(0);
+                for (uint i = attributes.size(); i < current_attr_count; i++)
+                    glDisableVertexAttribArray(i);
+                for (uint i = current_attr_count; i < attributes.size(); i++)
+                    glEnableVertexAttribArray(i);
+                current_attr_count = attributes.size();
+            }
+            glUseProgram(glid);
             Program_begin();
             current = this;
         }
     }
     void Program::unuse () {
-        if (current) current->Program_end();
+        if (current) {
+            current->Program_end();
+            if (!current->uses_vaos) {
+                for (uint i = 0; i < current_attr_count; i++)
+                    glDisableVertexAttribArray(i);
+                current_attr_count = 0;
+            }
+        }
+        glUseProgram(0);
         current = NULL;
     }
-    void Program::Program_begin () {
-        glUseProgram(glid);
-        current_attr_count = attributes.size();
-    }
-    void Program::Program_end () { }  // No default behavior
+    void Program::Program_begin () { }  // No default behavior
+    void Program::Program_end () { }
 
     void Shader::compile () {
         GLuint newid = glCreateShader(type);
@@ -86,8 +100,8 @@ namespace core {
                     throw std::logic_error("Look up the above GL error code.");
                 }
             }
-            for (auto& va : attributes) {
-                glBindAttribLocation(newid, va.second, va.first.c_str());
+            for (uint i = 0; i < attributes.size(); i++) {
+                glBindAttribLocation(newid, i, attributes[i].c_str());
             }
             glLinkProgram(newid);
             GLint status; glGetProgramiv(newid, GL_LINK_STATUS, &status);
@@ -122,15 +136,22 @@ namespace core {
     int Program::require_uniform (const char* uni) {
         int r = glGetUniformLocation(glid, uni);
         if (r == -1) {
-            fprintf(stderr, "Program %s has no uniform named %s\n", name.c_str(), uni);
-            throw std::logic_error("Uniform not found.");
+            throw hacc::X::Logic_Error("Program " + name + " has no uniform named " + uni);
         }
         return r;
     }
 
+    int Program::require_attribute (const char* attr) {
+        for (uint i = 0; i < attributes.size(); i++) {
+            if (attributes[i] == attr)
+                return i;
+        }
+        throw hacc::X::Logic_Error("Program " + name + " has no attribute name " + attr);
+    }
+
 } using namespace core;
 
-HCB_BEGIN(Shader)
+HACCABLE(Shader) {
     name("core::Shader");
     attr("type", value_funcs<std::string>(
         [](const Shader& s)->std::string{ return s.type == GL_FRAGMENT_SHADER ? "fragment" : "vertex"; },
@@ -141,15 +162,16 @@ HCB_BEGIN(Shader)
         }
     ));
     attr("source", member(&Shader::source));
-HCB_END(Shader)
+}
 
-HCB_BEGIN(Program)
+HACCABLE(Program) {
     name("core::Program");
     attr("name", member(&Program::name).optional());
     attr("shaders", member(&Program::shaders));
     attr("attributes", member(&Program::attributes).optional());
+    attr("uses_vaos", member(&Program::uses_vaos).optional());
     finish([](Program& p){ p.link(); });
-HCB_END(Program)
+}
 
 template <class C> using P = C*;
  // This is a lazy-loaded thunk that replaces itself with an OpenGL function

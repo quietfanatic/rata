@@ -12,12 +12,6 @@ namespace vis {
             model_pos = require_uniform("model_pos");
             color = require_uniform("color");
         }
-        void Program_begin () override {
-            Cameraed_Program::Program_begin();
-             // No VAOs
-            glBindVertexArray(0);
-            glEnableVertexAttribArray(0);
-        }
     };
 
     static Color_Program* prog = NULL;

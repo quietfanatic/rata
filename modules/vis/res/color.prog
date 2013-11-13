@@ -1,7 +1,8 @@
 {"hacc::Document":{
     prog:{"vis::Color_Program":{
-        shaders: [$.vert $.frag]
-        attributes: { vert_pos:0 }
+        shaders:[$.vert $.frag]
+        uses_vaos:false
+        attributes:[vert_pos]
     }}
     vert:{"core::Shader":{
         type:vertex

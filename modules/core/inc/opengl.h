@@ -29,9 +29,11 @@ namespace core {
         std::string name = "<Anonymous Program>";
         uint glid = 0;
         std::vector<Shader*> shaders;
-        std::unordered_map<std::string, uint> attributes;
+        std::vector<std::string> attributes;
+        bool uses_vaos = false;
 
         int require_uniform (const char* name);
+        int require_attribute (const char* name);
         void link ();
         ~Program ();
          // Supercall if you override these

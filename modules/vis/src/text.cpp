@@ -27,13 +27,6 @@ namespace vis {
             tex = require_uniform("tex");
             glUniform1i(tex, 0);
         }
-        void Program_begin () override {
-            Cameraed_Program::Program_begin();
-             // No VAOs
-            glBindVertexArray(0);
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-        }
     };
     static Text_Program* prog = NULL;
     void text_init () {
@@ -73,13 +66,6 @@ namespace vis {
                 curx = nextx;
                 if (curx > maxx) maxx = curx;
                 if (cury + font->line_height > maxy) maxy = cury + font->line_height;
-                //printf("'%c' [[[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]] [[%hu %hu] [%hu %hu]]]\n",
-                //    text[i],
-                //    verts[vert_i][0].px, verts[vert_i][0].py, verts[vert_i][0].tx, verts[vert_i][0].ty,
-                //    verts[vert_i][1].px, verts[vert_i][1].py, verts[vert_i][1].tx, verts[vert_i][1].ty,
-                //    verts[vert_i][2].px, verts[vert_i][2].py, verts[vert_i][2].tx, verts[vert_i][2].ty,
-                //    verts[vert_i][3].px, verts[vert_i][3].py, verts[vert_i][3].tx, verts[vert_i][3].ty
-                //);
                 vert_i++;
             }
         }
