@@ -19,6 +19,7 @@ namespace geo {
     void Resident_Editor::Drawn_draw (Overlay) {
         Vec cursor_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
         size_t unpositioned_residents = 0;
+        Resident* new_hovering = NULL;
         for (auto& room : all_rooms()) {
             color_offset(Vec(0, 0));
             draw_color(0xff00ffff);
@@ -35,21 +36,25 @@ namespace geo {
                     draw_color(0x00ff00ff);
                     draw_rect(boundary);
                     if (boundary.covers(cursor_pos - pos)) {
-                        std::string text = hacc::Reference(&res).show();
-                        color_offset(pos + boundary.rt());
-                        draw_color(0x000000cf);
-                        Vec size = text_size(text, font);
-                        draw_solid_rect(Rect(0, -size.y, size.x, 0));
-                        draw_text(text, font, pos + boundary.rt(), Vec(0, 0));
+                        new_hovering = &res;
                     }
                 }
             }
         }
         color_offset(Vec(0, 0));
+        if (new_hovering && new_hovering != hovering)
+            status = hacc::Reference(new_hovering).show();
+        else
+            status = "";
     }
-
-    Resident* dragging = NULL;
-    Vec dragging_offset;
+    void Resident_Editor::Drawn_draw (Dev) {
+        if (!status.empty()) {
+            draw_color(0x0000007f);
+            Vec size = text_size(status, font);
+            draw_solid_rect(Rect(0, size.y, size.x, 0));
+            draw_text(status, font, Vec(0, 0), Vec(1, -1));
+        }
+    }
 
     bool Resident_Editor::Listener_button (int code, int action) {
         if (code == GLFW_MOUSE_BUTTON_LEFT) {
@@ -82,7 +87,7 @@ namespace geo {
                 if (!picked) return false;
                 Vec pos = picked->Resident_get_pos();
                 dragging = picked;
-                dragging_offset = realpos - pos;
+                drag_offset = realpos - pos;
                 logger.log("Dragging @%lx", (size_t)picked);
                 return true;
             }
@@ -96,7 +101,7 @@ namespace geo {
     void Resident_Editor::Listener_cursor_pos (int x, int y) {
         if (dragging) {
             Vec realpos = geo::camera->window_to_world(x, y);
-            dragging->Resident_set_pos(realpos - dragging_offset);
+            dragging->Resident_set_pos(realpos - drag_offset);
         }
     }
 
@@ -112,13 +117,15 @@ namespace geo {
         fc.pos = geo::camera->Camera_pos();
         fc.size = Vec(40, 30);
         fc.activate();
-        appear();
+        Drawn<Overlay>::appear();
+        Drawn<Dev>::appear();
     }
     void Resident_Editor::deactivate () {
         logger.log("Deactivating editor.");
         Listener::deactivate();
         fc.deactivate();
-        disappear();
+        Drawn<Overlay>::disappear();
+        Drawn<Dev>::disappear();
     }
 
 } using namespace geo;
