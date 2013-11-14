@@ -1,4 +1,5 @@
 #include "../inc/opengl.h"
+#include "../inc/window.h"
 #include "../../hacc/inc/everything.h"
 
 namespace core {
@@ -179,6 +180,8 @@ template <class Ret, class... Args>
 struct glthunk1 {
     template <Ret(** fp )(Args...), const char** name>
     static Ret glthunk2 (Args... args) {
+        if (!window || !window->is_open)
+            throw hacc::X::Error("Cannot call OpenGL procedure before window is open: " + std::string(*name));
         void* func = glfwGetProcAddress(*name);
         if (!func)
             throw hacc::X::Error("OpenGL procedure not found: " + std::string(*name));
