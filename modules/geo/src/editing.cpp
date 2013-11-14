@@ -43,9 +43,7 @@ namespace geo {
 
     bool Resident_Editor::Listener_button (int code, int action) {
         if (code == GLFW_MOUSE_BUTTON_LEFT) {
-            Vec relpos = window->cursor_pos
-                       - Vec(window->width, window->height)/2*PX
-                       + geo::camera->pos;
+            Vec realpos = geo::camera->window_to_world(window->cursor_x, window->cursor_y);
             if (action == GLFW_PRESS) {
                 dragging = NULL;
                 std::vector<std::pair<float, Resident*>> matches;
@@ -56,7 +54,7 @@ namespace geo {
                             Vec pos = res.Resident_get_pos();
                             if (!pos.is_defined()) continue;
                             const Rect& boundary = res.Resident_boundary();
-                            if (boundary.covers(relpos - pos)) {
+                            if (boundary.covers(realpos - pos)) {
                                 matches.emplace_back(boundary.t, &res);
                             }
                         }
@@ -74,7 +72,7 @@ namespace geo {
                 if (!picked) return false;
                 Vec pos = picked->Resident_get_pos();
                 dragging = picked;
-                dragging_offset = relpos - pos;
+                dragging_offset = realpos - pos;
                 logger.log("Dragging @%lx", (size_t)picked);
                 return true;
             }
@@ -85,12 +83,10 @@ namespace geo {
         }
         return false;
     }
-    void Resident_Editor::Listener_cursor_pos (Vec cursor_pos) {
+    void Resident_Editor::Listener_cursor_pos (int x, int y) {
         if (dragging) {
-            Vec relpos = window->cursor_pos
-                       - Vec(window->width, window->height)/2*PX
-                       + geo::camera->pos;
-            dragging->Resident_set_pos(relpos - dragging_offset);
+            Vec realpos = geo::camera->window_to_world(x, y);
+            dragging->Resident_set_pos(realpos - dragging_offset);
         }
     }
 

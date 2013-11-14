@@ -33,7 +33,8 @@ namespace core {
         Listener* listener = NULL;
         bool cursor_trapped = false;
          // Not updated when trapped.
-        util::Vec cursor_pos = util::Vec(160, 120);  // TODO: better value?
+        int cursor_x = 160;
+        int cursor_y = 120;
 
         uint64 frames_simulated = 0;
         uint64 frames_drawn = 0;
@@ -79,9 +80,9 @@ namespace core {
          // false = don't trap, true = do trap, -1 = pass
         virtual int Listener_trap_cursor () { return false; }
          // Read cursor position; called if trap_cursor returns false
-        virtual void Listener_cursor_pos (util::Vec) { }
+        virtual void Listener_cursor_pos (int x, int y) { }
          // Read cursor motion; called if trap_cursor returns true
-        virtual void Listener_trapped_motion (util::Vec) { }
+        virtual void Listener_trapped_motion (int x, int y) { }
          // Prevent lower levels from using key_pressed etc.
         virtual bool Listener_blocks_input_polling () { return true; }
 

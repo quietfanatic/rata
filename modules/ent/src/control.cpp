@@ -1,4 +1,5 @@
 #include "../inc/control.h"
+#include "../../geo/inc/camera.h"
 #include "../../hacc/inc/haccable_standard.h"
 #include <GL/glfw.h>
 
@@ -36,8 +37,9 @@ namespace ent {
         }
         character->Controllable_buttons(ButtonBits(buttons));
     }
-    void Player::Listener_trapped_motion (Vec motion) {
-        character->Controllable_move_focus(motion);
+    void Player::Listener_trapped_motion (int x, int y) {
+        Vec mot = geo::camera->window_motion_to_world(x, y);
+        character->Controllable_move_focus(mot);
     }
 
     Player::Player () {

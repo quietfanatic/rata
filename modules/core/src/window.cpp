@@ -136,14 +136,12 @@ namespace core {
                 if (l == NULL) trap_cursor = false;
                 if (trap_cursor != cursor_trapped) {
                     if (trap_cursor) {
-                        int x, y;
-                        glfwGetMousePos(&x, &y);
-                        cursor_pos = Vec(x, y);
+                        glfwGetMousePos(&cursor_x, &cursor_y);
                         glfwDisable(GLFW_MOUSE_CURSOR);
                     }
                     else {
                         glfwEnable(GLFW_MOUSE_CURSOR);
-                        glfwSetMousePos(cursor_pos.x, cursor_pos.y);
+                        glfwSetMousePos(cursor_x, cursor_y);
                     }
                 }
                 cursor_trapped = trap_cursor;
@@ -156,15 +154,16 @@ namespace core {
                     if (l) {
                          // Something's odd about glfw's trapped cursor positioning.
                         if (x != 0 || y != 0)
-                            l->Listener_trapped_motion(Vec(x+1, -(y+1))*PX);
+                            l->Listener_trapped_motion(x+1, y+1);
                         else
-                            l->Listener_trapped_motion(Vec(0, 0));
+                            l->Listener_trapped_motion(0, 0);
                     }
                 }
                 else {
-                    cursor_pos = Vec(x, y)*PX;
+                    cursor_x = x;
+                    cursor_y = y;
                     if (l) {
-                        l->Listener_cursor_pos(cursor_pos);
+                        l->Listener_cursor_pos(cursor_x, cursor_y);
                     }
                 }
                  // Run step and render
