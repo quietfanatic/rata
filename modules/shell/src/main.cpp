@@ -63,6 +63,7 @@ int main (int argc, char** argv) {
     using namespace hacc;
     using namespace core;
 
+
     game = File(main_file).data().attr("game");
     window->step = step;
     window->render = vis::render;

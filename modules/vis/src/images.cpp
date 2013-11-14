@@ -5,6 +5,7 @@
 #include "../inc/images.h"
 #include "../inc/common.h"
 #include "../../hacc/inc/everything.h"
+#include "../../core/inc/window.h"
 #include "../../core/inc/opengl.h"
 
 namespace vis {
@@ -46,6 +47,8 @@ namespace vis {
     Texture::~Texture () { unload(); }
 
     void Image::load () {
+         // Can't use OpenGL if there isn't a window, bleh
+        core::window->open();
         int iw; int ih; int ich;
         data = (uint32*)SOIL_load_image(filename.c_str(), &iw, &ih, &ich, 4);
         if (!data) {

@@ -61,15 +61,17 @@ namespace core {
         window = this;
     }
     void Window::open () {
-        glfwInit();
-        is_open = glfwOpenWindow(
-            width, height,
-            red, green, blue,
-            alpha, depth, stencil,
-            fullscreen ? GLFW_FULLSCREEN : GLFW_WINDOW
-        );
         if (!is_open) {
-            throw hacc::X::Internal_Error("glfwOpenWindow failed for some reason");
+            glfwInit();
+            is_open = glfwOpenWindow(
+                width, height,
+                red, green, blue,
+                alpha, depth, stencil,
+                fullscreen ? GLFW_FULLSCREEN : GLFW_WINDOW
+            );
+            if (!is_open) {
+                throw hacc::X::Internal_Error("glfwOpenWindow failed for some reason");
+            }
         }
     }
 
