@@ -25,6 +25,7 @@ namespace hacc {
         String description () const;  // Says what kind of getset this is (value_funcs, etc.)
         void* address (void*) const;  // This returns null if the data is not addressable
         void* ro_address (void*) const;
+        void* inverse_address (void*) const;  // If possible, get host pointer from member pointer
         void get (void*, void*) const;  // Performs a copy
         void set (void*, void*) const;  // ''
          // Named-Parameter-Idiom setters

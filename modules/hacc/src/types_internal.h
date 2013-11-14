@@ -19,6 +19,7 @@ namespace hacc {
         virtual String description () const = 0;
         virtual void* address (void*) const = 0;
         virtual void* ro_address (void*) const = 0;
+        virtual void* inverse_address (void*) const = 0;
         virtual void get (void*, void*) const = 0;
         virtual void set (void*, void*) const = 0;
     };
@@ -28,6 +29,7 @@ namespace hacc {
         String description () const { return "<Converted from Pointer>"; }
         void* address (void* c) const { return c; }
         void* ro_address (void* c) const { return c; }
+        void* inverse_address (void* c) const { return c; }
         void get (void* c, void* m) const { t.copy_assign(m, c); }
         void set (void* c, void* m) const { t.copy_assign(c, m); }
     };
@@ -40,12 +42,16 @@ namespace hacc {
         { }
         String description () const { return "(" + l.description() + " => " + r.description() + ")"; }
         void* address (void* c) const {
-            void* mid = r.address(c);
-            return mid ? l.address(mid) : mid;
+            void* mid = l.address(c);
+            return mid ? r.address(mid) : mid;
         }
         void* ro_address (void* c) const {
-            void* mid = r.ro_address(c);
-            return mid ? l.ro_address(mid) : mid;
+            void* mid = l.ro_address(c);
+            return mid ? r.ro_address(mid) : mid;
+        }
+        void* inverse_address (void* m) const {
+            void* mid = r.inverse_address(m);
+            return mid ? l.inverse_address(mid) : mid;
         }
         void get (void* c, void* m) const {
             l.type().stalloc([&](void* mid){
@@ -75,6 +81,7 @@ namespace hacc {
         void* ro_address (void* c) const {
             return f(c).ro_address();
         }
+        void* inverse_address (void* c) const { return null; }
         void get (void* c, void* m) const {
             f(c).get(m);
         }

@@ -61,6 +61,7 @@ namespace hacc {
         String description () const { return "value_funcs"; }
         void* address (void* c) const { return null; }
         void* ro_address (void* c) const { return null; }
+        void* inverse_address (void* m) const { return null; }
         void get (void* c, void* m) const { g(c, m); }
         void set (void* c, void* m) const { s(c, m); }
     };
@@ -77,6 +78,7 @@ namespace hacc {
         String description () const { return "mixed_funcs"; }
         void* address (void* c) const { return null; }
         void* ro_address (void* c) const { return null; }
+        void* inverse_address (void* m) const { return null; }
         void get (void* c, void* m) const { g(c, m); }
         void set (void* c, void* m) const { s(c, m); }
     };
@@ -93,6 +95,7 @@ namespace hacc {
         String description () const { return "ref_funcs"; }
         void* address (void* c) const { return null; }
         void* ro_address (void* c) const { return g(c); }
+        void* inverse_address (void* m) const { return null; }
         void get (void* c, void* m) const { t.copy_assign(m, g(c)); }
         void set (void* c, void* m) const { s(c, m); }
     };
@@ -108,6 +111,7 @@ namespace hacc {
         String description () const { return "ref_func"; }
         void* address (void* c) const { return f(c); }
         void* ro_address (void* c) const { return f(c); }
+        void* inverse_address (void* m) const { return null; }
         void get (void* c, void* m) const { t.copy_assign(m, f(c)); }
         void set (void* c, void* m) const { t.copy_assign(f(c), m); }
     };
@@ -116,13 +120,15 @@ namespace hacc {
     }
 
     struct Base : GetSetData {
-        void*(* f )(void*);
-        Base(Type t, Type ht, void*(* f )(void*)) :
-           GetSetData(t, ht), f(f)
+        void*(* up )(void*);
+        void*(* down )(void*);
+        Base(Type t, Type ht, void*(* up )(void*), void*(* down )(void*)) :
+           GetSetData(t, ht), up(up), down(down)
         { }
         String description () const { return "base"; }
-        void* address (void* c) const { return f(c); }
-        void* ro_address (void* c) const { return f(c); }
+        void* address (void* c) const { return up(c); }
+        void* ro_address (void* c) const { return up(c); }
+        void* inverse_address (void* m) const { return down(c); }
         void get (void* c, void* m) const { t.copy_assign(m, f(c)); }
         void set (void* c, void* m) const { t.copy_assign(f(c), m); }
     };
@@ -139,6 +145,7 @@ namespace hacc {
         String description () const { return "assignable"; }
         void* address (void* c) const { return null; }
         void* ro_address (void* c) const { return null; }
+        void* inverse_address (void* m) const { return null; }
         void get (void* c, void* m) const { g(c, m); }
         void set (void* c, void* m) const { s(c, m); }
     };
@@ -154,6 +161,10 @@ namespace hacc {
         String description () const { return "member"; }
         void* address (void* c) const { return &(((Unknown*)c)->*mp); }
         void* ro_address (void* c) const { return &(((Unknown*)c)->*mp); }
+        void* inverse_address (void* m) const {
+            void* offset = &(((Unknown*)c)->*mp);
+            return m - (offset - m);
+        }
         void get (void* c, void* m) const { t.copy_assign(m, &(((Unknown*)c)->*mp)); }
         void set (void* c, void* m) const { t.copy_assign(&(((Unknown*)c)->*mp), m); }
     };
@@ -170,6 +181,7 @@ namespace hacc {
         String description () const { return "value_methods"; }
         void* address (void* c) const { return null; }
         void* ro_address (void* c) const { return null; }
+        void* inverse_address (void* m) const { return null; }
         void get (void* c, void* m) const { g(c, m); }
         void set (void* c, void* m) const { s(c, m); }
     };
@@ -186,6 +198,7 @@ namespace hacc {
         String description () const { return "mixed_methods"; }
         void* address (void* c) const { return null; }
         void* ro_address (void* c) const { return null; }
+        void* inverse_address (void* m) const { return null; }
         void get (void* c, void* m) const { g(c, m); }
         void set (void* c, void* m) const { (((Unknown*)c)->*s)(m); }
     };
@@ -201,6 +214,7 @@ namespace hacc {
         { }
         String description () const { return "ref_methods"; }
         void* address (void* c) const { return null; }
+        void* inverse_address (void* m) const { return null; }
         void* ro_address (void* c) const { return (((Unknown*)c)->*g)(); }
         void get (void* c, void* m) const { t.copy_assign(m, (((Unknown*)c)->*g)()); }
         void set (void* c, void* m) const { (((Unknown*)c)->*s)(m); }
@@ -217,6 +231,7 @@ namespace hacc {
         String description () const { return "ref_method"; }
         void* address (void* c) const { return (((Unknown*)c)->*f)(); }
         void* ro_address (void* c) const { return (((Unknown*)c)->*f)(); }
+        void* inverse_address (void* m) const { return null; }
         void get (void* c, void* m) const { t.copy_assign(m, (((Unknown*)c)->*f)()); }
         void set (void* c, void* m) const { t.copy_assign((((Unknown*)c)->*f)(), m); }
     };
