@@ -59,7 +59,9 @@ namespace hacc {
 
         operator void* () const { return address; }
         operator bool () const { return address; }
-         // These throw if the types don't exactly match
+         // If the types don't match, will attempt to downcast.
+         //  It does a depth-first search starting with the requested type and
+         //  following delegations, attrs, and elems declared as base or member.
         void* address_of_type (Type) const;
         template <class C>
         operator C* () const { return (C*)address_of_type(Type::CppType<C>()); }

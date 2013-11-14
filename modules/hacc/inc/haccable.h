@@ -32,7 +32,7 @@ namespace hacc {
     GetSet0 _mixed_funcs (Type, Type, const UnknownF2&, const UnknownF2&);
     GetSet0 _ref_funcs (Type, Type, const UnknownF1&, const UnknownF2&);
     GetSet0 _ref_func (Type, Type, const UnknownF1&);
-    GetSet0 _base (Type, Type, void*(*)(void*));
+    GetSet0 _base (Type, Type, void*(*)(void*), void*(*)(void*));
     GetSet0 _assignable (Type, Type, void(*)(void*,void*), void(*)(void*,void*));
     GetSet0 _member (Type, Type, UnknownMP);
     GetSet0 _value_methods (Type, Type, const UnknownF2&, const UnknownF2&);
@@ -81,7 +81,8 @@ namespace hacc {
         static GetSet2<C, M> base () {
             return static_cast<GetSet2<C, M>&&>(_base(
                 Type::CppType<M>(), Type::CppType<C>(),
-                [](void* c){ return (void*)static_cast<M*>((C*)c); }
+                [](void* c){ return (void*)static_cast<M*>((C*)c); },
+                [](void* m){ return (void*)static_cast<C*>((M*)m); }
             ));
         }
         template <class M>

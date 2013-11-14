@@ -128,12 +128,12 @@ namespace hacc {
         String description () const { return "base"; }
         void* address (void* c) const { return up(c); }
         void* ro_address (void* c) const { return up(c); }
-        void* inverse_address (void* m) const { return down(c); }
-        void get (void* c, void* m) const { t.copy_assign(m, f(c)); }
-        void set (void* c, void* m) const { t.copy_assign(f(c), m); }
+        void* inverse_address (void* m) const { return down(m); }
+        void get (void* c, void* m) const { t.copy_assign(m, up(c)); }
+        void set (void* c, void* m) const { t.copy_assign(up(c), m); }
     };
-    GetSet0 _base (Type t, Type ht, void*(* f )(void*)) {
-        return GetSet0(new Base(t, ht, f));
+    GetSet0 _base (Type t, Type ht, void*(* up )(void*), void*(* down )(void*)) {
+        return GetSet0(new Base(t, ht, up, down));
     }
 
     struct Assignable : GetSetData {
@@ -162,8 +162,8 @@ namespace hacc {
         void* address (void* c) const { return &(((Unknown*)c)->*mp); }
         void* ro_address (void* c) const { return &(((Unknown*)c)->*mp); }
         void* inverse_address (void* m) const {
-            void* offset = &(((Unknown*)c)->*mp);
-            return m - (offset - m);
+            void* offset = &(((Unknown*)m)->*mp);
+            return (void*)((char*)m - ((char*)offset - (char*)m));
         }
         void get (void* c, void* m) const { t.copy_assign(m, &(((Unknown*)c)->*mp)); }
         void set (void* c, void* m) const { t.copy_assign(&(((Unknown*)c)->*mp), m); }

@@ -12,6 +12,7 @@ namespace hacc {
     String GetSet0::description () const { return (*this)->description(); }
     void* GetSet0::address (void* c) const { return (*this)->address(c); }
     void* GetSet0::ro_address (void* c) const { return (*this)->ro_address(c); }
+    void* GetSet0::inverse_address (void* m) const { return (*this)->inverse_address(m); }
     void GetSet0::get (void* c, void* m) const { return (*this)->get(c, m); }
     void GetSet0::set (void* c, void* m) const { return (*this)->set(c, m); }
     GetSet0& GetSet0::optional () { (*this)->optional = true; return *this; }
@@ -26,15 +27,32 @@ namespace hacc {
         }
         if (t == p.type)
             return p.address;
-        else
+        else {
+             // Search delegation, attrs, and elems for a base pointer
+            if (t.data->delegate) {
+                if (void* midp = address_of_type_internal(p, t.data->delegate.type()))
+                    if (void* p = t.data->delegate.inverse_address(midp))
+                        return p;
+            }
+            for (auto& a : t.data->attr_list) {
+                if (void* midp = address_of_type_internal(p, a.second.type()))
+                    if (void* p = a.second.inverse_address(midp))
+                        return p;
+            }
+            for (auto& e : t.data->elem_list) {
+                if (void* midp = address_of_type_internal(p, e.type()))
+                    if (void* p = e.inverse_address(midp))
+                        return p;
+            }
             return null;
+        }
     }
 
     void* Pointer::address_of_type (Type t) const {
-        if (void* r = address_of_type_internal(*this, t)) {
+        if (void* r = address_of_type_internal(*this, t))
             return r;
-        }
-        else throw X::Type_Mismatch(t, type, "when converting " + show() + " to " + t.name() + "*");
+        else
+            throw X::Type_Mismatch(t, type, "when converting " + show() + " to " + t.name() + "*");
     }
     std::string Pointer::show () const {
         std::ostringstream ss;
