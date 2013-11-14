@@ -41,8 +41,9 @@ void step () {
         ent::run_minds();
         phys::space.run();
     }
-    vis::camera_pos = geo::camera->update();
-    vis::camera_size = geo::camera->size;
+    geo::camera->Camera_update();
+    vis::camera_pos = geo::camera->Camera_pos();
+    vis::camera_size = geo::camera->Camera_size();
 }
 
 int main (int argc, char** argv) {

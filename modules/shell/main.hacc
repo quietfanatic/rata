@@ -6,9 +6,6 @@
         height: 960
         depth: 8
     }}
-    camera:{"geo::Camera":{
-        size:[40 30]
-    }}
     hotkeys:{Hotkeys:[
         [96 [open_console]]  // `
         [80 [pause]]  // P

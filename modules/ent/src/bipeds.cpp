@@ -169,7 +169,7 @@ namespace ent {
          // Camera control
          // TODO: This kinda belongs somewhere else maybe?
          //  Well, it's gonna be replaced by a conspicuousity system anyway.
-        geo::camera->set_pos(pos());
+        geo::default_camera().pos = pos();
     }
 
     void Biped::animate () {

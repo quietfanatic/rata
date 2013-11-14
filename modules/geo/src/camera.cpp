@@ -5,14 +5,9 @@
 namespace geo {
     using namespace core;
 
-    void Camera::set_pos (Vec p) {
-        if (!free)
-            pos = p;
-    }
-
-    Vec& Camera::update () {
+    void Free_Camera::Camera_update () {
          // TODO: do stuff
-        if (free && !window->cursor_trapped) {
+        if (!window->cursor_trapped) {
             float move_speed = 1/256.0;
             if (window->cursor_x < 64) {
                 pos.x += (window->cursor_x - 64) * move_speed;
@@ -29,7 +24,6 @@ namespace geo {
         }
         if (!pos.is_defined())
             pos = Vec(10, 7.5);
-        return pos;
     }
 
     Camera* camera = NULL;
@@ -41,18 +35,22 @@ namespace geo {
         for (Camera** c = &camera; *c; c = &(*c)->prev) {
             if (*c == this) {
                 *c = prev;
+                prev = NULL;
                 return;
             }
         }
+        prev = NULL;
     }
-    Camera::~Camera () { deactivate(); }
+
+    Default_Camera& default_camera () {
+        static Default_Camera r (true);
+        return r;
+    }
 
 } using namespace geo;
 
-HACCABLE(Camera) {
-    name("geo::Camera");
-    attr("pos", member(&Camera::pos).optional());
-    attr("size", member(&Camera::size).optional());
-    attr("free", member(&Camera::free).optional());
-    finish([](Camera& v){ v.finish(); });
+HACCABLE(Default_Camera) {
+    name("geo::Default_Camera");
+    attr("pos", member(&Default_Camera::pos).optional());
+    finish([](Default_Camera& v){ v.finish(); });
 }

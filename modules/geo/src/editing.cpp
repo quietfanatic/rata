@@ -45,7 +45,6 @@ namespace geo {
         if (code == GLFW_MOUSE_BUTTON_LEFT) {
             Vec realpos = geo::camera->window_to_world(window->cursor_x, window->cursor_y);
             if (action == GLFW_PRESS) {
-                logger.log("%f %f\n", realpos.x, realpos.y);
                 dragging = NULL;
                 std::vector<std::pair<float, Resident*>> matches;
                  // Search for cursor overlap
@@ -100,14 +99,16 @@ namespace geo {
     void Resident_Editor::activate () {
         logger.log("Activating editor.");
         Listener::activate();
+        fc.pos = geo::camera->Camera_pos();
+        fc.size = Vec(40, 30);
+        fc.activate();
         appear();
-        geo::camera->free = true;
     }
     void Resident_Editor::deactivate () {
         logger.log("Deactivating editor.");
         Listener::deactivate();
+        fc.deactivate();
         disappear();
-        geo::camera->free = false;
     }
 
 } using namespace geo;
