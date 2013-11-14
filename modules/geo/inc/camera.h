@@ -30,8 +30,8 @@ namespace geo {
         Vec window_to_world (int x, int y) {
             using namespace core;
             return pos - size/2 + Vec(
-                x / window->width * size.x,
-                (window->height - y) / window->height * size.y
+                x * size.x / window->width,
+                (window->height - y) * size.y / window->height
             );
         }
         Vec window_motion_to_world (int x, int y) {
