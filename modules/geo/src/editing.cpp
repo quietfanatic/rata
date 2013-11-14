@@ -3,6 +3,7 @@
 #include "../inc/camera.h"
 #include "../../core/inc/commands.h"
 #include "../../vis/inc/color.h"
+#include "../../vis/inc/text.h"
 #include "../../util/inc/debug.h"
 
 using namespace util;
@@ -16,6 +17,7 @@ namespace geo {
     Resident_Editor* resident_editor = NULL;
 
     void Resident_Editor::Drawn_draw (Overlay) {
+        Vec cursor_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
         size_t unpositioned_residents = 0;
         for (auto& room : all_rooms()) {
             color_offset(Vec(0, 0));
@@ -32,6 +34,14 @@ namespace geo {
                     color_offset(pos);
                     draw_color(0x00ff00ff);
                     draw_rect(boundary);
+                    if (boundary.covers(cursor_pos - pos)) {
+                        std::string text = hacc::Reference(&res).show();
+                        color_offset(pos + boundary.rt());
+                        draw_color(0x000000cf);
+                        Vec size = text_size(text, font);
+                        draw_solid_rect(Rect(0, -size.y, size.x, 0));
+                        draw_text(text, font, pos + boundary.rt(), Vec(0, 0));
+                    }
                 }
             }
         }
@@ -115,6 +125,7 @@ namespace geo {
 
 HACCABLE(Resident_Editor) {
     name("geo::Resident_Editor");
+    attr("font", member(&Resident_Editor::font));
 }
 
 void _resident_editor () {

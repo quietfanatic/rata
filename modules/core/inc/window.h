@@ -4,7 +4,6 @@
 #include <functional>
 #include <vector>
 #include "../../util/inc/honestly.h"
-#include "../../util/inc/geometry.h"
 
 namespace core {
 

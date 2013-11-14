@@ -215,12 +215,7 @@ namespace shell {
              // Darken background
             color_offset(Vec(0, 0));
             draw_color(0x000000cf);
-            Vec pts [4];
-            pts[0] = Vec(0, 0);
-            pts[1] = Vec(core::window->width*PX, 0);
-            pts[2] = Vec(core::window->width*PX, core::window->height*PX);
-            pts[3] = Vec(0, core::window->height*PX);
-            draw_primitive(GL_QUADS, 4, pts);
+            draw_solid_rect(Rect(0, 0, core::window->width*PX, core::window->height*PX));
              // Draw text
             Vec cli_size = draw_text(cli + " ", font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, core::window->width*PX);
             Vec cursor_pos = get_glyph_pos(cli, font, cli_pos, Vec(1, -1), core::window->width*PX);

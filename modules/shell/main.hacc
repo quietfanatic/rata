@@ -14,5 +14,7 @@
     console:{"shell::Console":{
         font:$("shell/res/monospace.hacc").font
     }}
-    resed:{"geo::Resident_Editor":{ }}
+    resed:{"geo::Resident_Editor":{
+        font:$("shell/res/monospace.hacc").font
+    }}
 }}

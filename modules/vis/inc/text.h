@@ -21,7 +21,7 @@ namespace vis {
     void text_init ();
 
      // Returns the size of the rectangle encompassing the drawn text.
-    Vec draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color = 0xffffffff, float wrap = 0);
+    Vec draw_text (std::string text, Font* font, Vec pos, Vec align = Vec(1, 1), uint32 color = 0xffffffff, float wrap = 0);
      // Returns size without drawing
     Vec text_size (std::string text, Font* font, float wrap = 0);
      // Gets the position of the upper-left corner of the ith character in text,

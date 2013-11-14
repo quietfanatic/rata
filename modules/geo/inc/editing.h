@@ -3,12 +3,14 @@
 
 #include "camera.h"
 #include "../../vis/inc/common.h"
+#include "../../vis/inc/text.h"
 #include "../../core/inc/window.h"
 
 namespace geo {
 
     struct Resident_Editor : vis::Drawn<vis::Overlay>, core::Listener {
         Free_Camera fc;
+        vis::Font* font;
         void activate ();
         void deactivate ();
         Resident_Editor ();
