@@ -95,6 +95,8 @@ namespace phys {
 
         Object ();
         virtual ~Object ();
+        Object (const Object&) = delete;
+        Object& operator = (const Object&) = delete;
     };
 
      // Collision handling is done through registered collision rules.
