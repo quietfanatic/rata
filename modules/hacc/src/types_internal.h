@@ -122,6 +122,7 @@ namespace hacc {
         GetSet0 delegate = null;
         bool array = false;
         bool initialized = false;
+        bool can_copy_assign = false;
 
         TypeData (
             const std::type_info& cpptype,
@@ -129,13 +130,15 @@ namespace hacc {
             void (* construct )(void*),
             void (* destruct )(void*),
             void (* copy_assign )(void*, void*),
+            bool assignable,
             void (* stalloc )(const Func<void (void*)>&)
         ) :
             cpptype(&cpptype), size(size),
             construct(construct), destruct(destruct),
             copy_assign(copy_assign),
             stalloc(stalloc),
-            gs_id(new GS_Ptr(this))
+            gs_id(new GS_Ptr(this)),
+            can_copy_assign(assignable)
         {
             types_to_init().push_back(this);
         }

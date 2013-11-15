@@ -204,6 +204,7 @@ namespace hacc {
                 Constructibility<C>::construct,
                 Destructibility<C>::destruct,
                 Assignability<C>::assign,
+                Assignability<C>::assignable,
                 Constructibility<C>::stalloc,
                 Hacc_TypeDecl<C>::describe
             );

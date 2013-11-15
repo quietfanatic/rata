@@ -21,6 +21,7 @@ namespace hacc {
         void construct (void*) const;
         void destruct (void*) const;
         void copy_assign (void*, void*) const;
+        bool can_copy_assign () const;
         void stalloc (const Func<void (void*)>&) const;
 
         Type (TypeData* p) : data(p) { }
@@ -58,6 +59,7 @@ namespace hacc {
         void (* construct )(void*),
         void (* destruct )(void*),
         void (* copy_assign )(void*, void*),
+        bool assignable,
         void (* stalloc )(const Func<void (void*)>&),
         void (* describe )()
     );
@@ -113,10 +115,12 @@ namespace hacc {
     };
     template <class C>
     struct Assignability<C, true> {
+        static constexpr bool assignable = true;
         static void assign (void* to, void* from) { *(C*)to = *(C*)from; }
     };
     template <class C>
     struct Assignability<C, false> {
+        static constexpr bool assignable = false;
         static void assign (void* to, void* from) { throw X::Not_Assignable(Type::CppType<C>()); }
     };
     template <class C>
@@ -139,6 +143,7 @@ template <class C> struct Hacc_TypeDecl {
             hacc::Constructibility<C>::construct,
             hacc::Destructibility<C>::destruct,
             hacc::Assignability<C>::assign,
+            hacc::Assignability<C>::assignable,
             hacc::Constructibility<C>::stalloc,
             hacc::null
         );

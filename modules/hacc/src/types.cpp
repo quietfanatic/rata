@@ -44,6 +44,7 @@ namespace hacc {
     void Type::construct (void* p) const { data->construct(p); }
     void Type::destruct (void* p) const { data->destruct(p); }
     void Type::copy_assign (void* l, void* r) const { data->copy_assign(l, r); }
+    bool Type::can_copy_assign () const { return data->can_copy_assign; }
     void Type::stalloc (const Func<void (void*)>& f) const { data->stalloc(f); }
 
     void init () {
@@ -66,6 +67,7 @@ namespace hacc {
         void (* construct )(void*),
         void (* destruct )(void*),
         void (* copy_assign )(void*, void*),
+        bool assignable,
         void (* stalloc )(const Func<void (void*)>&),
         void (* describe )()
     ) {
@@ -75,6 +77,7 @@ namespace hacc {
                 cpptype, size,
                 construct, destruct,
                 copy_assign,
+                assignable,
                 stalloc
             );
         }
