@@ -7,6 +7,7 @@
 #include "../../geo/inc/camera.h"
 #include "../../ent/inc/control.h"
 #include "../../vis/inc/common.h"
+#include "../../vis/inc/text.h"
 
 static std::string initial_state = "shell/start.hacc";
 static std::string stop_state = "../save/last_stop.hacc";
@@ -65,6 +66,7 @@ int main (int argc, char** argv) {
 
 
     game = File(main_file).data().attr("game");
+    vis::default_font = File("shell/res/monospace.hacc").data().attr("font");
     window->step = step;
     window->render = vis::render;
     window->before_next_frame([](){

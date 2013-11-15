@@ -11,7 +11,7 @@ namespace geo {
 
     struct Resident_Editor : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Dev>, core::Listener {
         Free_Camera fc;
-        vis::Font* font;
+        vis::Font* font = NULL;
         Resident* hovering = NULL;
         Resident* dragging = NULL;
         Vec drag_offset;

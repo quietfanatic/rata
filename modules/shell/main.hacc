@@ -11,10 +11,6 @@
         [80 [pause]]  // P
         [48 [resident_editor]]  // 0
     ]}
-    console:{"shell::Console":{
-        font:$("shell/res/monospace.hacc").font
-    }}
-    resed:{"geo::Resident_Editor":{
-        font:$("shell/res/monospace.hacc").font
-    }}
+    console:{"shell::Console":{ }}
+    resed:{"geo::Resident_Editor":{ }}
 }}

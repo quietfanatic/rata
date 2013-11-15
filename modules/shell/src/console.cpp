@@ -211,16 +211,17 @@ namespace shell {
         }
         void Drawn_draw (Dev r) override {
             wait_for_draw = false;
-            if (!font) return;
+            if (!font && !default_font) return;
              // Darken background
             color_offset(Vec(0, 0));
             draw_color(0x000000cf);
             draw_solid_rect(Rect(0, 0, core::window->width*PX, core::window->height*PX));
              // Draw text
+            auto line_height = font ? font->line_height : default_font->line_height;
             Vec cli_size = draw_text(cli + " ", font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, core::window->width*PX);
             Vec cursor_pos = get_glyph_pos(cli, font, cli_pos, Vec(1, -1), core::window->width*PX);
             if (window->frames_drawn % 40 < 20) {
-                draw_text("_", font, Vec(1*PX + cursor_pos.x, cli_size.y - cursor_pos.y - font->line_height*PX - 2*PX), Vec(1, -1), 0xffffffff);
+                draw_text("_", font, Vec(1*PX + cursor_pos.x, cli_size.y - cursor_pos.y - line_height*PX - 2*PX), Vec(1, -1), 0xffffffff);
             }
             draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, core::window->width*PX);
         }
@@ -229,7 +230,7 @@ namespace shell {
 
 HACCABLE(shell::Console) {
     name("shell::Console");
-    attr("font", member(&shell::Console::font));
+    attr("font", member(&shell::Console::font).optional());
 }
 
 void _open_console () {

@@ -29,14 +29,24 @@ namespace vis {
         }
     };
     static Text_Program* prog = NULL;
+    Font* default_font = NULL;
     void text_init () {
         prog = hacc::File("vis/res/text.prog").data().attr("prog");
         hacc::manage(&prog);
+        hacc::manage(&default_font);
+    }
+
+    static Font* use_default (Font* font) {
+        if (font) return font;
+        if (default_font) return default_font;
+        printf("DSAFDSAF\n");
+        throw hacc::X::Logic_Error("No font provided and no default font set");
     }
 
      // TODO: Make align.x affect each line individually
     Vec draw_text (std::string text, Font* font, Vec pos, Vec align, uint32 color, float wrap) {
         prog->use();
+        font = use_default(font);
          // Coordinates here work with y being down instead of up.
          //  This may be a little confusing.
         auto verts = new Text_Vert [text.length()][4];
@@ -88,6 +98,7 @@ namespace vis {
     }
 
     Vec text_size (std::string text, Font* font, float wrap) {
+        font = use_default(font);
         uint16 maxx = 0;
         uint16 maxy = 0;
         uint16 curx = 0;
@@ -113,6 +124,7 @@ namespace vis {
     }
 
     Vec get_glyph_pos (std::string text, Font* font, uint index, Vec align, float wrap) {
+        font = use_default(font);
         uint curx = 0;
         uint cury = 0;
         for (uint i = 0; i < index && i < text.length(); i++) {

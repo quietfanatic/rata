@@ -134,7 +134,7 @@ namespace geo {
 
 HACCABLE(Resident_Editor) {
     name("geo::Resident_Editor");
-    attr("font", member(&Resident_Editor::font));
+    attr("font", member(&Resident_Editor::font).optional());
 }
 
 void _resident_editor () {

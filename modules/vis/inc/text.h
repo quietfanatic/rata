@@ -20,6 +20,8 @@ namespace vis {
 
     void text_init ();
 
+    extern Font* default_font;
+
      // Returns the size of the rectangle encompassing the drawn text.
     Vec draw_text (std::string text, Font* font, Vec pos, Vec align = Vec(1, 1), uint32 color = 0xffffffff, float wrap = 0);
      // Returns size without drawing
