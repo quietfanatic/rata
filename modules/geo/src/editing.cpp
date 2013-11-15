@@ -42,8 +42,10 @@ namespace geo {
             }
         }
         color_offset(Vec(0, 0));
-        if (new_hovering && new_hovering != hovering)
-            status = hacc::Reference(new_hovering).show();
+        if (new_hovering && new_hovering != hovering) {
+            void* derived = hacc::Pointer(new_hovering).address_of_type(hacc::Type(typeid(*new_hovering)));
+            status = hacc::Reference(hacc::Type(typeid(*new_hovering)), derived).show();
+        }
         else
             status = "";
     }
