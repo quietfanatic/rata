@@ -81,3 +81,17 @@ HACCABLE(Menu) {
     name("geo::Menu");
     attr("room", member(&Menu::room));
 }
+
+HACCABLE(Text_Button) {
+    name("geo::Text_Button");
+    attr("pos", member(&Text_Button::pos).optional());
+    attr("align", member(&Text_Button::align).optional());
+    attr("font", member(&Text_Button::font).optional());
+    attr("text", member(&Text_Button::text).optional());
+    attr("on_click", member(&Text_Button::on_click).optional());
+    attr("color", member(&Text_Button::color).optional());
+    attr("background_color", member(&Text_Button::background_color).optional());
+    attr("hover_color", member(&Text_Button::hover_color).optional());
+    attr("hover_background_color", member(&Text_Button::hover_background_color).optional());
+    finish([](Text_Button& v){ v.finish();});
+}

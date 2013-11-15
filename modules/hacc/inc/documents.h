@@ -49,6 +49,10 @@ namespace hacc {
         void dealloc (void*);
         void change_id (void* p, String id);
     };
+     // Linear search over all documents and their objects.
+    Document* get_document_containing(void* p);
+    template <class C>
+    Document* get_document_containing(C* p) { return get_document_containing((void*)p); }
 
     namespace X {
         struct Document_Bad_ID : Logic_Error {

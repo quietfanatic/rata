@@ -3,6 +3,7 @@
 
 #include "camera.h"
 #include "rooms.h"
+#include "menus.h"
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/text.h"
 #include "../../core/inc/window.h"
@@ -13,13 +14,20 @@ namespace geo {
         Free_Camera fc;
         vis::Font* font = NULL;
         Resident* hovering = NULL;
+        Resident* selected = NULL;
         Resident* dragging = NULL;
+        Menu* popup_menu = NULL;
+        bool clicking;
+        Vec drag_origin;
         Vec drag_offset;
         std::string status;
         void activate ();
         void deactivate ();
         Resident_Editor ();
         ~Resident_Editor ();
+
+         // Context menu actions
+        void re_delete ();
 
         void Drawn_draw (vis::Overlay) override;
         void Drawn_draw (vis::Dev) override;

@@ -9,7 +9,7 @@
     hotkeys:{Hotkeys:[
         [96 [open_console]]  // `
         [80 [pause]]  // P
-        [48 [resident_editor]]  // 0
+        [48 [re_toggle]]  // 0
     ]}
     console:{"shell::Console":{ }}
     resed:{"geo::Resident_Editor":{ }}

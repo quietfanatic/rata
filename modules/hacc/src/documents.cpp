@@ -1,4 +1,5 @@
 #include <unordered_map>
+#include <unordered_set>
 #include <sstream>
 #include "../inc/documents.h"
 #include "../inc/haccable.h"
@@ -6,6 +7,8 @@
 namespace hacc {
 
     struct DocObj;
+
+    std::unordered_set<Document*> all_docs;
 
     struct DocLink {
         DocLink* prev;
@@ -53,8 +56,13 @@ namespace hacc {
         }
     };
 
-    Document::Document () : data(new DocumentData) { }
-    Document::~Document () { delete data; }
+    Document::Document () : data(new DocumentData) {
+        all_docs.insert(this);
+    }
+    Document::~Document () {
+        all_docs.erase(this);
+        delete data;
+    }
     void* Document::alloc (Type type) {
         return data->alloc("", type) + 1;
     }
@@ -103,6 +111,16 @@ namespace hacc {
     }
     std::vector<String> Document::all_ids () {
         return _all_ids(data);
+    }
+
+    Document* get_document_containing (void* p) {
+        for (auto d : all_docs) {
+            for (DocLink* link = d->data->next; link != d->data; link = link->next) {
+                if ((char*)link + sizeof(DocObj) == (char*)p)
+                    return d;
+            }
+        }
+        return null;
     }
 
     namespace X {
