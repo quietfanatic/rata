@@ -33,6 +33,14 @@ namespace geo {
         Vec window_motion_to_world (int x, int y) {
             return Vec(x, -y)*PX;
         }
+        Vec window_to_hud (int x, int y) {
+            using namespace core;
+            Vec size = Camera_size();
+            return Vec(
+                x * size.x / window->width,
+                (window->height - y) * size.y / window->height
+            );
+        }
     };
     extern Camera* camera;
 

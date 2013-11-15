@@ -49,7 +49,11 @@ namespace geo {
         virtual void Resident_reclude () = 0;
         virtual Vec Resident_get_pos () { return Vec(NAN, NAN); }
         virtual void Resident_set_pos (Vec p) { }
+         // Primarily for menus, but also the editor
         virtual Rect Resident_boundary () { return Rect(-0.25, -0.25, 0.25, 0.25); }
+         // Just for menus
+        virtual void Resident_hover (Vec) { }
+        virtual void Resident_click (Vec) { }
         virtual ~Resident () { }
         void finish ();
          // Checks if the agent has moved to a different room.  If the agent
