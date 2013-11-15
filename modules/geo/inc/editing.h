@@ -27,6 +27,7 @@ namespace geo {
         ~Resident_Editor ();
 
          // Context menu actions
+        void re_duplicate ();
         void re_delete ();
 
         void Drawn_draw (vis::Overlay) override;

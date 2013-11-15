@@ -150,6 +150,33 @@ namespace geo {
     }
 
      // Context menu actions
+    void Resident_Editor::re_duplicate () {
+        if (!selected) return;
+        auto realp = res_realp(selected);
+        if (hacc::Document* doc = hacc::get_document_containing(realp.address)) {
+            if (realp.type.can_copy_assign()) {
+                void* newp = doc->alloc(realp.type);
+                realp.type.copy_assign(newp, realp);
+            }
+            else {
+                hacc::Tree tree = hacc::Reference(realp).to_tree();
+                void* newp = doc->alloc(realp.type);
+                try {
+                    realp.type.construct(newp);
+                    hacc::Reference(realp.type, newp).from_tree(tree);
+                }
+                catch (...) {
+                    realp.type.destruct(newp);
+                    doc->dealloc(newp);
+                    throw;
+                }
+            }
+             // TODO: set pos to nearby
+        }
+        else {
+            throw hacc::X::Logic_Error("Could not re_duplicate: this object does not belong to a document.");
+        }
+    }
     void Resident_Editor::re_delete () {
         if (!selected) return;
         auto realp = res_realp(selected);
@@ -158,7 +185,7 @@ namespace geo {
             doc->dealloc(realp.address);
         }
         else {
-            printf("Could not re_delete: this object does not belong to a document.");
+            throw hacc::X::Logic_Error("Could not re_delete: this object does not belong to a document.");
         }
     }
 
@@ -179,6 +206,11 @@ void _re_toggle () {
 
 New_Command _re_toggle_cmd ("re_toggle", "Toggle the Resident_Editor interface.", 0, _re_toggle);
 
+void _re_duplicate () {
+    if (!resident_editor) return;
+    resident_editor->re_duplicate();
+}
+New_Command _re_duplicate_cmd ("re_duplicate", "Duplicate the selected object.", 0, _re_duplicate);
 void _re_delete () {
     if (!resident_editor) return;
     resident_editor->re_delete();
