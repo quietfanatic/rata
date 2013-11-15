@@ -41,7 +41,7 @@ namespace geo {
                     }
                     const Rect& boundary = res.Resident_boundary();
                     color_offset(pos);
-                    draw_color(0x00ff00ff);
+                    draw_color(&res == selected ? 0xff0000ff : 0x00ff00ff);
                     draw_rect(boundary);
                     if (boundary.covers(cursor_pos - pos)) {
                         new_hovering = &res;
