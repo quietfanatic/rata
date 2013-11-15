@@ -46,4 +46,8 @@ static const float INF = 1.f/0.f;
 static const float NAN = 0.f/0.f;
 #endif
 
+static float frand () {
+    return rand() * 1.f / RAND_MAX;
+}
+
 #endif
