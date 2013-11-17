@@ -6,7 +6,6 @@ my @objects = qw<
     tmp/main.o
     tmp/console.o
     ../core/tmp/commands.o
-    ../core/tmp/input.o
     ../core/tmp/opengl.o
     ../core/tmp/window.o
     ../ent/tmp/bipeds.o
