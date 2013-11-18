@@ -18,7 +18,7 @@ my %flags = (
     'g++' => {
         compile => [qw(-std=c++11 -c), "-I$here/lib/Box2D"],
         link => [qw(-std=c++11)],
-        release => ['-O3 -Wno-null-conversion -Wno-format-security'],
+        release => [qw(-O3 -Wno-null-conversion -Wno-format-security)],
         debug => [qw(-ggdb -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security)],
         profile => ['-pg'],
     },
