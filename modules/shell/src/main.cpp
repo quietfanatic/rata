@@ -69,8 +69,13 @@ int main (int argc, char** argv) {
     vis::default_font = File("shell/res/monospace.hacc").data().attr("font");
     window->step = step;
     window->render = vis::render;
-    window->before_next_frame([](){
-        load(File(initial_state));
+    window->before_next_frame([&](){
+        if (argc >= 2) {
+            load(File(argv[1]));
+        }
+        else {
+            load(File(initial_state));
+        }
     });
      // Run
     phys::space.start();
