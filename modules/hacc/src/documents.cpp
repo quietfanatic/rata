@@ -80,8 +80,10 @@ namespace hacc {
     static Pointer _get (DocumentData* data, String s) {
         if (!data->by_id.empty()) {
             auto iter = data->by_id.find(s);
-            if (iter != data->by_id.end())
+            if (iter != data->by_id.end()) {
+                if (!iter->second) return null;
                 return Pointer(iter->second->type, iter->second + 1);
+            }
             else return null;
         }
         else {
@@ -162,6 +164,8 @@ HACCABLE(DocumentData) {
                     ss >> _ >> id;
                     if (!ss.eof()) throw X::Logic_Error("Invalid hacc::Document special id " + pair.first);
                     if (id > largest_id) largest_id = id;
+                    if (d.by_id.find(pair.first) != d.by_id.end())
+                        throw X::Logic_Error("Duplicate ID in hacc::Document: " + pair.first);
                 }
             }
             else {
@@ -171,7 +175,7 @@ HACCABLE(DocumentData) {
                 if (oo.size() != 1)
                     throw X::Logic_Error("Each object in a hacc::Document must have a single type:value pair");
                 Type(oo[0].first);  // Validate type name
-                if (!d.by_id.emplace(pair.first, null).second)
+                if (d.by_id.find(pair.first) != d.by_id.end())
                     throw X::Logic_Error("Duplicate ID in hacc::Document: " + pair.first);
             }
         }

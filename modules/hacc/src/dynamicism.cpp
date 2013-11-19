@@ -598,23 +598,35 @@ namespace hacc {
     }
 
     std::string Reference::show () const {
-        std::ostringstream ss;
-        ss << "Reference(" << type().name() << " at ";
-        if (void* addr = ro_address()) {
-            ss << addr;
-            if (auto path = address_to_path(Pointer(type(), addr))) {
-                ss << " " << path_to_string(path);
+        static bool called = false;
+        if (called) {
+            return "Reference(<call to show recursed: infinite exception loop?>)";
+        }
+        else try {
+            called = true;
+            std::ostringstream ss;
+            ss << "Reference(" << type().name() << " at ";
+            if (void* addr = ro_address()) {
+                ss << addr;
+                if (auto path = address_to_path(Pointer(type(), addr))) {
+                    ss << " " << path_to_string(path);
+                }
             }
+            else if (auto path = address_to_path(Pointer(host_type(), c))) {
+                ss << " " << path_to_string(path) << ".<unknown " << gs.description() << ">";
+            }
+            else {
+                ss << "unknown address hosted by " << host_type().name()
+                   << " at " << c;
+            }
+            ss << ")";
+            called = false;
+            return ss.str();
         }
-        else if (auto path = address_to_path(Pointer(host_type(), c))) {
-            ss << " " << path_to_string(path) << ".<unknown " << gs.description() << ">";
+        catch (...) {
+            called = false;
+            throw;
         }
-        else {
-            ss << "unknown address hosted by " << host_type().name()
-               << " at " << c;
-        }
-        ss << ")";
-        return ss.str();
     }
 
     namespace X {
