@@ -10,7 +10,7 @@
     }}
     skin:{"vis::Skin":{
         apps: [
-            [($s=$("ent/res/small.hacc").skel.segs).body [$.img.body]]
+            [($s=$("../../ent/res/small.hacc").skel.segs).body [$.img.body]]
             [$s.head [$.img.head]]
             [$s.arm1 [$.img.arm]]
             [$s.forearm1 [$.img.forearm]]

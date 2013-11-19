@@ -62,17 +62,17 @@
         segs:[{
             name:head 
             branches:[]
-            layout:$lh=$("ent/res/small.layouts").head
+            layout:$lh=$("small.layouts").head
             z_offset:-0.02  // Only 8-bit precision if that
         } {
             name:forearm1
             branches:[]
-            layout:$lf=$("ent/res/small.layouts").forearm
+            layout:$lf=$("small.layouts").forearm
             z_offset:-0.06
         } {
             name:arm1
             branches:[$.skel.segs.forearm1]
-            layout:$la=$("ent/res/small.layouts").arm
+            layout:$la=$("small.layouts").arm
             z_offset:-0.04
         } {
             name:forearm2
@@ -87,7 +87,7 @@
         } {
             name:body
             branches:[$.skel.segs.head $.skel.segs.arm1 $.skel.segs.arm2]
-            layout:$lb=$("ent/res/small.layouts").body
+            layout:$lb=$("small.layouts").body
             z_offset: 0.00
         }]
         root:$.skel.segs.body
