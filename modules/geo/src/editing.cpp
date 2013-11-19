@@ -156,13 +156,14 @@ namespace geo {
         if (!selected) return;
         auto realp = res_realp(selected);
         if (hacc::Document* doc = hacc::get_document_containing(realp.address)) {
+            void* newp = NULL;
             if (realp.type.can_copy_assign()) {
-                void* newp = doc->alloc(realp.type);
+                newp = doc->alloc(realp.type);
                 realp.type.copy_assign(newp, realp);
             }
             else {
                 hacc::Tree tree = hacc::Reference(realp).to_tree();
-                void* newp = doc->alloc(realp.type);
+                newp = doc->alloc(realp.type);
                 try {
                     realp.type.construct(newp);
                     hacc::Reference(realp.type, newp).from_tree(tree);
@@ -173,6 +174,11 @@ namespace geo {
                     throw;
                 }
             }
+            Resident* old_res = hacc::Pointer(realp.type, realp.address);
+            Resident* new_res = hacc::Pointer(realp.type, newp);
+            Vec pos = old_res->Resident_get_pos();
+            pos += Vec(frand()*2-1, 0.8);
+            new_res->Resident_set_pos(pos);
              // TODO: set pos to nearby
         }
         else {
