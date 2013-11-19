@@ -113,7 +113,7 @@ sub ld_rule {
     }
 }
 sub test_rule {
-    phony 'test', $_[0], sub { run "./$_[1][0] --test | prove -e '' -"; };
+    phony 'test', $_[0], sub { system "./$_[1][0] --test | prove -e '' -"; };
 }
 sub clean_rule {
     my @tmps = @_;
