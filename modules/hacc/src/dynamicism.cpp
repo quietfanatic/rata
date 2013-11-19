@@ -22,12 +22,13 @@ namespace hacc {
     GetSet0& GetSet0::prepare () { (*this)->prepare = true; return *this; }
 
     static void* upcast (Pointer p, Type t) {
+        if (!p.address) return null;
         if (t == p.type)
             return p.address;
          // Search delegation, attrs, and elems
         if (p.type.data->delegate)
-            if (void* midp = t.data->delegate.address(p.address))
-                if (void* r = upcast(Pointer(t.data->delegate.type(), midp), t))
+            if (void* midp = p.type.data->delegate.address(p.address))
+                if (void* r = upcast(Pointer(p.type.data->delegate.type(), midp), t))
                     return r;
         for (auto& a : p.type.data->attr_list)
             if (void* midp = a.second.address(p.address))
@@ -41,6 +42,7 @@ namespace hacc {
     }
 
     static void* downcast (Pointer p, Type t) {
+        if (!p.address) return null;
         if (t == p.type)
             return p.address;
         if (t.data->delegate) {
