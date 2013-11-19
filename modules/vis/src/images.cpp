@@ -48,6 +48,9 @@ namespace vis {
 
     void Image::load () {
          // Can't use OpenGL if there isn't a window, bleh
+        if (!core::window) {
+            throw hacc::X::Logic_Error("Tried to call Image::load when no window has been created.");
+        }
         core::window->open();
         int iw; int ih; int ich;
         data = (uint32*)SOIL_load_image(filename.c_str(), &iw, &ih, &ich, 4);
