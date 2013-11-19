@@ -70,7 +70,7 @@ int main (int argc, char** argv) {
     phys::space.start();
     window->start();
      // After window closes
-    File(initial_state).rename(stop_state);
+    File(state).rename(stop_state);
     save(File(stop_state));
     fprintf(stderr, "Quit successfully\n");
 }
