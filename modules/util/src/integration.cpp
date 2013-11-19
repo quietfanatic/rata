@@ -5,6 +5,8 @@
 #include "../../hacc/inc/common.h"
  // TODO: Windows support
 
+static inline int builtin_chdir (const char* s) { return chdir(s); }
+
 namespace util {
 
     std::string cwd () {
@@ -163,6 +165,16 @@ namespace util {
             }
         }
         return join_path(ret);
+    }
+
+    void chdir (std::string newdir) {
+        if (builtin_chdir(newdir.c_str()) == -1) {
+            throw hacc::X::Logic_Error(
+                "Could not chdir(\"" + newdir +
+                + "\"): " + std::to_string(errno)
+                + " " + strerror(errno)
+            );
+        }
     }
 
 }

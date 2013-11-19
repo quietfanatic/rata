@@ -49,32 +49,22 @@ void step () {
 }
 
 int main (int argc, char** argv) {
-     // Find program's directory, chdir to modules
-    auto here = util::my_dir(argc, argv);
-    auto modules_dir = here + "/modules";
-    if (chdir(modules_dir.c_str()) == -1) {
-        throw hacc::X::Logic_Error(
-            "Could not chdir(\"" + modules_dir +
-            + "\"): " + std::to_string(errno)
-            + " " + strerror(errno)
-        );
-    }
-
     using namespace hacc;
     using namespace core;
 
+    std::string state = argc >= 2
+        ? rel2abs(argv[1])
+        : initial_state;
+
+    auto here = util::my_dir(argc, argv);
+    chdir(here + "/modules");
 
     game = File(main_file).data().attr("game");
     vis::default_font = File("shell/res/monospace.hacc").data().attr("font");
     window->step = step;
     window->render = vis::render;
     window->before_next_frame([&](){
-        if (argc >= 2) {
-            load(File(argv[1]));
-        }
-        else {
-            load(File(initial_state));
-        }
+        load(File(state));
     });
      // Run
     phys::space.start();

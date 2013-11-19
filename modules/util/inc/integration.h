@@ -36,6 +36,9 @@ namespace util {
      //  actually exist.
     std::string rel2abs (std::string, std::string base = "");
     std::string abs2rel (std::string, std::string base = cwd());
+     // This actually does something active.  It throws an exception if we
+     //  can't chdir.
+    void chdir (std::string);
 }
 
 #endif
