@@ -21,35 +21,52 @@ namespace hacc {
     GetSet0& GetSet0::narrow () { (*this)->narrow = true; return *this; }
     GetSet0& GetSet0::prepare () { (*this)->prepare = true; return *this; }
 
-    void* address_of_type_internal (Pointer p, Type t) {
-        while (p.type == Type::CppType<Dynamic>()) {
-            p = ((Dynamic*)p.address)->address();
-        }
+    static void* upcast (Pointer p, Type t) {
         if (t == p.type)
             return p.address;
-        else {
-             // Search delegation, attrs, and elems for a base pointer
-            if (t.data->delegate) {
-                if (void* midp = address_of_type_internal(p, t.data->delegate.type()))
-                    if (void* p = t.data->delegate.inverse_address(midp))
-                        return p;
-            }
-            for (auto& a : t.data->attr_list) {
-                if (void* midp = address_of_type_internal(p, a.second.type()))
-                    if (void* p = a.second.inverse_address(midp))
-                        return p;
-            }
-            for (auto& e : t.data->elem_list) {
-                if (void* midp = address_of_type_internal(p, e.type()))
-                    if (void* p = e.inverse_address(midp))
-                        return p;
-            }
-            return null;
+         // Search delegation, attrs, and elems
+        if (p.type.data->delegate)
+            if (void* midp = t.data->delegate.address(p.address))
+                if (void* r = upcast(Pointer(t.data->delegate.type(), midp), t))
+                    return r;
+        for (auto& a : p.type.data->attr_list)
+            if (void* midp = a.second.address(p.address))
+                if (void* r = upcast(Pointer(a.second.type(), midp), t))
+                    return r;
+        for (auto& e : p.type.data->elem_list)
+            if (void* midp = e.address(p.address))
+                if (void* r = upcast(Pointer(e.type(), midp), t))
+                    return r;
+        return null;
+    }
+
+    static void* downcast (Pointer p, Type t) {
+        if (t == p.type)
+            return p.address;
+        if (t.data->delegate) {
+            if (void* midp = downcast(p, t.data->delegate.type()))
+                if (void* r = t.data->delegate.inverse_address(midp))
+                    return r;
         }
+        for (auto& a : t.data->attr_list) {
+            if (void* midp = downcast(p, a.second.type()))
+                if (void* r = a.second.inverse_address(midp))
+                    return r;
+        }
+        for (auto& e : t.data->elem_list) {
+            if (void* midp = downcast(p, e.type()))
+                if (void* r = e.inverse_address(midp))
+                    return r;
+        }
+        return null;
     }
 
     void* Pointer::address_of_type (Type t) const {
-        if (void* r = address_of_type_internal(*this, t))
+        if (type == Type::CppType<Dynamic>())
+            return ((Dynamic*)address)->address().address_of_type(t);
+        else if (void* r = upcast(*this, t))
+            return r;
+        else if (void* r = downcast(*this, t))
             return r;
         else
             throw X::Type_Mismatch(t, type, "when converting " + show() + " to " + t.name() + "*");
@@ -457,7 +474,7 @@ namespace hacc {
                 Reference pointee = path_to_reference(path);
                 if (void* pointee_addr = pointee.address()) {
                     Pointer p (pointee.type(), pointee_addr);
-                    if (void* addr = address_of_type_internal(p, type().data->pointee_type)) {
+                    if (void* addr = upcast(p, type().data->pointee_type)) {
                         set(&addr);
                     }
                     else throw X::Type_Mismatch(
