@@ -79,7 +79,7 @@ namespace util {
                 had_slash = true;
             }
             else if (had_slash) {
-                ret = "";
+                ret = std::string(1, c);
                 had_slash = false;
             }
             else {
@@ -102,7 +102,7 @@ namespace util {
                 if (!ret.empty())
                     ret += '/';
                 ret += seg;
-                seg = "";
+                seg = std::string(1, c);
                 had_slash = false;
             }
             else {
@@ -137,10 +137,10 @@ namespace util {
             return canonicalize(path);
         }
         else if (base.empty()) {
-            return canonicalize(cwd() + path);
+            return canonicalize(cwd() + '/' + path);
         }
         else {
-            return canonicalize(base + path);
+            return canonicalize(base + '/' + path);
         }
     }
 
