@@ -36,6 +36,8 @@ namespace hacc {
         size_t next_id = 1;
          // Will usually be non-resident
         std::unordered_map<String, DocObj*> by_id;
+         // all_ids returns empty when this is true
+        bool currently_preparing = false;
 
         DocObj* alloc (String id, Type type) {
             void* p = operator new(type.size() + sizeof(DocObj));
@@ -78,6 +80,7 @@ namespace hacc {
     }
 
     static Pointer _get (DocumentData* data, String s) {
+        if (data->currently_preparing) return null;
         if (!data->by_id.empty()) {
             auto iter = data->by_id.find(s);
             if (iter != data->by_id.end()) {
@@ -101,6 +104,7 @@ namespace hacc {
     Pointer Document::get (String s) { return _get(data, s); }
 
     static std::vector<String> _all_ids (DocumentData* data) {
+        if (data->currently_preparing) return std::vector<String>();
         std::vector<String> r;
         for (DocLink* link = data->next; link != data; link = link->next) {
             auto obj = static_cast<DocObj*>(link);
@@ -144,6 +148,7 @@ HACCABLE(Document) {
 HACCABLE(DocumentData) {
     name("hacc::DocumentData");
     prepare([](DocumentData& d, Tree t){
+        d.currently_preparing = true;
         if (t.form() != OBJECT)
             throw X::Form_Mismatch(Type::CppType<DocumentData>(), t);
         const Object& o = t.as<const Object&>();
@@ -164,7 +169,7 @@ HACCABLE(DocumentData) {
                     ss >> _ >> id;
                     if (!ss.eof()) throw X::Logic_Error("Invalid hacc::Document special id " + pair.first);
                     if (id > largest_id) largest_id = id;
-                    if (d.by_id.find(pair.first) != d.by_id.end())
+                    if (!d.by_id.emplace(pair.first, null).second)
                         throw X::Logic_Error("Duplicate ID in hacc::Document: " + pair.first);
                 }
             }
@@ -175,7 +180,7 @@ HACCABLE(DocumentData) {
                 if (oo.size() != 1)
                     throw X::Logic_Error("Each object in a hacc::Document must have a single type:value pair");
                 Type(oo[0].first);  // Validate type name
-                if (d.by_id.find(pair.first) != d.by_id.end())
+                if (!d.by_id.emplace(pair.first, null).second)
                     throw X::Logic_Error("Duplicate ID in hacc::Document: " + pair.first);
             }
         }
@@ -189,9 +194,10 @@ HACCABLE(DocumentData) {
             Type type = Type(oo[0].first);
             DocObj* obj = d.alloc(pair.first, type);
             type.construct(obj + 1);
-            d.by_id[pair.first] = obj;
+            d.by_id.at(pair.first) = obj;
             Reference(type, obj + 1).prepare(oo[0].second);
         }
+        d.currently_preparing = false;
     });
     fill([](DocumentData& d, Tree t){
         for (auto& pair : t.as<const Object&>()) {
