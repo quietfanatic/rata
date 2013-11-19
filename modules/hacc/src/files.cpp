@@ -71,6 +71,7 @@ namespace hacc {
         return p->data.address();
     }
     void File::rename (std::string new_filename) {
+        if (new_filename == p->filename) return;
         if (File(new_filename).loaded()) throw X::File_Already_Loaded(new_filename);
         files_by_filename.erase(p->filename);
         p->filename = new_filename;
