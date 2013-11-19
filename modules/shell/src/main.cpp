@@ -8,6 +8,7 @@
 #include "../../ent/inc/control.h"
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/text.h"
+#include "../../util/inc/integration.h"
 
 static std::string initial_state = "shell/start.hacc";
 static std::string stop_state = "../save/last_stop.hacc";
@@ -49,16 +50,14 @@ void step () {
 
 int main (int argc, char** argv) {
      // Find program's directory, chdir to modules
-    if (argc < 1) {
-        fprintf(stderr, "Program called with no argv[0]!?\n");
-    }
-    std::string me = (const char*)argv[0];
-    auto lastslash = me.rfind('/');
-    if (lastslash != std::string::npos) {
-        auto modules_dir = me.substr(0, lastslash) + "/modules";
-        if (chdir(modules_dir.c_str()) == -1) {
-            fprintf(stderr, "Could not chdir(\"%s\"): %d (%s)\n", modules_dir.c_str(), errno, strerror(errno));
-        }
+    auto here = util::my_dir(argc, argv);
+    auto modules_dir = here + "/modules";
+    if (chdir(modules_dir.c_str()) == -1) {
+        throw hacc::X::Logic_Error(
+            "Could not chdir(\"" + modules_dir +
+            + "\"): " + std::to_string(errno)
+            + " " + strerror(errno)
+        );
     }
 
     using namespace hacc;

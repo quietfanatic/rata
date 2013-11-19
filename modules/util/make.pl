@@ -4,7 +4,7 @@ use MakePl;
 
 include '../..';
 
-objects(qw(debug geometry));
+objects(qw(debug geometry integration));
 
 clean_rule(glob 'tmp/*');
 

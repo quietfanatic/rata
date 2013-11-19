@@ -35,6 +35,7 @@ my @objects = qw<
     ../vis/tmp/tiles.o
     ../util/tmp/debug.o
     ../util/tmp/geometry.o
+    ../util/tmp/integration.o
     ../../lib/libBox2D.a
 >;
 my @libs = qw(-lGL -lglfw -lSOIL);
