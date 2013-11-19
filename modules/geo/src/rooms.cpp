@@ -127,8 +127,8 @@ namespace geo {
 
 HACCABLE(Room) {
     name("geo::Room");
-    attr("boundary", member(&Room::boundary));
-    attr("neighbors", member(&Room::neighbors));
+    attr("boundary", member(&Room::boundary).optional());
+    attr("neighbors", member(&Room::neighbors).optional());
 }
 
 HACCABLE(Resident) {

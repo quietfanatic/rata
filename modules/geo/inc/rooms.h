@@ -11,7 +11,7 @@ namespace geo {
     struct Resident;
 
     struct Room : Link<Room> {
-        Rect boundary = Rect(0, 0, 20, 15);
+        Rect boundary = Rect(-INF, -INF, INF, INF);
         std::vector<Room*> neighbors;
 
         Links<Resident> residents;

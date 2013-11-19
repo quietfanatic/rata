@@ -76,8 +76,8 @@ namespace geo {
 
     bool Resident_Editor::Listener_button (int code, int action) {
         if (code == GLFW_MOUSE_BUTTON_LEFT) {
-            Vec realpos = geo::camera->window_to_world(window->cursor_x, window->cursor_y);
             if (action == GLFW_PRESS) {
+                Vec realpos = camera->window_to_world(window->cursor_x, window->cursor_y);
                 dragging = NULL;
                 std::vector<std::pair<float, Resident*>> matches;
                  // Search for cursor overlap
@@ -117,6 +117,16 @@ namespace geo {
                 return true;
             }
         }
+        else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
+            if (action == GLFW_PRESS) {
+                if (!context_menu->active()) {
+                    Vec pos = camera->window_to_hud(window->cursor_x, window->cursor_y);
+                    context_menu->activate(pos);
+                    return true;
+                }
+            }
+        }
+        context_menu->deactivate();
         return false;
     }
     void Resident_Editor::Listener_cursor_pos (int x, int y) {
@@ -128,7 +138,11 @@ namespace geo {
         }
     }
 
-    Resident_Editor::Resident_Editor () { resident_editor = this; }
+    Resident_Editor::Resident_Editor () :
+        context_menu(hacc::File("geo/res/re_context_menu.hacc").data().attr("cm"))
+    {
+        resident_editor = this;
+    }
     Resident_Editor::~Resident_Editor () {
         if (resident_editor == this)
             resident_editor = NULL;
@@ -197,11 +211,38 @@ namespace geo {
         }
     }
 
+    void Context_Menu::activate (Vec pos) {
+        for (auto& res : room.residents) {
+            const Rect& bound = res.Resident_boundary();
+            res.Resident_set_pos(pos - bound.lt());
+            pos.y -= bound.size().y;
+        }
+         // If we've gone below the bottom, compensate
+        if (pos.y < 0) {
+            for (auto& res : room.residents) {
+                res.Resident_set_pos(res.Resident_get_pos() - Vec(0, pos.y));
+            }
+        }
+        Menu::activate();
+    }
+    bool Context_Menu::Listener_button (int code, int action) {
+        bool res = Menu::Listener_button(code, action);
+        if (action == GLFW_PRESS) {
+            deactivate();
+        }
+        return res;
+    }
+
 } using namespace geo;
 
 HACCABLE(Resident_Editor) {
     name("geo::Resident_Editor");
     attr("font", member(&Resident_Editor::font).optional());
+}
+
+HACCABLE(Context_Menu) {
+    name("geo::Context_Menu");
+    delegate(base<geo::Menu>());
 }
 
 void _re_toggle () {

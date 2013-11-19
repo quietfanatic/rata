@@ -15,6 +15,10 @@ namespace geo {
         Listener::deactivate();
     }
 
+    bool Menu::active () {
+        return room.observer_count > 0;
+    }
+
     void Menu::Listener_cursor_pos (int x, int y) {
         Vec cursor_pos = camera->window_to_hud(x, y);
         float lowest = INF;
@@ -48,21 +52,26 @@ namespace geo {
         finish();
     }
 
-    void Text_Button::finish () {
-        Vec size = text_size(text, font);
-        Vec lt = size.scale(align+Vec(1,1)) / 2;
-        Vec rb = size.scale(Vec(1,1)-align) / 2;
-        boundary.l = lt.x;
-        boundary.b = rb.y;
-        boundary.r = rb.x;
-        boundary.t = lt.y;
-    }
+    void Text_Button::finish () { }
 
     Vec Text_Button::Resident_get_pos () { return pos; }
     void Text_Button::Resident_set_pos (Vec p) { pos = p; }
-    Rect Text_Button::Resident_boundary () { return boundary; }
+    Rect Text_Button::Resident_boundary () {
+        if (!boundary.is_defined()) {
+            Vec size = text_size(text, font);
+            Vec lt = size.scale(align+Vec(1,1)) / 2;
+            Vec rb = size.scale(Vec(1,1)-align) / 2;
+            boundary.l = lt.x;
+            boundary.b = rb.y;
+            boundary.r = rb.x;
+            boundary.t = lt.y;
+        }
+        return boundary;
+    }
     void Text_Button::Resident_hover (Vec) { hovering = true; }
     void Text_Button::Resident_click (Vec) { on_click(); }
+    void Text_Button::Resident_emerge () { appear(); }
+    void Text_Button::Resident_reclude () { disappear(); }
 
     void Text_Button::Drawn_draw (Hud) {
         uint32 fg = hovering ? hover_color : color;
@@ -79,11 +88,12 @@ namespace geo {
 
 HACCABLE(Menu) {
     name("geo::Menu");
-    attr("room", member(&Menu::room));
+    attr("room", member(&Menu::room).optional());
 }
 
 HACCABLE(Text_Button) {
     name("geo::Text_Button");
+    attr("Resident", base<Resident>());
     attr("pos", member(&Text_Button::pos).optional());
     attr("align", member(&Text_Button::align).optional());
     attr("font", member(&Text_Button::font).optional());

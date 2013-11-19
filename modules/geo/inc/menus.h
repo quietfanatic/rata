@@ -17,6 +17,8 @@ namespace geo {
         void activate ();
         void deactivate ();
 
+        bool active ();
+
         void Listener_cursor_pos (int, int) override;
         bool Listener_button (int, int) override;
     };
@@ -24,7 +26,7 @@ namespace geo {
     struct Text_Button : Resident, vis::Drawn<vis::Hud> {
         Vec pos = Vec(0, 0);
         Vec align = Vec(1, -1);
-        vis::Font* font;
+        vis::Font* font = NULL;
         std::string text;
         core::Command on_click;
         uint32 color = 0xffffffff;
@@ -43,6 +45,8 @@ namespace geo {
         Rect Resident_boundary () override;
         void Resident_hover (Vec) override;
         void Resident_click (Vec) override;
+        void Resident_emerge () override;
+        void Resident_reclude () override;
 
         void Drawn_draw (vis::Hud) override;
     };
