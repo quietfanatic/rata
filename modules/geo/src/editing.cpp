@@ -4,6 +4,7 @@
 #include "../inc/camera.h"
 #include "../../hacc/inc/files.h"
 #include "../../hacc/inc/documents.h"
+#include "../../hacc/inc/strings.h"
 #include "../../core/inc/commands.h"
 #include "../../vis/inc/color.h"
 #include "../../vis/inc/text.h"
@@ -53,8 +54,9 @@ namespace geo {
         if (new_hovering) {
             if (new_hovering != hovering) {
                 auto realp = res_realp(new_hovering);
+                auto path = hacc::address_to_path(realp);
                 std::ostringstream ss;
-                ss << realp.address << " " << hacc::address_to_path(realp);
+                ss << realp.address << " " << hacc::path_to_string(path);
                 status = ss.str();
             }
         }
