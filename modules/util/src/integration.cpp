@@ -102,7 +102,7 @@ namespace util {
             }
             else if (had_slash) {
                 if (!ret.empty())
-                    ret += '/';
+                    ret += "/";
                 ret += seg;
                 seg = std::string(1, c);
                 had_slash = false;
@@ -111,7 +111,8 @@ namespace util {
                 seg += c;
             }
         }
-        if (ret.empty()) return ".";
+        if (p[0] == '/') return "/" + ret;
+        else if (ret.empty()) return ".";
         else return ret;
     }
 
@@ -131,6 +132,8 @@ namespace util {
                 }
             }
         }
+        if (ret.empty())
+            ret.push_back(".");
         return ret;
     }
 
