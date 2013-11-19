@@ -153,6 +153,7 @@ HACCABLE(DocumentData) {
                 if (pair.first == "_next_id") {
                     if (pair.second.form() != INTEGER)
                         throw X::Logic_Error("The _next_id attribute of a hacc::Document must be an integer");
+                    next_id = pair.second.as<size_t>();
                 }
                 else {
                     std::istringstream ss (pair.first);
@@ -184,7 +185,7 @@ HACCABLE(DocumentData) {
             Type type = Type(oo[0].first);
             DocObj* obj = d.alloc(pair.first, type);
             type.construct(obj + 1);
-            d.by_id.at(pair.first) = obj;
+            d.by_id[pair.first] = obj;
             Reference(type, obj + 1).prepare(oo[0].second);
         }
     });
