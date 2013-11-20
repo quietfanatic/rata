@@ -53,9 +53,18 @@ namespace hacc {
             if (td->describe) {
                 td->initialized = true;
                 td->describe();
-                if (td->name) {
-                    types_by_name().emplace(td->name(), td);
+            }
+        }
+        for (size_t i = 0; i < types_to_init().size(); i++) {
+            TypeData* td = types_to_init()[i];
+            if (!td->initialized) {
+                if (td->describe) {
+                    td->initialized = true;
+                    td->describe();
                 }
+            }
+            if (td->name) {
+                types_by_name().emplace(td->name(), td);
             }
         }
         types_to_init().clear();
