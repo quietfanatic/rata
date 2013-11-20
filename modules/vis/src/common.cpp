@@ -83,3 +83,8 @@ namespace vis {
 
 } using namespace vis;
 
+HACCABLE(vis::Map) { name("vis::Map"); }
+HACCABLE(vis::Sprites) { name("vis::Sprites"); }
+HACCABLE(vis::Overlay) { name("vis::Overlay"); }
+HACCABLE(vis::Hud) { name("vis::Hud"); }
+HACCABLE(vis::Dev) { name("vis::Dev"); }

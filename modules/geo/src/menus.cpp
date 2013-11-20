@@ -47,16 +47,16 @@ namespace geo {
         return true;
     }
 
-    void Text_Button::set_text (std::string t) {
+    void Text_Button_Base::set_text (std::string t) {
         text = t;
         boundary = Rect();
     }
 
-    void Text_Button::finish () { Resident::finish(); }
+    void Text_Button_Base::finish () { Resident::finish(); }
 
-    Vec Text_Button::Resident_get_pos () { return pos; }
-    void Text_Button::Resident_set_pos (Vec p) { pos = p; }
-    Rect Text_Button::Resident_boundary () {
+    Vec Text_Button_Base::Resident_get_pos () { return pos; }
+    void Text_Button_Base::Resident_set_pos (Vec p) { pos = p; }
+    Rect Text_Button_Base::Resident_boundary () {
         if (!boundary.is_defined()) {
             Vec size = text_size(text, font);
             Vec lt = size.scale(align+Vec(1,1)) / 2;
@@ -68,12 +68,10 @@ namespace geo {
         }
         return boundary;
     }
-    void Text_Button::Resident_hover (Vec) { hovering = true; }
-    void Text_Button::Resident_click (Vec) { on_click(); }
-    void Text_Button::Resident_emerge () { appear(); printf("tb emerge\n"); }
-    void Text_Button::Resident_reclude () { disappear(); printf("tb reclude\n"); }
+    void Text_Button_Base::Resident_hover (Vec) { hovering = true; }
+    void Text_Button_Base::Resident_click (Vec) { on_click(); }
 
-    void Text_Button::Drawn_draw (Hud) {
+    void Text_Button_Base::draw () {
         uint32 fg = hovering ? hover_color : color;
         uint32 bg = hovering ? hover_background_color : background_color;
         hovering = false;
@@ -91,17 +89,24 @@ HACCABLE(Menu) {
     attr("room", member(&Menu::room).optional());
 }
 
-HACCABLE(Text_Button) {
-    name("geo::Text_Button");
+HACCABLE(Text_Button_Base) {
+    name("geo::Text_Button_Base");
     attr("Resident", base<Resident>());
-    attr("pos", member(&Text_Button::pos).optional());
-    attr("align", member(&Text_Button::align).optional());
-    attr("font", member(&Text_Button::font).optional());
-    attr("text", member(&Text_Button::text).optional());
-    attr("on_click", member(&Text_Button::on_click).optional());
-    attr("color", member(&Text_Button::color).optional());
-    attr("background_color", member(&Text_Button::background_color).optional());
-    attr("hover_color", member(&Text_Button::hover_color).optional());
-    attr("hover_background_color", member(&Text_Button::hover_background_color).optional());
-    finish([](Text_Button& v){ v.finish();});
+    attr("pos", member(&Text_Button_Base::pos).optional());
+    attr("align", member(&Text_Button_Base::align).optional());
+    attr("font", member(&Text_Button_Base::font).optional());
+    attr("text", member(&Text_Button_Base::text).optional());
+    attr("on_click", member(&Text_Button_Base::on_click).optional());
+    attr("color", member(&Text_Button_Base::color).optional());
+    attr("background_color", member(&Text_Button_Base::background_color).optional());
+    attr("hover_color", member(&Text_Button_Base::hover_color).optional());
+    attr("hover_background_color", member(&Text_Button_Base::hover_background_color).optional());
+    finish([](Text_Button_Base& v){ v.finish();});
 }
+
+HACCABLE_TEMPLATE(<class Layer>, Text_Button<Layer>) {
+    name([](){ return "geo::Text_Button<" + hacc::Type::CppType<Layer>().name() + ">"; });
+    delegate(hcb::template base<Text_Button_Base>());
+}
+HCB_INSTANCE(Text_Button<vis::Hud>)
+HCB_INSTANCE(Text_Button<vis::Dev>)

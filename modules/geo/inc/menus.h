@@ -23,7 +23,7 @@ namespace geo {
         bool Listener_button (int, int) override;
     };
 
-    struct Text_Button : Resident, vis::Drawn<vis::Hud> {
+    struct Text_Button_Base : Resident {
         Vec pos = Vec(0, 0);
         Vec align = Vec(1, -1);
         vis::Font* font = NULL;
@@ -45,10 +45,17 @@ namespace geo {
         Rect Resident_boundary () override;
         void Resident_hover (Vec) override;
         void Resident_click (Vec) override;
-        void Resident_emerge () override;
-        void Resident_reclude () override;
 
-        void Drawn_draw (vis::Hud) override;
+        void draw ();
+    };
+
+    template <class Layer>
+    struct Text_Button : Text_Button_Base, vis::Drawn<Layer> {
+        void Drawn_draw (Layer) override {
+            draw();
+        }
+        void Resident_emerge () override { vis::Drawn<Layer>::appear(); }
+        void Resident_reclude () override { vis::Drawn<Layer>::disappear(); }
     };
 
 }
