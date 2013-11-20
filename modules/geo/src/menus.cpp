@@ -49,10 +49,10 @@ namespace geo {
 
     void Text_Button::set_text (std::string t) {
         text = t;
-        finish();
+        boundary = Rect();
     }
 
-    void Text_Button::finish () { }
+    void Text_Button::finish () { Resident::finish(); }
 
     Vec Text_Button::Resident_get_pos () { return pos; }
     void Text_Button::Resident_set_pos (Vec p) { pos = p; }
@@ -70,8 +70,8 @@ namespace geo {
     }
     void Text_Button::Resident_hover (Vec) { hovering = true; }
     void Text_Button::Resident_click (Vec) { on_click(); }
-    void Text_Button::Resident_emerge () { appear(); }
-    void Text_Button::Resident_reclude () { disappear(); }
+    void Text_Button::Resident_emerge () { appear(); printf("tb emerge\n"); }
+    void Text_Button::Resident_reclude () { disappear(); printf("tb reclude\n"); }
 
     void Text_Button::Drawn_draw (Hud) {
         uint32 fg = hovering ? hover_color : color;
