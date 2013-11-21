@@ -9,6 +9,13 @@
 
 namespace geo {
 
+     // The menu does not get to choose what layer it is drawn on.
+    struct Menu_Item {
+        virtual Rect Menu_Item_boundary ();
+        virtual void Menu_Item_draw (Vec pos);
+        virtual bool Menu_Item_on_click (Vec pos);
+    };
+
     struct Menu : core::Listener {
         Room room {true};
         Resident* hovering = NULL;

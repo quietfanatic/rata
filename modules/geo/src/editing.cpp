@@ -231,9 +231,10 @@ namespace geo {
     }
 
     void Context_Menu::activate (Vec pos) {
+         // Expand downward
         for (auto& res : room.residents) {
             const Rect& bound = res.Resident_boundary();
-            res.Resident_set_pos(pos + Vec(bound.l, -bound.t));
+            res.Resident_set_pos(pos - Vec(bound.l, bound.t));
             pos.y -= bound.size().y;
         }
          // If we've gone below the bottom, compensate
