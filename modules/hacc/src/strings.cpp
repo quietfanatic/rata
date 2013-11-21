@@ -9,7 +9,6 @@
 #include "../inc/files.h"  // for Path
 #include "../inc/strings.h"
 #include "paths_internal.h"
-#include "../../util/inc/integration.h"
 
 namespace hacc {
 
@@ -51,12 +50,7 @@ namespace hacc {
             case ROOT: {
                 auto& pr = static_cast<const PathRoot&>(*p);
                 if (pr.filename == filename) return "$";
-                else {
-                    auto rel = filename.empty()
-                        ? pr.filename
-                        : util::abs2rel(pr.filename, util::dirname(filename));
-                    return "$(\"" + escape_string(rel) + "\")";
-                }
+                else return "$(\"" + escape_string(pr.filename) + "\")";
             }
             case ATTR: {
                 auto& pa = static_cast<const PathAttr&>(*p);
@@ -161,18 +155,11 @@ namespace hacc {
      // Parsing is simple enough that we don't need a separate lexer step (yet)
     struct Parser {
         String file;
-        String wd;
         const char* begin;
         const char* p;
         const char* end;
-        Parser (String s, String file = "") :
-            file(file), wd(file.empty() ? util::cwd() : util::dirname(file)),
-            begin(s.data()), p(s.data()), end(s.data()+s.length())
-        { }
-        Parser (const char* s, String file = "") :
-            file(file), wd(file.empty() ? util::cwd() : util::dirname(file)),
-            begin(s), p(s), end(s + strlen(s))
-        { }
+        Parser (String s, String file = "") : file(file), begin(s.data()), p(s.data()), end(s.data()+s.length()) { }
+        Parser (const char* s, String file = "") : file(file), begin(s), p(s), end(s + strlen(s)) { }
          // Just a little YAML-inspired syntax sugar
         std::unordered_map<String, Tree> refs;
 
@@ -444,7 +431,6 @@ namespace hacc {
             if (look() == '(') {
                 p++;
                 String f = parse_ident("After the $( in a path");
-                f = util::rel2abs(f, wd);
                 if (look() != ')')
                     throw error("Expected ) after filename, but got " + String(1, look()));
                 p++;

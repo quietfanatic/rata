@@ -3,15 +3,15 @@
     tilemap:{ "geo::Tilemap":{
         Resident:{ room:$.room }
         Object:{
-            def:$("../../geo/res/tilemap.bdf")
+            def:$("geo/res/tilemap.bdf")
             pos:[0~00000000 0~00000000]
             vel:[0~00000000 0~00000000]
         }
-        tileset:$("test.tileset").tileset
-        texture:$("test.tileset").img.textures[0]
+        tileset:$("world/res/test.tileset").tileset
+        texture:$("world/res/test.tileset").img.textures[0]
         width:40
         height:30
-        tiles:$("test.u16")
+        tiles:$("world/res/test.u16")
     } }
     room:{ "geo::Room":{
         boundary:[

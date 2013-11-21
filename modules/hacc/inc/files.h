@@ -22,12 +22,6 @@
  //  as arguments, because it is often more efficient to load and unload them
  //  all at once than to do it individually.
 
- // Note that all filenames are stored in absolute form.  Any relative
- //  filenames passed to the API will be relative to the current working
- //  directory.  While processing a hacc file, all relative paths in that
- //  file are relative to that file's dirname, not to the current working
- //  directory.
-
 namespace hacc {
 
      // FILES

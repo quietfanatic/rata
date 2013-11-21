@@ -4,7 +4,6 @@
 #include "../inc/strings.h"
 #include "types_internal.h"
 #include "paths_internal.h"
-#include "../../util/inc/integration.h"
 
 namespace hacc {
 
@@ -43,7 +42,6 @@ namespace hacc {
     bool File::loaded () { return p->state == LOADED; }
     bool File::requested () { return p->requested; }
     File::File (String filename) {
-        filename = util::rel2abs(filename);
         FileData*& fd = files_by_filename[filename];
         if (!fd) fd = new FileData (filename);
         p = fd;
@@ -73,7 +71,6 @@ namespace hacc {
         return p->data.address();
     }
     void File::rename (std::string new_filename) {
-        new_filename = util::rel2abs(new_filename);
         if (new_filename == p->filename) return;
         if (File(new_filename).loaded()) throw X::File_Already_Loaded(new_filename);
         files_by_filename.erase(p->filename);

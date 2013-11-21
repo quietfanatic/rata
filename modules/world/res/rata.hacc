@@ -1,10 +1,10 @@
 {"hacc::Document":{
     def:{"ent::BipedDef":{
-        fixdefs: $("../../ent/res/small.hacc").fixdefs
+        fixdefs: $("ent/res/small.hacc").fixdefs
         stats: $.stats
-        skel: $("../../ent/res/small.hacc").skel
-        poses: $("../../ent/res/small.hacc").poses
-        skin: $("frock.hacc").skin
+        skel: $("ent/res/small.hacc").skel
+        poses: $("ent/res/small.hacc").poses
+        skin: $("world/res/frock.hacc").skin
         focus_offset: [0 1]
     }}
     stats:{"ent::BipedStats":{
