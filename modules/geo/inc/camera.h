@@ -42,7 +42,7 @@ namespace geo {
             );
         }
         Vec window_to_dev (int x, int y) {
-            return Vec(core::window->height - y, x)*PX;
+            return Vec(x, core::window->height - y)*PX;
         }
     };
     extern Camera* camera;

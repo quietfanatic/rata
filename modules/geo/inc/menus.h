@@ -32,7 +32,7 @@ namespace geo {
         uint32 color = 0xffffffff;
         uint32 background_color = 0x0000007f;
         uint32 hover_color = 0xffffffff;
-        uint32 hover_background_color = 0x000000cf;
+        uint32 hover_background_color = 0x000000ff;
 
         void set_text (std::string text);
 

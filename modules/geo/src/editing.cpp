@@ -73,6 +73,21 @@ namespace geo {
             draw_solid_rect(Rect(0, size.y, size.x, 0));
             draw_text(status, font, Vec(0, 0), Vec(1, -1));
         }
+        Vec world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
+        Vec hud_pos = camera->window_to_hud(window->cursor_x, window->cursor_y);
+        Vec dev_pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
+        draw_text(
+            "window: " + std::to_string(window->cursor_x) +
+                  ", " + std::to_string(window->cursor_y) + "\n" +
+            "world: " + std::to_string(world_pos.x) +
+                 ", " + std::to_string(world_pos.y) + "\n" +
+            "hud: " + std::to_string(hud_pos.x) +
+               ", " + std::to_string(hud_pos.y) + "\n" +
+            "dev: " + std::to_string(dev_pos.x) +
+               ", " + std::to_string(dev_pos.y),
+            font, camera->window_to_dev(window->width, 0),
+            Vec(-1, 1)
+        );
     }
 
     bool Resident_Editor::Listener_button (int code, int action) {
@@ -103,9 +118,9 @@ namespace geo {
                     picked = p.second;
                 }
             }
+            selected = picked;
             if (!picked) return false;
             Vec pos = picked->Resident_get_pos();
-            selected = picked;
             if (code == GLFW_MOUSE_BUTTON_LEFT) {
                 drag_origin = pos;
                 drag_offset = realpos - pos;
