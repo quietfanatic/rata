@@ -11,6 +11,7 @@
  // You can override individual types if you want
 
 #include <tuple>
+#include <memory>
 #include "haccable.h"
 
 namespace hacc {
@@ -111,6 +112,44 @@ HACCABLE_TEMPLATE(<class A HCB_COMMA class B>, std::pair<A HCB_COMMA B>) {
     elem(member(&std::pair<A, B>::first));
     elem(member(&std::pair<A, B>::second));
 }
+
+HACCABLE_TEMPLATE(<class C>, std::unique_ptr<C>) {
+    using namespace hacc;
+    name([](){
+        return "std::unique_ptr<" + Type::CppType<C>().name() + ">";
+    });
+    keys(hcb::template mixed_funcs<std::vector<String>>(
+        [](const std::unique_ptr<C>& v){
+            if (!v) return std::vector<String>();
+            return std::vector<String>(1, Type(typeid(*v)).name());
+        },
+        [](std::unique_ptr<C>& v, const std::vector<String>& keys){
+            if (keys.size() == 0) {
+                v.reset(null);
+            }
+            else if (keys.size() == 1) {
+                Type type (keys[0]);
+                Dynamic dyn = Dynamic(type);
+                v.reset(dyn.address());
+                dyn.addr = null;
+            }
+            else {
+                throw X::Logic_Error("A std::unique_ptr must have one key representing its type or be empty");
+            }
+        }
+    ));
+    attrs([](std::unique_ptr<C>& v, String name)->Reference{
+        if (!v) throw X::No_Attrs(&v, name);
+        if (name == Type(typeid(*v)).name())
+            return Pointer(Type(typeid(*v)), &*v);
+        else return Reference(Type(typeid(*v)), &*v).attr(name);
+    });
+    elems([](std::unique_ptr<C>& v, size_t index)->Reference{
+        if (!v) throw X::No_Elems(&v, index);
+        return Reference(Type(typeid(*v)), &*v).elem(index);
+    });
+}
+
  // C++ variadic templates are powerful but very clunky.
 template <class... Es>
 struct Hacc_TypeDecl<std::tuple<Es...>> : hacc::Haccability<std::tuple<Es...>> {
