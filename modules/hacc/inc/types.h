@@ -45,9 +45,16 @@ namespace hacc {
     void init ();
 
      // Conditional operations
+     // Assignable needs to be special-cased for std::vectors because std::copy_assignable
+     //  reports true for them even if their element type is not assignable.
+    template <class C>
+    struct Is_Assignable : std::is_copy_assignable<C> { };
+    template <class C>
+    struct Is_Assignable<std::vector<C>> : std::is_copy_assignable<C> { };
+
     template <class C, bool cons = std::is_default_constructible<C>::value>
     struct Constructibility;
-    template <class C, bool assgn = std::is_copy_assignable<C>::value>
+    template <class C, bool assgn = Is_Assignable<C>::value>
     struct Assignability;
     template <class C, bool destr = std::is_destructible<C>::value && !std::is_array<C>::value>
     struct Destructibility;
