@@ -1,11 +1,11 @@
 {"hacc::Document":{
     cm:{"geo::Context_Menu":{ }}
-    cm_duplicate:{"geo::Text_Button<vis::Dev>":{
+    cm_duplicate:{"geo::Text_Button<vis::Hud>":{
         Resident:{ room:$.cm }
         text:"duplicate"
         on_click:[re_duplicate]
     }}
-    cm_delete:{"geo::Text_Button<vis::Dev>":{
+    cm_delete:{"geo::Text_Button<vis::Hud>":{
         Resident:{ room:$.cm }
         text:"delete"
         on_click:[re_delete]

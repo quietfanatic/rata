@@ -41,6 +41,9 @@ namespace geo {
                 (window->height - y) * size.y / window->height
             );
         }
+        Vec window_to_dev (int x, int y) {
+            return Vec(core::window->height - y, x)*PX;
+        }
     };
     extern Camera* camera;
 

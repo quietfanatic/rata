@@ -11,7 +11,7 @@ namespace geo {
 
      // Menu items use HUD positioning, not Overlay or Dev positioning.
     struct Menu : core::Listener {
-        Room room;
+        Room room {true};
         Resident* hovering = NULL;
 
         void activate ();

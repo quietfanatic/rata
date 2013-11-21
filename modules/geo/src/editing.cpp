@@ -67,6 +67,7 @@ namespace geo {
     }
     void Resident_Editor::Drawn_draw (Dev) {
         if (!status.empty()) {
+            color_offset(Vec(0, 0));
             draw_color(0x0000007f);
             Vec size = text_size(status, font);
             draw_solid_rect(Rect(0, size.y, size.x, 0));

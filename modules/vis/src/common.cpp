@@ -57,15 +57,11 @@ namespace vis {
             i.Drawn_draw(Hud());
          // Draw normal camera boundaries if camera_size is too big
         if (camera_size != Vec(20, 15)) {
-            Vec pts [4];
+            color_offset(Vec(10, 7.5));
             float h = 10 + 0.5*PX;
             float v = 7.5 + 0.5*PX;
-            pts[0] = Vec(10-h, 7.5-v);
-            pts[1] = Vec(10+h, 7.5-v);
-            pts[2] = Vec(10+h, 7.5+v);
-            pts[3] = Vec(10-h, 7.5+v);
             draw_color(0x0000007f);
-            draw_loop(4, pts);
+            draw_rect(Rect(-h, -v, h, v));
         }
          // Turn off camera scaling
         global_camera_size = Vec(core::window->width, core::window->height)*PX;
