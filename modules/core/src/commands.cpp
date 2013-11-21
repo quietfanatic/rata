@@ -17,6 +17,15 @@ namespace core {
         return r;
     }
 
+    void Command::operator () () const {
+        if (*this) {
+            (**this)();
+        }
+        else {
+            throw hacc::X::Logic_Error("Tried to invoke a null Command.\n");
+        }
+    }
+
     std::vector<std::string> command_history;
 
     void command_from_string (std::string s) {
@@ -192,6 +201,7 @@ New_Command _copy_cmd (
 HACCABLE(Command) {
     name("core::Command");
     to_tree([](const Command& cmd){
+        if (!cmd) return Tree(Array());
         Tree inner = Reference(Type(typeid(*cmd)), (void*)&*cmd).to_tree();
         auto& less = inner.as<const Array&>();
         Array more;
@@ -203,8 +213,10 @@ HACCABLE(Command) {
     });
     prepare([](Command& cmd, Tree tree){
         auto& more = tree.as<const Array&>();
-        if (more.size() == 0)
-            throw X::Logic_Error("A command cannot be represented by an empty array");
+        if (more.size() == 0) {
+            cmd = Command(null);
+            return;
+        }
         if (more[0].form() != STRING)
             throw X::Logic_Error("A command must have a string as its first element");
         std::string name = more[0].as<std::string>();
@@ -226,9 +238,8 @@ HACCABLE(Command) {
         else throw X::Logic_Error("No command found named " + name);
     });
     fill([](Command& cmd, Tree tree){
+        if (!cmd) return;
         auto& a = tree.as<const Array&>();
-        if (a.size() == 0)
-            throw X::Logic_Error("A command cannot be represented by an empty array");
         Array less;
         less.reserve(a.size() - 1);
         for (size_t i = 1; i < a.size(); i++)
@@ -239,6 +250,7 @@ HACCABLE(Command) {
         ).fill(Tree(std::move(less)));
     });
     finish([](Command& cmd){
+        if (!cmd) return;
         Reference(
             Type(typeid(*cmd)),
             &*cmd

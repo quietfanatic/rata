@@ -49,7 +49,7 @@ namespace core {
     };
     struct Command final : hacc::DPtr<CommandData> {
         explicit Command (CommandData* d = NULL) : DPtr(d) { }
-        void operator () () const { (**this)(); }
+        void operator () () const;
     };
 
      // All this is required to unpack a tuple into function arguments.
