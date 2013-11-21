@@ -6,87 +6,6 @@ namespace geo {
     using namespace core;
     using namespace vis;
 
-    void Menu::activate () {
-        if (!room.observer_count) {
-            room.observe();
-            Listener::activate();
-        }
-    }
-    void Menu::deactivate () {
-        if (room.observer_count) {
-            room.forget();
-            Listener::deactivate();
-        }
-    }
-
-    bool Menu::active () {
-        return room.observer_count > 0;
-    }
-
-    void Menu::Listener_cursor_pos (int x, int y) {
-        Vec cursor_pos = dev_space
-            ? camera->window_to_dev(x, y)
-            : camera->window_to_hud(x, y);
-        float lowest = INF;
-        hovering = NULL;
-        for (auto& res : room.residents) {
-            Vec pos = res.Resident_get_pos();
-            if (!pos.is_defined()) continue;
-            const Rect& boundary = res.Resident_boundary();
-            if (boundary.t < lowest) {
-                if (boundary.covers(cursor_pos - pos)) {
-                    lowest = boundary.t;
-                    hovering = &res;
-                }
-            }
-        }
-        if (hovering)
-            hovering->Resident_hover(cursor_pos);
-    }
-    bool Menu::Listener_button (int code, int action) {
-        if (code == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS) {
-            if (hovering) {
-                Vec pos = camera->window_to_hud(window->cursor_x, window->cursor_y);
-                hovering->Resident_click(pos);
-            }
-        }
-        return true;
-    }
-
-    void Text_Button_Base::set_text (std::string t) {
-        text = t;
-        boundary = Rect();
-    }
-
-    void Text_Button_Base::finish () { Resident::finish(); }
-
-    Vec Text_Button_Base::Resident_get_pos () { return pos; }
-    void Text_Button_Base::Resident_set_pos (Vec p) { pos = p; }
-    Rect Text_Button_Base::Resident_boundary () {
-        if (!boundary.is_defined()) {
-            Vec size = text_size(text, font);
-            Vec lt = size.scale(align+Vec(1,1)) / 2;
-            Vec rb = size.scale(Vec(1,1)-align) / 2;
-            boundary.l = lt.x;
-            boundary.b = rb.y;
-            boundary.r = rb.x;
-            boundary.t = lt.y;
-        }
-        return boundary;
-    }
-    void Text_Button_Base::Resident_hover (Vec) { hovering = true; }
-    void Text_Button_Base::Resident_click (Vec) { on_click(); }
-
-    void Text_Button_Base::draw () {
-        uint32 fg = hovering ? hover_color : color;
-        uint32 bg = hovering ? hover_background_color : background_color;
-
-        color_offset(pos);
-        draw_color(bg);
-        draw_solid_rect(boundary);
-        draw_text(text, font, pos, align, fg);
-    }
-
     void Menu_Base::draw () {
         if (root) root->Menu_Item_draw(pos, size);
     }
@@ -158,7 +77,7 @@ namespace geo {
         return Button::Menu_Item_click(pos, area);
     }
 
-    Vec Text_Button2::Menu_Item_size (Vec area) {
+    Vec Text_Button::Menu_Item_size (Vec area) {
         if (area != cached_area) {
             cached_area = area;
             cached_size = text_size(text, font, area.x);
@@ -166,7 +85,7 @@ namespace geo {
         return cached_size;
     }
 
-    void Text_Button2::Menu_Item_draw (Vec pos, Vec size) {
+    void Text_Button::Menu_Item_draw (Vec pos, Vec size) {
         uint32 fg = hovering() ? hover_color : color;
         Button::Menu_Item_draw(pos, size);
         draw_text(text, font, pos, Vec(1, -1), fg, cached_area.x);
@@ -174,33 +93,24 @@ namespace geo {
 
 } using namespace geo;
 
-HACCABLE(Menu) {
-    name("geo::Menu");
-    attr("room", member(&Menu::room).optional());
-    attr("dev_space", member(&Menu::dev_space).optional());
+HACCABLE(Menu_Base) {
+    name("geo::Menu_Base");
+    attr("pos", member(&Menu_Base::pos).optional());
+    attr("size", member(&Menu_Base::size).optional());
+    attr("root", member(&Menu_Base::root).optional());
+    attr("deactivate_on_click", member(&Menu_Base::deactivate_on_click).optional());
 }
 
-HACCABLE(Text_Button_Base) {
-    name("geo::Text_Button_Base");
-    attr("Resident", base<Resident>());
-    attr("pos", member(&Text_Button_Base::pos).optional());
-    attr("align", member(&Text_Button_Base::align).optional());
-    attr("font", member(&Text_Button_Base::font).optional());
-    attr("text", member(&Text_Button_Base::text).optional());
-    attr("on_click", member(&Text_Button_Base::on_click).optional());
-    attr("color", member(&Text_Button_Base::color).optional());
-    attr("background_color", member(&Text_Button_Base::background_color).optional());
-    attr("hover_color", member(&Text_Button_Base::hover_color).optional());
-    attr("hover_background_color", member(&Text_Button_Base::hover_background_color).optional());
-    finish([](Text_Button_Base& v){ v.finish();});
+HACCABLE_TEMPLATE(<class Layer>, Menu<Layer>) {
+    name([](){ return "geo::Menu<" + hacc::Type::CppType<Layer>().name() + ">"; });
+    delegate(hcb::template base<Menu_Base>());
 }
+HCB_INSTANCE(Menu<vis::Hud>)
+HCB_INSTANCE(Menu<vis::Dev>)
 
-HACCABLE_TEMPLATE(<class Layer>, Text_Button<Layer>) {
-    name([](){ return "geo::Text_Button<" + hacc::Type::CppType<Layer>().name() + ">"; });
-    delegate(hcb::template base<Text_Button_Base>());
+HACCABLE(Menu_Item) {
+    name("geo::Menu_Item");
 }
-HCB_INSTANCE(Text_Button<vis::Hud>)
-HCB_INSTANCE(Text_Button<vis::Dev>)
 
 HACCABLE(Button) {
     name("geo::Button");
@@ -218,28 +128,10 @@ HACCABLE(VBox) {
     attr("contents", member(&VBox::contents));
 }
 
-HACCABLE(Text_Button2) {
-    name("geo::Text_Button2");
+HACCABLE(Text_Button) {
+    name("geo::Text_Button");
     attr("Button", base<Button>().optional());
-    attr("text", member(&Text_Button2::text));
-    attr("font", member(&Text_Button2::font).optional());
+    attr("text", member(&Text_Button::text));
+    attr("font", member(&Text_Button::font).optional());
 }
 
-HACCABLE(Menu_Base) {
-    name("geo::Menu_Base");
-    attr("pos", member(&Menu_Base::pos).optional());
-    attr("size", member(&Menu_Base::size).optional());
-    attr("root", member(&Menu_Base::root).optional());
-    attr("deactivate_on_click", member(&Menu_Base::deactivate_on_click).optional());
-}
-
-HACCABLE(Menu_Item) {
-    name("geo::Menu_Item");
-}
-
-HACCABLE_TEMPLATE(<class Layer>, Menu2<Layer>) {
-    name([](){ return "geo::Menu2<" + hacc::Type::CppType<Layer>().name() + ">"; });
-    delegate(hcb::template base<Menu_Base>());
-}
-HCB_INSTANCE(Menu2<vis::Hud>)
-HCB_INSTANCE(Menu2<vis::Dev>)

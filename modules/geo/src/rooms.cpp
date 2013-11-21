@@ -7,7 +7,7 @@ namespace geo {
 
     Logger geo_logger ("geo");
 
-    Room::Room (bool menu) { if (!menu) link(&all_rooms()); }
+    Room::Room () { link(&all_rooms()); }
     Room::~Room () { unlink(); }
 
     Links<Room>& all_rooms () {

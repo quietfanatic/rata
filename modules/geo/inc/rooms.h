@@ -20,7 +20,7 @@ namespace geo {
         void observe ();
         void forget ();
          // Rooms are not to be destructed if they have non-doomed Residents
-        Room (bool menu = false);
+        Room ();
         ~Room ();
     };
     Links<Room>& all_rooms ();

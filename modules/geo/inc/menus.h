@@ -2,7 +2,6 @@
 #define HAVE_GEO_MENUS_H
 
 #include <memory>
-#include "rooms.h"
 #include "camera.h"
 #include "../../core/inc/window.h"
 #include "../../core/inc/commands.h"
@@ -35,7 +34,7 @@ namespace geo {
         bool click (Vec pos);
     };
     template <class Layer>
-    struct Menu2 : Menu_Base, vis::Drawn<Layer> {
+    struct Menu : Menu_Base, vis::Drawn<Layer> {
         void Drawn_draw (Layer) override { draw(); }
         void activate () { vis::Drawn<Layer>::appear(); core::Listener::activate(); }
         void deactivate () { vis::Drawn<Layer>::disappear(); core::Listener::deactivate(); }
@@ -45,55 +44,6 @@ namespace geo {
         bool Listener_button (int x, int y) {
             return click(camera->window_to_layer<Layer>(x, y));
         }
-    };
-
-    struct Menu : core::Listener {
-        Room room {true};
-        Resident* hovering = NULL;
-        bool dev_space = false;  // Otherwise use hud positioning
-
-        void activate ();
-        void deactivate ();
-
-        bool active ();
-
-        void Listener_cursor_pos (int, int) override;
-        bool Listener_button (int, int) override;
-    };
-
-    struct Text_Button_Base : Resident {
-        Vec pos = Vec(0, 0);
-        Vec align = Vec(1, -1);
-        vis::Font* font = NULL;
-        std::string text;
-        core::Command on_click;
-        uint32 color = 0xffffffff;
-        uint32 background_color = 0x0000007f;
-        uint32 hover_color = 0xffffffff;
-        uint32 hover_background_color = 0x000000ff;
-
-        void set_text (std::string text);
-
-        Rect boundary;
-        bool hovering = false;
-        void finish ();
-
-        Vec Resident_get_pos () override;
-        void Resident_set_pos (Vec) override;
-        Rect Resident_boundary () override;
-        void Resident_hover (Vec) override;
-        void Resident_click (Vec) override;
-
-        void draw ();
-    };
-
-    template <class Layer>
-    struct Text_Button : Text_Button_Base, vis::Drawn<Layer> {
-        void Drawn_draw (Layer) override {
-            draw();
-        }
-        void Resident_emerge () override { vis::Drawn<Layer>::appear(); }
-        void Resident_reclude () override { vis::Drawn<Layer>::disappear(); }
     };
 
     struct Button : Menu_Item {
@@ -128,7 +78,7 @@ namespace geo {
         VBox& operator = (const VBox&) = delete;
     };
 
-    struct Text_Button2 : Button {
+    struct Text_Button : Button {
         std::string text;
         vis::Font* font = NULL;
         Vec cached_area;

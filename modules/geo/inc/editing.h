@@ -10,20 +10,13 @@
 
 namespace geo {
 
-    struct Context_Menu : Menu {
-         // Stacks all residents below pos
-        void activate (Vec pos);
-         // Same as Menu::Listener_button, but deactivates on click
-        bool Listener_button (int code, int action) override;
-    };
-
     struct Resident_Editor : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Dev>, core::Listener {
         Free_Camera fc;
         vis::Font* font = NULL;
         Resident* hovering = NULL;
         Resident* selected = NULL;
         Resident* dragging = NULL;
-        Menu2<vis::Dev>* context_menu = NULL;
+        Menu<vis::Dev>* context_menu = NULL;
         bool clicking;
         Vec drag_origin;
         Vec drag_offset;
