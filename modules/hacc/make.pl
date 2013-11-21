@@ -18,6 +18,7 @@ ld_rule('tmp/t', [qw[
     tmp/files.o tmp/files.t.o
     tmp/documents.o tmp/documents.t.o
     ../tap/tmp/tap.o ../tap/tmp/main.o
+    ../util/tmp/integration.o
 ]]);
 
 test_rule('tmp/t');
