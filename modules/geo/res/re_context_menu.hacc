@@ -1,15 +1,18 @@
 {"hacc::Document":{
-    cm:{"geo::Context_Menu":{
-        dev_space:true
-    }}
-    cm_duplicate:{"geo::Text_Button<vis::Dev>":{
-        Resident:{ room:$.cm }
-        text:"duplicate"
-        on_click:[re_duplicate]
-    }}
-    cm_delete:{"geo::Text_Button<vis::Dev>":{
-        Resident:{ room:$.cm }
-        text:"delete"
-        on_click:[re_delete]
+    cm:{"geo::Menu2<vis::Dev>":{
+        deactivate_on_click:true;
+        root:{"geo::VBox":{
+            Button:{ background_color:0x0000007f }
+            contents:[
+                {"geo::Text_Button2":{
+                    text:"duplicate"
+                    Button:{ on_click:[re_duplicate] }
+                }}
+                {"geo::Text_Button2":{
+                    text:"delete"
+                    Button:{ on_click:[re_delete] }
+                }}
+            ]
+        }}
     }}
 }}

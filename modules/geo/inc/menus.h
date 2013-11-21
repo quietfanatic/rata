@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "rooms.h"
+#include "camera.h"
 #include "../../core/inc/window.h"
 #include "../../core/inc/commands.h"
 #include "../../vis/inc/common.h"
@@ -23,13 +24,27 @@ namespace geo {
         virtual bool Menu_Item_click (Vec pos, Vec area) { return false; }
     };
 
-    struct Menu_Base {
+    struct Menu_Base : core::Listener {
+        Vec pos = Vec(0, 0);
+        Vec size = Vec(INF, INF);
+        bool deactivate_on_click = false;
         std::unique_ptr<Menu_Item> root;
         void draw ();
+
+        void hover (Vec pos);
+        bool click (Vec pos);
     };
     template <class Layer>
     struct Menu2 : Menu_Base, vis::Drawn<Layer> {
-        void Drawn_draw (Layer) override;
+        void Drawn_draw (Layer) override { draw(); }
+        void activate () { vis::Drawn<Layer>::appear(); core::Listener::activate(); }
+        void deactivate () { vis::Drawn<Layer>::disappear(); core::Listener::deactivate(); }
+        void Listener_cursor_pos (int x, int y) {
+            hover(camera->window_to_layer<Layer>(x, y));
+        }
+        bool Listener_button (int x, int y) {
+            return click(camera->window_to_layer<Layer>(x, y));
+        }
     };
 
     struct Menu : core::Listener {
@@ -102,6 +117,8 @@ namespace geo {
 
     struct VBox : Button {
         std::vector<std::unique_ptr<Menu_Item>> contents;
+        Vec cached_area;
+        Vec cached_size;
         Vec Menu_Item_size (Vec area) override;
         void Menu_Item_draw (Vec, Vec) override;
         bool Menu_Item_hover (Vec, Vec) override;

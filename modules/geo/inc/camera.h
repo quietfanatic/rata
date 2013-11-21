@@ -1,6 +1,7 @@
 #ifndef HAVE_GEO_CAMERA_H
 #define HAVE_GEO_CAMERA_H
 
+#include "../../vis/inc/common.h"
 #include "../../core/inc/window.h"
 #include "../../util/inc/geometry.h"
 
@@ -44,6 +45,8 @@ namespace geo {
         Vec window_to_dev (int x, int y) {
             return Vec(x, core::window->height - y)*PX;
         }
+        template <class C>
+        Vec window_to_layer (int, int);
     };
     extern Camera* camera;
 
@@ -63,6 +66,27 @@ namespace geo {
         Vec Camera_size () override { return size; }
         void Camera_update () override;
     };
+
+    template <>
+    inline Vec Camera::window_to_layer<vis::Map> (int x, int y) {
+        return window_to_world(x, y);
+    }
+    template <>
+    inline Vec Camera::window_to_layer<vis::Sprites> (int x, int y) {
+        return window_to_world(x, y);
+    }
+    template <>
+    inline Vec Camera::window_to_layer<vis::Overlay> (int x, int y) {
+        return window_to_world(x, y);
+    }
+    template <>
+    inline Vec Camera::window_to_layer<vis::Hud> (int x, int y) {
+        return window_to_hud(x, y);
+    }
+    template <>
+    inline Vec Camera::window_to_layer<vis::Dev> (int x, int y) {
+        return window_to_dev(x, y);
+    }
 
 }
 

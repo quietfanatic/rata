@@ -87,6 +87,25 @@ namespace geo {
         draw_text(text, font, pos, align, fg);
     }
 
+    void Menu_Base::draw () {
+        if (root) root->Menu_Item_draw(pos, size);
+    }
+
+    void Menu_Base::hover (Vec cursor_pos) {
+        if (Rect(0, 0, size.x, size.y).covers(cursor_pos + pos)) {
+            root->Menu_Item_hover(cursor_pos - pos, size);
+        }
+    }
+    bool Menu_Base::click (Vec cursor_pos) {
+        if (Rect(0, 0, size.x, size.y).covers(cursor_pos + pos)) {
+            root->Menu_Item_click(cursor_pos - pos, size);
+            if (deactivate_on_click) deactivate();
+            return true;
+        }
+        if (deactivate_on_click) deactivate();
+        return false;
+    }
+
     void Button::Menu_Item_draw (Vec pos, Vec size) {
         uint32 bg = hovering() ? hover_background_color : background_color;
 
@@ -96,37 +115,44 @@ namespace geo {
     }
 
     Vec VBox::Menu_Item_size (Vec area) {
-        float height = 0;
-        for (auto& c : contents) {
-            Vec csize = c->Menu_Item_size(area - Vec(0, height));
-            height += csize.y;
+        if (cached_area != area) {
+            cached_area = area;
+            float height = 0;
+            for (auto& c : contents) {
+                Vec csize = c->Menu_Item_size(area - Vec(0, height));
+                height += csize.y;
+            }
+            cached_size = Vec(area.x, height);
         }
-        return Vec(area.x, height);
+        return cached_size;
     }
     void VBox::Menu_Item_draw (Vec pos, Vec area) {
-        float height = 0;
+        VBox::Menu_Item_size(area);
+        float cy = cached_size.y;
         for (auto& c : contents) {
-            Vec csize = c->Menu_Item_size(area - Vec(0, height));
-            height += csize.y;
-            c->Menu_Item_draw(Vec(pos.x, height), Vec(area.x, csize.y));
+            Vec csize = c->Menu_Item_size(area - Vec(0, cached_size.y - cy));
+            cy -= csize.y;
+            c->Menu_Item_draw(Vec(pos.x, cy), Vec(area.x, csize.y));
         }
     }
     bool VBox::Menu_Item_hover (Vec pos, Vec area) {
-        float height = 0;
+        VBox::Menu_Item_size(area);
+        float cy = cached_size.y;
         for (auto& c : contents) {
-            Vec csize = c->Menu_Item_size(area - Vec(0, height));
-            height += csize.y;
-            if (c->Menu_Item_hover(Vec(pos.x, pos.y - height), Vec(area.x, csize.y)))
+            Vec csize = c->Menu_Item_size(area - Vec(0, cached_size.y - cy));
+            cy -= csize.y;
+            if (c->Menu_Item_hover(Vec(pos.x, pos.y - cy), Vec(area.x, csize.y)))
                 return true;
         }
         return Button::Menu_Item_hover(pos, area);
     }
     bool VBox::Menu_Item_click (Vec pos, Vec area) {
-        float height = 0;
+        VBox::Menu_Item_size(area);
+        float cy = cached_size.y;
         for (auto& c : contents) {
-            Vec csize = c->Menu_Item_size(area - Vec(0, height));
-            height += csize.y;
-            if (c->Menu_Item_click(Vec(pos.x, pos.y - height), Vec(area.x, csize.y)))
+            Vec csize = c->Menu_Item_size(area - Vec(0, cy));
+            cy -= csize.y;
+            if (c->Menu_Item_click(Vec(pos.x, pos.y - cy), Vec(area.x, csize.y)))
                 return true;
         }
         return Button::Menu_Item_click(pos, area);
@@ -196,4 +222,17 @@ HACCABLE(Text_Button2) {
     attr("Button", base<Button>().optional());
     attr("text", member(&Text_Button2::text));
     attr("font", member(&Text_Button2::font).optional());
+}
+
+HACCABLE(Menu_Base) {
+    name("geo::Menu_Base");
+    attr("pos", member(&Menu_Base::pos).optional());
+    attr("size", member(&Menu_Base::size).optional());
+    attr("root", member(&Menu_Base::root).optional());
+    attr("deactivate_on_click", member(&Menu_Base::deactivate_on_click).optional());
+}
+
+HACCABLE_TEMPLATE(<class Layer>, Menu2<Layer>) {
+    name([](){ return "geo::Menu2<" + hacc::Type::CppType<Layer>().name() + ">"; });
+    delegate(hcb::template base<Menu_Base>());
 }
