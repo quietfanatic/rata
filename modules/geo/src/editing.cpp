@@ -129,11 +129,11 @@ namespace geo {
             }
             else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
                 if (action == GLFW_PRESS) {
-                    if (!context_menu->active()) {
-                        Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
-                        context_menu->activate(pos);
-                        return true;
-                    }
+                    Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
+                    context_menu->pos = pos;
+                    context_menu->size = camera->window_to_dev(window->width, window->height);
+                    context_menu->activate();
+                    return true;
                 }
             }
             return true;

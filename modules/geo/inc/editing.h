@@ -23,7 +23,7 @@ namespace geo {
         Resident* hovering = NULL;
         Resident* selected = NULL;
         Resident* dragging = NULL;
-        Context_Menu* context_menu = NULL;
+        Menu2<vis::Dev>* context_menu = NULL;
         bool clicking;
         Vec drag_origin;
         Vec drag_offset;

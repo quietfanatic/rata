@@ -204,6 +204,7 @@ HCB_INSTANCE(Text_Button<vis::Dev>)
 
 HACCABLE(Button) {
     name("geo::Button");
+    attr("Menu_Item", base<Menu_Item>().optional());
     attr("on_click", member(&Button::on_click).optional());
     attr("color", member(&Button::color).optional());
     attr("background_color", member(&Button::background_color).optional());
@@ -232,7 +233,13 @@ HACCABLE(Menu_Base) {
     attr("deactivate_on_click", member(&Menu_Base::deactivate_on_click).optional());
 }
 
+HACCABLE(Menu_Item) {
+    name("geo::Menu_Item");
+}
+
 HACCABLE_TEMPLATE(<class Layer>, Menu2<Layer>) {
     name([](){ return "geo::Menu2<" + hacc::Type::CppType<Layer>().name() + ">"; });
     delegate(hcb::template base<Menu_Base>());
 }
+HCB_INSTANCE(Menu2<vis::Hud>)
+HCB_INSTANCE(Menu2<vis::Dev>)
