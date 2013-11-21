@@ -350,7 +350,11 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             @{$autoed_subdeps{$target} //= [
                 map {
                     chdir $_->{base};
-                    realpaths($_->{code}($target));
+                    my @got = $_->{code}($target);
+                    if (grep !defined, @got) {
+                        warn "Warning: function that generated auto subdeps for $target returned an undefined value\n";
+                    }
+                    realpaths(grep defined, @got);
                 } @auto_subdeps
             ]}
         } @_;

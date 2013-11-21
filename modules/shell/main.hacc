@@ -12,5 +12,5 @@
         [48 [re_toggle]]  // 0
     ]}
     console:{"shell::Console":{ }}
-    resed:{"geo::Resident_Editor":{ }}
+    resed:{"shell::Resident_Editor":{ }}
 }}

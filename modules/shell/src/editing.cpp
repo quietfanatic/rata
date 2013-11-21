@@ -1,7 +1,7 @@
 #include <sstream>
 #include "../inc/editing.h"
-#include "../inc/rooms.h"
-#include "../inc/camera.h"
+#include "../../geo/inc/rooms.h"
+#include "../../geo/inc/camera.h"
 #include "../../hacc/inc/files.h"
 #include "../../hacc/inc/documents.h"
 #include "../../hacc/inc/strings.h"
@@ -13,8 +13,9 @@
 using namespace util;
 using namespace vis;
 using namespace core;
+using namespace geo;
 
-namespace geo {
+namespace shell {
 
     Logger logger ("editing");
 
@@ -148,7 +149,7 @@ namespace geo {
         return false;
     }
     void Resident_Editor::Listener_cursor_pos (int x, int y) {
-        Vec realpos = geo::camera->window_to_world(x, y);
+        Vec realpos = camera->window_to_world(x, y);
         if (clicking && selected && (drag_origin - realpos).mag2() > 0.2)
             dragging = selected;
         if (dragging) {
@@ -157,7 +158,7 @@ namespace geo {
     }
 
     Resident_Editor::Resident_Editor () :
-        context_menu(hacc::File("geo/res/re_context_menu.hacc").data().attr("cm"))
+        context_menu(hacc::File("shell/res/re_context_menu.hacc").data().attr("cm"))
     {
         resident_editor = this;
     }
@@ -169,7 +170,7 @@ namespace geo {
     void Resident_Editor::activate () {
         logger.log("Activating editor.");
         Listener::activate();
-        fc.pos = geo::camera->Camera_pos();
+        fc.pos = camera->Camera_pos();
         fc.size = Vec(40, 30);
         fc.activate();
         Drawn<Overlay>::appear();
@@ -230,10 +231,10 @@ namespace geo {
         }
     }
 
-} using namespace geo;
+} using namespace shell;
 
 HACCABLE(Resident_Editor) {
-    name("geo::Resident_Editor");
+    name("shell::Resident_Editor");
     attr("font", member(&Resident_Editor::font).optional());
 }
 

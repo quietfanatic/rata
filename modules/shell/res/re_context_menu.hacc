@@ -1,14 +1,14 @@
 {"hacc::Document":{
-    cm:{"geo::Menu<vis::Dev>":{
+    cm:{"shell::Menu<vis::Dev>":{
         deactivate_on_click:true
-        root:{"geo::VBox":{
+        root:{"shell::VBox":{
             Button:{ background_color:0x0000007f }
             contents:[
-                {"geo::Text_Button":{
+                {"shell::Text_Button":{
                     text:"duplicate"
                     Button:{ on_click:[re_duplicate] }
                 }}
-                {"geo::Text_Button":{
+                {"shell::Text_Button":{
                     text:"delete"
                     Button:{ on_click:[re_delete] }
                 }}

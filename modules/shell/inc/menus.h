@@ -2,13 +2,14 @@
 #define HAVE_GEO_MENUS_H
 
 #include <memory>
-#include "camera.h"
+#include "../../geo/inc/camera.h"
 #include "../../core/inc/window.h"
 #include "../../core/inc/commands.h"
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/text.h"
 
-namespace geo {
+namespace shell {
+    using namespace util;
 
      // Menu Items are always positioned by their lower-left corner.
      // Individual items do not get to choose what layer they are drawn on.
@@ -39,10 +40,10 @@ namespace geo {
         void activate () { vis::Drawn<Layer>::appear(); core::Listener::activate(); }
         void deactivate () { vis::Drawn<Layer>::disappear(); core::Listener::deactivate(); }
         void Listener_cursor_pos (int x, int y) {
-            hover(camera->window_to_layer<Layer>(x, y));
+            hover(geo::camera->window_to_layer<Layer>(x, y));
         }
         bool Listener_button (int x, int y) {
-            return click(camera->window_to_layer<Layer>(x, y));
+            return click(geo::camera->window_to_layer<Layer>(x, y));
         }
     };
 

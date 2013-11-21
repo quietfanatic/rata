@@ -1,8 +1,8 @@
 #include "../inc/menus.h"
-#include "../inc/camera.h"
+#include "../../geo/inc/camera.h"
 #include "../../vis/inc/color.h"
 
-namespace geo {
+namespace shell {
     using namespace core;
     using namespace vis;
 
@@ -91,10 +91,10 @@ namespace geo {
         draw_text(text, font, pos, Vec(1, -1), fg, cached_area.x);
     }
 
-} using namespace geo;
+} using namespace shell;
 
 HACCABLE(Menu_Base) {
-    name("geo::Menu_Base");
+    name("shell::Menu_Base");
     attr("pos", member(&Menu_Base::pos).optional());
     attr("size", member(&Menu_Base::size).optional());
     attr("root", member(&Menu_Base::root).optional());
@@ -102,18 +102,18 @@ HACCABLE(Menu_Base) {
 }
 
 HACCABLE_TEMPLATE(<class Layer>, Menu<Layer>) {
-    name([](){ return "geo::Menu<" + hacc::Type::CppType<Layer>().name() + ">"; });
+    name([](){ return "shell::Menu<" + hacc::Type::CppType<Layer>().name() + ">"; });
     delegate(hcb::template base<Menu_Base>());
 }
 HCB_INSTANCE(Menu<vis::Hud>)
 HCB_INSTANCE(Menu<vis::Dev>)
 
 HACCABLE(Menu_Item) {
-    name("geo::Menu_Item");
+    name("shell::Menu_Item");
 }
 
 HACCABLE(Button) {
-    name("geo::Button");
+    name("shell::Button");
     attr("Menu_Item", base<Menu_Item>().optional());
     attr("on_click", member(&Button::on_click).optional());
     attr("color", member(&Button::color).optional());
@@ -123,13 +123,13 @@ HACCABLE(Button) {
 }
 
 HACCABLE(VBox) {
-    name("geo::VBox");
+    name("shell::VBox");
     attr("Button", base<Button>().optional());
     attr("contents", member(&VBox::contents));
 }
 
 HACCABLE(Text_Button) {
-    name("geo::Text_Button");
+    name("shell::Text_Button");
     attr("Button", base<Button>().optional());
     attr("text", member(&Text_Button::text));
     attr("font", member(&Text_Button::font).optional());

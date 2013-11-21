@@ -5,6 +5,8 @@ use MakePl;
 my @objects = qw<
     tmp/main.o
     tmp/console.o
+    tmp/editing.o
+    tmp/menus.o
     ../core/tmp/commands.o
     ../core/tmp/opengl.o
     ../core/tmp/window.o
@@ -12,8 +14,6 @@ my @objects = qw<
     ../ent/tmp/control.o
     ../ent/tmp/various.o
     ../geo/tmp/camera.o
-    ../geo/tmp/editing.o
-    ../geo/tmp/menus.o
     ../geo/tmp/rooms.o
     ../geo/tmp/tiles.o
     ../hacc/tmp/common.o
@@ -42,7 +42,7 @@ my @libs = qw(-lGL -lglfw -lSOIL);
 
 include '../..';
 
-objects(qw(main console));
+objects(qw(main console editing menus));
 
  # Here's the main program
 ld_rule('../../rata', [@objects], [@libs]);

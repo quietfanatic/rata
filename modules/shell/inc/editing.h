@@ -1,21 +1,22 @@
 #ifndef HAVE_GEO_EDITING_H
 #define HAVE_GEO_EDITING_H
 
-#include "camera.h"
-#include "rooms.h"
 #include "menus.h"
+#include "../../geo/inc/camera.h"
+#include "../../geo/inc/rooms.h"
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/text.h"
 #include "../../core/inc/window.h"
 
-namespace geo {
+namespace shell {
+    using namespace util;
 
     struct Resident_Editor : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Dev>, core::Listener {
-        Free_Camera fc;
+        geo::Free_Camera fc;
         vis::Font* font = NULL;
-        Resident* hovering = NULL;
-        Resident* selected = NULL;
-        Resident* dragging = NULL;
+        geo::Resident* hovering = NULL;
+        geo::Resident* selected = NULL;
+        geo::Resident* dragging = NULL;
         Menu<vis::Dev>* context_menu = NULL;
         bool clicking;
         Vec drag_origin;
