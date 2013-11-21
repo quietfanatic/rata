@@ -130,7 +130,7 @@ namespace geo {
             else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
                 if (action == GLFW_PRESS) {
                     if (!context_menu->active()) {
-                        Vec pos = camera->window_to_hud(window->cursor_x, window->cursor_y);
+                        Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
                         context_menu->activate(pos);
                         return true;
                     }
@@ -233,7 +233,7 @@ namespace geo {
     void Context_Menu::activate (Vec pos) {
         for (auto& res : room.residents) {
             const Rect& bound = res.Resident_boundary();
-            res.Resident_set_pos(pos - bound.lt());
+            res.Resident_set_pos(pos + Vec(bound.l, -bound.t));
             pos.y -= bound.size().y;
         }
          // If we've gone below the bottom, compensate

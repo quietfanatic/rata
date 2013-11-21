@@ -24,7 +24,9 @@ namespace geo {
     }
 
     void Menu::Listener_cursor_pos (int x, int y) {
-        Vec cursor_pos = camera->window_to_hud(x, y);
+        Vec cursor_pos = dev_space
+            ? camera->window_to_dev(x, y)
+            : camera->window_to_hud(x, y);
         float lowest = INF;
         hovering = NULL;
         for (auto& res : room.residents) {
@@ -91,6 +93,7 @@ namespace geo {
 HACCABLE(Menu) {
     name("geo::Menu");
     attr("room", member(&Menu::room).optional());
+    attr("dev_space", member(&Menu::dev_space).optional());
 }
 
 HACCABLE(Text_Button_Base) {
