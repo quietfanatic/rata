@@ -7,9 +7,6 @@
 
 namespace core {
 
-    extern uint64 frames_simulated;
-    extern uint64 frames_drawn;
-
     struct Listener;
 
      // Window is unfortunately a singleton type.  If we ever support
