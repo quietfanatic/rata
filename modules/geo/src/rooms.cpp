@@ -30,7 +30,7 @@ namespace geo {
     }
     void Room::forget () {
         if (!observer_count) {
-            geo_logger.log("Room @%lu's reference count is corrupted!", (size_t)this);
+            geo_logger.log("Room @%lx's reference count is corrupted!", (size_t)this);
         }
         else if (!--observer_count) {
             geo_logger.log("Deactivating room @%lx", (unsigned long)this);

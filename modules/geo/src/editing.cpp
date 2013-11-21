@@ -76,58 +76,60 @@ namespace geo {
     }
 
     bool Resident_Editor::Listener_button (int code, int action) {
-        if (code == GLFW_MOUSE_BUTTON_LEFT) {
-            if (action == GLFW_PRESS) {
-                Vec realpos = camera->window_to_world(window->cursor_x, window->cursor_y);
-                dragging = NULL;
-                std::vector<std::pair<float, Resident*>> matches;
-                 // Search for cursor overlap
-                for (auto& room : all_rooms()) {
-                    if (room.observer_count) {
-                        for (auto& res : room.residents) {
-                            Vec pos = res.Resident_get_pos();
-                            if (!pos.is_defined()) continue;
-                            const Rect& boundary = res.Resident_boundary();
-                            if (boundary.covers(realpos - pos)) {
-                                matches.emplace_back(boundary.t, &res);
-                            }
+        if (action == GLFW_PRESS) {
+            context_menu->deactivate();
+            Vec realpos = camera->window_to_world(window->cursor_x, window->cursor_y);
+            dragging = NULL;
+            std::vector<std::pair<float, Resident*>> matches;
+             // Search for cursor overlap
+            for (auto& room : all_rooms()) {
+                if (room.observer_count) {
+                    for (auto& res : room.residents) {
+                        Vec pos = res.Resident_get_pos();
+                        if (!pos.is_defined()) continue;
+                        const Rect& boundary = res.Resident_boundary();
+                        if (boundary.covers(realpos - pos)) {
+                            matches.emplace_back(boundary.t, &res);
                         }
                     }
                 }
-                 // Resident with lowest top gets priority
-                float lowest = INF;
-                Resident* picked = NULL;
-                for (auto& p : matches) {
-                    if (p.first < lowest) {
-                        lowest = p.first;
-                        picked = p.second;
-                    }
+            }
+             // Resident with lowest top gets priority
+            float lowest = INF;
+            Resident* picked = NULL;
+            for (auto& p : matches) {
+                if (p.first < lowest) {
+                    lowest = p.first;
+                    picked = p.second;
                 }
-                if (!picked) return false;
-                Vec pos = picked->Resident_get_pos();
-                selected = picked;
+            }
+            if (!picked) return false;
+            Vec pos = picked->Resident_get_pos();
+            selected = picked;
+            if (code == GLFW_MOUSE_BUTTON_LEFT) {
                 drag_origin = pos;
                 drag_offset = realpos - pos;
                 logger.log("Dragging @%lx", (size_t)picked);
                 clicking = true;
-                return true;
             }
-            else {
-                dragging = NULL;
-                clicking = false;
-                return true;
-            }
-        }
-        else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
-            if (action == GLFW_PRESS) {
-                if (!context_menu->active()) {
-                    Vec pos = camera->window_to_hud(window->cursor_x, window->cursor_y);
-                    context_menu->activate(pos);
-                    return true;
+            else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
+                if (action == GLFW_PRESS) {
+                    if (!context_menu->active()) {
+                        Vec pos = camera->window_to_hud(window->cursor_x, window->cursor_y);
+                        context_menu->activate(pos);
+                        return true;
+                    }
                 }
             }
+            return true;
         }
-        context_menu->deactivate();
+        else {  // GLFW_RELEASE
+            if (code == GLFW_MOUSE_BUTTON_LEFT) {
+                dragging = NULL;
+                clicking = false;
+            }
+            return true;
+        }
         return false;
     }
     void Resident_Editor::Listener_cursor_pos (int x, int y) {
@@ -164,6 +166,7 @@ namespace geo {
         fc.deactivate();
         Drawn<Overlay>::disappear();
         Drawn<Dev>::disappear();
+        context_menu->deactivate();
     }
 
      // Context menu actions

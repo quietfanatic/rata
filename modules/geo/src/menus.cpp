@@ -7,12 +7,16 @@ namespace geo {
     using namespace vis;
 
     void Menu::activate () {
-        room.observe();
-        Listener::activate();
+        if (!room.observer_count) {
+            room.observe();
+            Listener::activate();
+        }
     }
     void Menu::deactivate () {
-        room.forget();
-        Listener::deactivate();
+        if (room.observer_count) {
+            room.forget();
+            Listener::deactivate();
+        }
     }
 
     bool Menu::active () {
