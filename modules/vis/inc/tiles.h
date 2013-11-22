@@ -9,12 +9,30 @@ namespace vis {
     using namespace util;
 
     struct Tiles {
+        uint width = 0;
+        uint height = 0;
+        std::vector<uint16> tiles;
         uint vbo_id = 0;
         uint vao_id = 0;
-        size_t vao_size = 0;
-         // Call this in your own finish
-        void finish (uint32 width, uint32 height, const uint16* tiles);
+        size_t vbo_size = 0;
+
+        void finish ();
         ~Tiles ();
+        Tiles () = default;
+        Tiles (const Tiles&) = delete;
+        Tiles& operator = (const Tiles&) = delete;
+        Tiles (Tiles&& o) :
+            width(o.width),
+            height(o.height),
+            tiles(o.tiles),
+            vbo_id(o.vbo_id),
+            vao_id(o.vao_id),
+            vbo_size(o.vbo_size)
+        {
+            o.vao_id = 0;
+            o.vbo_id = 0;
+        }
+        Tiles& operator = (Tiles&&) = delete;
     };
 
     void tiles_init ();

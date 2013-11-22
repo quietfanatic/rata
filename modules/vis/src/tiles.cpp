@@ -15,11 +15,19 @@ namespace vis {
         Tile_Vertex () { }
     };
 
-    void Tiles::finish (uint32 width, uint32 height, const uint16* tiles) {
+    void Tiles::finish () {
+        if (tiles.size() != width * height) {
+            throw hacc::X::Logic_Error(
+                "Tiles of incorrect size: given " + std::to_string(tiles.size()) +
+                " instead of " + std::to_string(width) + "x" + std::to_string(height)
+            );
+        }
         if (vao_id) {
+            printf("Deleting vao in finish\n");
             glDeleteVertexArrays(1, &vao_id);
         }
         if (vbo_id) {
+            printf("Deleting vbo in finish\n");
             glDeleteBuffers(1, &vbo_id);
         }
         auto vdats = new Tile_Vertex [height * width][4];
@@ -40,10 +48,10 @@ namespace vis {
                 vdat_i++;
             }
         }
-        vao_size = vdat_i * 4;
+        vbo_size = vdat_i * 4;
         glGenBuffers(1, &vbo_id);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
-        glBufferData(GL_ARRAY_BUFFER, vao_size * 4 * sizeof(Tile_Vertex), vdats, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vbo_size * 4 * sizeof(Tile_Vertex), vdats, GL_STATIC_DRAW);
         glGenVertexArrays(1, &vao_id);
         glBindVertexArray(vao_id);
         glEnableVertexAttribArray(0);
@@ -52,12 +60,20 @@ namespace vis {
         glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, px));
         glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, tx));
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        diagnose_opengl("after Tiles::finish");
         delete[] vdats;
-        printf("Uploaded %ld vertices\n", vao_size);
+        printf("vao_id is %d\n", vao_id);
+        printf("vbo_id is %d\n", vbo_id);
+        printf("Uploaded %ld vertices\n", vbo_size);
     }
     Tiles::~Tiles () {
-        glDeleteVertexArrays(1, &vao_id);
-        glDeleteBuffers(1, &vbo_id);
+        if (vao_id) {
+            printf("Deleting vao in destructor\n");
+            glDeleteVertexArrays(1, &vao_id);
+        }
+        if (vbo_id)
+            printf("Deleting vbo in destructor\n");
+            glDeleteBuffers(1, &vbo_id);
     }
 
     struct Tiles_Program : Cameraed_Program {
@@ -80,19 +96,84 @@ namespace vis {
 
     void draw_tiles (Tiles* tiles, Texture* tex, Vec pos) {
         prog->use();
+        printf("Drawing some tiles\n");
         glUniform2f(prog->model_pos, pos.x, pos.y);
         glUniform2f(prog->tileset_size, tex->size.x, tex->size.y);
+        core::diagnose_opengl("after draw_tiles/setting uniforms");
         glBindTexture(GL_TEXTURE_2D, tex->id);
+        core::diagnose_opengl("after draw_tiles/bind texture");
         glBindVertexArray(tiles->vao_id);
-        glDrawArrays(GL_QUADS, 0, tiles->vao_size);
+        printf("glBindVertexArray(%d)\n", tiles->vao_id);
+        core::diagnose_opengl("after draw_tiles/bind vertex array");
+        glDrawArrays(GL_QUADS, 0, tiles->vbo_size);
         core::diagnose_opengl("after draw_tiles");
     }
 
 } using namespace vis;
+
+HACCABLE(Tiles) {
+    name("vis::Tiles");
+    attr("width", member(&Tiles::width));
+    attr("height", member(&Tiles::height));
+    attr("tiles", member(&Tiles::tiles));
+    finish([](Tiles& v){ v.finish(); });
+}
 
 HACCABLE(Tiles_Program) {
     name("vis::Tiles_Program");
     delegate(base<core::Program>());
     finish(&Tiles_Program::finish);
 }
+
+hacc::Special_Filetype _tiles_ft ("tiles",
+    [] (std::string filename) -> hacc::Dynamic {
+        std::string s = hacc::string_from_file(filename);
+        if (s.size() == 0) {
+            return hacc::Dynamic(std::move(Tiles()));
+        }
+        if (s.size() < 8) {
+            throw hacc::X::Logic_Error(
+                "\"" + filename + "\" isn't large enough for a .tiles file."
+            );
+        }
+        if (s.size() % 2) {
+            throw hacc::X::Logic_Error(
+                "\"" + filename + "\" is not of even size (its size is " + std::to_string(s.size()) + ")"
+            );
+        }
+        Tiles r;
+        r.width = s[0] << 24 | s[1] << 16 | s[2] << 8 | s[3];
+        r.height = s[4] << 24 | s[5] << 16 | s[6] << 8 | s[7];
+        if ((s.size() - 8) / 2 != r.width * r.height) {
+            throw hacc::X::Logic_Error(
+                "\"" + filename + "\" is not of correct size for its given width and height: " +
+                std::to_string((s.size() - 8) / 2) + " != " + std::to_string(r.width) + " " + std::to_string(r.height)
+            );
+        }
+        r.tiles.resize(r.width * r.height);
+        for (uint i = 0; i < r.tiles.size(); i++) {
+            r.tiles[i] = (s[8 + i*2] << 8) | (s[8 + i*2 + 1]);
+        }
+        r.finish();
+        return hacc::Dynamic(std::move(r));
+    },
+    [] (std::string filename, const hacc::Dynamic& dyn) {
+        Tiles* val = dyn.address();
+        std::string s;
+        s.resize(8 + val->tiles.size() * 2);
+        s[0] = val->width >> 24;
+        s[1] = val->width >> 16;
+        s[2] = val->width >> 8;
+        s[3] = val->width;
+        s[4] = val->height >> 24;
+        s[5] = val->height >> 16;
+        s[6] = val->height >> 8;
+        s[7] = val->height;
+        for (uint i = 0; i < val->tiles.size(); i++) {
+            s[8 + i*2] = val->tiles[i] >> 8;
+            s[8 + i*2 + 1] = val->tiles[i];
+        }
+        hacc::string_to_file(s, filename);
+    }
+);
 

@@ -29,7 +29,7 @@ namespace geo {
     }
 
     void Tilemap::Drawn_draw (vis::Map) {
-        vis::draw_tiles(&vis_tiles, texture, Object::pos());
+        vis::draw_tiles(tiles, texture, Object::pos());
     }
 
 
@@ -116,10 +116,11 @@ namespace geo {
     void Tilemap::finish () {
         set_def(tilemap_bdf());
         physicalize();
-        vis_tiles.finish(width, height, tiles->data());
     }
 
     void Tilemap::physicalize () {
+        auto width = tiles->width;
+        auto height = tiles->height;
         while (b2Fixture* fix = b2body->GetFixtureList())
             b2body->DestroyFixture(fix);
         auto es = new TileEdge [height * width][MAX_EDGES];
@@ -128,18 +129,9 @@ namespace geo {
         uint merged = 0;
         uint eaten = 0;
         uint final = 0;
-        if (tiles->size() != width * height) {
-            throw hacc::X::Logic_Error(
-                "Tilemap has wrong number of tiles (" + std::to_string(tiles->size())
-              + " != " + std::to_string(width * height)
-              + " == " + std::to_string(width)
-              + " * " + std::to_string(height)
-              + ")"
-            );
-        }
         for (uint y = 0; y < height; y++)
         for (uint x = 0; x < width; x++) {
-            TileDef* def = tileset->tiles.at((*tiles)[y*width+x] & 0x3fff);
+            TileDef* def = tileset->tiles.at(tiles->tiles[y*width+x] & 0x3fff);
             if (def) {
                 uint n_edges = def->vertices.size();
                  // Create the edges for this tile
@@ -205,40 +197,11 @@ HACCABLE(Tilemap) {
     attr("Object", base<phys::Object>().optional());
     attr("tileset", member(&Tilemap::tileset));
     attr("texture", member(&Tilemap::texture));
-    attr("width", member(&Tilemap::width));
-    attr("height", member(&Tilemap::height));
     attr("tiles", member(&Tilemap::tiles));
     finish([](Tilemap& t){
         t.Resident::finish();
         t.finish();
     });
 }
-
-hacc::Special_Filetype _u16_ft ("u16",
-    [] (std::string filename) -> hacc::Dynamic {
-        std::string s = hacc::string_from_file(filename);
-        if (s.size() % 2) {
-            throw hacc::X::Logic_Error(
-                "\"" + filename + "\" is not of even size (its size is " + std::to_string(s.size()) + ")"
-            );
-        }
-        std::vector<uint16> r (s.size() / 2);
-        for (uint i = 0; i < r.size(); i++) {
-            r[i] = (s[i*2] << 8) | (s[i*2 + 1]);
-        }
-        return hacc::Dynamic(std::move(r));
-    },
-    [] (std::string filename, const hacc::Dynamic& dyn) {
-        std::vector<uint16>* val = dyn.address();
-        std::string s;
-        s.resize(val->size() * 2);
-        for (uint i = 0; i < val->size(); i++) {
-            s[i*2] = (*val)[i] >> 8;
-            s[i*2 + 1] = (*val)[i] & 0xff;
-        }
-        hacc::string_to_file(s, filename);
-    }
-);
-
 
 

@@ -9,9 +9,7 @@
         }
         tileset:$("world/res/test.tileset").tileset
         texture:$("world/res/test.tileset").img.textures[0]
-        width:40
-        height:30
-        tiles:$("world/res/test.u16")
+        tiles:$("world/res/test.tiles")
     } }
     room:{ "geo::Room":{
         boundary:[
