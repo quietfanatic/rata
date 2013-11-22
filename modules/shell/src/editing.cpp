@@ -27,9 +27,7 @@ namespace shell {
     }
 
     void Resident_Editor::Drawn_draw (Overlay) {
-        Vec cursor_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
         size_t unpositioned_residents = 0;
-        Resident* new_hovering = NULL;
         for (auto& room : all_rooms()) {
             color_offset(Vec(0, 0));
             draw_color(0xff00ffff);
@@ -45,26 +43,9 @@ namespace shell {
                     color_offset(pos);
                     draw_color(&res == selected ? 0xff0000ff : 0x00ff00ff);
                     draw_rect(boundary);
-                    if (boundary.covers(cursor_pos - pos)) {
-                        new_hovering = &res;
-                    }
                 }
             }
         }
-        color_offset(Vec(0, 0));
-        if (new_hovering) {
-            if (new_hovering != hovering) {
-                auto realp = res_realp(new_hovering);
-                auto path = hacc::address_to_path(realp);
-                std::ostringstream ss;
-                ss << realp.address << " " << hacc::path_to_string(path);
-                status = ss.str();
-            }
-        }
-        else {
-            status = "";
-        }
-        hovering = new_hovering;
     }
     void Resident_Editor::Drawn_draw (Dev) {
         if (!status.empty()) {
@@ -74,6 +55,7 @@ namespace shell {
             draw_solid_rect(Rect(0, size.y, size.x, 0));
             draw_text(status, font, Vec(0, 0), Vec(1, -1));
         }
+         // Show position in various coordinate spaces
         Vec world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
         Vec hud_pos = camera->window_to_hud(window->cursor_x, window->cursor_y);
         Vec dev_pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
@@ -91,6 +73,48 @@ namespace shell {
         );
     }
 
+    void Resident_Editor::Listener_cursor_pos (int x, int y) {
+        Vec world_pos = camera->window_to_world(x, y);
+        if (clicking) {
+            if (selected && (drag_origin - world_pos).mag2() > 0.2)
+                dragging = selected;
+            if (dragging) {
+                dragging->Resident_set_pos(world_pos - drag_offset);
+            }
+        }
+        else {
+            Resident* new_hovering = NULL;
+            size_t unpositioned_residents = 0;
+            for (auto& room : all_rooms()) {
+                if (room.observer_count) {
+                    for (auto& res : room.residents) {
+                        Vec pos = res.Resident_get_pos();
+                        const Rect& boundary = res.Resident_boundary();
+                        if (!pos.is_defined()) {
+                            pos = room.boundary.rt() + Vec(0.5, -0.5);
+                            pos.x += unpositioned_residents++;
+                        }
+                        if (boundary.covers(world_pos - pos)) {
+                            new_hovering = &res;
+                        }
+                    }
+                }
+            }
+            if (new_hovering) {
+                if (new_hovering != hovering) {
+                    auto realp = res_realp(new_hovering);
+                    auto path = hacc::address_to_path(realp);
+                    std::ostringstream ss;
+                    ss << realp.address << " " << hacc::path_to_string(path);
+                    status = ss.str();
+                }
+            }
+            else {
+                status = "";
+            }
+            hovering = new_hovering;
+        }
+    }
     bool Resident_Editor::Listener_button (int code, int action) {
         if (action == GLFW_PRESS) {
             Vec realpos = camera->window_to_world(window->cursor_x, window->cursor_y);
@@ -147,14 +171,6 @@ namespace shell {
             return true;
         }
         return false;
-    }
-    void Resident_Editor::Listener_cursor_pos (int x, int y) {
-        Vec realpos = camera->window_to_world(x, y);
-        if (clicking && selected && (drag_origin - realpos).mag2() > 0.2)
-            dragging = selected;
-        if (dragging) {
-            dragging->Resident_set_pos(realpos - drag_offset);
-        }
     }
 
     Resident_Editor::Resident_Editor () :
