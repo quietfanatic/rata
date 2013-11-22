@@ -8,6 +8,9 @@ namespace shell {
 
     void Menu_Base::draw () {
         if (root) root->Menu_Item_draw(pos, size);
+        color_offset(pos);
+        draw_color(0x000000ff);
+        draw_rect(Rect(0, 0, size.x, size.y));
     }
 
     void Menu_Base::hover (Vec cursor_pos) {
@@ -27,51 +30,54 @@ namespace shell {
 
     void Button::Menu_Item_draw (Vec pos, Vec size) {
         uint32 bg = hovering() ? hover_background_color : background_color;
-
-        color_offset(pos);
-        draw_color(bg);
-        draw_solid_rect(Rect(0, 0, size.x, size.y));
+        if (bg & 0xff) {
+            color_offset(pos);
+            draw_color(bg);
+            draw_solid_rect(Rect(0, 0, size.x, size.y));
+        }
     }
 
     Vec VBox::Menu_Item_size (Vec area) {
         if (cached_area != area) {
             cached_area = area;
-            float height = 0;
+            Vec size = Vec(0, 0);
             for (auto& c : contents) {
-                Vec csize = c->Menu_Item_size(area - Vec(0, height));
-                height += csize.y;
+                Vec csize = c->Menu_Item_size(area - Vec(0, size.y));
+                size.y += csize.y;
+                if (csize.x > size.x) size.x = csize.x;
             }
-            cached_size = Vec(area.x, height);
+            cached_size = size;
         }
         return cached_size;
     }
     void VBox::Menu_Item_draw (Vec pos, Vec area) {
         VBox::Menu_Item_size(area);
-        float cy = cached_size.y;
+        Button::Menu_Item_draw(pos, area);
+        float height = 0;
         for (auto& c : contents) {
-            Vec csize = c->Menu_Item_size(area - Vec(0, cached_size.y - cy));
-            cy -= csize.y;
-            c->Menu_Item_draw(Vec(pos.x, cy), Vec(area.x, csize.y));
+            Vec csize = c->Menu_Item_size(area - Vec(0, height));
+            height += csize.y;
+            c->Menu_Item_draw(Vec(pos.x, pos.y + cached_size.y - height), Vec(area.x, csize.y));
         }
     }
     bool VBox::Menu_Item_hover (Vec pos, Vec area) {
         VBox::Menu_Item_size(area);
-        float cy = cached_size.y;
+        float height = 0;
         for (auto& c : contents) {
-            Vec csize = c->Menu_Item_size(area - Vec(0, cached_size.y - cy));
-            cy -= csize.y;
-            if (c->Menu_Item_hover(Vec(pos.x, pos.y - cy), Vec(area.x, csize.y)))
+            Vec csize = c->Menu_Item_size(area - Vec(0, height));
+            height += csize.y;
+            if (c->Menu_Item_hover(Vec(pos.x, pos.y + cached_size.y - height), Vec(area.x, csize.y)))
                 return true;
         }
         return Button::Menu_Item_hover(pos, area);
     }
     bool VBox::Menu_Item_click (Vec pos, Vec area) {
         VBox::Menu_Item_size(area);
-        float cy = cached_size.y;
+        float height = 0;
         for (auto& c : contents) {
-            Vec csize = c->Menu_Item_size(area - Vec(0, cy));
-            cy -= csize.y;
-            if (c->Menu_Item_click(Vec(pos.x, pos.y - cy), Vec(area.x, csize.y)))
+            Vec csize = c->Menu_Item_size(area - Vec(0, height));
+            height += csize.y;
+            if (c->Menu_Item_click(Vec(pos.x, pos.y + cached_size.y - height), Vec(area.x, csize.y)))
                 return true;
         }
         return Button::Menu_Item_click(pos, area);
@@ -86,8 +92,8 @@ namespace shell {
     }
 
     void Text_Button::Menu_Item_draw (Vec pos, Vec size) {
-        uint32 fg = hovering() ? hover_color : color;
         Button::Menu_Item_draw(pos, size);
+        uint32 fg = hovering() ? hover_color : color;
         draw_text(text, font, pos, Vec(1, -1), fg, cached_area.x);
     }
 

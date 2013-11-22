@@ -86,6 +86,10 @@ namespace shell {
         Vec cached_size;
         Vec Menu_Item_size (Vec area) override;
         void Menu_Item_draw (Vec, Vec) override;
+        Text_Button () {
+            background_color = 0x0000007f;
+            hover_background_color = 0x000000ff;
+        }
     };
 
 }

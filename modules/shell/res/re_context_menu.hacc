@@ -2,7 +2,6 @@
     cm:{"shell::Menu<vis::Dev>":{
         deactivate_on_click:true
         root:{"shell::VBox":{
-            Button:{ background_color:0x0000007f }
             contents:[
                 {"shell::Text_Button":{
                     text:"duplicate"
