@@ -4,6 +4,10 @@
         root:{"shell::VBox":{
             contents:[
                 {"shell::Text_Button":{
+                    text:"edit"
+                    Button:{ on_click:[re_edit] }
+                }}
+                {"shell::Text_Button":{
                     text:"duplicate"
                     Button:{ on_click:[re_duplicate] }
                 }}

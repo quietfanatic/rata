@@ -186,6 +186,34 @@ namespace shell {
     }
 
      // Context menu actions
+    void Resident_Editor::re_edit () {
+        if (!selected) return;
+        auto realp = res_realp(selected);
+        auto tree = hacc::Reference(realp).to_tree();
+        auto tmp = tmpnam(NULL);
+        auto str = " // Editing " + hacc::Reference(realp).show() + "\n"
+                 + hacc::tree_to_string(tree, tmp, 3);
+        hacc::string_to_file(str, tmp);
+        auto editor = (const char*)getenv("EDITOR");
+        if (!editor) {
+            if (system("which gedit") == 0)
+                editor = "gedit";
+            else if (system("which mate-text-editor") == 0)
+                editor = "mate-text-editor";
+            else
+                editor = "vim";
+        }
+        system((std::string(editor) + " " + tmp).c_str());
+        auto new_str = hacc::string_from_file(tmp);
+        if (new_str != str) {
+            printf("Updating\n");
+            hacc::Reference(realp).from_tree(hacc::tree_from_string(new_str));
+        }
+        else {
+            printf("Not updating\n");
+        }
+        remove(tmp);
+    }
     void Resident_Editor::re_duplicate () {
         if (!selected) return;
         auto realp = res_realp(selected);
@@ -248,6 +276,11 @@ void _re_toggle () {
 
 New_Command _re_toggle_cmd ("re_toggle", "Toggle the Resident_Editor interface.", 0, _re_toggle);
 
+void _re_edit () {
+    if (!resident_editor) return;
+    resident_editor->re_edit();
+}
+New_Command _re_edit_cmd ("re_edit", "Edit the selected object's textual representation with $EDITOR.", 0, _re_edit);
 void _re_duplicate () {
     if (!resident_editor) return;
     resident_editor->re_duplicate();

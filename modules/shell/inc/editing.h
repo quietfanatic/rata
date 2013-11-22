@@ -28,6 +28,7 @@ namespace shell {
         ~Resident_Editor ();
 
          // Context menu actions
+        void re_edit ();
         void re_duplicate ();
         void re_delete ();
 
