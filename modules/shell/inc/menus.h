@@ -42,8 +42,14 @@ namespace shell {
         void Listener_cursor_pos (int x, int y) {
             hover(geo::camera->window_to_layer<Layer>(x, y));
         }
-        bool Listener_button (int x, int y) {
-            return click(geo::camera->window_to_layer<Layer>(x, y));
+        bool Listener_button (int code, int action) {
+            if (code == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+                return click(geo::camera->window_to_layer<Layer>(
+                    core::window->cursor_x,
+                    core::window->cursor_y
+                ));
+            }
+            else return false;
         }
     };
 
@@ -54,9 +60,9 @@ namespace shell {
         uint32 hover_color = 0xffffffff;
         uint32 hover_background_color = 0x00000000;
         uint64 hovering_frame = -1;
-        bool hovering () { return hovering_frame == core::window->frames_simulated; }
+        bool hovering () { return hovering_frame == core::window->frames_drawn; }
         bool Menu_Item_hover (Vec pos, Vec size) override {
-            hovering_frame = core::window->frames_simulated;
+            hovering_frame = core::window->frames_drawn;
             return true;
         }
         bool Menu_Item_click (Vec pos, Vec size) override {

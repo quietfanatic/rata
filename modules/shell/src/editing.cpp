@@ -133,7 +133,7 @@ namespace shell {
                     Vec area = camera->window_to_dev(window->width, 0);
                     context_menu->size = context_menu->root->Menu_Item_size(area);
                     Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
-                    context_menu->pos = pos - Vec(0, context_menu->size.y);
+                    context_menu->pos = pos - Vec(-1*PX, context_menu->size.y + 1*PX);
                     context_menu->activate();
                     return true;
                 }

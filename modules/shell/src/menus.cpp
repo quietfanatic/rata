@@ -14,7 +14,7 @@ namespace shell {
     }
 
     void Menu_Base::hover (Vec cursor_pos) {
-        if (Rect(0, 0, size.x, size.y).covers(cursor_pos + pos)) {
+        if (Rect(0, 0, size.x, size.y).covers(cursor_pos - pos)) {
             root->Menu_Item_hover(cursor_pos - pos, size);
         }
     }
@@ -66,8 +66,11 @@ namespace shell {
         for (auto& c : contents) {
             Vec csize = c->Menu_Item_size(area - Vec(0, height));
             height += csize.y;
-            if (c->Menu_Item_hover(Vec(pos.x, pos.y + cached_size.y - height), Vec(area.x, csize.y)))
-                return true;
+            Vec cpos = pos - Vec(0, cached_size.y - height);
+            if (Rect(0, 0, area.x, csize.y).covers(cpos)) {
+                if (c->Menu_Item_hover(cpos, Vec(area.x, csize.y)))
+                    return true;
+            }
         }
         return Button::Menu_Item_hover(pos, area);
     }
@@ -77,8 +80,11 @@ namespace shell {
         for (auto& c : contents) {
             Vec csize = c->Menu_Item_size(area - Vec(0, height));
             height += csize.y;
-            if (c->Menu_Item_click(Vec(pos.x, pos.y + cached_size.y - height), Vec(area.x, csize.y)))
-                return true;
+            Vec cpos = pos - Vec(0, cached_size.y - height);
+            if (Rect(0, 0, area.x, csize.y).covers(cpos)) {
+                if (c->Menu_Item_click(cpos, Vec(area.x, csize.y)))
+                    return true;
+            }
         }
         return Button::Menu_Item_click(pos, area);
     }
