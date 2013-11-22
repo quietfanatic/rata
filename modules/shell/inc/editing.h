@@ -14,11 +14,14 @@ namespace shell {
     struct Resident_Editor : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Dev>, core::Listener {
          // Associated utilities
         geo::Free_Camera fc;
-        Menu<vis::Dev>* context_menu = NULL;  // Set on construction
+        Menu<vis::Dev>* res_menu = NULL;  // Set on construction
+        Menu<vis::Dev>* room_menu = NULL;  // Set on construction
         vis::Font* font = NULL;
          // Selected items
         geo::Resident* hovering = NULL;
         geo::Resident* selected = NULL;
+        geo::Room* hovering_room = NULL;
+        geo::Room* selected_room = NULL;
          // Cursor control
         bool clicking = false;
         bool dragging = false;
@@ -36,6 +39,7 @@ namespace shell {
         void re_edit ();
         void re_duplicate ();
         void re_delete ();
+        void re_reload_room ();
 
         void Drawn_draw (vis::Overlay) override;
         void Drawn_draw (vis::Dev) override;

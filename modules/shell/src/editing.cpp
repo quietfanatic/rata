@@ -6,6 +6,7 @@
 #include "../../hacc/inc/documents.h"
 #include "../../hacc/inc/strings.h"
 #include "../../core/inc/commands.h"
+#include "../../core/inc/window.h"
 #include "../../vis/inc/color.h"
 #include "../../vis/inc/text.h"
 #include "../../util/inc/debug.h"
@@ -91,11 +92,19 @@ namespace shell {
         }
         else {
              // Prefer residents with lower tops
-            float lowest_t = INF;
+            float lowest_res_t = INF;
             Resident* lowest_res = NULL;
+            float lowest_room_t = INF;
+            Room* lowest_room = NULL;
             size_t unpositioned_residents = 0;
             for (auto& room : all_rooms()) {
                 if (room.observer_count) {
+                    if (room.boundary.covers(world_pos)) {
+                        if (room.boundary.t < lowest_room_t) {
+                            lowest_room_t = room.boundary.t;
+                            lowest_room = &room;
+                        }
+                    }
                     for (auto& res : room.residents) {
                         Vec pos = res.Resident_get_pos();
                         const Rect& boundary = res.Resident_boundary();
@@ -104,8 +113,8 @@ namespace shell {
                             pos.x += unpositioned_residents++;
                         }
                         if (boundary.covers(world_pos - pos)) {
-                            if (boundary.t < lowest_t) {
-                                lowest_t = boundary.t;
+                            if (boundary.t < lowest_res_t) {
+                                lowest_res_t = boundary.t;
                                 lowest_res = &res;
                             }
                         }
@@ -126,6 +135,7 @@ namespace shell {
                 status = "";
             }
             hovering = lowest_res;
+            hovering_room = lowest_room;
         }
     }
      // Clicking behavior
@@ -135,25 +145,37 @@ namespace shell {
             dragging = NULL;
              // Just upgrade hovering to selected
             selected = hovering;
-            if (!selected) return false;
-            Vec pos = selected->Resident_get_pos();
-            if (code == GLFW_MOUSE_BUTTON_LEFT) {
-                drag_origin = pos;
-                drag_offset = realpos - pos;
-                logger.log("Selected " + hacc::Reference(res_realp(selected)).show());
-                clicking = true;
+            selected_room = hovering_room;
+            if (selected) {
+                Vec pos = selected->Resident_get_pos();
+                if (code == GLFW_MOUSE_BUTTON_LEFT) {
+                    drag_origin = pos;
+                    drag_offset = realpos - pos;
+                    logger.log("Selected " + hacc::Reference(res_realp(selected)).show());
+                    clicking = true;
+                }
+                else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
+                    if (action == GLFW_PRESS) {
+                        Vec area = camera->window_to_dev(window->width, 0);
+                        res_menu->size = res_menu->root->Menu_Item_size(area);
+                        Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
+                        res_menu->pos = pos - Vec(-1*PX, res_menu->size.y + 1*PX);
+                        res_menu->activate();
+                    }
+                }
+                return true;
             }
-            else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
-                if (action == GLFW_PRESS) {
-                    Vec area = camera->window_to_dev(window->width, 0);
-                    context_menu->size = context_menu->root->Menu_Item_size(area);
-                    Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
-                    context_menu->pos = pos - Vec(-1*PX, context_menu->size.y + 1*PX);
-                    context_menu->activate();
-                    return true;
+            else if (selected_room) {
+                if (code == GLFW_MOUSE_BUTTON_RIGHT) {
+                    if (action == GLFW_PRESS) {
+                        Vec area = camera->window_to_dev(window->width, 0);
+                        room_menu->size = room_menu->root->Menu_Item_size(area);
+                        Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
+                        room_menu->pos = pos - Vec(-1*PX, room_menu->size.y + 1*PX);
+                        room_menu->activate();
+                    }
                 }
             }
-            return true;
         }
         else {  // GLFW_RELEASE
             if (code == GLFW_MOUSE_BUTTON_LEFT) {
@@ -166,7 +188,8 @@ namespace shell {
     }
 
     Resident_Editor::Resident_Editor () :
-        context_menu(hacc::File("shell/res/re_context_menu.hacc").data().attr("cm"))
+        res_menu(hacc::File("shell/res/re_menus.hacc").data().attr("res_menu")),
+        room_menu(hacc::File("shell/res/re_menus.hacc").data().attr("room_menu"))
     {
         resident_editor = this;
     }
@@ -194,16 +217,14 @@ namespace shell {
         fc.deactivate();
         Drawn<Overlay>::disappear();
         Drawn<Dev>::disappear();
-        context_menu->deactivate();
+        res_menu->deactivate();
+        room_menu->deactivate();
     }
 
-     // Context menu actions
-    void Resident_Editor::re_edit () {
-        if (!selected) return;
-        auto realp = res_realp(selected);
-        auto tree = hacc::Reference(realp).to_tree();
+    static void general_edit (hacc::Reference ref) {
+        auto tree = ref.to_tree();
         auto tmp = tmpnam(NULL);
-        auto str = " // Editing " + hacc::Reference(realp).show() + "\n"
+        auto str = " // Editing " + ref.show() + "\n"
                  + hacc::tree_to_string(tree, tmp, 3);
         hacc::string_to_file(str, tmp);
         auto editor = (const char*)getenv("EDITOR");
@@ -219,13 +240,20 @@ namespace shell {
         auto new_str = hacc::string_from_file(tmp);
         if (new_str != str) {
             printf("Updating\n");
-            hacc::Reference(realp).from_tree(hacc::tree_from_string(new_str));
+            ref.from_tree(hacc::tree_from_string(new_str));
         }
         else {
             printf("Not updating\n");
         }
         remove(tmp);
     }
+
+     // Context menu actions
+    void Resident_Editor::re_edit () {
+        if (!selected) return;
+        general_edit(res_realp(selected));
+    }
+
     void Resident_Editor::re_duplicate () {
         if (!selected) return;
         auto realp = res_realp(selected);
@@ -270,6 +298,11 @@ namespace shell {
             throw hacc::X::Logic_Error("Could not re_delete: this object does not belong to a document.");
         }
     }
+    void Resident_Editor::re_reload_room () {
+        if (!selected_room) return;
+        auto filename = hacc::address_to_path(selected_room).root();
+        window->before_next_frame([filename](){hacc::reload(filename);});
+    }
 
 } using namespace shell;
 
@@ -303,3 +336,9 @@ void _re_delete () {
     resident_editor->re_delete();
 }
 New_Command _re_delete_cmd ("re_delete", "Delete the selected object.", 0, _re_delete);
+
+void _re_reload_room () {
+    if (!resident_editor) return;
+    resident_editor->re_reload_room();
+}
+New_Command _re_reload_room_cmd ("re_reload_room", "Reload the selected room from disk.", 0, _re_reload_room);
