@@ -4,7 +4,7 @@
         root:{"shell::VBox":{
             contents:[
                 {"shell::Text_Button":{
-                    text:"edit"
+                    text:"text edit"
                     Button:{ on_click:[re_edit] }
                 }}
                 {"shell::Text_Button":{

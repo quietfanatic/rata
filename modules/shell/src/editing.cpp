@@ -21,11 +21,13 @@ namespace shell {
 
     Resident_Editor* resident_editor = NULL;
 
+     // Get pointer of most derived type from Resident*
     hacc::Pointer res_realp (Resident* res) {
         void* derived = hacc::Pointer(res).address_of_type(hacc::Type(typeid(*res)));
         return hacc::Pointer(hacc::Type(typeid(*res)), derived);
     }
 
+     // Draw outlines around all residents
     void Resident_Editor::Drawn_draw (Overlay) {
         size_t unpositioned_residents = 0;
         for (auto& room : all_rooms()) {
@@ -35,11 +37,11 @@ namespace shell {
             if (room.observer_count) {
                 for (auto& res : room.residents) {
                     Vec pos = res.Resident_get_pos();
-                    if (!pos.is_defined()) {
-                        pos = room.boundary.rt() + Vec(0.5, -0.5);
+                    const Rect& boundary = res.Resident_boundary();
+                    if (!pos.is_defined() || !boundary.is_defined()) {
+                        pos = room.boundary.lt() + Vec(0.5, -0.5);
                         pos.x += unpositioned_residents++;
                     }
-                    const Rect& boundary = res.Resident_boundary();
                     color_offset(pos);
                     draw_color(&res == selected ? 0xff0000ff : 0x00ff00ff);
                     draw_rect(boundary);
@@ -47,6 +49,8 @@ namespace shell {
             }
         }
     }
+
+     // Draw status messages and other info
     void Resident_Editor::Drawn_draw (Dev) {
         if (!status.empty()) {
             color_offset(Vec(0, 0));
@@ -73,36 +77,45 @@ namespace shell {
         );
     }
 
+     // Process cursor position; hover, drag
     void Resident_Editor::Listener_cursor_pos (int x, int y) {
         Vec world_pos = camera->window_to_world(x, y);
         if (clicking) {
-            if (selected && (drag_origin - world_pos).mag2() > 0.2)
-                dragging = selected;
-            if (dragging) {
-                dragging->Resident_set_pos(world_pos - drag_offset);
+            if (selected) {
+                if ((drag_origin - world_pos).mag2() > 0.2)
+                    dragging = true;
+                if (dragging) {
+                    selected->Resident_set_pos(world_pos - drag_offset);
+                }
             }
         }
         else {
-            Resident* new_hovering = NULL;
+             // Prefer residents with lower tops
+            float lowest_t = INF;
+            Resident* lowest_res = NULL;
             size_t unpositioned_residents = 0;
             for (auto& room : all_rooms()) {
                 if (room.observer_count) {
                     for (auto& res : room.residents) {
                         Vec pos = res.Resident_get_pos();
                         const Rect& boundary = res.Resident_boundary();
-                        if (!pos.is_defined()) {
-                            pos = room.boundary.rt() + Vec(0.5, -0.5);
+                        if (!pos.is_defined() || !boundary.is_defined()) {
+                            pos = room.boundary.lt() + Vec(0.5, -0.5);
                             pos.x += unpositioned_residents++;
                         }
                         if (boundary.covers(world_pos - pos)) {
-                            new_hovering = &res;
+                            if (boundary.t < lowest_t) {
+                                lowest_t = boundary.t;
+                                lowest_res = &res;
+                            }
                         }
                     }
                 }
             }
-            if (new_hovering) {
-                if (new_hovering != hovering) {
-                    auto realp = res_realp(new_hovering);
+             // Set status message about hovered object
+            if (lowest_res) {
+                if (lowest_res != hovering) {
+                    auto realp = res_realp(lowest_res);
                     auto path = hacc::address_to_path(realp);
                     std::ostringstream ss;
                     ss << realp.address << " " << hacc::path_to_string(path);
@@ -112,43 +125,22 @@ namespace shell {
             else {
                 status = "";
             }
-            hovering = new_hovering;
+            hovering = lowest_res;
         }
     }
+     // Clicking behavior
     bool Resident_Editor::Listener_button (int code, int action) {
         if (action == GLFW_PRESS) {
             Vec realpos = camera->window_to_world(window->cursor_x, window->cursor_y);
             dragging = NULL;
-            std::vector<std::pair<float, Resident*>> matches;
-             // Search for cursor overlap
-            for (auto& room : all_rooms()) {
-                if (room.observer_count) {
-                    for (auto& res : room.residents) {
-                        Vec pos = res.Resident_get_pos();
-                        if (!pos.is_defined()) continue;
-                        const Rect& boundary = res.Resident_boundary();
-                        if (boundary.covers(realpos - pos)) {
-                            matches.emplace_back(boundary.t, &res);
-                        }
-                    }
-                }
-            }
-             // Resident with lowest top gets priority
-            float lowest = INF;
-            Resident* picked = NULL;
-            for (auto& p : matches) {
-                if (p.first < lowest) {
-                    lowest = p.first;
-                    picked = p.second;
-                }
-            }
-            selected = picked;
-            if (!picked) return false;
-            Vec pos = picked->Resident_get_pos();
+             // Just upgrade hovering to selected
+            selected = hovering;
+            if (!selected) return false;
+            Vec pos = selected->Resident_get_pos();
             if (code == GLFW_MOUSE_BUTTON_LEFT) {
                 drag_origin = pos;
                 drag_offset = realpos - pos;
-                logger.log("Selected " + hacc::Reference(res_realp(picked)).show());
+                logger.log("Selected " + hacc::Reference(res_realp(selected)).show());
                 clicking = true;
             }
             else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
@@ -165,7 +157,7 @@ namespace shell {
         }
         else {  // GLFW_RELEASE
             if (code == GLFW_MOUSE_BUTTON_LEFT) {
-                dragging = NULL;
+                dragging = false;
                 clicking = false;
             }
             return true;
@@ -194,6 +186,10 @@ namespace shell {
     }
     void Resident_Editor::deactivate () {
         logger.log("Deactivating editor.");
+        hovering = NULL;
+        selected = NULL;
+        dragging = false;
+        clicking = false;
         Listener::deactivate();
         fc.deactivate();
         Drawn<Overlay>::disappear();

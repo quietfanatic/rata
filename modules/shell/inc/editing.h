@@ -12,16 +12,21 @@ namespace shell {
     using namespace util;
 
     struct Resident_Editor : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Dev>, core::Listener {
+         // Associated utilities
         geo::Free_Camera fc;
+        Menu<vis::Dev>* context_menu = NULL;  // Set on construction
         vis::Font* font = NULL;
+         // Selected items
         geo::Resident* hovering = NULL;
         geo::Resident* selected = NULL;
-        geo::Resident* dragging = NULL;
-        Menu<vis::Dev>* context_menu = NULL;
-        bool clicking;
+         // Cursor control
+        bool clicking = false;
+        bool dragging = false;
         Vec drag_origin;
         Vec drag_offset;
+         // Drawing
         std::string status;
+
         void activate ();
         void deactivate ();
         Resident_Editor ();
