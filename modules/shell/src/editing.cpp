@@ -124,7 +124,7 @@ namespace shell {
             if (code == GLFW_MOUSE_BUTTON_LEFT) {
                 drag_origin = pos;
                 drag_offset = realpos - pos;
-                logger.log("Dragging @%lx", (size_t)picked);
+                logger.log("Selected " + hacc::Reference(res_realp(picked)).show());
                 clicking = true;
             }
             else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
