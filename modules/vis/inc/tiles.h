@@ -14,6 +14,7 @@ namespace vis {
         size_t vao_size = 0;
          // Call this in your own finish
         void finish (uint32 width, uint32 height, const uint16* tiles);
+        ~Tiles ();
     };
 
     void tiles_init ();

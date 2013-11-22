@@ -47,6 +47,11 @@ namespace vis {
         glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, tx));
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         delete[] vdats;
+        printf("Uploaded %ld vertices\n", vao_size);
+    }
+    Tiles::~Tiles () {
+        glDeleteVertexArrays(1, &vao_id);
+        glDeleteBuffers(1, &vbo_id);
     }
 
     struct Tiles_Program : Cameraed_Program {
