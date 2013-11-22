@@ -37,17 +37,25 @@ namespace shell {
     template <class Layer>
     struct Menu : Menu_Base, vis::Drawn<Layer> {
         void Drawn_draw (Layer) override { draw(); }
-        void activate () { vis::Drawn<Layer>::appear(); core::Listener::activate(); }
-        void deactivate () { vis::Drawn<Layer>::disappear(); core::Listener::deactivate(); }
+        void activate () {
+            vis::Drawn<Layer>::appear();
+            core::Listener::activate();
+        }
+        void deactivate () {
+            vis::Drawn<Layer>::disappear();
+            core::Listener::deactivate();
+        }
         void Listener_cursor_pos (int x, int y) {
             hover(geo::camera->window_to_layer<Layer>(x, y));
         }
         bool Listener_button (int code, int action) {
             if (code == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-                return click(geo::camera->window_to_layer<Layer>(
+                bool res = click(geo::camera->window_to_layer<Layer>(
                     core::window->cursor_x,
                     core::window->cursor_y
                 ));
+                if (deactivate_on_click) deactivate();
+                return res;
             }
             else return false;
         }

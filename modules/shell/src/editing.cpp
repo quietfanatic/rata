@@ -93,7 +93,6 @@ namespace shell {
 
     bool Resident_Editor::Listener_button (int code, int action) {
         if (action == GLFW_PRESS) {
-            context_menu->deactivate();
             Vec realpos = camera->window_to_world(window->cursor_x, window->cursor_y);
             dragging = NULL;
             std::vector<std::pair<float, Resident*>> matches;
