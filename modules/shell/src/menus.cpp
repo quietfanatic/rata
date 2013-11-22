@@ -19,7 +19,7 @@ namespace shell {
         }
     }
     bool Menu_Base::click (Vec cursor_pos) {
-        if (Rect(0, 0, size.x, size.y).covers(cursor_pos + pos)) {
+        if (Rect(0, 0, size.x, size.y).covers(cursor_pos - pos)) {
             root->Menu_Item_click(cursor_pos - pos, size);
             if (deactivate_on_click) deactivate();
             return true;
