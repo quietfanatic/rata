@@ -199,6 +199,23 @@ namespace core {
     bool Listener::key_pressed (int code) { return glfwGetKey(code); }
     bool Listener::btn_pressed (int code) { return glfwGetMouseButton(code); }
 
+    void Listener::activate () {
+        if (active) deactivate();
+        active = true;
+        next = window->listener;
+        window->listener = this;
+    }
+    void Listener::deactivate () {
+        for (Listener** l = &window->listener; *l; l = &(*l)->next) {
+            if (*l == this) {
+                *l = next;
+                break;
+            }
+        }
+        next = NULL;
+        active = false;
+    }
+
     void quick_exit () {
         glfwTerminate();
         exit(0);

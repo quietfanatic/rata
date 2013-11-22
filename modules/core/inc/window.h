@@ -84,22 +84,8 @@ namespace core {
 
         bool active = false;
         Listener* next = NULL;
-        void deactivate () {
-            for (Listener** l = &window->listener; *l; l = &(*l)->next) {
-                if (*l == this) {
-                    *l = next;
-                    break;
-                }
-            }
-            next = NULL;
-            active = false;
-        }
-        void activate () {
-            if (active) deactivate();
-            active = true;
-            next = window->listener;
-            window->listener = this;
-        }
+        void activate ();
+        void deactivate ();
 
         bool can_poll_input ();
          // Only call these if the above is true.
