@@ -16,6 +16,12 @@ namespace vis {
     };
 
     void Tiles::finish (uint32 width, uint32 height, const uint16* tiles) {
+        if (vao_id) {
+            glDeleteVertexArrays(1, &vao_id);
+        }
+        if (vbo_id) {
+            glDeleteBuffers(1, &vbo_id);
+        }
         auto vdats = new Tile_Vertex [height * width][4];
         uint vdat_i = 0;
         for (uint y = 0; y < height; y++)
