@@ -193,8 +193,10 @@ namespace vis {
     }
 
     Layout::~Layout () {
-        glDeleteBuffers(1, &vbo_id);
-        glDeleteVertexArrays(1, &vao_id);
+        if (vao_id)
+            glDeleteVertexArrays(1, &vao_id);
+        if (vbo_id)
+            glDeleteBuffers(1, &vbo_id);
     }
 
     Frame* Layout::frame_named (std::string name) {

@@ -67,12 +67,9 @@ namespace vis {
         printf("Uploaded %ld vertices\n", vbo_size);
     }
     Tiles::~Tiles () {
-        if (vao_id) {
-            printf("Deleting vao in destructor\n");
+        if (vao_id)
             glDeleteVertexArrays(1, &vao_id);
-        }
         if (vbo_id)
-            printf("Deleting vbo in destructor\n");
             glDeleteBuffers(1, &vbo_id);
     }
 
