@@ -66,12 +66,13 @@ namespace ent {
     };
 
     struct Controllable {
+        Controllable** controller;
         virtual void Controllable_buttons (ButtonBits) { }
          // This changes the focus relative to its current position
         virtual void Controllable_move_focus (Vec diff) { }
          // This should return world coordinates, or NAN,NAN if no focus
         virtual Vec Controllable_get_focus () { return Vec(NAN, NAN); }
-        virtual ~Controllable () { }
+        virtual ~Controllable () { if (controller) *controller = NULL; }
     };
 
      // Between input and simulation, these run to do player interaction and AI
@@ -90,6 +91,12 @@ namespace ent {
     struct Player : vis::Drawn<vis::Overlay>, Mind, core::Listener {
         Mappings mappings;
         Controllable* character = NULL;
+        Controllable* get_character () { return character; }
+        void set_character (Controllable* c) {
+            if (character) character->controller = NULL;
+            character = c;
+            c->controller = &character;
+        }
         vis::Texture* cursor_tex = NULL;
         vis::Frame* cursor_frame = NULL;
 

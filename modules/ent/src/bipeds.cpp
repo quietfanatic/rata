@@ -166,6 +166,12 @@ namespace ent {
                 ceiling_low = true;
             }
         });
+         // Camera control
+         // TODO: This kinda belongs somewhere else maybe?
+         //  Well, it's gonna be replaced by a conspicuousity system anyway.
+        if (controller) {
+            geo::default_camera().pos = pos();
+        }
     }
 
     void Biped::animate () {

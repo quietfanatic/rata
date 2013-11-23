@@ -37,10 +37,6 @@ namespace ent {
             bit <<= 1;
         }
         character->Controllable_buttons(ButtonBits(buttons));
-         // Camera control
-         // TODO: This kinda belongs somewhere else maybe?
-         //  Well, it's gonna be replaced by a conspicuousity system anyway.
-        geo::default_camera().pos = dynamic_cast<geo::Resident*>(character)->Resident_get_pos();
     }
     void Player::Listener_trapped_motion (int x, int y) {
         Vec mot = geo::camera->window_motion_to_world(x, y);
