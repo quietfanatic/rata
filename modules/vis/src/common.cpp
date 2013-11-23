@@ -78,9 +78,10 @@ namespace vis {
     void render () {
         init();
         setup_rtt();
-         // For now, clear to 50% grey
+         // Start render to texture
         glBindFramebuffer(GL_FRAMEBUFFER, world_fb);
         glViewport(0, 0, rtt_camera_size.x/PX, rtt_camera_size.y/PX);
+         // For now, clear to 50% grey
         glClearColor(0.5, 0.5, 0.5, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
          // Map and sprite rendering uses depth and no blend
@@ -95,11 +96,10 @@ namespace vis {
             i.Drawn_draw(Map());
         for (auto& i : Sprites::items)
             i.Drawn_draw(Sprites());
+         // Now render from world fb to window fb
         glDisable(GL_DEPTH_TEST);
-         // Now convert from world fb to window fb
         world_program->use();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, window->width, window->height);
         glBindTexture(GL_TEXTURE_2D, world_tex);
         Vec pts [4];
         pts[0] = Vec(0, 0);
@@ -113,7 +113,7 @@ namespace vis {
         Program::unuse();
         for (auto& i : Overlay::items)
             i.Drawn_draw(Overlay());
-         // Turn off camera
+         // Turn off camera position
         global_camera_pos = Vec(10, 7.5);
         Program::unuse();
         for (auto& i : Hud::items)
@@ -130,6 +130,11 @@ namespace vis {
         global_camera_size = Vec(core::window->width, core::window->height)*PX;
         global_camera_pos = global_camera_size / 2;
         Program::unuse();
+         // Zoom the viewport
+        glPixelZoom(window->width*PX/rtt_camera_size.x, window->height*PX/rtt_camera_size.y);
+        glCopyPixels(0, 0, rtt_camera_size.x/PX, rtt_camera_size.y/PX, GL_COLOR);
+         // Draw dev layer
+        glViewport(0, 0, window->width, window->height);
         for (auto& i : Dev::items)
             i.Drawn_draw(Dev());
     }
