@@ -93,15 +93,10 @@ namespace vis {
 
     void draw_tiles (Tiles* tiles, Texture* tex, Vec pos) {
         prog->use();
-        printf("Drawing some tiles\n");
         glUniform2f(prog->model_pos, pos.x, pos.y);
         glUniform2f(prog->tileset_size, tex->size.x, tex->size.y);
-        core::diagnose_opengl("after draw_tiles/setting uniforms");
         glBindTexture(GL_TEXTURE_2D, tex->id);
-        core::diagnose_opengl("after draw_tiles/bind texture");
         glBindVertexArray(tiles->vao_id);
-        printf("glBindVertexArray(%d)\n", tiles->vao_id);
-        core::diagnose_opengl("after draw_tiles/bind vertex array");
         glDrawArrays(GL_QUADS, 0, tiles->vbo_size);
         core::diagnose_opengl("after draw_tiles");
     }
