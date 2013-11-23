@@ -91,11 +91,13 @@ extern void (* glUniform4f )(GLint, GLfloat, GLfloat, GLfloat, GLfloat);
 
 extern void (* glGenFramebuffers )(GLsizei, GLuint*);
 extern void (* glBindFramebuffer )(GLenum, GLuint);
+extern void (* glDeleteFramebuffers )(GLsizei, GLuint*);
 extern void (* glGenRenderbuffers )(GLsizei, GLuint*);
 extern void (* glBindRenderbuffer )(GLenum, GLuint);
+extern void (* glDeleteRenderbuffers )(GLsizei, GLuint*);
 extern void (* glRenderbufferStorage )(GLenum, GLenum, GLsizei, GLsizei);
 extern void (* glFramebufferRenderbuffer )(GLenum, GLenum, GLenum, GLuint);
-extern void (* glFramebufferTexture )(GLenum, GLenum, GLuint, GLint);
+extern void (* glFramebufferTexture2D )(GLenum, GLenum, GLenum, GLuint, GLint);
 extern void (* glDrawBuffers )(GLsizei, const GLenum*);
 extern GLenum (* glCheckFramebufferStatus )(GLenum);
 

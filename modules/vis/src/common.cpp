@@ -20,29 +20,34 @@ namespace vis {
     GLuint world_fb = 0;
     GLuint world_tex = 0;
     GLuint world_depth_rb = 0;
+    Vec rtt_camera_size = Vec(NAN, NAN);
 
-    void init () {
-        if (!initted) {
-            color_init();
-            images_init();
-            text_init();
-            tiles_init();
-            initted = true;
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-             // Set up the requirements for a render-to-texture step
+     // Set up the requirements for a render-to-texture step
+    void setup_rtt () {
+        if (rtt_camera_size != camera_size) {
+            rtt_camera_size = camera_size;
+            diagnose_opengl("before setting up render-to-texture capability");
+            if (world_fb) glDeleteFramebuffers(1, &world_fb);
+            if (world_tex) glDeleteTextures(1, &world_tex);
+            if (world_depth_rb) glDeleteRenderbuffers(1, &world_depth_rb);
             glGenFramebuffers(1, &world_fb);
             glBindFramebuffer(GL_FRAMEBUFFER, world_fb);
-            glGenTextures(2, &world_tex);
+            glGenTextures(1, &world_tex);
             glBindTexture(GL_TEXTURE_2D, world_tex);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 320, 240, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)0);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2*rtt_camera_size.x/PX, 2*rtt_camera_size.y/PX, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)0);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            diagnose_opengl("after setting up rtt tex");
             glGenRenderbuffers(1, &world_depth_rb);
             glBindRenderbuffer(GL_RENDERBUFFER, world_depth_rb);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 320, 240);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 2*rtt_camera_size.x/PX, 2*rtt_camera_size.y/PX);
+            diagnose_opengl("after setting up rtt rb");
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, world_depth_rb);
+            diagnose_opengl("after glFramebufferRenderbuffer");
              // Do we have to unbind world_tex first?
-            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, world_tex, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, world_tex, 0);
+            diagnose_opengl("after glFramebufferTexture");
              // Do we have to do this here or when rendering?
             auto ca = GL_COLOR_ATTACHMENT0;
             glDrawBuffers(1, (const GLenum*)&ca);
@@ -52,8 +57,21 @@ namespace vis {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
     }
+
+    void init () {
+        if (!initted) {
+            color_init();
+            images_init();
+            text_init();
+            tiles_init();
+            initted = true;
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        }
+    }
+
     void render () {
         init();
+        setup_rtt();
          // For now, clear to 50% grey
         glClearColor(0.5, 0.5, 0.5, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
