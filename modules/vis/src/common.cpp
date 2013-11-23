@@ -6,13 +6,16 @@
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/opengl.h"
 #include "../../core/inc/window.h"
+#include "../../util/inc/debug.h"
 
 namespace vis {
 
+    Logger logger ("vis");
+
     using namespace core;
 
-    Vec camera_pos = Vec(10, 7.5);
-    Vec camera_size = Vec(10, 7.5);
+    Vec camera_pos = Vec(20, 15);
+    Vec camera_size = Vec(20, 15);
     Vec global_camera_pos = camera_pos;
     Vec global_camera_size = camera_size;
 
@@ -28,6 +31,7 @@ namespace vis {
     void setup_rtt () {
         if (rtt_camera_size != camera_size) {
             rtt_camera_size = camera_size;
+            logger.log("setting up world framebuffer: %dx%d", (int)(rtt_camera_size.x/PX), (int)(rtt_camera_size.y/PX));
             if (world_fb) glDeleteFramebuffers(1, &world_fb);
             if (world_tex) glDeleteTextures(1, &world_tex);
             if (world_depth_rb) glDeleteRenderbuffers(1, &world_depth_rb);
@@ -35,13 +39,13 @@ namespace vis {
             glBindFramebuffer(GL_FRAMEBUFFER, world_fb);
             glGenTextures(1, &world_tex);
             glBindTexture(GL_TEXTURE_2D, world_tex);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2*rtt_camera_size.x/PX, 2*rtt_camera_size.y/PX, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)0);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rtt_camera_size.x/PX, rtt_camera_size.y/PX, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)0);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glBindTexture(GL_TEXTURE_2D, 0);
             glGenRenderbuffers(1, &world_depth_rb);
             glBindRenderbuffer(GL_RENDERBUFFER, world_depth_rb);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 2*rtt_camera_size.x/PX, 2*rtt_camera_size.y/PX);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, rtt_camera_size.x/PX, rtt_camera_size.y/PX);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, world_depth_rb);
              // Do we have to unbind world_tex first?
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, world_tex, 0);
@@ -76,6 +80,7 @@ namespace vis {
         setup_rtt();
          // For now, clear to 50% grey
         glBindFramebuffer(GL_FRAMEBUFFER, world_fb);
+        glViewport(0, 0, rtt_camera_size.x/PX, rtt_camera_size.y/PX);
         glClearColor(0.5, 0.5, 0.5, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
          // Map and sprite rendering uses depth and no blend
@@ -94,12 +99,13 @@ namespace vis {
          // Now convert from world fb to window fb
         world_program->use();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, window->width, window->height);
         glBindTexture(GL_TEXTURE_2D, world_tex);
         Vec pts [4];
-        pts[0] = Vec(-1, -1);
-        pts[1] = Vec(1, -1);
+        pts[0] = Vec(0, 0);
+        pts[1] = Vec(1, 0);
         pts[2] = Vec(1, 1);
-        pts[3] = Vec(-1, 1);
+        pts[3] = Vec(0, 1);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vec), pts);
         glDrawArrays(GL_QUADS, 0, 4);
          // Overlay rendering uses blend and no depth
