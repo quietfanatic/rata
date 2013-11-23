@@ -89,7 +89,7 @@ namespace vis {
 
     void draw_tiles (Tiles* tiles, Texture* tex, Vec pos) {
         prog->use();
-        glUniform2f(prog->model_pos, pos.x, pos.y);
+        glUniform2f(prog->model_pos, round(pos.x/PX)*PX, round(pos.y/PX)*PX);
         glUniform2f(prog->tileset_size, tex->size.x, tex->size.y);
         glBindTexture(GL_TEXTURE_2D, tex->id);
         glBindVertexArray(tiles->vao_id);

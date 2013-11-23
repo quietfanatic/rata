@@ -21,7 +21,7 @@ namespace vis {
     }
     void color_offset (Vec off) {
         prog->use();
-        glUniform2f(prog->model_pos, off.x, off.y);
+        glUniform2f(prog->model_pos, round(off.x/PX)*PX, round(off.y/PX)*PX);
     }
     void draw_color (uint32 color) {
         prog->use();

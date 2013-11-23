@@ -81,7 +81,7 @@ namespace vis {
         }
         Vec size = Vec(maxx*PX, maxy*PX);
         Vec ul = Vec(pos.x - (1 - align.x) / 2 * size.x, pos.y + (1 - align.y) / 2 * size.y);
-        glUniform2f(prog->model_pos, ul.x, ul.y);
+        glUniform2f(prog->model_pos, round(ul.x/PX)*PX, round(ul.y/PX)*PX);
         glUniform4f(prog->color,
             ((color >> 24) & 255) / 255.0,
             ((color >> 16) & 255) / 255.0,

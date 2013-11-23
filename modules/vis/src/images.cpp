@@ -229,7 +229,7 @@ namespace vis {
 
     void draw_frame (Frame* frame, Texture* texture, Vec pos, Vec scale, float z) {
         prog->use();
-        glUniform3f(prog->model_pos, pos.x, pos.y, z);
+        glUniform3f(prog->model_pos, round(pos.x/PX)*PX, round(pos.y/PX)*PX, z);
         glUniform2f(prog->model_scale, scale.x, scale.y);
         glBindTexture(GL_TEXTURE_2D, texture->id);
         glBindVertexArray(frame->parent->vao_id);

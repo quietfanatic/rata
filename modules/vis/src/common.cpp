@@ -89,7 +89,8 @@ namespace vis {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
          // Use camera
-        global_camera_pos = camera_pos;
+        global_camera_pos.x = round(camera_pos.x/PX) * PX;
+        global_camera_pos.y = round(camera_pos.y/PX) * PX;
         global_camera_size = camera_size;
         Program::unuse();
         for (auto& i : Map::items)
