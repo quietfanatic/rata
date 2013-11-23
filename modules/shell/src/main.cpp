@@ -61,6 +61,9 @@ int main (int argc, char** argv) {
 
     game = File(main_file).data().attr("game");
     vis::default_font = File("shell/res/monospace.hacc").data().attr("font");
+    std::vector<vis::Palette_Item>* palette = File("world/res/palette.hacc").data().attr("palette");
+    vis::set_palette(*palette);
+
     window->step = step;
     window->render = vis::render;
     window->before_next_frame([&](){

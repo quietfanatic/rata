@@ -1,6 +1,7 @@
 #ifndef HAVE_VIS_COMMON_H
 #define HAVE_VIS_COMMON_H
 
+#include "images.h"
 #include "../../util/inc/geometry.h"
 #include "../../util/inc/organization.h"
 #include "../../core/inc/opengl.h"
@@ -21,6 +22,16 @@ namespace vis {
 
      // Do it.
     void render ();
+
+    struct Palette_Item {
+        uint32 ambient;
+        uint32 diffuse;
+        uint32 radiant;
+    };
+
+     // Maximum of 256 palette items.
+    void set_palette (const std::vector<Palette_Item>&);
+    void set_palette_index (uint8, Palette_Item);
 
     template <class C>
     struct Drawn : Link<Drawn<C>> {
