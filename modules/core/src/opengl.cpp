@@ -1,8 +1,14 @@
+#ifdef CORE_OPENGL_VERY_DEBUG
+#include <sstream>
+#endif
 #include "../inc/opengl.h"
 #include "../inc/window.h"
 #include "../../hacc/inc/everything.h"
+#include "../../util/inc/debug.h"
 
 namespace core {
+
+    Logger logger ("opengl");
 
     GLenum diagnose_opengl (std::string when) {
         GLenum err = glGetError();
@@ -174,6 +180,22 @@ HACCABLE(Program) {
     finish([](Program& p){ p.link(); });
 }
 
+#ifdef CORE_OPENGL_VERY_DEBUG
+static std::string _concat () { return ""; }
+template <class H>
+static std::string _concat (H h) {
+    std::ostringstream ss;
+    ss << h;
+    return ss.str();
+}
+template <class H, class... T>
+static std::string _concat (H h, T... t) {
+    std::ostringstream ss;
+    ss << h << ", " << _concat(t...);
+    return ss.str();
+}
+#endif
+
 template <class C> using P = C*;
  // This is a lazy-loaded thunk that replaces itself with an OpenGL function
 template <class Ret, class... Args>
@@ -183,12 +205,20 @@ struct glthunk1 {
         if (!window)
             throw hacc::X::Error("Cannot call OpenGL procedure before window is open: " + std::string(*name));
         if (!window->is_open) window->open();
+#ifdef CORE_OPENGL_VERY_DEBUG
+        static void* func = glfwGetProcAddress(*name);
+        if (!func)
+            throw hacc::X::Error("OpenGL procedure not found: " + std::string(*name));
+        logger.log(std::string(*name) + "(" + _concat(args...) + ")");
+        return (*(decltype(fp))&func)(args...);
+#else
         void* func = glfwGetProcAddress(*name);
         if (!func)
             throw hacc::X::Error("OpenGL procedure not found: " + std::string(*name));
         *(void**)fp = func;
          // Can't use std::forward, but these are all C types anyway
         return (**fp)(args...);
+#endif
     }
 };
 #define OPENGL_THUNK(name, Ret, ...) \
