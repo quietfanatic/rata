@@ -89,6 +89,17 @@ extern void (* glUniform2f )(GLint, GLfloat, GLfloat);
 extern void (* glUniform3f )(GLint, GLfloat, GLfloat, GLfloat);
 extern void (* glUniform4f )(GLint, GLfloat, GLfloat, GLfloat, GLfloat);
 
+extern void (* glGenFramebuffers )(GLsizei, GLuint*);
+extern void (* glBindFramebuffer )(GLenum, GLuint);
+extern void (* glGenRenderbuffers )(GLsizei, GLuint*);
+extern void (* glBindRenderbuffer )(GLenum, GLuint);
+extern void (* glRenderbufferStorage )(GLenum, GLenum, GLsizei, GLsizei);
+extern void (* glFramebufferRenderbuffer )(GLenum, GLenum, GLenum, GLuint);
+extern void (* glFramebufferTexture )(GLenum, GLenum, GLuint, GLint);
+extern void (* glDrawBuffers )(GLsizei, const GLenum*);
+extern GLenum (* glCheckFramebufferStatus )(GLenum);
+
+
 #ifdef CORE_OPENGL_VERY_DEBUG
 namespace core {
     extern Logger opengl_logger;  // TODO: name collisions may happen
@@ -102,8 +113,8 @@ namespace core {
     template <class H, class... T>
     static std::string _concat (H h, T... t) {
         std::ostringstream ss;
-        ss << h << ", " << _concat(t...);
-        return ss.str();
+        ss << h;
+        return ss.str() + ", " + _concat(t...);
     }
 }
 

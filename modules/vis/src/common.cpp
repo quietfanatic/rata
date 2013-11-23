@@ -17,6 +17,9 @@ namespace vis {
     Vec global_camera_size = camera_size;
 
     bool initted = false;
+    GLuint world_fb = 0;
+    GLuint world_tex = 0;
+    GLuint world_depth_rb = 0;
 
     void init () {
         if (!initted) {
@@ -26,6 +29,27 @@ namespace vis {
             tiles_init();
             initted = true;
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+             // Set up the requirements for a render-to-texture step
+            glGenFramebuffers(1, &world_fb);
+            glBindFramebuffer(GL_FRAMEBUFFER, world_fb);
+            glGenTextures(2, &world_tex);
+            glBindTexture(GL_TEXTURE_2D, world_tex);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 320, 240, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glGenRenderbuffers(1, &world_depth_rb);
+            glBindRenderbuffer(GL_RENDERBUFFER, world_depth_rb);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 320, 240);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, world_depth_rb);
+             // Do we have to unbind world_tex first?
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, world_tex, 0);
+             // Do we have to do this here or when rendering?
+            auto ca = GL_COLOR_ATTACHMENT0;
+            glDrawBuffers(1, (const GLenum*)&ca);
+            diagnose_opengl("after setting up render-to-texture capability");
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+                throw hacc::X::Logic_Error("Framebuffer creationg failed!\n");
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
     }
     void render () {
