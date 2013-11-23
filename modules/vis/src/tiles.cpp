@@ -23,11 +23,9 @@ namespace vis {
             );
         }
         if (vao_id) {
-            printf("Deleting vao in finish\n");
             glDeleteVertexArrays(1, &vao_id);
         }
         if (vbo_id) {
-            printf("Deleting vbo in finish\n");
             glDeleteBuffers(1, &vbo_id);
         }
         auto vdats = new Tile_Vertex [height * width][4];
@@ -60,11 +58,9 @@ namespace vis {
         glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, px));
         glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, tx));
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
         diagnose_opengl("after Tiles::finish");
         delete[] vdats;
-        printf("vao_id is %d\n", vao_id);
-        printf("vbo_id is %d\n", vbo_id);
-        printf("Uploaded %ld vertices\n", vbo_size);
     }
     Tiles::~Tiles () {
         if (vao_id)
@@ -146,6 +142,7 @@ hacc::Special_Filetype _tiles_ft ("tiles",
         for (uint i = 0; i < r.tiles.size(); i++) {
             r.tiles[i] = (s[8 + i*2] << 8) | (s[8 + i*2 + 1]);
         }
+         // TODO: find out why we can't call finish here
         r.finish();
         return hacc::Dynamic(std::move(r));
     },

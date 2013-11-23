@@ -37,6 +37,7 @@ namespace vis {
             throw std::logic_error("OpenGL error");
         }
         if (newid) id = newid;
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
     void Texture::unload () {
         if (id) {
@@ -188,6 +189,7 @@ namespace vis {
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbp));
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbt));
         glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
         core::diagnose_opengl("after creating a layout vao");
         delete[] data;
     }

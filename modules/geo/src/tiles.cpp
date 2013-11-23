@@ -116,6 +116,8 @@ namespace geo {
     void Tilemap::finish () {
         set_def(tilemap_bdf());
         physicalize();
+         // TODO: find out why we can't do this earlier
+        tiles->finish();
     }
 
     void Tilemap::physicalize () {
