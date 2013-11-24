@@ -1,0 +1,6 @@
+{"hacc::Document":{
+    "palette":{"std::vector<vis::Palette_Item>":[
+        [0x3f3f3fff, 0x3f3f3fff, 0]  // 0. Just grey for testing
+        [0, 0, 0x7f7f7fff]  // 1. Default background color
+    ]}
+}}

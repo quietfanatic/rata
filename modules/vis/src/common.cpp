@@ -43,7 +43,6 @@ namespace vis {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         }
-        glBindTexture(GL_TEXTURE_2D, palette_tex);
          // The palette texture is internally laid out vertically.
         uint8 pdat [256 * 4 * 3];
         size_t j = 0;
@@ -61,9 +60,11 @@ namespace vis {
             pdat[j++] = palette[i].radiant >> 8;
             pdat[j++] = palette[i].radiant;
         }
-        while (j < 256 * 4 * 2)
-            pdat[j++] = 0;
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 256, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, pdat);
+        while (j < 256 * 4 * 3)
+            pdat[j++] = 255;
+        glBindTexture(GL_TEXTURE_2D, palette_tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 3, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, pdat);
+        diagnose_opengl("after setting palette");
     }
     void set_palette_index (uint8 i, Palette_Item item) {
         uint8 pdat[12];
@@ -138,11 +139,14 @@ namespace vis {
         if (!palette_tex) {
             throw hacc::X::Logic_Error("No palette texture was set!\n");
         }
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, palette_tex);
+        glActiveTexture(GL_TEXTURE0);
          // Start render to texture
         glBindFramebuffer(GL_FRAMEBUFFER, world_fb);
         glViewport(0, 0, rtt_camera_size.x/PX, rtt_camera_size.y/PX);
-         // For now, clear to 50% grey
-        glClearColor(0.5, 0.5, 0.5, 1);
+         // For now, clear to default background material
+        glClearColor(1 / 255.0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
          // Map and sprite rendering uses depth and no blend
         glDisable(GL_BLEND);
@@ -192,9 +196,11 @@ namespace vis {
         global_camera_pos = global_camera_size / 2;
         Program::unuse();
          // Zoom the viewport
+        glDisable(GL_BLEND);
         glPixelZoom(window->width*PX/rtt_camera_size.x, window->height*PX/rtt_camera_size.y);
         glCopyPixels(0, 0, rtt_camera_size.x/PX, rtt_camera_size.y/PX, GL_COLOR);
          // Draw dev layer
+        glEnable(GL_BLEND);
         glViewport(0, 0, window->width, window->height);
         for (auto& i : Dev::items)
             i.Drawn_draw(Dev());

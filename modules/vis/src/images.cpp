@@ -38,6 +38,10 @@ namespace vis {
         }
         if (newid) id = newid;
         glBindTexture(GL_TEXTURE_2D, 0);
+         // Reset these to avoid confusing other functions
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+        glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
     }
     void Texture::unload () {
         if (id) {
