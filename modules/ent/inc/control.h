@@ -66,7 +66,7 @@ namespace ent {
     };
 
     struct Controllable {
-        Controllable** controller;
+        Controllable** controller = NULL;
         virtual void Controllable_buttons (ButtonBits) { }
          // This changes the focus relative to its current position
         virtual void Controllable_move_focus (Vec diff) { }
@@ -91,7 +91,7 @@ namespace ent {
     struct Player : vis::Drawn<vis::Overlay>, Mind, core::Listener {
         Mappings mappings;
         Controllable* character = NULL;
-        Controllable* get_character () { return character; }
+        Controllable* get_character () const { return character; }
         void set_character (Controllable* c) {
             if (character) character->controller = NULL;
             character = c;

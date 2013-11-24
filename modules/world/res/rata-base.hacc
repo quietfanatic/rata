@@ -7,6 +7,9 @@
             {name:arm     offset:[  0  95] size:[100 16]}
             {name:forearm offset:[  0 112] size:[100 16]}
         ]
+        palettes:[
+            { offset:[102 85] length:8 vertical:true mask:0x00ffffff }
+        ]
     }}
     skin:{"vis::Skin":{
         apps: [

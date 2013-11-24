@@ -10,6 +10,10 @@
         [96 [open_console]]  // `
         [80 [pause]]  // P
         [48 [re_toggle]]  // 0
+        [91 [global_lighting -0.1 0 true]]  // [
+        [93 [global_lighting +0.1 0 true]]  // ]
+        [59 [global_lighting 0 -0.1 true]]  // ;
+        [39 [global_lighting 0 +0.1 true]]  // '
     ]}
     console:{"shell::Console":{ }}
     resed:{"shell::Resident_Editor":{ }}

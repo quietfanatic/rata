@@ -1,5 +1,5 @@
 {"hacc::Document":{
-    prog:{"core::Program":{
+    prog:{"vis::World_Program":{
         shaders:[$.vert $.frag]
         uses_vaos:false
         attributes:[vert_pos]
@@ -29,8 +29,8 @@
             uniform sampler2D palette;
             varying vec2 tex_coords;
 
-            const float ambient_light = 0.5;
-            const float diffuse_light = 0.5;
+            uniform vec4 ambient_light;
+            uniform vec4 diffuse_light;
 
             void main () {
                 vec4 atom = texture2D(tex, tex_coords);

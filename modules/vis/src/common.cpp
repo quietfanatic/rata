@@ -6,6 +6,7 @@
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/opengl.h"
 #include "../../core/inc/window.h"
+#include "../../core/inc/commands.h"
 #include "../../util/inc/debug.h"
 
 namespace vis {
@@ -25,7 +26,23 @@ namespace vis {
     GLuint world_depth_rb = 0;
     Vec rtt_camera_size = Vec(NAN, NAN);
 
-    core::Program* world_program = NULL;
+    float ambient_light = 0.5;
+    float diffuse_light = 0.5;
+
+    struct World_Program : Program {
+        GLint ambient;
+        GLint diffuse;
+        void finish () {
+            Program::link();
+            use();
+            glUniform1i(require_uniform("tex"), 0);
+            glUniform1i(require_uniform("palette"), 1);
+            ambient = require_uniform("ambient_light");
+            diffuse = require_uniform("diffuse_light");
+        }
+    };
+
+    World_Program* world_program = NULL;
 
     GLuint palette_tex = 0;
 
@@ -60,8 +77,20 @@ namespace vis {
             pdat[j++] = palette[i].radiant >> 8;
             pdat[j++] = palette[i].radiant;
         }
-        while (j < 256 * 4 * 3)
-            pdat[j++] = 255;
+        for (size_t i = palette.size(); i < 256; i++) {
+            pdat[j++] = 0x00;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0xff;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0xff;
+        }
         glBindTexture(GL_TEXTURE_2D, palette_tex);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 3, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, pdat);
         diagnose_opengl("after setting palette");
@@ -124,12 +153,8 @@ namespace vis {
             tiles_init();
             world_program = hacc::File("vis/res/world.prog").data().attr("prog");
             hacc::manage(&world_program);
-            world_program->use();
-//            glUniform1i(world_program->require_uniform("tex"), 0);
-            glUniform1i(world_program->require_uniform("palette"), 1);
             diagnose_opengl("after loading world.prog");
             initted = true;
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
     }
 
@@ -164,6 +189,9 @@ namespace vis {
          // Now render from world fb to window fb
         glDisable(GL_DEPTH_TEST);
         world_program->use();
+        glUniform4f(world_program->ambient, ambient_light, ambient_light, ambient_light, ambient_light);
+        glUniform4f(world_program->diffuse, diffuse_light, diffuse_light, diffuse_light, diffuse_light);
+        diagnose_opengl("after setting light");
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, world_tex);
         Vec pts [4];
@@ -175,6 +203,7 @@ namespace vis {
         glDrawArrays(GL_QUADS, 0, 4);
          // Overlay rendering uses blend and no depth
         glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         Program::unuse();
         for (auto& i : Overlay::items)
             i.Drawn_draw(Overlay());
@@ -227,3 +256,25 @@ HACCABLE(Palette_Item) {
     elem(member(&Palette_Item::radiant));
 }
 HCB_INSTANCE(std::vector<Palette_Item>);
+
+HACCABLE(World_Program) {
+    name("vis::World_Program");
+    delegate(base<Program>());
+    finish([](World_Program& v){ v.finish(); });
+}
+
+static void _global_lighting (float amb, float diff, bool relative) {
+    if (relative) {
+        ambient_light += amb;
+        diffuse_light += diff;
+    }
+    else {
+        ambient_light = amb;
+        diffuse_light = diff;
+    }
+}
+core::New_Command _global_lighting_cmd (
+    "global_lighting", "Set or adjust the lighting; <1> ambient, <2> diffuse, <3> relative",
+    2, _global_lighting
+);
+
