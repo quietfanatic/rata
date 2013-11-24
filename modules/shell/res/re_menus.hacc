@@ -1,0 +1,32 @@
+{"hacc::Document":{
+    res_menu:{"shell::Menu<vis::Dev>":{
+        deactivate_on_click:true
+        root:{"shell::VBox":{
+            contents:[
+                {"shell::Text_Button":{
+                    text:"text edit"
+                    Button:{ on_click:[re_edit] }
+                }}
+                {"shell::Text_Button":{
+                    text:"duplicate"
+                    Button:{ on_click:[re_duplicate] }
+                }}
+                {"shell::Text_Button":{
+                    text:"delete"
+                    Button:{ on_click:[re_delete] }
+                }}
+            ]
+        }}
+    }}
+    room_menu:{"shell::Menu<vis::Dev>":{
+        deactivate_on_click:true
+        root:{"shell::VBox":{
+            contents:[
+                {"shell::Text_Button":{
+                    text:"reload room"
+                    Button:{ on_click:[re_reload_room] }
+                }}
+            ]
+        }}
+    }}
+}}
