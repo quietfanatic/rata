@@ -26,8 +26,8 @@ namespace vis {
     GLuint world_depth_rb = 0;
     Vec rtt_camera_size = Vec(NAN, NAN);
 
-    float ambient_light = 0.5;
-    float diffuse_light = 0.5;
+    float ambient_light = 1;
+    float diffuse_light = 1;
 
     struct World_Program : Program {
         GLint ambient;

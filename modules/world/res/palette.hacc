@@ -1,11 +1,11 @@
 {"hacc::Document":{
     "palette":{"std::vector<vis::Palette_Item>":[
-        [0x3f3f3fff 0x7f7f7fff 0]  // 0. Just grey for testing
-        [0 0 0x7f7f7fff]  // 1. Default background color
-        [0xd9c2a9ff 0xb6a491ff 0]  // 2. Light skin
-        [0x5f5f5fff 0x1f1f1fff 0]  // 3. Dark grey hair
-        [0 0 0x7b0a25ff]  // 4. Purple eyes, pupil
-        [0 0 0x802c40ff]  // 5. Purple eyes, iris
-        [0xffffffff 0x7f7f7fff 0]  // 6. White fabric
+        [0x3f3f3fff 0x3f3f3fff 0x00000000]  // 0. Just grey for testing
+        [0x7f7f7fff 0x00000000 0x00000000]  // 1. Default background color
+        [0x8a7d6eff 0x5a5146ff 0x00000000]  // 2. Light skin
+        [0x3f3f3fff 0x1f1f1fff 0x00000000]  // 3. Dark grey hair
+        [0x00000000 0x00000000 0x7b0a25ff]  // 4. Purple eyes, pupil
+        [0x00000000 0x00000000 0x802c40ff]  // 5. Purple eyes, iris
+        [0xcfcfcfff 0x3f3f3fff 0x00000000]  // 6. White fabric
     ]}
 }}
