@@ -1,0 +1,22 @@
+phys - integration with Box2D and related mixins
+
+In order to modularly yet efficiently implement interactions between objects,
+there is a collision rule system in place.  For example, take the "ground"
+collision rule.  This is specified in ground.cpp as
+
+    struct Ground_Rule : Collision_Rule {
+        std::string name () const { return "ground"; }
+        void Collision_Rule_presolve (b2Contact*, b2Fixture* grounded, b2Fixture* ground) override {
+            ... // called every frame during collision between a "grounded" object and a "ground" object
+            ... // allows one object to stand and walk on another
+        }
+        void Collision_Rule_end (b2Contact*, b2Fixture* grounded, b2Fixture* ground) override {
+            ... // called when the collision ends
+        }
+    } ground_rule;  // Make sure to actually instantiate this class.
+
+When this struct is declared and instantiated, magic happens to set up this
+rule.  When providing the phys::Fixdef for a fixture of an object, set the
+attribute coll_a to [ground] to allow it to stand on ground, and set the
+attribute coll_b to [ground] to make it ground that can be stood on.
+
