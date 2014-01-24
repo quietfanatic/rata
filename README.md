@@ -35,7 +35,7 @@ For very verbose OpenGL API tracing, compile with
 
     $ ./make.pl --compiler-opts=-DCORE_OPENGL_VERY_DEBUG
 
-### Windows?
+#### Windows?
 
 Windows support is not currently implemented, but is planned for the future.
 
@@ -60,5 +60,18 @@ to low-level.
 For more in-depth documentation on one of these modules, see the README in
 that module's directory, if it exists.
 
+#### TODO
 
+ - Convert graphics to material-lighting format
+ - Implement some AI
+    - With another b2World for imaginary scenarios, or something simpler?
+ - Finish level editor
+ - Camera control (bring constraint satisfaction system from master branch)
+ - Items and inventory
+ - Add area-lighting and model-internal shadows to lighting shader
+ - Sound and music, probably with OpenAL
+ - Draw a global map mockup
+ - Content!  Levels!  Enemies!  Actors!  Puzzles!
+ - Implement text layout engine (for speech bubbles and maybe inventory)
+ - Add Windows support
 
