@@ -1,12 +1,12 @@
 What is this?
-=============
+-------------
 
 This is a 2-dimensional sidescrolling action-adventure video game.  It uses
 low-resolution pixel-art graphics, but with an unorthodox material-lighting
 model.
 
 Compiling (on Linux)
-====================
+--------------------
 There are a few dependencies for compiling this project.
  - OpenGL libraries (libgl1-mesa-dev on my system)
  - GLFW (libglfw-dev in debian-like systems)
@@ -30,11 +30,11 @@ For very verbose OpenGL API tracing, compile with
     $ ./make.pl --compiler-opts=-DCORE_OPENGL_VERY_DEBUG
 
 Windows?
-========
+--------
 Windows support is not currently implemented, but is planned for the future.
 
 Internal documentation
-======================
+----------------------
 
 This codebase is written in C++11, with OpenGL for graphics, and a JSON-like
 data language called HACC for runtime data management.
