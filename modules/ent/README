@@ -1,0 +1,9 @@
+ent - game actors, player controls, AI
+
+There isn't much here yet.  The most important thing to know, however, is that
+there are controlling objects and controlled objects, which are separate.  The
+class for a human or robot does not read keyboard input or have any
+intelligence; instead, it just recieves commands from another class, which can
+represent the player or an AI.  In other words, this module implements
+Cartesian dualism.  This is so that player and AI control can be switched
+between entities at runtime.  See control.h for details.
