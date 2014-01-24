@@ -11,21 +11,28 @@ There are a few dependencies for compiling this project.
  - GLFW (libglfw-dev in debian-like systems)
  - SOIL (libsoil-dev in debian-like systems)
  - Box2D SVN r252
-    - $ cd lib
-    - $ svn checkout http://box2d.googlecode.com/svn/trunk/ box2d-read-only -r 252
+    - <code>$ cd lib</code>
+    - <code>$ svn checkout http://box2d.googlecode.com/svn/trunk/ box2d-read-only -r 252</code>
     - Then follow that project's installation instructions.  Copy libBox2D.a
        into lib and make sure the Box2D headers are in lib/Box2D (such that the
        file lib/Box2D/Box2D/Box2D.h exists).
  - Perl >= 5.8 (for the build script)
 
 Once all dependencies have been satisfied, you can build the main executable with
+
     $ ./make.pl
+
 for debugging or
+
     $ ./make.pl --build=release
+
 for an optimized release.  Then run the executable with
+
     $ ./rata
 
+
 For very verbose OpenGL API tracing, compile with
+
     $ ./make.pl --compiler-opts=-DCORE_OPENGL_VERY_DEBUG
 
 ### Windows?
