@@ -23,15 +23,20 @@ namespace vis {
      // Do it.
     void render ();
 
-    struct Palette_Item {
+    struct Material {
         uint32 ambient;
         uint32 diffuse;
         uint32 radiant;
     };
 
-     // Maximum of 256 palette items.
-    void set_palette (const std::vector<Palette_Item>&);
-    void set_palette_index (uint8, Palette_Item);
+    struct Materials {
+        std::vector<Material> items;
+        GLuint tex = 0;
+        void update ();
+        ~Materials ();
+    };
+
+    void set_materials (Materials*);
 
     template <class C>
     struct Drawn : Link<Drawn<C>> {

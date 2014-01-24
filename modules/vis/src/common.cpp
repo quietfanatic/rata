@@ -36,25 +36,22 @@ namespace vis {
             Program::link();
             use();
             glUniform1i(require_uniform("tex"), 0);
-            glUniform1i(require_uniform("palette"), 1);
+            glUniform1i(require_uniform("materials"), 1);
             ambient = require_uniform("ambient_light");
             diffuse = require_uniform("diffuse_light");
         }
     };
-
     World_Program* world_program = NULL;
 
-    GLuint palette_tex = 0;
-
-    void set_palette (const std::vector<Palette_Item>& palette) {
-        if (palette.size() > 256) {
+    void Materials::update () {
+        if (items.size() > 256) {
             throw hacc::X::Logic_Error(
-                "Provided palette array is too large: " + std::to_string(palette.size()) + " > 256"
+                "Material palette is too large: " + std::to_string(items.size()) + " > 256"
             );
         }
-        if (!palette_tex) {
-            glGenTextures(1, &palette_tex);
-            glBindTexture(GL_TEXTURE_2D, palette_tex);
+        if (!tex) {
+            glGenTextures(1, &tex);
+            glBindTexture(GL_TEXTURE_2D, tex);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -63,21 +60,21 @@ namespace vis {
          // The palette texture is internally laid out vertically.
         uint8 pdat [256 * 4 * 3];
         size_t j = 0;
-        for (size_t i = 0; i < palette.size(); i++) {
-            pdat[j++] = palette[i].ambient >> 24;
-            pdat[j++] = palette[i].ambient >> 16;
-            pdat[j++] = palette[i].ambient >> 8;
-            pdat[j++] = palette[i].ambient;
-            pdat[j++] = palette[i].diffuse >> 24;
-            pdat[j++] = palette[i].diffuse >> 16;
-            pdat[j++] = palette[i].diffuse >> 8;
-            pdat[j++] = palette[i].diffuse;
-            pdat[j++] = palette[i].radiant >> 24;
-            pdat[j++] = palette[i].radiant >> 16;
-            pdat[j++] = palette[i].radiant >> 8;
-            pdat[j++] = palette[i].radiant;
+        for (size_t i = 0; i < items.size(); i++) {
+            pdat[j++] = items[i].ambient >> 24;
+            pdat[j++] = items[i].ambient >> 16;
+            pdat[j++] = items[i].ambient >> 8;
+            pdat[j++] = items[i].ambient;
+            pdat[j++] = items[i].diffuse >> 24;
+            pdat[j++] = items[i].diffuse >> 16;
+            pdat[j++] = items[i].diffuse >> 8;
+            pdat[j++] = items[i].diffuse;
+            pdat[j++] = items[i].radiant >> 24;
+            pdat[j++] = items[i].radiant >> 16;
+            pdat[j++] = items[i].radiant >> 8;
+            pdat[j++] = items[i].radiant;
         }
-        for (size_t i = palette.size(); i < 256; i++) {
+        for (size_t i = items.size(); i < 256; i++) {
             pdat[j++] = 0x00;
             pdat[j++] = 0x00;
             pdat[j++] = 0x00;
@@ -91,26 +88,24 @@ namespace vis {
             pdat[j++] = 0x00;
             pdat[j++] = 0xff;
         }
-        glBindTexture(GL_TEXTURE_2D, palette_tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 3, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, pdat);
         diagnose_opengl("after setting palette");
     }
-    void set_palette_index (uint8 i, Palette_Item item) {
-        uint8 pdat[12];
-        pdat[0] = item.ambient >> 24;
-        pdat[1] = item.ambient >> 16;
-        pdat[2] = item.ambient >> 8;
-        pdat[3] = item.ambient;
-        pdat[4] = item.diffuse >> 24;
-        pdat[5] = item.diffuse >> 16;
-        pdat[6] = item.diffuse >> 8;
-        pdat[7] = item.diffuse;
-        pdat[8] = item.radiant >> 24;
-        pdat[9] = item.radiant >> 16;
-        pdat[10] = item.radiant >> 8;
-        pdat[11] = item.radiant;
-        glBindTexture(GL_TEXTURE_2D, palette_tex);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, i, 3, 1, GL_RGBA, GL_UNSIGNED_BYTE, pdat);
+
+    Materials::~Materials () {
+        if (tex) glDeleteTextures(1, &tex);
+    }
+
+    Materials* materials = NULL;
+
+    void set_materials (Materials* m) {
+        if (materials != m) {
+            materials = m;
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, materials->tex);
+            glActiveTexture(GL_TEXTURE0);
+        }
     }
 
      // Set up the requirements for a render-to-texture step
@@ -153,6 +148,7 @@ namespace vis {
             tiles_init();
             world_program = hacc::File("vis/res/world.prog").data().attr("prog");
             hacc::manage(&world_program);
+            hacc::manage(&materials);
             diagnose_opengl("after loading world.prog");
             initted = true;
         }
@@ -161,11 +157,11 @@ namespace vis {
     void render () {
         init();
         setup_rtt();
-        if (!palette_tex) {
-            throw hacc::X::Logic_Error("No palette texture was set!\n");
+        if (!materials) {
+            throw hacc::X::Logic_Error("No materials were set!\n");
         }
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, palette_tex);
+        glBindTexture(GL_TEXTURE_2D, materials->tex);
         glActiveTexture(GL_TEXTURE0);
          // Start render to texture
         glBindFramebuffer(GL_FRAMEBUFFER, world_fb);
@@ -249,13 +245,18 @@ HACCABLE(vis::Overlay) { name("vis::Overlay"); }
 HACCABLE(vis::Hud) { name("vis::Hud"); }
 HACCABLE(vis::Dev) { name("vis::Dev"); }
 
-HACCABLE(Palette_Item) {
-    name("vis::Palette_Item");
-    elem(member(&Palette_Item::ambient));
-    elem(member(&Palette_Item::diffuse));
-    elem(member(&Palette_Item::radiant));
+HACCABLE(Material) {
+    name("vis::Material");
+    elem(member(&Material::ambient));
+    elem(member(&Material::diffuse));
+    elem(member(&Material::radiant));
 }
-HCB_INSTANCE(std::vector<Palette_Item>);
+
+HACCABLE(Materials) {
+    name("vis::Materials");
+    delegate(member(&Materials::items));
+    finish([](Materials& v){ v.update(); });
+}
 
 HACCABLE(World_Program) {
     name("vis::World_Program");
