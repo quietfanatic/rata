@@ -16,7 +16,7 @@ There are a few dependencies for compiling this project.
     - Then follow that project's installation instructions.  Copy libBox2D.a
        into lib and make sure the Box2D headers are in lib/Box2D (such that the
        file lib/Box2D/Box2D/Box2D.h exists).
- - Perl >= 5.8 (for the build script)
+ - Perl >= 5.10 (for the build script)
 
 Once all dependencies have been satisfied, you can build the main executable with
 
