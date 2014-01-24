@@ -1,0 +1,50 @@
+HACC - Humans And Computers Cooperating
+
+Most of this module is responsible for implementing a data language called
+HACC, which is similar to JSON, but with the following differences:
+ - There is a "path" data type, which symbolically refers to another object,
+    which can even be in another file, and is translated to and from native
+    C++ pointers.  Here is an example path.
+        $("file/containing/target").logical.path.to.target[3]
+    When the file containing this path is loaded into memory, the file
+    "file/containing/target" will also be loaded, and the path is translated
+    into a pointer to the third element of an array that is four nested
+    structures deep.  The filename can be left out to refer to the same file.
+ - Backreferences look kind of like oaths, but are just a syntactic
+    shortcut to duplicate data.
+ - Floating point numbers can be suffixed with a precise 32-bit or 64-bit
+    representation, so that exact floating point values can be stored.
+ - Quotes are not required around simple (C-like) identifiers, and no commas
+    are required.
+
+HACC documents are mapped to C++ objects through a system called Haccable.
+More documentation for this system is forthcoming, but for now here's an
+example.
+
+    HACCABLE(ent::Player) {
+        using namespace ent;
+        name("ent::Player");
+        attr("character", value_methods(&Player::get_character, &Player::set_character));
+        attr("cursor_tex", member(&Player::cursor_tex).optional());
+        attr("cursor_frame", member(&Player::cursor_frame).optional());
+        attr("mappings", member(&Player::mappings).optional());
+        finish(&Player::finish);
+    }
+
+This example specifies that the C++ struct ent::Player has four named
+attributes.  One of them must be accessed through getter and setter methods,
+but the other three can be accessed directly as data members.  In addition,
+whenever an ent::Player object is created by the hacc system, the object's
+finish() method will be called.  An object of this type in the HACC language
+may look like this.
+
+    {
+        character:$.rata.Controllable
+        cursor_tex:$("ent/res/cursor.hacc").img.ALL
+        cursor_frame:$("ent/res/cursor.hacc").layout.normal
+    }
+
+All three of these attributes are paths.  The first refers to another object
+in the same file, and the other two refer to an object in another file.
+
+TODO: explain hacc::Document.
