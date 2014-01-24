@@ -2,9 +2,10 @@
 /rata
 
 # resource dirs
-lib
+/lib/*
+!/lib/Put Box2D Here
 /res
-img
+/img
 /save
 
 # intermediates
