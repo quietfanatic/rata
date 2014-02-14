@@ -50,8 +50,6 @@ namespace core {
 
 }
 
-namespace opengl_stubs {
-
  // These are autovivifying OpenGL wrappers.
 extern void (* glGenBuffers )(GLsizei, GLuint*);
 extern void (* glBindBuffer )(GLenum, GLuint);
@@ -103,8 +101,6 @@ extern void (* glFramebufferTexture2D )(GLenum, GLenum, GLenum, GLuint, GLint);
 extern void (* glDrawBuffers )(GLsizei, const GLenum*);
 extern GLenum (* glCheckFramebufferStatus )(GLenum);
 
-}
-using namespace opengl_stubs;
 
 #ifdef CORE_OPENGL_VERY_DEBUG
 namespace core {
