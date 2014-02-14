@@ -56,9 +56,9 @@ namespace hacc {
 
     namespace X {
         struct Document_Bad_ID : Logic_Error {
-            size_t got;
-            size_t next;
-            Document_Bad_ID (size_t, size_t);
+            uint32 got;
+            uint32 next;
+            Document_Bad_ID (uint32, uint32);
         };
     }
 

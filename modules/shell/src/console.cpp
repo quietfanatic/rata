@@ -27,7 +27,7 @@ namespace shell {
          // Tab completion FTW
         std::vector<std::string> completion_matches;
 
-        static CE size_t max_size = 2<<15;
+        static CE uint32 max_size = 2<<15;
 
         Console () { if (!console) console = this; }
         ~Console () { if (console == this) console = NULL; }

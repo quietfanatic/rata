@@ -33,7 +33,7 @@ namespace hacc {
     };
 
     struct DocumentData : DocLink {
-        size_t next_id = 1;
+        uint32 next_id = 1;
          // Will usually be non-resident
         std::unordered_map<String, DocObj*> by_id;
          // all_ids returns empty when this is true
@@ -130,7 +130,7 @@ namespace hacc {
     }
 
     namespace X {
-        Document_Bad_ID::Document_Bad_ID (size_t got, size_t next) :
+        Document_Bad_ID::Document_Bad_ID (uint32 got, uint32 next) :
             Logic_Error(
                 "Invalid hacc::Document special ID: " + std::to_string(got)
               + " >= _next_id " + std::to_string(next)
@@ -153,19 +153,19 @@ HACCABLE(DocumentData) {
             throw X::Form_Mismatch(Type::CppType<DocumentData>(), t);
         const Object& o = t.as<const Object&>();
          // Verify format
-        size_t next_id = 1;
-        size_t largest_id = 0;
+        uint32 next_id = 1;
+        uint32 largest_id = 0;
         for (auto& pair : o) {
             if (pair.first[0] == '_') {
                 if (pair.first == "_next_id") {
                     if (pair.second.form() != INTEGER)
                         throw X::Logic_Error("The _next_id attribute of a hacc::Document must be an integer");
-                    next_id = pair.second.as<size_t>();
+                    next_id = pair.second.as<uint32>();
                 }
                 else {
                     std::istringstream ss (pair.first);
                     char _;
-                    size_t id;
+                    uint32 id;
                     ss >> _ >> id;
                     if (!ss.eof()) throw X::Logic_Error("Invalid hacc::Document special id " + pair.first);
                     if (id > largest_id) largest_id = id;

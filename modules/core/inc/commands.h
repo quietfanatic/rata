@@ -14,7 +14,7 @@ namespace core {
     struct New_Command {
         std::string name;
         std::string description;
-        size_t min_args;
+        uint min_args;
         std::vector<hacc::Type> arg_types;
         hacc::Type type;
         void* func;
