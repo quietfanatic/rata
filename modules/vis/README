@@ -1,0 +1,65 @@
+vis - rendering and shaders
+
+LAYERS
+
+A rendered object must inherit the vis::Drawn class, with the template
+instantiated with a layer.  There are five layers currently:
+
+Map - This is for rendering tilemaps and other static objects.  Currently,
+       only tile rendering works properly in this layer.  Instead of red,
+       green, blue, and alpha, tilemaps have these channels:
+        r - material
+        g - vertical angle
+        b - unused
+        a - depth
+       Depth values should generally be 200 for things in front of sprites,
+       100 for things behind sprites, and 0 for nonexistent pixels.
+Sprites - This is for rendering moving objects and such.  This layer also
+           uses material index and vertical angle channels as above, but it
+           does not use a depth channel.  Depth checking is enabled, however.
+           Backgrounds should also use this layer (with a depth less than 100).
+Overlay - This is for things in world coordinates that use traditional RGBA
+           channels and alpha blending.  No depth test is performed.
+Hud - Like overlay, but with a fixed camera, so that things are rendered in
+       screen coordinates instead of world coordinates.
+Dev - Like Hud, but does not account for camera zoom, allowing higher-
+       resolution rendering than is supposed to be used during the game.
+       Naturally, only development-usage objects should draw to this layer.
+
+MATERIALS
+
+The material palette is an array of triples, of the form
+    [$ambient $diffuse $radient]
+Lighting calculations use this formula.
+      $ambient * $ambient_light
+    + $diffuse * $diffuse_light * $vertical_angle (green channel)
+    + $radiant
+
+Objects with three shades of color use vertical_angle values of 0x40, 0x80,
+ and 0xC0.  Objects with two shades of color use 0x40 and 0x80.  Objects with
+ only one shade use 0x80.
+
+PALETTES
+
+Although textures should be specified in material/angle format, image files
+ are easier to work with in traditional RGB format.  So a palette system is in
+ place.  A palette is a visible line of pairs of pixels; the first is the color
+ as it appears in the file, and the second is the color that will appear in the
+ texture.  The former will be substituted with the latter.
+
+RENDERING PROCESS
+
+1. Enable camera
+2. Render Map to low-res material buffer; store depth but don't check it.
+3. Render Sprites to material buffer; check depth but don't store it.
+    - TODO: Re-remember how to implement internal shadows here.
+4. Render material buffer to main framebuffer, doing lighting calculation
+    - This only renders to a 320x240 corner of the screen.
+    - TODO: allow shaped areas of lighting, perhaps by rendering those shapes,
+             texture-mapped with the material buffer, to the main framebuffer.
+4. Render Overlay with alpha blending to the 320x240 corner
+5. Disable camera
+6. Render Hud layer
+7. Zoom the 320x240 corner to full size with glCopyPixels
+8. Render Dev layer
+

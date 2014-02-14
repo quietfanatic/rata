@@ -1,0 +1,62 @@
+world - images, rooms, and stuff
+
+
+Setting: An unspecified eurasian country in an unspecified decade after WWII.
+          The country used to be run by a Fascist dictator, who has just been
+          toppled by a Communist party.  You are a street urchin searching for
+          your father, who was helping with scientific research funded by the
+          old regime, and who went missing some years ago.  A lead has directed
+          you toward an alley near a military base, which is above a vast
+          bunker filled with strange things.
+
+Very rough overall map...
+--------------------------------------------|
+|            alley               |          |
+---------------------------------| military |
+|         |                      |          |
+|         |     laboratory       |----------|
+|  robot  |                      | chemical |
+| factory |--------------------|------------|
+|         |                    |            |
+|         | underground forest |    lair    |
+|         |                    |            |
+|---------|--------------------|------------|
+                 | |
+                 | |-------------|
+                 |   geothermal  |
+                 |---------------|
+
+alley - A run-down back alley with some secret passages into the bunker.
+         Mostly empty but with some city-dwelling wildlife.
+laboratory - Where biology experiments used to be run.  A few scientists are
+              still left in one room, but the rest is a battleground between
+              the robots and the mutant animals.  One library-like room is
+              sealed off, and it is expected that there are clues to the
+              whereabouts of the protagonist's father inside.  The secret code
+              needed to get in is distributed across a bunch of research books,
+              which are scattered about the bunker.  Since these books also
+              contain the sum of the decades of research carried on here,
+              nearly every major character wants to get their hands on them.
+robot factory - A fully-automated robot factory managed by an old hacker dude.
+                 Most of the robots are fairly unintelligent.
+military - A military base with the last remnant of the Old Regime.  Managed by
+            the dictator's most trusted general, who plans to rise back to
+            power eventually.  Actually, he just really hates the North Country.
+            The base is somewhat understaffed these days, but some robots
+            provided by the factory make up for that somewhat.
+chemical - A chemical weapons storage facility, originally part of the military
+            base but a gas leak forced them to seal off the area.  It is an
+            option to break in here and let loose poison gas all over the
+            bunker to clear out the mutants.
+underground forest - Conceived by the mad whims of "Dear Leader", intended to
+                      be a place to preserve flora and fauna in the case of a
+                      nuclear holocaust.  Obviously it won't work, but nobody
+                      dared tell him that.
+lair - Part of the underground forest that has been overrun by mutant animals.
+        Managed by a human known as "Creature" who was part of the biological
+        experiments, and now takes care of the mutants because of some sort of
+        sense of kinship.
+geothermal - The bunker is powered by a geothermal power plant, which is down
+              here.  It is an option to permanently cut the power to the entire
+              bunker, rendering the robot factory inert.  This place cannot be
+              entered without a nearby heat suit.
