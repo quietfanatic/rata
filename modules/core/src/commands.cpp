@@ -2,6 +2,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <iostream>
+#include "../../util/inc/honestly.h"
 #include "../../hacc/inc/everything.h"
 #include "../../hacc/src/types_internal.h"
 #include "../inc/commands.h"

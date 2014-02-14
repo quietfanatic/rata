@@ -194,7 +194,7 @@ bool doesnt_throw (void (* code )(), const char* name) {
 }
 
 
-static void pass_fail_message (bool succeeded, uint num) {
+static void pass_fail_message (bool succeeded, unsigned int num) {
     if (inverted ? succeeded : !succeeded) {
         printf("not ");
     }
@@ -245,7 +245,7 @@ void todo (unsigned num, const char* reason) {
 }
 
 void skip (unsigned num, const char* reason) {
-    for (uint i = 0; i < num; i++) {
+    for (unsigned int i = 0; i < num; i++) {
         tested++;
         printf("ok %d # SKIP", tested);
         if (reason && reason[0]) {
