@@ -7,6 +7,7 @@ model.
 ### Compiling (on Linux)
 
 There are a few dependencies for compiling this project.
+ - A C++11-capable compiler.  Both clang and gcc should work.
  - OpenGL libraries (libgl1-mesa-dev on my system)
  - GLFW (libglfw-dev in debian-like systems)
  - SOIL (libsoil-dev in debian-like systems)
