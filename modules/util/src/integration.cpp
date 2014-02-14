@@ -10,12 +10,17 @@ static inline int builtin_chdir (const char* s) { return chdir(s); }
 namespace util {
 
     std::string cwd () {
-        char* wd = get_current_dir_name();
-        if (wd == NULL) {
-            throw hacc::X::Logic_Error(
-                "Could not get working directory: "
-                + std::to_string(errno) + " " + strerror(errno)
-            );
+        size_t cwd_size = 256;
+        char* wd = (char*)malloc(256);
+        while (!getcwd(wd, cwd_size)) {
+            if (cwd_size > 65536) {
+                throw hacc::X::Logic_Error(
+                    "Could not get working directory: "
+                    + std::to_string(errno) + " " + strerror(errno)
+                );
+            }
+            cwd_size *= 2;
+            wd = (char*)realloc(wd, cwd_size);
         }
         std::string r = wd;
         free(wd);
