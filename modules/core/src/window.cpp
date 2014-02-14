@@ -73,8 +73,9 @@ namespace core {
             if (!is_open) {
                 throw hacc::X::Internal_Error("glfwOpenWindow failed for some reason");
             }
-            if (glewInit() != GLEW_OK) {
-                throw hacc::X::Internal_Error("GLEW init failed!\n");
+            auto glew_initted = glewInit();
+            if (glew_initted != GLEW_OK) {
+                throw hacc::X::Internal_Error("GLEW init failed: " + std::string((const char*)glewGetErrorString(glew_initted)));
             }
         }
     }
