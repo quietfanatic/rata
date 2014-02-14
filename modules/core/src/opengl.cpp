@@ -212,6 +212,7 @@ struct glthunk1 {
     static const char* name##_name = #name; \
     Ret (* name )() = &glthunk1<Ret>::glthunk2<&name, &name##_name>;
 
+namespace opengl_stubs {
 
 OPENGL_THUNK(glGenBuffers, void, GLsizei, GLuint*)
 OPENGL_THUNK(glBindBuffer, void, GLenum, GLuint)
@@ -262,3 +263,5 @@ OPENGL_THUNK(glFramebufferRenderbuffer, void, GLenum, GLenum, GLenum, GLuint)
 OPENGL_THUNK(glFramebufferTexture2D, void, GLenum, GLenum, GLenum, GLuint, GLint)
 OPENGL_THUNK(glDrawBuffers, void, GLsizei, const GLenum*)
 OPENGL_THUNK(glCheckFramebufferStatus, GLenum, GLenum)
+
+}
