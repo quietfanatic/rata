@@ -1,8 +1,9 @@
+#include <GL/glew.h>
+#include <GL/glfw.h>
 #include "../inc/control.h"
 #include "../../geo/inc/camera.h"
 #include "../../geo/inc/rooms.h"
 #include "../../hacc/inc/haccable_standard.h"
-#include <GL/glfw.h>
 
 namespace ent {
 

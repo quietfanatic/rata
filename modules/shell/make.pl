@@ -38,7 +38,7 @@ my @objects = qw<
     ../util/tmp/integration.o
     ../../lib/libBox2D.a
 >;
-my @libs = qw(-lGL -lglfw -lSOIL);
+my @libs = qw(-lGL -lGLEW -lglfw -lSOIL);
 
 include '../..';
 

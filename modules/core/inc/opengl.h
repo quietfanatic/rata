@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <vector>
 #include <unordered_map>
+#include <GL/glew.h>
 #include <GL/glfw.h>
 
 #ifdef CORE_OPENGL_VERY_DEBUG
@@ -50,6 +51,8 @@ namespace core {
 
 }
 
+
+/*
  // These are autovivifying OpenGL wrappers.
 extern void (* glGenBuffers )(GLsizei, GLuint*);
 extern void (* glBindBuffer )(GLenum, GLuint);
@@ -100,7 +103,7 @@ extern void (* glFramebufferRenderbuffer )(GLenum, GLenum, GLenum, GLuint);
 extern void (* glFramebufferTexture2D )(GLenum, GLenum, GLenum, GLuint, GLint);
 extern void (* glDrawBuffers )(GLsizei, const GLenum*);
 extern GLenum (* glCheckFramebufferStatus )(GLenum);
-
+*/
 
 #ifdef CORE_OPENGL_VERY_DEBUG
 namespace core {

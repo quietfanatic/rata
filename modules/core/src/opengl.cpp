@@ -180,6 +180,7 @@ HACCABLE(Program) {
     finish([](Program& p){ p.link(); });
 }
 
+/*
 template <class C> using P = C*;
  // This is a lazy-loaded thunk that replaces itself with an OpenGL function
 template <class Ret, class... Args>
@@ -262,3 +263,4 @@ OPENGL_THUNK(glFramebufferRenderbuffer, void, GLenum, GLenum, GLenum, GLuint)
 OPENGL_THUNK(glFramebufferTexture2D, void, GLenum, GLenum, GLenum, GLuint, GLint)
 OPENGL_THUNK(glDrawBuffers, void, GLsizei, const GLenum*)
 OPENGL_THUNK(glCheckFramebufferStatus, GLenum, GLenum)
+*/

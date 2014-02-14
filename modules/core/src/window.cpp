@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include <GL/glfw.h>
 #include "../inc/window.h"
 #include "../inc/commands.h"
@@ -71,6 +72,9 @@ namespace core {
             );
             if (!is_open) {
                 throw hacc::X::Internal_Error("glfwOpenWindow failed for some reason");
+            }
+            if (glewInit() != GLEW_OK) {
+                throw hacc::X::Internal_Error("GLEW init failed!\n");
             }
         }
     }

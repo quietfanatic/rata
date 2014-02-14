@@ -1,5 +1,5 @@
 #include <stdexcept>
-#include <GL/gl.h>
+#include <GL/glew.h>
 #include <GL/glfw.h>
 #include <SOIL/SOIL.h>
 #include "../inc/images.h"
