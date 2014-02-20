@@ -111,6 +111,31 @@ namespace shell {
         draw_text(text, font, pos, Vec(1, -1), fg, cached_area.x);
     }
 
+    void SubMenu::Menu_Item_draw (Vec pos, Vec size) {
+        Text_Button::Menu_Item_draw(pos, size);
+         // TODO: figure out what the parameter to size should be should be.
+        if (open) {
+            Vec csize = contents->Menu_Item_size(Vec(INF, INF));
+            contents->Menu_Item_draw(pos + size - Vec(0, csize.y), csize);
+        }
+    }
+    bool SubMenu::Menu_Item_hover (Vec pos, Vec size) {
+        if (open) {
+            Vec csize = contents->Menu_Item_size(Vec(INF, INF));
+            if (contents->Menu_Item_hover(pos - size + Vec(0, csize.y), csize))
+                return true;
+        }
+        return open = Text_Button::Menu_Item_hover(pos, size);
+    }
+    bool SubMenu::Menu_Item_click (Vec pos, Vec size) {
+        if (open) {
+            Vec csize = contents->Menu_Item_size(Vec(INF, INF));
+            if (contents->Menu_Item_click(pos - size + Vec(0, csize.y), csize))
+                return true;
+        }
+        return Text_Button::Menu_Item_click(pos, size);
+    }
+
 } using namespace shell;
 
 HACCABLE(Menu_Base) {
@@ -155,3 +180,8 @@ HACCABLE(Text_Button) {
     attr("font", member(&Text_Button::font).optional());
 }
 
+HACCABLE(SubMenu) {
+    name("shell::SubMenu");
+    attr("Text_Button", base<Text_Button>());
+    attr("contents", member(&SubMenu::contents));
+}

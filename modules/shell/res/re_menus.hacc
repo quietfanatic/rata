@@ -26,6 +26,19 @@
                     text:"reload room"
                     Button:{ on_click:[re_reload_room] }
                 }}
+                {"shell::SubMenu":{
+                    Text_Button:{ text:"create actor" }
+                    contents:{"shell::VBox":{
+                        contents:[
+                            {"shell::Text_Button":{
+                                text:"A"
+                            }}
+                            {"shell::Text_Button":{
+                                text:"B"
+                            }}
+                        ]
+                    }}
+                }}
             ]
         }}
     }}

@@ -98,6 +98,14 @@ namespace shell {
         }
     };
 
+    struct SubMenu : Text_Button {
+        std::unique_ptr<Menu_Item> contents;
+        bool open = false;
+        void Menu_Item_draw (Vec, Vec) override;
+        bool Menu_Item_hover (Vec, Vec) override;
+        bool Menu_Item_click (Vec, Vec) override;
+    };
+
 }
 
 #endif
