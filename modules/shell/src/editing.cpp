@@ -20,7 +20,7 @@ namespace shell {
 
     Logger logger ("editing");
 
-    Resident_Editor* resident_editor = NULL;
+    Room_Editor* room_editor = NULL;
 
      // Get pointer of most derived type from Resident*
     hacc::Pointer res_realp (Resident* res) {
@@ -29,7 +29,7 @@ namespace shell {
     }
 
      // Draw outlines around all residents
-    void Resident_Editor::Drawn_draw (Overlay) {
+    void Room_Editor::Drawn_draw (Overlay) {
         size_t unpositioned_residents = 0;
         for (auto& room : all_rooms()) {
             color_offset(Vec(0, 0));
@@ -52,7 +52,7 @@ namespace shell {
     }
 
      // Draw status messages and other info
-    void Resident_Editor::Drawn_draw (Dev) {
+    void Room_Editor::Drawn_draw (Dev) {
         if (!status.empty()) {
             color_offset(Vec(0, 0));
             draw_color(0x0000007f);
@@ -79,7 +79,7 @@ namespace shell {
     }
 
      // Process cursor position; hover, drag
-    void Resident_Editor::Listener_cursor_pos (int x, int y) {
+    void Room_Editor::Listener_cursor_pos (int x, int y) {
         Vec world_pos = camera->window_to_world(x, y);
         if (clicking) {
             if (selected) {
@@ -139,7 +139,7 @@ namespace shell {
         }
     }
      // Clicking behavior
-    bool Resident_Editor::Listener_button (int code, int action) {
+    bool Room_Editor::Listener_button (int code, int action) {
         if (action == GLFW_PRESS) {
             Vec realpos = camera->window_to_world(window->cursor_x, window->cursor_y);
             dragging = NULL;
@@ -187,18 +187,18 @@ namespace shell {
         return false;
     }
 
-    Resident_Editor::Resident_Editor () :
+    Room_Editor::Room_Editor () :
         res_menu(hacc::File("shell/res/re_menus.hacc").data().attr("res_menu")),
         room_menu(hacc::File("shell/res/re_menus.hacc").data().attr("room_menu"))
     {
-        resident_editor = this;
+        room_editor = this;
     }
-    Resident_Editor::~Resident_Editor () {
-        if (resident_editor == this)
-            resident_editor = NULL;
+    Room_Editor::~Room_Editor () {
+        if (room_editor == this)
+            room_editor = NULL;
     }
 
-    void Resident_Editor::activate () {
+    void Room_Editor::activate () {
         logger.log("Activating editor.");
         Listener::activate();
         fc.pos = camera->Camera_pos();
@@ -207,7 +207,7 @@ namespace shell {
         Drawn<Overlay>::appear();
         Drawn<Dev>::appear();
     }
-    void Resident_Editor::deactivate () {
+    void Room_Editor::deactivate () {
         logger.log("Deactivating editor.");
         hovering = NULL;
         selected = NULL;
@@ -249,12 +249,12 @@ namespace shell {
     }
 
      // Context menu actions
-    void Resident_Editor::re_edit () {
+    void Room_Editor::re_edit () {
         if (!selected) return;
         general_edit(res_realp(selected));
     }
 
-    void Resident_Editor::re_duplicate () {
+    void Room_Editor::re_duplicate () {
         if (!selected) return;
         auto realp = res_realp(selected);
         if (hacc::Document* doc = hacc::get_document_containing(realp.address)) {
@@ -287,7 +287,7 @@ namespace shell {
             throw hacc::X::Logic_Error("Could not re_duplicate: this object does not belong to a document.");
         }
     }
-    void Resident_Editor::re_delete () {
+    void Room_Editor::re_delete () {
         if (!selected) return;
         auto realp = res_realp(selected);
         if (hacc::Document* doc = hacc::get_document_containing(realp.address)) {
@@ -298,7 +298,7 @@ namespace shell {
             throw hacc::X::Logic_Error("Could not re_delete: this object does not belong to a document.");
         }
     }
-    void Resident_Editor::re_reload_room () {
+    void Room_Editor::re_reload_room () {
         if (!selected_room) return;
         auto filename = hacc::address_to_path(selected_room).root();
         window->before_next_frame([filename](){hacc::reload(filename);});
@@ -306,39 +306,39 @@ namespace shell {
 
 } using namespace shell;
 
-HACCABLE(Resident_Editor) {
-    name("shell::Resident_Editor");
-    attr("font", member(&Resident_Editor::font).optional());
+HACCABLE(Room_Editor) {
+    name("shell::Room_Editor");
+    attr("font", member(&Room_Editor::font).optional());
 }
 
 void _re_toggle () {
-    if (!resident_editor) return;
-    if (resident_editor->active)
-        resident_editor->deactivate();
+    if (!room_editor) return;
+    if (room_editor->active)
+        room_editor->deactivate();
     else
-        resident_editor->activate();
+        room_editor->activate();
 }
 
-New_Command _re_toggle_cmd ("re_toggle", "Toggle the Resident_Editor interface.", 0, _re_toggle);
+New_Command _re_toggle_cmd ("re_toggle", "Toggle the Room_Editor interface.", 0, _re_toggle);
 
 void _re_edit () {
-    if (!resident_editor) return;
-    resident_editor->re_edit();
+    if (!room_editor) return;
+    room_editor->re_edit();
 }
 New_Command _re_edit_cmd ("re_edit", "Edit the selected object's textual representation with $EDITOR.", 0, _re_edit);
 void _re_duplicate () {
-    if (!resident_editor) return;
-    resident_editor->re_duplicate();
+    if (!room_editor) return;
+    room_editor->re_duplicate();
 }
 New_Command _re_duplicate_cmd ("re_duplicate", "Duplicate the selected object.", 0, _re_duplicate);
 void _re_delete () {
-    if (!resident_editor) return;
-    resident_editor->re_delete();
+    if (!room_editor) return;
+    room_editor->re_delete();
 }
 New_Command _re_delete_cmd ("re_delete", "Delete the selected object.", 0, _re_delete);
 
 void _re_reload_room () {
-    if (!resident_editor) return;
-    resident_editor->re_reload_room();
+    if (!room_editor) return;
+    room_editor->re_reload_room();
 }
 New_Command _re_reload_room_cmd ("re_reload_room", "Reload the selected room from disk.", 0, _re_reload_room);

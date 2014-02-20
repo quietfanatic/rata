@@ -11,7 +11,7 @@
 namespace shell {
     using namespace util;
 
-    struct Resident_Editor : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Dev>, core::Listener {
+    struct Room_Editor : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Dev>, core::Listener {
          // Associated utilities
         geo::Free_Camera fc;
         Menu<vis::Dev>* res_menu = NULL;  // Set on construction
@@ -32,8 +32,8 @@ namespace shell {
 
         void activate ();
         void deactivate ();
-        Resident_Editor ();
-        ~Resident_Editor ();
+        Room_Editor ();
+        ~Room_Editor ();
 
          // Context menu actions
         void re_edit ();
@@ -46,7 +46,7 @@ namespace shell {
         bool Listener_button (int, int) override;
         void Listener_cursor_pos (int x, int y) override;
     };
-    extern Resident_Editor* resident_editor;
+    extern Room_Editor* room_editor;
 
 }
 

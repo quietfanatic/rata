@@ -16,5 +16,5 @@
         [39 [global_lighting 0 +0.1 true]]  // '
     ]}
     console:{"shell::Console":{ }}
-    resed:{"shell::Resident_Editor":{ }}
+    room_editor:{"shell::Room_Editor":{ }}
 }}
