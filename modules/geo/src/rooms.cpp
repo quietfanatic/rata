@@ -74,7 +74,7 @@ namespace geo {
          // Make sure only to call emerge when finished
         if (finished) {
             if (room && room->observer_count) {
-                if (!old_room->observer_count) {
+                if (!old_room || !old_room->observer_count) {
                     Resident_emerge();
                 }
             }
