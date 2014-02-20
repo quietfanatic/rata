@@ -34,6 +34,20 @@ namespace shell {
             draw_solid_rect(Rect(0, 0, size.x, size.y));
         }
     }
+    bool Button::Menu_Item_hover (Vec pos, Vec size) {
+        if (Rect(0, 0, size.x, size.y).covers(pos)) {
+            hovering_frame = core::window->frames_drawn;
+            return true;
+        }
+        return false;
+    }
+    bool Button::Menu_Item_click (Vec pos, Vec size) {
+        if (Rect(0, 0, size.x, size.y).covers(pos)) {
+            if (on_click) on_click();
+            return true;
+        }
+        return false;
+    }
 
     Vec VBox::Menu_Item_size (Vec area) {
         if (cached_area != area) {
@@ -65,10 +79,8 @@ namespace shell {
             Vec csize = c->Menu_Item_size(area - Vec(0, height));
             height += csize.y;
             Vec cpos = pos - Vec(0, cached_size.y - height);
-            if (Rect(0, 0, area.x, csize.y).covers(cpos)) {
-                if (c->Menu_Item_hover(cpos, Vec(area.x, csize.y)))
-                    return true;
-            }
+            if (c->Menu_Item_hover(cpos, Vec(area.x, csize.y)))
+                return true;
         }
         return Button::Menu_Item_hover(pos, area);
     }
@@ -79,10 +91,8 @@ namespace shell {
             Vec csize = c->Menu_Item_size(area - Vec(0, height));
             height += csize.y;
             Vec cpos = pos - Vec(0, cached_size.y - height);
-            if (Rect(0, 0, area.x, csize.y).covers(cpos)) {
-                if (c->Menu_Item_click(cpos, Vec(area.x, csize.y)))
-                    return true;
-            }
+            if (c->Menu_Item_click(cpos, Vec(area.x, csize.y)))
+                return true;
         }
         return Button::Menu_Item_click(pos, area);
     }

@@ -16,8 +16,6 @@ namespace shell {
     struct Menu_Item {
         virtual Vec Menu_Item_size (Vec area) { return Vec(0, 0); }
         virtual void Menu_Item_draw (Vec pos, Vec area) = 0;
-         // These should not check that pos is actually in
-         //  their boundary.  That's the container's job.
          // If these return false, the event is cascaded up.
          // pos is relative to the item's lower-left corner.
         virtual bool Menu_Item_hover (Vec pos, Vec area) { return false; }
@@ -69,14 +67,8 @@ namespace shell {
         uint32 hover_background_color = 0x00000000;
         uint64 hovering_frame = -1;
         bool hovering () { return hovering_frame == core::window->frames_drawn; }
-        bool Menu_Item_hover (Vec pos, Vec size) override {
-            hovering_frame = core::window->frames_drawn;
-            return true;
-        }
-        bool Menu_Item_click (Vec pos, Vec size) override {
-            if (on_click) on_click();
-            return true;
-        }
+        bool Menu_Item_hover (Vec, Vec) override;
+        bool Menu_Item_click (Vec, Vec) override;
         void Menu_Item_draw (Vec, Vec) override;
     };
 
