@@ -233,9 +233,9 @@ namespace ent {
 HACCABLE(Biped) {
     name("ent::Biped");
     attr("def", value_methods(&Biped::get_def, &Biped::set_def));
-    attr("Object", base<phys::Object>());
-    attr("Resident", base<geo::Resident>());
-    attr("Grounded", base<phys::Grounded>().optional());
+    attr("Object", base<phys::Object>().collapse());
+    attr("Resident", base<geo::Resident>().collapse());
+    attr("Grounded", base<phys::Grounded>().collapse());
     attr("Controllable", base<ent::Controllable>().optional());
     attr("direction", member(&Biped::direction).optional());
     attr("crouching", member(&Biped::crouching).optional());

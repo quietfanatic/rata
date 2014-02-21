@@ -3,7 +3,7 @@
     tilemap:{ "geo::Tilemap":{
         Resident:{ room:$.room }
         Object:{
-            def:$("geo/res/tilemap.bdf")
+            bdf:$("geo/res/tilemap.bdf")
             pos:[0~00000000 0~00000000]
             vel:[0~00000000 0~00000000]
         }

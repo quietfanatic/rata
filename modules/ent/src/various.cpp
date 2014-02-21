@@ -29,7 +29,7 @@ namespace ent {
             }
         }
         void finish () {
-            Object::set_def(bdf);
+            Object::set_bdf(bdf);
             Resident::finish();
         }
     };
@@ -81,7 +81,7 @@ static phys::BodyDef*& boundary_bdf () {
 struct Boundary : phys::Object {
     Boundary () : Object() { boundary_bdf(); }
     void finish () {
-        set_def(boundary_bdf());
+        set_bdf(boundary_bdf());
         materialize();
     }
 };
