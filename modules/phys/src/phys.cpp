@@ -5,6 +5,7 @@
 #include "../../util/inc/debug.h"
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/color.h"
+#include "../../core/inc/commands.h"
 
 namespace phys {
 
@@ -394,4 +395,12 @@ HACCABLE(Phys_Debug_Layer) {
         pdb.appear();
     });
 }
+
+void _phys_debug () {
+    if (phys_debug_layer.visible())
+        phys_debug_layer.disappear();
+    else
+        phys_debug_layer.appear();
+}
+core::New_Command _phys_debug_cmd ("phys_debug", "Toggle contours around physical objects", 0, _phys_debug);
 
