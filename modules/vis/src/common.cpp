@@ -1,6 +1,7 @@
 #include "../inc/common.h"
 #include "../inc/color.h"
 #include "../inc/images.h"
+#include "../inc/light.h"
 #include "../inc/text.h"
 #include "../inc/tiles.h"
 #include "../../hacc/inc/everything.h"
@@ -29,97 +30,6 @@ namespace vis {
     RGBf ambient_light = RGBf{1, 1, 1};
     RGBf diffuse_light = RGBf{1, 1, 1};
     RGBf radiant_light = RGBf{1, 1, 1};
-    int light_debug_type = 0;
-
-    struct Light_Program : Cameraed_Program {
-        GLint model_pos;
-        GLint ambient;
-        GLint diffuse;
-        GLint radiant;
-        GLint materials_length;
-        GLint debug_type;
-        void finish () {
-            Cameraed_Program::finish();
-            glUniform1i(require_uniform("tex"), 0);
-            glUniform1i(require_uniform("materials"), 1);
-            model_pos = require_uniform("model_pos");
-            ambient = require_uniform("ambient");
-            diffuse = require_uniform("diffuse");
-            radiant = require_uniform("radiant");
-            materials_length = require_uniform("materials_length");
-            debug_type = require_uniform("debug_type");
-        }
-        void Program_begin () override {
-            Cameraed_Program::Program_begin();
-            glUniform1i(debug_type, light_debug_type);
-        }
-    };
-    Light_Program* light_program = NULL;
-
-    void Materials::update () {
-        if (items.size() > 256) {
-            throw hacc::X::Logic_Error(
-                "Material palette is too large: " + std::to_string(items.size()) + " > 256"
-            );
-        }
-        if (!tex) {
-            glGenTextures(1, &tex);
-            glBindTexture(GL_TEXTURE_2D, tex);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        }
-         // The palette texture is internally laid out vertically.
-        uint8 pdat [256 * 4 * 3];
-        size_t j = 0;
-        for (size_t i = 0; i < items.size(); i++) {
-            pdat[j++] = items[i].ambient >> 24;
-            pdat[j++] = items[i].ambient >> 16;
-            pdat[j++] = items[i].ambient >> 8;
-            pdat[j++] = items[i].ambient;
-            pdat[j++] = items[i].diffuse >> 24;
-            pdat[j++] = items[i].diffuse >> 16;
-            pdat[j++] = items[i].diffuse >> 8;
-            pdat[j++] = items[i].diffuse;
-            pdat[j++] = items[i].radiant >> 24;
-            pdat[j++] = items[i].radiant >> 16;
-            pdat[j++] = items[i].radiant >> 8;
-            pdat[j++] = items[i].radiant;
-        }
-        for (size_t i = items.size(); i < 256; i++) {
-            pdat[j++] = 0x00;
-            pdat[j++] = 0x00;
-            pdat[j++] = 0x00;
-            pdat[j++] = 0x00;
-            pdat[j++] = 0x00;
-            pdat[j++] = 0x00;
-            pdat[j++] = 0x00;
-            pdat[j++] = 0x00;
-            pdat[j++] = 0x00;
-            pdat[j++] = 0xff;
-            pdat[j++] = 0x00;
-            pdat[j++] = 0xff;
-        }
-        glBindTexture(GL_TEXTURE_2D, tex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 3, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, pdat);
-        diagnose_opengl("after setting palette");
-    }
-
-    Materials::~Materials () {
-        if (tex) glDeleteTextures(1, &tex);
-    }
-
-    Materials* materials = NULL;
-
-    void set_materials (Materials* m) {
-        if (materials != m) {
-            materials = m;
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, materials->tex);
-            glActiveTexture(GL_TEXTURE0);
-        }
-    }
 
      // Set up the requirements for a render-to-texture step
     void setup_rtt () {
@@ -159,25 +69,13 @@ namespace vis {
             images_init();
             text_init();
             tiles_init();
-            light_program = hacc::File("vis/res/light.prog").data().attr("prog");
-            hacc::manage(&light_program);
-            hacc::manage(&materials);
-            diagnose_opengl("after loading world.prog");
-            initted = true;
-            light_program->use();
-            glUniform1f(light_program->materials_length, 7);  // TODO: This is not dynamic
+            light_init();
         }
     }
 
     void render () {
         init();
         setup_rtt();
-        if (!materials) {
-            throw hacc::X::Logic_Error("No materials were set!\n");
-        }
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, materials->tex);
-        glActiveTexture(GL_TEXTURE0);
          // Start render to texture
         glBindFramebuffer(GL_FRAMEBUFFER, world_fb);
         glViewport(0, 0, rtt_camera_size.x/PX, rtt_camera_size.y/PX);
@@ -206,20 +104,22 @@ namespace vis {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT);
-        light_program->use();
-        glUniform3fv(light_program->ambient, 1, &ambient_light.r);
-        glUniform3fv(light_program->diffuse, 1, &diffuse_light.r);
-        glUniform3fv(light_program->radiant, 1, &radiant_light.r);
-        glUniform2f(light_program->model_pos, 0, 0);
+        diagnose_opengl("before setting world tex");
+        light_texture(world_tex);
+        diagnose_opengl("after setting world tex");
+
+         // One global light render
+        set_ambient(ambient_light);
+        set_diffuse(diffuse_light);
+        set_radiant(radiant_light);
+        light_offset(Vec(0, 0));
         diagnose_opengl("after setting light");
-        glBindTexture(GL_TEXTURE_2D, world_tex);
         Vec pts [4];
         pts[0] = global_camera_pos - global_camera_size/2;
         pts[2] = global_camera_pos + global_camera_size/2;
         pts[1] = Vec(pts[2].x, pts[0].y);
         pts[3] = Vec(pts[0].x, pts[2].y);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vec), pts);
-        glDrawArrays(GL_QUADS, 0, 4);
+        draw_light(4, pts);
          // Overlay rendering uses blend and no depth
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         Program::unuse();
@@ -263,35 +163,10 @@ namespace vis {
 
 HACCABLE(vis::Map) { name("vis::Map"); }
 HACCABLE(vis::Sprites) { name("vis::Sprites"); }
+HACCABLE(vis::Lights) { name("vis::Lights"); }
 HACCABLE(vis::Overlay) { name("vis::Overlay"); }
 HACCABLE(vis::Hud) { name("vis::Hud"); }
 HACCABLE(vis::Dev) { name("vis::Dev"); }
-
-HACCABLE(RGBf) {
-    name("vis::RGBf");
-    elem(member(&RGBf::r));
-    elem(member(&RGBf::g));
-    elem(member(&RGBf::b));
-}
-
-HACCABLE(Material) {
-    name("vis::Material");
-    elem(member(&Material::ambient));
-    elem(member(&Material::diffuse));
-    elem(member(&Material::radiant));
-}
-
-HACCABLE(Materials) {
-    name("vis::Materials");
-    delegate(member(&Materials::items));
-    finish([](Materials& v){ v.update(); });
-}
-
-HACCABLE(Light_Program) {
-    name("vis::Light_Program");
-    delegate(base<Program>());
-    finish(&Light_Program::finish);
-}
 
 static void _global_lighting (const RGBf& amb, const RGBf& dif, bool relative) {
     if (relative) {
@@ -308,14 +183,3 @@ core::New_Command _global_lighting_cmd (
     2, _global_lighting
 );
 
-static void _light_debug () {
-    light_debug_type++;
-    if (light_debug_type > 3)
-        light_debug_type = 0;
-    print_to_console("Light debug type: " + std::to_string(light_debug_type) + "\n");
-}
-
-core::New_Command _light_debug_cmd (
-    "light_debug", "Toggle between light debug modes",
-    0, _light_debug
-);

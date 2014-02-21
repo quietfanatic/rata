@@ -8,6 +8,7 @@
 #include "../../ent/inc/control.h"
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/text.h"
+#include "../../vis/inc/light.h"
 #include "../../util/inc/integration.h"
 #include "../inc/main.h"
 

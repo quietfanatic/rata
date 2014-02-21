@@ -4,7 +4,7 @@ use MakePl;
 
 include '../..';
 
-objects(qw(common color images text tiles models));
+objects(qw(common color images light text tiles models));
 
 clean_rule(glob 'tmp/*');
 
