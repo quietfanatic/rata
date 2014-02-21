@@ -59,7 +59,7 @@ namespace vis {
         }
         core::window->open();
         int iw; int ih; int ich;
-        abs_fn = rel2abs(filename);
+        std::string abs_fn = rel2abs(filename);
         data = (uint32*)SOIL_load_image(abs_fn.c_str(), &iw, &ih, &ich, 4);
         if (!data) {
             throw hacc::X::Logic_Error("Couldn't open image \"" + abs_fn + "\": " + SOIL_last_result());
