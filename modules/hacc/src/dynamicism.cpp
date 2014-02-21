@@ -665,9 +665,25 @@ namespace hacc {
                 const std::vector<String>& ks = keys();
                 if (!ks.empty()) {
                     for (auto& k : ks) {
-                        Path newpath = path ? Path(path, k) : path;
-                        if (attr(k).foreach_address(cb, newpath))
-                            return true;
+                        if (auto ar = attr_imm(*this, k)) {
+                            Path newpath = path ? Path(path, k) : path;
+                            if (ar.foreach_address(cb, newpath))
+                                return true;
+                        }
+                    }
+                     // Any collapsed members not covered by ks?
+                    for (auto& a : type().data->attr_list) {
+                        if (a.second->collapse) {
+                            for (auto& ksk : ks)
+                                if (a.first == ksk)
+                                    goto next;
+                            {
+                                Path newpath = path ? Path(path, a.first) : path;
+                                if (chain(*this, a.second).foreach_address(cb, newpath))
+                                    return true;
+                            }
+                            next: { }
+                        }
                     }
                 }
                 else {
@@ -694,9 +710,25 @@ namespace hacc {
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
                 for (auto& k : ks) {
-                    Path newpath = path ? Path(path, k) : Path(null);
-                    if (attr(k).foreach_pointer(cb, newpath))
-                        return true;
+                    if (auto ar = attr_imm(*this, k)) {
+                        Path newpath = path ? Path(path, k) : Path(null);
+                        if (ar.foreach_pointer(cb, newpath))
+                            return true;
+                    }
+                }
+                 // Any collapsed members not covered by ks?
+                for (auto& a : type().data->attr_list) {
+                    if (a.second->collapse) {
+                        for (auto& ksk : ks)
+                            if (a.first == ksk)
+                                goto next;
+                        {
+                            Path newpath = path ? Path(path,a.first) : path;
+                            if (chain(*this, a.second).foreach_pointer(cb, newpath))
+                                return true;
+                        }
+                        next: { }
+                    }
                 }
             }
             else {
