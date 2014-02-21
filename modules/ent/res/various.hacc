@@ -39,7 +39,7 @@
         coll_b:[ground]
     }}
     crate_shape: {b2PolygonShape:{
-        verts:[[-0.5 0] [0.5 0] [0.5 1] [-0.5 1]]
+        verts:[[-0.48 0.98] [-0.4 0] [0.4 0] [0.48 0.1] [0.48 0.9] [0.4 0.98] [-0.4 0.98] [-0.48 0.9]]
     }}
     stuff_img: {"vis::Image":{
         filename:"world/res/stuff.png"
