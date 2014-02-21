@@ -18,6 +18,7 @@
         [93 [global_lighting [+0.1 +0.1 +0.1] [0 0 0] true]]  // ]
         [59 [global_lighting [0 0 0] [-0.1 -0.1 -0.1] true]]  // ;
         [39 [global_lighting [0 0 0] [+0.1 +0.1 +0.1] true]]  // '
+        [92 [light_debug]] // \
     ]}
     console:{"shell::Console":{ }}
     room_editor:{"shell::Room_Editor":{ }}

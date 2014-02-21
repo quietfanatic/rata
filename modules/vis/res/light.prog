@@ -36,17 +36,34 @@
             uniform vec3 diffuse;
             uniform vec3 radiant;
 
+            uniform float materials_length;
+            uniform int debug_type;
+
             varying vec2 tex_coords;
 
             void main () {
                 vec4 atom = texture2D(tex, tex_coords);
-                vec3 amb = texture2D(materials, vec2(0.0, atom.r)).rgb;
-                vec3 dif = texture2D(materials, vec2(0.5, atom.r)).rgb;
-                vec3 rad = texture2D(materials, vec2(1.0, atom.r)).rgb;
-                gl_FragColor.rgb = amb * ambient
-                                 + dif * diffuse * atom.g
-                                 + rad * radiant;
-                gl_FragColor.a = 1.0;
+                if (debug_type == 1) {
+                    gl_FragColor = atom;
+                    gl_FragColor.r *= (255.0 / materials_length);
+                }
+                else if (debug_type == 2) {
+                    gl_FragColor.rgb = ambient;
+                    gl_FragColor.a = 1.0;
+                }
+                else if (debug_type == 3) {
+                    gl_FragColor.rgb = diffuse;
+                    gl_FragColor.a = 1.0;
+                }
+                else {
+                    vec3 amb = texture2D(materials, vec2(0.0, atom.r)).rgb;
+                    vec3 dif = texture2D(materials, vec2(0.5, atom.r)).rgb;
+                    vec3 rad = texture2D(materials, vec2(1.0, atom.r)).rgb;
+                    gl_FragColor.rgb = amb * ambient
+                                     + dif * diffuse * atom.g
+                                     + rad * radiant;
+                    gl_FragColor.a = 1.0;
+                }
             }
             END
     }}

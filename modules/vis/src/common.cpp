@@ -29,20 +29,29 @@ namespace vis {
     RGBf ambient_light = RGBf{1, 1, 1};
     RGBf diffuse_light = RGBf{1, 1, 1};
     RGBf radiant_light = RGBf{1, 1, 1};
+    int light_debug_type = 0;
 
     struct Light_Program : Cameraed_Program {
+        GLint model_pos;
         GLint ambient;
         GLint diffuse;
         GLint radiant;
-        GLint model_pos;
+        GLint materials_length;
+        GLint debug_type;
         void finish () {
             Cameraed_Program::finish();
             glUniform1i(require_uniform("tex"), 0);
             glUniform1i(require_uniform("materials"), 1);
+            model_pos = require_uniform("model_pos");
             ambient = require_uniform("ambient");
             diffuse = require_uniform("diffuse");
             radiant = require_uniform("radiant");
-            model_pos = require_uniform("model_pos");
+            materials_length = require_uniform("materials_length");
+            debug_type = require_uniform("debug_type");
+        }
+        void Program_begin () override {
+            Cameraed_Program::Program_begin();
+            glUniform1i(debug_type, light_debug_type);
         }
     };
     Light_Program* light_program = NULL;
@@ -155,6 +164,8 @@ namespace vis {
             hacc::manage(&materials);
             diagnose_opengl("after loading world.prog");
             initted = true;
+            light_program->use();
+            glUniform1f(light_program->materials_length, 7);  // TODO: This is not dynamic
         }
     }
 
@@ -297,3 +308,14 @@ core::New_Command _global_lighting_cmd (
     2, _global_lighting
 );
 
+static void _light_debug () {
+    light_debug_type++;
+    if (light_debug_type > 3)
+        light_debug_type = 0;
+    print_to_console("Light debug type: " + std::to_string(light_debug_type) + "\n");
+}
+
+core::New_Command _light_debug_cmd (
+    "light_debug", "Toggle between light debug modes",
+    0, _light_debug
+);
