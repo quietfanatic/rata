@@ -2,6 +2,7 @@
 #define HAVE_ENT_BIPEDS_H
 
 #include "../inc/control.h"
+#include "../inc/mixins.h"
 #include "../../phys/inc/phys.h"
 #include "../../phys/inc/ground.h"
 #include "../../geo/inc/rooms.h"
@@ -32,7 +33,7 @@ namespace ent {
      // Various bits of static info.
     struct BipedDef;
 
-    struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Drawn<vis::Sprites>, Controllable {
+    struct Biped : ROD<vis::Sprites>, phys::Grounded, Controllable {
 
         BipedDef* def = NULL;
          // Bleh
@@ -67,11 +68,6 @@ namespace ent {
         float distance_walked = 0;
         float oldxrel = 0;
         void Drawn_draw (vis::Sprites) override;
-
-        void Resident_emerge () override;
-        void Resident_reclude () override;
-        Vec Resident_get_pos () override { return Object::pos(); }
-        void Resident_set_pos (Vec p) override { Object::set_pos(p); }
 
         Biped ();
         void finish ();

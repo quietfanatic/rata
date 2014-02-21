@@ -12,15 +12,6 @@ namespace ent {
         stats = *def->stats;
     }
 
-    void Biped::Resident_emerge () {
-        materialize();
-        appear();
-    }
-    void Biped::Resident_reclude () {
-        dematerialize();
-        disappear();
-    }
-
     void Biped::Controllable_buttons (ButtonBits bits) {
          // Since we walk by altering our contact with the ground,
          //  and since contacts aren't processed if the body is asleep,
