@@ -29,7 +29,7 @@ namespace vis {
     float ambient_light = 1;
     float diffuse_light = 1;
 
-    struct World_Program : Program {
+    struct Light_Program : Program {
         GLint ambient;
         GLint diffuse;
         void finish () {
@@ -41,7 +41,7 @@ namespace vis {
             diffuse = require_uniform("diffuse_light");
         }
     };
-    World_Program* world_program = NULL;
+    Light_Program* light_program = NULL;
 
     void Materials::update () {
         if (items.size() > 256) {
@@ -146,8 +146,8 @@ namespace vis {
             images_init();
             text_init();
             tiles_init();
-            world_program = hacc::File("vis/res/world.prog").data().attr("prog");
-            hacc::manage(&world_program);
+            light_program = hacc::File("vis/res/light.prog").data().attr("prog");
+            hacc::manage(&light_program);
             hacc::manage(&materials);
             diagnose_opengl("after loading world.prog");
             initted = true;
@@ -184,9 +184,9 @@ namespace vis {
             i.Drawn_draw(Sprites());
          // Now render from world fb to window fb
         glDisable(GL_DEPTH_TEST);
-        world_program->use();
-        glUniform4f(world_program->ambient, ambient_light, ambient_light, ambient_light, ambient_light);
-        glUniform4f(world_program->diffuse, diffuse_light, diffuse_light, diffuse_light, diffuse_light);
+        light_program->use();
+        glUniform4f(light_program->ambient, ambient_light, ambient_light, ambient_light, ambient_light);
+        glUniform4f(light_program->diffuse, diffuse_light, diffuse_light, diffuse_light, diffuse_light);
         diagnose_opengl("after setting light");
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, world_tex);
@@ -258,10 +258,10 @@ HACCABLE(Materials) {
     finish([](Materials& v){ v.update(); });
 }
 
-HACCABLE(World_Program) {
-    name("vis::World_Program");
+HACCABLE(Light_Program) {
+    name("vis::Light_Program");
     delegate(base<Program>());
-    finish([](World_Program& v){ v.finish(); });
+    finish([](Light_Program& v){ v.finish(); });
 }
 
 static void _global_lighting (float amb, float diff, bool relative) {
