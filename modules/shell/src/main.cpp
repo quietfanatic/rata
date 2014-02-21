@@ -9,10 +9,16 @@
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/text.h"
 #include "../../util/inc/integration.h"
+#include "../inc/main.h"
 
-static std::string initial_state = "shell/start.hacc";
-static std::string stop_state = "../save/last_stop.hacc";
-static std::string main_file = "shell/main.hacc";
+using namespace hacc;
+using namespace core;
+
+File main_file = File("shell/main.hacc");
+File current_state = File("shell/initial-state.hacc");
+
+static std::string default_state_filename = "shell/initial-state.hacc";
+static std::string stop_state_filename = "../save/last_stop.hacc";
 
 struct Hotkeys : core::Listener {
     std::vector<std::pair<int, core::Command>> hotkeys;
@@ -49,17 +55,15 @@ void step () {
 }
 
 int main (int argc, char** argv) {
-    using namespace hacc;
-    using namespace core;
 
     std::string state = argc >= 2
         ? rel2abs(argv[1])
-        : initial_state;
+        : default_state_filename;
 
     auto here = util::my_dir(argc, argv);
     chdir(here + "/modules");
 
-    game = File(main_file).data().attr("game");
+    game = main_file.data().attr("game");
     vis::default_font = File("shell/res/monospace.hacc").data().attr("font");
     vis::Materials* materials = File("world/res/materials.hacc").data().attr("materials");
     vis::set_materials(materials);
@@ -67,14 +71,15 @@ int main (int argc, char** argv) {
     window->step = step;
     window->render = vis::render;
     window->before_next_frame([&](){
-        load(File(state));
+        current_state = File(state);
+        load(current_state);
     });
      // Run
     phys::space.start();
     window->start();
      // After window closes
-    File(state).rename(stop_state);
-    save(File(stop_state));
+    current_state.rename(stop_state_filename);
+    save(current_state);
     fprintf(stderr, "Quit successfully\n");
 }
 
