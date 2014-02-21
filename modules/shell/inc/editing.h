@@ -27,6 +27,7 @@ namespace shell {
         bool dragging = false;
         Vec drag_origin;
         Vec drag_offset;
+        Vec menu_world_pos;
          // Drawing
         std::string status;
 

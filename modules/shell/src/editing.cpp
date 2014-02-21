@@ -157,6 +157,7 @@ namespace shell {
                 }
                 else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
                     if (action == GLFW_PRESS) {
+                        menu_world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
                         Vec area = camera->window_to_dev(window->width, 0);
                         res_menu->size = res_menu->root->Menu_Item_size(area);
                         Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
@@ -169,6 +170,7 @@ namespace shell {
             else if (selected_room) {
                 if (code == GLFW_MOUSE_BUTTON_RIGHT) {
                     if (action == GLFW_PRESS) {
+                        menu_world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
                         Vec area = camera->window_to_dev(window->width, 0);
                         room_menu->size = room_menu->root->Menu_Item_size(area);
                         Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
@@ -311,7 +313,7 @@ namespace shell {
         hacc::Reference(type, newp).from_tree(data);
         Resident* resp = (Resident*)hacc::Pointer(type, newp).address_of_type(hacc::Type::CppType<Resident>());
         if (resp) {
-            resp->Resident_set_pos(room_menu->pos);
+            resp->Resident_set_pos(menu_world_pos);
             resp->set_room(selected_room);
         }
     }
