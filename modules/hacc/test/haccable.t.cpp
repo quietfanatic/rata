@@ -160,7 +160,7 @@ MyThing myt (10, 20, 30);
 tap::Tester haccable_tester ("hacc/haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(52);
+    plan(54);
     is(to_tree(&i).as<int>(), 4, "to_tree on int32 works");
     doesnt_throw([](){ from_tree(&i, Tree(35)); }, "from_tree on int32");
     is(i, 35, "...works");
@@ -215,9 +215,11 @@ tap::Tester haccable_tester ("hacc/haccable", [](){
     is(to_tree(&myt).form(), OBJECT, "MyThing is Object by default");
     is(to_tree(&myt).attr("x").as<float>(), 10.f, "MyThing's collapse attr works");
     is(to_tree(&myt).attr("z").as<float>(), 30.f, "MyThing's non-collapse attr works");
-    doesnt_throw([](){ from_tree(&myt, Tree(Object{Pair("x", Tree(10.f)), Pair("y", Tree(20.f)), Pair("z", Tree(30.f))})); }, "Mything accepts 3-attr object");
-    is(myt, MyThing(10.f, 20.f, 30.f), "MyThing's from_tree with object worked correctly");
-    doesnt_throw([](){ from_tree(&myt, Tree(Array{Tree(10.f), Tree(20.f), Tree(30.f)})); }, "Mything accepts 3-elem array");
-    is(myt, MyThing(10.f, 20.f, 30.f), "MyThing's from_tree with array worked correctly");
+    doesnt_throw([](){ from_tree(&myt, Tree(Object{Pair("x", Tree(11.f)), Pair("y", Tree(21.f)), Pair("z", Tree(31.f))})); }, "Mything accepts 3-attr object");
+    is(myt, MyThing(11.f, 21.f, 31.f), "MyThing's from_tree with object worked correctly");
+    doesnt_throw([](){ from_tree(&myt, Tree(Array{Tree(12.f), Tree(22.f), Tree(32.f)})); }, "Mything accepts 3-elem array");
+    is(myt, MyThing(12.f, 22.f, 32.f), "MyThing's from_tree with array worked correctly");
+    doesnt_throw([](){ from_tree(&myt, Tree(Object{Pair("Vectorly", Tree(Array{Tree(13.f), Tree(23.f)})), Pair("z", Tree(33.f))})); }, "MyThing accepts object with uncollapsed attrs");
+    is(myt, MyThing(13.f, 23.f, 33.f), "MyThing's from_tree with uncollapsed worked correctly");
 });
 

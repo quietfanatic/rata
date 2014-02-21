@@ -201,9 +201,7 @@ namespace hacc {
                 next: { }
             }
         }
-        else if (!keys.empty()) {
-            throw X::No_Attrs(*this);
-        }
+         // Don't throw No_Attrs.
     }
 
     static Reference attr_inner (const Reference& r, std::string name) {
