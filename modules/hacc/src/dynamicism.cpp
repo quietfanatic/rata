@@ -444,7 +444,21 @@ namespace hacc {
                 }
                 set_keys(ks);
                 for (size_t i = 0; i < n; i++) {
-                    attr(ks[i]).prepare(o[i].second);
+                    if (auto ar = attr_inner(*this, ks[i]))
+                        ar.prepare(o[i].second);
+                }
+                 // Any collapsed members not covered by ks?
+                for (auto& a : type().data->attr_list) {
+                    if (a.second->collapse) {
+                        for (auto& ksk : ks)
+                            if (a.first == ksk)
+                                goto next;
+                         // Prepare collapsed member with same Tree
+                        mod([&](void* p){
+                            Reference(p, a.second).prepare(t);
+                        });
+                        next: { }
+                    }
                 }
                 break;
             }
@@ -507,7 +521,8 @@ namespace hacc {
         else switch (t.form()) {
             case OBJECT: {
                 for (auto& a : t.as<const Object&>()) {
-                    attr(a.first).fill(a.second);
+                    if (auto ar = attr_inner(*this, a.first))
+                        ar.fill(a.second);
                 }
                 break;
             }
