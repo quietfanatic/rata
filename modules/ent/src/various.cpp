@@ -27,7 +27,8 @@ namespace ent {
             }
         }
         void finish () {
-            set_def(bdf);
+            Object::set_def(bdf);
+            Resident::finish();
         }
     };
     phys::BodyDef* Crate::bdf = NULL;
