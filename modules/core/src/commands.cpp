@@ -142,16 +142,8 @@ void __length (const Reference& ref) {
 }
 New_Command _length_cmd ("length", "Print the length of an array.", 1, __length);
 
-void _set (const Reference& ref, const Dynamic& val) {
-    if (val.type != ref.type()) {
-        throw hacc::X::Logic_Error(
-            "Arguments to set are of different types "
-          + ref.type().name() + " and " + val.type.name()
-        );
-    }
-    ref.write([&](void* p){
-        ref.type().copy_assign(p, val.address());
-    });
+void _set (const Reference& ref, hacc::Tree data) {
+    ref.from_tree(data);
 }
 New_Command _set_cmd ("set", "Set the data at a path to a value.", 2, _set);
 

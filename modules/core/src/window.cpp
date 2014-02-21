@@ -306,16 +306,16 @@ New_Command _create_file_cmd (
     2, _create_file
 );
 
-void _add (hacc::Document* doc, const hacc::Dynamic& data) {
-    void* p = doc->alloc(data.type);
-    data.type.construct(p);
-    data.type.copy_assign(p, data.addr);
+void _add (hacc::Document* doc, std::string type, hacc::Tree data) {
+    void* p = doc->alloc(hacc::Type(type));
+    hacc::Type(type).construct(p);
+    hacc::Reference(hacc::Type(type), p).from_tree(data);
 }
 New_Command _add_cmd ("add", "Create a new object inside a document.", 2, _add);
-void _add_id (hacc::Document* doc, std::string id, const hacc::Dynamic& data) {
-    void* p = doc->alloc_id(id, data.type);
-    data.type.construct(p);
-    data.type.copy_assign(p, data.addr);
+void _add_id (hacc::Document* doc, std::string id, std::string type, hacc::Tree data) {
+    void* p = doc->alloc_id(id, hacc::Type(type));
+    hacc::Type(type).construct(p);
+    hacc::Reference(hacc::Type(type), p).from_tree(data);
 }
 New_Command _add_id_cmd ("add_id", "Create a new object inside a document with a given ID.", 3, _add_id);
 
