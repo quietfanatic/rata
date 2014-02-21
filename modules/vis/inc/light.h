@@ -10,6 +10,9 @@ namespace vis {
         float r;
         float g;
         float b;
+        RGBf () : r(0), g(0), b(0) { }
+        RGBf (float v) : r(v), g(v), b(v) { }
+        RGBf (float r, float g, float b) : r(r), g(g), b(b) { }
         RGBf& operator += (const RGBf& o) {
             r += o.r;
             g += o.g;
@@ -44,6 +47,9 @@ namespace vis {
 
      // This only needs to be called once, by common.cpp
     void light_texture (GLuint);
+
+    extern int light_debug_type;
+
 }
 
 #endif

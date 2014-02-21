@@ -72,7 +72,8 @@ that module's directory, if it exists.
  - ☐ Sound and music, probably with OpenAL
  - ☐ Camera control (bring constraint satisfaction system from master branch)
  - ☐ Items and inventory
- - ☐ Add area-lighting and model-internal shadows to lighting shader
+ - ☑ Implement area lighting
+ - ☐ Add model-internal shadows to lighting shader
  - ☐ Some basic game content
 
 ###### Long Term

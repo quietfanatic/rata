@@ -27,9 +27,9 @@ namespace vis {
     GLuint world_depth_rb = 0;
     Vec rtt_camera_size = Vec(NAN, NAN);
 
-    RGBf ambient_light = RGBf{1, 1, 1};
-    RGBf diffuse_light = RGBf{1, 1, 1};
-    RGBf radiant_light = RGBf{1, 1, 1};
+    RGBf ambient_light = 1;
+    RGBf diffuse_light = 0;
+    RGBf radiant_light = 1;
 
      // Set up the requirements for a render-to-texture step
     void setup_rtt () {
@@ -98,7 +98,8 @@ namespace vis {
          // Now render from world fb to window fb
         glDisable(GL_DEPTH_TEST);
          // Light renders blend by adding.
-        glEnable(GL_BLEND);
+        if (light_debug_type != 1)
+            glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
          // Clear to black, to make blending work.
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -108,7 +109,9 @@ namespace vis {
         light_texture(world_tex);
         diagnose_opengl("after setting world tex");
 
-         // One global light render
+        for (auto& i : Lights::items)
+            i.Drawn_draw(Lights());
+         // One global light render finally
         set_ambient(ambient_light);
         set_diffuse(diffuse_light);
         set_radiant(radiant_light);
@@ -155,6 +158,7 @@ namespace vis {
 
     Links<Drawn<Map>> Map::items;
     Links<Drawn<Sprites>> Sprites::items;
+    Links<Drawn<Lights>> Lights::items;
     Links<Drawn<Overlay>> Overlay::items;
     Links<Drawn<Hud>> Hud::items;
     Links<Drawn<Dev>> Dev::items;

@@ -140,7 +140,7 @@ subdep sub {
     my @includes = (slurp $file, 2048) =~ /^\s*#include\s*"([^"]*)"/gmi;
     my $old_cwd = cwd;
     chdir $base;
-    my @r = map realpath($_), @includes;
+    my @r = map -e($_) ? realpath($_) : (), @includes;
     chdir $old_cwd;
     return @r;
 };

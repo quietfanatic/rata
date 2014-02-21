@@ -11,6 +11,12 @@
         texture:$("world/res/test.tileset").img.textures[0]
         tiles:$("world/res/test.tiles")
     } }
+    test_light:{ "ent::Light":{
+        Resident:{ room:$.room }
+        pos:[0 0]
+        vertices:[[0 0] [20 0] [20 30] [0 30]]
+        diffuse:[1.0 1.0 1.0]
+    } }
     room:{ "geo::Room":{
         boundary:[
             0~00000000
