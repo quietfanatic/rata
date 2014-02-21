@@ -29,16 +29,17 @@ namespace vis {
     float ambient_light = 1;
     float diffuse_light = 1;
 
-    struct Light_Program : Program {
+    struct Light_Program : Cameraed_Program {
         GLint ambient;
         GLint diffuse;
+        GLint model_pos;
         void finish () {
-            Program::link();
-            use();
+            Cameraed_Program::finish();
             glUniform1i(require_uniform("tex"), 0);
             glUniform1i(require_uniform("materials"), 1);
             ambient = require_uniform("ambient_light");
             diffuse = require_uniform("diffuse_light");
+            model_pos = require_uniform("model_pos");
         }
     };
     Light_Program* light_program = NULL;
@@ -173,11 +174,11 @@ namespace vis {
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
+        Program::unuse();
          // Use camera
         global_camera_pos.x = round(camera_pos.x/PX) * PX;
         global_camera_pos.y = round(camera_pos.y/PX) * PX;
         global_camera_size = camera_size;
-        Program::unuse();
         for (auto& i : Map::items)
             i.Drawn_draw(Map());
         for (auto& i : Sprites::items)
@@ -187,14 +188,15 @@ namespace vis {
         light_program->use();
         glUniform4f(light_program->ambient, ambient_light, ambient_light, ambient_light, ambient_light);
         glUniform4f(light_program->diffuse, diffuse_light, diffuse_light, diffuse_light, diffuse_light);
+        glUniform2f(light_program->model_pos, 0, 0);
         diagnose_opengl("after setting light");
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, world_tex);
         Vec pts [4];
-        pts[0] = Vec(0, 0);
-        pts[1] = Vec(1, 0);
-        pts[2] = Vec(1, 1);
-        pts[3] = Vec(0, 1);
+        pts[0] = global_camera_pos - global_camera_size/2;
+        pts[2] = global_camera_pos + global_camera_size/2;
+        pts[1] = Vec(pts[2].x, pts[0].y);
+        pts[3] = Vec(pts[0].x, pts[2].y);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vec), pts);
         glDrawArrays(GL_QUADS, 0, 4);
          // Overlay rendering uses blend and no depth
@@ -261,7 +263,7 @@ HACCABLE(Materials) {
 HACCABLE(Light_Program) {
     name("vis::Light_Program");
     delegate(base<Program>());
-    finish([](Light_Program& v){ v.finish(); });
+    finish(&Light_Program::finish);
 }
 
 static void _global_lighting (float amb, float diff, bool relative) {

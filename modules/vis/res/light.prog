@@ -1,0 +1,50 @@
+{"hacc::Document":{
+    prog:{"vis::Light_Program":{
+        shaders:[$.vert $.frag]
+        uses_vaos:false
+        attributes:[vert_pos]
+    }}
+    vert:{"core::Shader":{
+        type:vertex
+        source:<<END
+            #version 110
+
+            uniform vec2 model_pos;
+            uniform vec2 camera_pos;
+            uniform vec2 camera_size;
+
+            attribute vec2 vert_pos;
+
+            varying vec2 tex_coords;
+
+            void main () {
+                gl_Position.xy = (model_pos - camera_pos + vert_pos) / (camera_size / 2.0);
+                gl_Position.zw = vec2(0.0, 1.0);
+                tex_coords = (gl_Position.xy + 1.0) / 2.0;
+            }
+            END
+    }}
+    frag:{"core::Shader":{
+        type:fragment
+        source:<<END
+            #version 110
+
+            uniform sampler2D tex;
+            uniform sampler2D materials;
+            varying vec2 tex_coords;
+
+            uniform vec4 ambient_light;
+            uniform vec4 diffuse_light;
+
+            void main () {
+                vec4 atom = texture2D(tex, tex_coords);
+                vec4 ambient = texture2D(materials, vec2(0.0, atom.r));
+                vec4 diffuse = texture2D(materials, vec2(0.5, atom.r));
+                vec4 radiant = texture2D(materials, vec2(1.0, atom.r));
+                gl_FragColor = ambient * ambient_light
+                             + diffuse * diffuse_light * atom.g
+                             + radiant;
+            }
+            END
+    }}
+}}
