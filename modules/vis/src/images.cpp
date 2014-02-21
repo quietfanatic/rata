@@ -244,7 +244,7 @@ namespace vis {
         core::diagnose_opengl("after draw_frame");
     }
     void draw_texture (Texture* texture, Rect area, float z) {
-        draw_frame(plain_frame, texture, area.lb(), area.rt() - area.lb(), z);
+        draw_frame(plain_frame, texture, area.lb(), (area.rt() - area.lb())/PX, z);
     }
 
 } using namespace vis;

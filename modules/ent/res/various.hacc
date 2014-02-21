@@ -47,7 +47,7 @@
             { name:crate offset:[24 24] size:[16 16] }
         ]
         palettes:[
-            { offset:[0 2] }
+            { offset:[0 1] }
         ]
     }}
 }}

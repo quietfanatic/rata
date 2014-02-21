@@ -13,7 +13,7 @@ namespace ent {
         static vis::Texture* texture;
 
         void Drawn_draw (vis::Sprites) override {
-            vis::draw_texture(texture, pos() + Rect(0.5, 0, 0.5, 1));
+            vis::draw_texture(texture, pos() + Rect(-0.5, 0, 0.5, 1));
         }
 
         Crate () {
