@@ -104,6 +104,16 @@ namespace util {
     }
     static inline Rect& operator &= (Rect& a, const Rect& b) { return a = a & b; }
 
+    CE Rect operator + (const Rect& a, Vec b) {
+        return Rect(a.l+b.x, a.b+b.y, a.r+b.x, a.t+b.y);
+    }
+    CE Rect operator + (Vec a, const Rect& b) {
+        return b+a;
+    }
+    CE Rect operator - (const Rect& a, Vec b) {
+        return Rect(a.l-b.x, a.b-b.y, a.r-b.x, a.t-b.y);
+    }
+
     Vec constrain (Vec p, const Rect& range);
 
 }
