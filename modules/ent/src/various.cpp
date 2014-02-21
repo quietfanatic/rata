@@ -37,7 +37,7 @@ vis::Frame* Crate::frame = NULL;
 
 HACCABLE(Crate) {
     name("ent::Crate");
-    attr("Object", base<phys::Object>());
+    attr("Object", base<phys::Object>().optional());
     finish(&Crate::finish);
 }
 
