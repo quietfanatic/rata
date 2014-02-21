@@ -34,7 +34,6 @@ typedef uint32 uint;
 #define ANON ANON_HELPER_2(_anon_, __COUNTER__)
 
  // Constants
-CE float FPS = 60.0;
 CE float FR = 1/60.0;
 CE float PX = 1/16.0;
 CE float PI = M_PI;

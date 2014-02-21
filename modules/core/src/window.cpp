@@ -109,7 +109,7 @@ namespace core {
 
     void Window::start () {
         if (!is_open) open();
-         // Set all the window calbacks.  The reason these aren't set on open
+         // Set all the window callbacks.  The reason these aren't set on open
          //  is because the input system may crash if the callbacks are called
          //  while the program is exiting and things are being destructed.
         glfwSetWindowCloseCallback(close_cb);
@@ -188,18 +188,22 @@ namespace core {
                     }
                 }
                  // Run step and render
-                 // TODO: real timing and allow frame-skipping display
                 if (step) step();
                 frames_simulated++;
                  // Do timing around the render step.
-                lag -= 1/FPS;
-                if (lag > 1/FPS) {
+                 // TODO: this is not quite optimal.
+                lag -= 1/fps;
+                if (lag > 1/fps + 0.002) {
                     timing_logger.log("Skipping frame!");
                 }
                 else {
+                    if (lag > 1/fps) {
+                         // Allow a tiny bit of slowdown in case the window is
+                         //  being vsynced at 59.9hz or something like that.
+                        lag = 1/fps;
+                    }
                     if (render) render();
                     frames_drawn++;
-                    glfwSwapBuffers();
                 }
                 lag += glfwGetTime();
                 glfwSetTime(0);
@@ -207,6 +211,7 @@ namespace core {
                     glfwSleep(-lag);
                 }
                 timing_logger.log("%f\n", lag);
+                glfwSwapBuffers();
             }
         }
         catch (...) {
@@ -266,6 +271,7 @@ HACCABLE(Window) {
     attr("depth", member(&Window::depth).optional());
     attr("stencil", member(&Window::stencil).optional());
     attr("fullscreen", member(&Window::fullscreen).optional());
+    attr("fps", member(&Window::fps).optional());
     attr("limit_fps", member(&Window::limit_fps).optional());
 }
 
