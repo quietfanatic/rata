@@ -1,5 +1,6 @@
 #include <sstream>
 #include "../inc/editing.h"
+#include "../inc/main.h"
 #include "../../geo/inc/rooms.h"
 #include "../../geo/inc/camera.h"
 #include "../../hacc/inc/files.h"
@@ -303,6 +304,16 @@ namespace shell {
         auto filename = hacc::address_to_path(selected_room).root();
         window->before_next_frame([filename](){hacc::reload(filename);});
     }
+    void Room_Editor::re_new_actor (hacc::Type type, hacc::Tree data) {
+        hacc::Document* st = current_state.data();
+        void* newp = st->alloc(type);
+        type.construct(newp);
+        Resident* resp = (Resident*)hacc::Pointer(type, newp).address_of_type(hacc::Type::CppType<Resident>());
+        if (resp) {
+            resp->Resident_set_pos(room_menu->pos);
+            resp->set_room(selected_room);
+        }
+    }
 
 } using namespace shell;
 
@@ -342,3 +353,9 @@ void _re_reload_room () {
     room_editor->re_reload_room();
 }
 New_Command _re_reload_room_cmd ("re_reload_room", "Reload the selected room from disk.", 0, _re_reload_room);
+
+void _re_new_actor (std::string type, hacc::Tree data) {
+    if (!room_editor) return;
+    room_editor->re_new_actor(hacc::Type(type), data);
+}
+New_Command _re_new_actor_cmd ("re_new_actor", "Add a new actor to the current state.", 2, _re_new_actor);
