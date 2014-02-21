@@ -858,6 +858,54 @@ auto opengl_debug_wrap_glew (Func* f, const char* name, Args... args) -> decltyp
 #else
     #define glUniform4i(...) opengl_debug_wrap(glUniform4i, "glUniform4i", __VA_ARGS__)
 #endif
+#ifdef glUniform1fv
+    #undef glUniform1fv
+    #define glUniform1fv(...) opengl_debug_wrap_glew(__glewUniform1fv, "glUniform1fv", __VA_ARGS__)
+#else
+    #define glUniform1fv(...) opengl_debug_wrapv(glUniform1fv, "glUniform1fv", __VA_ARGS__)
+#endif
+#ifdef glUniform1iv
+    #undef glUniform1iv
+    #define glUniform1iv(...) opengl_debug_wrap_glew(__glewUniform1iv, "glUniform1iv", __VA_ARGS__)
+#else
+    #define glUniform1iv(...) opengl_debug_wrapv(glUniform1iv, "glUniform1iv", __VA_ARGS__)
+#endif
+#ifdef glUniform2fv
+    #undef glUniform2fv
+    #define glUniform2fv(...) opengl_debug_wrap_glew(__glewUniform2fv, "glUniform2fv", __VA_ARGS__)
+#else
+    #define glUniform2fv(...) opengl_debug_wrapv(glUniform2fv, "glUniform2fv", __VA_ARGS__)
+#endif
+#ifdef glUniform2iv
+    #undef glUniform2iv
+    #define glUniform2iv(...) opengl_debug_wrap_glew(__glewUniform2iv, "glUniform2iv", __VA_ARGS__)
+#else
+    #define glUniform2iv(...) opengl_debug_wrapv(glUniform2iv, "glUniform2iv", __VA_ARGS__)
+#endif
+#ifdef glUniform3fv
+    #undef glUniform3fv
+    #define glUniform3fv(...) opengl_debug_wrap_glew(__glewUniform3fv, "glUniform3fv", __VA_ARGS__)
+#else
+    #define glUniform3fv(...) opengl_debug_wrapv(glUniform3fv, "glUniform3fv", __VA_ARGS__)
+#endif
+#ifdef glUniform3iv
+    #undef glUniform3iv
+    #define glUniform3iv(...) opengl_debug_wrap_glew(__glewUniform3iv, "glUniform3iv", __VA_ARGS__)
+#else
+    #define glUniform3iv(...) opengl_debug_wrapv(glUniform3iv, "glUniform3iv", __VA_ARGS__)
+#endif
+#ifdef glUniform4fv
+    #undef glUniform4fv
+    #define glUniform4fv(...) opengl_debug_wrap_glew(__glewUniform4fv, "glUniform4fv", __VA_ARGS__)
+#else
+    #define glUniform4fv(...) opengl_debug_wrapv(glUniform4fv, "glUniform4fv", __VA_ARGS__)
+#endif
+#ifdef glUniform4iv
+    #undef glUniform4iv
+    #define glUniform4iv(...) opengl_debug_wrap_glew(__glewUniform4iv, "glUniform4iv", __VA_ARGS__)
+#else
+    #define glUniform4iv(...) opengl_debug_wrapv(glUniform4iv, "glUniform4iv", __VA_ARGS__)
+#endif
 #ifdef glUseProgram
     #undef glUseProgram
     #define glUseProgram(...) opengl_debug_wrap_glew(__glewUseProgram, "glUseProgram", __VA_ARGS__)
