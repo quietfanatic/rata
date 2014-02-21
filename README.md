@@ -63,16 +63,25 @@ that module's directory, if it exists.
 
 #### TODO
 
- - Convert graphics to material-lighting format
- - Implement some AI
-    - With another b2World for imaginary scenarios, or something simpler?
- - Finish level editor
- - Camera control (bring constraint satisfaction system from master branch)
- - Items and inventory
- - Add area-lighting and model-internal shadows to lighting shader
- - Sound and music, probably with OpenAL
- - Draw a global map mockup
- - Content!  Levels!  Enemies!  Actors!  Puzzles!
- - Implement text layout engine (for speech bubbles and maybe inventory)
- - Add Windows support
+###### Short Term
+
+ - [X] Basic room editor
+ - [ ] Tilemap editor
+ - [ ] OS X support
+ - [ ] Convert graphics to material-lighting format
+ - [ ] Sound and music, probably with OpenAL
+ - [ ] Camera control (bring constraint satisfaction system from master branch)
+ - [ ] Items and inventory
+ - [ ] Add area-lighting and model-internal shadows to lighting shader
+ - [ ] Some basic game content
+
+###### Long Term
+
+ - [ ] Draw a global map mockup
+ - [ ] Implement some AI
+    - [ ] With another b2World for imaginary scenarios, or something simpler?
+ - [ ] Scripting (for story and events and stuff)
+ - [ ] Content!  Levels!  Enemies!  Actors!  Puzzles!
+ - [ ] Implement text layout engine (for speech bubbles and maybe inventory)
+ - [ ] Windows support
 
