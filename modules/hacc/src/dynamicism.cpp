@@ -195,7 +195,7 @@ namespace hacc {
                 if (a.second->collapse) {
                     chain(*this, a.second).set_keys(keys);
                 }
-                if (!a.second->optional && !a.second->readonly) {
+                if (!a.second->optional && !a.second->collapse && !a.second->readonly) {
                     throw X::Missing_Attr(*this, a.first);
                 }
                 next: { }
