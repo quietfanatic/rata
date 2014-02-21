@@ -70,6 +70,7 @@ namespace vis {
             text_init();
             tiles_init();
             light_init();
+            initted = true;
         }
     }
 
