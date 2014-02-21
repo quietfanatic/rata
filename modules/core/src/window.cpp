@@ -60,7 +60,7 @@ namespace core {
 
     static Logger file_logger ("files");
     static Logger game_logger ("game");
-    static Logger timing_logger ("timing");
+    static Logger timing_logger ("timing", false);
 
 
     Window* window = NULL;
