@@ -203,7 +203,7 @@ namespace core {
                 }
                 lag += glfwGetTime();
                 glfwSetTime(0);
-                if (lag < 0) {
+                if (limit_fps && lag < 0) {
                     glfwSleep(-lag);
                 }
                 timing_logger.log("%f\n", lag);
@@ -266,6 +266,7 @@ HACCABLE(Window) {
     attr("depth", member(&Window::depth).optional());
     attr("stencil", member(&Window::stencil).optional());
     attr("fullscreen", member(&Window::fullscreen).optional());
+    attr("limit_fps", member(&Window::limit_fps).optional());
 }
 
 void _load (std::string filename) {

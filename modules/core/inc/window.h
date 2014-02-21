@@ -22,6 +22,7 @@ namespace core {
         uint8 depth = 0;
         uint8 stencil = 0;
         bool fullscreen = false;
+        bool limit_fps = true;
 
         std::function<void ()> step;
         std::function<void ()> render;
