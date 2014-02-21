@@ -308,6 +308,7 @@ namespace shell {
         hacc::Document* st = current_state.data();
         void* newp = st->alloc(type);
         type.construct(newp);
+        hacc::Reference(type, newp).from_tree(data);
         Resident* resp = (Resident*)hacc::Pointer(type, newp).address_of_type(hacc::Type::CppType<Resident>());
         if (resp) {
             resp->Resident_set_pos(room_menu->pos);
