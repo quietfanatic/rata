@@ -39,8 +39,7 @@ namespace core {
         bool to_stop = false;
         std::vector<std::function<void ()>> pending_ops;
 
-         // Shortcuts.  If you want to set any other fields, do it manually and
-         //  then call open().
+         // Other fields cannot be changed once the window is open.
         void set_size (uint16 w, uint16 h) {
             width = w;
             height = h;

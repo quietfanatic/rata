@@ -78,6 +78,9 @@ namespace core {
                 throw hacc::X::Internal_Error("GLEW init failed: " + std::string((const char*)glewGetErrorString(glew_initted)));
             }
         }
+        else {
+            glfwSetWindowSize(width, height);
+        }
     }
 
     void Window::close () {
@@ -339,3 +342,8 @@ New_Command _remove_cmd (
     "remove", "Destroy an object from a document.  This will break any pointers to the object!",
     2, _remove
 );
+
+void _window_size (int width, int height) {
+    window->set_size(width, height);
+}
+New_Command _window_size_cmd ("window_size", "Set the window size in pixels.", 2, _window_size);

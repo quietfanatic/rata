@@ -2,14 +2,18 @@
     game:{Game:{
     }}
     window:{"core::Window":{
-        width: 1280  // Large dimensions for editing
-        height: 960
+        width: 640
+        height: 480
         depth: 8
     }}
     hotkeys:{Hotkeys:[
         [96 [open_console]]  // `
         [80 [pause]]  // P
         [48 [re_toggle]]  // 0
+        [49 [window_size 320 240]]  // 1
+        [50 [window_size 640 480]]  // 2
+        [51 [window_size 960 720]]  // 3
+        [52 [window_size 1280 960]]  // 4
         [91 [global_lighting -0.1 0 true]]  // [
         [93 [global_lighting +0.1 0 true]]  // ]
         [59 [global_lighting 0 -0.1 true]]  // ;
