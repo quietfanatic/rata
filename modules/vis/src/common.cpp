@@ -26,19 +26,22 @@ namespace vis {
     GLuint world_depth_rb = 0;
     Vec rtt_camera_size = Vec(NAN, NAN);
 
-    float ambient_light = 1;
-    float diffuse_light = 1;
+    RGBf ambient_light = RGBf{1, 1, 1};
+    RGBf diffuse_light = RGBf{1, 1, 1};
+    RGBf radiant_light = RGBf{1, 1, 1};
 
     struct Light_Program : Cameraed_Program {
         GLint ambient;
         GLint diffuse;
+        GLint radiant;
         GLint model_pos;
         void finish () {
             Cameraed_Program::finish();
             glUniform1i(require_uniform("tex"), 0);
             glUniform1i(require_uniform("materials"), 1);
-            ambient = require_uniform("ambient_light");
-            diffuse = require_uniform("diffuse_light");
+            ambient = require_uniform("ambient");
+            diffuse = require_uniform("diffuse");
+            radiant = require_uniform("radiant");
             model_pos = require_uniform("model_pos");
         }
     };
@@ -193,8 +196,9 @@ namespace vis {
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT);
         light_program->use();
-        glUniform4f(light_program->ambient, ambient_light, ambient_light, ambient_light, ambient_light);
-        glUniform4f(light_program->diffuse, diffuse_light, diffuse_light, diffuse_light, diffuse_light);
+        glUniform3fv(light_program->ambient, 1, &ambient_light.r);
+        glUniform3fv(light_program->diffuse, 1, &diffuse_light.r);
+        glUniform3fv(light_program->radiant, 1, &radiant_light.r);
         glUniform2f(light_program->model_pos, 0, 0);
         diagnose_opengl("after setting light");
         glBindTexture(GL_TEXTURE_2D, world_tex);
@@ -252,6 +256,13 @@ HACCABLE(vis::Overlay) { name("vis::Overlay"); }
 HACCABLE(vis::Hud) { name("vis::Hud"); }
 HACCABLE(vis::Dev) { name("vis::Dev"); }
 
+HACCABLE(RGBf) {
+    name("vis::RGBf");
+    elem(member(&RGBf::r));
+    elem(member(&RGBf::g));
+    elem(member(&RGBf::b));
+}
+
 HACCABLE(Material) {
     name("vis::Material");
     elem(member(&Material::ambient));
@@ -271,14 +282,14 @@ HACCABLE(Light_Program) {
     finish(&Light_Program::finish);
 }
 
-static void _global_lighting (float amb, float diff, bool relative) {
+static void _global_lighting (const RGBf& amb, const RGBf& dif, bool relative) {
     if (relative) {
         ambient_light += amb;
-        diffuse_light += diff;
+        diffuse_light += dif;
     }
     else {
         ambient_light = amb;
-        diffuse_light = diff;
+        diffuse_light = dif;
     }
 }
 core::New_Command _global_lighting_cmd (

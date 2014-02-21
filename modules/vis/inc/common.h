@@ -95,6 +95,19 @@ namespace vis {
         }
     };
 
+     // Mainly for lighting calculations; needs to be able to go above 1
+    struct RGBf {
+        float r;
+        float g;
+        float b;
+        RGBf& operator += (const RGBf& o) {
+            r += o.r;
+            g += o.g;
+            b += o.b;
+            return *this;
+        }
+    };
+
 }
 
 #endif

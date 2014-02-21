@@ -31,19 +31,22 @@
 
             uniform sampler2D tex;
             uniform sampler2D materials;
-            varying vec2 tex_coords;
 
-            uniform vec4 ambient_light;
-            uniform vec4 diffuse_light;
+            uniform vec3 ambient;
+            uniform vec3 diffuse;
+            uniform vec3 radiant;
+
+            varying vec2 tex_coords;
 
             void main () {
                 vec4 atom = texture2D(tex, tex_coords);
-                vec4 ambient = texture2D(materials, vec2(0.0, atom.r));
-                vec4 diffuse = texture2D(materials, vec2(0.5, atom.r));
-                vec4 radiant = texture2D(materials, vec2(1.0, atom.r));
-                gl_FragColor = ambient * ambient_light
-                             + diffuse * diffuse_light * atom.g
-                             + radiant;
+                vec3 amb = texture2D(materials, vec2(0.0, atom.r)).rgb;
+                vec3 dif = texture2D(materials, vec2(0.5, atom.r)).rgb;
+                vec3 rad = texture2D(materials, vec2(1.0, atom.r)).rgb;
+                gl_FragColor.rgb = amb * ambient
+                                 + dif * diffuse * atom.g
+                                 + rad * radiant;
+                gl_FragColor.a = 1.0;
             }
             END
     }}
