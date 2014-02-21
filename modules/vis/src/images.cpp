@@ -7,6 +7,7 @@
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/window.h"
 #include "../../core/inc/opengl.h"
+#include "../../util/inc/integration.h"
 
 namespace vis {
 
@@ -58,7 +59,7 @@ namespace vis {
         }
         core::window->open();
         int iw; int ih; int ich;
-        data = (uint32*)SOIL_load_image(filename.c_str(), &iw, &ih, &ich, 4);
+        data = (uint32*)SOIL_load_image(rel2abs(filename).c_str(), &iw, &ih, &ich, 4);
         if (!data) {
             throw hacc::X::Logic_Error("Couldn't open image \"" + filename + "\": " + SOIL_last_result());
         }
