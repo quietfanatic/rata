@@ -52,7 +52,7 @@ namespace phys {
      // Stores properties of motion, inertia, and a list of fixtures.
     struct BodyDef {
         b2BodyType type = b2_dynamicBody;
-        float mass = NAN;
+        float mass = 0;
         float damping = 0;
         float gravity_scale = 1;
         std::vector<FixtureDef*> fixtures;
