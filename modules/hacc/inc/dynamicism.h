@@ -34,6 +34,7 @@ namespace hacc {
         GetSet0& readonly ();
         GetSet0& narrow ();  // Do prepare and finish steps at fill time
         GetSet0& prepare ();  // Do fill and finish steps at prepare time
+        GetSet0& collapse ();  // Merge member's attrs or elems into parent
     };
     template <class C>
     struct GetSet1 : GetSet0 { };
@@ -45,6 +46,7 @@ namespace hacc {
         GetSet2<C, M>& readonly () { return static_cast<GetSet2<C, M>&>(this->GetSet0::readonly()); }
         GetSet2<C, M>& narrow () { return static_cast<GetSet2<C, M>&>(this->GetSet0::narrow()); }
         GetSet2<C, M>& prepare () { return static_cast<GetSet2<C, M>&>(this->GetSet0::prepare()); }
+        GetSet2<C, M>& collapse () { return static_cast<GetSet2<C, M>&>(this->GetSet0::collapse()); }
     };
 
      // A Pointer implements a dynamically-typed pointer.
@@ -107,6 +109,8 @@ namespace hacc {
         operator Pointer () const;
         template <class C>
         operator C* () const { return Pointer(*this); }
+
+        explicit operator bool () const { return c && gs; }
 
          // Hacc-specific
         std::vector<String> keys () const;
