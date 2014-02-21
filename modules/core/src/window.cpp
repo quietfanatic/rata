@@ -193,7 +193,7 @@ namespace core {
                  // Do timing around the render step.
                  // TODO: this is not quite optimal.
                 lag -= 1/fps;
-                if (lag > 1/fps + 0.002) {
+                if (lag > 1/fps + 0.002 && lag < 4/fps) {
                     timing_logger.log("Skipping frame!");
                 }
                 else {
