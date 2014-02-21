@@ -53,16 +53,40 @@ namespace vis {
 
      // These are the layers you can render to.
 
-     // Uses depth, materials
+     // Coordinates: world
+     // Input: materials with depth
+     // Blend: no
+     // Depth: yes
     struct Map { static Links<Drawn<Map>> items; };
-     // Uses depth, materials
+
+     // Coordinates: world
+     // Input: materials without depth
+     // Blend: no
+     // Depth: checked but not set
     struct Sprites { static Links<Drawn<Sprites>> items; };
-     // Alpha blending, no depth or materials
+
+     // Coordinates: world
+     // Input: none (light values set through uniform)
+     // Blend: additive, no alpha
+     // Depth: no
+    struct Lights { static Links<Drawn<Lights>> items; };
+
+     // Coordinates: world
+     // Input: color with alpha
+     // Blend: alpha blending
+     // Depth: no
     struct Overlay { static Links<Drawn<Overlay>> items; };
-     // Alpha blending, no depth or materials, fixed camera
+
+     // Coordinates: camera
+     // Input: color with alpha
+     // Blend: alpha blending
+     // Depth: no
     struct Hud { static Links<Drawn<Hud>> items; };
-     // Ignores camera_size (Full pixel resolution for console and stuff)
-     // Sixteen real-pixels per space unit (as opposed to virtual pixels).
+
+     // Coordinates: dev (strictly 16 window pixels per unit)
+     // Input: color with alpha
+     // Blend: alpha blending
+     // Depth: no
     struct Dev { static Links<Drawn<Dev>> items; };
 
      // For primarily internal use
