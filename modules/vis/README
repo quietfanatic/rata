@@ -18,6 +18,9 @@ Sprites - This is for rendering moving objects and such.  This layer also
            uses material index and vertical angle channels as above, but it
            does not use a depth channel.  Depth checking is enabled, however.
            Backgrounds should also use this layer (with a depth less than 100).
+Lights - This is for areas of lighting.  It uses the output of the Map and
+          Sprites layers as a texture.  Only use the functions in light.h in
+          this layer.  Blending is additive and there is no depth.
 Overlay - This is for things in world coordinates that use traditional RGBA
            channels and alpha blending.  No depth test is performed.
 Hud - Like overlay, but with a fixed camera, so that things are rendered in
@@ -28,16 +31,23 @@ Dev - Like Hud, but does not account for camera zoom, allowing higher-
 
 MATERIALS
 
-The material palette is an array of triples, of the form
-    [$ambient $diffuse $radient]
+Rendered materials are expected to be of this format:
+    r=$index, g=$angle, b=$shadow, a=(depth during Map, unused otherwise)
+
+The material palette is an array of triples indexed by $index, of the form
+    [$ambient $diffuse $radiant]
 Lighting calculations use this formula.
       $ambient * $ambient_light
-    + $diffuse * $diffuse_light * $vertical_angle (green channel)
+    + ($shadow == 0.5 ? 0 : $diffuse * $diffuse_light * $angle)
     + $radiant
+
+$shadow is projected onto earlier renders by (ab)using glBlendFunc.
+TODO: implement $shadow.
 
 Objects with three shades of color use vertical_angle values of 0x40, 0x80,
  and 0xC0.  Objects with two shades of color use 0x40 and 0x80.  Objects with
  only one shade use 0x80.
+TODO: switch to more enumerated values that include specular highlights.
 
 PALETTES
 
@@ -53,13 +63,11 @@ RENDERING PROCESS
 2. Render Map to low-res material buffer; store depth but don't check it.
 3. Render Sprites to material buffer; check depth but don't store it.
     - TODO: Re-remember how to implement internal shadows here.
-4. Render material buffer to main framebuffer, doing lighting calculation
+4. Render Lights to main framebuffer with material buffer as texture.
     - This only renders to a 320x240 corner of the screen.
-    - TODO: allow shaped areas of lighting, perhaps by rendering those shapes,
-             texture-mapped with the material buffer, to the main framebuffer.
-4. Render Overlay with alpha blending to the 320x240 corner
-5. Disable camera
-6. Render Hud layer
-7. Zoom the 320x240 corner to full size with glCopyPixels
-8. Render Dev layer
+5. Render Overlay with alpha blending to the 320x240 corner
+6. Disable camera
+7. Render Hud layer
+8. Zoom the 320x240 corner to full size with glCopyPixels
+9. Render Dev layer
 
