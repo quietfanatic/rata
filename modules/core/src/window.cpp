@@ -1,3 +1,4 @@
+#include <float.h>
 #include <GL/glew.h>
 #include <GL/glfw.h>
 #include "../inc/window.h"
@@ -10,11 +11,11 @@
 namespace core {
 
      // Input handling
-    int GLFWCALL close_cb () {
+    static int GLFWCALL close_cb () {
         window->stop();
         return false;
     }
-    void GLFWCALL key_cb (int keycode, int action) {
+    static void GLFWCALL key_cb (int keycode, int action) {
         Listener* next_l = NULL;
         for (Listener* l = window->listener; l; l = next_l) {
              // In case a listener disables itself.
@@ -36,7 +37,7 @@ namespace core {
             }
         }
     }
-    void GLFWCALL char_cb (int charcode, int action) {
+    static void GLFWCALL char_cb (int charcode, int action) {
         Listener* next_l = NULL;
         for (Listener* l = window->listener; l; l = next_l) {
             next_l = l->next;
@@ -44,7 +45,7 @@ namespace core {
                 return;
         }
     }
-    void GLFWCALL button_cb (int code, int action) {
+    static void GLFWCALL button_cb (int code, int action) {
         Listener* next_l = NULL;
         for (Listener* l = window->listener; l; l = next_l) {
             next_l = l->next;
@@ -52,13 +53,15 @@ namespace core {
                 return;
         }
     }
-    void GLFWCALL resize_cb (int width, int height) {
+    static void GLFWCALL resize_cb (int width, int height) {
         window->width = width;
         window->height = height;
     }
 
-    Logger file_logger ("files");
-    Logger game_logger ("game");
+    static Logger file_logger ("files");
+    static Logger game_logger ("game");
+    static Logger timing_logger ("timing");
+
 
     Window* window = NULL;
     Window::Window () {
@@ -116,6 +119,8 @@ namespace core {
         glfwSetWindowSizeCallback(resize_cb);
         glfwDisable(GLFW_AUTO_POLL_EVENTS);
         hacc::set_file_logger([](std::string s){ file_logger.log(s); });
+        glfwSetTime(0);
+        static double lag = 0;
         try {
             for (;;) {
                  // Run queued operations
@@ -186,10 +191,22 @@ namespace core {
                  // TODO: real timing and allow frame-skipping display
                 if (step) step();
                 frames_simulated++;
-                if (render) render();
-                frames_drawn++;
-                glfwSwapBuffers();
-                glfwSleep(1/60.0);
+                 // Do timing around the render step.
+                lag -= 1/FPS;
+                if (lag > 1/FPS) {
+                    timing_logger.log("Skipping frame!");
+                }
+                else {
+                    if (render) render();
+                    frames_drawn++;
+                    glfwSwapBuffers();
+                }
+                lag += glfwGetTime();
+                glfwSetTime(0);
+                if (lag < 0) {
+                    glfwSleep(-lag);
+                }
+                timing_logger.log("%f\n", lag);
             }
         }
         catch (...) {
