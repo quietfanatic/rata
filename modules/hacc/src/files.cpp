@@ -7,7 +7,10 @@
 
 namespace hacc {
 
-    std::unordered_map<std::string, FileData*> files_by_filename;
+    std::unordered_map<std::string, FileData*>& files_by_filename () {
+        static std::unordered_map<std::string, FileData*> r;
+        return r;
+    }
     Func<void (String)> logger;
     std::vector<Reference> managed_objects;
 
@@ -42,7 +45,7 @@ namespace hacc {
     bool File::loaded () { return p->state == LOADED; }
     bool File::requested () { return p->requested; }
     File::File (String filename) {
-        FileData*& fd = files_by_filename[filename];
+        FileData*& fd = files_by_filename()[filename];
         if (!fd) fd = new FileData (filename);
         p = fd;
     };
@@ -73,16 +76,16 @@ namespace hacc {
     void File::rename (std::string new_filename) {
         if (new_filename == p->filename) return;
         if (File(new_filename).loaded()) throw X::File_Already_Loaded(new_filename);
-        files_by_filename.erase(p->filename);
+        files_by_filename().erase(p->filename);
         p->filename = new_filename;
-        files_by_filename[new_filename] = p;
+        files_by_filename()[new_filename] = p;
     }
 
      // SEARCHING
 
     std::vector<File> loaded_files () {
         std::vector<File> fs;
-        for (auto& p : files_by_filename)
+        for (auto& p : files_by_filename())
             if (p.second->state == LOADED)
                 fs.push_back(p.second);
         return fs;
@@ -369,7 +372,7 @@ namespace hacc {
         void reload_verify () {
             reload_verify_scheduled = false;
              // Check for any pointers we'll need to update
-            for (auto& p : files_by_filename) {
+            for (auto& p : files_by_filename()) {
                 File f = p.second;
                 try {
                     switch (f.p->state) {
@@ -394,7 +397,7 @@ namespace hacc {
                 }
             }
             for (auto r : managed_objects) reload_verify_scan(r, Path(null));
-            for (auto& p : files_by_filename) {
+            for (auto& p : files_by_filename()) {
                 File f = p.second;
                 if (f.p->state == RELOAD_VERIFYING) {
                     f.p->state = RELOAD_COMMITTING;
@@ -417,7 +420,7 @@ namespace hacc {
             }
             updates.clear();
              // delete old_data for all reloaded files
-            for (auto& p : files_by_filename) {
+            for (auto& p : files_by_filename()) {
                 File f = p.second;
                 if (f.p->state == RELOAD_COMMITTING) {
                     f.p->old_data = null;
@@ -453,7 +456,7 @@ namespace hacc {
         void unload_verify () {
             unload_verify_scheduled = false;
              // Fail if there are any references in any other file to this file.
-            for (auto& p : files_by_filename) {
+            for (auto& p : files_by_filename()) {
                 File f = p.second;
                 try {
                      // But it's okay if the referencing file is also being unloaded.
@@ -468,7 +471,7 @@ namespace hacc {
                 }
             }
             for (auto r : managed_objects) unload_verify_scan(r, Path(null));
-            for (auto& p : files_by_filename) {
+            for (auto& p : files_by_filename()) {
                 File f = p.second;
                 if (f.p->state == UNLOAD_VERIFYING) {
                     f.p->state = UNLOAD_COMMITTING;
@@ -477,7 +480,7 @@ namespace hacc {
             new Action(COMMIT, [=](){ unload_commit(); });
         }
         void unload_commit () {
-            for (auto& p : files_by_filename) {
+            for (auto& p : files_by_filename()) {
                 File f = p.second;
                 if (f.p->state == UNLOAD_COMMITTING) {
                     f.p->data = null;
@@ -506,7 +509,7 @@ namespace hacc {
 
         ~Transaction () {
              // If we left a job undone, we need to clean up.
-            for (auto& p : files_by_filename) {
+            for (auto& p : files_by_filename()) {
                 File f = p.second;
                 switch (f.p->state) {
                     case LOAD_PREPARING:
@@ -619,7 +622,7 @@ namespace hacc {
              // We can't iterate over the main files hash, because
              //  if a new file is inserted it'll invalidate the iterators
             std::vector<File> scannable_files;
-            for (auto& p : files_by_filename) {
+            for (auto& p : files_by_filename()) {
                  // TODO: There is probably some more optimization that can be done here.
                 if (reload_verify) {
                     if (p.second->state == RELOAD_VERIFYING)
