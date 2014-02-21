@@ -185,12 +185,18 @@ namespace vis {
             i.Drawn_draw(Sprites());
          // Now render from world fb to window fb
         glDisable(GL_DEPTH_TEST);
+         // Light renders blend by adding.
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+         // Clear to black, to make blending work.
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(0, 0, 0, 1);
+        glClear(GL_COLOR_BUFFER_BIT);
         light_program->use();
         glUniform4f(light_program->ambient, ambient_light, ambient_light, ambient_light, ambient_light);
         glUniform4f(light_program->diffuse, diffuse_light, diffuse_light, diffuse_light, diffuse_light);
         glUniform2f(light_program->model_pos, 0, 0);
         diagnose_opengl("after setting light");
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, world_tex);
         Vec pts [4];
         pts[0] = global_camera_pos - global_camera_size/2;
@@ -200,7 +206,6 @@ namespace vis {
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vec), pts);
         glDrawArrays(GL_QUADS, 0, 4);
          // Overlay rendering uses blend and no depth
-        glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         Program::unuse();
         for (auto& i : Overlay::items)
