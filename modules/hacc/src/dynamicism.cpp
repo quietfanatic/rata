@@ -204,6 +204,42 @@ namespace hacc {
          // Don't throw No_Attrs.
     }
 
+    static Reference attr_imm (const Reference& r, std::string name) {
+        init();
+        if (!r.type().initialized()) throw X::Unhaccable_Reference(r, "get attr " + name + " from");
+         // First try specific attrs
+        for (auto& a : r.type().data->attr_list) {
+            if (a.first == name)
+                return chain(r, a.second);
+        }
+         // Then custom attrs function
+        if (auto& f = r.type().data->attrs_f) {
+            if (void* addr = r.address()) {
+                return f(addr, name);
+            }
+            else {
+                 // We're casting all hopes of efficiency under the
+                 //  Do What The User Asks bus.
+                 // i.e. we may end up generating large objects over and over
+                 //  again only to access one member each time.
+                Reference ref_for_type;
+                r.read([&](void* p){
+                    ref_for_type = f(p, name);
+                });
+                return chain(r, GetSet0(new GS_ReferenceFunc(
+                    ref_for_type.type(),
+                    r.type(),
+                    [=](void* p){ return f(p, name); }
+                )));
+            }
+        }
+         // Then delegation
+        else if (auto& gs = r.type().data->delegate) {
+            return chain(r, gs).attr(name);
+        }
+        else return null;
+    }
+
     static Reference attr_inner (const Reference& r, std::string name) {
         init();
         if (!r.type().initialized()) throw X::Unhaccable_Reference(r, "get attr " + name + " from");
@@ -444,7 +480,7 @@ namespace hacc {
                 }
                 set_keys(ks);
                 for (size_t i = 0; i < n; i++) {
-                    if (auto ar = attr_inner(*this, ks[i]))
+                    if (auto ar = attr_imm(*this, ks[i]))
                         ar.prepare(o[i].second);
                 }
                  // Any collapsed members not covered by ks?
@@ -581,8 +617,21 @@ namespace hacc {
              // Do attrs and elems before main item
             std::vector<String> ks = keys();
             if (!ks.empty()) {
-                for (auto k : ks) {
-                    attr(k).finish();
+                for (size_t i = 0; i < ks.size(); i++) {
+                    if (auto ar = attr_imm(*this, ks[i]))
+                        ar.finish();
+                }
+                 // Any collapsed members not covered by ks?
+                for (auto& a : type().data->attr_list) {
+                    if (a.second->collapse) {
+                        for (auto& ksk : ks)
+                            if (a.first == ksk)
+                                goto next;
+                        mod([&](void* p){
+                            Reference(p, a.second).finish();
+                        });
+                        next: { }
+                    }
                 }
             }
             else {
