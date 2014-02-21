@@ -41,16 +41,13 @@
     crate_shape: {b2PolygonShape:{
         verts:[[-0.5 0] [0.5 0] [0.5 1] [-0.5 1]]
     }}
-    stuff_layout: {"vis::Layout":{
-        size: [64 64]
-        frames: [
-            { name:crate offset:[32 24] box:[-8 0 8 16] }
-        ]
-    }}
     stuff_img: {"vis::Image":{
         filename:"world/res/stuff.png"
+        textures:[
+            { name:crate offset:[24 24] size:[16 16] }
+        ]
         palettes:[
-            { offset:[0 0] }
+            { offset:[0 2] }
         ]
     }}
 }}

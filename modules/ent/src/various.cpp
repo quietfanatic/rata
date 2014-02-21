@@ -2,16 +2,18 @@
 #include "../../hacc/inc/everything.h"
 #include "../inc/mixins.h"
 #include "../../vis/inc/images.h"
+#include "../../util/inc/geometry.h"
+
+using namespace util;
 
 namespace ent {
 
     struct Crate : ROD<vis::Sprites> {
         static phys::BodyDef* bdf;
         static vis::Texture* texture;
-        static vis::Frame* frame;
 
         void Drawn_draw (vis::Sprites) override {
-            vis::draw_frame(frame, texture, pos());
+            vis::draw_texture(texture, pos() + Rect(0.5, 0, 0.5, 1));
         }
 
         Crate () {
@@ -19,11 +21,9 @@ namespace ent {
             if (!initted) {
                 initted = true;
                 bdf = hacc::File("ent/res/various.hacc").data().attr("crate_bdf");
-                texture = hacc::File("ent/res/various.hacc").data().attr("stuff_img").attr("ALL");
-                frame = hacc::File("ent/res/various.hacc").data().attr("stuff_layout").attr("crate");
+                texture = hacc::File("ent/res/various.hacc").data().attr("stuff_img").attr("crate");
                 hacc::manage(bdf);
                 hacc::manage(texture);
-                hacc::manage(frame);
             }
         }
         void finish () {
@@ -32,7 +32,6 @@ namespace ent {
     };
     phys::BodyDef* Crate::bdf = NULL;
     vis::Texture* Crate::texture = NULL;
-    vis::Frame* Crate::frame = NULL;
 
 } using namespace ent;
 
