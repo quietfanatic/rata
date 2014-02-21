@@ -34,7 +34,7 @@ namespace ent {
 
     struct Biped : phys::Object, phys::Grounded, geo::Resident, vis::Drawn<vis::Sprites>, Controllable {
 
-        BipedDef* def;
+        BipedDef* def = NULL;
          // Bleh
         BipedDef* get_def () const { return def; }
         void set_def (BipedDef*);
