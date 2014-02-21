@@ -52,6 +52,10 @@ namespace core {
                 return;
         }
     }
+    void GLFWCALL resize_cb (int width, int height) {
+        window->width = width;
+        window->height = height;
+    }
 
     Logger file_logger ("files");
     Logger game_logger ("game");
@@ -97,6 +101,7 @@ namespace core {
         glfwSetCharCallback(NULL);
         glfwSetMouseButtonCallback(NULL);
         glfwSetWindowCloseCallback(NULL);
+        glfwSetWindowSizeCallback(NULL);
     }
 
     void Window::start () {
@@ -108,6 +113,7 @@ namespace core {
         glfwSetKeyCallback(key_cb);
         glfwSetMouseButtonCallback(button_cb);
         glfwSetCharCallback(char_cb);
+        glfwSetWindowSizeCallback(resize_cb);
         glfwDisable(GLFW_AUTO_POLL_EVENTS);
         hacc::set_file_logger([](std::string s){ file_logger.log(s); });
         try {
