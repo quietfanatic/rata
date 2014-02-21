@@ -226,8 +226,11 @@ namespace vis {
     };
 
     static Images_Program* prog = NULL;
+    static Frame* plain_frame = NULL;
     void images_init () {
-        prog = hacc::File("vis/res/images.prog").data().attr("prog");
+        auto prog_doc = hacc::File("vis/res/images.prog").data();
+        prog = prog_doc.attr("prog");
+        plain_frame = prog_doc.attr("plain_layout").attr("ALL");
         hacc::manage(&prog);
     }
 
@@ -239,6 +242,9 @@ namespace vis {
         glBindVertexArray(frame->parent->vao_id);
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
         core::diagnose_opengl("after draw_frame");
+    }
+    void draw_texture (Texture* texture, Rect area, float z) {
+        draw_frame(plain_frame, texture, area.lb(), area.rt() - area.lb(), z);
     }
 
 } using namespace vis;

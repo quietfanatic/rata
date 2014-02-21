@@ -80,6 +80,8 @@ namespace vis {
     void images_init ();
 
     void draw_frame (Frame*, Texture*, Vec pos, Vec scale = Vec(1, 1), float z = 0.5);
+     // Just draw a whole texture over the given area.
+    void draw_texture (Texture*, Rect area, float z = 0.5);
 
 }
 
