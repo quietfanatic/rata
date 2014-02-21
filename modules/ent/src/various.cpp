@@ -22,8 +22,8 @@ namespace ent {
                 initted = true;
                 bdf = hacc::File("ent/res/various.hacc").data().attr("crate_bdf");
                 texture = hacc::File("ent/res/various.hacc").data().attr("stuff_img").attr("crate");
-                hacc::manage(bdf);
-                hacc::manage(texture);
+                hacc::manage(&bdf);
+                hacc::manage(&texture);
             }
         }
         void finish () {
