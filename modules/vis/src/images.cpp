@@ -59,9 +59,10 @@ namespace vis {
         }
         core::window->open();
         int iw; int ih; int ich;
-        data = (uint32*)SOIL_load_image(rel2abs(filename).c_str(), &iw, &ih, &ich, 4);
+        abs_fn = rel2abs(filename);
+        data = (uint32*)SOIL_load_image(abs_fn.c_str(), &iw, &ih, &ich, 4);
         if (!data) {
-            throw hacc::X::Logic_Error("Couldn't open image \"" + filename + "\": " + SOIL_last_result());
+            throw hacc::X::Logic_Error("Couldn't open image \"" + abs_fn + "\": " + SOIL_last_result());
         }
         if (ich != 4) {
             throw hacc::X::Logic_Error("Tried to use an image with " + std::to_string(ich) + " channels, but we can only use images with 4 channels.");
