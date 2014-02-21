@@ -70,7 +70,6 @@ namespace ent {
         void Drawn_draw (vis::Sprites) override;
 
         Biped ();
-        void finish ();
 
     };
 

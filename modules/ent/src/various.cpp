@@ -1,43 +1,44 @@
 
 #include "../../hacc/inc/everything.h"
-#include "../../phys/inc/phys.h"
-#include "../../vis/inc/common.h"
+#include "../inc/mixins.h"
 #include "../../vis/inc/images.h"
 
-struct Crate : phys::Object, vis::Drawn<vis::Sprites> {
-    static phys::BodyDef* bdf;
-    static vis::Texture* texture;
-    static vis::Frame* frame;
+namespace ent {
 
-    void Drawn_draw (vis::Sprites) {
-        vis::draw_frame(frame, texture, pos());
-    }
+    struct Crate : ROD<vis::Sprites> {
+        static phys::BodyDef* bdf;
+        static vis::Texture* texture;
+        static vis::Frame* frame;
 
-    Crate () : Object() {
-        static bool initted = false;
-        if (!initted) {
-            initted = true;
-            bdf = hacc::File("ent/res/various.hacc").data().attr("crate_bdf");
-            texture = hacc::File("ent/res/various.hacc").data().attr("stuff_img").attr("ALL");
-            frame = hacc::File("ent/res/various.hacc").data().attr("stuff_layout").attr("crate");
-            hacc::manage(bdf);
-            hacc::manage(texture);
-            hacc::manage(frame);
+        void Drawn_draw (vis::Sprites) override {
+            vis::draw_frame(frame, texture, pos());
         }
-    }
-    void finish () {
-        set_def(bdf);
-        materialize();
-        appear();
-    }
-};
-phys::BodyDef* Crate::bdf = NULL;
-vis::Texture* Crate::texture = NULL;
-vis::Frame* Crate::frame = NULL;
+
+        Crate () {
+            static bool initted = false;
+            if (!initted) {
+                initted = true;
+                bdf = hacc::File("ent/res/various.hacc").data().attr("crate_bdf");
+                texture = hacc::File("ent/res/various.hacc").data().attr("stuff_img").attr("ALL");
+                frame = hacc::File("ent/res/various.hacc").data().attr("stuff_layout").attr("crate");
+                hacc::manage(bdf);
+                hacc::manage(texture);
+                hacc::manage(frame);
+            }
+        }
+        void finish () {
+            set_def(bdf);
+        }
+    };
+    phys::BodyDef* Crate::bdf = NULL;
+    vis::Texture* Crate::texture = NULL;
+    vis::Frame* Crate::frame = NULL;
+
+} using namespace ent;
 
 HACCABLE(Crate) {
     name("ent::Crate");
-    attr("Object", base<phys::Object>().optional());
+    attr("ROD", base<ROD<vis::Sprites>>().optional());
     finish(&Crate::finish);
 }
 
