@@ -71,7 +71,13 @@ namespace hacc {
         else if (void* r = downcast(*this, t))
             return r;
         else
+            return null;
+    }
+    void* Pointer::force_address_of_type (Type t) const {
+        void* r = address_of_type(t);
+        if (!r)
             throw X::Type_Mismatch(t, type, "when converting " + show() + " to " + t.name() + "*");
+        return r;
     }
     std::string Pointer::show () const {
         std::ostringstream ss;

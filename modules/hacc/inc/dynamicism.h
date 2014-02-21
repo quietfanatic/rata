@@ -62,9 +62,12 @@ namespace hacc {
          // If the types don't match, will attempt to downcast.
          //  It does a depth-first search starting with the requested type and
          //  following delegations, attrs, and elems declared as base or member.
+         // Returns null if it doesn't work.
         void* address_of_type (Type) const;
+         // Throws if it doesn't work.
+        void* force_address_of_type (Type) const;
         template <class C>
-        operator C* () const { return (C*)address_of_type(Type::CppType<C>()); }
+        operator C* () const { return (C*)force_address_of_type(Type::CppType<C>()); }
 
         std::string show () const;
     };
