@@ -20,8 +20,8 @@ namespace ent {
  // This is provided, but you can skip directly to each of the bases instead.
 HACCABLE_TEMPLATE(<class Layer>, ent::ROD<Layer>) {
     name([](){ return "ent::ROD<" + hacc::Type::CppType<Layer>().name() + ">"; });
-    attr("Resident", hcb::template base<geo::Resident>().optional());
-    attr("Object", hcb::template base<phys::Object>().optional());
+    attr("Resident", hcb::template base<geo::Resident>().collapse());
+    attr("Object", hcb::template base<phys::Object>().collapse());
 }
 
 #endif
