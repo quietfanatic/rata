@@ -38,9 +38,10 @@ my @objects = qw<
     ../util/tmp/integration.o
     ../../lib/libBox2D.a
 >;
+
 my @libs =
-    `uname -s` eq 'Darwin'
-        ? qw(-framework OpenGL -lGLEW -lglfw -lSOIL)
+    `uname -s` eq "Darwin\n"
+        ? qw(-framework OpenGL -lGLEW -lglfw -lSOIL -framework Cocoa -L/opt/local/lib)
         : qw(-lGL -lGLEW -lglfw -lSOIL);
 
 include '../..';
