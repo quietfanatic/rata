@@ -69,9 +69,15 @@ namespace phys {
 
          // A paltry amount of wrapper methods.
         Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }
-        void set_pos (Vec v) { b2body->SetTransform(b2Vec2(v.x, v.y), 0); }
+        void set_pos (Vec v) {
+            b2body->SetTransform(b2Vec2(v.x, v.y), 0);
+            b2body->SetAwake(true);
+        }
         Vec vel () const { const b2Vec2& v = b2body->GetLinearVelocity(); return reinterpret_cast<const Vec&>(v); }
-        void set_vel (Vec v) { b2body->SetLinearVelocity(b2Vec2(v.x, v.y)); }
+        void set_vel (Vec v) {
+            b2body->SetLinearVelocity(b2Vec2(v.x, v.y));
+            b2body->SetAwake(true);
+        }
         void impulse (Vec i) { b2body->ApplyLinearImpulse(b2Vec2(i.x, i.y), b2Vec2(0, 0), true); }
         void force (Vec f) { b2body->ApplyForceToCenter(b2Vec2(f.x, f.y), true); }
 
