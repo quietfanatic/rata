@@ -4,33 +4,41 @@
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/images.h"
 
-static phys::BodyDef*& test_bdf () {
-    static phys::BodyDef* test_bdf = hacc::File("ent/res/various.hacc").data().attr("test_bdf");
-    hacc::manage(&test_bdf);
-    return test_bdf;
-}
-struct Test_Actor : phys::Object, vis::Drawn<vis::Sprites> {
-    vis::Texture* texture;
-    vis::Frame* frame;
+struct Crate : phys::Object, vis::Drawn<vis::Sprites> {
+    static phys::BodyDef* bdf;
+    static vis::Texture* texture;
+    static vis::Frame* frame;
 
     void Drawn_draw (vis::Sprites) {
         vis::draw_frame(frame, texture, pos());
     }
 
-    Test_Actor () : Object() { test_bdf(); }
+    Crate () : Object() {
+        static bool initted = false;
+        if (!initted) {
+            initted = true;
+            bdf = hacc::File("ent/res/various.hacc").data().attr("crate_bdf");
+            texture = hacc::File("ent/res/various.hacc").data().attr("stuff_img").attr("ALL");
+            frame = hacc::File("ent/res/various.hacc").data().attr("stuff_layout").attr("crate");
+            hacc::manage(bdf);
+            hacc::manage(texture);
+            hacc::manage(frame);
+        }
+    }
     void finish () {
-        set_def(test_bdf());
+        set_def(bdf);
         materialize();
         appear();
     }
 };
+phys::BodyDef* Crate::bdf = NULL;
+vis::Texture* Crate::texture = NULL;
+vis::Frame* Crate::frame = NULL;
 
-HACCABLE(Test_Actor) {
-    name("ent::Test_Actor");
+HACCABLE(Crate) {
+    name("ent::Crate");
     attr("Object", base<phys::Object>());
-    attr("texture", member(&Test_Actor::texture));
-    attr("frame", member(&Test_Actor::frame));
-    finish([](Test_Actor& ta){ ta.finish(); });
+    finish(&Crate::finish);
 }
 
 static phys::BodyDef*& boundary_bdf () {

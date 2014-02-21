@@ -7,5 +7,6 @@
         [0x00000000 0x00000000 0x7b0a25ff]  // 4. Purple eyes, pupil
         [0x00000000 0x00000000 0x802c40ff]  // 5. Purple eyes, iris
         [0xcfcfcfff 0x3f3f3fff 0x00000000]  // 6. White fabric
+        [0x634209ff 0x634209ff 0x00000000]  // 7. Wood, a little orangeish
     ]}
 }}

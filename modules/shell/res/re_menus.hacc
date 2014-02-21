@@ -34,10 +34,14 @@
                                 text:"test"
                                 Button:{ on_click:[re_new_actor "ent::Biped" {
                                     def:$("world/res/rata.hacc").def
-                                    Object:{ def:$("ent/res/small.hacc").bdf pos:[1 22] }
+                                    Object:{ def:$("ent/res/small.hacc").bdf }
                                     Resident:{ room:$("world/res/test.room").room }
                                     direction:1
-                                }]}
+                                }] }
+                            }}
+                            {"shell::Text_Button":{
+                                text:"crate"
+                                Button:{ on_click:[re_new_actor "ent::Crate" { }] }
                             }}
                         ]
                     }}
