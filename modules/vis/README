@@ -32,22 +32,18 @@ Dev - Like Hud, but does not account for camera zoom, allowing higher-
 MATERIALS
 
 Rendered materials are expected to be of this format:
-    r=$index, g=$angle, b=$shadow, a=(depth during Map, unused otherwise)
+    r=$index, g=$angle, b=unused, a=(depth during Map, $shadow during Sprites)
 
-The material palette is an array of triples indexed by $index, of the form
-    [$ambient $diffuse $radiant]
+The material palette is an array of quadruples indexed by $index, of the form
+    [$ambient $diffuse $specular $radiant]
 Lighting calculations use this formula.
       $ambient * $ambient_light
-    + ($shadow == 0.5 ? 0 : $diffuse * $diffuse_light * $angle)
+    + ($shadow != 254/255 && $angle > 0.4 ? $diffuse * $diffuse_light : 0)
+    + ($shadow == 254/255 && $angle > 0.9 ? $specular * $diffuse_light : 0)
     + $radiant
 
 $shadow is projected onto earlier renders by (ab)using glBlendFunc.
 TODO: implement $shadow.
-
-Objects with three shades of color use vertical_angle values of 0x40, 0x80,
- and 0xC0.  Objects with two shades of color use 0x40 and 0x80.  Objects with
- only one shade use 0x80.
-TODO: switch to more enumerated values that include specular highlights.
 
 PALETTES
 

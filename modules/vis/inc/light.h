@@ -24,6 +24,7 @@ namespace vis {
     struct Material {
         uint32 ambient;
         uint32 diffuse;
+        uint32 specular;
         uint32 radiant;
     };
 

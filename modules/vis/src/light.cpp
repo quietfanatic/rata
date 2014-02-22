@@ -48,7 +48,7 @@ namespace vis {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         }
          // The palette texture is internally laid out vertically.
-        uint8 pdat [256 * 4 * 3];
+        uint8 pdat [256 * 4 * 4];
         size_t j = 0;
         for (size_t i = 0; i < items.size(); i++) {
             pdat[j++] = items[i].ambient >> 24;
@@ -59,6 +59,10 @@ namespace vis {
             pdat[j++] = items[i].diffuse >> 16;
             pdat[j++] = items[i].diffuse >> 8;
             pdat[j++] = items[i].diffuse;
+            pdat[j++] = items[i].specular >> 24;
+            pdat[j++] = items[i].specular >> 16;
+            pdat[j++] = items[i].specular >> 8;
+            pdat[j++] = items[i].specular;
             pdat[j++] = items[i].radiant >> 24;
             pdat[j++] = items[i].radiant >> 16;
             pdat[j++] = items[i].radiant >> 8;
@@ -74,7 +78,11 @@ namespace vis {
             pdat[j++] = 0x00;
             pdat[j++] = 0x00;
             pdat[j++] = 0x00;
-            pdat[j++] = 0xff;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0x00;
+            pdat[j++] = 0xff;  // Highlight invalid materials magenta
             pdat[j++] = 0x00;
             pdat[j++] = 0xff;
         }
@@ -155,6 +163,7 @@ HACCABLE(Material) {
     name("vis::Material");
     elem(member(&Material::ambient));
     elem(member(&Material::diffuse));
+    elem(member(&Material::specular));
     elem(member(&Material::radiant));
 }
 
