@@ -165,8 +165,8 @@ namespace ent {
         }
     }
 
-    void Biped::animate () {
-        model.apply_skel(def->skel);
+    void Biped::Drawn_draw (vis::Sprites) {
+        vis::Model model (def->skel);
         uint8 look_frame = angle_frame(atan2(focus.y, focus.x));
         if (ground) {
             if (jump_timer) {
@@ -219,9 +219,6 @@ namespace ent {
             model.apply_pose(&def->poses->jump);
             model.apply_pose(&def->poses->look_walk[look_frame]);
         }
-    }
-    void Biped::Drawn_draw (vis::Sprites) {
-        animate();
         model.apply_skin(def->skin);
         model.draw(pos(), direction < 0);
     }
