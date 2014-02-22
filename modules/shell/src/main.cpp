@@ -18,6 +18,8 @@ using namespace core;
 File main_file = File("shell/main.hacc");
 File current_state = File("shell/initial-state.hacc");
 
+static std::string state_arg;
+
 static std::string default_state_filename = "shell/initial-state.hacc";
 static std::string stop_state_filename = "../save/last_stop.hacc";
 
@@ -59,22 +61,17 @@ void step () {
 
 int main (int argc, char** argv) {
 
-    std::string state = argc >= 2
-        ? rel2abs(argv[1])
-        : default_state_filename;
+    if (argc >= 2)
+        state_arg = rel2abs(argv[1]);
 
     auto here = util::my_dir(argc, argv);
     chdir(here + "/modules");
 
     game = main_file.data().attr("game");
-    if (game->on_start)
-        game->on_start();
-
     window->step = step;
     window->render = vis::render;
     window->before_next_frame([&](){
-        current_state = File(state);
-        load(current_state);
+        game->on_start();
     });
      // Run
     phys::space.start();
@@ -90,7 +87,7 @@ int main (int argc, char** argv) {
 HACCABLE(Game) {
     name("Game");
     attr("paused", member(&Game::paused).optional());
-    attr("on_start", member(&Game::on_start).optional());
+    attr("on_start", member(&Game::on_start));
     attr("on_exit", member(&Game::on_exit).optional());
 }
 HACCABLE(Hotkeys) {
@@ -104,4 +101,23 @@ void _pause () {
 }
 core::New_Command _pause_cmd ("pause", "Toggle whether game activity occurs.", 0, _pause);
 
+void _lst (std::string s) {
+    if (s.empty()) {
+        reload(current_state);
+    }
+    else {
+        unload(current_state);
+        current_state = File(s);
+        load(current_state);
+    }
+}
+core::New_Command _lst_cmd ("lst", "Load a state (throwing away current state), by default reload same state.", 0, _pause);
 
+void _lst_arg (std::string s) {
+    if (!state_arg.empty())
+        _lst(state_arg);
+    else
+        _lst(s);
+}
+
+core::New_Command _lst_arg_cmd ("lst_arg", "Load the command-line argument state with this as default.", 0, _lst_arg);
