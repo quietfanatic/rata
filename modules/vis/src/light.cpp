@@ -131,8 +131,10 @@ namespace vis {
 
     void draw_light (size_t n, Vec* pts) {
         light_program->use();
+        glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vec), pts);
         glDrawArrays(GL_POLYGON, 0, n);
+        glDisableVertexAttribArray(0);
     };
 
     void light_init () {

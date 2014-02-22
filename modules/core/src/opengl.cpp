@@ -18,18 +18,10 @@ namespace core {
     }
 
     Program* Program::current = NULL;
-    size_t Program::current_attr_count = 0;
 
     void Program::use () {
         if (current != this) {
             if (current) current->Program_end();
-            if (!uses_vbos) {
-                for (uint i = attributes.size(); i < current_attr_count; i++)
-                    glDisableVertexAttribArray(i);
-                for (uint i = current_attr_count; i < attributes.size(); i++)
-                    glEnableVertexAttribArray(i);
-                current_attr_count = attributes.size();
-            }
             glUseProgram(glid);
             Program_begin();
             current = this;
@@ -38,11 +30,6 @@ namespace core {
     void Program::unuse () {
         if (current) {
             current->Program_end();
-            if (!current->uses_vbos) {
-                for (uint i = 0; i < current_attr_count; i++)
-                    glDisableVertexAttribArray(i);
-                current_attr_count = 0;
-            }
         }
         glUseProgram(0);
         current = NULL;
@@ -175,7 +162,6 @@ HACCABLE(Program) {
     attr("name", member(&Program::name).optional());
     attr("shaders", member(&Program::shaders));
     attr("attributes", member(&Program::attributes).optional());
-    attr("uses_vbos", member(&Program::uses_vbos).optional());
     finish([](Program& p){ p.link(); });
 }
 

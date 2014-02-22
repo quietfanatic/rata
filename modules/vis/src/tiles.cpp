@@ -80,10 +80,14 @@ namespace vis {
         glUniform2f(prog->tileset_size, tex->size.x, tex->size.y);
         glBindTexture(GL_TEXTURE_2D, tex->id);
         glBindBuffer(GL_ARRAY_BUFFER, tiles->vbo_id);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
          // index, n_elements, type, normalize, stride, offset
         glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, px));
         glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, tx));
         glDrawArrays(GL_QUADS, 0, tiles->vbo_size);
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         core::diagnose_opengl("after draw_tiles");
     }

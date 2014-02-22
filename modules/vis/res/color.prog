@@ -1,7 +1,6 @@
 {"hacc::Document":{
     prog:{"vis::Color_Program":{
         shaders:[$.vert $.frag]
-        uses_vbos:false
         attributes:[vert_pos]
     }}
     vert:{"core::Shader":{

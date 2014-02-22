@@ -1,7 +1,6 @@
 {"hacc::Document":{
     prog:{"vis::Tiles_Program":{
         shaders:[$.vert $.frag]
-        uses_vbos:true
         attributes:[vert_pos vert_tex]
     }}
     vert:{"core::Shader":{

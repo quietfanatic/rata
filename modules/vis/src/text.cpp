@@ -93,9 +93,13 @@ namespace vis {
             (color & 255) / 255.0
         );
         glBindTexture(GL_TEXTURE_2D, font->texture->id);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
         glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Text_Vert), verts);
         glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Text_Vert), ((char*)verts) + 2*sizeof(uint16));
         glDrawArrays(GL_QUADS, 0, vert_i * 4);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
         diagnose_opengl("after drawing some text");
         delete[] verts;
         return size;
