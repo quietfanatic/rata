@@ -62,7 +62,7 @@ int main (int argc, char** argv) {
         state_arg = rel2abs(argv[1]);
 
     auto here = util::my_dir(argc, argv);
-    chdir(here + "/modules");
+    util::chdir(here + "/modules");
 
     game = main_file.data().attr("game");
 
