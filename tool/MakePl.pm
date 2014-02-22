@@ -293,6 +293,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                                 delazify($rule);
                                 $rule->{recipe}->($rule->{to}, $rule->{from})
                                     unless $simulate or not defined $rule->{recipe};
+                                $rule->{executed} = 1;
                             }
                         }
                     }
@@ -891,6 +892,10 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
 
     sub plan_rule {
         my ($plan, $rule) = @_;
+         # Register dependency for parallel scheduling.
+        if (@{$plan->{stack}}) {
+            push @{$plan->{stack}[-1]{follow}}, $rule;
+        }
          # detect loops
         if (not defined $rule->{planned}) {
             my $mess = "☢ Dependency loop\n";
@@ -904,9 +909,6 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             return $rule->{stale};  # Already planned
         }
          # Commit to planning
-        if (@{$plan->{stack}}) {
-            push @{$plan->{stack}[-1]{follow}}, $rule;
-        }
         push @{$plan->{stack}}, $rule;
         $rule->{planned} = undef;  # Mark that we're currently planning this
 
