@@ -226,6 +226,10 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                 eval {
                     if ($jobs > 1) {
                         my %jobs;
+                        $SIG{INT} = sub {
+                            kill 2, $_ for keys %jobs;
+                            die "interrupted\n";
+                        };
                         $SIG{__DIE__} = sub {
                             kill 2, $_ for keys %jobs;
                             die $_[0];
