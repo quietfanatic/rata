@@ -78,6 +78,7 @@ that module's directory, if it exists.
 
 ###### Long Term
 
+ - Refactor Haccable for better abstraction and predictability
  - Draw a global map mockup
  - Implement some AI
     - With another b2World for imaginary scenarios, or something simpler?
