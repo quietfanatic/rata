@@ -24,7 +24,6 @@ namespace core {
         if (current != this) {
             if (current) current->Program_end();
             if (!uses_vbos) {
-                glBindVertexArray(0);
                 for (uint i = attributes.size(); i < current_attr_count; i++)
                     glDisableVertexAttribArray(i);
                 for (uint i = current_attr_count; i < attributes.size(); i++)
