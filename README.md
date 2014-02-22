@@ -19,6 +19,12 @@ There are a few dependencies for compiling this project.
        file lib/Box2D/Box2D/Box2D.h exists).
  - Perl >= 5.10 (for the build script)
 
+Because git doesn't add empty directories, it doesn't save the tmp/ directories where the
+.o files are stored, which will cause make.pl to fail. Because of this, you will need to
+manually create tmp/ directories in each of the subdirectories in modules. This can be
+accomplished with a single command:
+    $ for i in modules/*; do mkdir $i/tmp; done
+
 Once all dependencies have been satisfied, you can build the main executable with
 
     $ ./make.pl
