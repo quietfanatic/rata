@@ -42,6 +42,8 @@ struct Hotkeys : core::Listener {
  //  are expected to reserve a member of this struct.
 struct Game {
     bool paused = false;
+    core::Command on_start;
+    core::Command on_exit;
 };
 static Game* game = NULL;
 
@@ -65,9 +67,8 @@ int main (int argc, char** argv) {
     chdir(here + "/modules");
 
     game = main_file.data().attr("game");
-    vis::default_font = File("shell/res/monospace.hacc").data().attr("font");
-    vis::Materials* materials = File("world/res/materials.hacc").data().attr("materials");
-    vis::set_materials(materials);
+    if (game->on_start)
+        game->on_start();
 
     window->step = step;
     window->render = vis::render;
@@ -79,6 +80,8 @@ int main (int argc, char** argv) {
     phys::space.start();
     window->start();
      // After window closes
+    if (game->on_exit)
+        game->on_exit();
     current_state.rename(stop_state_filename);
     save(current_state);
     fprintf(stderr, "Quit successfully\n");
@@ -87,6 +90,8 @@ int main (int argc, char** argv) {
 HACCABLE(Game) {
     name("Game");
     attr("paused", member(&Game::paused).optional());
+    attr("on_start", member(&Game::on_start).optional());
+    attr("on_exit", member(&Game::on_exit).optional());
 }
 HACCABLE(Hotkeys) {
     name("Hotkeys");

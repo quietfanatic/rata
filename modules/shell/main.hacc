@@ -1,5 +1,9 @@
 {"hacc::Document":{
     game:{Game:{
+        on_start:[seq[
+            [set_default_font $("shell/res/monospace.hacc").font]
+            [set_materials $("world/res/materials.hacc").materials]
+        ]]
     }}
     window:{"core::Window":{
         width: 640

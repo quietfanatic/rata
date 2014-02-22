@@ -179,6 +179,8 @@ HACCABLE(Light_Program) {
     finish(&Light_Program::finish);
 }
 
+using namespace core;
+
 static void _light_debug () {
     light_debug_type++;
     if (light_debug_type > 3)
@@ -186,7 +188,6 @@ static void _light_debug () {
     print_to_console("Light debug type: " + std::to_string(light_debug_type) + "\n");
 }
 
-core::New_Command _light_debug_cmd (
-    "light_debug", "Toggle between light debug modes",
-    0, _light_debug
-);
+New_Command _light_debug_cmd ("light_debug", "Toggle between light debug modes", 0, _light_debug);
+
+New_Command _set_materials_cmd ("set_materials", "Set the materials palette", 1, set_materials);
