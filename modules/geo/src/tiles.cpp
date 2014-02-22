@@ -195,8 +195,8 @@ HACCABLE(Tileset) {
 
 HACCABLE(Tilemap) {
     name("geo::Tilemap");
-    attr("Resident", base<Resident>());
-    attr("Object", base<phys::Object>().optional());
+    attr("Resident", base<Resident>().collapse());
+    attr("Object", base<phys::Object>().optional().collapse());
     attr("tileset", member(&Tilemap::tileset));
     attr("texture", member(&Tilemap::texture));
     attr("tiles", member(&Tilemap::tiles));

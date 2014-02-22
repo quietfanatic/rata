@@ -5,15 +5,15 @@
             contents:[
                 {"shell::Text_Button":{
                     text:"text edit"
-                    Button:{ on_click:[re_edit] }
+                    on_click:[re_edit]
                 }}
                 {"shell::Text_Button":{
                     text:"duplicate"
-                    Button:{ on_click:[re_duplicate] }
+                    on_click:[re_duplicate]
                 }}
                 {"shell::Text_Button":{
                     text:"delete"
-                    Button:{ on_click:[re_delete] }
+                    on_click:[re_delete]
                 }}
             ]
         }}
@@ -24,24 +24,24 @@
             contents:[
                 {"shell::Text_Button":{
                     text:"reload room"
-                    Button:{ on_click:[re_reload_room] }
+                    on_click:[re_reload_room]
                 }}
                 {"shell::SubMenu":{
-                    Text_Button:{ text:"create actor" }
+                    text:"create actor"
                     contents:{"shell::VBox":{
                         contents:[
                             {"shell::Text_Button":{
                                 text:"test"
-                                Button:{ on_click:[re_new_actor "ent::Biped" {
+                                on_click:[re_new_actor "ent::Biped" {
                                     def:$("world/res/rata.hacc").def
-                                    Object:{ def:$("ent/res/small.hacc").bdf }
-                                    Resident:{ room:$("world/res/test.room").room }
+                                    bdf:$("ent/res/small.hacc").bdf
+                                    room:$("world/res/test.room").room
                                     direction:1
-                                }] }
+                                }]
                             }}
                             {"shell::Text_Button":{
                                 text:"crate"
-                                Button:{ on_click:[re_new_actor "ent::Crate" { }] }
+                                on_click:[re_new_actor "ent::Crate" { }]
                             }}
                         ]
                     }}

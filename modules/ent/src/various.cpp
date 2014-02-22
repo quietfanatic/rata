@@ -59,13 +59,13 @@ namespace ent {
 
 HACCABLE(Crate) {
     name("ent::Crate");
-    attr("ROD", base<ROD<Sprites>>().optional());
+    attr("ROD", base<ROD<Sprites>>().collapse());
     finish(&Crate::finish);
 }
 
 HACCABLE(Light) {
     name("ent::Light");
-    attr("Resident", base<geo::Resident>().optional());
+    attr("Resident", base<geo::Resident>().collapse());
     attr("pos", member(&Light::pos).optional());
     attr("vertices", member(&Light::vertices).optional());
     attr("ambient", member(&Light::ambient).optional());
@@ -88,7 +88,7 @@ struct Boundary : phys::Object {
 
 HACCABLE(Boundary) {
     name("ent::Boundary");
-    attr("Object", base<phys::Object>());
+    attr("Object", base<phys::Object>().collapse());
     finish([](Boundary& b){ b.finish(); });
 }
 

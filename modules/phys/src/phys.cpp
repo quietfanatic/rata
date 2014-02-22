@@ -262,7 +262,7 @@ HACCABLE(b2Shape) {
 
 HACCABLE(b2CircleShape) {
     name("b2CircleShape");
-    attr("b2Shape", base<b2Shape>().optional());
+    attr("b2Shape", base<b2Shape>().collapse());
     attr("c", member(&b2CircleShape::m_p));
     attr("r", member((float b2CircleShape::*)&b2CircleShape::m_radius));
 }
@@ -271,7 +271,7 @@ struct Hack_b2PolygonShape_Verts : b2PolygonShape { };
 
 HACCABLE(b2PolygonShape) {
     name("b2PolygonShape");
-    attr("b2Shape", base<b2Shape>().optional());
+    attr("b2Shape", base<b2Shape>().collapse());
     attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius).optional());
     attr("verts", base<Hack_b2PolygonShape_Verts>());
 }
@@ -309,7 +309,7 @@ HACCABLE(Hack_b2PolygonShape_Verts) {
 
 HACCABLE(b2EdgeShape) {
     name("b2EdgeShape");
-    attr("b2Shape", base<b2Shape>().optional());
+    attr("b2Shape", base<b2Shape>().collapse());
     attr("v1", member(&b2EdgeShape::m_vertex1));
     attr("v2", member(&b2EdgeShape::m_vertex2));
     elem(member(&b2EdgeShape::m_vertex1));
@@ -343,7 +343,7 @@ static uint64 coll_v2b (const std::vector<Collision_Rule*>& v) {
 
 HACCABLE(FixtureDef) {
     name("phys::FixtureDef");
-    attr("b2", member(&FixtureDef::b2));
+    attr("b2", member(&FixtureDef::b2).collapse());
     attr("coll_a", value_funcs<std::vector<Collision_Rule*>>(
         [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_a); },
         [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){

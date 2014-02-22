@@ -1,8 +1,9 @@
 {"hacc::Document":{
     rata:{"ent::Biped":{
         def:$("world/res/rata.hacc").def
-        Object:{ bdf:$("ent/res/small.hacc").bdf pos:[1 22] }
-        Resident:{ room:$("world/res/test.room").room }
+        bdf:$("ent/res/small.hacc").bdf
+        pos:[1 22]
+        room:$("world/res/test.room").room
         direction:1
     }}
     observer:{"geo::Observer":{
@@ -15,8 +16,9 @@
     }}
     rata2:{"ent::Biped":{
         def:$("world/res/rata.hacc").def
-        Object:{ bdf:$("ent/res/small.hacc").bdf pos:[4 22] }
-        Resident:{ room:$("world/res/test.room").room }
+        bdf:$("ent/res/small.hacc").bdf
+        pos:[4 22]
+        room:$("world/res/test.room").room
         direction:-1
     }}
 }}

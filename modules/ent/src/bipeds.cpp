@@ -235,7 +235,7 @@ HACCABLE(Biped) {
     attr("def", value_methods(&Biped::get_def, &Biped::set_def));
     attr("ROD", base<ROD<vis::Sprites>>().collapse());
     attr("Grounded", base<phys::Grounded>().collapse());
-    attr("Controllable", base<ent::Controllable>().optional());
+    attr("Controllable", base<ent::Controllable>().collapse());
     attr("direction", member(&Biped::direction).optional());
     attr("crouching", member(&Biped::crouching).optional());
     attr("crawling", member(&Biped::crawling).optional());

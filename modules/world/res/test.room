@@ -1,18 +1,16 @@
 { "hacc::Document":{
     _next_id:1
     tilemap:{ "geo::Tilemap":{
-        Resident:{ room:$.room }
-        Object:{
-            bdf:$("geo/res/tilemap.bdf")
-            pos:[0~00000000 0~00000000]
-            vel:[0~00000000 0~00000000]
-        }
+        room:$.room
+        bdf:$("geo/res/tilemap.bdf")
+        pos:[0~00000000 0~00000000]
+        vel:[0~00000000 0~00000000]
         tileset:$("world/res/test.tileset").tileset
         texture:$("world/res/test.tileset").img.textures[0]
         tiles:$("world/res/test.tiles")
     } }
     test_light:{ "ent::Light":{
-        Resident:{ room:$.room }
+        room:$.room
         pos:[0 0]
         vertices:[[0 0] [20 0] [20 30] [0 30]]
         diffuse:[1.0 1.0 1.0]

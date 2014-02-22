@@ -3,7 +3,7 @@
         tiles: [null $.solid null null null null null]
     }}
     solid:{"geo::TileDef":{
-        nature:{ b2:{ friction:0.4 } coll_b:[ground] }
+        nature:{ friction:0.4 coll_b:[ground] }
         vertices:[[0 0] [1 0] [1 1] [0 1]]
     }}
     img:{"vis::Image":{

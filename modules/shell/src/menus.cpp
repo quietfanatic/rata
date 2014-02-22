@@ -161,7 +161,7 @@ HACCABLE(Menu_Item) {
 
 HACCABLE(Button) {
     name("shell::Button");
-    attr("Menu_Item", base<Menu_Item>().optional());
+    attr("Menu_Item", base<Menu_Item>().collapse());
     attr("on_click", member(&Button::on_click).optional());
     attr("color", member(&Button::color).optional());
     attr("background_color", member(&Button::background_color).optional());
@@ -171,19 +171,19 @@ HACCABLE(Button) {
 
 HACCABLE(VBox) {
     name("shell::VBox");
-    attr("Button", base<Button>().optional());
+    attr("Button", base<Button>().collapse());
     attr("contents", member(&VBox::contents));
 }
 
 HACCABLE(Text_Button) {
     name("shell::Text_Button");
-    attr("Button", base<Button>().optional());
+    attr("Button", base<Button>().collapse());
     attr("text", member(&Text_Button::text));
     attr("font", member(&Text_Button::font).optional());
 }
 
 HACCABLE(SubMenu) {
     name("shell::SubMenu");
-    attr("Text_Button", base<Text_Button>());
+    attr("Text_Button", base<Text_Button>().collapse());
     attr("contents", member(&SubMenu::contents));
 }
