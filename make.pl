@@ -11,8 +11,8 @@ my %flags = (
     clang => {
         compile => [qw(-std=c++11 -c), "-I$here/lib/Box2D"],
         link => [qw(-std=c++11 -lstdc++ -lm)],
-        release => [qw(-O3 -Wno-null-conversion -Wno-format-security)],
-        debug => [qw(-ggdb -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security)],
+        release => [qw(-O3 -Wno-null-conversion -Wno-format-security -fcolor-diagnostics)],
+        debug => [qw(-ggdb -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security -fcolor-diagnostics)],
         profile => ['-pg'],
     },
     'g++' => {

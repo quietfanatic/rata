@@ -42,6 +42,7 @@ use strict qw(subs vars);
 use warnings; no warnings 'once';
 use utf8;
 binmode STDOUT, ':utf8';
+binmode STDERR, ':utf8';
 use Carp 'croak';
 use Cwd 'realpath';
 use subs qw(cwd chdir);
@@ -238,10 +239,14 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                                 die "Unexpectedly lost children!\n";
                             }
                             if ($?) {
+                                print readline($jobs{$child}{output});
+                                close $jobs{$child}{output};
                                 delete $jobs{$child};
-                                die "Child $child died of $?\n";
+                                die "\n";
                             }
                             $jobs{$child}{executed} = 1;
+                            print readline($jobs{$child}{output});
+                            close $jobs{$child}{output};
                             delete $jobs{$child};
                         };
                         while (@program || %jobs) {
@@ -258,15 +263,25 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                                 chdir $rule->{base};
                                 status $rule->{config} ? "⚒ " : "⚙ ", show_rule($rule);
                                 delazify($rule);
+                                pipe($rule->{output}, my $OUTPUT) or die "pipe failed: $!\n";
+                                binmode $rule->{output}, ':utf8';
+                                binmode $OUTPUT, ':utf8';
                                 if (my $child = fork // die "Failed to fork: $!\n") {
                                      # parent
                                     $jobs{$child} = $rule;
                                 }
                                 else {  # child
+                                     # Don't fall out of the eval {} out there
+                                    $SIG{__DIE__} = sub { warn @_; exit 1; };
+                                    close STDOUT;
+                                    open STDOUT, '>&', $OUTPUT or die "Could not reopen STDOUT: $!\n";
+                                    close STDERR;
+                                    open STDERR, '>&', $OUTPUT or die "Could not reopen STDERR: $!\n";
                                     $rule->{recipe}->($rule->{to}, $rule->{from})
                                         unless $simulate or not defined $rule->{recipe};
                                     exit 0;
                                 }
+                                close $OUTPUT;
                             }
                             elsif (%jobs) {
                                 $do_wait->();
@@ -340,6 +355,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             planned => 0,
             follow => [],
             executed => 0,
+            output => undef,
         };
         push @rules, $rule;
         for (@{$rule->{to}}) {
@@ -588,8 +604,12 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             caller_file => $current_file,
             caller_line => $line,
             config => 1,
-            planned => 0,
+            options => {},
             stale => 0,
+             # Intrusive state for planning and execution phases
+            planned => 0,
+            follow => [],
+            executed => 0,
         };
         push @rules, $rule;
         push @{$targets{realpath($filename)}}, $rule;
