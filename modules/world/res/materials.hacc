@@ -1,5 +1,6 @@
 {"hacc::Document":{
     "materials":{"vis::Materials":[
+     //   Ambient    Diffuse    Specular    Radiant
         [0x3f3f3fff 0x2f2f2fff 0x2f2f2fff 0x00000000]  // 0. Metallic grey
         [0x7f7f7fff 0x00000000 0x00000000 0x00000000]  // 1. Default background color
         [0xb6a491ff 0x231e18ff 0x00000000 0x00000000]  // 2. Light skin
@@ -8,5 +9,6 @@
         [0x00000000 0x00000000 0x00000000 0x802c40ff]  // 5. Purple eyes, iris
         [0xd7d7d7ff 0x191919ff 0x00000000 0x00000000]  // 6. White fabric
         [0x634209ff 0x634209ff 0x00000000 0x00000000]  // 7. Wood, a little orangeish
+        [0x383d28ff 0x383d28ff 0x00000000 0x00000000]  // 8. Greenish bricks
     ]}
 }}

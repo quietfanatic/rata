@@ -5,6 +5,7 @@ use Cwd 'realpath';
 use File::Path qw<remove_tree>;
 
 my $here = cwd;
+mkdir 'save';
 
 ##### COMMAND LINE FLAGS
 my %flags = (

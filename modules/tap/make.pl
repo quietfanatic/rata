@@ -4,6 +4,8 @@ use MakePl;
 
 include '../..';
 
+mkdir 'tmp';
+
 objects(qw(tap main));
 cppc_rule('tmp/tap.t.o', 'src/tap.t.cpp');
 ld_rule('tmp/t', ['tmp/tap.o', 'tmp/tap.t.o', 'tmp/main.o']);

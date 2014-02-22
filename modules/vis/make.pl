@@ -4,6 +4,8 @@ use MakePl;
 
 include '../..';
 
+mkdir 'tmp';
+
 objects(qw(common color images light text tiles models));
 
 clean_rule(glob 'tmp/*');

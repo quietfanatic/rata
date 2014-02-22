@@ -4,6 +4,8 @@ use MakePl;
 
 include '../..';
 
+mkdir 'tmp';
+
 objects(qw(common tree strings types dynamicism haccable files haccable_standard documents));
 tests(qw(tree strings haccable files documents));
 

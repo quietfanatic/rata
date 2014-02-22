@@ -4,6 +4,8 @@ use MakePl;
 
 include '../..';
 
+mkdir 'tmp';
+
 objects(qw(camera rooms tiles));
 
 clean_rule(glob 'tmp/*');

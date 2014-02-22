@@ -4,6 +4,8 @@ use MakePl;
 
 include '../..';
 
+mkdir 'tmp';
+
 objects(qw(debug geometry integration));
 tests(qw(integration));
 

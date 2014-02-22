@@ -47,6 +47,8 @@ my @libs =
 
 include '../..';
 
+mkdir 'tmp';
+
 objects(qw(main console editing menus));
 
  # Here's the main program

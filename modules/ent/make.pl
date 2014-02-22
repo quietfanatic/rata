@@ -4,6 +4,8 @@ use MakePl;
 
 include '../..';
 
+mkdir 'tmp';
+
 objects(qw(various bipeds control));
 
 clean_rule(glob 'tmp/*');
