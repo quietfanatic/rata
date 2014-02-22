@@ -68,6 +68,7 @@ int main (int argc, char** argv) {
     chdir(here + "/modules");
 
     game = main_file.data().attr("game");
+
     window->step = step;
     window->render = vis::render;
     window->before_next_frame([&](){
@@ -109,7 +110,7 @@ void _lst (std::string s) {
         load(current_state);
     }
 }
-core::New_Command _lst_cmd ("lst", "Load a state (throwing away current state), by default reload same state.", 0, _pause);
+core::New_Command _lst_cmd ("lst", "Load a state (throwing away current state), by default reload same state.", 0, _lst);
 
 void _lst_arg (std::string s) {
     if (!state_arg.empty())
@@ -121,9 +122,8 @@ void _lst_arg (std::string s) {
 core::New_Command _lst_arg_cmd ("lst_arg", "Load the command-line argument state with this as default.", 0, _lst_arg);
 
 void _sst (std::string s) {
-    if (!s.empty())
-        current_state.rename(s);
+    current_state.rename(s);
     save(current_state);
 }
 
-core::New_Command _sst_cmd ("sst", "Save the current state to a file (default same as was loaded from).", 0, _sst);
+core::New_Command _sst_cmd ("sst", "Save the current state to a file.", 1, _sst);
