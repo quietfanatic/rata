@@ -82,12 +82,12 @@ namespace vis {
             pdat[j++] = 0x00;
             pdat[j++] = 0x00;
             pdat[j++] = 0x00;
-            pdat[j++] = 0xff;  // Highlight invalid materials magenta
+            pdat[j++] = 0xff;  // Highlight invalid materials green.
             pdat[j++] = 0x00;
             pdat[j++] = 0xff;
         }
         glBindTexture(GL_TEXTURE_2D, tex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 3, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, pdat);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 4, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, pdat);
         diagnose_opengl("after setting palette");
     }
 

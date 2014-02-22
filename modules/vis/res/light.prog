@@ -60,10 +60,10 @@
                     vec3 dif = texture2D(materials, vec2(1.0/3.0, atom.r)).rgb;
                     vec3 spe = texture2D(materials, vec2(2.0/3.0, atom.r)).rgb;
                     vec3 rad = texture2D(materials, vec2(3.0/3.0, atom.r)).rgb;
-                    gl_FragColor.rgb = amb * ambient;
+                    gl_FragColor.rgb = amb * ambient
                                      + dif * diffuse * atom.g
                                      + rad * radiant;
-                    if (atom.g == 1.0) {
+                    if (atom.g == 1.0)
                         gl_FragColor.rgb += spe * diffuse;
                     gl_FragColor.a = 1.0;
                 }
