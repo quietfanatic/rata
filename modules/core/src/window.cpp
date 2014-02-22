@@ -7,6 +7,7 @@
 #include "../../hacc/inc/files.h"
 #include "../../hacc/inc/strings.h"
 #include "../../hacc/inc/documents.h"
+#include "../../util/inc/integration.h"
 
 namespace core {
 
@@ -70,7 +71,9 @@ namespace core {
     }
     void Window::open () {
         if (!is_open) {
+            auto wd = cwd();
             glfwInit();
+            util::chdir(wd);
             is_open = glfwOpenWindow(
                 width, height,
                 red, green, blue,
