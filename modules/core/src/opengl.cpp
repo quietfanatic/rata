@@ -23,7 +23,7 @@ namespace core {
     void Program::use () {
         if (current != this) {
             if (current) current->Program_end();
-            if (!uses_vaos) {
+            if (!uses_vbos) {
                 glBindVertexArray(0);
                 for (uint i = attributes.size(); i < current_attr_count; i++)
                     glDisableVertexAttribArray(i);
@@ -39,7 +39,7 @@ namespace core {
     void Program::unuse () {
         if (current) {
             current->Program_end();
-            if (!current->uses_vaos) {
+            if (!current->uses_vbos) {
                 for (uint i = 0; i < current_attr_count; i++)
                     glDisableVertexAttribArray(i);
                 current_attr_count = 0;
@@ -176,7 +176,7 @@ HACCABLE(Program) {
     attr("name", member(&Program::name).optional());
     attr("shaders", member(&Program::shaders));
     attr("attributes", member(&Program::attributes).optional());
-    attr("uses_vaos", member(&Program::uses_vaos).optional());
+    attr("uses_vbos", member(&Program::uses_vbos).optional());
     finish([](Program& p){ p.link(); });
 }
 

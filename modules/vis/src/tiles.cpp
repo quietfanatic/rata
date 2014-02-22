@@ -22,9 +22,6 @@ namespace vis {
                 " instead of " + std::to_string(width) + "x" + std::to_string(height)
             );
         }
-        if (vao_id) {
-            glDeleteVertexArrays(1, &vao_id);
-        }
         if (vbo_id) {
             glDeleteBuffers(1, &vbo_id);
         }
@@ -50,21 +47,11 @@ namespace vis {
         glGenBuffers(1, &vbo_id);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
         glBufferData(GL_ARRAY_BUFFER, vbo_size * 4 * sizeof(Tile_Vertex), vdats, GL_STATIC_DRAW);
-        glGenVertexArrays(1, &vao_id);
-        glBindVertexArray(vao_id);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-         // index, n_elements, type, normalize, stride, offset
-        glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, px));
-        glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, tx));
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
         diagnose_opengl("after Tiles::finish");
         delete[] vdats;
     }
     Tiles::~Tiles () {
-        if (vao_id)
-            glDeleteVertexArrays(1, &vao_id);
         if (vbo_id)
             glDeleteBuffers(1, &vbo_id);
     }
@@ -92,8 +79,12 @@ namespace vis {
         glUniform2f(prog->model_pos, round(pos.x/PX)*PX, round(pos.y/PX)*PX);
         glUniform2f(prog->tileset_size, tex->size.x, tex->size.y);
         glBindTexture(GL_TEXTURE_2D, tex->id);
-        glBindVertexArray(tiles->vao_id);
+        glBindBuffer(GL_ARRAY_BUFFER, tiles->vbo_id);
+         // index, n_elements, type, normalize, stride, offset
+        glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, px));
+        glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, tx));
         glDrawArrays(GL_QUADS, 0, tiles->vbo_size);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         core::diagnose_opengl("after draw_tiles");
     }
 

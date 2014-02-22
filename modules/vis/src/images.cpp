@@ -186,23 +186,12 @@ namespace vis {
         glGenBuffers(1, &vbo_id);
         glBindBuffer(GL_ARRAY_BUFFER, vbo_id);
         glBufferData(GL_ARRAY_BUFFER, frames.size() * sizeof(Layout_VBO_Data), data, GL_STATIC_DRAW);
-         // And create the VAO.
-        glGenVertexArrays(1, &vao_id);
-        glBindVertexArray(vao_id);
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-         // index, n_elements, type, normalize, stride, offset
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbp));
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbt));
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-        core::diagnose_opengl("after creating a layout vao");
+        core::diagnose_opengl("after creating a layout vbo");
         delete[] data;
     }
 
     Layout::~Layout () {
-        if (vao_id)
-            glDeleteVertexArrays(1, &vao_id);
         if (vbo_id)
             glDeleteBuffers(1, &vbo_id);
     }
@@ -241,8 +230,14 @@ namespace vis {
         glUniform3f(prog->model_pos, round(pos.x/PX)*PX, round(pos.y/PX)*PX, z);
         glUniform2f(prog->model_scale, scale.x, scale.y);
         glBindTexture(GL_TEXTURE_2D, texture->id);
-        glBindVertexArray(frame->parent->vao_id);
+
+        glBindBuffer(GL_ARRAY_BUFFER, frame->parent->vbo_id);
+         // Set up format of the buffer
+         // index, n_elements, type, normalize, stride, offset
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbp));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Layout_VBO_Data) / 4, (void*)offsetof(Layout_VBO_Data, lbt));
         glDrawArrays(GL_QUADS, 4 * (frame - frame->parent->frames.data()), 4);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         core::diagnose_opengl("after draw_frame");
     }
     void draw_texture (Texture* texture, Rect area, float z) {

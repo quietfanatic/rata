@@ -1,7 +1,7 @@
 {"hacc::Document":{
     prog:{"vis::Text_Program":{
         shaders:[$.vert $.frag]
-        uses_vaos:false
+        uses_vbos:false
         attributes:[vert_pos vert_tex]
     }}
     vert:{"core::Shader":{

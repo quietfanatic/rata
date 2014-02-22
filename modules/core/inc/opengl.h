@@ -38,7 +38,7 @@ namespace core {
         uint glid = 0;
         std::vector<Shader*> shaders;
         std::vector<std::string> attributes;
-        bool uses_vaos = false;
+        bool uses_vbos = false;
 
         int require_uniform (const char* name);
         int require_attribute (const char* name);

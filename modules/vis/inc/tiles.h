@@ -13,7 +13,6 @@ namespace vis {
         uint height = 0;
         std::vector<uint16> tiles;
         uint vbo_id = 0;
-        uint vao_id = 0;
         size_t vbo_size = 0;
 
         void finish ();
@@ -26,10 +25,8 @@ namespace vis {
             height(o.height),
             tiles(o.tiles),
             vbo_id(o.vbo_id),
-            vao_id(o.vao_id),
             vbo_size(o.vbo_size)
         {
-            o.vao_id = 0;
             o.vbo_id = 0;
         }
         Tiles& operator = (Tiles&&) = delete;

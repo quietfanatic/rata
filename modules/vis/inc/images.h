@@ -61,7 +61,6 @@ namespace vis {
         std::vector<Frame> frames;
 
         uint vbo_id;
-        uint vao_id;
 
         void finish ();
         ~Layout ();
