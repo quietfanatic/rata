@@ -57,18 +57,16 @@ namespace vis {
 
     struct Model {
         struct Seg {
-            Skin::App* skin = NULL;
-            Pose::App* pose = NULL;
+            Skin::App* skin;
+            Pose::App* pose;
         };
 
         Skel* skel = NULL;
-        std::vector<Model::Seg> segs;
+        Model::Seg* segs;
 
-        Model ();
-        Model (Skel*);
+        Model (Skel*, Model::Seg*);
 
         Vec offset_of (Skel::Seg* seg);
-        void apply_skel (Skel*);
         void apply_pose (Pose*);
         void apply_skin (Skin*);
 

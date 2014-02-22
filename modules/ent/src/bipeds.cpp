@@ -166,7 +166,8 @@ namespace ent {
     }
 
     void Biped::Drawn_draw (vis::Sprites) {
-        vis::Model model (def->skel);
+        vis::Model::Seg model_data [def->skel->segs.size()];
+        vis::Model model (def->skel, model_data);
         uint8 look_frame = angle_frame(atan2(focus.y, focus.x));
         if (ground) {
             if (jump_timer) {

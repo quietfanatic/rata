@@ -69,13 +69,8 @@ namespace vis {
             model_logger.log("Model has no associated skeleton");
             return;
         }
-        model_logger.log("Drawing a model with %lu segs", segs.size());
+        model_logger.log("Drawing a model with %lu segs", skel->segs.size());
         draw_seg(skel->root, pos + skel->root_offset, fliph, flipv, z);
-    }
-
-    void Model::apply_skel (Skel* skel_) {
-        skel = skel_;
-        segs.resize(skel->segs.size());
     }
 
     void Model::apply_pose (Pose* pose) {
@@ -89,24 +84,12 @@ namespace vis {
         }
     }
 
-    Model::Model () : skel(NULL), segs() { }
-    Model::Model (Skel* skel) : skel(skel), segs(skel ? skel->segs.size() : 0) { }
-
-
-    struct Model_Tester : Drawn<Sprites> {
-        bool flip = false;
-        Model model = Model(hacc::File("ent/res/small.skel").data());
-
-        Model_Tester () { }
-        void finish () {
-            model.apply_skin(hacc::File("rata/res/rata-base.hacc").data().attr("skin"));
-            model.apply_pose(hacc::File("ent/res/small.hacc").data().attr("poses").attr("stand"));
-            appear();
+    Model::Model (Skel* skel, Model::Seg* segs) : skel(skel), segs(segs) {
+        for (size_t i = 0; i < skel->segs.size(); i++) {
+            segs[i].pose = NULL;
+            segs[i].skin = NULL;
         }
-        void Drawn_draw (Sprites) override {
-            model.draw(Vec(10, 4), flip, false, 0.5);
-        }
-    };
+    }
 
 } using namespace vis;
 
@@ -150,7 +133,3 @@ HACCABLE(Skin::App) {
     elem(member(&Skin::App::textures));
 }
 
-HACCABLE(Model_Tester) {
-    name("vis::Model_Tester");
-    finish([](Model_Tester& mt){ mt.finish(); });
-}

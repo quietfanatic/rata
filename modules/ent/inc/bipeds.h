@@ -63,7 +63,6 @@ namespace ent {
         float Grounded_friction () override;
 
          // For animation
-        vis::Model model;  // Must be a humanlike model
         void animate ();
         float distance_walked = 0;
         float oldxrel = 0;
