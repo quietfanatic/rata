@@ -79,8 +79,6 @@ int main (int argc, char** argv) {
      // After window closes
     if (game->on_exit)
         game->on_exit();
-    current_state.rename(stop_state_filename);
-    save(current_state);
     fprintf(stderr, "Quit successfully\n");
 }
 
@@ -121,3 +119,11 @@ void _lst_arg (std::string s) {
 }
 
 core::New_Command _lst_arg_cmd ("lst_arg", "Load the command-line argument state with this as default.", 0, _lst_arg);
+
+void _sst (std::string s) {
+    if (!s.empty())
+        current_state.rename(s);
+    save(current_state);
+}
+
+core::New_Command _sst_cmd ("sst", "Save the current state to a file (default same as was loaded from).", 0, _sst);
