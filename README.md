@@ -73,7 +73,7 @@ that module's directory, if it exists.
 
  - ☑ Basic room editor
  - ☐ Tilemap editor
- - ☐ OS X support
+ - ☑ OS X support
  - ☐ Convert graphics to material-lighting format
  - ☐ Sound and music, probably with OpenAL
  - ☐ Camera control (bring constraint satisfaction system from master branch)
