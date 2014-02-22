@@ -20,9 +20,6 @@ File current_state = File("shell/initial-state.hacc");
 
 static std::string state_arg;
 
-static std::string default_state_filename = "shell/initial-state.hacc";
-static std::string stop_state_filename = "../save/last_stop.hacc";
-
 struct Hotkeys : core::Listener {
     std::vector<std::pair<int, core::Command>> hotkeys;
     bool Listener_key (int keycode, int action) override {
