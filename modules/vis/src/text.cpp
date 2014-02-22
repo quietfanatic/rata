@@ -2,6 +2,7 @@
 #include "../inc/common.h"
 #include "../../hacc/inc/everything.h"
 #include "../../core/inc/opengl.h"
+#include "../../core/inc/commands.h"
 
 namespace vis {
 
@@ -28,8 +29,11 @@ namespace vis {
             glUniform1i(tex, 0);
         }
     };
+
     static Text_Program* prog = NULL;
+
     Font* default_font = NULL;
+
     void text_init () {
         prog = hacc::File("vis/res/text.prog").data().attr("prog");
         hacc::manage(&prog);
@@ -162,3 +166,6 @@ HACCABLE(Text_Program) {
     delegate(base<core::Program>());
     finish(&Text_Program::finish);
 }
+
+static void _set_default_font (Font* f) { default_font = f; }
+New_Command _set_default_font_cmd ("set_default_font", "Set the default font", 1, _set_default_font);

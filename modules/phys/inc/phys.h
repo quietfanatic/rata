@@ -61,11 +61,11 @@ namespace phys {
      // The dynamic thing
      // Every class that wants to have a physical presence should inherit from this.
     struct Object {
-        BodyDef* def = NULL;
+        BodyDef* bdf = NULL;
         b2Body* b2body = NULL;
 
-        BodyDef* get_def () const { return def; }
-        void set_def (BodyDef* def);
+        BodyDef* get_bdf () const { return bdf; }
+        void set_bdf (BodyDef*);
 
          // A paltry amount of wrapper methods.
         Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }

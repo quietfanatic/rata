@@ -11,8 +11,8 @@ my %flags = (
     clang => {
         compile => [qw(-std=c++11 -c), "-I$here/lib/Box2D"],
         link => [qw(-std=c++11 -lstdc++ -lm)],
-        release => [qw(-O3 -Wno-null-conversion -Wno-format-security)],
-        debug => [qw(-ggdb -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security)],
+        release => [qw(-O3 -Wno-null-conversion -Wno-format-security -fcolor-diagnostics)],
+        debug => [qw(-ggdb -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security -fcolor-diagnostics)],
         profile => ['-pg'],
     },
     'g++' => {
@@ -102,7 +102,7 @@ sub cppc_rule {
     my @from = ref $from eq 'ARRAY' ? @$from : $from;
     rule $to, [@from, $conf], sub {
         cppc((grep /.cpp$/, @from), output($_[0][0]));
-    }
+    }, {fork => 1}
 }
 sub ld_rule {
     my ($to, $from, $libs) = @_;
@@ -110,7 +110,7 @@ sub ld_rule {
     my @libs = defined $libs ? (ref $libs eq 'ARRAY' ? @$libs : $libs) : ();
     rule $to, [@from, $conf], sub {
         ld @from, @libs, output($_[0][0]);
-    }
+    }, {fork => 1}
 }
 sub test_rule {
     phony 'test', $_[0], sub { system "./$_[1][0] --test | prove -e '' -"; };
@@ -140,7 +140,7 @@ subdep sub {
     my @includes = (slurp $file, 2048) =~ /^\s*#include\s*"([^"]*)"/gmi;
     my $old_cwd = cwd;
     chdir $base;
-    my @r = map realpath($_), @includes;
+    my @r = map -e($_) ? realpath($_) : (), @includes;
     chdir $old_cwd;
     return @r;
 };

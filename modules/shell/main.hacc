@@ -1,5 +1,11 @@
 {"hacc::Document":{
     game:{Game:{
+        on_start:[seq[
+            [set_default_font $("shell/res/monospace.hacc").font]
+            [set_materials $("world/res/materials.hacc").materials]
+            [lst_arg "shell/initial-state.hacc"]
+        ]]
+        on_exit:[sst "../save/last_stop.hacc"]
     }}
     window:{"core::Window":{
         width: 640

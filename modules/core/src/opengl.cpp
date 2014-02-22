@@ -68,7 +68,7 @@ namespace core {
             GLint loglen; glGetShaderiv(newid, GL_INFO_LOG_LENGTH, &loglen);
             if (!status || loglen > 1) {
                 char log [loglen];
-                glGetShaderInfoLog(newid, loglen, NULL, log);
+                glGetShaderInfoLog(newid, loglen, (int*)NULL, log);
                 fprintf(stderr, "Shader info log:\n");
                 fputs(log, stderr);
                 if (!status) throw std::logic_error("Failed to compile GL shader.");
@@ -116,7 +116,7 @@ namespace core {
             diagnose_opengl("after linking program");
             if (!status || loglen > 1) {
                 char log [loglen];
-                glGetProgramInfoLog(newid, loglen, NULL, log);
+                glGetProgramInfoLog(newid, loglen, (int*)NULL, log);
                 fprintf(stderr, "Program info log for %s:\n", name.c_str());
                 fputs(log, stderr);
                 if (!status) throw std::logic_error("Failed to link GL program");

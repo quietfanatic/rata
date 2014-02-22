@@ -111,24 +111,24 @@ namespace phys {
     Space::~Space () { stop(); }
 
      // Objects
-    void Object::set_def (BodyDef* new_def) {
-        if (new_def != def) {
-            b2body->SetType(new_def->type);
-            b2body->SetLinearDamping(new_def->damping);
-            b2body->SetGravityScale(new_def->gravity_scale);
-            b2MassData md {new_def->mass, Vec(0, 0), 0};
+    void Object::set_bdf (BodyDef* new_bdf) {
+        if (new_bdf != bdf) {
+            b2body->SetType(new_bdf->type);
+            b2body->SetLinearDamping(new_bdf->damping);
+            b2body->SetGravityScale(new_bdf->gravity_scale);
+            b2MassData md {new_bdf->mass, Vec(0, 0), 0};
             b2body->SetMassData(&md);
              // Remove old fixtures
-            if (def) {
-                for (auto fix : def->fixtures) {
+            if (bdf) {
+                for (auto fix : bdf->fixtures) {
                     b2body->DestroyFixture(get_fixture(fix));
                 }
             }
              // Add new fixtures
-            for (auto fix : new_def->fixtures) {
+            for (auto fix : new_bdf->fixtures) {
                 add_fixture(fix);
             }
-            def = new_def;
+            bdf = new_bdf;
         }
     }
     b2Fixture* Object::add_fixture (FixtureDef* fdf) {
@@ -262,7 +262,7 @@ HACCABLE(b2Shape) {
 
 HACCABLE(b2CircleShape) {
     name("b2CircleShape");
-    attr("b2Shape", base<b2Shape>().optional());
+    attr("b2Shape", base<b2Shape>().collapse());
     attr("c", member(&b2CircleShape::m_p));
     attr("r", member((float b2CircleShape::*)&b2CircleShape::m_radius));
 }
@@ -271,7 +271,7 @@ struct Hack_b2PolygonShape_Verts : b2PolygonShape { };
 
 HACCABLE(b2PolygonShape) {
     name("b2PolygonShape");
-    attr("b2Shape", base<b2Shape>().optional());
+    attr("b2Shape", base<b2Shape>().collapse());
     attr("radius", member((float b2PolygonShape::*)&b2PolygonShape::m_radius).optional());
     attr("verts", base<Hack_b2PolygonShape_Verts>());
 }
@@ -309,7 +309,7 @@ HACCABLE(Hack_b2PolygonShape_Verts) {
 
 HACCABLE(b2EdgeShape) {
     name("b2EdgeShape");
-    attr("b2Shape", base<b2Shape>().optional());
+    attr("b2Shape", base<b2Shape>().collapse());
     attr("v1", member(&b2EdgeShape::m_vertex1));
     attr("v2", member(&b2EdgeShape::m_vertex2));
     elem(member(&b2EdgeShape::m_vertex1));
@@ -343,7 +343,7 @@ static uint64 coll_v2b (const std::vector<Collision_Rule*>& v) {
 
 HACCABLE(FixtureDef) {
     name("phys::FixtureDef");
-    attr("b2", member(&FixtureDef::b2));
+    attr("b2", member(&FixtureDef::b2).collapse());
     attr("coll_a", value_funcs<std::vector<Collision_Rule*>>(
         [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_a); },
         [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
@@ -384,15 +384,15 @@ HACCABLE(BodyDef) {
 
 HACCABLE(Object) {
     name("phys::Object");
-    attr("def", value_methods(&Object::get_def, &Object::set_def).optional());
+    attr("bdf", value_methods(&Object::get_bdf, &Object::set_bdf).optional());
     attr("pos", value_methods(&Object::pos, &Object::set_pos).optional());
     attr("vel", value_methods(&Object::vel, &Object::set_vel).optional());
 }
 
 HACCABLE(Phys_Debug_Layer) {
     name("phys::Phys_Debug_Layer");
-    finish([](Phys_Debug_Layer& pdb){
-        pdb.appear();
+    finish([](Phys_Debug_Layer& pdl){
+        pdl.appear();
     });
 }
 

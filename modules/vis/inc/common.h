@@ -22,22 +22,6 @@ namespace vis {
 
      // Do it.
     void render ();
-
-    struct Material {
-        uint32 ambient;
-        uint32 diffuse;
-        uint32 radiant;
-    };
-
-    struct Materials {
-        std::vector<Material> items;
-        GLuint tex = 0;
-        void update ();
-        ~Materials ();
-    };
-
-    void set_materials (Materials*);
-
     template <class C>
     struct Drawn : Link<Drawn<C>> {
         virtual void Drawn_draw (C) = 0;
@@ -116,19 +100,6 @@ namespace vis {
             glUseProgram(glid);
             camera_pos = require_uniform("camera_pos");
             camera_size = require_uniform("camera_size");
-        }
-    };
-
-     // Mainly for lighting calculations; needs to be able to go above 1
-    struct RGBf {
-        float r;
-        float g;
-        float b;
-        RGBf& operator += (const RGBf& o) {
-            r += o.r;
-            g += o.g;
-            b += o.b;
-            return *this;
         }
     };
 

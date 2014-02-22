@@ -42,6 +42,7 @@ use strict qw(subs vars);
 use warnings; no warnings 'once';
 use utf8;
 binmode STDOUT, ':utf8';
+binmode STDERR, ':utf8';
 use Carp 'croak';
 use Cwd 'realpath';
 use subs qw(cwd chdir);
@@ -74,6 +75,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
     my $force = 0; # Flags set from options
     my $verbose = 0;
     my $simulate = 0;
+    my $jobs = 1;
 
 # START, INCLUDE, END
 
@@ -222,12 +224,91 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             }
             else {
                 eval {
-                    for my $rule (@program) {
-                        chdir $rule->{base};
-                        status $rule->{config} ? "⚒ " : "⚙ ", show_rule($rule);
-                        delazify($rule);
-                        $rule->{recipe}->($rule->{to}, $rule->{from})
-                            unless $simulate or not defined $rule->{recipe};
+                    if ($jobs > 1) {
+                        my %jobs;
+                        $SIG{INT} = sub {
+                            kill 2, $_ for keys %jobs;
+                            die "interrupted\n";
+                        };
+                        $SIG{__DIE__} = sub {
+                            kill 2, $_ for keys %jobs;
+                            die $_[0];
+                        };
+                        my $do_wait = sub {
+                            keys(%jobs) > 0 or do {
+                                die "Tried to wait on no jobs -- internal planner error?\n", join "\n", map show_rule($_), @program;
+                            };
+                            my $child = wait;
+                            if ($child == -1) {
+                                die "Unexpectedly lost children!\n";
+                            }
+                            if ($?) {
+                                print readline($jobs{$child}{output});
+                                close $jobs{$child}{output};
+                                delete $jobs{$child};
+                                die "\n";
+                            }
+                            $jobs{$child}{done} = 1;
+                            print readline($jobs{$child}{output});
+                            close $jobs{$child}{output};
+                            delete $jobs{$child};
+                        };
+                        while (@program || %jobs) {
+                            $do_wait->() if keys(%jobs) >= $jobs;
+                            my $rule;
+                            for (0..$#program) {
+                                next unless $program[$_]{options}{fork};
+                                 # Don't run program if its deps haven't been finished
+                                next if grep !$_->{done}, @{$program[$_]{follow}};
+                                $rule = splice @program, $_, 1;
+                                last;
+                            }
+                            if (defined $rule) {
+                                chdir $rule->{base};
+                                status $rule->{config} ? "⚒ " : "⚙ ", show_rule($rule);
+                                delazify($rule);
+                                pipe($rule->{output}, my $OUTPUT) or die "pipe failed: $!\n";
+                                binmode $rule->{output}, ':utf8';
+                                binmode $OUTPUT, ':utf8';
+                                if (my $child = fork // die "Failed to fork: $!\n") {
+                                     # parent
+                                    $jobs{$child} = $rule;
+                                }
+                                else {  # child
+                                     # Don't fall out of the eval {} out there
+                                    $SIG{__DIE__} = sub { warn @_; exit 1; };
+                                    close STDOUT;
+                                    open STDOUT, '>&', $OUTPUT or die "Could not reopen STDOUT: $!\n";
+                                    close STDERR;
+                                    open STDERR, '>&', $OUTPUT or die "Could not reopen STDERR: $!\n";
+                                    $rule->{recipe}->($rule->{to}, $rule->{from})
+                                        unless $simulate or not defined $rule->{recipe};
+                                    exit 0;
+                                }
+                                close $OUTPUT;
+                            }
+                            elsif (%jobs) {
+                                $do_wait->();
+                            }
+                            else {  # Do a non-parallel job
+                                my $rule = shift @program;
+                                chdir $rule->{base};
+                                status $rule->{config} ? "⚒ " : "⚙ ", show_rule($rule);
+                                delazify($rule);
+                                $rule->{recipe}->($rule->{to}, $rule->{from})
+                                    unless $simulate or not defined $rule->{recipe};
+                                $rule->{done} = 1;
+                            }
+                        }
+                    }
+                    else {
+                        for my $rule (@program) {
+                            chdir $rule->{base};
+                            status $rule->{config} ? "⚒ " : "⚙ ", show_rule($rule);
+                            delazify($rule);
+                            $rule->{recipe}->($rule->{to}, $rule->{from})
+                                unless $simulate or not defined $rule->{recipe};
+                        }
                     }
                 };
                 if ("$@" eq "interrupted\n") {
@@ -262,7 +343,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
 # RULES AND DEPENDENCIES
 
     sub create_rule {
-        my ($to, $from, $recipe, $package, $file, $line) = @_;
+        my ($to, $from, $recipe, $options, $package, $file, $line) = @_;
         ref $recipe eq 'CODE' or !defined $recipe or croak "Non-code recipe given to rule";
         my $rule = {
             caller_file => $current_file,
@@ -272,9 +353,14 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             from => lazify($from),
             deps => undef,  # Generated from from
             recipe => $recipe,
+            options => $options,
             check_stale => undef,
             config => 0,
-            planned => 0,  # Intrusive state for the planning phase
+             # Intrusive state for planning and execution phases
+            planned => 0,
+            follow => [],
+            done => 0,
+            output => undef,
         };
         push @rules, $rule;
         for (@{$rule->{to}}) {
@@ -282,16 +368,16 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
         }
     }
 
-    sub rule ($$$) {
-        create_rule(@_, caller);
+    sub rule ($$$;$) {
+        create_rule($_[0], $_[1], $_[2], $_[3] // {}, caller);
     }
 
-    sub phony ($;$$) {
-        my ($to, $from, $recipe) = @_;
+    sub phony ($;$$$) {
+        my ($to, $from, $recipe, $options) = @_;
         for (arrayify($to)) {
             $phonies{realpath($_) // rel2abs($_)} = 1;
         }
-        create_rule($to, $from, $recipe, caller) if defined $from;
+        create_rule($to, $from, $recipe, $options // {}, caller) if defined $from;
     }
 
     sub subdep ($;$) {
@@ -523,8 +609,12 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             caller_file => $current_file,
             caller_line => $line,
             config => 1,
-            planned => 0,
+            options => {},
             stale => 0,
+             # Intrusive state for planning and execution phases
+            planned => 0,
+            follow => [],
+            executed => 0,
         };
         push @rules, $rule;
         push @{$targets{realpath($filename)}}, $rule;
@@ -659,6 +749,11 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
         simulate => {
             ref => \$simulate,
             desc => '--simulate - Show rules that would be run but don\'t run them',
+            custom => 0
+        },
+        jobs => {
+            ref => \$jobs,
+            desc => '--jobs=<number> - Run this many parallel jobs if the rules support it',
             custom => 0
         },
     );
@@ -801,6 +896,10 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
 
     sub plan_rule {
         my ($plan, $rule) = @_;
+         # Register dependency for parallel scheduling.
+        if (@{$plan->{stack}}) {
+            push @{$plan->{stack}[-1]{follow}}, $rule;
+        }
          # detect loops
         if (not defined $rule->{planned}) {
             my $mess = "☢ Dependency loop\n";
@@ -813,6 +912,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
         elsif ($rule->{planned}) {
             return $rule->{stale};  # Already planned
         }
+         # Commit to planning
         push @{$plan->{stack}}, $rule;
         $rule->{planned} = undef;  # Mark that we're currently planning this
 
@@ -827,7 +927,12 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             my $abs = realpath($_) // rel2abs($_);
             !fexists($abs) or grep modtime($abs) < modtime($_), @{$rule->{deps}};
         } @{$rule->{to}};
-        push @{$plan->{program}}, $rule if $stale;
+        if ($stale) {
+            push @{$plan->{program}}, $rule;
+        }
+        else {
+            $rule->{done} = 1;  # Don't confuse parallel scheduler.
+        }
          # Done planning this rule
         $rule->{planned} = 1;
         $rule->{stale} = $stale;

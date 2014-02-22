@@ -20,6 +20,7 @@ namespace hacc {
     GetSet0& GetSet0::readonly () { (*this)->readonly = true; return *this; }
     GetSet0& GetSet0::narrow () { (*this)->narrow = true; return *this; }
     GetSet0& GetSet0::prepare () { (*this)->prepare = true; return *this; }
+    GetSet0& GetSet0::collapse () { (*this)->collapse = true; return *this; }
 
     static void* upcast (Pointer p, Type t) {
         if (!p.address) return null;
@@ -162,8 +163,15 @@ namespace hacc {
             std::vector<std::string> r;
             r.reserve(type().data->attr_list.size());
             for (auto& a : type().data->attr_list) {
-                if (!a.second->readonly)
-                    r.push_back(a.first);
+                if (!a.second->readonly) {
+                    if (a.second->collapse) {
+                       for (auto ck : chain(*this, a.second).keys())
+                           r.push_back(ck);
+                    }
+                    else {
+                        r.push_back(a.first);
+                    }
+                }
             }
             return r;
         }
@@ -184,29 +192,29 @@ namespace hacc {
                     if (a.first == k)
                         goto next;
                 }
-                if (!a.second->optional && !a.second->readonly) {
+                if (a.second->collapse) {
+                    chain(*this, a.second).set_keys(keys);
+                }
+                if (!a.second->optional && !a.second->collapse && !a.second->readonly) {
                     throw X::Missing_Attr(*this, a.first);
                 }
                 next: { }
             }
         }
-        else if (!keys.empty()) {
-            throw X::No_Attrs(*this);
-        }
+         // Don't throw No_Attrs.
     }
 
-    Reference Reference::attr (std::string name) const {
+    static Reference attr_imm (const Reference& r, std::string name) {
         init();
-        if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get attr " + name + " from");
+        if (!r.type().initialized()) throw X::Unhaccable_Reference(r, "get attr " + name + " from");
          // First try specific attrs
-        for (auto& a : type().data->attr_list) {
-            if (a.first == name) {
-                return chain(*this, a.second);
-            }
+        for (auto& a : r.type().data->attr_list) {
+            if (a.first == name)
+                return chain(r, a.second);
         }
          // Then custom attrs function
-        if (auto& f = type().data->attrs_f) {
-            if (void* addr = address()) {
+        if (auto& f = r.type().data->attrs_f) {
+            if (void* addr = r.address()) {
                 return f(addr, name);
             }
             else {
@@ -215,20 +223,68 @@ namespace hacc {
                  // i.e. we may end up generating large objects over and over
                  //  again only to access one member each time.
                 Reference ref_for_type;
-                read([&](void* p){
+                r.read([&](void* p){
                     ref_for_type = f(p, name);
                 });
-                return chain(*this, GetSet0(new GS_ReferenceFunc(
+                return chain(r, GetSet0(new GS_ReferenceFunc(
                     ref_for_type.type(),
-                    type(),
+                    r.type(),
                     [=](void* p){ return f(p, name); }
                 )));
             }
         }
          // Then delegation
-        else if (auto& gs = type().data->delegate) {
-            return chain(*this, gs).attr(name);
+        else if (auto& gs = r.type().data->delegate) {
+            return chain(r, gs).attr(name);
         }
+        else return null;
+    }
+
+    static Reference attr_inner (const Reference& r, std::string name) {
+        init();
+        if (!r.type().initialized()) throw X::Unhaccable_Reference(r, "get attr " + name + " from");
+         // First try specific attrs
+        for (auto& a : r.type().data->attr_list) {
+            if (a.first == name)
+                return chain(r, a.second);
+        }
+         // Then collapsed attrs
+        for (auto& a : r.type().data->attr_list) {
+            if (a.second->collapse)
+                if (auto ret = attr_inner(chain(r, a.second), name))
+                    return ret;
+        }
+         // Then custom attrs function
+        if (auto& f = r.type().data->attrs_f) {
+            if (void* addr = r.address()) {
+                return f(addr, name);
+            }
+            else {
+                 // We're casting all hopes of efficiency under the
+                 //  Do What The User Asks bus.
+                 // i.e. we may end up generating large objects over and over
+                 //  again only to access one member each time.
+                Reference ref_for_type;
+                r.read([&](void* p){
+                    ref_for_type = f(p, name);
+                });
+                return chain(r, GetSet0(new GS_ReferenceFunc(
+                    ref_for_type.type(),
+                    r.type(),
+                    [=](void* p){ return f(p, name); }
+                )));
+            }
+        }
+         // Then delegation
+        else if (auto& gs = r.type().data->delegate) {
+            return chain(r, gs).attr(name);
+        }
+        else return null;
+    }
+    Reference Reference::attr (std::string name) const {
+        auto r = attr_inner(*this, name);
+        if (r)
+            return r;
         else if (!type().data->attr_list.empty())
             throw X::No_Attr(*this, name);
         else
@@ -247,8 +303,29 @@ namespace hacc {
             return chain(*this, gs).length();
         }
         else {
+            size_t r = 0;
+            for (auto& gs : type().data->elem_list) {
+                if (gs->collapse)
+                    r += chain(*this, gs).length();
+                else
+                    r += 0;
+            }
             return type().data->elem_list.size();
         }
+    }
+
+    static std::vector<const GetSet0*> elem_list_gss_inner (const Reference& r) {
+        std::vector<const GetSet0*> gss;
+        for (auto& gs : r.type().data->elem_list) {
+            if (gs->collapse) {
+                for (auto cgs : elem_list_gss_inner(chain(r, gs)))
+                    gss.emplace_back(cgs);
+            }
+            else {
+                gss.emplace_back(&gs);
+            }
+        }
+        return gss;
     }
 
     void Reference::set_length (size_t length) const {
@@ -261,12 +338,12 @@ namespace hacc {
             chain(*this, gs).set_length(length);
         }
         else if (!type().data->elem_list.empty()) {
-            size_t n = type().data->elem_list.size();
-            if (length > n) {
-                throw X::Wrong_Size(*this, length, n);
+            auto gss = elem_list_gss_inner(*this);
+            if (length > gss.size()) {
+                throw X::Wrong_Size(*this, length, gss.size());
             }
-            else for (size_t i = length; i < n; i++) {
-                if (!type().data->elem_list[i]->optional) {
+            else for (size_t i = length; i < gss.size(); i++) {
+                if (!(*gss[i])->optional) {
                     throw X::Missing_Elem(*this, i);
                 }
             }
@@ -280,8 +357,9 @@ namespace hacc {
         init();
         if (!type().initialized()) throw X::Unhaccable_Reference(*this, "get elem from");
          // First try individual elems
-        if (index < type().data->elem_list.size()) {
-            return chain(*this, type().data->elem_list[index]);
+        const auto& gss = elem_list_gss_inner(*this);
+        if (index < gss.size()) {
+            return chain(*this, *gss[index]);
         }
          // Then custom elems function
         else if (auto& f = type().data->elems_f) {
@@ -402,7 +480,21 @@ namespace hacc {
                 }
                 set_keys(ks);
                 for (size_t i = 0; i < n; i++) {
-                    attr(ks[i]).prepare(o[i].second);
+                    if (auto ar = attr_imm(*this, ks[i]))
+                        ar.prepare(o[i].second);
+                }
+                 // Any collapsed members not covered by ks?
+                for (auto& a : type().data->attr_list) {
+                    if (a.second->collapse) {
+                        for (auto& ksk : ks)
+                            if (a.first == ksk)
+                                goto next;
+                         // Prepare collapsed member with same Tree
+                        mod([&](void* p){
+                            Reference(p, a.second).prepare(t);
+                        });
+                        next: { }
+                    }
                 }
                 break;
             }
@@ -465,7 +557,8 @@ namespace hacc {
         else switch (t.form()) {
             case OBJECT: {
                 for (auto& a : t.as<const Object&>()) {
-                    attr(a.first).fill(a.second);
+                    if (auto ar = attr_inner(*this, a.first))
+                        ar.fill(a.second);
                 }
                 break;
             }
@@ -524,8 +617,21 @@ namespace hacc {
              // Do attrs and elems before main item
             std::vector<String> ks = keys();
             if (!ks.empty()) {
-                for (auto k : ks) {
-                    attr(k).finish();
+                for (size_t i = 0; i < ks.size(); i++) {
+                    if (auto ar = attr_imm(*this, ks[i]))
+                        ar.finish();
+                }
+                 // Any collapsed members not covered by ks?
+                for (auto& a : type().data->attr_list) {
+                    if (a.second->collapse) {
+                        for (auto& ksk : ks)
+                            if (a.first == ksk)
+                                goto next;
+                        mod([&](void* p){
+                            Reference(p, a.second).finish();
+                        });
+                        next: { }
+                    }
                 }
             }
             else {
@@ -559,9 +665,25 @@ namespace hacc {
                 const std::vector<String>& ks = keys();
                 if (!ks.empty()) {
                     for (auto& k : ks) {
-                        Path newpath = path ? Path(path, k) : path;
-                        if (attr(k).foreach_address(cb, newpath))
-                            return true;
+                        if (auto ar = attr_imm(*this, k)) {
+                            Path newpath = path ? Path(path, k) : path;
+                            if (ar.foreach_address(cb, newpath))
+                                return true;
+                        }
+                    }
+                     // Any collapsed members not covered by ks?
+                    for (auto& a : type().data->attr_list) {
+                        if (a.second->collapse) {
+                            for (auto& ksk : ks)
+                                if (a.first == ksk)
+                                    goto next;
+                            {
+                                Path newpath = path ? Path(path, a.first) : path;
+                                if (chain(*this, a.second).foreach_address(cb, newpath))
+                                    return true;
+                            }
+                            next: { }
+                        }
                     }
                 }
                 else {
@@ -588,9 +710,25 @@ namespace hacc {
             const std::vector<String>& ks = keys();
             if (!ks.empty()) {
                 for (auto& k : ks) {
-                    Path newpath = path ? Path(path, k) : Path(null);
-                    if (attr(k).foreach_pointer(cb, newpath))
-                        return true;
+                    if (auto ar = attr_imm(*this, k)) {
+                        Path newpath = path ? Path(path, k) : Path(null);
+                        if (ar.foreach_pointer(cb, newpath))
+                            return true;
+                    }
+                }
+                 // Any collapsed members not covered by ks?
+                for (auto& a : type().data->attr_list) {
+                    if (a.second->collapse) {
+                        for (auto& ksk : ks)
+                            if (a.first == ksk)
+                                goto next;
+                        {
+                            Path newpath = path ? Path(path,a.first) : path;
+                            if (chain(*this, a.second).foreach_pointer(cb, newpath))
+                                return true;
+                        }
+                        next: { }
+                    }
                 }
             }
             else {

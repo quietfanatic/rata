@@ -128,6 +128,20 @@ HACCABLE(MyNamed*) {
     hacc_pointer_by_member(&MyNamed::name, mns, true);
 }
 
+struct MyThing : Vectorly {
+    float z;
+    bool operator == (const MyThing& o) const { return static_cast<const Vectorly&>(*this) == static_cast<const Vectorly&>(o) && z==o.z; }
+    MyThing (float x, float y, float z) : Vectorly{x, y}, z(z) { }
+};
+
+HACCABLE(MyThing) {
+    name("MyThing");
+    attr("Vectorly", base<Vectorly>().collapse());
+    attr("z", member(&MyThing::z));
+    elem(base<Vectorly>().collapse());
+    elem(member(&MyThing::z));
+}
+
 template <class C>
 Tree to_tree (C* p) { return Reference(p).to_tree(); }
 template <class C>
@@ -140,12 +154,13 @@ MyUnion mu;
 MyEnum me = VALUE2;
 Dynamic dyn = Dynamic::New<int32>(3);
 MyNamed* mnp = mns[0];
+MyThing myt (10, 20, 30);
 
 #include "../../tap/inc/tap.h"
 tap::Tester haccable_tester ("hacc/haccable", [](){
     using namespace hacc;
     using namespace tap;
-    plan(45);
+    plan(54);
     is(to_tree(&i).as<int>(), 4, "to_tree on int32 works");
     doesnt_throw([](){ from_tree(&i, Tree(35)); }, "from_tree on int32");
     is(i, 35, "...works");
@@ -197,5 +212,14 @@ tap::Tester haccable_tester ("hacc/haccable", [](){
     is(to_tree(&tup).elem(2).as<String>(), String("asdf"), "std::tuple element 2 writes right");
     doesnt_throw([](){ from_tree(&tup, Tree(Array{Tree(7), Tree(7.f), Tree("fdsa")})); }, "std::tuple can be read");
     is(tup, std::make_tuple(7, 7.f, String("fdsa")), "std::tuple is read correctly");
+    is(to_tree(&myt).form(), OBJECT, "MyThing is Object by default");
+    is(to_tree(&myt).attr("x").as<float>(), 10.f, "MyThing's collapse attr works");
+    is(to_tree(&myt).attr("z").as<float>(), 30.f, "MyThing's non-collapse attr works");
+    doesnt_throw([](){ from_tree(&myt, Tree(Object{Pair("x", Tree(11.f)), Pair("y", Tree(21.f)), Pair("z", Tree(31.f))})); }, "Mything accepts 3-attr object");
+    is(myt, MyThing(11.f, 21.f, 31.f), "MyThing's from_tree with object worked correctly");
+    doesnt_throw([](){ from_tree(&myt, Tree(Array{Tree(12.f), Tree(22.f), Tree(32.f)})); }, "Mything accepts 3-elem array");
+    is(myt, MyThing(12.f, 22.f, 32.f), "MyThing's from_tree with array worked correctly");
+    doesnt_throw([](){ from_tree(&myt, Tree(Object{Pair("Vectorly", Tree(Array{Tree(13.f), Tree(23.f)})), Pair("z", Tree(33.f))})); }, "MyThing accepts object with uncollapsed attrs");
+    is(myt, MyThing(13.f, 23.f, 33.f), "MyThing's from_tree with uncollapsed worked correctly");
 });
 

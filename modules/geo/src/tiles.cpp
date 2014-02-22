@@ -114,7 +114,7 @@ namespace geo {
     }
 
     void Tilemap::finish () {
-        set_def(tilemap_bdf());
+        set_bdf(tilemap_bdf());
         physicalize();
          // TODO: find out why we can't do this earlier
         tiles->finish();
@@ -195,8 +195,8 @@ HACCABLE(Tileset) {
 
 HACCABLE(Tilemap) {
     name("geo::Tilemap");
-    attr("Resident", base<Resident>());
-    attr("Object", base<phys::Object>().optional());
+    attr("Resident", base<Resident>().collapse());
+    attr("Object", base<phys::Object>().optional().collapse());
     attr("tileset", member(&Tilemap::tileset));
     attr("texture", member(&Tilemap::texture));
     attr("tiles", member(&Tilemap::tiles));

@@ -8,6 +8,7 @@
 #include "../../ent/inc/control.h"
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/text.h"
+#include "../../vis/inc/light.h"
 #include "../../util/inc/integration.h"
 #include "../inc/main.h"
 
@@ -17,8 +18,7 @@ using namespace core;
 File main_file = File("shell/main.hacc");
 File current_state = File("shell/initial-state.hacc");
 
-static std::string default_state_filename = "shell/initial-state.hacc";
-static std::string stop_state_filename = "../save/last_stop.hacc";
+static std::string state_arg;
 
 struct Hotkeys : core::Listener {
     std::vector<std::pair<int, core::Command>> hotkeys;
@@ -41,6 +41,8 @@ struct Hotkeys : core::Listener {
  //  are expected to reserve a member of this struct.
 struct Game {
     bool paused = false;
+    core::Command on_start;
+    core::Command on_exit;
 };
 static Game* game = NULL;
 
@@ -56,36 +58,33 @@ void step () {
 
 int main (int argc, char** argv) {
 
-    std::string state = argc >= 2
-        ? rel2abs(argv[1])
-        : default_state_filename;
+    if (argc >= 2)
+        state_arg = rel2abs(argv[1]);
 
     auto here = util::my_dir(argc, argv);
-    chdir(here + "/modules");
+    util::chdir(here + "/modules");
 
     game = main_file.data().attr("game");
-    vis::default_font = File("shell/res/monospace.hacc").data().attr("font");
-    vis::Materials* materials = File("world/res/materials.hacc").data().attr("materials");
-    vis::set_materials(materials);
 
     window->step = step;
     window->render = vis::render;
     window->before_next_frame([&](){
-        current_state = File(state);
-        load(current_state);
+        game->on_start();
     });
      // Run
     phys::space.start();
     window->start();
      // After window closes
-    current_state.rename(stop_state_filename);
-    save(current_state);
+    if (game->on_exit)
+        game->on_exit();
     fprintf(stderr, "Quit successfully\n");
 }
 
 HACCABLE(Game) {
     name("Game");
     attr("paused", member(&Game::paused).optional());
+    attr("on_start", member(&Game::on_start));
+    attr("on_exit", member(&Game::on_exit).optional());
 }
 HACCABLE(Hotkeys) {
     name("Hotkeys");
@@ -98,4 +97,30 @@ void _pause () {
 }
 core::New_Command _pause_cmd ("pause", "Toggle whether game activity occurs.", 0, _pause);
 
+void _lst (std::string s) {
+    if (s.empty()) {
+        reload(current_state);
+    }
+    else {
+        unload(current_state);
+        current_state = File(s);
+        load(current_state);
+    }
+}
+core::New_Command _lst_cmd ("lst", "Load a state (throwing away current state), by default reload same state.", 0, _lst);
 
+void _lst_arg (std::string s) {
+    if (!state_arg.empty())
+        _lst(state_arg);
+    else
+        _lst(s);
+}
+
+core::New_Command _lst_arg_cmd ("lst_arg", "Load the command-line argument state with this as default.", 0, _lst_arg);
+
+void _sst (std::string s) {
+    current_state.rename(s);
+    save(current_state);
+}
+
+core::New_Command _sst_cmd ("sst", "Save the current state to a file.", 1, _sst);

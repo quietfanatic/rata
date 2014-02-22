@@ -30,6 +30,7 @@ my @objects = qw<
     ../vis/tmp/common.o
     ../vis/tmp/color.o
     ../vis/tmp/images.o
+    ../vis/tmp/light.o
     ../vis/tmp/models.o
     ../vis/tmp/text.o
     ../vis/tmp/tiles.o

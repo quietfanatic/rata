@@ -133,7 +133,7 @@ HACCABLE(Room) {
 
 HACCABLE(Resident) {
     name("geo::Resident");
-    attr("room", value_methods(&Resident::get_room, &Resident::set_room));
+    attr("room", value_methods(&Resident::get_room, &Resident::set_room).optional());
     finish(&Resident::finish);
 }
 

@@ -4,10 +4,10 @@
         type:static
         fixtures:[$.bb_f0 $.bb_f1 $.bb_f2 $.bb_f3]
     }}
-    bb_f0: {"phys::FixtureDef":{ b2:{ shape:$.bb_e0.b2Shape } coll_b:[ground] }}
-    bb_f1: {"phys::FixtureDef":{ b2:{ shape:$.bb_e1.b2Shape } coll_b:[ground] }}
-    bb_f2: {"phys::FixtureDef":{ b2:{ shape:$.bb_e2.b2Shape } coll_b:[ground] }}
-    bb_f3: {"phys::FixtureDef":{ b2:{ shape:$.bb_e3.b2Shape } coll_b:[ground] }}
+    bb_f0: {"phys::FixtureDef":{ shape:$.bb_e0.b2Shape coll_b:[ground] }}
+    bb_f1: {"phys::FixtureDef":{ shape:$.bb_e1.b2Shape coll_b:[ground] }}
+    bb_f2: {"phys::FixtureDef":{ shape:$.bb_e2.b2Shape coll_b:[ground] }}
+    bb_f3: {"phys::FixtureDef":{ shape:$.bb_e3.b2Shape coll_b:[ground] }}
     bb_e0: {b2EdgeShape:{ v1:[20  0] v2:[ 0  0] }}
     bb_e1: {b2EdgeShape:{ v1:[20 15] v2:[20  0] }}
     bb_e2: {b2EdgeShape:{ v1:[ 0 15] v2:[20 15] }}
@@ -17,10 +17,8 @@
         fixtures:[$.test_fix]
     }}
     test_fix: {"phys::FixtureDef":{
-        b2:{
-            shape:$.test_shape.b2Shape
-            friction:0.4
-        }
+        shape:$.test_shape.b2Shape
+        friction:0.4
         coll_b:[ground]
     }}
     test_shape: {b2PolygonShape:{
@@ -32,10 +30,8 @@
         fixtures:[$.crate_fix]
     }}
     crate_fix: {"phys::FixtureDef":{
-        b2:{
-            shape:$.crate_shape.b2Shape
-            friction:0.4
-        }
+        shape:$.crate_shape.b2Shape
+        friction:0.4
         coll_b:[ground]
     }}
     crate_shape: {b2PolygonShape:{
