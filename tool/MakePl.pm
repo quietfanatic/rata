@@ -244,7 +244,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                                 delete $jobs{$child};
                                 die "\n";
                             }
-                            $jobs{$child}{executed} = 1;
+                            $jobs{$child}{done} = 1;
                             print readline($jobs{$child}{output});
                             close $jobs{$child}{output};
                             delete $jobs{$child};
@@ -255,7 +255,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                             for (0..$#program) {
                                 next unless $program[$_]{options}{fork};
                                  # Don't run program if its deps haven't been finished
-                                next if grep !$_->{executed}, @{$program[$_]{follow}};
+                                next if grep !$_->{done}, @{$program[$_]{follow}};
                                 $rule = splice @program, $_, 1;
                                 last;
                             }
@@ -293,7 +293,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                                 delazify($rule);
                                 $rule->{recipe}->($rule->{to}, $rule->{from})
                                     unless $simulate or not defined $rule->{recipe};
-                                $rule->{executed} = 1;
+                                $rule->{done} = 1;
                             }
                         }
                     }
@@ -355,7 +355,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
              # Intrusive state for planning and execution phases
             planned => 0,
             follow => [],
-            executed => 0,
+            done => 0,
             output => undef,
         };
         push @rules, $rule;
@@ -923,7 +923,12 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
             my $abs = realpath($_) // rel2abs($_);
             !fexists($abs) or grep modtime($abs) < modtime($_), @{$rule->{deps}};
         } @{$rule->{to}};
-        push @{$plan->{program}}, $rule if $stale;
+        if ($stale) {
+            push @{$plan->{program}}, $rule;
+        }
+        else {
+            $rule->{done} = 1;  # Don't confuse parallel scheduler.
+        }
          # Done planning this rule
         $rule->{planned} = 1;
         $rule->{stale} = $stale;
