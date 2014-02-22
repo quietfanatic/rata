@@ -102,7 +102,7 @@ sub cppc_rule {
     my @from = ref $from eq 'ARRAY' ? @$from : $from;
     rule $to, [@from, $conf], sub {
         cppc((grep /.cpp$/, @from), output($_[0][0]));
-    }
+    }, {fork => 1}
 }
 sub ld_rule {
     my ($to, $from, $libs) = @_;
@@ -110,7 +110,7 @@ sub ld_rule {
     my @libs = defined $libs ? (ref $libs eq 'ARRAY' ? @$libs : $libs) : ();
     rule $to, [@from, $conf], sub {
         ld @from, @libs, output($_[0][0]);
-    }
+    }, {fork => 1}
 }
 sub test_rule {
     phony 'test', $_[0], sub { system "./$_[1][0] --test | prove -e '' -"; };
