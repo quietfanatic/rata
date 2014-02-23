@@ -168,7 +168,7 @@ namespace ent {
     static vis::Skin* frock_skin;
 
     void Biped::Drawn_draw (vis::Sprites) {
-        vis::Model::Seg model_data [def->skel->segs.size()];
+        char model_data [def->skel->model_data_size()];
         vis::Model model (def->skel, model_data);
         uint8 look_frame = angle_frame(atan2(focus.y, focus.x));
         if (ground) {
@@ -222,7 +222,7 @@ namespace ent {
             model.apply_pose(&def->poses->jump);
             model.apply_pose(&def->poses->look_walk[look_frame]);
         }
-        model.draw(def->skin, pos(), direction < 0);
+        model.draw(def->skin, pos(), Vec(direction, 1));
          // TODO: implement this as an item
         static bool initted = false;
         if (!initted) {
@@ -230,7 +230,7 @@ namespace ent {
             frock_skin = hacc::File("world/res/frock.hacc").data().attr("skin");
             hacc::manage(&frock_skin);
         }
-        model.draw(frock_skin, pos(), direction < 0);
+        model.draw(frock_skin, pos(), Vec(direction, 1));
     }
 
     Biped::Biped () { }

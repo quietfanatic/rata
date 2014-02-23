@@ -33,6 +33,8 @@ namespace vis {
         uint seg_index (Skel::Seg* p);
 
         void finish ();
+
+        size_t model_data_size ();
     };
 
     struct Pose {
@@ -58,19 +60,19 @@ namespace vis {
     struct Model {
         struct Seg {
             Pose::App* pose;
+            Vec pos;
         };
 
         Skel* skel = NULL;
         Model::Seg* segs;
 
-        Model (Skel*, Model::Seg*);
+        Model (Skel*, char*);
 
         Vec offset_of (Skel::Seg* seg);
         void apply_pose (Pose*);
 
          // TODO: make this better
-        void draw_seg (Skin* skin, Skel::Seg* ss, Vec pos, bool fh, bool fv, float z);
-        void draw (Skin* skin, Vec pos, bool fliph = false, bool flipv = false, float z = 0);
+        void draw (Skin* skin, Vec pos, Vec scale = Vec(1, 1), float z = 0);
     };
 
 }
