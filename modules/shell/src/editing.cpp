@@ -368,20 +368,30 @@ namespace shell {
         logger.log("Deactivating tile editor");
         Listener::deactivate();
         Drawn<vis::Map>::disappear();
-        if (tilemap)
-            tilemap->finish();
     }
 
 
     void Tile_Editor::Drawn_draw (vis::Map) {
-        if (!room_editor) return;
-         // TODO: display current tile in corner
-        draw_tile(tile, tilemap->texture, room_editor->fc.window_to_world(0, 0) - Vec(0, 1));
+        if (!tilemap) return;
+         // display current tile in corner
+        draw_tile(tile, tilemap->texture, camera->window_to_world(0, 0) - Vec(0, 1));
     }
-    bool Tile_Editor::Listener_button (int, int) {
+    bool Tile_Editor::Listener_button (int btn, int action) {
+        if (!tilemap) return false;
          // TODO: left-click = draw
          //       right-click = select
-        return false;
+        if (action == GLFW_PRESS) {
+            if (btn == GLFW_MOUSE_BUTTON_LEFT) {
+                Vec pos = camera->window_to_world(window->cursor_x, window->cursor_y) - tilemap->pos();
+                if (Rect(0, 0, tilemap->tiles->width, tilemap->tiles->height).covers(pos)) {
+                    size_t x = floor(pos.x);
+                    size_t y = tilemap->tiles->height - floor(pos.y) - 1;
+                    tilemap->tiles->tiles[tilemap->tiles->width * y + x] = tile;
+                    tilemap->finish();
+                }
+            }
+        }
+        return true;
     }
     bool Tile_Editor::Listener_key (int code, int action) {
         if (code == GLFW_KEY_ESC && action == GLFW_PRESS) {
