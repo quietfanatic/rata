@@ -85,7 +85,7 @@ namespace vis {
             for (auto& sa : skins[i]->apps) {
                 draws[draw_i].seg = &segs[skel->seg_index(sa.target)];
                 draws[draw_i].tex = sa.texture;
-                draws[draw_i].z = sa.target->z_offset;
+                draws[draw_i].z = sa.target->z_offset + sa.z_offset;
                 draw_i++;
             }
         }
@@ -150,5 +150,6 @@ HACCABLE(Skin::App) {
     name("vis::Skin::App");
     elem(member(&Skin::App::target));
     elem(member(&Skin::App::texture));
+    elem(member(&Skin::App::z_offset).optional());
 }
 

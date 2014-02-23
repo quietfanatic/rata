@@ -51,6 +51,7 @@ namespace vis {
         struct App {
             Skel::Seg* target;
             vis::Texture* texture;
+            float z_offset = 0;
         };
 
         std::vector<Skin::App> apps;
