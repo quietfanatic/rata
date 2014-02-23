@@ -43,34 +43,36 @@ namespace vis {
         return r;
     }
 
-    void Model::draw_seg (Skel::Seg* ss, Vec pos, bool fliph, bool flipv, float z) {
+    void Model::draw_seg (Skin* skin, Skel::Seg* ss, Vec pos, bool fliph, bool flipv, float z) {
         Model::Seg* ms = &segs[skel->seg_index(ss)];
         if (!ms->pose) return;
          // Wishing for a boolean xor
         bool fh = ms->pose->fliph ? !fliph : fliph;
         bool fv = ms->pose->flipv ? !flipv : flipv;
-        if (ms->skin) {
-            for (Texture* tex : ms->skin->textures) {
-                draw_frame(
-                    ms->pose->frame, tex, pos,
-                    Vec(fh?-1:1, fv?-1:1), z + ss->z_offset
-                );
+        for (auto& sa : skin->apps) {
+            if (sa.target == ss) {
+                for (Texture* tex : sa.textures) {
+                    draw_frame(
+                        ms->pose->frame, tex, pos,
+                        Vec(fh?-1:1, fv?-1:1), z + ss->z_offset
+                    );
+                }
             }
         }
         for (Skel::Seg*& branch : ss->branches) {
             Vec pt = PX*ms->pose->frame->points[&branch - ss->branches.data()];
             if (fh) pt.x = -pt.x;
             if (fv) pt.y = -pt.y;
-            draw_seg(branch, pos + pt, fliph, flipv, z);
+            draw_seg(skin, branch, pos + pt, fliph, flipv, z);
         }
     }
-    void Model::draw (Vec pos, bool fliph, bool flipv, float z) {
+    void Model::draw (Skin* skin, Vec pos, bool fliph, bool flipv, float z) {
         if (!skel) {
             model_logger.log("Model has no associated skeleton");
             return;
         }
         model_logger.log("Drawing a model with %lu segs", skel->segs.size());
-        draw_seg(skel->root, pos + skel->root_offset, fliph, flipv, z);
+        draw_seg(skin, skel->root, pos + skel->root_offset, fliph, flipv, z);
     }
 
     void Model::apply_pose (Pose* pose) {
@@ -78,16 +80,10 @@ namespace vis {
             segs[skel->seg_index(app.target)].pose = &app;
         }
     }
-    void Model::apply_skin (Skin* skin) {
-        for (auto& app : skin->apps) {
-            segs[skel->seg_index(app.target)].skin = &app;
-        }
-    }
 
     Model::Model (Skel* skel, Model::Seg* segs) : skel(skel), segs(segs) {
         for (size_t i = 0; i < skel->segs.size(); i++) {
             segs[i].pose = NULL;
-            segs[i].skin = NULL;
         }
     }
 

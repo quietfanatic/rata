@@ -220,8 +220,7 @@ namespace ent {
             model.apply_pose(&def->poses->jump);
             model.apply_pose(&def->poses->look_walk[look_frame]);
         }
-        model.apply_skin(def->skin);
-        model.draw(pos(), direction < 0);
+        model.draw(def->skin, pos(), direction < 0);
     }
 
     Biped::Biped () { }

@@ -57,7 +57,6 @@ namespace vis {
 
     struct Model {
         struct Seg {
-            Skin::App* skin;
             Pose::App* pose;
         };
 
@@ -68,10 +67,10 @@ namespace vis {
 
         Vec offset_of (Skel::Seg* seg);
         void apply_pose (Pose*);
-        void apply_skin (Skin*);
 
-        void draw_seg (Skel::Seg* ss, Vec pos, bool fh, bool fv, float z);
-        void draw (Vec pos, bool fliph = false, bool flipv = false, float z = 0);
+         // TODO: make this better
+        void draw_seg (Skin* skin, Skel::Seg* ss, Vec pos, bool fh, bool fv, float z);
+        void draw (Skin* skin, Vec pos, bool fliph = false, bool flipv = false, float z = 0);
     };
 
 }
