@@ -65,7 +65,7 @@ namespace vis {
         float az = ((Draw*)a)->z;
         float bz = ((Draw*)b)->z;
          // Ascending order
-        return (az < bz) - (az > bz);
+        return (az > bz) - (az < bz);
     }
 
     void Model::draw (size_t n_skins, Skin** skins, Vec pos, Vec scale, float z) {
@@ -94,7 +94,7 @@ namespace vis {
             draw_frame(
                 draws[i].seg->pose->frame, draws[i].tex,
                 pos + draws[i].seg->pos.scale(scale),
-                scale, draws[i].z
+                scale, z
             );
         }
     }

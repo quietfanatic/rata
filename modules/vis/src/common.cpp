@@ -96,18 +96,18 @@ namespace vis {
         for (auto& i : Map::items)
             i.Drawn_draw(Map());
          // Sprite rendering uses blend for shadows
+        glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-        glBlendEquation(GL_MAX);
+        glBlendFunc(GL_ONE, GL_SRC_ALPHA);
         for (auto& i : Sprites::items)
             i.Drawn_draw(Sprites());
          // Now render from world fb to window fb
         glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
          // Light renders blend by adding.
         if (light_debug_type == 1)
             glDisable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
-        glBlendEquation(GL_FUNC_ADD);
          // Clear to black, to make blending work.
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(0, 0, 0, 1);
