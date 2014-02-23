@@ -378,16 +378,22 @@ namespace shell {
     }
     bool Tile_Editor::Listener_button (int btn, int action) {
         if (!tilemap) return false;
-         // TODO: left-click = draw
-         //       right-click = select
         if (action == GLFW_PRESS) {
-            if (btn == GLFW_MOUSE_BUTTON_LEFT) {
-                Vec pos = camera->window_to_world(window->cursor_x, window->cursor_y) - tilemap->pos();
-                if (Rect(0, 0, tilemap->tiles->width, tilemap->tiles->height).covers(pos)) {
-                    size_t x = floor(pos.x);
-                    size_t y = tilemap->tiles->height - floor(pos.y) - 1;
-                    tilemap->tiles->tiles[tilemap->tiles->width * y + x] = tile;
-                    tilemap->finish();
+            Vec pos = camera->window_to_world(window->cursor_x, window->cursor_y) - tilemap->pos();
+            if (Rect(0, 0, tilemap->tiles->width, tilemap->tiles->height).covers(pos)) {
+                size_t x = floor(pos.x);
+                size_t y = tilemap->tiles->height - floor(pos.y) - 1;
+                auto& selected = tilemap->tiles->tiles[tilemap->tiles->width * y + x];
+                 // Lay tile
+                if (btn == GLFW_MOUSE_BUTTON_LEFT) {
+                    if (selected != tile) {
+                        selected = tile;
+                        tilemap->finish();
+                    }
+                }
+                 // Pick tile
+                else if (btn == GLFW_MOUSE_BUTTON_RIGHT) {
+                    tile = selected;
                 }
             }
         }
