@@ -11,12 +11,12 @@
 
 namespace shell {
     using namespace util;
-    geo::Free_Camera fc;
 
     struct Room_Editor : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Dev>, core::Listener {
          // Associated utilities
         Menu<vis::Dev>* res_menu = NULL;  // Set on construction
         Menu<vis::Dev>* room_menu = NULL;  // Set on construction
+        geo::Free_Camera fc;
         vis::Font* font = NULL;
          // Selected items
         geo::Resident* hovering = NULL;

@@ -203,8 +203,6 @@ namespace shell {
 
     void Room_Editor::activate () {
         logger.log("Activating room editor.");
-        if (tile_editor && tile_editor->active)
-            tile_editor->deactivate();
         Listener::activate();
         fc.pos = camera->Camera_pos();
         fc.size = Vec(40, 30);
@@ -362,17 +360,15 @@ namespace shell {
 
     void Tile_Editor::activate () {
         logger.log("Activating tile editor");
-        if (room_editor && room_editor->active)
-            room_editor->deactivate();
         Listener::activate();
-        fc.activate();
         Drawn<vis::Overlay>::appear();
     }
     void Tile_Editor::deactivate () {
         logger.log("Deactivating tile editor");
         Listener::deactivate();
-        fc.deactivate();
         Drawn<vis::Overlay>::disappear();
+        if (selected)
+            selected->finish();
     }
 
 
@@ -384,7 +380,11 @@ namespace shell {
          //       right-click = select
         return false;
     }
-    bool Tile_Editor::Listener_key (int, int) {
+    bool Tile_Editor::Listener_key (int code, int action) {
+        if (code == GLFW_KEY_ESC && action == GLFW_PRESS) {
+            deactivate();
+            return true;
+        }
          // TODO: h and v flip current tile
         return false;
     }
@@ -448,9 +448,18 @@ New_Command _re_new_actor_cmd ("re_new_actor", "Add a new actor to the current s
 
 void _re_control_this () {
     if (!room_editor || !ent::player) return;
-    ent::Controllable* cont = res_realp(room_editor->selected);
-    ent::player->set_character(cont);
+    if (auto cont = dynamic_cast<ent::Controllable*>(room_editor->selected))
+        ent::player->set_character(cont);
 }
 New_Command _re_control_this_cmd ("re_control_this", "Transfer keyboard control to this Biped.", 0, _re_control_this);
+
+void _re_start_te () {
+    if (!room_editor || !tile_editor) return;
+    if (auto tilemap = dynamic_cast<Tilemap*>(room_editor->selected)) {
+        tile_editor->selected = tilemap;
+        tile_editor->activate();
+    }
+}
+New_Command _re_start_te_cmd ("re_start_te", "Start tilemap editor from room editor.", 0, _re_start_te);
 
 }

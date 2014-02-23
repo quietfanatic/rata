@@ -17,6 +17,7 @@
                 }}
                 {"shell::Type_Specific_Menu":{
                     "ent::Biped":$.biped_menu
+                    "geo::Tilemap":$.tilemap_menu
                 }}
             ]
         }}
@@ -24,6 +25,10 @@
     biped_menu:{"shell::Text_Button":{
         text:"control this"
         on_click:[re_control_this]
+    }}
+    tilemap_menu:{"shell::Text_Button":{
+        text:"Edit tilemap"
+        on_click:[re_start_te]
     }}
     room_menu:{"shell::Menu<vis::Dev>":{
         deactivate_on_click:true
