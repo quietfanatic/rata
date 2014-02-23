@@ -73,7 +73,8 @@ that module's directory, if it exists.
  - ☐ Camera control (bring constraint satisfaction system from master branch)
  - ☐ Items and inventory
  - ☑ Implement area lighting
- - ☐ Add model-internal shadows to lighting shader
+ - ☑ Add model-internal shadows to lighting shader
+ - ☐ Fix model rendering for multiple interleaved skins
  - ☐ Some basic game content
 
 ###### Long Term
