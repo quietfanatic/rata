@@ -92,6 +92,31 @@ namespace vis {
         core::diagnose_opengl("after draw_tiles");
     }
 
+    void draw_tile (uint16 tile, Texture* tex, Vec pos) {
+//        printf("Drawing tile %hu at %f,%f\n", tile, pos.x, pos.y);
+        prog->use();
+        glUniform2f(prog->model_pos, round(pos.x/PX)*PX, round(pos.y/PX)*PX);
+        glUniform2f(prog->tileset_size, tex->size.x, tex->size.y);
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        Tile_Vertex verts [4];
+        uint tx = (tile & 0x3fff) % 16 * 16;
+        uint ty = (tile & 0x3fff) / 16 * 16;
+        bool flipx = !!(tile & 0x8000);
+        bool flipy = !!(tile & 0x4000);
+        verts[0] = Tile_Vertex(pos.x+0, pos.y-1+0, tx+(16* flipx), ty+(16*!flipy));
+        verts[1] = Tile_Vertex(pos.x+1, pos.y-1+0, tx+(16* flipx), ty+(16*!flipy));
+        verts[2] = Tile_Vertex(pos.x+1, pos.y-1+1, tx+(16* flipx), ty+(16*!flipy));
+        verts[3] = Tile_Vertex(pos.x+0, pos.y-1+1, tx+(16* flipx), ty+(16*!flipy));
+        glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), &verts[0].px);
+        glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), &verts[0].tx);
+        glDrawArrays(GL_QUADS, 0, 4);
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        core::diagnose_opengl("after draw_tiles");
+    }
+
 } using namespace vis;
 
 HACCABLE(Tiles) {

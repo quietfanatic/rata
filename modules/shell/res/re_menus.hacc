@@ -27,7 +27,7 @@
         on_click:[re_control_this]
     }}
     tilemap_menu:{"shell::Text_Button":{
-        text:"Edit tilemap"
+        text:"edit tilemap"
         on_click:[re_start_te]
     }}
     room_menu:{"shell::Menu<vis::Dev>":{

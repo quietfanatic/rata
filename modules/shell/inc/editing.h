@@ -52,15 +52,16 @@ namespace shell {
     };
     extern Room_Editor* room_editor;
 
-    struct Tile_Editor : vis::Drawn<vis::Overlay>, core::Listener {
-        geo::Tilemap* selected = NULL;
+    struct Tile_Editor : vis::Drawn<vis::Map>, core::Listener {
+        geo::Tilemap* tilemap = NULL;
+        uint16 tile = 0x0002;
 
         Tile_Editor ();
         ~Tile_Editor ();
         void activate ();
         void deactivate ();
 
-        void Drawn_draw (vis::Overlay) override;
+        void Drawn_draw (vis::Map) override;
         bool Listener_button (int, int) override;
         bool Listener_key (int, int) override;
     };

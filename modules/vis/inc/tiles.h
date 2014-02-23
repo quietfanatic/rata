@@ -34,6 +34,7 @@ namespace vis {
 
     void tiles_init ();
     void draw_tiles (Tiles*, Texture*, Vec pos);
+    void draw_tile (uint16, Texture*, Vec pos);
 
 }
 

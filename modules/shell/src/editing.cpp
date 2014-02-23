@@ -362,19 +362,21 @@ namespace shell {
     void Tile_Editor::activate () {
         logger.log("Activating tile editor");
         Listener::activate();
-        Drawn<vis::Overlay>::appear();
+        Drawn<vis::Map>::appear();
     }
     void Tile_Editor::deactivate () {
         logger.log("Deactivating tile editor");
         Listener::deactivate();
-        Drawn<vis::Overlay>::disappear();
-        if (selected)
-            selected->finish();
+        Drawn<vis::Map>::disappear();
+        if (tilemap)
+            tilemap->finish();
     }
 
 
-    void Tile_Editor::Drawn_draw (vis::Overlay) {
+    void Tile_Editor::Drawn_draw (vis::Map) {
+        if (!room_editor) return;
          // TODO: display current tile in corner
+        draw_tile(tile, tilemap->texture, room_editor->fc.window_to_world(0, 0));
     }
     bool Tile_Editor::Listener_button (int, int) {
          // TODO: left-click = draw
@@ -459,7 +461,7 @@ New_Command _re_control_this_cmd ("re_control_this", "Transfer keyboard control 
 void _re_start_te () {
     if (!room_editor || !tile_editor) return;
     if (auto tilemap = dynamic_cast<Tilemap*>(room_editor->selected)) {
-        tile_editor->selected = tilemap;
+        tile_editor->tilemap = tilemap;
         tile_editor->activate();
     }
 }
