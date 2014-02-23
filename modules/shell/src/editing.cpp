@@ -23,6 +23,7 @@ namespace shell {
 
      // Get pointer of most derived type from Resident*
     hacc::Pointer res_realp (Resident* res) {
+        if (!res) return nullptr;
         void* derived = hacc::Pointer(res).address_of_type(hacc::Type(typeid(*res)));
         return hacc::Pointer(hacc::Type(typeid(*res)), derived);
     }
@@ -145,7 +146,6 @@ namespace shell {
              // Just upgrade hovering to selected
             selected = hovering;
             selected_room = hovering_room;
-            selected_type_name = res_realp(selected).type.name();
             if (selected) {
                 Vec pos = selected->Resident_get_pos();
                 if (code == GLFW_MOUSE_BUTTON_LEFT) {
@@ -156,6 +156,7 @@ namespace shell {
                 }
                 else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
                     if (action == GLFW_PRESS) {
+                        selected_type_name = res_realp(selected).type.name();
                         menu_world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
                         Vec area = camera->window_to_dev(window->width, 0);
                         res_menu->size = res_menu->root->Menu_Item_size(area);

@@ -9,15 +9,17 @@
 namespace geo {
     using namespace util;
 
-    static phys::BodyDef*& tilemap_bdf () {
-        static phys::BodyDef* r = hacc::File("geo/res/tilemap.bdf").data();
-        hacc::manage(&r);
-        return r;
-    }
+    static phys::BodyDef* tilemap_bdf;
 
     static Logger tilemap_logger ("tilemap");
 
-    Tilemap::Tilemap () { tilemap_bdf(); }
+    Tilemap::Tilemap () {
+        static bool initted = false;
+        if (!initted) {
+            tilemap_bdf = hacc::File("geo/res/tilemap.bdf").data();
+            hacc::manage(&tilemap_bdf);
+        }
+    }
 
     void Tilemap::Resident_emerge () {
         materialize();
@@ -114,7 +116,7 @@ namespace geo {
     }
 
     void Tilemap::finish () {
-        set_bdf(tilemap_bdf());
+        set_bdf(tilemap_bdf);
         physicalize();
          // TODO: find out why we can't do this earlier
         tiles->finish();

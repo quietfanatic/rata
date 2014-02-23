@@ -1,4 +1,3 @@
-
 #include "../../hacc/inc/everything.h"
 #include "../inc/mixins.h"
 #include "../../vis/inc/images.h"
@@ -71,24 +70,5 @@ HACCABLE(Light) {
     attr("ambient", member(&Light::ambient).optional());
     attr("diffuse", member(&Light::diffuse).optional());
     attr("radiant", member(&Light::radiant).optional());
-}
-
-static phys::BodyDef*& boundary_bdf () {
-    static phys::BodyDef* boundary_bdf = hacc::File("ent/res/various.hacc").data().attr("boundary_bdf");
-    hacc::manage(&boundary_bdf);
-    return boundary_bdf;
-}
-struct Boundary : phys::Object {
-    Boundary () : Object() { boundary_bdf(); }
-    void finish () {
-        set_bdf(boundary_bdf());
-        materialize();
-    }
-};
-
-HACCABLE(Boundary) {
-    name("ent::Boundary");
-    attr("Object", base<phys::Object>().collapse());
-    finish([](Boundary& b){ b.finish(); });
 }
 
