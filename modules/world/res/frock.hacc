@@ -12,11 +12,11 @@
     }}
     skin:{"vis::Skin":{
         apps: [
-            [($s=$("ent/res/small.hacc").skel.segs).body $.img.body 0.0000001]
-            [$s.arm1 $.img.arm 0.0000001]
-            [$s.forearm1 $.img.forearm 0.0000001]
-            [$s.arm2 $.img.arm 0.0000001]
-            [$s.forearm2 $.img.forearm 0.0000001]
+            [($s=$("ent/res/small.hacc").skel.segs).body $.img.body 0.01]
+            [$s.arm1 $.img.arm 0.01]
+            [$s.forearm1 $.img.forearm 0.01]
+            [$s.arm2 $.img.arm 0.01]
+            [$s.forearm2 $.img.forearm 0.01]
         ]
     }}
 }}

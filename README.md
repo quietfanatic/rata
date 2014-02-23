@@ -74,7 +74,7 @@ that module's directory, if it exists.
  - ☐ Items and inventory
  - ☑ Implement area lighting
  - ☑ Add model-internal shadows to lighting shader
- - ☐ Fix model rendering for multiple interleaved skins
+ - ☑ Allow model rendering for multiple interleaved skins
  - ☐ Some basic game content
 
 ###### Long Term

@@ -63,32 +63,32 @@
             name:head
             branches:[]
             layout:$lh=$("ent/res/small.layouts").head
-            z_offset:0.000001
+            z_offset:1
         } {
             name:forearm1
             branches:[]
             layout:$lf=$("ent/res/small.layouts").forearm
-            z_offset:0.000003
+            z_offset:3
         } {
             name:arm1
             branches:[$.skel.segs.forearm1]
             layout:$la=$("ent/res/small.layouts").arm
-            z_offset:0.000002
+            z_offset:2
         } {
             name:forearm2
             branches:[]
             layout:$lf
-            z_offset:-0.000002
+            z_offset:-2
         } {
             name:arm2
             branches:[$.skel.segs.forearm2]
             layout:$la
-            z_offset:-0.000003
+            z_offset:-3
         } {
             name:body
             branches:[$.skel.segs.head $.skel.segs.arm1 $.skel.segs.arm2]
             layout:$lb=$("ent/res/small.layouts").body
-            z_offset:0.000000
+            z_offset:0
         }]
         root:$.skel.segs.body
         root_offset:[0 0]
