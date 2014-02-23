@@ -68,21 +68,26 @@ namespace vis {
         return (az < bz) - (az > bz);
     }
 
-    void Model::draw (Skin* skin, Vec pos, Vec scale, float z) {
+    void Model::draw (size_t n_skins, Skin** skins, Vec pos, Vec scale, float z) {
         if (!skel) {
             model_logger.log("Model has no associated skeleton");
             return;
         }
         model_logger.log("Drawing a model with %lu segs", skel->segs.size());
         reposition_segment(this, skel->root, skel->root_offset);
-        size_t n_draws = skin->apps.size();
+        size_t n_draws = 0;
+        for (size_t i = 0; i < n_skins; i++) {
+            n_draws += skins[i]->apps.size();
+        }
         Draw draws [n_draws];
         size_t draw_i = 0;
-        for (auto& sa : skin->apps) {
-            draws[draw_i].seg = &segs[skel->seg_index(sa.target)];
-            draws[draw_i].tex = sa.textures[0];
-            draws[draw_i].z = sa.target->z_offset;
-            draw_i++;
+        for (size_t i = 0; i < n_skins; i++) {
+            for (auto& sa : skins[i]->apps) {
+                draws[draw_i].seg = &segs[skel->seg_index(sa.target)];
+                draws[draw_i].tex = sa.textures[0];
+                draws[draw_i].z = sa.target->z_offset;
+                draw_i++;
+            }
         }
         qsort(draws, n_draws, sizeof(Draw), cmp_Draw);
         for (size_t i = 0; i < n_draws; i++) {

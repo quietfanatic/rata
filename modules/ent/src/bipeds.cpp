@@ -222,7 +222,6 @@ namespace ent {
             model.apply_pose(&def->poses->jump);
             model.apply_pose(&def->poses->look_walk[look_frame]);
         }
-        model.draw(def->skin, pos(), Vec(direction, 1));
          // TODO: implement this as an item
         static bool initted = false;
         if (!initted) {
@@ -230,7 +229,10 @@ namespace ent {
             frock_skin = hacc::File("world/res/frock.hacc").data().attr("skin");
             hacc::manage(&frock_skin);
         }
-        model.draw(frock_skin, pos(), Vec(direction, 1));
+        vis::Skin* skins [2];
+        skins[0] = def->skin;
+        skins[1] = frock_skin;
+        model.draw(2, skins, pos(), Vec(direction, 1));
     }
 
     Biped::Biped () { }
