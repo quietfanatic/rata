@@ -54,7 +54,7 @@ namespace shell {
 
     struct Tile_Editor : vis::Drawn<vis::Map>, core::Listener {
         geo::Tilemap* tilemap = NULL;
-        uint16 tile = 0x0002;
+        uint16 tile = 0x0001;
 
         Tile_Editor ();
         ~Tile_Editor ();

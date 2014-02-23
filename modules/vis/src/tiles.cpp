@@ -86,8 +86,8 @@ namespace vis {
         glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, px));
         glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), (void*)offsetof(Tile_Vertex, tx));
         glDrawArrays(GL_QUADS, 0, tiles->vbo_size);
-        glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         core::diagnose_opengl("after draw_tiles");
     }
@@ -105,15 +105,15 @@ namespace vis {
         uint ty = (tile & 0x3fff) / 16 * 16;
         bool flipx = !!(tile & 0x8000);
         bool flipy = !!(tile & 0x4000);
-        verts[0] = Tile_Vertex(pos.x+0, pos.y-1+0, tx+(16* flipx), ty+(16*!flipy));
-        verts[1] = Tile_Vertex(pos.x+1, pos.y-1+0, tx+(16* flipx), ty+(16*!flipy));
-        verts[2] = Tile_Vertex(pos.x+1, pos.y-1+1, tx+(16* flipx), ty+(16*!flipy));
-        verts[3] = Tile_Vertex(pos.x+0, pos.y-1+1, tx+(16* flipx), ty+(16*!flipy));
+        verts[0] = Tile_Vertex(0, -1, tx+(16* flipx), ty+(16*!flipy));
+        verts[1] = Tile_Vertex(1, -1, tx+(16*!flipx), ty+(16*!flipy));
+        verts[2] = Tile_Vertex(1, 0, tx+(16*!flipx), ty+(16* flipy));
+        verts[3] = Tile_Vertex(0, 0, tx+(16* flipx), ty+(16* flipy));
         glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), &verts[0].px);
         glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), &verts[0].tx);
         glDrawArrays(GL_QUADS, 0, 4);
-        glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
         core::diagnose_opengl("after draw_tiles");
     }
 
