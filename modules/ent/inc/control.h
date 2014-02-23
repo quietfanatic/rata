@@ -107,8 +107,10 @@ namespace ent {
         void Listener_trapped_motion (int x, int y) override;
 
         Player ();
+        ~Player ();
         void finish ();
     };
+    extern Player* player;
 
 }
 

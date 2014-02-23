@@ -7,6 +7,8 @@
 
 namespace ent {
 
+    Player* player = NULL;
+
     void Player::Drawn_draw (vis::Overlay) {
         if (character && cursor_tex && cursor_frame) {
             Vec focus = character->Controllable_get_focus();
@@ -57,6 +59,11 @@ namespace ent {
         mappings[BTN_AIM].emplace_back(BTN, GLFW_MOUSE_BUTTON_RIGHT);
         mappings[BTN_AIM].emplace_back(KEY, GLFW_KEY_LSHIFT);
         mappings[BTN_ATTACK].emplace_back(BTN, GLFW_MOUSE_BUTTON_LEFT);
+        player = this;
+    }
+    Player::~Player () {
+        if (player == this)
+            player = NULL;
     }
 
     void Player::finish () {

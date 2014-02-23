@@ -22,7 +22,8 @@
         }}
     }}
     biped_menu:{"shell::Text_Button":{
-        text:"asdfasdf"
+        text:"control this"
+        on_click:[re_control_this]
     }}
     room_menu:{"shell::Menu<vis::Dev>":{
         deactivate_on_click:true

@@ -7,6 +7,7 @@
 #include "../../core/inc/commands.h"
 #include "../../vis/inc/color.h"
 #include "../../util/inc/debug.h"
+#include "../../ent/inc/control.h"
 
 using namespace util;
 using namespace vis;
@@ -444,5 +445,12 @@ void _re_new_actor (std::string type, hacc::Tree data) {
     room_editor->re_new_actor(hacc::Type(type), data);
 }
 New_Command _re_new_actor_cmd ("re_new_actor", "Add a new actor to the current state.", 2, _re_new_actor);
+
+void _re_control_this () {
+    if (!room_editor || !ent::player) return;
+    ent::Controllable* cont = res_realp(room_editor->selected);
+    ent::player->set_character(cont);
+}
+New_Command _re_control_this_cmd ("re_control_this", "Transfer keyboard control to this Biped.", 0, _re_control_this);
 
 }
