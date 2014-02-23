@@ -32,7 +32,7 @@ namespace vis {
         bool visible () { return Link<Drawn<C>>::linked(); }
 
         Drawn () { }
-        virtual ~Drawn () { disappear(); }
+        virtual ~Drawn () { }
     };
 
      // These are the layers you can render to.
