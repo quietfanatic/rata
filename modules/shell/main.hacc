@@ -28,4 +28,5 @@
     ]}
     console:{"shell::Console":{ }}
     room_editor:{"shell::Room_Editor":{ }}
+    tile_editor:{"shell::Tile_Editor":{ }}
 }}

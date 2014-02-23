@@ -15,8 +15,14 @@
                     text:"delete"
                     on_click:[re_delete]
                 }}
+                {"shell::Type_Specific_Menu":{
+                    "ent::Biped":$.biped_menu
+                }}
             ]
         }}
+    }}
+    biped_menu:{"shell::Text_Button":{
+        text:"asdfasdf"
     }}
     room_menu:{"shell::Menu<vis::Dev>":{
         deactivate_on_click:true

@@ -1,15 +1,11 @@
 #include <sstream>
 #include "../inc/editing.h"
 #include "../inc/main.h"
-#include "../../geo/inc/rooms.h"
-#include "../../geo/inc/camera.h"
 #include "../../hacc/inc/files.h"
 #include "../../hacc/inc/documents.h"
 #include "../../hacc/inc/strings.h"
 #include "../../core/inc/commands.h"
-#include "../../core/inc/window.h"
 #include "../../vis/inc/color.h"
-#include "../../vis/inc/text.h"
 #include "../../util/inc/debug.h"
 
 using namespace util;
@@ -22,6 +18,7 @@ namespace shell {
     Logger logger ("editing");
 
     Room_Editor* room_editor = NULL;
+    Tile_Editor* tile_editor = NULL;
 
      // Get pointer of most derived type from Resident*
     hacc::Pointer res_realp (Resident* res) {
@@ -147,6 +144,7 @@ namespace shell {
              // Just upgrade hovering to selected
             selected = hovering;
             selected_room = hovering_room;
+            selected_type_name = res_realp(selected).type.name();
             if (selected) {
                 Vec pos = selected->Resident_get_pos();
                 if (code == GLFW_MOUSE_BUTTON_LEFT) {
@@ -197,12 +195,15 @@ namespace shell {
         room_editor = this;
     }
     Room_Editor::~Room_Editor () {
+        if (active) deactivate();
         if (room_editor == this)
             room_editor = NULL;
     }
 
     void Room_Editor::activate () {
-        logger.log("Activating editor.");
+        logger.log("Activating room editor.");
+        if (tile_editor && tile_editor->active)
+            tile_editor->deactivate();
         Listener::activate();
         fc.pos = camera->Camera_pos();
         fc.size = Vec(40, 30);
@@ -211,7 +212,7 @@ namespace shell {
         Drawn<Dev>::appear();
     }
     void Room_Editor::deactivate () {
-        logger.log("Deactivating editor.");
+        logger.log("Deactivating room editor.");
         hovering = NULL;
         selected = NULL;
         dragging = false;
@@ -242,11 +243,11 @@ namespace shell {
         system((std::string(editor) + " " + tmp).c_str());
         auto new_str = hacc::string_from_file(tmp);
         if (new_str != str) {
-            printf("Updating\n");
+            logger.log("Updating");
             ref.from_tree(hacc::tree_from_string(new_str));
         }
         else {
-            printf("Not updating\n");
+            logger.log("Not updating");
         }
         remove(tmp);
     }
@@ -318,12 +319,93 @@ namespace shell {
         }
     }
 
+    struct Type_Specific_Menu : Menu_Item {
+        std::unordered_map<std::string, Menu_Item*> items;
+
+        Vec Menu_Item_size (Vec area) override {
+            auto iter = items.find(room_editor->selected_type_name);
+            if (iter != items.end())
+                return iter->second->Menu_Item_size(area);
+            else
+                return Vec(0, 0);
+        }
+        void Menu_Item_draw (Vec pos, Vec size) override {
+            auto iter = items.find(room_editor->selected_type_name);
+            if (iter != items.end())
+                iter->second->Menu_Item_draw(pos, size);
+        }
+        bool Menu_Item_hover (Vec pos, Vec size) override {
+            auto iter = items.find(room_editor->selected_type_name);
+            if (iter != items.end())
+                return iter->second->Menu_Item_hover(pos, size);
+            else
+                return false;
+        }
+        bool Menu_Item_click (Vec pos, Vec size) override {
+            auto iter = items.find(room_editor->selected_type_name);
+            if (iter != items.end())
+                return iter->second->Menu_Item_click(pos, size);
+            else
+                return false;
+        }
+    };
+
+    Tile_Editor::Tile_Editor () {
+        tile_editor = this;
+    }
+    Tile_Editor::~Tile_Editor () {
+        if (active) deactivate();
+        if (tile_editor == this)
+            tile_editor = NULL;
+    }
+
+    void Tile_Editor::activate () {
+        logger.log("Activating tile editor");
+        if (room_editor && room_editor->active)
+            room_editor->deactivate();
+        Listener::activate();
+        fc.activate();
+        Drawn<vis::Overlay>::appear();
+    }
+    void Tile_Editor::deactivate () {
+        logger.log("Deactivating tile editor");
+        Listener::deactivate();
+        fc.deactivate();
+        Drawn<vis::Overlay>::disappear();
+    }
+
+
+    void Tile_Editor::Drawn_draw (vis::Overlay) {
+         // TODO: display current tile in corner
+    }
+    bool Tile_Editor::Listener_button (int, int) {
+         // TODO: left-click = draw
+         //       right-click = select
+        return false;
+    }
+    bool Tile_Editor::Listener_key (int, int) {
+         // TODO: h and v flip current tile
+        return false;
+    }
+
 } using namespace shell;
 
 HACCABLE(Room_Editor) {
     name("shell::Room_Editor");
     attr("font", member(&Room_Editor::font).optional());
 }
+
+HACCABLE(Type_Specific_Menu) {
+    name("shell::Type_Specific_Menu");
+    attr("Menu_Item", base<Menu_Item>().collapse());
+    delegate(member(&Type_Specific_Menu::items));
+}
+
+HACCABLE(Tile_Editor) {
+    name("shell::Tile_Editor");
+}
+
+namespace {
 
 void _re_toggle () {
     if (!room_editor) return;
@@ -362,3 +444,5 @@ void _re_new_actor (std::string type, hacc::Tree data) {
     room_editor->re_new_actor(hacc::Type(type), data);
 }
 New_Command _re_new_actor_cmd ("re_new_actor", "Add a new actor to the current state.", 2, _re_new_actor);
+
+}

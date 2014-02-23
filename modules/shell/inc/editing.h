@@ -4,22 +4,24 @@
 #include "menus.h"
 #include "../../geo/inc/camera.h"
 #include "../../geo/inc/rooms.h"
+#include "../../geo/inc/tiles.h"
 #include "../../vis/inc/common.h"
 #include "../../vis/inc/text.h"
 #include "../../core/inc/window.h"
 
 namespace shell {
     using namespace util;
+    geo::Free_Camera fc;
 
     struct Room_Editor : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Dev>, core::Listener {
          // Associated utilities
-        geo::Free_Camera fc;
         Menu<vis::Dev>* res_menu = NULL;  // Set on construction
         Menu<vis::Dev>* room_menu = NULL;  // Set on construction
         vis::Font* font = NULL;
          // Selected items
         geo::Resident* hovering = NULL;
         geo::Resident* selected = NULL;
+        std::string selected_type_name;
         geo::Room* hovering_room = NULL;
         geo::Room* selected_room = NULL;
          // Cursor control
@@ -49,6 +51,20 @@ namespace shell {
         void Listener_cursor_pos (int x, int y) override;
     };
     extern Room_Editor* room_editor;
+
+    struct Tile_Editor : vis::Drawn<vis::Overlay>, core::Listener {
+        geo::Tilemap* selected = NULL;
+
+        Tile_Editor ();
+        ~Tile_Editor ();
+        void activate ();
+        void deactivate ();
+
+        void Drawn_draw (vis::Overlay) override;
+        bool Listener_button (int, int) override;
+        bool Listener_key (int, int) override;
+    };
+    extern Tile_Editor* tile_editor;
 
 }
 
