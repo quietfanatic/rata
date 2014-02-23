@@ -56,6 +56,18 @@ namespace vis {
         }
     }
 
+    struct Draw {
+        Model::Seg* seg;
+        Texture* tex;
+        float z;
+    };
+    int cmp_Draw (const void* a, const void* b) {
+        float az = ((Draw*)a)->z;
+        float bz = ((Draw*)b)->z;
+         // Descending order
+        return (az < bz) - (az > bz);
+    }
+
     void Model::draw (Skin* skin, Vec pos, Vec scale, float z) {
         if (!skel) {
             model_logger.log("Model has no associated skeleton");
@@ -63,18 +75,22 @@ namespace vis {
         }
         model_logger.log("Drawing a model with %lu segs", skel->segs.size());
         reposition_segment(this, skel->root, skel->root_offset);
-        for (auto& ss : skel->segs) {
-            auto ms = &segs[skel->seg_index(&ss)];
-            for (auto& sa : skin->apps) {
-                if (sa.target == &ss) {
-                    for (Texture* tex : sa.textures) {
-                        draw_frame(
-                            ms->pose->frame, tex, pos + ms->pos.scale(scale),
-                            scale, z + ss.z_offset
-                        );
-                    }
-                }
-            }
+        size_t n_draws = skin->apps.size();
+        Draw draws [n_draws];
+        size_t draw_i = 0;
+        for (auto& sa : skin->apps) {
+            draws[draw_i].seg = &segs[skel->seg_index(sa.target)];
+            draws[draw_i].tex = sa.textures[0];
+            draws[draw_i].z = sa.target->z_offset;
+            draw_i++;
+        }
+        qsort(draws, n_draws, sizeof(Draw), cmp_Draw);
+        for (size_t i = 0; i < n_draws; i++) {
+            draw_frame(
+                draws[i].seg->pose->frame, draws[i].tex,
+                pos + draws[i].seg->pos.scale(scale),
+                scale, draws[i].z
+            );
         }
     }
 
