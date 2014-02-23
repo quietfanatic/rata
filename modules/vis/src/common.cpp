@@ -103,8 +103,8 @@ namespace vis {
          // Now render from world fb to window fb
         glDisable(GL_DEPTH_TEST);
          // Light renders blend by adding.
-        if (light_debug_type != 1)
-            glEnable(GL_BLEND);
+        if (light_debug_type == 1)
+            glDisable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
         glBlendEquation(GL_FUNC_ADD);
          // Clear to black, to make blending work.
