@@ -44,6 +44,7 @@
                 vec4 atom = texture2D(tex, tex_coords);
                 if (debug_type == 1) {
                     gl_FragColor = atom;
+                    gl_FragColor.b = atom.a;
                     gl_FragColor.r *= (255.0 / materials_length);
                 }
                 else if (debug_type == 2) {
@@ -59,11 +60,12 @@
                     vec3 dif = texture2D(materials, vec2(1.0/3.0, atom.r)).rgb;
                     vec3 spe = texture2D(materials, vec2(2.0/3.0, atom.r)).rgb;
                     vec3 rad = texture2D(materials, vec2(3.0/3.0, atom.r)).rgb;
-                    gl_FragColor.rgb = amb * ambient
-                                     + dif * diffuse * atom.g
-                                     + rad * radiant;
-                    if (atom.g == 1.0)
-                        gl_FragColor.rgb += spe * diffuse;
+                    gl_FragColor.rgb = amb * ambient + rad * radiant;
+                    if (atom.a == 0.0) {
+                        gl_FragColor.rgb += dif * diffuse * atom.g;
+                        if (atom.g == 1.0)
+                            gl_FragColor.rgb += spe * diffuse;
+                    }
                     gl_FragColor.a = 1.0;
                 }
             }

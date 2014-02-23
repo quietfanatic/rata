@@ -37,7 +37,8 @@
                 gl_FragColor = texture2D(tex, tex_coords);
                 if (gl_FragColor.a == 0.0)
                     discard;
-                gl_FragDepth = 1.0 - gl_FragColor.a;
+                gl_FragDepth = (100.0/255.0) + (1.0 - gl_FragColor.a) * (100.0/255.0);
+                gl_FragColor.a = 0.0;
             }
             END
     }}

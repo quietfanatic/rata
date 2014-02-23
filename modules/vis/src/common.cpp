@@ -43,7 +43,7 @@ namespace vis {
             glBindFramebuffer(GL_FRAMEBUFFER, world_fb);
             glGenTextures(1, &world_tex);
             glBindTexture(GL_TEXTURE_2D, world_tex);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rtt_camera_size.x/PX, rtt_camera_size.y/PX, 0, GL_RGB, GL_UNSIGNED_BYTE, (void*)0);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rtt_camera_size.x/PX, rtt_camera_size.y/PX, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)0);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glBindTexture(GL_TEXTURE_2D, 0);
@@ -81,9 +81,9 @@ namespace vis {
         glBindFramebuffer(GL_FRAMEBUFFER, world_fb);
         glViewport(0, 0, rtt_camera_size.x/PX, rtt_camera_size.y/PX);
          // For now, clear to default background material
-        glClearColor(1 / 255.0, 0, 0, 1);
+        glClearColor(1 / 255.0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-         // Map and sprite rendering uses depth and no blend
+         // Map rendering uses depth and no blend
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
@@ -94,6 +94,10 @@ namespace vis {
         global_camera_size = camera_size;
         for (auto& i : Map::items)
             i.Drawn_draw(Map());
+         // Sprite rendering uses blend for shadows
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendEquation(GL_MAX);
         for (auto& i : Sprites::items)
             i.Drawn_draw(Sprites());
          // Now render from world fb to window fb
@@ -102,6 +106,7 @@ namespace vis {
         if (light_debug_type != 1)
             glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
+        glBlendEquation(GL_FUNC_ADD);
          // Clear to black, to make blending work.
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(0, 0, 0, 1);
