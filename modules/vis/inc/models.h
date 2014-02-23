@@ -41,8 +41,7 @@ namespace vis {
         struct App {
             Skel::Seg* target;
             Frame* frame;  // Must belong to the target's layout
-            bool fliph;
-            bool flipv;
+            Vec scale = Vec(1, 1);
         };
 
         std::vector<App> apps;

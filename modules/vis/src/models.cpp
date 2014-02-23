@@ -51,10 +51,7 @@ namespace vis {
         Model::Seg* ms = &model->segs[model->skel->seg_index(ss)];
         ms->pos = pos;
         for (size_t i = 0; i < ss->branches.size(); i++) {
-            Vec new_pos = pos + PX*ms->pose->frame->points[i].scale(Vec(
-                ms->pose->fliph ? -1 : 1,
-                ms->pose->flipv ? -1 : 1
-            ));
+            Vec new_pos = pos + PX*ms->pose->frame->points[i].scale(ms->pose->scale);
             reposition_segment(model, ss->branches[i], new_pos);
         }
     }
@@ -120,8 +117,7 @@ HACCABLE(Pose::App) {
     name("vis::Pose");
     elem(member(&Pose::App::target));
     elem(member(&Pose::App::frame));
-    elem(member(&Pose::App::fliph).optional());
-    elem(member(&Pose::App::flipv).optional());
+    elem(member(&Pose::App::scale).optional());
 }
 
 HACCABLE(Skin) {
