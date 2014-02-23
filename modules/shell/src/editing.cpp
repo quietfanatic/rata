@@ -400,9 +400,20 @@ namespace shell {
         return true;
     }
     bool Tile_Editor::Listener_key (int code, int action) {
-        if (code == GLFW_KEY_ESC && action == GLFW_PRESS) {
-            deactivate();
-            return true;
+        if (action == GLFW_PRESS) {
+            switch (code) {
+                case GLFW_KEY_ESC:
+                    deactivate();
+                    return true;
+                case 'H':
+                    tile ^= 0x8000;
+                    return true;
+                case 'V':
+                    tile ^= 0x4000;
+                    return true;
+                default:
+                    return false;
+            }
         }
          // TODO: h and v flip current tile
         return false;
