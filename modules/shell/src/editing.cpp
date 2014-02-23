@@ -411,6 +411,48 @@ namespace shell {
                 case 'V':
                     tile ^= 0x4000;
                     return true;
+                case GLFW_KEY_LEFT:
+                    if ((tile & 0x3fff) == 0) {
+                        tile += tilemap->tileset->tiles.size() - 1;
+                    }
+                    else {
+                        tile -= 1;
+                    }
+                    return true;
+                case GLFW_KEY_RIGHT:
+                    if ((tile & 0x3fff) >= tilemap->tileset->tiles.size() - 1) {
+                        tile = 0;
+                    }
+                    else {
+                        tile += 1;
+                    }
+                    return true;
+                case GLFW_KEY_UP: {
+                    Vec size = tilemap->texture->size*PX;
+                    if ((tile & 0x3fff) < size.y) {
+                        tile += size.y - size.x;
+                        if ((tile & 0x3fff) >= tilemap->tileset->tiles.size() - 1) {
+                            tile -= size.x;
+                        }
+                    }
+                    else {
+                        tile -= size.x;
+                    }
+                    return true;
+                }
+                case GLFW_KEY_DOWN: {
+                    Vec size = tilemap->texture->size*PX;
+                    if ((tile & 0x3fff) >= size.y - size.x) {
+                        tile -= size.y - size.x;
+                    }
+                    else if ((tile & 0x3fff) >= tilemap->tileset->tiles.size() - size.x) {
+                        tile -= size.y - size.x - size.x;
+                    }
+                    else {
+                        tile += size.x;
+                    }
+                    return true;
+                }
                 default:
                     return false;
             }
