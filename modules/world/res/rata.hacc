@@ -4,7 +4,7 @@
         stats: $.stats
         skel: $("ent/res/small.hacc").skel
         poses: $("ent/res/small.hacc").poses
-        skin: $("world/res/frock.hacc").skin
+        skin: $("world/res/rata-base.hacc").skin
         focus_offset: [0 1]
     }}
     stats:{"ent::BipedStats":{

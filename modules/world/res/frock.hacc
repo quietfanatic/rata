@@ -14,7 +14,6 @@
         apps: [
             [($s=$("ent/res/small.hacc").skel.segs).body [$.img.body]]
              // TODO: make this not necessary
-            [$s.head [$("world/res/rata-base.hacc").img.head]]
             [$s.arm1 [$.img.arm]]
             [$s.forearm1 [$.img.forearm]]
             [$s.arm2 [$.img.arm]]

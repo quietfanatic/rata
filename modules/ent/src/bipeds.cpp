@@ -165,6 +165,8 @@ namespace ent {
         }
     }
 
+    static vis::Skin* frock_skin;
+
     void Biped::Drawn_draw (vis::Sprites) {
         vis::Model::Seg model_data [def->skel->segs.size()];
         vis::Model model (def->skel, model_data);
@@ -221,6 +223,14 @@ namespace ent {
             model.apply_pose(&def->poses->look_walk[look_frame]);
         }
         model.draw(def->skin, pos(), direction < 0);
+         // TODO: implement this as an item
+        static bool initted = false;
+        if (!initted) {
+            initted = true;
+            frock_skin = hacc::File("world/res/frock.hacc").data().attr("skin");
+            hacc::manage(&frock_skin);
+        }
+        model.draw(frock_skin, pos(), direction < 0);
     }
 
     Biped::Biped () { }
