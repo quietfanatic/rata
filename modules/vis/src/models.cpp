@@ -64,7 +64,7 @@ namespace vis {
     int cmp_Draw (const void* a, const void* b) {
         float az = ((Draw*)a)->z;
         float bz = ((Draw*)b)->z;
-         // Descending order
+         // Ascending order
         return (az < bz) - (az > bz);
     }
 

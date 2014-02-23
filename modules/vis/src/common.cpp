@@ -82,11 +82,12 @@ namespace vis {
         glViewport(0, 0, rtt_camera_size.x/PX, rtt_camera_size.y/PX);
          // For now, clear to default background material
         glClearColor(1 / 255.0, 0, 0, 0);
+        glClearDepth(0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
          // Map rendering uses depth and no blend
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
+        glDepthFunc(GL_GEQUAL);
         Program::unuse();
          // Use camera
         global_camera_pos.x = round(camera_pos.x/PX) * PX;

@@ -72,7 +72,7 @@ namespace vis {
         void apply_pose (Pose*);
 
          // TODO: make this better
-        void draw (size_t n_skins, Skin** skins, Vec pos, Vec scale = Vec(1, 1), float z = 0);
+        void draw (size_t n_skins, Skin** skins, Vec pos, Vec scale = Vec(1, 1), float z = 0.5);
     };
 
 }
