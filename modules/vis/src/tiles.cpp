@@ -105,10 +105,10 @@ namespace vis {
         uint ty = (tile & 0x3fff) / 16 * 16;
         bool flipx = !!(tile & 0x8000);
         bool flipy = !!(tile & 0x4000);
-        verts[0] = Tile_Vertex(0, -1, tx+(16* flipx), ty+(16*!flipy));
-        verts[1] = Tile_Vertex(1, -1, tx+(16*!flipx), ty+(16*!flipy));
-        verts[2] = Tile_Vertex(1, 0, tx+(16*!flipx), ty+(16* flipy));
-        verts[3] = Tile_Vertex(0, 0, tx+(16* flipx), ty+(16* flipy));
+        verts[0] = Tile_Vertex(0, 0, tx+(16* flipx), ty+(16*!flipy));
+        verts[1] = Tile_Vertex(1, 0, tx+(16*!flipx), ty+(16*!flipy));
+        verts[2] = Tile_Vertex(1, 1, tx+(16*!flipx), ty+(16* flipy));
+        verts[3] = Tile_Vertex(0, 1, tx+(16* flipx), ty+(16* flipy));
         glVertexAttribPointer(0, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), &verts[0].px);
         glVertexAttribPointer(1, 2, GL_UNSIGNED_SHORT, GL_FALSE, sizeof(Tile_Vertex), &verts[0].tx);
         glDrawArrays(GL_QUADS, 0, 4);

@@ -376,9 +376,7 @@ namespace shell {
     void Tile_Editor::Drawn_draw (vis::Map) {
         if (!room_editor) return;
          // TODO: display current tile in corner
-        draw_tile(tile, tilemap->texture, room_editor->fc.window_to_world(0, 0));
-        draw_tile(tile, tilemap->texture, room_editor->fc.window_to_world(50, 50));
-        draw_tile(tile, tilemap->texture, room_editor->fc.window_to_world(-50, -50));
+        draw_tile(tile, tilemap->texture, room_editor->fc.window_to_world(0, 0) - Vec(0, 1));
     }
     bool Tile_Editor::Listener_button (int, int) {
          // TODO: left-click = draw
