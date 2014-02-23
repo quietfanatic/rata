@@ -120,8 +120,7 @@ namespace core {
 
     Program::~Program () {
         if (current == this) {
-            Program_end();
-            current = NULL;
+            unuse();
         }
         if (glid) glDeleteProgram(glid);
     }

@@ -8,6 +8,8 @@ namespace vis {
 
     int light_debug_type = 0;
 
+    Materials* materials = NULL;
+
     struct Light_Program : Cameraed_Program {
         GLint model_pos;
         GLint ambient;
@@ -95,15 +97,8 @@ namespace vis {
         if (tex) glDeleteTextures(1, &tex);
     }
 
-    Materials* materials = NULL;
-
     void set_materials (Materials* m) {
-        if (materials != m) {
-            materials = m;
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, materials->tex);
-            glActiveTexture(GL_TEXTURE0);
-        }
+        materials = m;
     }
 
     void set_ambient (const RGBf& amb) {
@@ -130,7 +125,16 @@ namespace vis {
     }
 
     void draw_light (size_t n, Vec* pts) {
+        if (!materials) {
+            throw hacc::X::Logic_Error("No materials were set!\n");
+        }
         light_program->use();
+        if (light_debug_type == 1) {
+            glUniform1f(light_program->materials_length, materials->items.size());
+        }
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, materials->tex);
+        glActiveTexture(GL_TEXTURE0);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vec), pts);
         glDrawArrays(GL_POLYGON, 0, n);
@@ -138,18 +142,11 @@ namespace vis {
     };
 
     void light_init () {
-        if (!materials) {
-            throw hacc::X::Logic_Error("No materials were set!\n");
-        }
         light_program = hacc::File("vis/res/light.prog").data().attr("prog");
         hacc::manage(&light_program);
         hacc::manage(&materials);
         diagnose_opengl("after loading light.prog");
         light_program->use();
-        glUniform1f(light_program->materials_length, 7);  // TODO: This is not dynamic
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, materials->tex);
-        glActiveTexture(GL_TEXTURE0);
     }
 
 } using namespace vis;
