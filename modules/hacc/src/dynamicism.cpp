@@ -264,6 +264,7 @@ namespace hacc {
                  //  Do What The User Asks bus.
                  // i.e. we may end up generating large objects over and over
                  //  again only to access one member each time.
+                fprintf(stderr, "Hacc warning: slow/dangerous using attrs func on unaddressable ref\n");
                 Reference ref_for_type;
                 r.read([&](void* p){
                     ref_for_type = f(p, name);
@@ -367,6 +368,7 @@ namespace hacc {
                 return f(addr, index);
             }
             else {
+                fprintf(stderr, "Hacc warning: slow/dangerous using elems func on unaddressable ref\n");
                 Reference ref_for_type;
                 read([&](void* p){
                     ref_for_type = f(p, index);

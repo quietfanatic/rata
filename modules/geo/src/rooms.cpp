@@ -30,7 +30,8 @@ namespace geo {
         if (observe_neighbors) {
             neighbor_observer_count++;
             for (auto n : neighbors) {
-                n->observe();
+                if (n)
+                    n->observe();
             }
         }
     }
@@ -50,16 +51,15 @@ namespace geo {
         if (forget_neighbors && neighbor_observer_count) {
             neighbor_observer_count--;
             for (auto n : neighbors) {
-                n->forget();
+                if (n)
+                    n->forget();
             }
         }
     }
     void Room::set_neighbors (std::vector<Room*> new_ns) {
-        for (auto nn : new_ns) {
-            printf("%p\n", nn);
-        }
         if (neighbor_observer_count) {
             for (auto nn : new_ns) {
+                if (!nn) continue;
                 for (auto on : neighbors) {
                     if (nn == on)
                         goto next_n;
@@ -70,6 +70,7 @@ namespace geo {
                 next_n: { }
             }
             for (auto on : neighbors) {
+                if (!on) continue;
                 for (auto nn : new_ns) {
                     if (on == nn)
                         goto next_o;
@@ -128,7 +129,7 @@ namespace geo {
         }
         else if (!room->boundary.covers(pos)) {
             for (auto n : room->neighbors) {
-                if (n->boundary.covers(pos)) {
+                if (n && n->boundary.covers(pos)) {
                     set_room(n);
                     return;
                 }
@@ -143,7 +144,7 @@ namespace geo {
         }
         else if (!room->boundary.covers(pos)) {
             for (auto n : room->neighbors) {
-                if (n->boundary.covers(pos)) {
+                if (n && n->boundary.covers(pos)) {
                     set_room(n);
                     return;
                 }
