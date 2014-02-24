@@ -47,6 +47,7 @@ namespace shell {
 
         void Drawn_draw (vis::Overlay) override;
         void Drawn_draw (vis::Dev) override;
+        bool Listener_key (int, int) override;
         bool Listener_button (int, int) override;
         void Listener_cursor_pos (int x, int y) override;
     };

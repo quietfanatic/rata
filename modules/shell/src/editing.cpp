@@ -189,6 +189,13 @@ namespace shell {
         }
         return false;
     }
+    bool Room_Editor::Listener_key (int code, int action) {
+        if (action == GLFW_PRESS && code == GLFW_KEY_ESC) {
+            deactivate();
+            return true;
+        }
+        return false;
+    }
 
     Room_Editor::Room_Editor () :
         res_menu(hacc::File("shell/res/re_menus.hacc").data().attr("res_menu")),
