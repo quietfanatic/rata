@@ -88,6 +88,7 @@ namespace vis {
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_GEQUAL);
+        set_draw_phase(true);
         Program::unuse();
          // Use camera
         global_camera_pos.x = round(camera_pos.x/PX) * PX;
@@ -104,6 +105,7 @@ namespace vis {
          // Now render from world fb to window fb
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
+        set_draw_phase(false);
          // Light renders blend by adding.
         if (light_debug_type == 1)
             glDisable(GL_BLEND);

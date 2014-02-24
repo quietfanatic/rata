@@ -82,6 +82,9 @@ namespace vis {
      // Just draw a whole texture over the given area.
     void draw_texture (Texture*, Rect area, float z = 0.5);
 
+     // Internal usage
+    void set_draw_phase (bool);
+
 }
 
 #endif

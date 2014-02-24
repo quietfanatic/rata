@@ -207,11 +207,13 @@ namespace vis {
         GLint model_pos = 0;
         GLint model_scale = 0;
         GLint tex = 0;
+        GLint draw_phase = 0;
         void finish () {
             Cameraed_Program::finish();
             model_pos = require_uniform("model_pos");
             model_scale = require_uniform("model_scale");
             tex = require_uniform("tex");
+            draw_phase = require_uniform("draw_phase");
             glUniform1i(tex, 0);
         }
     };
@@ -224,6 +226,12 @@ namespace vis {
         plain_frame = prog_doc.attr("plain_layout").attr("ALL");
         hacc::manage(&prog);
     }
+
+    void set_draw_phase (bool phase) {
+        prog->use();
+        glUniform1i(prog->draw_phase, phase);
+    }
+
 
     void draw_frame (Frame* frame, Texture* texture, Vec pos, Vec scale, float z) {
         prog->use();

@@ -31,16 +31,19 @@
             #version 110
 
             uniform sampler2D tex;
+            uniform int draw_phase;
             varying vec2 tex_coords;
 
             void main () {
                 gl_FragColor = texture2D(tex, tex_coords);
-                if (gl_FragColor.a == 0.0)
-                    discard;
-                else if (gl_FragColor == vec4(0.0, 0.0, 0.0, 127.0/255.0))
-                    gl_FragColor.a = 1.0;  // Shadow
-                else
-                    gl_FragColor.a = 0.0;  // No shadow
+                if (draw_phase == 1) {
+                    if (gl_FragColor.a == 0.0)
+                        discard;
+                    else if (gl_FragColor == vec4(0.0, 0.0, 0.0, 127.0/255.0))
+                        gl_FragColor.a = 1.0;  // Shadow
+                    else
+                        gl_FragColor.a = 0.0;  // No shadow
+                }
             }
             END
     }}
