@@ -309,6 +309,10 @@ namespace shell {
             throw hacc::X::Logic_Error("Could not re_delete: this object does not belong to a document.");
         }
     }
+    void Room_Editor::re_edit_room () {
+        if (!selected_room) return;
+        general_edit(selected_room);
+    }
     void Room_Editor::re_reload_room () {
         if (!selected_room) return;
         auto filename = hacc::address_to_path(selected_room).root();
@@ -544,6 +548,12 @@ void _re_delete () {
     room_editor->re_delete();
 }
 New_Command _re_delete_cmd ("re_delete", "Delete the selected object.", 0, _re_delete);
+
+void _re_edit_room () {
+    if (!room_editor) return;
+    room_editor->re_edit_room();
+}
+New_Command _re_edit_room_cmd ("re_edit_room", "Text-edit the selected room.", 0, _re_edit_room);
 
 void _re_reload_room () {
     if (!room_editor) return;
