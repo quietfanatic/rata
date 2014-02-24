@@ -24,7 +24,7 @@ namespace geo {
     struct Tilemap : Resident, phys::Object, vis::Drawn<vis::Map> {
         Tileset* tileset;
         vis::Texture* texture;
-        vis::Tiles* tiles;
+        vis::Tiles* tiles = NULL;
 
         void Resident_emerge () override;
         void Resident_reclude () override;
