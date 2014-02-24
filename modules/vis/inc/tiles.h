@@ -15,6 +15,8 @@ namespace vis {
         uint vbo_id = 0;
         size_t vbo_size = 0;
 
+        void resize (uint, uint);
+
         void finish ();
         ~Tiles ();
         Tiles () = default;

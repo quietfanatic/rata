@@ -1,6 +1,7 @@
 #include "../inc/tiles.h"
 #include "../inc/common.h"
 #include "../../core/inc/opengl.h"
+#include "../../core/inc/commands.h"
 #include "../../hacc/inc/everything.h"
 
 namespace vis {
@@ -54,6 +55,23 @@ namespace vis {
     Tiles::~Tiles () {
         if (vbo_id)
             glDeleteBuffers(1, &vbo_id);
+    }
+
+    void Tiles::resize (uint w, uint h) {
+        std::vector<uint16> new_tiles (w * h);
+        for (uint y = 0; y < h; y++)
+        for (uint x = 0; x < w; x++) {
+            if (x < width && y < height) {
+                new_tiles[y*w+x] = tiles[y*width+x];
+            }
+            else {
+                new_tiles[y*w+x] = 0;
+            }
+        }
+        width = w;
+        height = h;
+        tiles = std::move(new_tiles);
+        finish();
     }
 
     struct Tiles_Program : Cameraed_Program {
@@ -133,6 +151,8 @@ HACCABLE(Tiles_Program) {
     finish(&Tiles_Program::finish);
 }
 
+namespace {
+
 hacc::Special_Filetype _tiles_ft ("tiles",
     [] (std::string filename) -> hacc::Dynamic {
         std::string s = hacc::string_from_file(filename);
@@ -186,3 +206,14 @@ hacc::Special_Filetype _tiles_ft ("tiles",
     }
 );
 
+void _resize_tiles (Tiles* tiles, uint w, uint h) {
+    if (tiles)
+        tiles->resize(w, h);
+}
+
+core::New_Command _resize_tiles_cmd (
+    "resize_tiles", "Resize a vis::Tiles object.  Will lose tiles if shrunk.",
+    3, _resize_tiles
+);
+
+}
