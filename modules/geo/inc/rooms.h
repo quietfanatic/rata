@@ -14,11 +14,15 @@ namespace geo {
         Rect boundary = Rect(-INF, -INF, INF, INF);
         std::vector<Room*> neighbors;
 
+        std::vector<Room*> get_neighbors () const { return neighbors; }
+        void set_neighbors (std::vector<Room*>);
+
         Links<Resident> residents;
          // The room is loaded if this is non-zero.
         uint observer_count = 0;
-        void observe ();
-        void forget ();
+        uint neighbor_observer_count = 0;
+        void observe (bool neighbors = false);
+        void forget (bool neighbors = false);
          // Rooms are not to be destructed if they have non-doomed Residents
         Room ();
         ~Room ();

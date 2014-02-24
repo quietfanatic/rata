@@ -15,7 +15,7 @@ namespace geo {
         return r;
     }
 
-    void Room::observe () {
+    void Room::observe (bool observe_neighbors) {
         if (!observer_count++) {
             geo_logger.log("Activating room @%lx", (unsigned long)this);
             size_t i = 0;
@@ -23,12 +23,18 @@ namespace geo {
                 if (r.finished) {
                     r.Resident_emerge();
                     i++;
-                 }
+                }
             }
             geo_logger.log("...%lu residents", i);
         }
+        if (observe_neighbors) {
+            neighbor_observer_count++;
+            for (auto n : neighbors) {
+                n->observe();
+            }
+        }
     }
-    void Room::forget () {
+    void Room::forget (bool forget_neighbors) {
         if (!observer_count) {
             geo_logger.log("Room @%lx's reference count is corrupted!", (size_t)this);
         }
@@ -41,6 +47,40 @@ namespace geo {
             }
             geo_logger.log("...and its %lu residents", i);
         }
+        if (forget_neighbors && neighbor_observer_count) {
+            neighbor_observer_count--;
+            for (auto n : neighbors) {
+                n->forget();
+            }
+        }
+    }
+    void Room::set_neighbors (std::vector<Room*> new_ns) {
+        for (auto nn : new_ns) {
+            printf("%p\n", nn);
+        }
+        if (neighbor_observer_count) {
+            for (auto nn : new_ns) {
+                for (auto on : neighbors) {
+                    if (nn == on)
+                        goto next_n;
+                }
+                for (uint i = 0; i < neighbor_observer_count; i++) {
+                    nn->observe();
+                }
+                next_n: { }
+            }
+            for (auto on : neighbors) {
+                for (auto nn : new_ns) {
+                    if (on == nn)
+                        goto next_o;
+                }
+                for (uint i = 0; i < neighbor_observer_count; i++) {
+                    on->forget();
+                }
+                next_o: { }
+            }
+        }
+        neighbors = new_ns;
     }
 
     Room* Observer::get_room () const {
@@ -48,20 +88,10 @@ namespace geo {
     }
     void Observer::set_room (Room* new_room) {
         if (new_room) {
-            new_room->observe();
-            if (observe_neighbors) {
-                for (auto r : new_room->neighbors) {
-                    r->observe();
-                }
-            }
+            new_room->observe(observe_neighbors);
         }
         if (room) {
-            room->forget();
-            if (observe_neighbors) {
-                for (auto r : room->neighbors) {
-                    r->forget();
-                }
-            }
+            room->forget(observe_neighbors);
         }
         room = new_room;
     }
@@ -128,7 +158,7 @@ namespace geo {
 HACCABLE(Room) {
     name("geo::Room");
     attr("boundary", member(&Room::boundary).optional());
-    attr("neighbors", member(&Room::neighbors).optional());
+    attr("neighbors", value_methods(&Room::get_neighbors, &Room::set_neighbors).optional());
 }
 
 HACCABLE(Resident) {
