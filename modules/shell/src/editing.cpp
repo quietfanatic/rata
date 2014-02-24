@@ -496,7 +496,7 @@ HACCABLE(Room_Editor) {
     name("shell::Room_Editor");
     attr("font", member(&Room_Editor::font).optional());
     attr("res_menu", member(&Room_Editor::res_menu).optional());
-    attr("room_menu", member(&Room_Editor::res_menu).optional());
+    attr("room_menu", member(&Room_Editor::room_menu).optional());
 }
 
 HACCABLE(Type_Specific_Menu) {
