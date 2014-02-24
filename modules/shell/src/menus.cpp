@@ -73,29 +73,25 @@ namespace shell {
     bool VBox::Menu_Item_hover (Vec pos, Vec area) {
         VBox::Menu_Item_size(area);
         float height = 0;
-        bool on_item = false;
         for (auto& c : contents) {
             Vec csize = c->Menu_Item_size(area - Vec(0, height));
             height += csize.y;
             Vec cpos = pos - Vec(0, cached_size.y - height);
             if (c->Menu_Item_hover(cpos, Vec(area.x, csize.y)))
-                on_item = true;
+                return true;
         }
-        if (on_item) return true;
         return Button::Menu_Item_hover(pos, area);
     }
     bool VBox::Menu_Item_click (Vec pos, Vec area) {
         VBox::Menu_Item_size(area);
         float height = 0;
-        bool on_item = false;
         for (auto& c : contents) {
             Vec csize = c->Menu_Item_size(area - Vec(0, height));
             height += csize.y;
             Vec cpos = pos - Vec(0, cached_size.y - height);
             if (c->Menu_Item_click(cpos, Vec(area.x, csize.y)))
-                on_item = true;
+                return true;
         }
-        if (on_item) return true;
         return Button::Menu_Item_click(pos, area);
     }
 
