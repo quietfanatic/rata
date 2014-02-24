@@ -30,6 +30,8 @@ namespace geo {
 
         void Resident_emerge () override;
         void Resident_reclude () override;
+        Vec Resident_get_pos () override { return pos(); }
+        void Resident_set_pos (Vec p) override { set_pos(p); }
 
         void Drawn_draw (vis::Map) override;
 
