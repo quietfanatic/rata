@@ -407,7 +407,15 @@ namespace shell {
                 if (btn == GLFW_MOUSE_BUTTON_LEFT) {
                     if (selected != tile) {
                         selected = tile;
-                        tilemap->finish();
+                        tilemap->tiles->finish();
+                         // Update all relevant tilemaps
+                        for (auto b = phys::space.b2world->GetBodyList(); b; b = b->GetNext()) {
+                            if (auto tm = dynamic_cast<Tilemap*>((phys::Object*)b->GetUserData())) {
+                                if (tm->tiles == tilemap->tiles) {
+                                    tm->set_tiles(tilemap->tiles);
+                                }
+                            }
+                        }
                     }
                 }
                  // Pick tile
