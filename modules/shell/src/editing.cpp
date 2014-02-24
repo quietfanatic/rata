@@ -318,6 +318,11 @@ namespace shell {
         auto filename = hacc::address_to_path(selected_room).root();
         window->before_next_frame([filename](){hacc::reload(filename);});
     }
+    void Room_Editor::re_save_room () {
+        if (!selected_room) return;
+        auto filename = hacc::address_to_path(selected_room).root();
+        window->before_next_frame([filename](){hacc::save(filename);});
+    }
     void Room_Editor::re_new_actor (hacc::Type type, hacc::Tree data) {
         hacc::Document* st = current_state.data();
         void* newp = st->alloc(type);
@@ -560,6 +565,12 @@ void _re_reload_room () {
     room_editor->re_reload_room();
 }
 New_Command _re_reload_room_cmd ("re_reload_room", "Reload the selected room from disk.", 0, _re_reload_room);
+
+void _re_save_room () {
+    if (!room_editor) return;
+    room_editor->re_save_room();
+}
+New_Command _re_save_room_cmd ("re_save_room", "Save the selected room to disk.", 0, _re_save_room);
 
 void _re_new_actor (std::string type, hacc::Tree data) {
     if (!room_editor) return;
