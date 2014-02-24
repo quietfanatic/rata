@@ -21,6 +21,11 @@ namespace geo {
         }
     }
 
+    void Tilemap::set_tiles (vis::Tiles* t) {
+        tiles = t;
+        physicalize();
+    }
+
     void Tilemap::Resident_emerge () {
         materialize();
         appear();
@@ -119,7 +124,6 @@ namespace geo {
     void Tilemap::finish () {
         if (!tiles) return;
         set_bdf(tilemap_bdf);
-        physicalize();
          // TODO: find out why we can't do this earlier
         tiles->finish();
     }
@@ -203,7 +207,7 @@ HACCABLE(Tilemap) {
     attr("Object", base<phys::Object>().optional().collapse());
     attr("tileset", member(&Tilemap::tileset));
     attr("texture", member(&Tilemap::texture));
-    attr("tiles", member(&Tilemap::tiles));
+    attr("tiles", value_methods(&Tilemap::get_tiles, &Tilemap::set_tiles));
     finish([](Tilemap& t){
         t.Resident::finish();
         t.finish();

@@ -25,6 +25,8 @@ namespace geo {
         Tileset* tileset;
         vis::Texture* texture;
         vis::Tiles* tiles = NULL;
+        vis::Tiles* get_tiles () const { return tiles; }
+        void set_tiles (vis::Tiles* t);
 
         void Resident_emerge () override;
         void Resident_reclude () override;
