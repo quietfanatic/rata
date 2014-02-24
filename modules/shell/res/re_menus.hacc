@@ -47,7 +47,6 @@
                                 on_click:[re_new_actor "ent::Biped" {
                                     def:$("world/res/rata.hacc").def
                                     bdf:$("ent/res/small.hacc").bdf
-                                    room:$("world/res/test.room").room
                                     direction:1
                                 }]
                             }}
@@ -64,11 +63,9 @@
                         text:"tilemap"
                         on_click:[re_new_furniture "geo::Tilemap" {
                             bdf:$("geo/res/tilemap.bdf")
-                            pos:[0~00000000 0~00000000]
-                            vel:[0~00000000 0~00000000]
                             tileset:$("world/res/test.tileset").tileset
                             texture:$("world/res/test.tileset").img.textures[0]
-                            tiles:null
+                            tiles:$("world/res/default.tiles")
                         }]
                     }}
                 }}
