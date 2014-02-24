@@ -44,6 +44,7 @@ namespace shell {
         void re_delete ();
         void re_reload_room ();
         void re_new_actor (hacc::Type type, hacc::Tree data);
+        void re_new_furniture (hacc::Type type, hacc::Tree data);
 
         void Drawn_draw (vis::Overlay) override;
         void Drawn_draw (vis::Dev) override;

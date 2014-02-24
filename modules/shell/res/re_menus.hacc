@@ -58,6 +58,20 @@
                         ]
                     }}
                 }}
+                {"shell::SubMenu":{
+                    text:"add furniture"
+                    contents:{"shell::Text_Button":{
+                        text:"tilemap"
+                        on_click:[re_new_furniture "geo::Tilemap" {
+                            bdf:$("geo/res/tilemap.bdf")
+                            pos:[0~00000000 0~00000000]
+                            vel:[0~00000000 0~00000000]
+                            tileset:$("world/res/test.tileset").tileset
+                            texture:$("world/res/test.tileset").img.textures[0]
+                            tiles:null
+                        }]
+                    }}
+                }}
             ]
         }}
     }}

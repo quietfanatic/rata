@@ -325,6 +325,18 @@ namespace shell {
             resp->set_room(selected_room);
         }
     }
+    void Room_Editor::re_new_furniture (hacc::Type type, hacc::Tree data) {
+        if (!selected_room) return;
+        hacc::Document* doc = hacc::get_document_containing(selected_room);
+        void* newp = doc->alloc(type);
+        type.construct(newp);
+        hacc::Reference(type, newp).from_tree(data);
+        Resident* resp = (Resident*)hacc::Pointer(type, newp).address_of_type(hacc::Type::CppType<Resident>());
+        if (resp) {
+            resp->Resident_set_pos(menu_world_pos);
+            resp->set_room(selected_room);
+        }
+    }
 
     struct Type_Specific_Menu : Menu_Item {
         std::unordered_map<std::string, Menu_Item*> items;
@@ -526,6 +538,12 @@ void _re_new_actor (std::string type, hacc::Tree data) {
     room_editor->re_new_actor(hacc::Type(type), data);
 }
 New_Command _re_new_actor_cmd ("re_new_actor", "Add a new actor to the current state.", 2, _re_new_actor);
+
+void _re_new_furniture (std::string type, hacc::Tree data) {
+    if (!room_editor) return;
+    room_editor->re_new_furniture(hacc::Type(type), data);
+}
+New_Command _re_new_furniture_cmd ("re_new_furniture", "Add a new object to the current room.", 2, _re_new_furniture);
 
 void _re_control_this () {
     if (!room_editor || !ent::player) return;
