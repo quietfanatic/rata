@@ -61,15 +61,19 @@ namespace hacc {
         File(filename)
     {
         if (p->state != UNLOADED) throw X::File_Already_Loaded(filename);
-        p->data = data;
+        p->data = std::move(data);
         p->state = LOADED;
         p->requested = true;
     }
     Reference File::data () {
-        if (p->state == UNLOADED)
+        if (p->state == UNLOADED) {
             load(*this);
-        if (!p->data.address()) {
-            throw X::Internal_Error("Something went wrong when autoloading \"" + filename() + "\"; No exception happened but it wasn't loaded.  It's state was " + std::to_string(p->state));
+            if (!p->data.address()) {
+                throw X::Internal_Error("Something went wrong when autoloading \"" + filename() + "\"; No exception happened but it wasn't loaded.  It's state was " + std::to_string(p->state));
+            }
+        }
+        else if (!p->data.address()) {
+            throw X::Internal_Error("File \"" + filename() + "\" is marked as loaded but its data is NULL!?");
         }
         return p->data.address();
     }
