@@ -31,6 +31,7 @@ namespace geo {
     }
 
     void Tilemap::Drawn_draw (vis::Map) {
+        if (!tiles) return;
         vis::draw_tiles(tiles, texture, Object::pos());
     }
 
@@ -116,6 +117,7 @@ namespace geo {
     }
 
     void Tilemap::finish () {
+        if (!tiles) return;
         set_bdf(tilemap_bdf);
         physicalize();
          // TODO: find out why we can't do this earlier
