@@ -55,6 +55,8 @@ namespace shell {
     extern Room_Editor* room_editor;
 
     struct Tile_Editor : vis::Drawn<vis::Map>, core::Listener {
+         // TODO: somehow update all tilemaps referencing this one's tiles
+         //  Can HACC be useful for that?
         geo::Tilemap* tilemap = NULL;
         uint16 tile = 0x0001;
 

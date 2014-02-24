@@ -424,6 +424,16 @@ namespace shell {
                 case GLFW_KEY_ESC:
                     deactivate();
                     return true;
+                case 'S': {
+                    for (auto& f : hacc::loaded_files()) {
+                        if (f.data().address() == tilemap->tiles) {
+                            hacc::save(f);
+                            return true;
+                        }
+                    }
+                    fprintf(stderr, "Could not save this tiles object, because it doesn't belong to a file.\n");
+                    return true;
+                }
                 case 'H':
                     tile ^= 0x8000;
                     return true;
