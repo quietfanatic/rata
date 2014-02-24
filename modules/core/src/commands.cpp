@@ -125,6 +125,20 @@ void _history () {
 }
 New_Command _history_cmd ("history", "Show previously entered commands.", 0, _history);
 
+void _load_history (std::string filename) {
+    try {
+        hacc::Reference(&command_history).from_tree(tree_from_file(filename));
+    }
+    catch (std::exception& e) {
+        print_to_console("History load failed: " + std::string(e.what()) + "\n");
+    }
+}
+New_Command _load_history_cmd ("load_history", "Load command history from a file.", 1, _load_history);
+void _save_history (std::string filename) {
+    tree_to_file(hacc::Reference(&command_history).to_tree(), filename);
+}
+New_Command _save_history_cmd ("save_history", "Save command history to a file.", 1, _save_history);
+
 void _get (const Reference& ref) {
     print_to_console(ref.show() + "\n");
     print_to_console(hacc::tree_to_string(ref.to_tree(), "", 3) + "\n");

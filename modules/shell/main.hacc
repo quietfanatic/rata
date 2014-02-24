@@ -4,8 +4,12 @@
             [set_default_font $("shell/res/monospace.hacc").font]
             [set_materials $("world/res/materials.hacc").materials]
             [lst_arg "shell/initial-state.hacc"]
+            [load_history "../save/command_history"]
         ]]
-        on_exit:[sst "../save/last_stop.hacc"]
+        on_exit:[seq[
+            [save_history "../save/command_history"]
+            [sst "../save/last_stop.hacc"]
+        ]]
     }}
     window:{"core::Window":{
         width: 640

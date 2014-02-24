@@ -17,7 +17,8 @@ namespace shell {
         std::string cli = "";
         uint cli_pos = 0;
 
-        uint history_index = core::command_history.size();
+        uint history_size = core::command_history.size();
+        uint history_index = history_size;
         std::string stash_cli;
 
         Font* font = NULL;
@@ -52,6 +53,10 @@ namespace shell {
                         break;
                     }
                     case GLFW_KEY_UP: {
+                        if (history_size != core::command_history.size()) {
+                            history_size = core::command_history.size();
+                            history_index = history_size;
+                        }
                         if (history_index > 0) {
                             if (history_index == core::command_history.size()) {
                                 stash_cli = cli;
