@@ -1,0 +1,27 @@
+{ "hacc::Document":{
+    _next_id:2
+    _1:{ "geo::Tilemap":{
+        room:$.room
+        bdf:$("geo/res/tilemap.bdf")
+        pos:[
+            40~42200000
+            0~00000000
+        ]
+        vel:[
+            0~00000000
+            0~00000000
+        ]
+        tileset:$("world/res/test.tileset").tileset
+        texture:$("world/res/test.tileset").img.textures[0]
+        tiles:$("world/res/test2.tiles")
+    } }
+    room:{ "geo::Room":{
+        boundary:[
+            40~42200000
+            0~00000000
+            60~42700000
+            15~41700000
+        ]
+        neighbors:[$("world/res/test.room").room]
+    } }
+} }
