@@ -62,6 +62,8 @@ namespace shell {
         bool clicking = false;
         bool showing_selector = false;
 
+        geo::Free_Camera selector_camera;
+
         Tile_Editor ();
         ~Tile_Editor ();
         void activate ();

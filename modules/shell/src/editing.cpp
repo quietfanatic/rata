@@ -402,13 +402,26 @@ namespace shell {
         logger.log("Deactivating tile editor");
         Listener::deactivate();
         Drawn<vis::Map>::disappear();
+        selector_camera.deactivate();
     }
 
 
     void Tile_Editor::Drawn_draw (vis::Map) {
-        if (!tilemap) return;
-         // display current tile in corner
-        draw_tile(tile, tilemap->texture, camera->window_to_world(0, 0) - Vec(0, 1));
+        if (!tilemap || !tilemap->tileset) return;
+        if (showing_selector) {
+            size_t width = tilemap->texture->size.x*PX;
+            auto size = tilemap->tileset->tiles.size();
+            for (size_t i = 0; i < size; i++) {
+                draw_tile(
+                    i | (tile & 0xc000), tilemap->texture,
+                    Vec(-10000, -10000) + Vec(i % width, -(i / width + 1))
+                );
+            }
+        }
+        else {
+             // display current tile in corner
+            draw_tile(tile, tilemap->texture, camera->window_to_world(0, 0) - Vec(0, 1));
+        }
     }
     bool Tile_Editor::in_bounds (Vec pos) {
         return pos.x >= 0 && pos.x < tilemap->tiles->width
@@ -472,7 +485,13 @@ namespace shell {
         if (action == GLFW_PRESS) {
             switch (code) {
                 case GLFW_KEY_ESC:
-                    deactivate();
+                    if (showing_selector) {
+                        showing_selector = false;
+                        selector_camera.deactivate();
+                    }
+                    else {
+                        deactivate();
+                    }
                     return true;
                 case 'S': {
                     for (auto& f : hacc::loaded_files()) {
@@ -492,17 +511,13 @@ namespace shell {
                     return true;
                 case '/':
                     showing_selector = !showing_selector;
-                    for (auto b = phys::space.b2world->GetBodyList(); b; b = b->GetNext()) {
-                        if (auto tm = dynamic_cast<Tilemap*>((phys::Object*)b->GetUserData())) {
-                            if (tm->tiles == tilemap->tiles) {
-                                if (tm->b2body->IsActive()) {
-                                    if (showing_selector)
-                                        tm->disappear();
-                                    else
-                                        tm->appear();
-                                }
-                            }
-                        }
+                    if (showing_selector) {
+                        selector_camera.pos = Vec(-10000, -10000);
+                        selector_camera.size = Vec(40, 30);
+                        selector_camera.activate();
+                    }
+                    else {
+                        selector_camera.deactivate();
                     }
                     return true;
                 case GLFW_KEY_LEFT:
