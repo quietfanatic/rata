@@ -355,7 +355,7 @@ namespace hacc {
                 rp.read([&](void* pp){
                     Path target = address_to_path(
                         Pointer(rp.type().data->pointee_type, *(void**)pp),
-                        Path(null), true
+                        Path(null), RELOAD_VERIFYING
                     );
                     if (target && File(target->root()).p->state == RELOAD_VERIFYING) {
                         Pointer new_addr = path_to_reference(target);
@@ -449,7 +449,8 @@ namespace hacc {
             r.foreach_pointer([&](Reference rp, Path path){
                 rp.read([&](void* pp){
                     Path target = address_to_path(
-                        Pointer(rp.type().data->pointee_type, *(void**)pp)
+                        Pointer(rp.type().data->pointee_type, *(void**)pp),
+                        Path(null), UNLOAD_VERIFYING
                     );
                     if (target && File(target->root()).p->state == UNLOAD_VERIFYING) {
                         try { throw X::Unload_Would_Break(path, target); }
@@ -611,7 +612,7 @@ namespace hacc {
     Reference path_to_reference (Path path, Pointer root) {
         return path->to_reference(root);
     }
-    Path address_to_path (Pointer ptr, Path prefix, bool reload_verify) {
+    Path address_to_path (Pointer ptr, Path prefix, int only_state) {
         if (prefix != Path(null)) {
             Path found = Path(null);
             Reference start = path_to_reference(prefix);
@@ -630,20 +631,21 @@ namespace hacc {
             std::vector<File> scannable_files;
             for (auto& p : files_by_filename()) {
                  // TODO: There is probably some more optimization that can be done here.
-                if (reload_verify) {
-                    if (p.second->state == RELOAD_VERIFYING)
-                        scannable_files.push_back(p.second);
-                }
-                else {
+                if (only_state == -1) {
                     if (p.second->state != UNLOADED
                      && p.second->state != UNLOAD_COMMITTING) {
+                        scannable_files.push_back(p.second);
+                    }
+                }
+                else {
+                    if (p.second->state == only_state) {
                         scannable_files.push_back(p.second);
                     }
                 }
             }
             Path found = Path(null);
             for (auto f : scannable_files) {
-                Reference ref = reload_verify && f.p->old_data.address()
+                Reference ref = only_state == RELOAD_VERIFYING && f.p->old_data.address()
                     ? Reference(f.p->old_data.address())
                     : f.data();
                 ref.foreach_address(

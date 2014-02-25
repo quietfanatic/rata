@@ -113,8 +113,8 @@ namespace hacc {
      //  single file-object.  Returns null if the address isn't found.
      // If you run address_to_path inside a file_transaction, the address
      //  scan results will be cached between calls.
-     // The reload_verify flag is for internal optimization use.
-    Path address_to_path (Pointer, Path prefix = Path(null), bool reload_verify = false);
+     // The only_state is for internal optimization use.
+    Path address_to_path (Pointer, Path prefix = Path(null), int only_state = -1);
 
      // Performs an operation for each pointer found in the given root, or in
      //  every file-object if root is null.  The callback will be always be
