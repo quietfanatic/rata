@@ -465,7 +465,7 @@ namespace hacc {
                 try {
                      // But it's okay if the referencing file is also being unloaded.
                     if (f.p->state != UNLOAD_VERIFYING && f.p->state != UNLOADED) {
-                        reload_verify_scan(f.p->data.address(), Path(f.p->filename));
+                        unload_verify_scan(f.p->data.address(), Path(f.p->filename));
                     }
                 }
                  // Only catch exceptions so we can attach a filename to them.
