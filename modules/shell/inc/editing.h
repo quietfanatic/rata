@@ -60,6 +60,7 @@ namespace shell {
         geo::Tilemap* tilemap = NULL;
         uint16 tile = 0x0001;
         bool clicking = false;
+        bool showing_selector = false;
 
         Tile_Editor ();
         ~Tile_Editor ();

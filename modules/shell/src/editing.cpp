@@ -219,6 +219,8 @@ namespace shell {
         fc.activate();
         Drawn<Overlay>::appear();
         Drawn<Dev>::appear();
+        clicking = false;
+        dragging = false;
     }
     void Room_Editor::deactivate () {
         logger.log("Deactivating room editor.");
@@ -393,6 +395,8 @@ namespace shell {
         logger.log("Activating tile editor");
         Listener::activate();
         Drawn<vis::Map>::appear();
+        clicking = false;
+        showing_selector = false;
     }
     void Tile_Editor::deactivate () {
         logger.log("Deactivating tile editor");
@@ -485,6 +489,21 @@ namespace shell {
                     return true;
                 case 'V':
                     tile ^= 0x4000;
+                    return true;
+                case '/':
+                    showing_selector = !showing_selector;
+                    for (auto b = phys::space.b2world->GetBodyList(); b; b = b->GetNext()) {
+                        if (auto tm = dynamic_cast<Tilemap*>((phys::Object*)b->GetUserData())) {
+                            if (tm->tiles == tilemap->tiles) {
+                                if (tm->b2body->IsActive()) {
+                                    if (showing_selector)
+                                        tm->disappear();
+                                    else
+                                        tm->appear();
+                                }
+                            }
+                        }
+                    }
                     return true;
                 case GLFW_KEY_LEFT:
                     if ((tile & 0x3fff) == 0) {
