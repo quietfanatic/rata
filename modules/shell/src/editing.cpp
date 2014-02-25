@@ -35,6 +35,8 @@ namespace shell {
             color_offset(Vec(0, 0));
             draw_color(0xff00ffff);
             draw_rect(room.boundary);
+            if (tile_editor && tile_editor->active)
+                continue;
             if (room.observer_count) {
                 for (auto& res : room.residents) {
                     Vec pos = res.Resident_get_pos();
