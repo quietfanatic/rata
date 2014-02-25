@@ -1,20 +1,20 @@
-{"hacc::Document":{
-    rata:{"ent::Biped":{
+{hacc::Document:{
+    rata:{ent::Biped:{
         def:$("world/res/rata.hacc").def
         bdf:$("ent/res/small.hacc").bdf
         pos:[1 22]
         room:$("world/res/test.room").room
         direction:1
     }}
-    observer:{"geo::Observer":{
+    observer:{geo::Observer:{
         room:$("world/res/test.room").room
     }}
-    player:{"ent::Player":{
+    player:{ent::Player:{
         character:$.rata.Controllable
         cursor_tex:$("ent/res/cursor.hacc").img.ALL
         cursor_frame:$("ent/res/cursor.hacc").layout.normal
     }}
-    rata2:{"ent::Biped":{
+    rata2:{ent::Biped:{
         def:$("world/res/rata.hacc").def
         bdf:$("ent/res/small.hacc").bdf
         pos:[4 22]

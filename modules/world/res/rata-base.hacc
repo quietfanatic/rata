@@ -1,5 +1,5 @@
-{"hacc::Document":{
-    img:{"vis::Image":{
+{hacc::Document:{
+    img:{vis::Image:{
         filename: "world/res/rata-base.png"
         textures: [
             {name:body    offset:[  0   0] size:[ 85 64]}
@@ -11,7 +11,7 @@
             { offset:[102 85] length:8 vertical:true mask:0x00ffffff }
         ]
     }}
-    skin:{"vis::Skin":{
+    skin:{vis::Skin:{
         apps: [
             [($s=$("ent/res/small.hacc").skel.segs).body $.img.body]
             [$s.head $.img.head]

@@ -1,5 +1,5 @@
-{"hacc::Document":{
-    bdf:{"phys::BodyDef":{
+{hacc::Document:{
+    bdf:{phys::BodyDef:{
         fixtures:[
             $.fixdefs.feet
             $.fixdefs.stand
@@ -11,7 +11,7 @@
         ]
         mass:1
     }}
-    fixdefs:{"ent::BipedFixdefs":{
+    fixdefs:{ent::BipedFixdefs:{
         feet:{
             b2:{ shape:$.feet_shape.b2Shape friction:0 }
             coll_a:[ground] coll_b:[ground]
@@ -58,7 +58,7 @@
     ceiling_low_shape:{b2PolygonShape:{
         verts:[[-0.1875 0.75] [0.1875 0.75] [0.1875 1.375] [-0.1875 1.375]]
     }}
-    skel:{"vis::Skel":{
+    skel:{vis::Skel:{
         segs:[{
             name:head
             branches:[]
@@ -93,7 +93,7 @@
         root:$.skel.segs.body
         root_offset:[0 0]
     }}
-    poses:{"ent::BipedPoses":{
+    poses:{ent::BipedPoses:{
         stand:[
             [$b =$.skel.segs.body     $lb.stand  ]
             [$h =$.skel.segs.head     $lh.stand90]

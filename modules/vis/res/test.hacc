@@ -1,8 +1,8 @@
-{"hacc::Document":{
-    img:{"vis::Image":{
+{hacc::Document:{
+    img:{vis::Image:{
         filename: "vis/res/test.png"
     }}
-    layout:{"vis::Layout":{
+    layout:{vis::Layout:{
         size:[64 64]
         frames:[
             {name:"white" offset:[16 48] box:$box=[-16 -16 16 16]}

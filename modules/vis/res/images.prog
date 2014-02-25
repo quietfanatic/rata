@@ -1,9 +1,9 @@
-{"hacc::Document":{
-    prog:{"vis::Images_Program":{
+{hacc::Document:{
+    prog:{vis::Images_Program:{
         shaders:[$.vert $.frag]
         attributes:[vert_pos vert_tex]
     }}
-    vert:{"core::Shader":{
+    vert:{core::Shader:{
         type:vertex
         source:<<END
             #version 110
@@ -25,7 +25,7 @@
             }
             END
     }}
-    frag:{"core::Shader":{
+    frag:{core::Shader:{
         type:fragment
         source:<<END
             #version 110
@@ -47,7 +47,7 @@
             }
             END
     }}
-    plain_layout:{"vis::Layout":{
+    plain_layout:{vis::Layout:{
         size:[1 1]
         frames:[
             { name:ALL offset:[0 0] box:[0 0 1 1] }

@@ -1,9 +1,9 @@
-{"hacc::Document":{
-    prog:{"vis::Text_Program":{
+{hacc::Document:{
+    prog:{vis::Text_Program:{
         shaders:[$.vert $.frag]
         attributes:[vert_pos vert_tex]
     }}
-    vert:{"core::Shader":{
+    vert:{core::Shader:{
         type:vertex
         source:<<END
             #version 110
@@ -26,7 +26,7 @@
             }
             END
     }}
-    frag:{"core::Shader":{
+    frag:{core::Shader:{
         type:fragment
         source:<<END
             #version 110

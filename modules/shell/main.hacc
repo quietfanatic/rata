@@ -1,4 +1,4 @@
-{"hacc::Document":{
+{hacc::Document:{
     game:{Game:{
         on_start:[seq[
             [set_default_font $("shell/res/monospace.hacc").font]
@@ -11,7 +11,7 @@
             [sst "../save/last_stop.hacc"]
         ]]
     }}
-    window:{"core::Window":{
+    window:{core::Window:{
         width: 640
         height: 480
         depth: 8
@@ -31,7 +31,7 @@
         [92 [light_debug]]  // \
         [82 [reload]]  // R
     ]}
-    console:{"shell::Console":{ }}
-    room_editor:{"shell::Room_Editor":{ }}
-    tile_editor:{"shell::Tile_Editor":{ }}
+    console:{shell::Console:{ }}
+    room_editor:{shell::Room_Editor:{ }}
+    tile_editor:{shell::Tile_Editor:{ }}
 }}

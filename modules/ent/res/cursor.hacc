@@ -1,8 +1,8 @@
-{"hacc::Document":{
-    img:{"vis::Image":{
+{hacc::Document:{
+    img:{vis::Image:{
         filename:"ent/res/cursor.png"
     }}
-    layout:{"vis::Layout":{
+    layout:{vis::Layout:{
         size:[9 9]
         frames:[
             { name:normal offset:[4.5 4.5] box:[-4.5 -4.5 4.5 4.5] }

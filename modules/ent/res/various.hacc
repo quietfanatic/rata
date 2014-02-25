@@ -1,22 +1,22 @@
 
-{"hacc::Document":{
-    boundary_bdf: {"phys::BodyDef":{
+{hacc::Document:{
+    boundary_bdf: {phys::BodyDef:{
         type:static
         fixtures:[$.bb_f0 $.bb_f1 $.bb_f2 $.bb_f3]
     }}
-    bb_f0: {"phys::FixtureDef":{ shape:$.bb_e0.b2Shape coll_b:[ground] }}
-    bb_f1: {"phys::FixtureDef":{ shape:$.bb_e1.b2Shape coll_b:[ground] }}
-    bb_f2: {"phys::FixtureDef":{ shape:$.bb_e2.b2Shape coll_b:[ground] }}
-    bb_f3: {"phys::FixtureDef":{ shape:$.bb_e3.b2Shape coll_b:[ground] }}
+    bb_f0: {phys::FixtureDef:{ shape:$.bb_e0.b2Shape coll_b:[ground] }}
+    bb_f1: {phys::FixtureDef:{ shape:$.bb_e1.b2Shape coll_b:[ground] }}
+    bb_f2: {phys::FixtureDef:{ shape:$.bb_e2.b2Shape coll_b:[ground] }}
+    bb_f3: {phys::FixtureDef:{ shape:$.bb_e3.b2Shape coll_b:[ground] }}
     bb_e0: {b2EdgeShape:{ v1:[20  0] v2:[ 0  0] }}
     bb_e1: {b2EdgeShape:{ v1:[20 15] v2:[20  0] }}
     bb_e2: {b2EdgeShape:{ v1:[ 0 15] v2:[20 15] }}
     bb_e3: {b2EdgeShape:{ v1:[ 0  0] v2:[ 0 15] }}
 
-    test_bdf: {"phys::BodyDef":{
+    test_bdf: {phys::BodyDef:{
         fixtures:[$.test_fix]
     }}
-    test_fix: {"phys::FixtureDef":{
+    test_fix: {phys::FixtureDef:{
         shape:$.test_shape.b2Shape
         friction:0.4
         coll_b:[ground]
@@ -25,11 +25,11 @@
         verts:[[-1 -1] [1 -1] [1 1] [-1 1]]
     }}
 
-    crate_bdf: {"phys::BodyDef":{
+    crate_bdf: {phys::BodyDef:{
         type:dynamic
         fixtures:[$.crate_fix]
     }}
-    crate_fix: {"phys::FixtureDef":{
+    crate_fix: {phys::FixtureDef:{
         shape:$.crate_shape.b2Shape
         friction:0.4
         coll_b:[ground]
@@ -37,7 +37,7 @@
     crate_shape: {b2PolygonShape:{
         verts:[[-0.48 0.98] [-0.4 0] [0.4 0] [0.48 0.1] [0.48 0.9] [0.4 0.98] [-0.4 0.98] [-0.48 0.9]]
     }}
-    stuff_img: {"vis::Image":{
+    stuff_img: {vis::Image:{
         filename:"world/res/stuff.png"
         textures:[
             { name:crate offset:[24 24] size:[16 16] }

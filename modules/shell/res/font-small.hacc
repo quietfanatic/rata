@@ -1,5 +1,5 @@
-{"hacc::Document":{
-    font:{"vis::Font":{
+{hacc::Document:{
+    font:{vis::Font:{
         texture:$.img.ALL
         width:8 height:8 line_height:8
         widths:[
@@ -22,7 +22,7 @@
             0 0 0 0 0 0 0 0  0 0 0 0 0 0 0 0
         ]
     }}
-    img:{"vis::Image":{
+    img:{vis::Image:{
         filename:"shell/res/font-small.png"
     }}
 }}

@@ -1,5 +1,5 @@
-{"hacc::Document":{
-    "materials":{"vis::Materials":[
+{hacc::Document:{
+    materials:{vis::Materials:[
      //   Ambient    Diffuse    Specular    Radiant
         [0x3f3f3fff 0x2f2f2fff 0x2f2f2fff 0x00000000]  // 0. Metallic grey
         [0x7f7f7fff 0x00000000 0x00000000 0x00000000]  // 1. Default background color

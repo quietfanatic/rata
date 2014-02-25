@@ -1,5 +1,5 @@
-{"hacc::Document":{
-    def:{"ent::BipedDef":{
+{hacc::Document:{
+    def:{ent::BipedDef:{
         fixdefs: $("ent/res/small.hacc").fixdefs
         stats: $.stats
         skel: $("ent/res/small.hacc").skel
@@ -7,7 +7,7 @@
         skin: $("world/res/rata-base.hacc").skin
         focus_offset: [0 1]
     }}
-    stats:{"ent::BipedStats":{
+    stats:{ent::BipedStats:{
         walk_friction: 0.8
         walk_speed: 5.0
         run_friction: 0.2

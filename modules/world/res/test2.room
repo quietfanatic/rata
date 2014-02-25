@@ -1,6 +1,6 @@
-{ "hacc::Document":{
+{ hacc::Document:{
     _next_id:2
-    _1:{ "geo::Tilemap":{
+    _1:{ geo::Tilemap:{
         room:$.room
         bdf:$("geo/res/tilemap.bdf")
         pos:[
@@ -15,7 +15,7 @@
         texture:$("world/res/test.tileset").img.textures[0]
         tiles:$("world/res/test2.tiles")
     } }
-    room:{ "geo::Room":{
+    room:{ geo::Room:{
         boundary:[
             40~42200000
             0~00000000

@@ -1,9 +1,9 @@
-{"hacc::Document":{
-    font:{"vis::Font":{
+{hacc::Document:{
+    font:{vis::Font:{
         texture:$.img.ALL
         width:6 height:12 line_height:12
     }}
-    img:{"vis::Image":{
+    img:{vis::Image:{
         filename:"shell/res/monospace.png"
     }}
 }}

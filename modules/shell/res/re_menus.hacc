@@ -1,75 +1,75 @@
-{"hacc::Document":{
+{hacc::Document:{
     res_menu:{"shell::Menu<vis::Dev>":{
         deactivate_on_click:true
-        root:{"shell::VBox":{
+        root:{shell::VBox:{
             contents:[
-                {"shell::Text_Button":{
+                {shell::Text_Button:{
                     text:"text edit"
                     on_click:[re_edit]
                 }}
-                {"shell::Text_Button":{
+                {shell::Text_Button:{
                     text:"duplicate"
                     on_click:[re_duplicate]
                 }}
-                {"shell::Text_Button":{
+                {shell::Text_Button:{
                     text:"delete"
                     on_click:[re_delete]
                 }}
-                {"shell::Type_Specific_Menu":{
-                    "ent::Biped":$.biped_menu
-                    "geo::Tilemap":$.tilemap_menu
+                {shell::Type_Specific_Menu:{
+                    ent::Biped:$.biped_menu
+                    geo::Tilemap:$.tilemap_menu
                 }}
             ]
         }}
     }}
-    biped_menu:{"shell::Text_Button":{
+    biped_menu:{shell::Text_Button:{
         text:"control this"
         on_click:[re_control_this]
     }}
-    tilemap_menu:{"shell::Text_Button":{
+    tilemap_menu:{shell::Text_Button:{
         text:"edit tiles"
         on_click:[re_start_te]
     }}
     room_menu:{"shell::Menu<vis::Dev>":{
         deactivate_on_click:true
-        root:{"shell::VBox":{
+        root:{shell::VBox:{
             contents:[
-                {"shell::Text_Button":{
+                {shell::Text_Button:{
                     text:"edit room"
                     on_click:[re_edit_room]
                 }}
-                {"shell::Text_Button":{
+                {shell::Text_Button:{
                     text:"reload room"
                     on_click:[re_reload_room]
                 }}
-                {"shell::Text_Button":{
+                {shell::Text_Button:{
                     text:"save room"
                     on_click:[re_save_room]
                 }}
-                {"shell::SubMenu":{
+                {shell::SubMenu:{
                     text:"create actor"
-                    contents:{"shell::VBox":{
+                    contents:{shell::VBox:{
                         contents:[
-                            {"shell::Text_Button":{
+                            {shell::Text_Button:{
                                 text:"test"
-                                on_click:[re_new_actor "ent::Biped" {
+                                on_click:[re_new_actor ent::Biped {
                                     def:$("world/res/rata.hacc").def
                                     bdf:$("ent/res/small.hacc").bdf
                                     direction:1
                                 }]
                             }}
-                            {"shell::Text_Button":{
+                            {shell::Text_Button:{
                                 text:"crate"
-                                on_click:[re_new_actor "ent::Crate" { }]
+                                on_click:[re_new_actor ent::Crate { }]
                             }}
                         ]
                     }}
                 }}
-                {"shell::SubMenu":{
+                {shell::SubMenu:{
                     text:"add furniture"
-                    contents:{"shell::Text_Button":{
+                    contents:{shell::Text_Button:{
                         text:"tilemap"
-                        on_click:[re_new_furniture "geo::Tilemap" {
+                        on_click:[re_new_furniture geo::Tilemap {
                             bdf:$("geo/res/tilemap.bdf")
                             tileset:$("world/res/test.tileset").tileset
                             texture:$("world/res/test.tileset").img.textures[0]

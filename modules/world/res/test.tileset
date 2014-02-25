@@ -1,12 +1,12 @@
-{"hacc::Document":{
-    tileset:{"geo::Tileset":{
+{hacc::Document:{
+    tileset:{geo::Tileset:{
         tiles: [null $.solid null null null null null]
     }}
-    solid:{"geo::TileDef":{
+    solid:{geo::TileDef:{
         nature:{ friction:0.4 coll_b:[ground] }
         vertices:[[0 0] [1 0] [1 1] [0 1]]
     }}
-    img:{"vis::Image":{
+    img:{vis::Image:{
         filename:"world/res/test-tiles.png"
         palettes:[
             { offset:[2 493] mask:0x00ffffff }
