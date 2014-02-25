@@ -404,36 +404,63 @@ namespace shell {
          // display current tile in corner
         draw_tile(tile, tilemap->texture, camera->window_to_world(0, 0) - Vec(0, 1));
     }
+    bool Tile_Editor::in_bounds (Vec pos) {
+        return pos.x >= 0 && pos.x < tilemap->tiles->width
+            && pos.y >= 0 && pos.y < tilemap->tiles->height;
+    }
+    uint16& Tile_Editor::tile_at (Vec pos) {
+        if (!in_bounds(pos)) {
+            throw hacc::X::Logic_Error("Position (%f,%f) is out of bounds for this tilemap\n");
+        }
+        size_t x = floor(pos.x);
+        size_t y = tilemap->tiles->height - floor(pos.y) - 1;
+        return tilemap->tiles->tiles[tilemap->tiles->width * y + x];
+    }
+    void Tile_Editor::draw (Vec pos) {
+        if (!in_bounds(pos))
+            return;
+        uint16& selected = tile_at(pos);
+        if (selected != tile) {
+            selected = tile;
+            tilemap->tiles->finish();
+             // Update all relevant tilemaps
+            for (auto b = phys::space.b2world->GetBodyList(); b; b = b->GetNext()) {
+                if (auto tm = dynamic_cast<Tilemap*>((phys::Object*)b->GetUserData())) {
+                    if (tm->tiles == tilemap->tiles) {
+                        tm->set_tiles(tilemap->tiles);
+                    }
+                }
+            }
+        }
+    }
+    void Tile_Editor::pick (Vec pos) {
+        if (!in_bounds(pos))
+            return;
+        tile = tile_at(pos);
+    }
     bool Tile_Editor::Listener_button (int btn, int action) {
         if (!tilemap) return false;
         if (action == GLFW_PRESS) {
             Vec pos = camera->window_to_world(window->cursor_x, window->cursor_y) - tilemap->pos();
-            if (Rect(0, 0, tilemap->tiles->width, tilemap->tiles->height).covers(pos)) {
-                size_t x = floor(pos.x);
-                size_t y = tilemap->tiles->height - floor(pos.y) - 1;
-                auto& selected = tilemap->tiles->tiles[tilemap->tiles->width * y + x];
-                 // Lay tile
-                if (btn == GLFW_MOUSE_BUTTON_LEFT) {
-                    if (selected != tile) {
-                        selected = tile;
-                        tilemap->tiles->finish();
-                         // Update all relevant tilemaps
-                        for (auto b = phys::space.b2world->GetBodyList(); b; b = b->GetNext()) {
-                            if (auto tm = dynamic_cast<Tilemap*>((phys::Object*)b->GetUserData())) {
-                                if (tm->tiles == tilemap->tiles) {
-                                    tm->set_tiles(tilemap->tiles);
-                                }
-                            }
-                        }
-                    }
-                }
-                 // Pick tile
-                else if (btn == GLFW_MOUSE_BUTTON_RIGHT) {
-                    tile = selected;
-                }
+            if (btn == GLFW_MOUSE_BUTTON_LEFT) {
+                draw(pos);
+                clicking = true;
+            }
+            else if (btn == GLFW_MOUSE_BUTTON_RIGHT) {
+                pick(pos);
+            }
+        }
+        else {  // GLFW_RELEASE
+            if (btn == GLFW_MOUSE_BUTTON_LEFT) {
+                clicking = false;
             }
         }
         return true;
+    }
+    void Tile_Editor::Listener_cursor_pos (int x, int y) {
+        if (clicking) {
+            draw(camera->window_to_world(x, y));
+        }
     }
     bool Tile_Editor::Listener_key (int code, int action) {
         if (action == GLFW_PRESS) {

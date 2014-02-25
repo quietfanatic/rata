@@ -59,15 +59,22 @@ namespace shell {
     struct Tile_Editor : vis::Drawn<vis::Map>, core::Listener {
         geo::Tilemap* tilemap = NULL;
         uint16 tile = 0x0001;
+        bool clicking = false;
 
         Tile_Editor ();
         ~Tile_Editor ();
         void activate ();
         void deactivate ();
 
+        bool in_bounds (Vec);
+        uint16& tile_at (Vec);
+        void draw (Vec);
+        void pick (Vec);
+
         void Drawn_draw (vis::Map) override;
         bool Listener_button (int, int) override;
         bool Listener_key (int, int) override;
+        void Listener_cursor_pos (int, int) override;
     };
     extern Tile_Editor* tile_editor;
 
