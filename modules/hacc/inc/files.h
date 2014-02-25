@@ -139,9 +139,6 @@ namespace hacc {
         struct Double_Transaction : Internal_Error {
             Double_Transaction ();
         };
-        struct Reload_NYI : Internal_Error {
-            Reload_NYI ();
-        };
         struct Unload_Would_Break : Logic_Error {
             Path ref;
             Path target;

@@ -677,7 +677,7 @@ namespace hacc {
         { }
         Unload_Would_Break::Unload_Would_Break (Path ref, Path target) :
             Logic_Error(
-                "Reload would break the pointer at " + path_to_string(ref)
+                "Unload would break the pointer at " + path_to_string(ref)
               + " pointing to " + path_to_string(target)
             ), ref(ref), target(target)
         { }
@@ -695,7 +695,6 @@ namespace hacc {
               + " and has a new type of " + nt.name()
             ), ref(ref), target(target), ot(ot), nt(nt)
         { }
-        Reload_NYI::Reload_NYI () : Internal_Error("Reload NYI, sorry") { }
     }
 
 }
