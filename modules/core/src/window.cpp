@@ -260,6 +260,8 @@ namespace core {
         exit(0);
     }
 
+    Listener::~Listener () { deactivate(); }
+
 } using namespace core;
 
  // TODO: use magic setters

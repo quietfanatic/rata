@@ -92,6 +92,8 @@ namespace core {
          // Only call these if the above is true.
         bool key_pressed (int keycode);
         bool btn_pressed (int code);
+
+        virtual ~Listener ();
     };
 
      // Immediately close the window and exit the program.  Does not return.
