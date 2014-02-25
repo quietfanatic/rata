@@ -63,28 +63,43 @@ that module's directory, if it exists.
 
 #### TODO
 
-###### Short Term
+###### Milestone 1
 
  - ☑ Basic room editor
- - ☐ Tilemap editor
  - ☑ OS X support
- - ☐ Convert graphics to material-lighting format
- - ☐ Sound and music, probably with OpenAL
- - ☐ Camera control (bring constraint satisfaction system from master branch)
- - ☐ Items and inventory
  - ☑ Implement area lighting
+
+###### Milestone 2
+
  - ☑ Add model-internal shadows to lighting shader
  - ☑ Allow model rendering for multiple interleaved skins
+ - ☐ Tilemap editor
+ - ☐ Convert graphics to material-lighting format
+
+###### Milestone 3
+
+ - ☐ Sound and music, probably with OpenAL
+ - ☐ Camera control (bring constraint satisfaction system from master branch)
+ - ☐ Items and equipment
+
+###### Milestone 4
+
+ - ☐ Usable inventory screen
  - ☐ Some basic game content
 
-###### Long Term
+###### The Future and Beyond
 
- - Refactor Haccable for better abstraction and predictability
- - Draw a global map mockup
- - Implement some AI
-    - With another b2World for imaginary scenarios, or something simpler?
- - Scripting (for story and events and stuff)
- - Content!  Levels!  Enemies!  Actors!  Puzzles!
- - Implement text layout engine (for speech bubbles and maybe inventory)
- - Windows support
+ - ☐ windows support
+ - ☐ Implement some AI
+ - ☐ Implement text layout engine (for speech bubbles and maybe inventory)
+ - ☐ Scripting system (for story and events and stuff)
+ - ☐ Think of some puzzle-like game mechanics
+ - ☐ Characters and enemies
+ - ☐ Formalize game script
+ - ☐ Create approximately complete world
+
+###### Uncertain
+
+ - ☐ Refactor Haccable for better abstraction and predictability
+ - ☐ In-program texture editor
 
