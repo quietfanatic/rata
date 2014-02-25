@@ -111,7 +111,6 @@ namespace vis {
     }
 
     void draw_tile (uint16 tile, Texture* tex, Vec pos) {
-//        printf("Drawing tile %hu at %f,%f\n", tile, pos.x, pos.y);
         prog->use();
         glUniform2f(prog->model_pos, round(pos.x/PX)*PX, round(pos.y/PX)*PX);
         glUniform2f(prog->tileset_size, tex->size.x, tex->size.y);
@@ -132,7 +131,7 @@ namespace vis {
         glDrawArrays(GL_QUADS, 0, 4);
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(0);
-        core::diagnose_opengl("after draw_tiles");
+        core::diagnose_opengl("after draw_tile");
     }
 
 } using namespace vis;

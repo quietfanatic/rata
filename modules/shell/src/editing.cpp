@@ -410,11 +410,11 @@ namespace shell {
         if (!tilemap || !tilemap->tileset) return;
         if (showing_selector) {
             size_t width = tilemap->texture->size.x*PX;
-            auto size = tilemap->tileset->tiles.size();
+            size_t size = tilemap->tileset->tiles.size();
             for (size_t i = 0; i < size; i++) {
                 draw_tile(
                     i | (tile & 0xc000), tilemap->texture,
-                    Vec(-10000, -10000) + Vec(i % width, -(i / width + 1))
+                    Vec(-10000, -10000) + Vec(i % width, -(float)(i / width + 1))
                 );
             }
         }
