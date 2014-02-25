@@ -40,8 +40,8 @@ tap::Tester documents_tester ("hacc/documents", [](){
     plan(6);
     remove("../test/document2.hacc");
     doesnt_throw([](){ load(File("../test/document.hacc")); }, "Can load a document");
-    is(File("../test/document.hacc").data().attr("asdf").type(), Type::CppType<int32>(), "Document object has right type");
-    is(*(int32*)File("../test/document.hacc").data().attr("asdf").address(), (int32)50, "Document object has right value");
+    is(File("../test/document.hacc").attr("asdf").type(), Type::CppType<int32>(), "Document object has right type");
+    is(*(int32*)File("../test/document.hacc").attr("asdf").address(), (int32)50, "Document object has right value");
     doesnt_throw([](){ File("../test/document.hacc").rename("../test/document2.hacc"); }, "Can rename a File object");
     doesnt_throw([](){ save(File("../test/document2.hacc")); }, "Can save a Document");
     is(

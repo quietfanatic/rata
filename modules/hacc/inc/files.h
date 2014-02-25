@@ -51,6 +51,10 @@ namespace hacc {
          // Create a new file with the given data.
         File (std::string filename, const Dynamic& data);
         File (std::string filename, Dynamic&& data);
+
+         // Shortcuts
+        Reference attr (std::string name) { return data().attr(name); }
+        Reference elem (size_t i) { return data().elem(i); }
     };
 
      // Show all loaded files.
