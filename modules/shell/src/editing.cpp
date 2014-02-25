@@ -623,6 +623,8 @@ New_Command _re_control_this_cmd ("re_control_this", "Transfer keyboard control 
 void _re_start_te () {
     if (!room_editor || !tile_editor) return;
     if (auto tilemap = dynamic_cast<Tilemap*>(room_editor->selected)) {
+        room_editor->status = "Editing "
+                            + hacc::path_to_string(hacc::address_to_path(tilemap->tiles));
         tile_editor->tilemap = tilemap;
         tile_editor->activate();
     }
