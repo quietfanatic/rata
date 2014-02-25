@@ -28,7 +28,7 @@ namespace hacc {
         String id;
         Type type;
         DocObj (DocLink* list, String id, Type type) :
-            DocLink(list), id(id), type(type)
+            DocLink(list->prev), id(id), type(type)
         { }
     };
 
