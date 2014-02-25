@@ -136,6 +136,10 @@ namespace hacc {
             String filename;
             File_Already_Loaded(String);
         };
+        struct Save_Unloaded : Logic_Error {
+            String filename;
+            Save_Unloaded(String);
+        };
         struct Double_Transaction : Internal_Error {
             Double_Transaction ();
         };

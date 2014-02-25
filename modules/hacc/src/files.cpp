@@ -231,6 +231,8 @@ namespace hacc {
 
          // SAVING
         void request_save (File f) {
+            if (f.p->state != LOADED)
+                throw X::Save_Unloaded(f.p->filename);
              // Saving is ideally a read-only operation, so no state changes
              //  are necessary.
             if (auto ext = get_ext(f.p->filename)) {
@@ -673,6 +675,10 @@ namespace hacc {
         { }
         File_Already_Loaded::File_Already_Loaded (String filename) :
             Logic_Error("Cannot create file \"" + filename + "\" because that filename is already loaded."),
+            filename(filename)
+        { }
+        Save_Unloaded::Save_Unloaded (String filename) :
+            Logic_Error("Cannot save file \"" + filename + "\" because it is not loaded."),
             filename(filename)
         { }
         Unload_Would_Break::Unload_Would_Break (Path ref, Path target) :
