@@ -20,7 +20,7 @@ void tst (hacc::String from, hacc::String to) {
 
 tap::Tester tree_strings_tester ("hacc/strings", [](){
     using namespace tap;
-    plan(46);
+    plan(47);
      printf(" # Bools\n");  // 2
     tst("true", "true");
     tst("false", "false");
@@ -43,12 +43,13 @@ tap::Tester tree_strings_tester ("hacc/strings", [](){
     tst("~3ff0000000000000", "1~3ff0000000000000");
     tst("2.0", "2~4000000000000000");
     tst("0.5", "0.5~3fe0000000000000");
-     printf(" # Strings\n");  // 5
+     printf(" # Strings\n");  // 6
     is(hacc::escape_string("\"\\\b\f\n\r\t"), "\\\"\\\\\\b\\f\\n\\r\\t", "hacc::escape_string does its job");
-    tst("\"asdfasdf\"", "\"asdfasdf\"");
+    tst("asdfasdf", "asdfasdf");
     tst("\"\"", "\"\"");
     tst("\"\\\"\\\\\\b\\f\\n\\r\\t\"", "\"\\\"\\\\\\b\\f\\n\\r\\t\"");
-    tst("asdf", "\"asdf\"");
+    tst("asdf", "asdf");
+    tst("std::string", "std::string");
      printf(" # Arrays\n");  // 8
     tst("[]", "[]");
     tst("[1]", "[1]");
@@ -63,7 +64,7 @@ tap::Tester tree_strings_tester ("hacc/strings", [](){
     tst("{\"a\": 1}", "{ a:1 }");
     tst("{a: 1}", "{ a:1 }");
     tst("{a: 1, b: 2, ccc: 3}", "{ a:1 b:2 ccc:3 }");
-    tst("{ , a: -32 b:\"sadf\" ,,,,,,,c:null,}", "{ a:-32 b:\"sadf\" c:null }");
+    tst("{ , a: -32 b:\"sadf\" ,,,,,,,c:null,}", "{ a:-32 b:sadf c:null }");
     tst("{\"\\\"\\\\\\b\\f\\n\\r\\t\": null}", "{ \"\\\"\\\\\\b\\f\\n\\r\\t\":null }");
     tst("{a: {b: {c: {} d: {}} e: {}}}", "{ a:{ b:{ c:{} d:{} } e:{} } }");
      printf(" # Arrays and Objects\n");  // 2

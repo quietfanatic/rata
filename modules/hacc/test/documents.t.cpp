@@ -46,7 +46,7 @@ tap::Tester documents_tester ("hacc/documents", [](){
     doesnt_throw([](){ save(File("../test/document2.hacc")); }, "Can save a Document");
     is(
         slurp("../test/document2.hacc"),
-        String("{ \"hacc::Document\":{\n    _next_id:1\n    asdf:{ int32:50 }\n} }\n"),
+        String("{ hacc::Document:{\n    _next_id:1\n    asdf:{ int32:50 }\n} }\n"),
         "Saved document has the right data"
     );
     remove("../test/document2.hacc");
