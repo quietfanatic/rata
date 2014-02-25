@@ -37,6 +37,8 @@ namespace hacc {
          //  for the sake of storage and program-generated references.
         std::vector<String> all_ids ();
 
+        std::string get_id (void*);
+
         Document ();
         ~Document ();
 

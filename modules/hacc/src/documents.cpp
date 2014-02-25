@@ -33,7 +33,7 @@ namespace hacc {
     };
 
     struct DocumentData : DocLink {
-        uint32 next_id = 1;
+        mutable uint32 next_id = 1;
          // Will usually be non-resident
         std::unordered_map<String, DocObj*> by_id;
          // all_ids returns empty when this is true
@@ -117,6 +117,18 @@ namespace hacc {
     }
     std::vector<String> Document::all_ids () {
         return _all_ids(data);
+    }
+
+    std::string Document::get_id (void* p) {
+        for (DocLink* link = data->next; link != data; link = link->next) {
+            auto obj = static_cast<DocObj*>(link);
+            if (obj->id.empty()) {
+                obj->id = "_" + std::to_string(data->next_id++);
+            }
+            if ((void*)(obj+1) == p)
+                return obj->id;
+        }
+        return "";
     }
 
     Document* get_document_containing (void* p) {
@@ -232,6 +244,12 @@ HACCABLE(DocumentData) {
         d.by_id.clear();
     });
     to_tree([](const DocumentData& d){
+        for (DocLink* link = d.next; link != &d; link = link->next) {
+            auto obj = static_cast<DocObj*>(link);
+            if (obj->id.empty()) {
+                obj->id = "_" + std::to_string(d.next_id++);
+            }
+        }
         Object o;
         o.emplace_back("_next_id", Tree(d.next_id));
         for (DocLink* link = d.next; link != &d; link = link->next) {
