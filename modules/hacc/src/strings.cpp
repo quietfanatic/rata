@@ -32,6 +32,10 @@ namespace hacc {
     String escape_ident (String unesc) {
         if (unesc.empty()) return "\"\"";
         for (auto p = unesc.begin(); p != unesc.end(); p++) {
+            if (*p == ':' && p+1 != unesc.end() && p[1] == ':') {
+                p++;
+                continue;
+            }
             if (!isalnum(*p) && *p != '_' && *p != '-')
                 return "\"" + escape_string(unesc) + "\"";
         }
@@ -246,7 +250,13 @@ namespace hacc {
                 case '"': return parse_stringly();
                 default: {
                     const char* start = p;
-                    while (isalnum(look()) || look() == '_' || look() == '-') p++;
+                    for (;;) {
+                        while (isalnum(look()) || look() == '_' || look() == '-') p++;
+                        if (look() == ':' && end - p > 1 && p[1] == ':') {
+                            p += 2;
+                        }
+                        else break;
+                    }
                     if (p == start) throw error("Expected " + what + ", but saw " + String(1, look()));
                     return String(start, p - start);
                 }
