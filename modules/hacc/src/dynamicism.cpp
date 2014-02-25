@@ -456,7 +456,10 @@ namespace hacc {
                 }
                 return Tree(std::move(a));
             }
-            else return Tree(Object());
+            else if (type().data->array)
+                return Tree(Array());
+            else
+                return Tree(Object());
         }
     }
     void Reference::prepare (Tree t) const {
