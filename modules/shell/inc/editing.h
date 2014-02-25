@@ -61,6 +61,7 @@ namespace shell {
         uint16 tile = 0x0001;
         bool clicking = false;
         bool showing_selector = false;
+        Vec selector_pos = Vec(-10020, -9985);
 
         geo::Free_Camera selector_camera;
 

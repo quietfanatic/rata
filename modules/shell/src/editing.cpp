@@ -414,14 +414,12 @@ namespace shell {
             for (size_t i = 0; i < size; i++) {
                 draw_tile(
                     i | (tile & 0xc000), tilemap->texture,
-                    Vec(-10000, -10000) + Vec(i % width, -(float)(i / width + 1))
+                    selector_pos + Vec(i % width, -(float)(i / width + 1))
                 );
             }
         }
-        else {
-             // display current tile in corner
-            draw_tile(tile, tilemap->texture, camera->window_to_world(0, 0) - Vec(0, 1));
-        }
+         // display current tile in corner
+        draw_tile(tile, tilemap->texture, camera->window_to_world(0, 0) - Vec(0, 1));
     }
     bool Tile_Editor::in_bounds (Vec pos) {
         return pos.x >= 0 && pos.x < tilemap->tiles->width
@@ -453,9 +451,17 @@ namespace shell {
         }
     }
     void Tile_Editor::pick (Vec pos) {
-        if (!in_bounds(pos))
-            return;
-        tile = tile_at(pos);
+        if (in_bounds(pos))
+            tile = tile_at(pos);
+        else if (tilemap->tileset && tilemap->texture
+              && pos.x >= selector_pos.x && pos.x < (selector_pos.x + tilemap->texture->size.x*PX)
+              && pos.y <= selector_pos.y && pos.y > (selector_pos.y - tilemap->texture->size.y*PX)) {
+            uint16 index = pos.x - selector_pos.x
+                         + (pos.y - selector_pos.y) / tilemap->texture->size.y*PX;
+            if (index < tilemap->tileset->tiles.size()) {
+                tile = (tile & 0xc000) | index;
+            }
+        }
     }
     bool Tile_Editor::Listener_button (int btn, int action) {
         if (!tilemap) return false;
@@ -512,7 +518,7 @@ namespace shell {
                 case '/':
                     showing_selector = !showing_selector;
                     if (showing_selector) {
-                        selector_camera.pos = Vec(-10000, -10000);
+                        selector_camera.pos = selector_pos + Vec(10, -7.5);
                         selector_camera.size = Vec(40, 30);
                         selector_camera.activate();
                     }
