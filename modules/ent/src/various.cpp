@@ -21,8 +21,8 @@ namespace ent {
             static bool initted = false;
             if (!initted) {
                 initted = true;
-                bdf = hacc::File("ent/res/various.hacc").data().attr("crate_bdf");
-                texture = hacc::File("ent/res/various.hacc").data().attr("stuff_img").attr("crate");
+                bdf = hacc::File("ent/res/various.hacc").attr("crate_bdf");
+                texture = hacc::File("ent/res/various.hacc").attr("stuff_img").attr("crate");
                 hacc::manage(&bdf);
                 hacc::manage(&texture);
             }

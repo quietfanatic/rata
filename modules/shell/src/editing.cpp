@@ -200,8 +200,8 @@ namespace shell {
     }
 
     Room_Editor::Room_Editor () :
-        res_menu(hacc::File("shell/res/re_menus.hacc").data().attr("res_menu")),
-        room_menu(hacc::File("shell/res/re_menus.hacc").data().attr("room_menu"))
+        res_menu(hacc::File("shell/res/re_menus.hacc").attr("res_menu")),
+        room_menu(hacc::File("shell/res/re_menus.hacc").attr("room_menu"))
     {
         room_editor = this;
     }

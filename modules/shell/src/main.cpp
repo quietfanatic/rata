@@ -64,7 +64,7 @@ int main (int argc, char** argv) {
     auto here = util::my_dir(argc, argv);
     util::chdir(here + "/modules");
 
-    game = main_file.data().attr("game");
+    game = main_file.attr("game");
 
     window->step = step;
     window->render = vis::render;

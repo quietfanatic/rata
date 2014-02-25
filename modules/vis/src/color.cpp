@@ -16,7 +16,7 @@ namespace vis {
 
     static Color_Program* prog = NULL;
     void color_init () {
-        prog = hacc::File("vis/res/color.prog").data().attr("prog");
+        prog = hacc::File("vis/res/color.prog").attr("prog");
         hacc::manage(&prog);
     }
     void color_offset (Vec off) {

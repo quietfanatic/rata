@@ -35,7 +35,7 @@ namespace vis {
     Font* default_font = NULL;
 
     void text_init () {
-        prog = hacc::File("vis/res/text.prog").data().attr("prog");
+        prog = hacc::File("vis/res/text.prog").attr("prog");
         hacc::manage(&prog);
         hacc::manage(&default_font);
     }

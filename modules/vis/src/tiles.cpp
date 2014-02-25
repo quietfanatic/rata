@@ -88,7 +88,7 @@ namespace vis {
     };
     static Tiles_Program* prog = NULL;
     void tiles_init () {
-        prog = hacc::File("vis/res/tiles.prog").data().attr("prog");
+        prog = hacc::File("vis/res/tiles.prog").attr("prog");
         hacc::manage(&prog);
     }
 

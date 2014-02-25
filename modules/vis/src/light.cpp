@@ -142,7 +142,7 @@ namespace vis {
     };
 
     void light_init () {
-        light_program = hacc::File("vis/res/light.prog").data().attr("prog");
+        light_program = hacc::File("vis/res/light.prog").attr("prog");
         hacc::manage(&light_program);
         hacc::manage(&materials);
         diagnose_opengl("after loading light.prog");

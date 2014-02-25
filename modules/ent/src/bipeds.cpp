@@ -226,7 +226,7 @@ namespace ent {
         static bool initted = false;
         if (!initted) {
             initted = true;
-            frock_skin = hacc::File("world/res/frock.hacc").data().attr("skin");
+            frock_skin = hacc::File("world/res/frock.hacc").attr("skin");
             hacc::manage(&frock_skin);
         }
         vis::Skin* skins [2];
