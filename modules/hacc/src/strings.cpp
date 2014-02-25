@@ -82,7 +82,7 @@ namespace hacc {
                 s << d << "~" << std::setfill('0') << std::setw(16) << std::hex << *(uint64*)&d;
                 return s.str();
             }
-            case STRING: return "\"" + escape_string(t.as<String>()) + "\"";
+            case STRING: return escape_ident(t.as<String>());
             case ARRAY: {
                 const Array& a = t.as<const Array&>();
                 if (a.size() == 0) return "[]";
