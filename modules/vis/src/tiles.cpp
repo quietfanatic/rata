@@ -181,7 +181,6 @@ hacc::Special_Filetype _tiles_ft ("tiles",
         for (uint i = 0; i < r.tiles.size(); i++) {
             r.tiles[i] = (s[8 + i*2] << 8) | (s[8 + i*2 + 1]);
         }
-         // TODO: find out why we can't call finish here
         r.finish();
         return hacc::Dynamic(std::move(r));
     },

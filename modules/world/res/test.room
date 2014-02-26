@@ -39,7 +39,6 @@
     } }
     tilemap:{ geo::Tilemap:{
         room:$.room
-        bdf:$("geo/res/tilemap.bdf")
         pos:[
             0~00000000
             0~00000000

@@ -23,6 +23,8 @@ namespace geo {
 
     void Tilemap::set_tiles (vis::Tiles* t) {
         tiles = t;
+        if (bdf)
+            physicalize();
     }
 
     void Tilemap::Resident_emerge () {
@@ -123,9 +125,7 @@ namespace geo {
     void Tilemap::finish () {
         if (!tiles) return;
         set_bdf(tilemap_bdf);
-         // TODO: find out why we can't do this earlier
         physicalize();
-        tiles->finish();
     }
 
     void Tilemap::physicalize () {
