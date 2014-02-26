@@ -16,6 +16,7 @@ namespace geo {
     Tilemap::Tilemap () {
         static bool initted = false;
         if (!initted) {
+            initted = true;
             tilemap_bdf = hacc::File("geo/res/tilemap.bdf").data();
             hacc::manage(&tilemap_bdf);
         }
