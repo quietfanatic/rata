@@ -11,11 +11,6 @@
             [sst "../save/last_stop.hacc"]
         ]]
     }}
-    window:{core::Window:{
-        width: 640
-        height: 480
-        depth: 8
-    }}
     hotkeys:{Hotkeys:[
         [96 [open_console]]  // `
         [80 [pause]]  // P

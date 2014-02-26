@@ -64,15 +64,19 @@ int main (int argc, char** argv) {
     auto here = util::my_dir(argc, argv);
     util::chdir(here + "/modules");
 
-    game = main_file.attr("game");
-
+     // Because OpenGL functions won't work until there's a window,
+     //  we need to open one ASAP.
+    new Window;
+    window->width = 640;
+    window->height = 480;
     window->step = step;
     window->render = vis::render;
     window->before_next_frame([&](){
+        phys::space.start();
+        game = main_file.attr("game");
         game->on_start();
     });
      // Run
-    phys::space.start();
     window->start();
      // After window closes
     if (game->on_exit)
