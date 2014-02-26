@@ -170,8 +170,8 @@ namespace hacc {
         void request_load (File f) {
             if (f.p->state != UNLOADED) return;
             if (auto ext = get_ext(f.p->filename)) {
-                f.p->state = LOAD_FILLING;
-                new Action(FILL, [=](){ load_ext(f, ext); });
+                f.p->state = LOAD_PREPARING;
+                new Action(PREPARE, [=](){ load_ext(f, ext); });
             }
             else {
                 f.p->state = LOAD_PREPARING;
@@ -285,8 +285,8 @@ namespace hacc {
             if (f.p->state != LOADED) return;
             f.p->old_data = std::move(f.p->data);
             if (auto ext = get_ext(f.p->filename)) {
-                f.p->state = RELOAD_FILLING;
-                new Action(FILL, [=](){ reload_ext(f, ext); });
+                f.p->state = RELOAD_PREPARING;
+                new Action(PREPARE, [=](){ reload_ext(f, ext); });
             }
             else {
                 f.p->state = RELOAD_PREPARING;

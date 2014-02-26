@@ -88,6 +88,7 @@ namespace hacc {
 
      // Special rules for files with a specific extension.  For example,
      //  loading a tilemap from a binary file instead of a hacc file.
+     // Loads will happen during the prepare phase.
     struct Special_Filetype {
         std::string extension;
         Func<Dynamic (std::string filename)> load;
