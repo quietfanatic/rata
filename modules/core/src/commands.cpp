@@ -218,6 +218,24 @@ HACCABLE(Command) {
             more.emplace_back(t);
         return Tree(std::move(more));
     });
+    length(value_funcs<size_t>([](const Command& cmd){
+        if (!cmd) return (size_t)0;
+        return 1 + cmd->info->arg_types.size();
+    }, [](Command& cmd, size_t size){
+        throw X::Logic_Error("Cannot set length of Command because quietfanatic is a bad hacker.");
+    }));
+    elems([](Command& cmd, size_t i){
+        if (!cmd) throw X::Out_Of_Range(&cmd, i, 0);
+        if (i == 0) {
+             // Returning a reference to a shared string to keep hacc from
+             //  crashing, even though that string must not be modified.
+             // This is going to get me into trouble I know it.
+            return Reference(&cmd->info->name);
+        }
+        else {
+            return Reference(Type(typeid(*cmd)), (void*)&*cmd).elem(i - 1);
+        }
+    });
     prepare([](Command& cmd, Tree tree){
         auto& more = tree.as<const Array&>();
         if (more.size() == 0) {
