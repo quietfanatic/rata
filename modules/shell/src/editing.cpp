@@ -735,9 +735,16 @@ New_Command _re_start_te_cmd ("re_start_te", "Start tilemap editor from room edi
 
 void _texture_test (Texture* tex, uint layer) {
     if (!texture_tester) return;
-    texture_tester->tex = tex;
-    texture_tester->layer = layer;
-    texture_tester->activate();
+    if (texture_tester->active
+     && texture_tester->tex == tex
+     && texture_tester->layer == layer) {
+        texture_tester->deactivate();
+    }
+    else {
+        texture_tester->tex = tex;
+        texture_tester->layer = layer;
+        texture_tester->activate();
+    }
 }
 New_Command _texture_test_cmd ("texture_test", "Show a texture on the given-numbered layer.", 2, _texture_test);
 
