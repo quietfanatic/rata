@@ -129,12 +129,10 @@ namespace core {
                  // Run queued operations
                 if (!pending_ops.empty()) {
                     try {
-                        hacc::file_transaction([this](){
-                             // Allow ops to be expanded while executing
-                            for (size_t i = 0; i < pending_ops.size(); i++) {
-                                pending_ops[i]();
-                            }
-                        });
+                         // Allow ops to be expanded while executing
+                        for (size_t i = 0; i < pending_ops.size(); i++) {
+                            pending_ops[i]();
+                        }
                     } catch (std::exception& e) {
                         print_to_console("Exception: " + std::string(e.what()) + "\n");
                     }
@@ -293,11 +291,13 @@ New_Command _save_cmd ("save", "Save the file object with the given filename.", 
 void _reload (std::string filename) {
     if (filename.empty()) {
         window->before_next_frame([](){
-            for (auto f : hacc::loaded_files()) {
-                if (f.filename().find("/res/") != std::string::npos) {
-                    hacc::reload(f);
+            hacc::file_transaction([](){
+                for (auto f : hacc::loaded_files()) {
+                    if (f.filename().find("/res/") != std::string::npos) {
+                        hacc::reload(f);
+                    }
                 }
-            }
+            });
         });
     }
     else {
