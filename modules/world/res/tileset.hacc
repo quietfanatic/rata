@@ -1,0 +1,11 @@
+{hacc::Document:{
+    img:{vis::Image:{
+        filename:"world/res/tiles.png"
+        textures: [
+            { name:tiles offset:[16 192] size:[256 272] }
+        ]
+        palettes:[
+            { offset:[279 456] length:0 vertical:true mask:0x00ffffff }
+        ]
+    }}
+}}

@@ -30,6 +30,7 @@
         [39 [global_lighting [0 0 0] [+0.1 +0.1 +0.1] true]]  // '
         [92 [light_debug]]  // \
         [82 [reload]]  // R
+        [84 [texture_test $("world/res/tileset.hacc").img.tiles 0]]  // T
     ]}
     console:{shell::Console:{ }}
     room_editor:{shell::Room_Editor:{ }}
