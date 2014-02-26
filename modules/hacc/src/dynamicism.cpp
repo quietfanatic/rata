@@ -83,8 +83,10 @@ namespace hacc {
     std::string Pointer::show () const {
         std::ostringstream ss;
         ss << "Pointer(" << type.name() << " at " << address;
-        if (auto path = address_to_path(*this)) {
-            ss << " " << path_to_string(path);
+        if (address) {
+            if (auto path = address_to_path(*this)) {
+                ss << " " << path_to_string(path);
+            }
         }
         ss << ")";
         return ss.str();
