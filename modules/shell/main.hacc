@@ -34,4 +34,5 @@
     console:{shell::Console:{ }}
     room_editor:{shell::Room_Editor:{ }}
     tile_editor:{shell::Tile_Editor:{ }}
+    texture_tester:{shell::Texture_Tester:{ }}
 }}

@@ -82,6 +82,26 @@ namespace shell {
     };
     extern Tile_Editor* tile_editor;
 
+    struct Texture_Tester : vis::Drawn<vis::Map>, vis::Drawn<vis::Sprites>, vis::Drawn<vis::Overlay>, core::Listener {
+        vis::Texture* tex = NULL;
+        Vec pos = Vec(10000, 10000);
+        uint layer = 1;
+        geo::Free_Camera camera;
+
+        Texture_Tester ();
+        ~Texture_Tester ();
+
+        void activate ();
+        void deactivate ();
+
+        void Drawn_draw (vis::Map) override;
+        void Drawn_draw (vis::Sprites) override;
+        void Drawn_draw (vis::Overlay) override;
+
+        bool Listener_key (int, int) override;
+    };
+    extern Texture_Tester* texture_tester;
+
 }
 
 #endif

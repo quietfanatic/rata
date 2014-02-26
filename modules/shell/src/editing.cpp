@@ -576,6 +576,62 @@ namespace shell {
         return false;
     }
 
+    Texture_Tester* texture_tester;
+
+    Texture_Tester::Texture_Tester () {
+        texture_tester = this;
+        static bool initted = false;
+        if (!initted) {
+            initted = true;
+            hacc::manage(&texture_tester);
+        }
+    }
+    Texture_Tester::~Texture_Tester () {
+        if (texture_tester == this)
+            texture_tester = NULL;
+    }
+
+    void Texture_Tester::activate () {
+        deactivate();
+        switch (layer) {
+            case 0: Drawn<vis::Map>::appear(); break;
+            case 1: Drawn<vis::Sprites>::appear(); break;
+            case 3: Drawn<vis::Overlay>::appear(); break;
+            default: return;
+        }
+        Listener::activate();
+        camera.pos = pos + Vec(10, 7.5);
+        camera.activate();
+    }
+    void Texture_Tester::deactivate () {
+        Drawn<vis::Map>::disappear();
+        Drawn<vis::Sprites>::disappear();
+        Drawn<vis::Overlay>::disappear();
+        Listener::deactivate();
+        camera.deactivate();
+    }
+
+    void Texture_Tester::Drawn_draw (vis::Map) {
+        if (!tex) return;
+        draw_texture(tex, Rect(pos, pos + tex->size*PX));
+    }
+    void Texture_Tester::Drawn_draw (vis::Sprites) {
+        if (!tex) return;
+        draw_texture(tex, Rect(pos, pos + tex->size*PX));
+    }
+    void Texture_Tester::Drawn_draw (vis::Overlay) {
+        if (!tex) return;
+        draw_texture(tex, Rect(pos, pos + tex->size*PX));
+    }
+
+    bool Texture_Tester::Listener_key (int code, int action) {
+        if (action == GLFW_PRESS && code == GLFW_KEY_ESC) {
+            deactivate();
+            return true;
+        }
+        return false;
+    }
+
 } using namespace shell;
 
 HACCABLE(Room_Editor) {
@@ -593,6 +649,12 @@ HACCABLE(Type_Specific_Menu) {
 
 HACCABLE(Tile_Editor) {
     name("shell::Tile_Editor");
+}
+
+HACCABLE(Texture_Tester) {
+    name("shell::Texture_Tester");
+    attr("tex", member(&Texture_Tester::tex).optional());
+    attr("layer", member(&Texture_Tester::layer).optional());
 }
 
 namespace {
@@ -670,5 +732,13 @@ void _re_start_te () {
     }
 }
 New_Command _re_start_te_cmd ("re_start_te", "Start tilemap editor from room editor.", 0, _re_start_te);
+
+void _texture_test (Texture* tex, uint layer) {
+    if (!texture_tester) return;
+    texture_tester->tex = tex;
+    texture_tester->layer = layer;
+    texture_tester->activate();
+}
+New_Command _texture_test_cmd ("texture_test", "Show a texture on the given-numbered layer.", 2, _texture_test);
 
 }
