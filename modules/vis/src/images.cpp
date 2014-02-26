@@ -225,6 +225,7 @@ namespace vis {
         prog = prog_doc.attr("prog");
         plain_frame = prog_doc.attr("plain_layout").attr("ALL");
         hacc::manage(&prog);
+        hacc::manage(&plain_frame);
     }
 
     void set_draw_phase (bool phase) {
