@@ -1,6 +1,5 @@
 {hacc::Document:{
     def:{ent::BipedDef:{
-        bdf:$("ent/res/small.hacc").bdf
         fixdefs: $("ent/res/small.hacc").fixdefs
         stats: $.stats
         skel: $("ent/res/small.hacc").skel

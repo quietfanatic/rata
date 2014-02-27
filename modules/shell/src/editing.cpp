@@ -494,8 +494,7 @@ namespace shell {
             for (auto b = phys::space.b2world->GetBodyList(); b; b = b->GetNext()) {
                 if (auto tm = dynamic_cast<Tilemap*>((phys::Object*)b->GetUserData())) {
                     if (tm->tiles == tilemap->tiles) {
-                        tm->tiles = tilemap->tiles;
-                        tm->finish();
+                        tm->set_tiles(tilemap->tiles);
                     }
                 }
             }

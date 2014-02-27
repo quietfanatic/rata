@@ -10,7 +10,6 @@ namespace ent {
     void Biped::set_def (BipedDef* _def) {
         def = _def;
         stats = *def->stats;
-        if (finished) Object::finish();
     }
 
     void Biped::Controllable_buttons (ButtonBits bits) {
@@ -26,10 +25,6 @@ namespace ent {
     }
     Vec Biped::Controllable_get_focus () {
         return focus + pos() + def->focus_offset;
-    }
-
-    phys::BodyDef* Biped::Object_def () {
-        return def ? def->bdf : NULL;
     }
 
      // Change some kinds of movement state
@@ -277,7 +272,6 @@ HACCABLE(BipedStats) {
 
 HACCABLE(BipedDef) {
     name("ent::BipedDef");
-    attr("bdf", member(&BipedDef::bdf));
     attr("fixdefs", member(&BipedDef::fixdefs));
     attr("stats", member(&BipedDef::stats));
     attr("skel", member(&BipedDef::skel));
