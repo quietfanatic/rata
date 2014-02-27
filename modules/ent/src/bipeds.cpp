@@ -10,6 +10,7 @@ namespace ent {
     void Biped::set_def (BipedDef* _def) {
         def = _def;
         stats = *def->stats;
+        if (finished) Object::finish();
     }
 
     void Biped::Controllable_buttons (ButtonBits bits) {
