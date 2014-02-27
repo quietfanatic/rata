@@ -4,10 +4,10 @@
         [0x3f3f3fff 0x2f2f2fff 0x2f2f2fff 0x00000000]  // 0. Metallic grey
         [0x7f7f7fff 0x00000000 0x00000000 0x00000000]  // 1. Default background color
         [0xb6a491ff 0x231e18ff 0x00000000 0x00000000]  // 2. Light skin
-        [0x363636ff 0x0b0b0bff 0x00000000 0x00000000]  // 3. Dark grey hair
+        [0x363636ff 0x181818ff 0x00000000 0x00000000]  // 3. Dark grey hair
         [0x00000000 0x00000000 0x00000000 0x7b0a25ff]  // 4. Purple eyes, pupil
         [0x00000000 0x00000000 0x00000000 0x802c40ff]  // 5. Purple eyes, iris
-        [0xd7d7d7ff 0x191919ff 0x00000000 0x00000000]  // 6. White fabric
+        [0xc8c8c8ff 0x282828ff 0x00000000 0x00000000]  // 6. White fabric
         [0x634209ff 0x634209ff 0x00000000 0x00000000]  // 7. Wood, a little orangeish
         [0x383d28ff 0x383d28ff 0x00000000 0x00000000]  // 8. Greenish bricks
     ]}
