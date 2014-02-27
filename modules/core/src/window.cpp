@@ -191,6 +191,7 @@ namespace core {
                  // Run step and render
                 if (step) step();
                 frames_simulated++;
+                logging_frame = frames_simulated;
                  // Do timing around the render step.
                  // TODO: this is not quite optimal.
                 lag -= 1/fps;
