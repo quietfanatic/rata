@@ -93,14 +93,14 @@ namespace phys {
         for (b2Body* b2b = b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
             if (Object* obj = (Object*)b2b->GetUserData())
                 if (b2b->IsActive())
-                    obj->before_move();
+                    obj->Object_before_move();
         }
         b2world->Step(1/60.0, 10, 10);
         for (b2Body* b2b = b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
             if (Object* obj = (Object*)b2b->GetUserData()) {
                 if (b2b->IsActive())
-                    obj->after_move();
-                else obj->while_intangible();
+                    obj->Object_after_move();
+                else obj->Object_while_intangible();
             }
         }
     }

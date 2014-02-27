@@ -92,11 +92,11 @@ namespace phys {
         void dematerialize ();
 
          // Called every frame before space simulation, only if tangible
-        virtual void before_move () { }
+        virtual void Object_before_move () { }
          // Called every frame after space simulation, only if tangible
-        virtual void after_move () { }
+        virtual void Object_after_move () { }
          // Called every frame after space simulation, only if not tangible
-        virtual void while_intangible () { }
+        virtual void Object_while_intangible () { }
 
         Object ();
         virtual ~Object ();

@@ -59,8 +59,8 @@ namespace ent {
         uint8 jump_timer = 0;  // counts up until stats.jump_delay
 
         phys::BodyDef* Object_def () override;
-        void before_move () override;  // Object
-        void after_move () override;
+        void Object_before_move () override;
+        void Object_after_move () override;
         float Grounded_velocity () override;
         float Grounded_friction () override;
 

@@ -34,7 +34,7 @@ namespace ent {
 
      // Change some kinds of movement state
      // Do not change ground velocity, but do change air velocity
-    void Biped::before_move () {
+    void Biped::Object_before_move () {
         int8 mdir = move_direction();
          // Turn around
         if (!crawling || !ceiling_low) {
@@ -139,7 +139,7 @@ namespace ent {
         else return stats.stop_friction;
     }
      // Ensure we're in the right room and also calculate walk animation.
-    void Biped::after_move () {
+    void Biped::Object_after_move () {
          // Clear input before next frame
         buttons = ButtonBits(0);
         reroom(pos());
