@@ -73,7 +73,7 @@ that module's directory, if it exists.
 
  - ☑ Add model-internal shadows to lighting shader
  - ☑ Allow model rendering for multiple interleaved skins
- - ☐ Tilemap editor
+ - ☑ Tilemap editor
  - ☐ Convert graphics to material-lighting format
 
 ###### Milestone 3
