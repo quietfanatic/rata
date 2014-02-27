@@ -98,7 +98,8 @@ namespace shell {
         Vec world_pos = camera->window_to_world(x, y);
         if (editing_pts) {
             if (dragging_pt >= 0) {
-                selected->Resident_set_pt(dragging_pt, world_pos - drag_offset);
+                Vec r_pos = selected->Resident_get_pos();
+                selected->Resident_set_pt(dragging_pt, world_pos - r_pos - drag_offset);
             }
         }
         else {
@@ -169,20 +170,22 @@ namespace shell {
                     size_t n_pts = selected->Resident_n_pts();
                     Vec r_pos = selected->Resident_get_pos();
                     float lowest_pt_t = INF;
+                    Vec lowest_pt_pos = Vec(0, 0);
                     int lowest_pt = -1;
                     for (size_t i = 0; i < n_pts; i++) {
-                        const Rect& boundary = selected->Resident_get_pt(i)
-                                             + r_pos
+                        Vec pos = selected->Resident_get_pt(i);
+                        const Rect& boundary = pos + r_pos
                                              + Rect(-0.25, -0.25, 0.25, 0.25);
                         if (boundary.covers(realpos)) {
                             if (boundary.t < lowest_pt_t) {
                                 lowest_pt_t = boundary.t;
+                                lowest_pt_pos = pos;
                                 lowest_pt = i;
                             }
                         }
                     }
                     dragging_pt = lowest_pt;
-                    drag_offset = realpos - r_pos;
+                    drag_offset = realpos - r_pos - lowest_pt_pos;
                 }
             }
             else {
