@@ -25,9 +25,11 @@
         verts:[[-1 -1] [1 -1] [1 1] [-1 1]]
     }}
 
-    crate_bdf: {phys::Object_Def:{
+    crate_def: {ent::Inert_Def:{
         type:dynamic
         fixtures:[$.crate_fix]
+        texture:$.stuff_img.crate
+        boundary:[-0.5 0 0.5 1]
     }}
     crate_fix: {phys::FixtureDef:{
         shape:$.crate_shape.b2Shape

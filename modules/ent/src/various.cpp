@@ -6,27 +6,23 @@
 
 using namespace util;
 using namespace vis;
+using namespace phys;
 
 namespace ent {
 
-    struct Crate : ROD<Sprites> {
-        static Texture* texture;
+    struct Inert_Def : Object_Def {
+        Texture* texture;
+        Rect boundary;
+    };
+
+    struct Inert : ROD<Sprites> {
 
         void Drawn_draw (Sprites) override {
-            draw_texture(texture, pos() + Rect(-0.5, 0, 0.5, 1));
+            auto def = static_cast<Inert_Def*>(bdf);
+            draw_texture(def->texture, pos() + def->boundary);
         }
 
-        Crate () {
-            static bool initted = false;
-            if (!initted) {
-                initted = true;
-                texture = hacc::File("ent/res/various.hacc").attr("stuff_img").attr("crate");
-                hacc::manage(&bdf);
-                hacc::manage(&texture);
-            }
-        }
     };
-    Texture* Crate::texture = NULL;
 
     struct Light : geo::Resident, Drawn<Lights> {
         Vec pos;
@@ -54,8 +50,15 @@ namespace ent {
 
 } using namespace ent;
 
-HACCABLE(Crate) {
-    name("ent::Crate");
+HACCABLE(Inert_Def) {
+    name("ent::Inert_Def");
+    attr("Object_Def", base<Object_Def>().collapse());
+    attr("texture", member(&Inert_Def::texture));
+    attr("boundary", member(&Inert_Def::boundary));
+}
+
+HACCABLE(Inert) {
+    name("ent::Inert");
     attr("ROD", base<ROD<Sprites>>().collapse());
 }
 
