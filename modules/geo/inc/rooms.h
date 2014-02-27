@@ -51,13 +51,15 @@ namespace geo {
         virtual void Resident_emerge () = 0;
          // Called when the room is unloaded
         virtual void Resident_reclude () = 0;
+         // These are primarily for the editor
         virtual Vec Resident_get_pos () { return Vec(NAN, NAN); }
         virtual void Resident_set_pos (Vec p) { }
-         // Primarily for menus, but also the editor
+        virtual size_t Resident_n_pts () { return 0; }
+         // These should be relative to get_pos
+        virtual Vec Resident_get_pt (size_t i) { return Vec(NAN, NAN); }
+        virtual void Resident_set_pt (size_t i, Vec) { }
         virtual Rect Resident_boundary () { return Rect(-0.25, -0.25, 0.25, 0.25); }
-         // Just for menus
-        virtual void Resident_hover (Vec) { }
-        virtual void Resident_click (Vec) { }
+
         virtual ~Resident () { }
         void finish ();
          // Checks if the agent has moved to a different room.  If the agent

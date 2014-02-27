@@ -28,10 +28,23 @@ namespace shell {
         return hacc::Pointer(hacc::Type(typeid(*res)), derived);
     }
 
-     // Draw outlines around all residents
     void Room_Editor::Drawn_draw (Overlay) {
         size_t unpositioned_residents = 0;
-        for (auto& room : all_rooms()) {
+        if (editing_pts) {
+            if (!selected) return;
+            Vec r_pos = selected->Resident_get_pos();
+            auto n_pts = selected->Resident_n_pts();
+            for (size_t i = 0; i < n_pts; i++) {
+                Vec pos = r_pos + selected->Resident_get_pt(i);
+                if (pos.is_defined()) {
+                    color_offset(pos);
+                    draw_color(i == dragging_pt ? 0xff0000ff : 0xffff00ff);
+                    draw_rect(Rect(-0.5, -0.5, 0.5, 0.5));
+                }
+            }
+        }
+         // Draw outlines around all residents
+        else for (auto& room : all_rooms()) {
             color_offset(Vec(0, 0));
             draw_color(0xff00ffff);
             draw_rect(room.boundary);
@@ -83,101 +96,130 @@ namespace shell {
      // Process cursor position; hover, drag
     void Room_Editor::Listener_cursor_pos (int x, int y) {
         Vec world_pos = camera->window_to_world(x, y);
-        if (clicking) {
-            if (selected) {
-                if ((drag_origin - world_pos).mag2() > 0.2)
-                    dragging = true;
-                if (dragging) {
-                    selected->Resident_set_pos(world_pos - drag_offset);
-                }
+        if (editing_pts) {
+            if (dragging_pt) {
+                selected->Resident_set_pt(dragging_pt, world_pos);
             }
         }
         else {
-             // Prefer residents with lower tops
-            float lowest_res_t = INF;
-            Resident* lowest_res = NULL;
-            float lowest_room_t = INF;
-            Room* lowest_room = NULL;
-            size_t unpositioned_residents = 0;
-            for (auto& room : all_rooms()) {
-                if (room.observer_count) {
-                    if (room.boundary.covers(world_pos)) {
-                        if (room.boundary.t < lowest_room_t) {
-                            lowest_room_t = room.boundary.t;
-                            lowest_room = &room;
-                        }
+            if (clicking) {
+                if (selected) {
+                    if ((drag_origin - world_pos).mag2() > 0.2)
+                        dragging = true;
+                    if (dragging) {
+                        selected->Resident_set_pos(world_pos - drag_offset);
                     }
-                    for (auto& res : room.residents) {
-                        Vec pos = res.Resident_get_pos();
-                        const Rect& boundary = res.Resident_boundary();
-                        if (!pos.is_defined() || !boundary.is_defined()) {
-                            pos = room.boundary.lt() + Vec(0.5, -0.5);
-                            pos.x += unpositioned_residents++;
+                }
+            }
+            else {
+                 // Prefer residents with lower tops
+                float lowest_res_t = INF;
+                Resident* lowest_res = NULL;
+                float lowest_room_t = INF;
+                Room* lowest_room = NULL;
+                size_t unpositioned_residents = 0;
+                for (auto& room : all_rooms()) {
+                    if (room.observer_count) {
+                        if (room.boundary.covers(world_pos)) {
+                            if (room.boundary.t < lowest_room_t) {
+                                lowest_room_t = room.boundary.t;
+                                lowest_room = &room;
+                            }
                         }
-                        if (boundary.covers(world_pos - pos)) {
-                            if (boundary.t < lowest_res_t) {
-                                lowest_res_t = boundary.t;
-                                lowest_res = &res;
+                        for (auto& res : room.residents) {
+                            Vec pos = res.Resident_get_pos();
+                            const Rect& boundary = res.Resident_boundary();
+                            if (!pos.is_defined() || !boundary.is_defined()) {
+                                pos = room.boundary.lt() + Vec(0.5, -0.5);
+                                pos.x += unpositioned_residents++;
+                            }
+                            if (boundary.covers(world_pos - pos)) {
+                                if (boundary.t < lowest_res_t) {
+                                    lowest_res_t = boundary.t;
+                                    lowest_res = &res;
+                                }
                             }
                         }
                     }
                 }
-            }
-             // Set status message about hovered object
-            if (lowest_res) {
-                if (lowest_res != hovering) {
-                    auto realp = res_realp(lowest_res);
-                    auto path = hacc::address_to_path(realp);
-                    std::ostringstream ss;
-                    ss << realp.address << " " << hacc::path_to_string(path);
-                    status = ss.str();
+                 // Set status message about hovered object
+                if (lowest_res) {
+                    if (lowest_res != hovering) {
+                        auto realp = res_realp(lowest_res);
+                        auto path = hacc::address_to_path(realp);
+                        std::ostringstream ss;
+                        ss << realp.address << " " << hacc::path_to_string(path);
+                        status = ss.str();
+                    }
                 }
+                else {
+                    status = "";
+                }
+                hovering = lowest_res;
+                hovering_room = lowest_room;
             }
-            else {
-                status = "";
-            }
-            hovering = lowest_res;
-            hovering_room = lowest_room;
         }
     }
      // Clicking behavior
     bool Room_Editor::Listener_button (int code, int action) {
         if (action == GLFW_PRESS) {
             Vec realpos = camera->window_to_world(window->cursor_x, window->cursor_y);
-            dragging = NULL;
-             // Just upgrade hovering to selected
-            selected = hovering;
-            selected_room = hovering_room;
-            if (selected) {
-                Vec pos = selected->Resident_get_pos();
+            if (editing_pts) {
                 if (code == GLFW_MOUSE_BUTTON_LEFT) {
-                    drag_origin = pos;
-                    drag_offset = realpos - pos;
-                    logger.log("Selected " + hacc::Reference(res_realp(selected)).show());
-                    clicking = true;
-                }
-                else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
-                    if (action == GLFW_PRESS) {
-                        selected_type_name = res_realp(selected).type.name();
-                        menu_world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
-                        Vec area = camera->window_to_dev(window->width, 0);
-                        res_menu->size = res_menu->root->Menu_Item_size(area);
-                        Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
-                        res_menu->pos = pos - Vec(-1*PX, res_menu->size.y + 1*PX);
-                        res_menu->activate();
+                    size_t n_pts = selected->Resident_n_pts();
+                    Vec r_pos = selected->Resident_get_pos();
+                    float lowest_pt_t = INF;
+                    int lowest_pt = -1;
+                    for (size_t i = 0; i < n_pts; i++) {
+                        const Rect& boundary = selected->Resident_get_pt(i)
+                                             + r_pos
+                                             + Rect(-0.5, -0.5, 0.5, 0.5);
+                        if (boundary.covers(realpos)) {
+                            if (boundary.t < lowest_pt_t) {
+                                lowest_pt_t = boundary.t;
+                                lowest_pt = i;
+                            }
+                        }
                     }
+                    dragging_pt = lowest_pt;
                 }
-                return true;
             }
-            else if (selected_room) {
-                if (code == GLFW_MOUSE_BUTTON_RIGHT) {
-                    if (action == GLFW_PRESS) {
-                        menu_world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
-                        Vec area = camera->window_to_dev(window->width, 0);
-                        room_menu->size = room_menu->root->Menu_Item_size(area);
-                        Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
-                        room_menu->pos = pos - Vec(-1*PX, room_menu->size.y + 1*PX);
-                        room_menu->activate();
+            else {
+                 // Just upgrade hovering to selected
+                dragging = NULL;
+                selected = hovering;
+                selected_room = hovering_room;
+                if (selected) {
+                    Vec pos = selected->Resident_get_pos();
+                    if (code == GLFW_MOUSE_BUTTON_LEFT) {
+                        drag_origin = pos;
+                        drag_offset = realpos - pos;
+                        logger.log("Selected " + hacc::Reference(res_realp(selected)).show());
+                        clicking = true;
+                    }
+                    else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
+                        if (action == GLFW_PRESS) {
+                            selected_type_name = res_realp(selected).type.name();
+                            menu_world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
+                            Vec area = camera->window_to_dev(window->width, 0);
+                            res_menu->size = res_menu->root->Menu_Item_size(area);
+                            Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
+                            res_menu->pos = pos - Vec(-1*PX, res_menu->size.y + 1*PX);
+                            res_menu->activate();
+                        }
+                    }
+                    return true;
+                }
+                else if (selected_room) {
+                    if (code == GLFW_MOUSE_BUTTON_RIGHT) {
+                        if (action == GLFW_PRESS) {
+                            menu_world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
+                            Vec area = camera->window_to_dev(window->width, 0);
+                            room_menu->size = room_menu->root->Menu_Item_size(area);
+                            Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
+                            room_menu->pos = pos - Vec(-1*PX, room_menu->size.y + 1*PX);
+                            room_menu->activate();
+                        }
                     }
                 }
             }
@@ -186,6 +228,7 @@ namespace shell {
             if (code == GLFW_MOUSE_BUTTON_LEFT) {
                 dragging = false;
                 clicking = false;
+                dragging_pt = -1;
             }
             return true;
         }
@@ -193,7 +236,10 @@ namespace shell {
     }
     bool Room_Editor::Listener_key (int code, int action) {
         if (action == GLFW_PRESS && code == GLFW_KEY_ESC) {
-            deactivate();
+            if (editing_pts)
+                editing_pts = false;
+            else
+                deactivate();
             return true;
         }
         return false;
@@ -748,5 +794,11 @@ void _texture_test (Texture* tex, uint layer) {
     }
 }
 New_Command _texture_test_cmd ("texture_test", "Show a texture on the given-numbered layer.", 2, _texture_test);
+
+void _re_edit_pts () {
+    if (!room_editor || !room_editor->selected) return;
+    room_editor->editing_pts = !room_editor->editing_pts;
+}
+New_Command _re_edit_pts_cmd ("re_edit_pts", "Edit object-specific pts.", 0, _re_edit_pts);
 
 }

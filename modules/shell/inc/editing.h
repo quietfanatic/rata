@@ -24,12 +24,15 @@ namespace shell {
         std::string selected_type_name;
         geo::Room* hovering_room = NULL;
         geo::Room* selected_room = NULL;
+         // Modes
+        bool editing_pts = false;
          // Cursor control
         bool clicking = false;
         bool dragging = false;
         Vec drag_origin;
         Vec drag_offset;
         Vec menu_world_pos;
+        int dragging_pt = -1;
          // Drawing
         std::string status;
 
