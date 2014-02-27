@@ -22,12 +22,6 @@ namespace geo {
         }
     }
 
-    void Tilemap::set_tiles (vis::Tiles* t) {
-        tiles = t;
-        if (bdf)
-            physicalize();
-    }
-
     void Tilemap::Resident_emerge () {
         materialize();
         appear();
@@ -35,6 +29,10 @@ namespace geo {
     void Tilemap::Resident_reclude () {
         dematerialize();
         disappear();
+    }
+
+    phys::BodyDef* Tilemap::Object_def () {
+        return tilemap_bdf;
     }
 
     void Tilemap::Drawn_draw (vis::Map) {
@@ -124,12 +122,13 @@ namespace geo {
     }
 
     void Tilemap::finish () {
-        if (!tiles) return;
-        set_bdf(tilemap_bdf);
+        Object::finish();
+        Resident::finish();
         physicalize();
     }
 
     void Tilemap::physicalize () {
+        if (!tiles) return;
         auto width = tiles->width;
         auto height = tiles->height;
         while (b2Fixture* fix = b2body->GetFixtureList())
@@ -208,11 +207,8 @@ HACCABLE(Tilemap) {
     attr("Object", base<phys::Object>().optional().collapse());
     attr("tileset", member(&Tilemap::tileset));
     attr("texture", member(&Tilemap::texture));
-    attr("tiles", value_methods(&Tilemap::get_tiles, &Tilemap::set_tiles));
-    finish([](Tilemap& t){
-        t.Resident::finish();
-        t.finish();
-    });
+    attr("tiles", member(&Tilemap::tiles));
+    finish(&Tilemap::finish);
 }
 
 

@@ -111,24 +111,21 @@ namespace phys {
     Space::~Space () { stop(); }
 
      // Objects
-    void Object::set_bdf (BodyDef* new_bdf) {
-        if (new_bdf != bdf) {
-            b2body->SetType(new_bdf->type);
-            b2body->SetLinearDamping(new_bdf->damping);
-            b2body->SetGravityScale(new_bdf->gravity_scale);
-            b2MassData md {new_bdf->mass, Vec(0, 0), 0};
+    void Object::finish () {
+        if (auto def = Object_def()) {
+            b2body->SetType(def->type);
+            b2body->SetLinearDamping(def->damping);
+            b2body->SetGravityScale(def->gravity_scale);
+            b2MassData md {def->mass, Vec(0, 0), 0};
             b2body->SetMassData(&md);
              // Remove old fixtures
-            if (bdf) {
-                for (auto fix : bdf->fixtures) {
-                    b2body->DestroyFixture(get_fixture(fix));
-                }
+            while (auto fix = b2body->GetFixtureList()) {
+                b2body->DestroyFixture(fix);
             }
              // Add new fixtures
-            for (auto fix : new_bdf->fixtures) {
+            for (auto fix : def->fixtures) {
                 add_fixture(fix);
             }
-            bdf = new_bdf;
         }
     }
     b2Fixture* Object::add_fixture (FixtureDef* fdf) {
@@ -384,9 +381,9 @@ HACCABLE(BodyDef) {
 
 HACCABLE(Object) {
     name("phys::Object");
-    attr("bdf", value_methods(&Object::get_bdf, &Object::set_bdf).optional());
     attr("pos", value_methods(&Object::pos, &Object::set_pos).optional());
     attr("vel", value_methods(&Object::vel, &Object::set_vel).optional());
+    finish(&Object::finish);
 }
 
 HACCABLE(Phys_Debug_Layer) {

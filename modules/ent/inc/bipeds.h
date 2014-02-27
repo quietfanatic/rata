@@ -57,6 +57,8 @@ namespace ent {
         bool crawling = false;
         bool ceiling_low = false;  // Established by a sensor
         uint8 jump_timer = 0;  // counts up until stats.jump_delay
+
+        phys::BodyDef* Object_def () override;
         void before_move () override;  // Object
         void after_move () override;
         float Grounded_velocity () override;
@@ -104,6 +106,7 @@ namespace ent {
     };
 
     struct BipedDef {
+        phys::BodyDef* bdf;
         BipedFixdefs* fixdefs;
         BipedStats* stats;  // Initial stats only.
         BipedPoses* poses;

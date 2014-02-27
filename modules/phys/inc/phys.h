@@ -61,11 +61,10 @@ namespace phys {
      // The dynamic thing
      // Every class that wants to have a physical presence should inherit from this.
     struct Object {
-        BodyDef* bdf = NULL;
         b2Body* b2body = NULL;
 
-        BodyDef* get_bdf () const { return bdf; }
-        void set_bdf (BodyDef*);
+         // This will not be called at the finish phase.
+        virtual BodyDef* Object_def () = 0;
 
          // A paltry amount of wrapper methods.
         Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }
@@ -103,6 +102,8 @@ namespace phys {
         virtual ~Object ();
         Object (const Object&) = delete;
         Object& operator = (const Object&) = delete;
+
+        void finish ();
     };
 
      // Collision handling is done through registered collision rules.

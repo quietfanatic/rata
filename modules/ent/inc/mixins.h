@@ -13,6 +13,11 @@ namespace ent {
         void Resident_set_pos (util::Vec p) override { Object::set_pos(p); Object::set_vel(util::Vec(0, 0)); }
         void Resident_emerge () override { materialize(); vis::Drawn<Layer>::appear(); }
         void Resident_reclude () override { vis::Drawn<Layer>::disappear(); dematerialize(); }
+        void finish () {
+             // This order is probably important
+            Object::finish();
+            Resident::finish();
+        }
     };
 
 }
