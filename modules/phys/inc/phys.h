@@ -49,6 +49,7 @@ namespace phys {
         uint64 coll_b = 0;
         Filter filter;  // Just the initial filter
     };
+
      // Stores properties of motion, inertia, and a list of fixtures.
      // Inherit from this to store more static properties of your objects.
     struct Object_Def {
@@ -65,8 +66,8 @@ namespace phys {
         Object_Def* bdf = NULL;
         b2Body* b2body = NULL;
 
-        Object_Def* get_bdf () const { return bdf; }
-        void set_bdf (Object_Def*);
+         // To make Haccable happy
+        Object_Def* get_def () const { return bdf; }
 
          // A paltry amount of wrapper methods.
         Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }
@@ -93,6 +94,8 @@ namespace phys {
         void materialize ();
         void dematerialize ();
 
+         // Make your static properties inherit from Object_Def and override this
+        virtual void Object_set_def (Object_Def* def);
          // Called every frame before space simulation, only if tangible
         virtual void Object_before_move () { }
          // Called every frame after space simulation, only if tangible

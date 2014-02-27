@@ -65,7 +65,9 @@
                             }}
                             {shell::Text_Button:{
                                 text:"crate"
-                                on_click:[re_new_actor ent::Crate { }]
+                                on_click:[re_new_actor ent::Crate {
+                                    bdf:$("ent/res/various.hacc").crate_bdf
+                                }]
                             }}
                         ]
                     }}

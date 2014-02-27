@@ -125,7 +125,6 @@ namespace geo {
 
     void Tilemap::finish () {
         if (!tiles) return;
-        set_bdf(tilemap_bdf);
         physicalize();
     }
 

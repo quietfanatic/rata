@@ -111,7 +111,7 @@ namespace phys {
     Space::~Space () { stop(); }
 
      // Objects
-    void Object::set_bdf (Object_Def* new_bdf) {
+    void Object::Object_set_def (Object_Def* new_bdf) {
         if (new_bdf != bdf) {
             b2body->SetType(new_bdf->type);
             b2body->SetLinearDamping(new_bdf->damping);
@@ -384,7 +384,7 @@ HACCABLE(Object_Def) {
 
 HACCABLE(Object) {
     name("phys::Object");
-    attr("bdf", value_methods(&Object::get_bdf, &Object::set_bdf).optional());
+    attr("bdf", value_methods(&Object::get_def, &Object::Object_set_def).optional());
     attr("pos", value_methods(&Object::pos, &Object::set_pos).optional());
     attr("vel", value_methods(&Object::vel, &Object::set_vel).optional());
 }

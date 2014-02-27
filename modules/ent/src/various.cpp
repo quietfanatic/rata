@@ -10,7 +10,6 @@ using namespace vis;
 namespace ent {
 
     struct Crate : ROD<Sprites> {
-        static phys::Object_Def* bdf;
         static Texture* texture;
 
         void Drawn_draw (Sprites) override {
@@ -21,18 +20,12 @@ namespace ent {
             static bool initted = false;
             if (!initted) {
                 initted = true;
-                bdf = hacc::File("ent/res/various.hacc").attr("crate_bdf");
                 texture = hacc::File("ent/res/various.hacc").attr("stuff_img").attr("crate");
                 hacc::manage(&bdf);
                 hacc::manage(&texture);
             }
         }
-        void finish () {
-            Object::set_bdf(bdf);
-            Resident::finish();
-        }
     };
-    phys::Object_Def* Crate::bdf = NULL;
     Texture* Crate::texture = NULL;
 
     struct Light : geo::Resident, Drawn<Lights> {
@@ -64,7 +57,6 @@ namespace ent {
 HACCABLE(Crate) {
     name("ent::Crate");
     attr("ROD", base<ROD<Sprites>>().collapse());
-    finish(&Crate::finish);
 }
 
 HACCABLE(Light) {
