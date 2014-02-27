@@ -39,7 +39,7 @@ namespace shell {
                 if (pos.is_defined()) {
                     color_offset(pos);
                     draw_color(i == dragging_pt ? 0xff0000ff : 0xffff00ff);
-                    draw_rect(Rect(-0.5, -0.5, 0.5, 0.5));
+                    draw_rect(Rect(-0.25, -0.25, 0.25, 0.25));
                 }
             }
         }
@@ -97,8 +97,8 @@ namespace shell {
     void Room_Editor::Listener_cursor_pos (int x, int y) {
         Vec world_pos = camera->window_to_world(x, y);
         if (editing_pts) {
-            if (dragging_pt) {
-                selected->Resident_set_pt(dragging_pt, world_pos);
+            if (dragging_pt >= 0) {
+                selected->Resident_set_pt(dragging_pt, world_pos - drag_offset);
             }
         }
         else {
@@ -173,7 +173,7 @@ namespace shell {
                     for (size_t i = 0; i < n_pts; i++) {
                         const Rect& boundary = selected->Resident_get_pt(i)
                                              + r_pos
-                                             + Rect(-0.5, -0.5, 0.5, 0.5);
+                                             + Rect(-0.25, -0.25, 0.25, 0.25);
                         if (boundary.covers(realpos)) {
                             if (boundary.t < lowest_pt_t) {
                                 lowest_pt_t = boundary.t;
@@ -182,6 +182,7 @@ namespace shell {
                         }
                     }
                     dragging_pt = lowest_pt;
+                    drag_offset = realpos - r_pos;
                 }
             }
             else {

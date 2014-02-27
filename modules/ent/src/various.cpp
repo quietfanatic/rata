@@ -52,6 +52,11 @@ namespace ent {
         void Resident_set_pos (Vec p) override { pos = p; }
         void Resident_emerge () override { appear(); }
         void Resident_reclude () override { disappear(); }
+        size_t Resident_n_pts () override { return vertices.size(); }
+        Vec Resident_get_pt (size_t i) override { return vertices.at(i); }
+        void Resident_set_pt (size_t i, Vec v) override {
+            vertices.at(i) = v;
+        }
     };
 
 } using namespace ent;
