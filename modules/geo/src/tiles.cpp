@@ -9,7 +9,7 @@
 namespace geo {
     using namespace util;
 
-    static phys::BodyDef* tilemap_bdf;
+    static phys::Object_Def* tilemap_bdf;
 
     static Logger tilemap_logger ("tilemap");
 

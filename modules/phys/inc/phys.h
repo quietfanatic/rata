@@ -50,7 +50,8 @@ namespace phys {
         Filter filter;  // Just the initial filter
     };
      // Stores properties of motion, inertia, and a list of fixtures.
-    struct BodyDef {
+     // Inherit from this to store more static properties of your objects.
+    struct Object_Def {
         b2BodyType type = b2_dynamicBody;
         float mass = 0;
         float damping = 0;
@@ -61,11 +62,11 @@ namespace phys {
      // The dynamic thing
      // Every class that wants to have a physical presence should inherit from this.
     struct Object {
-        BodyDef* bdf = NULL;
+        Object_Def* bdf = NULL;
         b2Body* b2body = NULL;
 
-        BodyDef* get_bdf () const { return bdf; }
-        void set_bdf (BodyDef*);
+        Object_Def* get_bdf () const { return bdf; }
+        void set_bdf (Object_Def*);
 
          // A paltry amount of wrapper methods.
         Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }

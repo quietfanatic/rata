@@ -1,5 +1,5 @@
 {hacc::Document:{
-    bdf:{phys::BodyDef:{
+    bdf:{phys::Object_Def:{
         fixtures:[
             $.fixdefs.feet
             $.fixdefs.stand

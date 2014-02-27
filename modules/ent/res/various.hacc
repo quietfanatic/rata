@@ -1,6 +1,6 @@
 
 {hacc::Document:{
-    boundary_bdf: {phys::BodyDef:{
+    boundary_bdf: {phys::Object_Def:{
         type:static
         fixtures:[$.bb_f0 $.bb_f1 $.bb_f2 $.bb_f3]
     }}
@@ -13,7 +13,7 @@
     bb_e2: {b2EdgeShape:{ v1:[ 0 15] v2:[20 15] }}
     bb_e3: {b2EdgeShape:{ v1:[ 0  0] v2:[ 0 15] }}
 
-    test_bdf: {phys::BodyDef:{
+    test_bdf: {phys::Object_Def:{
         fixtures:[$.test_fix]
     }}
     test_fix: {phys::FixtureDef:{
@@ -25,7 +25,7 @@
         verts:[[-1 -1] [1 -1] [1 1] [-1 1]]
     }}
 
-    crate_bdf: {phys::BodyDef:{
+    crate_bdf: {phys::Object_Def:{
         type:dynamic
         fixtures:[$.crate_fix]
     }}

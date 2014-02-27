@@ -111,7 +111,7 @@ namespace phys {
     Space::~Space () { stop(); }
 
      // Objects
-    void Object::set_bdf (BodyDef* new_bdf) {
+    void Object::set_bdf (Object_Def* new_bdf) {
         if (new_bdf != bdf) {
             b2body->SetType(new_bdf->type);
             b2body->SetLinearDamping(new_bdf->damping);
@@ -373,13 +373,13 @@ HACCABLE(b2BodyType) {
     value("kinematic", b2_kinematicBody);
 }
 
-HACCABLE(BodyDef) {
-    name("phys::BodyDef");
-    attr("type", member(&BodyDef::type).optional());
-    attr("mass", member(&BodyDef::mass).optional());
-    attr("damping", member(&BodyDef::damping).optional());
-    attr("gravity_scale", member(&BodyDef::gravity_scale).optional());
-    attr("fixtures", member(&BodyDef::fixtures));
+HACCABLE(Object_Def) {
+    name("phys::Object_Def");
+    attr("type", member(&Object_Def::type).optional());
+    attr("mass", member(&Object_Def::mass).optional());
+    attr("damping", member(&Object_Def::damping).optional());
+    attr("gravity_scale", member(&Object_Def::gravity_scale).optional());
+    attr("fixtures", member(&Object_Def::fixtures));
 }
 
 HACCABLE(Object) {

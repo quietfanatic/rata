@@ -10,7 +10,7 @@ using namespace vis;
 namespace ent {
 
     struct Crate : ROD<Sprites> {
-        static phys::BodyDef* bdf;
+        static phys::Object_Def* bdf;
         static Texture* texture;
 
         void Drawn_draw (Sprites) override {
@@ -32,7 +32,7 @@ namespace ent {
             Resident::finish();
         }
     };
-    phys::BodyDef* Crate::bdf = NULL;
+    phys::Object_Def* Crate::bdf = NULL;
     Texture* Crate::texture = NULL;
 
     struct Light : geo::Resident, Drawn<Lights> {
