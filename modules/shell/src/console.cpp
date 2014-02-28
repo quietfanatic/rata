@@ -93,6 +93,8 @@ namespace shell {
                         cli_pos = 0;
                         stash_cli = "";
                         history_index = core::command_history.size();
+                         // Be jealous with the keyboard.
+                        Listener::activate();
                         break;
                     }
                     case GLFW_KEY_BACKSPACE: {
