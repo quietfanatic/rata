@@ -43,7 +43,6 @@ namespace vis {
     static Font* use_default (Font* font) {
         if (font) return font;
         if (default_font) return default_font;
-        printf("DSAFDSAF\n");
         throw hacc::X::Logic_Error("No font provided and no default font set");
     }
 

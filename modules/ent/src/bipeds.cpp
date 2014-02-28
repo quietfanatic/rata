@@ -7,7 +7,6 @@
 namespace ent {
 
     void Biped::finish () {
-        printf("Biped::finish()\n");
         ROD::finish();
         auto def = static_cast<Biped_Def*>(Object::def);
         stats = *def->stats;

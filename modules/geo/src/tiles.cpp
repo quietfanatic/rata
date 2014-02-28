@@ -13,7 +13,6 @@ namespace geo {
     static Logger tilemap_logger ("tilemap");
 
     void Tilemap::finish () {
-        printf("Tilemap::finish()\n");
         Object::finish();
         Resident::finish();
         physicalize();
