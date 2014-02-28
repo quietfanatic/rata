@@ -37,8 +37,14 @@
             0~00000000
         ]
     } }
+    tilemap_def:{ geo::Tilemap_Def:{
+        type:static
+        tileset:$("world/res/test.tileset").tileset
+        texture:$("world/res/test.tileset").img.textures[0]
+        tiles:$("world/res/test.tiles")
+    }}
     tilemap:{ geo::Tilemap:{
-        def:$("geo/res/tilemap.bdf")
+        def:$.tilemap_def
         room:$.room
         pos:[
             0~00000000
@@ -48,8 +54,5 @@
             0~00000000
             0~00000000
         ]
-        tileset:$("world/res/test.tileset").tileset
-        texture:$("world/res/test.tileset").img.textures[0]
-        tiles:$("world/res/test.tiles")
     } }
 } }

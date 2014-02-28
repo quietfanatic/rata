@@ -8,24 +8,14 @@
 
 namespace geo {
     using namespace util;
-
-    static phys::Object_Def* tilemap_def;
+    using namespace phys;
 
     static Logger tilemap_logger ("tilemap");
 
-    Tilemap::Tilemap () {
-        static bool initted = false;
-        if (!initted) {
-            initted = true;
-            tilemap_def = hacc::File("geo/res/tilemap.bdf").data();
-            hacc::manage(&tilemap_def);
-        }
-    }
-
-    void Tilemap::set_tiles (vis::Tiles* t) {
-        tiles = t;
-        if (def)
-            physicalize();
+    void Tilemap::finish () {
+        printf("Tilemap::finish()\n");
+        Object::finish();
+        physicalize();
     }
 
     void Tilemap::Resident_emerge () {
@@ -38,8 +28,9 @@ namespace geo {
     }
 
     void Tilemap::Drawn_draw (vis::Map) {
-        if (!tiles) return;
-        vis::draw_tiles(tiles, texture, Object::pos());
+        auto def = get_def();
+        if (!def->tiles) return;
+        vis::draw_tiles(def->tiles, def->texture, Object::pos());
     }
 
 
@@ -123,16 +114,10 @@ namespace geo {
         (*final)++;
     }
 
-    void Tilemap::finish () {
-        if (!tiles) return;
-        physicalize();
-    }
-
     void Tilemap::physicalize () {
-        auto width = tiles->width;
-        auto height = tiles->height;
-        while (b2Fixture* fix = b2body->GetFixtureList())
-            b2body->DestroyFixture(fix);
+        auto def = get_def();
+        auto width = def->tiles->width;
+        auto height = def->tiles->height;
         auto es = new TileEdge [height * width][MAX_EDGES];
         uint initial = 0;
         uint cancelled = 0;
@@ -141,16 +126,16 @@ namespace geo {
         uint final = 0;
         for (uint y = 0; y < height; y++)
         for (uint x = 0; x < width; x++) {
-            TileDef* def = tileset->tiles.at(tiles->tiles[y*width+x] & 0x3fff);
-            if (def) {
-                uint n_edges = def->vertices.size();
+            TileDef* td = def->tileset->tiles.at(def->tiles->tiles[y*width+x] & 0x3fff);
+            if (td) {
+                uint n_edges = td->vertices.size();
                  // Create the edges for this tile
                 for (uint e = 0; e < n_edges; e++) {
-                    es[y * width + x][e].v1 = def->vertices[e] + Vec(x, height - y - 1);
-                    es[y * width + x][e].v2 = def->vertices[e+1 == n_edges ? 0 : e+1] + Vec(x, height - y - 1);
+                    es[y * width + x][e].v1 = td->vertices[e] + Vec(x, height - y - 1);
+                    es[y * width + x][e].v2 = td->vertices[e+1 == n_edges ? 0 : e+1] + Vec(x, height - y - 1);
                     es[y * width + x][e].next = &es[y * width + x][e+1 == n_edges ? 0 : e+1];
                     es[y * width + x][e].prev = &es[y * width + x][e == 0 ? n_edges-1 : e-1];
-                    es[y * width + x][e].def = def;
+                    es[y * width + x][e].def = td;
                     initial++;
                      // Connect edges
                     if (x > 0)
@@ -201,17 +186,18 @@ HACCABLE(Tileset) {
     attr("tiles", member(&Tileset::tiles));
 }
 
+HACCABLE(Tilemap_Def) {
+    name("geo::Tilemap_Def");
+    attr("Object_Def", base<Object_Def>().collapse());
+    attr("tileset", member(&Tilemap_Def::tileset));
+    attr("texture", member(&Tilemap_Def::texture));
+    attr("tiles", member(&Tilemap_Def::tiles));
+}
+
 HACCABLE(Tilemap) {
     name("geo::Tilemap");
     attr("Resident", base<Resident>().collapse());
     attr("Object", base<phys::Object>().optional().collapse());
-    attr("tileset", member(&Tilemap::tileset));
-    attr("texture", member(&Tilemap::texture));
-    attr("tiles", value_methods(&Tilemap::get_tiles, &Tilemap::set_tiles));
-    finish([](Tilemap& t){
-        t.Resident::finish();
-        t.finish();
-    });
 }
 
 

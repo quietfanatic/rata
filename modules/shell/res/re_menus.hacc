@@ -76,10 +76,7 @@
                     contents:{shell::Text_Button:{
                         text:"tilemap"
                         on_click:[re_new_furniture geo::Tilemap {
-                            def:$("geo/res/tilemap.bdf")
-                            tileset:$("world/res/test.tileset").tileset
-                            texture:$("world/res/test.tileset").img.textures[0]
-                            tiles:$("world/res/default.tiles")
+                            def:$("world/res/test.tileset").def
                         }]
                     }}
                 }}

@@ -66,8 +66,15 @@ namespace phys {
         Object_Def* def = NULL;
         b2Body* b2body = NULL;
 
-         // To make Haccable happy
+         // TODO: Have hacc finish everything on reload so that this isn't necessary.
+        bool finished = false;
         Object_Def* get_def () const { return def; }
+        void set_def (Object_Def* _def) {
+            def = _def;
+            if (finished)
+                finish();
+        }
+        virtual void finish ();
 
          // A paltry amount of wrapper methods.
         Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }
@@ -94,8 +101,6 @@ namespace phys {
         void materialize ();
         void dematerialize ();
 
-         // Make your static properties inherit from Object_Def and override this
-        virtual void Object_set_def (Object_Def* def);
          // Called every frame before space simulation, only if tangible
         virtual void Object_before_move () { }
          // Called every frame after space simulation, only if tangible

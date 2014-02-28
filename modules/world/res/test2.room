@@ -1,8 +1,14 @@
 { hacc::Document:{
     _next_id:2
+    tilemap_def:{ geo::Tilemap_Def:{
+        type:static
+        tileset:$("world/res/test.tileset").tileset
+        texture:$("world/res/test.tileset").img.textures[0]
+        tiles:$("world/res/test2.tiles")
+    } }
     _1:{ geo::Tilemap:{
         room:$.room
-        def:$("geo/res/tilemap.bdf")
+        def:$.tilemap_def
         pos:[
             40~42200000
             0~00000000
@@ -11,9 +17,6 @@
             0~00000000
             0~00000000
         ]
-        tileset:$("world/res/test.tileset").tileset
-        texture:$("world/res/test.tileset").img.textures[0]
-        tiles:$("world/res/test2.tiles")
     } }
     room:{ geo::Room:{
         boundary:[

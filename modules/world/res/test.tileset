@@ -1,4 +1,10 @@
 {hacc::Document:{
+    def:{geo::Tilemap_Def:{
+        type:static
+        tileset:$.tileset
+        texture:$.img.ALL
+        tiles:$("world/res/default.tiles")
+    }}
     tileset:{geo::Tileset:{
         tiles: [null $.solid null null null null null]
     }}

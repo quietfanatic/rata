@@ -6,9 +6,9 @@
 
 namespace ent {
 
-    void Biped::Object_set_def (phys::Object_Def* _def) {
-        Object::Object_set_def(_def);
-        auto def = static_cast<Biped_Def*>(_def);
+    void Biped::finish () {
+        Object::finish();
+        auto def = static_cast<Biped_Def*>(Object::def);
         stats = *def->stats;
         for (auto fp = &def->fixdefs->feet; fp <= &def->fixdefs->ceiling_low; fp++) {
             add_fixture(fp);

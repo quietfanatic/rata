@@ -19,14 +19,17 @@ namespace geo {
         std::vector<TileDef*> tiles;  // TileDefs can be provided with local()
     };
 
+    struct Tilemap_Def : phys::Object_Def {
+        Tileset* tileset;
+        vis::Tiles* tiles;
+        vis::Texture* texture;
+    };
+
      // A visible, tangible object that uses a matrix of tiles to create
      //  level geometry.
     struct Tilemap : Resident, phys::Object, vis::Drawn<vis::Map> {
-        Tileset* tileset;
-        vis::Texture* texture;
-        vis::Tiles* tiles = NULL;
-        vis::Tiles* get_tiles () const { return tiles; }
-        void set_tiles (vis::Tiles* t);
+
+        Tilemap_Def* get_def () { return static_cast<Tilemap_Def*>(def); }
 
         void Resident_emerge () override;
         void Resident_reclude () override;
@@ -35,12 +38,9 @@ namespace geo {
 
         void Drawn_draw (vis::Map) override;
 
-        Tilemap ();
         void physicalize ();
-        void finish ();
+        void finish () override;
     };
-
-    extern Links<Tilemap> active_tilemaps;
 
 }
 

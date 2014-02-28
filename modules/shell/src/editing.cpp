@@ -457,58 +457,64 @@ namespace shell {
 
 
     void Tile_Editor::Drawn_draw (vis::Map) {
-        if (!tilemap || !tilemap->tileset) return;
+        if (!tilemap || !tilemap->get_def()->tileset) return;
+        auto def = tilemap->get_def();
         if (showing_selector) {
-            size_t width = tilemap->texture->size.x*PX;
-            size_t size = tilemap->tileset->tiles.size();
+            size_t width = def->texture->size.x*PX;
+            size_t size = def->tileset->tiles.size();
             for (size_t i = 0; i < size; i++) {
                 draw_tile(
-                    i | (tile & 0xc000), tilemap->texture,
+                    i | (tile & 0xc000), def->texture,
                     selector_pos + Vec(i % width, -(float)(i / width + 1))
                 );
             }
         }
          // display current tile in corner
-        draw_tile(tile, tilemap->texture, camera->window_to_world(0, 0) - Vec(0, 1));
+        draw_tile(tile, def->texture, camera->window_to_world(0, 0) - Vec(0, 1));
     }
     bool Tile_Editor::in_bounds (Vec pos) {
-        return pos.x >= 0 && pos.x < tilemap->tiles->width
-            && pos.y >= 0 && pos.y < tilemap->tiles->height;
+        auto def = tilemap->get_def();
+        return pos.x >= 0 && pos.x < def->tiles->width
+            && pos.y >= 0 && pos.y < def->tiles->height;
     }
     uint16& Tile_Editor::tile_at (Vec pos) {
         if (!in_bounds(pos)) {
             throw hacc::X::Logic_Error("Position (%f,%f) is out of bounds for this tilemap\n");
         }
+        auto def = tilemap->get_def();
         size_t x = floor(pos.x);
-        size_t y = tilemap->tiles->height - floor(pos.y) - 1;
-        return tilemap->tiles->tiles[tilemap->tiles->width * y + x];
+        size_t y = def->tiles->height - floor(pos.y) - 1;
+        return def->tiles->tiles[def->tiles->width * y + x];
     }
     void Tile_Editor::draw (Vec pos) {
         if (!in_bounds(pos))
             return;
+        auto def = tilemap->get_def();
         uint16& selected = tile_at(pos);
         if (selected != tile) {
             selected = tile;
-            tilemap->tiles->finish();
+            def->tiles->finish();
              // Update all relevant tilemaps
             for (auto b = phys::space.b2world->GetBodyList(); b; b = b->GetNext()) {
                 if (auto tm = dynamic_cast<Tilemap*>((phys::Object*)b->GetUserData())) {
-                    if (tm->tiles == tilemap->tiles) {
-                        tm->set_tiles(tilemap->tiles);
+                    if (tm->get_def()->tiles == def->tiles) {
+                        tm->get_def()->tiles = def->tiles;
+                        tm->finish();
                     }
                 }
             }
         }
     }
     void Tile_Editor::pick (Vec pos) {
+        auto def = tilemap->get_def();
         if (in_bounds(pos))
             tile = tile_at(pos);
-        else if (tilemap->tileset && tilemap->texture
-              && pos.x >= selector_pos.x && pos.x < (selector_pos.x + tilemap->texture->size.x*PX)
-              && pos.y <= selector_pos.y && pos.y > (selector_pos.y - tilemap->texture->size.y*PX)) {
+        else if (def->tileset && def->texture
+              && pos.x >= selector_pos.x && pos.x < (selector_pos.x + def->texture->size.x*PX)
+              && pos.y <= selector_pos.y && pos.y > (selector_pos.y - def->texture->size.y*PX)) {
             uint16 index = pos.x - selector_pos.x
-                         + (pos.y - selector_pos.y) / tilemap->texture->size.y*PX;
-            if (index < tilemap->tileset->tiles.size()) {
+                         + (pos.y - selector_pos.y) / def->texture->size.y*PX;
+            if (index < def->tileset->tiles.size()) {
                 tile = (tile & 0xc000) | index;
             }
         }
@@ -539,6 +545,7 @@ namespace shell {
     }
     bool Tile_Editor::Listener_key (int code, int action) {
         if (action == GLFW_PRESS) {
+            auto def = tilemap->get_def();
             switch (code) {
                 case GLFW_KEY_ESC:
                     if (showing_selector) {
@@ -551,7 +558,7 @@ namespace shell {
                     return true;
                 case 'S': {
                     for (auto& f : hacc::loaded_files()) {
-                        if (f.data().address() == tilemap->tiles) {
+                        if (f.data().address() == def->tiles) {
                             hacc::save(f);
                             return true;
                         }
@@ -578,14 +585,14 @@ namespace shell {
                     return true;
                 case GLFW_KEY_LEFT:
                     if ((tile & 0x3fff) == 0) {
-                        tile += tilemap->tileset->tiles.size() - 1;
+                        tile += def->tileset->tiles.size() - 1;
                     }
                     else {
                         tile -= 1;
                     }
                     return true;
                 case GLFW_KEY_RIGHT:
-                    if ((tile & 0x3fff) >= tilemap->tileset->tiles.size() - 1) {
+                    if ((tile & 0x3fff) >= def->tileset->tiles.size() - 1) {
                         tile = 0;
                     }
                     else {
@@ -593,10 +600,10 @@ namespace shell {
                     }
                     return true;
                 case GLFW_KEY_UP: {
-                    Vec size = tilemap->texture->size*PX;
+                    Vec size = def->texture->size*PX;
                     if ((tile & 0x3fff) < size.y) {
                         tile += size.y - size.x;
-                        if ((tile & 0x3fff) >= tilemap->tileset->tiles.size() - 1) {
+                        if ((tile & 0x3fff) >= def->tileset->tiles.size() - 1) {
                             tile -= size.x;
                         }
                     }
@@ -606,11 +613,11 @@ namespace shell {
                     return true;
                 }
                 case GLFW_KEY_DOWN: {
-                    Vec size = tilemap->texture->size*PX;
+                    Vec size = def->texture->size*PX;
                     if ((tile & 0x3fff) >= size.y - size.x) {
                         tile -= size.y - size.x;
                     }
-                    else if ((tile & 0x3fff) >= tilemap->tileset->tiles.size() - size.x) {
+                    else if ((tile & 0x3fff) >= def->tileset->tiles.size() - size.x) {
                         tile -= size.y - size.x - size.x;
                     }
                     else {
@@ -776,7 +783,7 @@ void _re_start_te () {
     if (!room_editor || !tile_editor) return;
     if (auto tilemap = dynamic_cast<Tilemap*>(room_editor->selected)) {
         room_editor->status = "Editing "
-                            + hacc::path_to_string(hacc::address_to_path(tilemap->tiles));
+                            + hacc::path_to_string(hacc::address_to_path(tilemap->get_def()->tiles));
         tile_editor->tilemap = tilemap;
         tile_editor->activate();
     }

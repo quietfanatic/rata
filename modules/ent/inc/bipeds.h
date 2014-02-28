@@ -92,7 +92,6 @@ namespace ent {
         bool ceiling_low = false;  // Established by a sensor
         uint8 jump_timer = 0;  // counts up until stats.jump_delay
 
-        void Object_set_def (phys::Object_Def*) override;
         void Object_before_move () override;
         void Object_after_move () override;
         float Grounded_velocity () override;
@@ -105,6 +104,8 @@ namespace ent {
         void Drawn_draw (vis::Sprites) override;
 
         Biped ();
+
+        void finish () override;
 
     };
 

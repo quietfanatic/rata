@@ -1,4 +1,0 @@
-{phys::Object_Def:{
-    type: static
-    fixtures: [] // Gonna populate this from the tiles
-}}
