@@ -50,17 +50,17 @@
         segs:[{
             name:head
             branches:[]
-            layout:$lh=$("ent/res/small.layouts").head
+            layout:$lh=$.head_layout
             z_offset:1
         } {
             name:forearm1
             branches:[]
-            layout:$lf=$("ent/res/small.layouts").forearm
+            layout:$lf=$.forearm_layout
             z_offset:3
         } {
             name:arm1
             branches:[$.skel.segs.forearm1]
-            layout:$la=$("ent/res/small.layouts").arm
+            layout:$la=$.arm_layout
             z_offset:2
         } {
             name:forearm2
@@ -75,7 +75,7 @@
         } {
             name:body
             branches:[$.skel.segs.head $.skel.segs.arm1 $.skel.segs.arm2]
-            layout:$lb=$("ent/res/small.layouts").body
+            layout:$lb=$.body_layout
             z_offset:0
         }]
         root:$.skel.segs.body
@@ -136,6 +136,70 @@
             [[$h $lh.walk135]]
             [[$h $lh.walk158]]
             [[$h $lh.walk158]]
+        ]
+    }}
+    body_layout:{vis::Layout:{
+        size: [85 64]
+        frames: [
+            {name: stand  offset: [11  3] box: [-10 -2 10 18] points: [[ 0 16] [-1 14] [ 1 14]]}
+            {name: walk   offset: [32  3] box: [-10 -2 10 18] points: [[ 0 15] [-1 13] [ 1 13]]}
+            {name: kneel  offset: [53  3] box: [-10 -2 10 18] points: [[ 0 10] [-1  8] [ 1  8]]}
+            {name: sit    offset: [74  3] box: [-10 -2 10 18] points: [[-2  9] [-3  7] [-1  7]]}
+            {name: crawl1 offset: [11 24] box: [-10 -2 10 18] points: [[ 6  5] [ 4  4] [ 4  4]]}
+            {name: crawl2 offset: [32 24] box: [-10 -2 10 18] points: [[ 6  4] [ 4  3] [ 4  3]]}
+            {name: hurtbk offset: [53 24] box: [-10 -2 10 18] points: [[ 0 15] [-1 13] [-1 13]]}
+            {name: laybk  offset: [74 24] box: [-10 -2 10 18] points: [[-8  2] [-6  1] [-6  1]]}
+            {name: run1   offset: [11 45] box: [-10 -2 10 18] points: [[ 1 15] [ 0 13] [ 0 13]]}
+            {name: run2   offset: [32 45] box: [-10 -2 10 18] points: [[ 1 16] [ 0 14] [ 0 14]]}
+            {name: run3   offset: [53 45] box: [-10 -2 10 18] points: [[ 1 15] [ 0 13] [ 0 13]]}
+        ]
+    }}
+    head_layout:{vis::Layout:{
+        size: [127 88]
+        frames: [
+            {name: stand23  offset: [ 12 13] box: [-11 -12  9 16]}
+            {name: stand45  offset: [ 33 13] box: [-11 -12  9 16]}
+            {name: stand68  offset: [ 54 13] box: [-11 -12  9 16]}
+            {name: stand90  offset: [ 75 13] box: [-11 -12  9 16]}
+            {name: stand135 offset: [ 96 13] box: [-11 -12  9 16]}
+            {name: stand158 offset: [117 13] box: [-11 -12  9 16]}
+            {name: walk23   offset: [ 12 42] box: [-11 -12  9 16]}
+            {name: walk45   offset: [ 33 42] box: [-11 -12  9 16]}
+            {name: walk68   offset: [ 54 42] box: [-11 -12  9 16]}
+            {name: walk90   offset: [ 75 42] box: [-11 -12  9 16]}
+            {name: walk135  offset: [ 96 42] box: [-11 -12  9 16]}
+            {name: walk158  offset: [117 42] box: [-11 -12  9 16]}
+            {name: hurtbk   offset: [ 12 71] box: [-11 -12  9 16]}
+            {name: crawl    offset: [ 32 71] box: [-10 -12 10 16]}
+            {name: laybk    offset: [ 62 73] box: [-17 -12 11  8]}
+        ]
+    }}
+    arm_layout:{vis::Layout:{
+        size: [100 16]
+        frames: [
+            {name: a0   offset: [ 5 8] box: [-4 -7 6 7] points: [[0 -3]]}
+            {name: a23  offset: [16 8] box: [-4 -7 6 7] points: [[1 -3]]}
+            {name: a45  offset: [27 8] box: [-4 -7 6 7] points: [[2 -2]]}
+            {name: a68  offset: [38 8] box: [-4 -7 6 7] points: [[3 -1]]}
+            {name: a90  offset: [49 8] box: [-4 -7 6 7] points: [[3  0]]}
+            {name: a113 offset: [60 8] box: [-4 -7 6 7] points: [[3  1]]}
+            {name: a135 offset: [71 8] box: [-4 -7 6 7] points: [[2  2]]}
+            {name: a158 offset: [82 8] box: [-4 -7 6 7] points: [[1  3]]}
+            {name: a180 offset: [93 8] box: [-4 -7 6 7] points: [[0  3]]}
+        ]
+    }}
+    forearm_layout:{vis::Layout:{
+        size: [100 16]
+        frames: [
+            {name: a0   offset: [ 4 8] box: [-3 -7 7 7]}
+            {name: a23  offset: [15 8] box: [-3 -7 7 7]}
+            {name: a45  offset: [26 8] box: [-3 -7 7 7]}
+            {name: a68  offset: [37 8] box: [-3 -7 7 7]}
+            {name: a90  offset: [48 8] box: [-3 -7 7 7]}
+            {name: a113 offset: [59 8] box: [-3 -7 7 7]}
+            {name: a135 offset: [70 8] box: [-3 -7 7 7]}
+            {name: a158 offset: [81 8] box: [-3 -7 7 7]}
+            {name: a180 offset: [92 8] box: [-3 -7 7 7]}
         ]
     }}
 }}

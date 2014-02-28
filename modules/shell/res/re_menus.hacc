@@ -58,7 +58,7 @@
                             {shell::Text_Button:{
                                 text:"test"
                                 on_click:[re_new_actor ent::Biped {
-                                    def:$("world/res/rata.hacc").def
+                                    def:$("world/char/rata.hacc").def
                                     direction:1
                                 }]
                             }}

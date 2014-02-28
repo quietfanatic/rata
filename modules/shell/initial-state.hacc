@@ -1,12 +1,12 @@
 {hacc::Document:{
     rata:{ent::Biped:{
-        def:$("world/res/rata.hacc").def
+        def:$("world/char/rata.hacc").def
         pos:[1 22]
-        room:$("world/res/test.room").room
+        room:$("world/room/test.hacc").room
         direction:1
     }}
     observer:{geo::Observer:{
-        room:$("world/res/test.room").room
+        room:$("world/room/test.hacc").room
     }}
     player:{ent::Player:{
         character:$.rata.Controllable
@@ -14,9 +14,9 @@
         cursor_frame:$("ent/res/cursor.hacc").layout.normal
     }}
     rata2:{ent::Biped:{
-        def:$("world/res/rata.hacc").def
+        def:$("world/char/rata.hacc").def
         pos:[4 22]
-        room:$("world/res/test.room").room
+        room:$("world/room/test.hacc").room
         direction:-1
     }}
 }}

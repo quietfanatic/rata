@@ -1,6 +1,6 @@
 {hacc::Document:{
     img:{vis::Image:{
-        filename: "world/res/rata-base.png"
+        filename: "world/char/rata-base.png"
         textures: [
             {name:body    offset:[  0   0] size:[ 85 64]}
             {name:head    offset:[117   1] size:[127 88]}

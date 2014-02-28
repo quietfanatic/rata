@@ -7,7 +7,7 @@
             40~42200000
             30~41f00000
         ]
-        neighbors:[$("world/res/test2.room").room]
+        neighbors:[$("world/room/test2.hacc").room]
     } }
     test_light:{ ent::Light:{
         room:$.room
@@ -41,7 +41,7 @@
         type:static
         tileset:$("world/res/test.tileset").tileset
         texture:$("world/res/test.tileset").img.textures[0]
-        tiles:$("world/res/test.tiles")
+        tiles:$("world/room/test.tiles")
     }}
     tilemap:{ geo::Tilemap:{
         def:$.tilemap_def

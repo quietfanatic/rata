@@ -1,6 +1,6 @@
 {hacc::Document:{
     img:{vis::Image:{
-        filename: "world/res/frock.png"
+        filename: "world/char/frock.png"
         textures: [
             {name:body    offset:[  0   0] size:[ 85 64]}
             {name:arm     offset:[  0  95] size:[100 16]}
