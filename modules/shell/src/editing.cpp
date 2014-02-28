@@ -16,8 +16,6 @@ using namespace geo;
 
 namespace shell {
 
-    Logger logger ("editing");
-
     Room_Editor* room_editor = NULL;
     Tile_Editor* tile_editor = NULL;
 
@@ -198,7 +196,7 @@ namespace shell {
                     if (code == GLFW_MOUSE_BUTTON_LEFT) {
                         drag_origin = pos;
                         drag_offset = realpos - pos;
-                        logger.log("Selected " + hacc::Reference(res_realp(selected)).show());
+                        log("editing", "Selected " + hacc::Reference(res_realp(selected)).show());
                         clicking = true;
                     }
                     else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
@@ -262,7 +260,7 @@ namespace shell {
     }
 
     void Room_Editor::activate () {
-        logger.log("Activating room editor.");
+        log("editing", "Activating room editor.");
         Listener::activate();
         fc.pos = camera->Camera_pos();
         fc.size = Vec(40, 30);
@@ -273,7 +271,7 @@ namespace shell {
         dragging = false;
     }
     void Room_Editor::deactivate () {
-        logger.log("Deactivating room editor.");
+        log("editing", "Deactivating room editor.");
         hovering = NULL;
         selected = NULL;
         dragging = false;
@@ -304,11 +302,11 @@ namespace shell {
         system((std::string(editor) + " " + tmp).c_str());
         auto new_str = hacc::string_from_file(tmp);
         if (new_str != str) {
-            logger.log("Updating");
+            log("editing", "Updating");
             ref.from_tree(hacc::tree_from_string(new_str));
         }
         else {
-            logger.log("Not updating");
+            log("editing", "Not updating");
         }
         remove(tmp);
     }
@@ -442,14 +440,14 @@ namespace shell {
     }
 
     void Tile_Editor::activate () {
-        logger.log("Activating tile editor");
+        log("editing", "Activating tile editor");
         Listener::activate();
         Drawn<vis::Map>::appear();
         clicking = false;
         showing_selector = false;
     }
     void Tile_Editor::deactivate () {
-        logger.log("Deactivating tile editor");
+        log("editing", "Deactivating tile editor");
         Listener::deactivate();
         Drawn<vis::Map>::disappear();
         selector_camera.deactivate();

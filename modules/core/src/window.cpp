@@ -59,11 +59,6 @@ namespace core {
         window->height = height;
     }
 
-    static Logger file_logger ("files");
-    static Logger game_logger ("game");
-    static Logger timing_logger ("timing", false);
-
-
     Window* window = NULL;
     Window::Window () {
         if (window) throw hacc::X::Logic_Error("Tried to create multiple windows at once");
@@ -121,7 +116,7 @@ namespace core {
         glfwSetCharCallback(char_cb);
         glfwSetWindowSizeCallback(resize_cb);
         glfwDisable(GLFW_AUTO_POLL_EVENTS);
-        hacc::set_file_logger([](std::string s){ file_logger.log(s); });
+        hacc::set_file_logger([](std::string s){ log("file", s); });
         glfwSetTime(0);
         static double lag = 0;
         try {
@@ -196,7 +191,7 @@ namespace core {
                  // TODO: this is not quite optimal.
                 lag -= 1/fps;
                 if (lag > 1/fps + 0.002 && lag < 4/fps) {
-                    timing_logger.log("Skipping frame!");
+                    log("frameskip", "Skipping frame!");
                 }
                 else {
                     if (lag > 1/fps) {
@@ -212,7 +207,7 @@ namespace core {
                 if (limit_fps && lag < 0) {
                     glfwSleep(-lag);
                 }
-                timing_logger.log("%f\n", lag);
+                log("timing", "%f", lag);
                 glfwSwapBuffers();
             }
         }

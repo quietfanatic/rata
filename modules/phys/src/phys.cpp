@@ -11,15 +11,13 @@ namespace phys {
 
      // Collision rules
 
-    static Logger cr_logger ("collision_rules");
-
     INIT_SAFE(std::vector<Collision_Rule*>, coll_rules);
     INIT_SAFE(uint, n_coll_rules, = 0);
 
     Collision_Rule::Collision_Rule () : index(n_coll_rules()++) {
         if (index < 64) {
             coll_rules().push_back(this);
-            cr_logger.log("Declared collision rule: %u", index);
+            log("collision_rules", "Declared collision rule: %u", index);
         }
         else throw hacc::X::Logic_Error("Too many Collision_Rules were created (> 64)");
     }
@@ -76,13 +74,11 @@ namespace phys {
 
      // Space handling
 
-    static Logger space_logger ("space");
-
     Space space;
 
     Space::Space () { }
     void Space::start () {
-        space_logger.log("Creating the spacetime continuum.  Well, the space part anyway.");
+        log("space", "Creating the spacetime continuum.  Well, the space part anyway.");
         b2world = new b2World(
             b2Vec2(0, -30)
         );
@@ -105,7 +101,7 @@ namespace phys {
         }
     }
     void Space::stop () {
-        space_logger.log("Destroying space.");
+        log("space", "Destroying space.");
         delete b2world;
     }
     Space::~Space () { stop(); }
@@ -128,7 +124,7 @@ namespace phys {
         fdf->b2.filter = fdf->filter;
         b2Fixture* b2f = b2body->CreateFixture(&fdf->b2);
         b2f->SetUserData(fdf);
-        space_logger.log("Adding fixture @%lx to @%lx", (size_t)fdf, (size_t)this);
+        log("space", "Adding fixture @%lx to @%lx", (size_t)fdf, (size_t)this);
         return b2f;
     }
     b2Fixture* Object::get_fixture (FixtureDef* fd) {
@@ -159,12 +155,12 @@ namespace phys {
         b2bd.type = b2_dynamicBody;
         b2bd.userData = this;
         b2body = space.b2world->CreateBody(&b2bd);
-        space_logger.log("Added @%lx; %d objects in space.", (size_t)this, space.b2world->GetBodyCount());
+        log("space", "Added @%lx; %d objects in space.", (size_t)this, space.b2world->GetBodyCount());
     }
     Object::~Object () {
         if (b2body) {
             space.b2world->DestroyBody(b2body);
-            space_logger.log("Removed @%lx; %d objects in space.", (size_t)this, space.b2world->GetBodyCount());
+            log("space", "Removed @%lx; %d objects in space.", (size_t)this, space.b2world->GetBodyCount());
         }
     }
 

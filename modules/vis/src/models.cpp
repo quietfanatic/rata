@@ -6,8 +6,6 @@
 
 namespace vis {
 
-    Logger model_logger ("models", false);
-
     void Skel::finish () {
         for (auto& seg : segs) {
             auto n_branches = seg.branches.size();
@@ -70,10 +68,10 @@ namespace vis {
 
     void Model::draw (size_t n_skins, Skin** skins, Vec pos, Vec scale, float z) {
         if (!skel) {
-            model_logger.log("Model has no associated skeleton");
+            log("models", "Model has no associated skeleton");
             return;
         }
-        model_logger.log("Drawing a model with %lu segs", skel->segs.size());
+        log("models", "Drawing a model with %lu segs", skel->segs.size());
         reposition_segment(this, skel->root, skel->root_offset);
         size_t n_draws = 0;
         for (size_t i = 0; i < n_skins; i++) {

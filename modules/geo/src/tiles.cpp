@@ -10,8 +10,6 @@ namespace geo {
     using namespace util;
     using namespace phys;
 
-    static Logger tilemap_logger ("tilemap");
-
     void Tilemap::finish () {
         Object::finish();
         Resident::finish();
@@ -166,7 +164,7 @@ namespace geo {
                 create_edge(b2body, &es[y * width + x][e], &final);
             }
         }
-        tilemap_logger.log("Optimized tilemap edges.  initial:%u cancelled:%u merged:%u eaten:%u final:%u",
+        log("tilemap", "Optimized tilemap edges.  initial:%u cancelled:%u merged:%u eaten:%u final:%u",
             initial, cancelled, merged, eaten, final
         );
          // And...we're done with the edges.

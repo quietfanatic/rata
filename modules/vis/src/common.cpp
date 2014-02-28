@@ -12,8 +12,6 @@
 
 namespace vis {
 
-    Logger logger ("vis");
-
     using namespace core;
 
     Vec camera_pos = Vec(20, 15);
@@ -35,7 +33,7 @@ namespace vis {
     void setup_rtt () {
         if (rtt_camera_size != camera_size) {
             rtt_camera_size = camera_size;
-            logger.log("setting up world framebuffer: %dx%d", (int)(rtt_camera_size.x/PX), (int)(rtt_camera_size.y/PX));
+            log("vis", "setting up world framebuffer: %dx%d", (int)(rtt_camera_size.x/PX), (int)(rtt_camera_size.y/PX));
             if (world_fb) glDeleteFramebuffers(1, &world_fb);
             if (world_tex) glDeleteTextures(1, &world_tex);
             if (world_depth_rb) glDeleteRenderbuffers(1, &world_depth_rb);

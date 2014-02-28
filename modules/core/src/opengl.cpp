@@ -8,8 +8,6 @@
 
 namespace core {
 
-    Logger opengl_logger ("opengl");
-
     GLenum diagnose_opengl (std::string when) {
         GLenum err = glGetError();
         if (err)
