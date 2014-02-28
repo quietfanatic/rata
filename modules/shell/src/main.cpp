@@ -71,12 +71,11 @@ int main (int argc, char** argv) {
     window->height = 480;
     window->step = step;
     window->render = vis::render;
-    window->before_next_frame([&](){
-        phys::space.start();
-        game = main_file.attr("game");
-        game->on_start();
-    });
      // Run
+    window->open();
+    phys::space.start();
+    game = main_file.attr("game");
+    game->on_start();
     window->start();
      // After window closes
     if (game->on_exit)
