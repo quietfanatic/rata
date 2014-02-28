@@ -110,7 +110,6 @@ namespace phys {
     }
     Space::~Space () { stop(); }
 
-     // This should be overridden if more behavior is required
     void Object::finish () {
         b2body->SetType(def->type);
         b2body->SetLinearDamping(def->damping);
@@ -121,10 +120,9 @@ namespace phys {
         while (auto fix = b2body->GetFixtureList())
             b2body->DestroyFixture(fix);
          // Add new fixtures
-        for (auto fix : def->fixtures) {
-            add_fixture(fix);
+        for (auto& fix : def->fixtures) {
+            add_fixture(&fix);
         }
-        finished = true;
     }
     b2Fixture* Object::add_fixture (FixtureDef* fdf) {
         fdf->b2.filter = fdf->filter;
@@ -379,7 +377,7 @@ HACCABLE(Object_Def) {
 
 HACCABLE(Object) {
     name("phys::Object");
-    attr("def", value_methods(&Object::get_def, &Object::set_def).optional());
+    attr("def", member(&Object::def));
     attr("pos", value_methods(&Object::pos, &Object::set_pos).optional());
     attr("vel", value_methods(&Object::vel, &Object::set_vel).optional());
     finish(&Object::finish);

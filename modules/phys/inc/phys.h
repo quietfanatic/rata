@@ -57,7 +57,7 @@ namespace phys {
         float mass = 0;
         float damping = 0;
         float gravity_scale = 1;
-        std::vector<FixtureDef*> fixtures;
+        std::vector<FixtureDef> fixtures;
     };
 
      // The dynamic thing
@@ -66,15 +66,7 @@ namespace phys {
         Object_Def* def = NULL;
         b2Body* b2body = NULL;
 
-         // TODO: Have hacc finish everything on reload so that this isn't necessary.
-        bool finished = false;
-        Object_Def* get_def () const { return def; }
-        void set_def (Object_Def* _def) {
-            def = _def;
-            if (finished)
-                finish();
-        }
-        virtual void finish ();
+        void finish ();
 
          // A paltry amount of wrapper methods.
         Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }

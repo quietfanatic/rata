@@ -39,7 +39,7 @@ namespace geo {
         void Drawn_draw (vis::Map) override;
 
         void physicalize ();
-        void finish () override;
+        void finish ();
     };
 
 }

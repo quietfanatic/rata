@@ -7,7 +7,8 @@
 namespace ent {
 
     void Biped::finish () {
-        Object::finish();
+        printf("Biped::finish()\n");
+        ROD::finish();
         auto def = static_cast<Biped_Def*>(Object::def);
         stats = *def->stats;
         for (auto fp = &def->fixdefs->feet; fp <= &def->fixdefs->ceiling_low; fp++) {
@@ -254,6 +255,7 @@ HACCABLE(Biped) {
     attr("jump_timer", member(&Biped::jump_timer).optional());
     attr("focus", member(&Biped::focus).optional());
     attr("distance_walked", member(&Biped::distance_walked).optional());
+    finish(&Biped::finish);
 }
 
 HACCABLE(BipedStats) {

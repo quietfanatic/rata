@@ -13,6 +13,7 @@ namespace ent {
         void Resident_set_pos (util::Vec p) override { Object::set_pos(p); Object::set_vel(util::Vec(0, 0)); }
         void Resident_emerge () override { materialize(); vis::Drawn<Layer>::appear(); }
         void Resident_reclude () override { vis::Drawn<Layer>::disappear(); dematerialize(); }
+        void finish () { Object::finish(); Resident::finish(); }
     };
 
 }
@@ -22,6 +23,7 @@ HACCABLE_TEMPLATE(<class Layer>, ent::ROD<Layer>) {
     name([](){ return "ent::ROD<" + hacc::Type::CppType<Layer>().name() + ">"; });
     attr("Resident", hcb::template base<geo::Resident>().collapse());
     attr("Object", hcb::template base<phys::Object>().collapse());
+    finish(&ent::ROD<Layer>::finish);
 }
 
 #endif

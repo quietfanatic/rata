@@ -105,7 +105,7 @@ namespace ent {
 
         Biped ();
 
-        void finish () override;
+        void finish ();
 
     };
 

@@ -15,6 +15,7 @@ namespace geo {
     void Tilemap::finish () {
         printf("Tilemap::finish()\n");
         Object::finish();
+        Resident::finish();
         physicalize();
     }
 
@@ -198,6 +199,7 @@ HACCABLE(Tilemap) {
     name("geo::Tilemap");
     attr("Resident", base<Resident>().collapse());
     attr("Object", base<phys::Object>().optional().collapse());
+    finish(&Tilemap::finish);
 }
 
 
