@@ -425,6 +425,13 @@ namespace hacc {
                 });
             }
             updates.clear();
+             // Run finish on all non-reloaded files
+            for (auto& p : files_by_filename()) {
+                File f = p.second;
+                if (f.p->state == LOADED) {
+                    hacc::Reference(f.p->data.address()).finish();
+                }
+            }
              // delete old_data for all reloaded files
             for (auto& p : files_by_filename()) {
                 File f = p.second;
