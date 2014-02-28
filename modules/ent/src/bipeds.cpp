@@ -15,7 +15,7 @@ namespace ent {
         }
     }
 
-    void Biped::Controllable_buttons (ButtonBits bits) {
+    void Biped::Controllable_buttons (Button_Bits bits) {
          // Since we walk by altering our contact with the ground,
          //  and since contacts aren't processed if the body is asleep,
          //  then if the body falls asleep we can't move T_T
@@ -139,7 +139,7 @@ namespace ent {
      // Ensure we're in the right room and also calculate walk animation.
     void Biped::Object_after_move () {
          // Clear input before next frame
-        buttons = ButtonBits(0);
+        buttons = Button_Bits(0);
         reroom(pos());
         if (ground && (!crouching || crawling)) {
             if (fabs(vel().x) < 0.01) {
@@ -257,20 +257,20 @@ HACCABLE(Biped) {
     finish(&Biped::finish);
 }
 
-HACCABLE(BipedStats) {
-    name("ent::BipedStats");
-    attr("walk_friction", member(&BipedStats::walk_friction).optional());
-    attr("walk_speed", member(&BipedStats::walk_speed).optional());
-    attr("run_friction", member(&BipedStats::run_friction).optional());
-    attr("run_speed", member(&BipedStats::run_speed).optional());
-    attr("crawl_friction", member(&BipedStats::crawl_friction).optional());
-    attr("crawl_speed", member(&BipedStats::crawl_speed).optional());
-    attr("stop_friction", member(&BipedStats::stop_friction).optional());
-    attr("skid_friction", member(&BipedStats::skid_friction).optional());
-    attr("air_friction", member(&BipedStats::air_friction).optional());
-    attr("air_speed", member(&BipedStats::air_speed).optional());
-    attr("jump_speed", member(&BipedStats::jump_speed).optional());
-    attr("jump_delay", member(&BipedStats::jump_delay).optional());
+HACCABLE(Biped_Stats) {
+    name("ent::Biped_Stats");
+    attr("walk_friction", member(&Biped_Stats::walk_friction).optional());
+    attr("walk_speed", member(&Biped_Stats::walk_speed).optional());
+    attr("run_friction", member(&Biped_Stats::run_friction).optional());
+    attr("run_speed", member(&Biped_Stats::run_speed).optional());
+    attr("crawl_friction", member(&Biped_Stats::crawl_friction).optional());
+    attr("crawl_speed", member(&Biped_Stats::crawl_speed).optional());
+    attr("stop_friction", member(&Biped_Stats::stop_friction).optional());
+    attr("skid_friction", member(&Biped_Stats::skid_friction).optional());
+    attr("air_friction", member(&Biped_Stats::air_friction).optional());
+    attr("air_speed", member(&Biped_Stats::air_speed).optional());
+    attr("jump_speed", member(&Biped_Stats::jump_speed).optional());
+    attr("jump_delay", member(&Biped_Stats::jump_delay).optional());
 }
 
 HACCABLE(Biped_Def) {
@@ -284,28 +284,28 @@ HACCABLE(Biped_Def) {
     attr("focus_offset", member(&Biped_Def::focus_offset));
 }
 
-HACCABLE(BipedPoses) {
-    name("ent::BipedPoses");
-    attr("stand", member(&BipedPoses::stand));
-    attr("walk", member(&BipedPoses::walk));
-    attr("run", member(&BipedPoses::run));
-    attr("crouch", member(&BipedPoses::crouch));
-    attr("prejump", member(&BipedPoses::prejump));
-    attr("jump", member(&BipedPoses::jump));
-    attr("crawl", member(&BipedPoses::crawl));
-    attr("hurtbk", member(&BipedPoses::hurtbk));
-    attr("laybk", member(&BipedPoses::laybk));
-    attr("look_stand", member(&BipedPoses::look_stand));
-    attr("look_walk", member(&BipedPoses::look_walk));
+HACCABLE(Biped_Poses) {
+    name("ent::Biped_Poses");
+    attr("stand", member(&Biped_Poses::stand));
+    attr("walk", member(&Biped_Poses::walk));
+    attr("run", member(&Biped_Poses::run));
+    attr("crouch", member(&Biped_Poses::crouch));
+    attr("prejump", member(&Biped_Poses::prejump));
+    attr("jump", member(&Biped_Poses::jump));
+    attr("crawl", member(&Biped_Poses::crawl));
+    attr("hurtbk", member(&Biped_Poses::hurtbk));
+    attr("laybk", member(&Biped_Poses::laybk));
+    attr("look_stand", member(&Biped_Poses::look_stand));
+    attr("look_walk", member(&Biped_Poses::look_walk));
 }
 
-HACCABLE(BipedFixdefs) {
-    name("ent::BipedFixdefs");
-    attr("feet", member(&BipedFixdefs::feet));
-    attr("stand", member(&BipedFixdefs::stand));
-    attr("hurt", member(&BipedFixdefs::hurt));
-    attr("crouch", member(&BipedFixdefs::crouch));
-    attr("crawl_l", member(&BipedFixdefs::crawl_l));
-    attr("crawl_r", member(&BipedFixdefs::crawl_r));
-    attr("ceiling_low", member(&BipedFixdefs::ceiling_low));
+HACCABLE(Biped_Fixdefs) {
+    name("ent::Biped_Fixdefs");
+    attr("feet", member(&Biped_Fixdefs::feet));
+    attr("stand", member(&Biped_Fixdefs::stand));
+    attr("hurt", member(&Biped_Fixdefs::hurt));
+    attr("crouch", member(&Biped_Fixdefs::crouch));
+    attr("crawl_l", member(&Biped_Fixdefs::crawl_l));
+    attr("crawl_r", member(&Biped_Fixdefs::crawl_r));
+    attr("ceiling_low", member(&Biped_Fixdefs::ceiling_low));
 }

@@ -1,5 +1,5 @@
 {hacc::Document:{
-    fixdefs:{ent::BipedFixdefs:{
+    fixdefs:{ent::Biped_Fixdefs:{
         feet:{
             b2:{ shape:$.feet_shape.b2Shape friction:0 }
             coll_a:[ground] coll_b:[ground]
@@ -81,7 +81,7 @@
         root:$.skel.segs.body
         root_offset:[0 0]
     }}
-    poses:{ent::BipedPoses:{
+    poses:{ent::Biped_Poses:{
         stand:[
             [$b =$.skel.segs.body     $lb.stand  ]
             [$h =$.skel.segs.head     $lh.stand90]

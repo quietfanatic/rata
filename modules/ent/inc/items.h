@@ -18,6 +18,8 @@ namespace ent {
 
      // An Item can never simultaneously have a room and an owner.
      // Use set_owner to take and set_room then set_owner(NULL) to drop.
+     //  (Can't call set_owner(NULL) in Resident_emerge because it might
+     //   be dropped into an unobserved room.)
     struct Item : Linkable<Item>, geo::Resident {
         Owner* owner;
         Owner* get_owner () { return owner; }

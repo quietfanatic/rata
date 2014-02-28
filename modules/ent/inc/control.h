@@ -27,7 +27,7 @@ namespace ent {
         BTN_ATTACK,
         N_BUTTONS
     };
-    enum ButtonBits {
+    enum Button_Bits {
         LEFT_BIT = 1<<BTN_LEFT,
         RIGHT_BIT = 1<<BTN_RIGHT,
         DOWN_BIT = 1<<BTN_DOWN,
@@ -40,16 +40,16 @@ namespace ent {
         ATTACK_BIT = 1<<BTN_ATTACK
     };
 
-    enum MappingType {
+    enum Mapping_Type {
         KEY,
         BTN
     };
 
     struct Mapping {
-        MappingType type;
+        Mapping_Type type;
         int code;
         Mapping () { }
-        Mapping (MappingType type, int code) : type(type), code(code) { }
+        Mapping (Mapping_Type type, int code) : type(type), code(code) { }
     };
     struct Mappings {
         std::vector<Mapping> left;
@@ -67,7 +67,7 @@ namespace ent {
 
     struct Controllable {
         Controllable** controller = NULL;
-        virtual void Controllable_buttons (ButtonBits) { }
+        virtual void Controllable_buttons (Button_Bits) { }
          // This changes the focus relative to its current position
         virtual void Controllable_move_focus (Vec diff) { }
          // This should return world coordinates, or NAN,NAN if no focus

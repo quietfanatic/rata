@@ -11,7 +11,7 @@
 
 namespace ent {
 
-    struct BipedStats {
+    struct Biped_Stats {
         float walk_friction;
         float walk_speed;
         float run_friction;
@@ -27,7 +27,7 @@ namespace ent {
     };
 
      // Enumerates all possible poses for a Biped.
-    struct BipedPoses {
+    struct Biped_Poses {
         vis::Pose stand;
         vis::Pose walk [4];
         vis::Pose run [6];
@@ -42,7 +42,7 @@ namespace ent {
     };
 
      // All the fixdefs for a given Biped.
-    struct BipedFixdefs {
+    struct Biped_Fixdefs {
         phys::FixtureDef feet;
         phys::FixtureDef stand;
         phys::FixtureDef hurt;
@@ -61,9 +61,9 @@ namespace ent {
 
      // Various bits of static info.
     struct Biped_Def : phys::Object_Def {
-        BipedFixdefs* fixdefs;
-        BipedStats* stats;  // Initial stats only.
-        BipedPoses* poses;
+        Biped_Fixdefs* fixdefs;
+        Biped_Stats* stats;  // Initial stats only.
+        Biped_Poses* poses;
         vis::Skel* skel;
         vis::Skin* skin;
          // Not part of the frame pts, because it shouldn't vary.
@@ -75,9 +75,9 @@ namespace ent {
         Biped_Def* bpdef () { return static_cast<Biped_Def*>(def); }
 
          // For control
-        ButtonBits buttons = ButtonBits(0);
+        Button_Bits buttons = Button_Bits(0);
         Vec focus = Vec(2, 0);
-        void Controllable_buttons (ButtonBits) override;
+        void Controllable_buttons (Button_Bits) override;
         void Controllable_move_focus (Vec) override;
         Vec Controllable_get_focus () override;
         int8 move_direction () {
@@ -85,7 +85,7 @@ namespace ent {
         }
 
          // For movement
-        BipedStats stats;
+        Biped_Stats stats;
         int8 direction = 1;
         bool crouching = false;
         bool crawling = false;

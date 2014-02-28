@@ -39,7 +39,7 @@ namespace ent {
             }
             bit <<= 1;
         }
-        character->Controllable_buttons(ButtonBits(buttons));
+        character->Controllable_buttons(Button_Bits(buttons));
     }
     void Player::Listener_trapped_motion (int x, int y) {
         Vec mot = geo::camera->window_motion_to_world(x, y);
@@ -92,7 +92,7 @@ HACCABLE(Controllable) {
     name("ent::Controllable");
 }
 
-HACCABLE(MappingType) {
+HACCABLE(Mapping_Type) {
     name("ent::MappingType");
     value("key", KEY);
     value("btn", BTN);

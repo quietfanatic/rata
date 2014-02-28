@@ -8,7 +8,7 @@
         skin: $("world/char/rata-base.hacc").skin
         focus_offset: [0 1]
     }}
-    stats:{ent::BipedStats:{
+    stats:{ent::Biped_Stats:{
         walk_friction: 0.8
         walk_speed: 5.0
         run_friction: 0.2
