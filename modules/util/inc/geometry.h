@@ -116,16 +116,17 @@ namespace util {
 
     Vec constrain (Vec p, const Rect& range);
 
-     // Circles
+     // Circles.  These can be inverted if their radius is negative.
     struct Circle {
         Vec c;
         float r;
         Circle () : c(Vec()),  r(0/0.0) { }
         CE Circle (Vec c, float r) : c(c), r(r) { }
-        CE Rect bounds () { return Rec(p.x-r, p.y-r, p.x+r, p.y+r); }
+        CE Rect bounds () { return Rect(c.x-r, c.y-r, c.x+r, c.y+r); }
         CE bool covers (Vec p) {
             return ((p.x-c.x)*(p.x-c.y) + (p.y-c.y)*(p.y-c.y) < r*r) != (r < 0);
         }
+        Vec snap (Vec);
     };
 
     CE Circle operator + (const Circle& a, Vec b) {
@@ -138,7 +139,39 @@ namespace util {
         return Circle(a.c-b, a.r);
     }
 
-    Vec constrain (Vec p, const Circle& range);
+     // These act at times like infinite lines and at times like segments
+    struct Line {
+        Vec a;
+        Vec b;
+        Line () : a(), b() { }
+        CE Line (Vec a, Vec b) : a(a), b(b) { }
+        CE Rect bounds () { return Rect(a, b).uninvert(); }
+        CE float slope () { return (b.y - a.y) / (b.x - a.x); }
+
+        CE bool vertical () { return a.x == b.x; }
+        CE bool horizontal () { return a.y == b.y; }
+        CE bool verticalish () { return slope() > 0.5 || slope() < -0.5; }
+        CE bool horizontalish () { return !verticalish(); }
+
+        CE float y_at_x (float x) { return a.y + (x - a.x) * slope(); }
+        CE float x_at_y (float y) { return a.x + (y - a.y) / slope(); }
+
+        CE Line bound_a () {
+            return Line(a + Vec(a.y - b.y, b.x - a.x), a);
+        }
+        CE Line bound_b () {
+            return Line(b, b + Vec(a.y - b.y, b.x - a.x));
+        }
+
+        CE bool covers (Vec p) {
+            return verticalish()
+                ? a.y < b.y ? y_at_x(p.x) < p.y
+                            : y_at_x(p.x) > p.y
+                : a.x < b.x ? x_at_y(p.y) < p.x
+                            : x_at_y(p.y) > p.x;
+        }
+        Vec snap (Vec);
+    };
 
 }
 
