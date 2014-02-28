@@ -116,6 +116,30 @@ namespace util {
 
     Vec constrain (Vec p, const Rect& range);
 
+     // Circles
+    struct Circle {
+        Vec c;
+        float r;
+        Circle () : c(Vec()),  r(0/0.0) { }
+        CE Circle (Vec c, float r) : c(c), r(r) { }
+        CE Rect bounds () { return Rec(p.x-r, p.y-r, p.x+r, p.y+r); }
+        CE bool covers (Vec p) {
+            return ((p.x-c.x)*(p.x-c.y) + (p.y-c.y)*(p.y-c.y) < r*r) != (r < 0);
+        }
+    };
+
+    CE Circle operator + (const Circle& a, Vec b) {
+        return Circle(a.c+b, a.r);
+    }
+    CE Circle operator + (Vec a, const Circle& b) {
+        return b+a;
+    }
+    CE Circle operator - (const Circle& a, Vec b) {
+        return Circle(a.c-b, a.r);
+    }
+
+    Vec constrain (Vec p, const Circle& range);
+
 }
 
 #endif
