@@ -28,16 +28,19 @@ namespace geo {
 
     Camera* camera = NULL;
     void Camera::activate () {
-        active = true;
+        deactivate();
         prev = camera;
         camera = this;
+        active = true;
     }
     void Camera::deactivate () {
-        for (Camera** c = &camera; *c; c = &(*c)->prev) {
-            if (*c == this) {
-                *c = prev;
-                prev = NULL;
-                return;
+        if (active) {
+            for (Camera** c = &camera; *c; c = &(*c)->prev) {
+                if (*c == this) {
+                    *c = prev;
+                    prev = NULL;
+                    return;
+                }
             }
         }
         prev = NULL;
