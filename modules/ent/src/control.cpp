@@ -67,7 +67,8 @@ namespace ent {
     }
 
     void Player::finish () {
-        Listener::activate();
+        if (!active)
+            Listener::activate();
         appear();
     }
 

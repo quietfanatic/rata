@@ -34,7 +34,7 @@ struct Hotkeys : core::Listener {
         return false;
     }
     int Listener_trap_cursor () override { return -1; }
-    void finish () { activate(); }
+    void finish () { if (!active) activate(); }
 };
 
  // Global game settings.  Eventually, all modules with configurable settings

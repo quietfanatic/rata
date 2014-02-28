@@ -18,9 +18,13 @@ namespace geo {
         virtual ~Camera () { deactivate(); }
 
         Camera (bool active = false) { activate(); }
+
+        bool active;
         Camera* prev = NULL;
+
         void activate ();
         void deactivate ();
+
          // USAGE
         Vec window_to_world (int x, int y) {
             using namespace core;
@@ -54,7 +58,7 @@ namespace geo {
         Vec pos = Vec(10, 7.5);
         Vec Camera_pos () override { return pos; }
         void Camera_update () { }
-        void finish () { activate(); }
+        void finish () { if (!active) activate(); }
         Default_Camera (bool active = true) : Camera(active) { }
     };
     Default_Camera& default_camera ();

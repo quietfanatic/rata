@@ -28,6 +28,7 @@ namespace geo {
 
     Camera* camera = NULL;
     void Camera::activate () {
+        active = true;
         prev = camera;
         camera = this;
     }
@@ -40,6 +41,7 @@ namespace geo {
             }
         }
         prev = NULL;
+        active = false;
     }
 
     Default_Camera& default_camera () {
