@@ -379,7 +379,7 @@ HACCABLE(Object_Def) {
     attr("mass", member(&Object_Def::mass).optional());
     attr("damping", member(&Object_Def::damping).optional());
     attr("gravity_scale", member(&Object_Def::gravity_scale).optional());
-    attr("fixtures", member(&Object_Def::fixtures));
+    attr("fixtures", member(&Object_Def::fixtures).optional());
 }
 
 HACCABLE(Object) {

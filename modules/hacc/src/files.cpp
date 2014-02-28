@@ -171,7 +171,7 @@ namespace hacc {
             if (f.p->state != UNLOADED) return;
             if (auto ext = get_ext(f.p->filename)) {
                 f.p->state = LOAD_PREPARING;
-                new Action(PREPARE, [=](){ load_ext(f, ext); });
+                load_ext(f, ext);
             }
             else {
                 f.p->state = LOAD_PREPARING;
@@ -286,7 +286,7 @@ namespace hacc {
             f.p->old_data = std::move(f.p->data);
             if (auto ext = get_ext(f.p->filename)) {
                 f.p->state = RELOAD_PREPARING;
-                new Action(PREPARE, [=](){ reload_ext(f, ext); });
+                reload_ext(f, ext);
             }
             else {
                 f.p->state = RELOAD_PREPARING;

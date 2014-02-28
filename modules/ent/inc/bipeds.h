@@ -11,7 +11,6 @@
 
 namespace ent {
 
-    struct Biped;
     struct BipedStats {
         float walk_friction;
         float walk_speed;
@@ -26,19 +25,54 @@ namespace ent {
         float jump_speed;
         float jump_delay;
     };
+
      // Enumerates all possible poses for a Biped.
-    struct BipedPoses;
+    struct BipedPoses {
+        vis::Pose stand;
+        vis::Pose walk [4];
+        vis::Pose run [6];
+        vis::Pose crouch;
+        vis::Pose prejump;
+        vis::Pose jump;
+        vis::Pose crawl [4];
+        vis::Pose hurtbk;
+        vis::Pose laybk;
+        vis::Pose look_stand [9];
+        vis::Pose look_walk [9];
+    };
+
      // All the fixdefs for a given Biped.
-    struct BipedFixdefs;
+    struct BipedFixdefs {
+        phys::FixtureDef feet;
+        phys::FixtureDef stand;
+        phys::FixtureDef hurt;
+        phys::FixtureDef crouch;
+        phys::FixtureDef crawl_l;
+        phys::FixtureDef crawl_r;
+        phys::FixtureDef ceiling_low;
+         // LOL, categorizing things by comparing their addresses
+        bool is_primary (phys::FixtureDef* fd) {
+            return fd >= &stand && fd <= &crawl_r;
+        }
+        bool is_sensor (phys::FixtureDef* fd) {
+            return fd == &ceiling_low;
+        }
+    };
+
      // Various bits of static info.
-    struct BipedDef;
+    struct Biped_Def : phys::Object_Def {
+        BipedFixdefs* fixdefs;
+        BipedStats* stats;  // Initial stats only.
+        BipedPoses* poses;
+        vis::Skel* skel;
+        vis::Skin* skin;
+         // Not part of the frame pts, because it shouldn't vary.
+        Vec focus_offset;
+    };
 
     struct Biped : ROD<vis::Sprites>, phys::Grounded, Controllable {
 
-        BipedDef* def = NULL;
-         // Bleh
-        BipedDef* get_def () const { return def; }
-        void set_def (BipedDef*);
+        Biped_Def* bpdef () { return static_cast<Biped_Def*>(bdf); }
 
          // For control
         ButtonBits buttons = ButtonBits(0);
@@ -58,6 +92,7 @@ namespace ent {
         bool ceiling_low = false;  // Established by a sensor
         uint8 jump_timer = 0;  // counts up until stats.jump_delay
 
+        void Object_set_def (phys::Object_Def*) override;
         void Object_before_move () override;
         void Object_after_move () override;
         float Grounded_velocity () override;
@@ -71,47 +106,6 @@ namespace ent {
 
         Biped ();
 
-    };
-
-    struct BipedPoses {
-        vis::Pose stand;
-        vis::Pose walk [4];
-        vis::Pose run [6];
-        vis::Pose crouch;
-        vis::Pose prejump;
-        vis::Pose jump;
-        vis::Pose crawl [4];
-        vis::Pose hurtbk;
-        vis::Pose laybk;
-        vis::Pose look_stand [9];
-        vis::Pose look_walk [9];
-    };
-
-    struct BipedFixdefs {
-        phys::FixtureDef feet;
-        phys::FixtureDef stand;
-        phys::FixtureDef hurt;
-        phys::FixtureDef crouch;
-        phys::FixtureDef crawl_l;
-        phys::FixtureDef crawl_r;
-        phys::FixtureDef ceiling_low;
-         // LOL, categorizing things by comparing their addresses
-        bool is_primary (phys::FixtureDef* fd) {
-            return fd >= &stand && fd <= &crawl_r;
-        }
-        bool is_sensor (phys::FixtureDef* fd) {
-            return fd == &ceiling_low;
-        }
-    };
-
-    struct BipedDef {
-        BipedFixdefs* fixdefs;
-        BipedStats* stats;  // Initial stats only.
-        BipedPoses* poses;
-        vis::Skel* skel;
-        vis::Skin* skin;
-         // Not part of the frame pts, because it shouldn't vary.
-        Vec focus_offset;
     };
 
 }

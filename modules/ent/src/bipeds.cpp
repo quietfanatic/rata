@@ -6,10 +6,13 @@
 
 namespace ent {
 
-     // Definitions
-    void Biped::set_def (BipedDef* _def) {
-        def = _def;
+    void Biped::Object_set_def (phys::Object_Def* _def) {
+        Object::Object_set_def(_def);
+        auto def = static_cast<Biped_Def*>(_def);
         stats = *def->stats;
+        for (auto fp = &def->fixdefs->feet; fp <= &def->fixdefs->ceiling_low; fp++) {
+            add_fixture(fp);
+        }
     }
 
     void Biped::Controllable_buttons (ButtonBits bits) {
@@ -24,7 +27,7 @@ namespace ent {
         focus = constrain(focus + diff, Rect(-18, -13, 18, 13));
     }
     Vec Biped::Controllable_get_focus () {
-        return focus + pos() + def->focus_offset;
+        return focus + pos() + bpdef()->focus_offset;
     }
 
      // Change some kinds of movement state
@@ -89,19 +92,19 @@ namespace ent {
         auto active = (
             ground
                 ? jump_timer
-                    ? &def->fixdefs->crouch
+                    ? &bpdef()->fixdefs->crouch
                     : crawling
                         ? mdir == 1
-                            ? &def->fixdefs->crawl_r
-                            : &def->fixdefs->crawl_l
+                            ? &bpdef()->fixdefs->crawl_r
+                            : &bpdef()->fixdefs->crawl_l
                         : crouching
-                            ? &def->fixdefs->crouch
-                        : &def->fixdefs->stand
-                : &def->fixdefs->stand
+                            ? &bpdef()->fixdefs->crouch
+                        : &bpdef()->fixdefs->stand
+                : &bpdef()->fixdefs->stand
         );
         for (auto fix = b2body->GetFixtureList(); fix; fix = fix->GetNext()) {
             auto fd = (phys::FixtureDef*)fix->GetUserData();
-            if (def->fixdefs->is_primary(fd)) {
+            if (bpdef()->fixdefs->is_primary(fd)) {
                 phys::Filter filt = fix->GetFilterData();
                 if (filt.active != (fd == active)) {
                     filt.active = (fd == active);
@@ -153,7 +156,7 @@ namespace ent {
         ceiling_low = false;
         foreach_contact([&](b2Fixture* mine, b2Fixture* other){
             auto fd = (phys::FixtureDef*)mine->GetUserData();
-            if (fd == &def->fixdefs->ceiling_low) {
+            if (fd == &bpdef()->fixdefs->ceiling_low) {
                 ceiling_low = true;
             }
         });
@@ -168,26 +171,26 @@ namespace ent {
     static vis::Skin* frock_skin;
 
     void Biped::Drawn_draw (vis::Sprites) {
-        char model_data [def->skel->model_data_size()];
-        vis::Model model (def->skel, model_data);
+        char model_data [bpdef()->skel->model_data_size()];
+        vis::Model model (bpdef()->skel, model_data);
         uint8 look_frame = angle_frame(atan2(focus.y, focus.x));
         if (ground) {
             if (jump_timer) {
-                model.apply_pose(&def->poses->prejump);
-                model.apply_pose(&def->poses->look_stand[look_frame]);
+                model.apply_pose(&bpdef()->poses->prejump);
+                model.apply_pose(&bpdef()->poses->look_stand[look_frame]);
             }
             else if (crawling) {
                 if (fabs(vel().x) < 0.01) {
-                    model.apply_pose(&def->poses->crawl[3]);
+                    model.apply_pose(&bpdef()->poses->crawl[3]);
                 }
                 else {
                     uint step = fmod(distance_walked * 2.0, 4.0);
-                    model.apply_pose(&def->poses->crawl[step]);
+                    model.apply_pose(&bpdef()->poses->crawl[step]);
                 }
             }
             else if (crouching) {
-                model.apply_pose(&def->poses->crouch);
-                model.apply_pose(&def->poses->look_stand[look_frame]);
+                model.apply_pose(&bpdef()->poses->crouch);
+                model.apply_pose(&bpdef()->poses->look_stand[look_frame]);
             }
             else if (vel().x * direction > stats.walk_speed) {
                 float stepdist = fmod(distance_walked * 1.5, 6.0);
@@ -199,28 +202,28 @@ namespace ent {
                   : stepdist < 3.9 ? 3
                   : stepdist < 5.1 ? 4
                   :                  5;
-                model.apply_pose(&def->poses->run[step]);
+                model.apply_pose(&bpdef()->poses->run[step]);
                 if (step % 3 < 1)
-                    model.apply_pose(&def->poses->look_stand[look_frame]);
+                    model.apply_pose(&bpdef()->poses->look_stand[look_frame]);
                 else
-                    model.apply_pose(&def->poses->look_walk[look_frame]);
+                    model.apply_pose(&bpdef()->poses->look_walk[look_frame]);
             }
             else if (fabs(vel().x) >= 0.01) {
                 uint step = fmod(distance_walked * 2.0, 4.0);
-                model.apply_pose(&def->poses->walk[step]);
+                model.apply_pose(&bpdef()->poses->walk[step]);
                 if (step % 2 < 1)
-                    model.apply_pose(&def->poses->look_walk[look_frame]);
+                    model.apply_pose(&bpdef()->poses->look_walk[look_frame]);
                 else
-                    model.apply_pose(&def->poses->look_stand[look_frame]);
+                    model.apply_pose(&bpdef()->poses->look_stand[look_frame]);
             }
             else {
-                model.apply_pose(&def->poses->stand);
-                model.apply_pose(&def->poses->look_stand[look_frame]);
+                model.apply_pose(&bpdef()->poses->stand);
+                model.apply_pose(&bpdef()->poses->look_stand[look_frame]);
             }
         }
         else {
-            model.apply_pose(&def->poses->jump);
-            model.apply_pose(&def->poses->look_walk[look_frame]);
+            model.apply_pose(&bpdef()->poses->jump);
+            model.apply_pose(&bpdef()->poses->look_walk[look_frame]);
         }
          // TODO: implement this as an item
         static bool initted = false;
@@ -230,7 +233,7 @@ namespace ent {
             hacc::manage(&frock_skin);
         }
         vis::Skin* skins [2];
-        skins[0] = def->skin;
+        skins[0] = bpdef()->skin;
         skins[1] = frock_skin;
         model.draw(2, skins, pos(), Vec(direction, 1));
     }
@@ -241,7 +244,6 @@ namespace ent {
 
 HACCABLE(Biped) {
     name("ent::Biped");
-    attr("def", value_methods(&Biped::get_def, &Biped::set_def));
     attr("ROD", base<ROD<vis::Sprites>>().collapse());
     attr("Grounded", base<phys::Grounded>().collapse());
     attr("Controllable", base<ent::Controllable>().collapse());
@@ -270,14 +272,15 @@ HACCABLE(BipedStats) {
     attr("jump_delay", member(&BipedStats::jump_delay).optional());
 }
 
-HACCABLE(BipedDef) {
-    name("ent::BipedDef");
-    attr("fixdefs", member(&BipedDef::fixdefs));
-    attr("stats", member(&BipedDef::stats));
-    attr("skel", member(&BipedDef::skel));
-    attr("poses", member(&BipedDef::poses));
-    attr("skin", member(&BipedDef::skin));
-    attr("focus_offset", member(&BipedDef::focus_offset));
+HACCABLE(Biped_Def) {
+    name("ent::Biped_Def");
+    attr("Object_def", base<phys::Object_Def>().collapse());
+    attr("fixdefs", member(&Biped_Def::fixdefs));
+    attr("stats", member(&Biped_Def::stats));
+    attr("skel", member(&Biped_Def::skel));
+    attr("poses", member(&Biped_Def::poses));
+    attr("skin", member(&Biped_Def::skin));
+    attr("focus_offset", member(&Biped_Def::focus_offset));
 }
 
 HACCABLE(BipedPoses) {

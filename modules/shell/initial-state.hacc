@@ -1,7 +1,6 @@
 {hacc::Document:{
     rata:{ent::Biped:{
-        def:$("world/res/rata.hacc").def
-        bdf:$("ent/res/small.hacc").bdf
+        bdf:$("world/res/rata.hacc").def
         pos:[1 22]
         room:$("world/res/test.room").room
         direction:1
@@ -15,8 +14,7 @@
         cursor_frame:$("ent/res/cursor.hacc").layout.normal
     }}
     rata2:{ent::Biped:{
-        def:$("world/res/rata.hacc").def
-        bdf:$("ent/res/small.hacc").bdf
+        bdf:$("world/res/rata.hacc").def
         pos:[4 22]
         room:$("world/res/test.room").room
         direction:-1
