@@ -2,7 +2,7 @@
     _next_id:2
     _1:{ geo::Tilemap:{
         room:$.room
-        bdf:$("geo/res/tilemap.bdf")
+        def:$("geo/res/tilemap.bdf")
         pos:[
             40~42200000
             0~00000000

@@ -72,7 +72,7 @@ namespace ent {
 
     struct Biped : ROD<vis::Sprites>, phys::Grounded, Controllable {
 
-        Biped_Def* bpdef () { return static_cast<Biped_Def*>(bdf); }
+        Biped_Def* bpdef () { return static_cast<Biped_Def*>(def); }
 
          // For control
         ButtonBits buttons = ButtonBits(0);

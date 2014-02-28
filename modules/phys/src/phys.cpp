@@ -111,24 +111,24 @@ namespace phys {
     Space::~Space () { stop(); }
 
      // Objects
-    void Object::Object_set_def (Object_Def* new_bdf) {
-        if (new_bdf != bdf) {
-            b2body->SetType(new_bdf->type);
-            b2body->SetLinearDamping(new_bdf->damping);
-            b2body->SetGravityScale(new_bdf->gravity_scale);
-            b2MassData md {new_bdf->mass, Vec(0, 0), 0};
+    void Object::Object_set_def (Object_Def* new_def) {
+        if (new_def != def) {
+            b2body->SetType(new_def->type);
+            b2body->SetLinearDamping(new_def->damping);
+            b2body->SetGravityScale(new_def->gravity_scale);
+            b2MassData md {new_def->mass, Vec(0, 0), 0};
             b2body->SetMassData(&md);
              // Remove old fixtures
-            if (bdf) {
-                for (auto fix : bdf->fixtures) {
+            if (def) {
+                for (auto fix : def->fixtures) {
                     b2body->DestroyFixture(get_fixture(fix));
                 }
             }
              // Add new fixtures
-            for (auto fix : new_bdf->fixtures) {
+            for (auto fix : new_def->fixtures) {
                 add_fixture(fix);
             }
-            bdf = new_bdf;
+            def = new_def;
         }
     }
     b2Fixture* Object::add_fixture (FixtureDef* fdf) {
@@ -384,7 +384,7 @@ HACCABLE(Object_Def) {
 
 HACCABLE(Object) {
     name("phys::Object");
-    attr("bdf", value_methods(&Object::get_def, &Object::Object_set_def).optional());
+    attr("def", value_methods(&Object::get_def, &Object::Object_set_def).optional());
     attr("pos", value_methods(&Object::pos, &Object::set_pos).optional());
     attr("vel", value_methods(&Object::vel, &Object::set_vel).optional());
 }

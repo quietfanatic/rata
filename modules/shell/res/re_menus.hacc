@@ -59,14 +59,13 @@
                                 text:"test"
                                 on_click:[re_new_actor ent::Biped {
                                     def:$("world/res/rata.hacc").def
-                                    bdf:$("ent/res/small.hacc").bdf
                                     direction:1
                                 }]
                             }}
                             {shell::Text_Button:{
                                 text:"crate"
                                 on_click:[re_new_actor ent::Inert {
-                                    bdf:$("ent/res/various.hacc").crate_def
+                                    def:$("ent/res/various.hacc").crate_def
                                 }]
                             }}
                         ]
@@ -77,7 +76,7 @@
                     contents:{shell::Text_Button:{
                         text:"tilemap"
                         on_click:[re_new_furniture geo::Tilemap {
-                            bdf:$("geo/res/tilemap.bdf")
+                            def:$("geo/res/tilemap.bdf")
                             tileset:$("world/res/test.tileset").tileset
                             texture:$("world/res/test.tileset").img.textures[0]
                             tiles:$("world/res/default.tiles")

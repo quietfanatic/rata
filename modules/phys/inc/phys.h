@@ -63,11 +63,11 @@ namespace phys {
      // The dynamic thing
      // Every class that wants to have a physical presence should inherit from this.
     struct Object {
-        Object_Def* bdf = NULL;
+        Object_Def* def = NULL;
         b2Body* b2body = NULL;
 
          // To make Haccable happy
-        Object_Def* get_def () const { return bdf; }
+        Object_Def* get_def () const { return def; }
 
          // A paltry amount of wrapper methods.
         Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }

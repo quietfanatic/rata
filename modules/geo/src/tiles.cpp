@@ -9,7 +9,7 @@
 namespace geo {
     using namespace util;
 
-    static phys::Object_Def* tilemap_bdf;
+    static phys::Object_Def* tilemap_def;
 
     static Logger tilemap_logger ("tilemap");
 
@@ -17,14 +17,14 @@ namespace geo {
         static bool initted = false;
         if (!initted) {
             initted = true;
-            tilemap_bdf = hacc::File("geo/res/tilemap.bdf").data();
-            hacc::manage(&tilemap_bdf);
+            tilemap_def = hacc::File("geo/res/tilemap.bdf").data();
+            hacc::manage(&tilemap_def);
         }
     }
 
     void Tilemap::set_tiles (vis::Tiles* t) {
         tiles = t;
-        if (bdf)
+        if (def)
             physicalize();
     }
 

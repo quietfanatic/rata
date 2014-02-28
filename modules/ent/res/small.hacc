@@ -1,16 +1,4 @@
 {hacc::Document:{
-    bdf:{phys::Object_Def:{
-        fixtures:[
-            $.fixdefs.feet
-            $.fixdefs.stand
-            $.fixdefs.hurt
-            $.fixdefs.crouch
-            $.fixdefs.crawl_l
-            $.fixdefs.crawl_r
-            $.fixdefs.ceiling_low
-        ]
-        mass:1
-    }}
     fixdefs:{ent::BipedFixdefs:{
         feet:{
             b2:{ shape:$.feet_shape.b2Shape friction:0 }

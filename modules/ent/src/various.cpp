@@ -18,8 +18,8 @@ namespace ent {
     struct Inert : ROD<Sprites> {
 
         void Drawn_draw (Sprites) override {
-            auto def = static_cast<Inert_Def*>(bdf);
-            draw_texture(def->texture, pos() + def->boundary);
+            auto idef = static_cast<Inert_Def*>(def);
+            draw_texture(idef->texture, pos() + idef->boundary);
         }
 
     };
