@@ -1,8 +1,9 @@
 #ifndef HAVE_ENT_BIPEDS_H
 #define HAVE_ENT_BIPEDS_H
 
-#include "../inc/control.h"
-#include "../inc/mixins.h"
+#include "control.h"
+#include "mixins.h"
+#include "items.h"
 #include "../../phys/inc/phys.h"
 #include "../../phys/inc/ground.h"
 #include "../../geo/inc/rooms.h"
@@ -96,6 +97,10 @@ namespace ent {
         void Object_after_move () override;
         float Grounded_velocity () override;
         float Grounded_friction () override;
+
+         // Items, equipment
+        Links<Equipment> equipment;
+        Inventory inventory;
 
          // For animation
         void animate ();
