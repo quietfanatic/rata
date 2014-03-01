@@ -8,7 +8,7 @@ namespace ent {
 
     void Biped::finish () {
         ROD::finish();
-        auto def = static_cast<Biped_Def*>(Object::def);
+        auto def = get_def();
         stats = *def->stats;
         for (auto fp = &def->fixdefs->feet; fp <= &def->fixdefs->ceiling_low; fp++) {
             add_fixture(fp);
@@ -27,12 +27,13 @@ namespace ent {
         focus = constrain(focus + diff, Rect(-18, -13, 18, 13));
     }
     Vec Biped::Controllable_get_focus () {
-        return focus + pos() + bpdef()->focus_offset;
+        return focus + pos() + get_def()->focus_offset;
     }
 
      // Change some kinds of movement state
      // Do not change ground velocity, but do change air velocity
     void Biped::Object_before_move () {
+        auto def = get_def();
         int8 mdir = move_direction();
          // Turn around
         if (!crawling || !ceiling_low) {
@@ -92,19 +93,19 @@ namespace ent {
         auto active = (
             ground
                 ? jump_timer
-                    ? &bpdef()->fixdefs->crouch
+                    ? &def->fixdefs->crouch
                     : crawling
                         ? mdir == 1
-                            ? &bpdef()->fixdefs->crawl_r
-                            : &bpdef()->fixdefs->crawl_l
+                            ? &def->fixdefs->crawl_r
+                            : &def->fixdefs->crawl_l
                         : crouching
-                            ? &bpdef()->fixdefs->crouch
-                        : &bpdef()->fixdefs->stand
-                : &bpdef()->fixdefs->stand
+                            ? &def->fixdefs->crouch
+                        : &def->fixdefs->stand
+                : &def->fixdefs->stand
         );
         for (auto fix = b2body->GetFixtureList(); fix; fix = fix->GetNext()) {
             auto fd = (phys::FixtureDef*)fix->GetUserData();
-            if (bpdef()->fixdefs->is_primary(fd)) {
+            if (def->fixdefs->is_primary(fd)) {
                 phys::Filter filt = fix->GetFilterData();
                 if (filt.active != (fd == active)) {
                     filt.active = (fd == active);
@@ -138,6 +139,7 @@ namespace ent {
     }
      // Ensure we're in the right room and also calculate walk animation.
     void Biped::Object_after_move () {
+        auto def = get_def();
          // Clear input before next frame
         buttons = Button_Bits(0);
         reroom(pos());
@@ -156,7 +158,7 @@ namespace ent {
         ceiling_low = false;
         foreach_contact([&](b2Fixture* mine, b2Fixture* other){
             auto fd = (phys::FixtureDef*)mine->GetUserData();
-            if (fd == &bpdef()->fixdefs->ceiling_low) {
+            if (fd == &def->fixdefs->ceiling_low) {
                 ceiling_low = true;
             }
         });
@@ -164,32 +166,33 @@ namespace ent {
          // TODO: This kinda belongs somewhere else maybe?
          //  Well, it's gonna be replaced by a conspicuousity system anyway.
         if (controller) {
-            geo::default_camera().pos = pos() + bpdef()->focus_offset
+            geo::default_camera().pos = pos() + def->focus_offset
                                       + Vec(floor(focus.x/2/PX), floor(focus.y/2/PX))*PX;
         }
     }
 
     void Biped::Drawn_draw (vis::Sprites) {
-        char model_data [bpdef()->skel->model_data_size()];
-        vis::Model model (bpdef()->skel, model_data);
+        auto def = get_def();
+        char model_data [def->skel->model_data_size()];
+        vis::Model model (def->skel, model_data);
         uint8 look_frame = angle_frame(atan2(focus.y, focus.x));
         if (ground) {
             if (jump_timer) {
-                model.apply_pose(&bpdef()->poses->prejump);
-                model.apply_pose(&bpdef()->poses->look_stand[look_frame]);
+                model.apply_pose(&def->poses->prejump);
+                model.apply_pose(&def->poses->look_stand[look_frame]);
             }
             else if (crawling) {
                 if (fabs(vel().x) < 0.01) {
-                    model.apply_pose(&bpdef()->poses->crawl[3]);
+                    model.apply_pose(&def->poses->crawl[3]);
                 }
                 else {
                     uint step = fmod(distance_walked * 2.0, 4.0);
-                    model.apply_pose(&bpdef()->poses->crawl[step]);
+                    model.apply_pose(&def->poses->crawl[step]);
                 }
             }
             else if (crouching) {
-                model.apply_pose(&bpdef()->poses->crouch);
-                model.apply_pose(&bpdef()->poses->look_stand[look_frame]);
+                model.apply_pose(&def->poses->crouch);
+                model.apply_pose(&def->poses->look_stand[look_frame]);
             }
             else if (vel().x * direction > stats.walk_speed) {
                 float stepdist = fmod(distance_walked * 1.5, 6.0);
@@ -201,33 +204,33 @@ namespace ent {
                   : stepdist < 3.9 ? 3
                   : stepdist < 5.1 ? 4
                   :                  5;
-                model.apply_pose(&bpdef()->poses->run[step]);
+                model.apply_pose(&def->poses->run[step]);
                 if (step % 3 < 1)
-                    model.apply_pose(&bpdef()->poses->look_stand[look_frame]);
+                    model.apply_pose(&def->poses->look_stand[look_frame]);
                 else
-                    model.apply_pose(&bpdef()->poses->look_walk[look_frame]);
+                    model.apply_pose(&def->poses->look_walk[look_frame]);
             }
             else if (fabs(vel().x) >= 0.01) {
                 uint step = fmod(distance_walked * 2.0, 4.0);
-                model.apply_pose(&bpdef()->poses->walk[step]);
+                model.apply_pose(&def->poses->walk[step]);
                 if (step % 2 < 1)
-                    model.apply_pose(&bpdef()->poses->look_walk[look_frame]);
+                    model.apply_pose(&def->poses->look_walk[look_frame]);
                 else
-                    model.apply_pose(&bpdef()->poses->look_stand[look_frame]);
+                    model.apply_pose(&def->poses->look_stand[look_frame]);
             }
             else {
-                model.apply_pose(&bpdef()->poses->stand);
-                model.apply_pose(&bpdef()->poses->look_stand[look_frame]);
+                model.apply_pose(&def->poses->stand);
+                model.apply_pose(&def->poses->look_stand[look_frame]);
             }
         }
         else {
-            model.apply_pose(&bpdef()->poses->jump);
-            model.apply_pose(&bpdef()->poses->look_walk[look_frame]);
+            model.apply_pose(&def->poses->jump);
+            model.apply_pose(&def->poses->look_walk[look_frame]);
         }
          // TODO: implement this as an item
         size_t n_skins = 1 + equipment.items.count();
         vis::Skin* skins [n_skins];
-        skins[0] = bpdef()->skin;
+        skins[0] = def->skin;
         size_t i = 0;
         for (auto& e : equipment.items) {
             skins[++i] = e.def->skin;
@@ -241,7 +244,7 @@ namespace ent {
 
 HACCABLE(Biped) {
     name("ent::Biped");
-    attr("ROD", base<ROD<vis::Sprites>>().collapse());
+    attr("ROD", base<ROD<vis::Sprites, Biped_Def>>().collapse());
     attr("Grounded", base<phys::Grounded>().collapse());
     attr("Controllable", base<ent::Controllable>().collapse());
     attr("direction", member(&Biped::direction).optional());

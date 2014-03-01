@@ -15,11 +15,11 @@ namespace ent {
         Rect boundary;
     };
 
-    struct Inert : ROD<Sprites> {
+    struct Inert : ROD<Sprites, Inert_Def> {
 
         void Drawn_draw (Sprites) override {
-            auto idef = static_cast<Inert_Def*>(def);
-            draw_texture(idef->texture, pos() + idef->boundary);
+            auto def = get_def();
+            draw_texture(def->texture, pos() + def->boundary);
         }
 
     };
@@ -59,7 +59,7 @@ HACCABLE(Inert_Def) {
 
 HACCABLE(Inert) {
     name("ent::Inert");
-    attr("ROD", base<ROD<Sprites>>().collapse());
+    attr("ROD", base<ROD<Sprites, Inert_Def>>().collapse());
 }
 
 HACCABLE(Light) {

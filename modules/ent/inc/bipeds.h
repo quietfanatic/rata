@@ -71,9 +71,7 @@ namespace ent {
         Vec focus_offset;
     };
 
-    struct Biped : ROD<vis::Sprites>, phys::Grounded, Controllable {
-
-        Biped_Def* bpdef () { return static_cast<Biped_Def*>(def); }
+    struct Biped : ROD<vis::Sprites, Biped_Def>, phys::Grounded, Controllable {
 
          // For control
         Button_Bits buttons = Button_Bits(0);
