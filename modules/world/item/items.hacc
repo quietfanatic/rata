@@ -1,0 +1,13 @@
+{hacc::Document:{
+    frock:{ent::ResItem_Def:{
+        name:"Frock"
+        holdable:false
+        equippable:[$("ent/res/small.hacc").skel]
+        slots:[body]
+        skin:$("world/char/frock.hacc").skin
+        tex:null  // TODO
+        frame:null  // TODO
+        res_tex:null  // TODO
+        res_frame:null  // TODO
+    }}
+}}
