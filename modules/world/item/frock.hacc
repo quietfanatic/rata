@@ -1,6 +1,6 @@
 {hacc::Document:{
     img:{vis::Image:{
-        filename: "world/char/frock.png"
+        filename: "world/item/frock.png"
         textures: [
             {name:body    offset:[  0   0] size:[ 85 64]}
             {name:arm     offset:[  0  95] size:[100 16]}
@@ -12,7 +12,7 @@
     }}
     skin:{vis::Skin:{
         apps: [
-            [($s=$("ent/res/small.hacc").skel.segs).body $.img.body 0.01]
+            [($s=$("world/char/small.hacc").skel.segs).body $.img.body 0.01]
             [$s.arm1 $.img.arm 0.01]
             [$s.forearm1 $.img.forearm 0.01]
             [$s.arm2 $.img.arm 0.01]

@@ -65,7 +65,7 @@
                             {shell::Text_Button:{
                                 text:"crate"
                                 on_click:[re_new_actor ent::Inert {
-                                    def:$("ent/res/various.hacc").crate_def
+                                    def:$("world/res/stuff.hacc").crate_def
                                 }]
                             }}
                         ]
@@ -76,7 +76,7 @@
                     contents:{shell::Text_Button:{
                         text:"tilemap"
                         on_click:[re_new_furniture geo::Tilemap {
-                            def:$("world/res/test.tileset").def
+                            def:$("world/res/test-tiles.hacc").def
                         }]
                     }}
                 }}

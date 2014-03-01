@@ -40,7 +40,7 @@ namespace hacc {
         struct IO_Error : Error {
             int no;
             IO_Error (String mess, String filename, int no) :
-                Error(mess, filename), no(no)
+                Error(mess), no(no)
             { }
         };
         struct Open_Error : IO_Error {

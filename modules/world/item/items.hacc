@@ -2,9 +2,9 @@
     frock:{ent::ResItem_Def:{
         name:"Frock"
         holdable:false
-        equippable:[$("ent/res/small.hacc").skel]
+        equippable:[$("world/char/small.hacc").skel]
         slots:[body]
-        skin:$("world/char/frock.hacc").skin
+        skin:$("world/item/frock.hacc").skin
         tex:null  // TODO
         frame:null  // TODO
         res_tex:null  // TODO

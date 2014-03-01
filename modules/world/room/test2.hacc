@@ -11,8 +11,8 @@
     } }
     tilemap_def:{ geo::Tilemap_Def:{
         type:static
-        tileset:$("world/res/test.tileset").tileset
-        texture:$("world/res/test.tileset").img.textures[0]
+        tileset:$("world/res/test-tiles.hacc").tileset
+        texture:$("world/res/test-tiles.hacc").img.textures[0]
         tiles:$("world/room/test2.tiles")
     } }
     _1:{ geo::Tilemap:{

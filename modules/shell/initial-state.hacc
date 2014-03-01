@@ -10,8 +10,8 @@
     }}
     player:{ent::Player:{
         character:$.rata.Controllable
-        cursor_tex:$("ent/res/cursor.hacc").img.ALL
-        cursor_frame:$("ent/res/cursor.hacc").layout.normal
+        cursor_tex:$("world/res/cursor.hacc").img.ALL
+        cursor_frame:$("world/res/cursor.hacc").layout.normal
     }}
     rata2:{ent::Biped:{
         def:$("world/char/rata.hacc").def

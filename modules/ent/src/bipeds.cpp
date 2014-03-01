@@ -168,8 +168,6 @@ namespace ent {
         }
     }
 
-    static vis::Skin* frock_skin;
-
     void Biped::Drawn_draw (vis::Sprites) {
         char model_data [bpdef()->skel->model_data_size()];
         vis::Model model (bpdef()->skel, model_data);
@@ -226,12 +224,6 @@ namespace ent {
             model.apply_pose(&bpdef()->poses->look_walk[look_frame]);
         }
          // TODO: implement this as an item
-        static bool initted = false;
-        if (!initted) {
-            initted = true;
-            frock_skin = hacc::File("world/char/frock.hacc").attr("skin");
-            hacc::manage(&frock_skin);
-        }
         size_t n_skins = 1 + equipment.items.count();
         vis::Skin* skins [n_skins];
         skins[0] = bpdef()->skin;
