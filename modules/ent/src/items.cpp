@@ -8,6 +8,11 @@ namespace ent {
         vis::draw_frame(ridef->res_frame, ridef->res_tex, pos);
     }
 
+    Inventory::~Inventory () {
+        for (auto& i : items)
+            i.set_owner(NULL);
+    }
+
 } using namespace ent;
 
 HACCABLE(Equipment_Slots) {

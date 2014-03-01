@@ -35,6 +35,7 @@ namespace ent {
 
     struct Inventory {
         util::Links<Item> items;  // Passive list
+        ~Inventory ();
     };
 
      // Objects that inherit both Item and Resident should never have
@@ -43,7 +44,11 @@ namespace ent {
         Item_Def* def = NULL;
         Inventory* owner = NULL;
         Inventory* get_owner () const { return owner; }
-        void set_owner (Inventory* inv) { link((owner = inv)->items); }
+        void set_owner (Inventory* inv) {
+            owner = inv;
+            if (owner)
+                link(owner->items);
+        }
         Item () { }
     };
 
