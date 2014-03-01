@@ -16,7 +16,7 @@ namespace util {
     struct Vec {
         float x;
         float y;
-        Vec () :x(0/0.0), y(0/0.0) { }  // Can't be CE because of NaNs. :[
+        CE Vec () :x(NAN), y(NAN) { }
         CE Vec (float x, float y) :x(x), y(y) { }
         Vec (b2Vec2 bv) :x(bv.x), y(bv.y) { }
         operator b2Vec2& () { return reinterpret_cast<b2Vec2&>(*this); }
@@ -59,9 +59,7 @@ namespace util {
         float b;
         float r;
         float t;
-        Rect () :
-            l(0/0.0), b(0/0.0), r(0/0.0), t(0/0.0)
-        { }
+        CE Rect () : l(NAN), b(NAN), r(NAN), t(NAN) { }
         CE Rect (float l, float b, float r, float t) :
             l(l), b(b), r(r), t(t)
         { }
@@ -120,7 +118,7 @@ namespace util {
     struct Circle {
         Vec c;
         float r;
-        Circle () : c(Vec()),  r(0/0.0) { }
+        CE Circle () : c(),  r(NAN) { }
         CE Circle (Vec c, float r) : c(c), r(r) { }
         CE Rect bounds () { return Rect(c.x-r, c.y-r, c.x+r, c.y+r); }
         CE bool covers (Vec p) {
@@ -143,7 +141,7 @@ namespace util {
     struct Line {
         Vec a;
         Vec b;
-        Line () : a(), b() { }
+        CE Line () : a(), b() { }
         CE Line (Vec a, Vec b) : a(a), b(b) { }
         CE Rect bounds () { return Rect(a, b).uninvert(); }
         CE float slope () { return (b.y - a.y) / (b.x - a.x); }

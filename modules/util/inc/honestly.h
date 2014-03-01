@@ -37,12 +37,9 @@ typedef uint32 uint;
 CE float FR = 1/60.0;
 CE float PX = 1/16.0;
 CE float PI = M_PI;
- // Can't be CEs because apparently division by 0 is not constant?
+ // Can't be a CE because apparently division by 0 is not constant?
 #ifndef INF
 static const float INF = 1.f/0.f;
-#endif
-#ifndef NAN
-static const float NAN = 0.f/0.f;
 #endif
 
 static float frand () {
