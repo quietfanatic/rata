@@ -65,6 +65,11 @@ namespace util {
         };
         iterator begin () { return iterator{next}; }
         iterator end () { return iterator{this}; }
+        size_t count () {
+            size_t r = 0;
+            for (auto& a : *this) r++;
+            return r;
+        }
     };
 
     template <class C, Links<C>&(* all)()>

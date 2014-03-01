@@ -232,10 +232,14 @@ namespace ent {
             frock_skin = hacc::File("world/char/frock.hacc").attr("skin");
             hacc::manage(&frock_skin);
         }
-        vis::Skin* skins [2];
+        size_t n_skins = 1 + equipment.items.count();
+        vis::Skin* skins [n_skins];
         skins[0] = bpdef()->skin;
-        skins[1] = frock_skin;
-        model.draw(2, skins, pos(), Vec(direction, 1));
+        size_t i = 0;
+        for (auto& e : equipment.items) {
+            skins[++i] = e.def->skin;
+        }
+        model.draw(n_skins, skins, pos(), Vec(direction, 1));
     }
 
     Biped::Biped () { }
