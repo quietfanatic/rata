@@ -164,7 +164,8 @@ namespace ent {
          // TODO: This kinda belongs somewhere else maybe?
          //  Well, it's gonna be replaced by a conspicuousity system anyway.
         if (controller) {
-            geo::default_camera().pos = pos();
+            geo::default_camera().pos = pos() + bpdef()->focus_offset
+                                      + Vec(floor(focus.x/2/PX), floor(focus.y/2/PX))*PX;
         }
     }
 
