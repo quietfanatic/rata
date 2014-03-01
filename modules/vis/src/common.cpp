@@ -1,4 +1,4 @@
-#include "vis/inc/common.h"
+#include "vis/src/common_internal.h"
 
 #include "core/inc/commands.h"
 #include "core/inc/opengl.h"

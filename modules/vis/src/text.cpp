@@ -3,7 +3,7 @@
 #include "core/inc/commands.h"
 #include "core/inc/opengl.h"
 #include "hacc/inc/everything.h"
-#include "vis/inc/common.h"
+#include "vis/src/common_internal.h"
 using namespace core;
 using namespace util;
 

@@ -1,6 +1,7 @@
 #include "shell/inc/editing.h"
 
 #include <sstream>
+#include <GL/glfw.h>
 #include "core/inc/commands.h"
 #include "ent/inc/control.h"
 #include "geo/inc/rooms.h"

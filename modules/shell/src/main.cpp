@@ -20,8 +20,8 @@ static std::string state_arg;
 
 struct Hotkeys : core::Listener {
     std::vector<std::pair<int, core::Command>> hotkeys;
-    bool Listener_key (int keycode, int action) override {
-        if (action == GLFW_PRESS) {
+    bool Listener_key (int keycode, int press) override {
+        if (press) {
             for (auto& p : hotkeys) {
                 if (keycode == p.first) {
                     p.second();

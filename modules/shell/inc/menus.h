@@ -46,8 +46,8 @@ namespace shell {
         void Listener_cursor_pos (int x, int y) {
             hover(geo::camera->window_to_layer<Layer>(x, y));
         }
-        bool Listener_button (int code, int action) {
-            if (code == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        bool Listener_button (int code, int press) {
+            if (code == 1 && press) {
                 bool res = click(geo::camera->window_to_layer<Layer>(
                     core::window->cursor_x,
                     core::window->cursor_y

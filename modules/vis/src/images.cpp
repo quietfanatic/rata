@@ -8,7 +8,7 @@
 #include "core/inc/window.h"
 #include "hacc/inc/everything.h"
 #include "util/inc/integration.h"
-#include "vis/inc/common.h"
+#include "vis/src/common_internal.h"
 using namespace util;
 
 namespace vis {
