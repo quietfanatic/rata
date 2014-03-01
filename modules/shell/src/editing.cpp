@@ -42,7 +42,7 @@ namespace shell {
                 Vec pos = r_pos + selected->Resident_get_pt(i);
                 if (pos.is_defined()) {
                     color_offset(pos);
-                    draw_color(i == dragging_pt ? 0xff0000ff : 0xffff00ff);
+                    draw_color((int)i == dragging_pt ? 0xff0000ff : 0xffff00ff);
                     draw_rect(Rect(-0.25, -0.25, 0.25, 0.25));
                 }
             }
@@ -305,7 +305,8 @@ namespace shell {
             else
                 editor = "vim";
         }
-        system((std::string(editor) + " " + tmp).c_str());
+        if (system((std::string(editor) + " " + tmp).c_str()) != 0)
+            log("editing", "Failed to open text editor.");
         auto new_str = hacc::string_from_file(tmp);
         if (new_str != str) {
             log("editing", "Updating");

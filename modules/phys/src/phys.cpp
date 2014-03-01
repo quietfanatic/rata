@@ -281,7 +281,7 @@ HACCABLE(Hack_b2PolygonShape_Verts) {
         }
     ));
     elems([](Hack_b2PolygonShape_Verts& v, size_t index){
-        if (index <= v.m_count)
+        if ((int)index <= v.m_count)
             return hacc::Reference(v.m_vertices + index);
         else
             throw hacc::X::Out_Of_Range(hacc::Pointer(&v), index, v.m_count);
