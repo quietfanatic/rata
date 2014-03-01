@@ -42,6 +42,7 @@ namespace ent {
         character->Controllable_buttons(Button_Bits(buttons));
     }
     void Player::Listener_trapped_motion (int x, int y) {
+        if (!character) return;
         Vec mot = geo::camera->window_motion_to_world(x, y);
         character->Controllable_move_focus(mot);
     }
