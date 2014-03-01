@@ -92,7 +92,7 @@ namespace vis {
             draw_frame(
                 draws[i].seg->pose->frame, draws[i].tex,
                 pos + draws[i].seg->pos.scale(scale),
-                scale, z
+                scale.scale(draws[i].seg->pose->scale), z
             );
         }
     }
