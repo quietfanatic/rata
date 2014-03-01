@@ -19,4 +19,8 @@
         room:$("world/room/test.hacc").room
         direction:-1
     }}
+    frock:{ent::ResItem:{
+        def:$("world/item/items.hacc").frock
+        owner:$.rata.equipment
+    }}
 }}

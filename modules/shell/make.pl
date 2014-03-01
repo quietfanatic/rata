@@ -12,6 +12,7 @@ my @objects = qw<
     ../core/tmp/window.o
     ../ent/tmp/bipeds.o
     ../ent/tmp/control.o
+    ../ent/tmp/items.o
     ../ent/tmp/various.o
     ../geo/tmp/camera.o
     ../geo/tmp/rooms.o

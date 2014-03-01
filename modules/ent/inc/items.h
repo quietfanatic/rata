@@ -1,69 +1,63 @@
 #ifndef HAVE_ENT_ITEMS_H
 #define HAVE_ENT_ITEMS_H
 
-#include "../../vis/inc/models.h"
+#include "../../util/inc/geometry.h"
 #include "../../util/inc/organization.h"
+#include "../../vis/inc/common.h"
+#include "../../vis/inc/models.h"
+#include "../../geo/inc/rooms.h"
 
 namespace ent {
 
+    struct Item;
+    struct Biped_Stats;
+
+    enum Equipment_Slots {
+        HEAD = 1<<0,
+        HAND = 1<<1,
+        BODY = 1<<2,
+        FEET = 1<<3,
+    };
+
     struct Item_Def {
+        std::string name = "<Mystery Item>";
+        bool holdable = true;  // Can carry without equipping
+        std::vector<vis::Skel*> equippable;
+        Equipment_Slots slots = Equipment_Slots(0);
+        vis::Skin* skin = NULL;
          // For drawing as an inventory item.
         vis::Texture* tex = NULL;
         vis::Frame* frame = NULL;
-    };
 
-    struct Item;
+         // Inherit if you want to alter the equipper's stats
+        virtual void Item_stats (Biped_Stats*) { }
+    };
 
     struct Inventory {
-        Links<Item> items;  // Passive list
+        util::Links<Item> items;  // Passive list
     };
 
-
-     // An Item can never simultaneously have a room and an owner.
-     // Use set_owner to take and set_room then set_owner(NULL) to drop.
-     //  (Can't call set_owner(NULL) in Resident_emerge because it might
-     //   be dropped into an unobserved room.)
-    struct Item : Link<Item>, geo::Resident {
+     // Objects that inherit both Item and Resident should never have
+     //  both a owner and a room at the same time.
+    struct Item : util::Link<Item> {
         Item_Def* def = NULL;
         Inventory* owner = NULL;
-        Inventory* get_owner () { return owner; }
-        void set_owner (Inventory*);
-
-        void Resident_emerge () override;
-        void Resident_reclude () override;
-
-        ~Item ();
+        Inventory* get_owner () const { return owner; }
+        void set_owner (Inventory* inv) { link((owner = inv)->items); }
+        Item () { }
     };
 
-    enum Equipment_Slots {
-        FEET = 1<<0,
-        BODY = 1<<1,
-        HEAD = 1<<2,
-        HAND = 1<<3
+    struct ResItem_Def : Item_Def {
+        vis::Texture* res_tex = NULL;
+        vis::Frame* res_frame = NULL;
     };
 
-    struct Equipment_Def {
-        vis::Texture* tex = NULL;
-        vis::Frame* frame = NULL;
-         // TODO: denote compatibility with different skeletons
-        vis::Skin* skin = NULL;
-        Equipment_Slots slots = Equipment_Slots(0);
-    };
-
-    struct Biped;
-    struct Biped_Stats;
-
-     // This is not a subclass of Item, because some things can be
-     //  equipped but not carried unequipped.
-    struct Equipment : Link<Equipment> {
-        Equipment_Def* def = NULL;
-        Biped* user = NULL;
-        Biped* get_user () { return user; }
-        void set_user (Biped*);
-         // Use this to tweak stats
-        virtual void Equipment_stats (Biped_Stats*) { }
-
-        ~Equipment ();
+    struct ResItem : Item, geo::Resident, vis::Drawn<vis::Sprites> {
+        util::Vec pos;
+        void Drawn_draw (vis::Sprites) override;
+        void Resident_emerge () override { appear(); }
+        void Resident_reclude () override { disappear(); }
+        ResItem () { }
     };
 
 }

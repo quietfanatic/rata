@@ -99,7 +99,7 @@ namespace ent {
         float Grounded_friction () override;
 
          // Items, equipment
-        Links<Equipment> equipment;
+        Inventory equipment;
         Inventory inventory;
 
          // For animation
