@@ -1,5 +1,6 @@
 #include "util/inc/debug.h"
 
+#include <stdarg.h>
 #include "core/inc/commands.h"
 #include "hacc/inc/haccable.h"
 
