@@ -1,11 +1,11 @@
+#include "hacc/inc/files.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../inc/files.h"
-#include "../inc/strings.h"
-#include "../inc/haccable_standard.h"
-#include "../../tap/inc/tap.h"
-
+#include "hacc/inc/haccable_standard.h"
+#include "hacc/inc/strings.h"
+#include "tap/inc/tap.h"
 using namespace hacc;
 using namespace tap;
 
@@ -43,7 +43,7 @@ static void clobber (const char* filename) {
 }
 
 
-tap::Tester files_tester ("hacc/files", [](){
+Tester files_tester ("hacc/files", [](){
     plan(26);
 
     remove("../test/eight.hacc");

@@ -1,9 +1,9 @@
-#include <GL/glew.h>
-#include <GL/glfw.h>
-#include "../inc/control.h"
-#include "../../geo/inc/camera.h"
-#include "../../geo/inc/rooms.h"
-#include "../../hacc/inc/haccable_standard.h"
+#include "ent/inc/control.h"
+
+#include "geo/inc/camera.h"
+#include "geo/inc/rooms.h"
+#include "hacc/inc/haccable_standard.h"
+#include "vis/inc/images.h"
 
 namespace ent {
 
@@ -54,12 +54,12 @@ namespace ent {
         mappings[BTN_DOWN].emplace_back(KEY, 'S');
         mappings[BTN_UP].emplace_back(KEY, 'W');
         mappings[BTN_CROUCH].emplace_back(KEY, 'S');
-        mappings[BTN_JUMP].emplace_back(KEY, GLFW_KEY_SPACE);
+        mappings[BTN_JUMP].emplace_back(KEY, ' ');
         mappings[BTN_ACTION].emplace_back(KEY, 'E');
-        mappings[BTN_EXAMINE].emplace_back(BTN, GLFW_MOUSE_BUTTON_LEFT);
-        mappings[BTN_AIM].emplace_back(BTN, GLFW_MOUSE_BUTTON_RIGHT);
-        mappings[BTN_AIM].emplace_back(KEY, GLFW_KEY_LSHIFT);
-        mappings[BTN_ATTACK].emplace_back(BTN, GLFW_MOUSE_BUTTON_LEFT);
+        mappings[BTN_EXAMINE].emplace_back(BTN, 1);
+        mappings[BTN_AIM].emplace_back(BTN, 2);
+        mappings[BTN_AIM].emplace_back(KEY, 287);
+        mappings[BTN_ATTACK].emplace_back(BTN, 1);
         player = this;
     }
     Player::~Player () {

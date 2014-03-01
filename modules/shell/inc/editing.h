@@ -1,16 +1,14 @@
 #ifndef HAVE_GEO_EDITING_H
 #define HAVE_GEO_EDITING_H
 
-#include "menus.h"
-#include "../../geo/inc/camera.h"
-#include "../../geo/inc/rooms.h"
-#include "../../geo/inc/tiles.h"
-#include "../../vis/inc/common.h"
-#include "../../vis/inc/text.h"
-#include "../../core/inc/window.h"
+#include "shell/inc/menus.h"
+#include "core/inc/window.h"
+#include "geo/inc/camera.h"
+#include "vis/inc/common.h"
+namespace geo { struct Room; struct Resident; struct Tilemap; }
+namespace vis { struct Font; struct Texture; }
 
 namespace shell {
-    using namespace util;
 
     struct Room_Editor : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Dev>, core::Listener {
          // Associated utilities
@@ -29,9 +27,9 @@ namespace shell {
          // Cursor control
         bool clicking = false;
         bool dragging = false;
-        Vec drag_origin;
-        Vec drag_offset;
-        Vec menu_world_pos;
+        util::Vec drag_origin;
+        util::Vec drag_offset;
+        util::Vec menu_world_pos;
         int dragging_pt = -1;
          // Drawing
         std::string status;
@@ -64,7 +62,7 @@ namespace shell {
         uint16 tile = 0x0001;
         bool clicking = false;
         bool showing_selector = false;
-        Vec selector_pos = Vec(-10020, -9985);
+        util::Vec selector_pos = util::Vec(-10020, -9985);
 
         geo::Free_Camera selector_camera;
 
@@ -73,10 +71,10 @@ namespace shell {
         void activate ();
         void deactivate ();
 
-        bool in_bounds (Vec);
-        uint16& tile_at (Vec);
-        void draw (Vec);
-        void pick (Vec);
+        bool in_bounds (util::Vec);
+        uint16& tile_at (util::Vec);
+        void draw (util::Vec);
+        void pick (util::Vec);
 
         void Drawn_draw (vis::Map) override;
         bool Listener_button (int, int) override;
@@ -87,7 +85,7 @@ namespace shell {
 
     struct Texture_Tester : vis::Drawn<vis::Map>, vis::Drawn<vis::Sprites>, vis::Drawn<vis::Overlay>, core::Listener {
         vis::Texture* tex = NULL;
-        Vec pos = Vec(10000, 10000);
+        util::Vec pos = util::Vec(10000, 10000);
         uint layer = 1;
         geo::Free_Camera camera;
 

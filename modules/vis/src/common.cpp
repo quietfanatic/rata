@@ -1,18 +1,19 @@
-#include "../inc/common.h"
-#include "../inc/color.h"
-#include "../inc/images.h"
-#include "../inc/light.h"
-#include "../inc/text.h"
-#include "../inc/tiles.h"
-#include "../../hacc/inc/everything.h"
-#include "../../core/inc/opengl.h"
-#include "../../core/inc/window.h"
-#include "../../core/inc/commands.h"
-#include "../../util/inc/debug.h"
+#include "vis/inc/common.h"
+
+#include "core/inc/commands.h"
+#include "core/inc/opengl.h"
+#include "core/inc/window.h"
+#include "hacc/inc/everything.h"
+#include "util/inc/debug.h"
+#include "vis/inc/color.h"
+#include "vis/inc/images.h"
+#include "vis/inc/light.h"
+#include "vis/inc/text.h"
+#include "vis/inc/tiles.h"
+using namespace core;
+using namespace util;
 
 namespace vis {
-
-    using namespace core;
 
     Vec camera_pos = Vec(20, 15);
     Vec camera_size = Vec(20, 15);

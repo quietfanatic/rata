@@ -2,12 +2,11 @@
 #define HAVE_VIS_MODELS_H
 
 #include <stdexcept>
-#include "../../hacc/inc/haccable_standard.h"
-#include "../../util/inc/geometry.h"
-#include "images.h"
+#include "hacc/inc/haccable_standard.h"
+#include "util/inc/geometry.h"
+#include "vis/inc/images.h"
 
 namespace vis {
-    using namespace util;
 
      // Static things
     struct Pose;
@@ -28,7 +27,7 @@ namespace vis {
 
         hacc::named_vector<Skel::Seg> segs;
         Skel::Seg* root;
-        Vec root_offset;
+        util::Vec root_offset;
 
         uint seg_index (Skel::Seg* p);
 
@@ -41,7 +40,7 @@ namespace vis {
         struct App {
             Skel::Seg* target;
             Frame* frame;  // Must belong to the target's layout
-            Vec scale = Vec(1, 1);
+            util::Vec scale = util::Vec(1, 1);
         };
 
         std::vector<App> apps;
@@ -60,7 +59,7 @@ namespace vis {
     struct Model {
         struct Seg {
             Pose::App* pose;
-            Vec pos;
+            util::Vec pos;
         };
 
         Skel* skel = NULL;
@@ -68,11 +67,11 @@ namespace vis {
 
         Model (Skel*, char*);
 
-        Vec offset_of (Skel::Seg* seg);
+        util::Vec offset_of (Skel::Seg* seg);
         void apply_pose (Pose*);
 
          // TODO: make this better
-        void draw (size_t n_skins, Skin** skins, Vec pos, Vec scale = Vec(1, 1), float z = 0.5);
+        void draw (size_t n_skins, Skin** skins, util::Vec pos, util::Vec scale = util::Vec(1, 1), float z = 0.5);
     };
 
 }

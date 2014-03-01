@@ -1,14 +1,14 @@
-#include <algorithm>  // std::move
-#include "../../core/inc/commands.h"
-#include "../../core/inc/window.h"
-#include "../../vis/inc/common.h"
-#include "../../vis/inc/color.h"
-#include "../../vis/inc/text.h"
+
+#include "core/inc/commands.h"
+#include "core/inc/window.h"
+#include "vis/inc/color.h"
+#include "vis/inc/common.h"
+#include "vis/inc/text.h"
+using namespace core;
+using namespace util;
+using namespace vis;
 
 namespace shell {
-
-    using namespace core;
-    using namespace vis;
 
     struct Console;
     Console* console = NULL;

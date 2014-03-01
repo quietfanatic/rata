@@ -2,11 +2,11 @@
 #define HAVE_GEO_MENUS_H
 
 #include <memory>
-#include "../../geo/inc/camera.h"
-#include "../../core/inc/window.h"
-#include "../../core/inc/commands.h"
-#include "../../vis/inc/common.h"
-#include "../../vis/inc/text.h"
+#include "core/inc/commands.h"
+#include "core/inc/window.h"
+#include "geo/inc/camera.h"
+#include "vis/inc/common.h"
+namespace vis { struct Font; }
 
 namespace shell {
     using namespace util;

@@ -1,10 +1,10 @@
 #ifndef HAVE_HACC_TYPES_INTERNAL_H
 #define HAVE_HACC_TYPES_INTERNAL_H
+#include "hacc/inc/types.h"
 
 #include <typeindex>
 #include <unordered_map>
-#include "../inc/types.h"
-#include "../inc/dynamicism.h"
+#include "hacc/inc/dynamicism.h"
 
 namespace hacc {
 

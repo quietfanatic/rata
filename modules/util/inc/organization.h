@@ -2,8 +2,8 @@
 #define HAVE_UTIL_ORGANIZATION_H
 
 #include <stdexcept>
-#include "../../hacc/inc/haccable.h"
-#include "honestly.h"
+#include "hacc/inc/haccable.h"
+#include "util/inc/honestly.h"
 
 namespace util {
 

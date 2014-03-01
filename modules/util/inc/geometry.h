@@ -2,8 +2,8 @@
 #define HAVE_UTIL_GEOMETRY_H
 
 #include <Box2D/Box2D.h>
-#include "honestly.h"
-#include "../../hacc/inc/haccable.h"
+#include "hacc/inc/haccable.h"
+#include "util/inc/honestly.h"
 
 namespace util {
 
@@ -33,25 +33,25 @@ namespace util {
         CE float slope () const { return y/x; }
         CE Vec rotcw () const { return Vec(y, -x); }
         CE Vec rotccw () const { return Vec(-y, x); }
-        Vec norm () const;  
+        Vec norm () const;
     };
 
-    CE inline Vec operator - (Vec a) { return Vec(-a.x, -a.y); }
-    CE inline Vec operator + (Vec a, Vec b) { return Vec(a.x+b.x, a.y+b.y); }
-    CE inline Vec operator - (Vec a, Vec b) { return Vec(a.x-b.x, a.y-b.y); }
-    CE inline Vec operator * (Vec a, float b) { return Vec(a.x*b, a.y*b); }
-    CE inline Vec operator * (float a, Vec b) { return Vec(a*b.x, a*b.y); }
-    CE inline Vec operator / (Vec a,  float b) { return Vec(a.x/b, a.y/b); }
+    CE Vec operator - (Vec a) { return Vec(-a.x, -a.y); }
+    CE Vec operator + (Vec a, Vec b) { return Vec(a.x+b.x, a.y+b.y); }
+    CE Vec operator - (Vec a, Vec b) { return Vec(a.x-b.x, a.y-b.y); }
+    CE Vec operator * (Vec a, float b) { return Vec(a.x*b, a.y*b); }
+    CE Vec operator * (float a, Vec b) { return Vec(a*b.x, a*b.y); }
+    CE Vec operator / (Vec a,  float b) { return Vec(a.x/b, a.y/b); }
     static inline Vec operator += (Vec& a, Vec b) { return a = a + b; }
     static inline Vec operator -= (Vec& a, Vec b) { return a = a - b; }
     static inline Vec operator *= (Vec& a, float b) { return a = a * b; }
     static inline Vec operator /= (Vec& a, float b) { return a = a / b; }
-    CE inline bool operator == (Vec a, Vec b) { return a.x==b.x && a.y==b.y; }
-    CE inline bool operator != (Vec a, Vec b) { return a.x!=b.x || a.y!=b.y; }
-    CE inline float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
+    CE bool operator == (Vec a, Vec b) { return a.x==b.x && a.y==b.y; }
+    CE bool operator != (Vec a, Vec b) { return a.x!=b.x || a.y!=b.y; }
+    CE float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
 
     inline Vec Vec::norm () const { return *this / mag(); }
-    inline Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
+    static inline Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
 
     // RECTANGLES
     struct Rect {

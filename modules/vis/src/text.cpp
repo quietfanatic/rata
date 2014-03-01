@@ -1,12 +1,14 @@
-#include "../inc/text.h"
-#include "../inc/common.h"
-#include "../../hacc/inc/everything.h"
-#include "../../core/inc/opengl.h"
-#include "../../core/inc/commands.h"
+#include "vis/inc/text.h"
+
+#include "core/inc/commands.h"
+#include "core/inc/opengl.h"
+#include "hacc/inc/everything.h"
+#include "vis/inc/common.h"
+using namespace core;
+using namespace util;
 
 namespace vis {
 
-    using namespace core;
 
     struct Text_Vert {
         uint16 px;
@@ -170,5 +172,5 @@ HACCABLE(Text_Program) {
     finish(&Text_Program::finish);
 }
 
-static void _set_default_font (Font* f) { default_font = f; }
+void _set_default_font (Font* f) { default_font = f; }
 New_Command _set_default_font_cmd ("set_default_font", "Set the default font", 1, _set_default_font);

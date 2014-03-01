@@ -1,11 +1,12 @@
+#include "phys/inc/phys.h"
 
 #include <stdexcept>
-#include "../inc/phys.h"
-#include "../../hacc/inc/haccable_standard.h"
-#include "../../util/inc/debug.h"
-#include "../../vis/inc/common.h"
-#include "../../vis/inc/color.h"
-#include "../../core/inc/commands.h"
+#include "core/inc/commands.h"
+#include "hacc/inc/haccable_standard.h"
+#include "util/inc/debug.h"
+#include "vis/inc/color.h"
+#include "vis/inc/common.h"
+using namespace util;
 
 namespace phys {
 

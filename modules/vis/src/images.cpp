@@ -1,13 +1,15 @@
+#include "vis/inc/images.h"
+
 #include <stdexcept>
 #include <GL/glew.h>
 #include <GL/glfw.h>
 #include <SOIL/SOIL.h>
-#include "../inc/images.h"
-#include "../inc/common.h"
-#include "../../hacc/inc/everything.h"
-#include "../../core/inc/window.h"
-#include "../../core/inc/opengl.h"
-#include "../../util/inc/integration.h"
+#include "core/inc/opengl.h"
+#include "core/inc/window.h"
+#include "hacc/inc/everything.h"
+#include "util/inc/integration.h"
+#include "vis/inc/common.h"
+using namespace util;
 
 namespace vis {
 

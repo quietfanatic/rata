@@ -1,10 +1,10 @@
 #ifndef HAVE_HACC_TREE_H
 #define HAVE_HACC_TREE_H
 
+#include "hacc/inc/common.h"
+
  // This defines the main Tree datatype which represents a Hacc structure.
  // It also declares the Path type for references.
-
-#include "common.h"
 
 namespace hacc {
 

@@ -1,10 +1,12 @@
+#include "core/inc/opengl.h"
+
 #ifdef CORE_OPENGL_VERY_DEBUG
-#include <sstream>
+    #include <sstream>
 #endif
-#include "../inc/opengl.h"
-#include "../inc/window.h"
-#include "../../hacc/inc/everything.h"
-#include "../../util/inc/debug.h"
+#include <stdexcept>
+#include "core/inc/window.h"
+#include "hacc/inc/everything.h"
+#include "util/inc/debug.h"
 
 namespace core {
 

@@ -1,6 +1,10 @@
 #ifndef HAVE_HACC_HACCABLE_STANDARD_H
 #define HAVE_HACC_HACCABLE_STANDARD_H
 
+#include <tuple>
+#include <memory>
+#include "hacc/inc/haccable.h"
+
  // This contains some predefined Haccables for builtin types:
  //  - C pointers
  //  - C arrays
@@ -9,10 +13,6 @@
  //  - std::unordered_map
  //  - std::pair
  // You can override individual types if you want
-
-#include <tuple>
-#include <memory>
-#include "haccable.h"
 
 namespace hacc {
     template <class C>

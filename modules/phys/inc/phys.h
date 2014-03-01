@@ -2,10 +2,9 @@
 #define HAVE_PHYS_PHYS_H
 
 #include <Box2D/Box2D.h>
-#include "../../util/inc/geometry.h"
+#include "util/inc/geometry.h"
 
 namespace phys {
-    using namespace util;
 
     struct Object;
 
@@ -14,8 +13,8 @@ namespace phys {
         b2World* b2world;
         Space ();
 
-        Vec get_gravity () const { return b2world->GetGravity(); }
-        void set_gravity (Vec g) { b2world->SetGravity(g); }
+        util::Vec get_gravity () const { return b2world->GetGravity(); }
+        void set_gravity (util::Vec g) { b2world->SetGravity(g); }
 
         void start ();
         void run ();
@@ -69,18 +68,18 @@ namespace phys {
         void finish ();
 
          // A paltry amount of wrapper methods.
-        Vec pos () const { return reinterpret_cast<const Vec&>(b2body->GetPosition()); }
-        void set_pos (Vec v) {
+        util::Vec pos () const { return reinterpret_cast<const util::Vec&>(b2body->GetPosition()); }
+        void set_pos (util::Vec v) {
             b2body->SetTransform(b2Vec2(v.x, v.y), 0);
             b2body->SetAwake(true);
         }
-        Vec vel () const { const b2Vec2& v = b2body->GetLinearVelocity(); return reinterpret_cast<const Vec&>(v); }
-        void set_vel (Vec v) {
+        util::Vec vel () const { const b2Vec2& v = b2body->GetLinearVelocity(); return reinterpret_cast<const util::Vec&>(v); }
+        void set_vel (util::Vec v) {
             b2body->SetLinearVelocity(b2Vec2(v.x, v.y));
             b2body->SetAwake(true);
         }
-        void impulse (Vec i) { b2body->ApplyLinearImpulse(b2Vec2(i.x, i.y), b2Vec2(0, 0), true); }
-        void force (Vec f) { b2body->ApplyForceToCenter(b2Vec2(f.x, f.y), true); }
+        void impulse (util::Vec i) { b2body->ApplyLinearImpulse(b2Vec2(i.x, i.y), b2Vec2(0, 0), true); }
+        void force (util::Vec f) { b2body->ApplyForceToCenter(b2Vec2(f.x, f.y), true); }
 
         b2Fixture* add_fixture (FixtureDef*);
 

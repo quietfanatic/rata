@@ -1,5 +1,5 @@
+#include "tap/inc/tap.h"
 
-#include "../inc/tap.h"
 #include <string>
 #include <stdexcept>
 

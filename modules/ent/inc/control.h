@@ -1,10 +1,10 @@
 #ifndef HAVE_ENT_CONTROL_H
 #define HAVE_ENT_CONTROL_H
 
-#include "../../core/inc/window.h"
-#include "../../util/inc/geometry.h"
-#include "../../vis/inc/common.h"
-#include "../../vis/inc/images.h"
+#include "core/inc/window.h"
+#include "util/inc/geometry.h"
+#include "vis/inc/common.h"
+namespace vis { struct Texture; struct Frame; }
 
 namespace ent {
     using namespace util;

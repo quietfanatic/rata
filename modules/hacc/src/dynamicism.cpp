@@ -1,9 +1,9 @@
 #include <sstream>
-#include "../inc/tree.h"
-#include "../inc/strings.h"  // for path_to_string for diagnostics
-#include "../inc/files.h"
-#include "../inc/haccable.h"  // We're defining haccability on Dynamic
-#include "types_internal.h"
+#include "hacc/inc/files.h"
+#include "hacc/inc/haccable.h"  // We're defining haccability on Dynamic
+#include "hacc/inc/strings.h"  // for path_to_string for diagnostics
+#include "hacc/inc/tree.h"
+#include "hacc/src/types_internal.h"
 
 namespace hacc {
 

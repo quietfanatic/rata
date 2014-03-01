@@ -1,7 +1,7 @@
 #ifndef HAVE_PHYS_GROUND_H
 #define HAVE_PHYS_GROUND_H
 
-#include "phys.h"
+#include "phys/inc/phys.h"
 
  // This modules provides a collision rule "ground" that
  //  allows Grounded objects to walk using friction and surface

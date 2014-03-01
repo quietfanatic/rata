@@ -1,11 +1,13 @@
-#include "../inc/tiles.h"
-#include "../inc/common.h"
-#include "../../core/inc/opengl.h"
-#include "../../core/inc/commands.h"
-#include "../../hacc/inc/everything.h"
+#include "vis/inc/tiles.h"
+
+#include "core/inc/commands.h"
+#include "core/inc/opengl.h"
+#include "hacc/inc/everything.h"
+#include "vis/inc/common.h"
+using namespace core;
+using namespace util;
 
 namespace vis {
-    using namespace core;
 
     struct Tile_Vertex {
         uint16 px;  // None of these are normalized

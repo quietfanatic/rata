@@ -1,14 +1,14 @@
 #ifndef HAVE_ENT_BIPEDS_H
 #define HAVE_ENT_BIPEDS_H
 
-#include "control.h"
-#include "mixins.h"
-#include "items.h"
-#include "../../phys/inc/phys.h"
-#include "../../phys/inc/ground.h"
-#include "../../geo/inc/rooms.h"
-#include "../../vis/inc/common.h"
-#include "../../vis/inc/models.h"
+#include "ent/inc/control.h"
+#include "ent/inc/items.h"
+#include "ent/inc/mixins.h"
+#include "geo/inc/rooms.h"
+#include "phys/inc/ground.h"
+#include "phys/inc/phys.h"
+#include "vis/inc/common.h"
+#include "vis/inc/models.h"
 
 namespace ent {
 

@@ -1,8 +1,10 @@
-#include "../inc/light.h"
-#include "../../hacc/inc/files.h"
-#include "../../core/inc/commands.h"
+#include "vis/inc/light.h"
 
+#include "core/inc/commands.h"
+#include "hacc/inc/files.h"
+#include "vis/inc/common.h"
 using namespace core;
+using namespace util;
 
 namespace vis {
 

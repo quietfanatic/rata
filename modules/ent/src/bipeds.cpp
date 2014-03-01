@@ -1,8 +1,9 @@
+#include "ent/inc/bipeds.h"
 
-#include "../inc/bipeds.h"
-#include "../../geo/inc/camera.h"
-#include "../../hacc/inc/everything.h"
-#include "../../util/inc/debug.h"
+#include "geo/inc/camera.h"
+#include "hacc/inc/everything.h"
+#include "util/inc/debug.h"
+#include "vis/inc/models.h"
 
 namespace ent {
 

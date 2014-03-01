@@ -1,6 +1,6 @@
 
  // A TAP outputting test library for C++
- // 
+ //
  // Instructions:
  //
  // 1. Declare Testers at the bottom of each cpp file, or wherever you want.  They
@@ -72,7 +72,6 @@
 #include <string.h>
 #include <stdlib.h>
 namespace tap {
-    
      // Provide dummy testing functions
     static void run_test (const char* name) {
         printf("1..0 # Skipping: This program was compiled with tests disabled.\n");
@@ -84,9 +83,7 @@ namespace tap {
             exit(0);
         }
     }
-
 }
-
 #else
 
 namespace tap {

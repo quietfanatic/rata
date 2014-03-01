@@ -4,7 +4,7 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include "../inc/tap.h"
+#include "tap/inc/tap.h"
 
 int main (int argc, char** argv) {
      // Change directory to program

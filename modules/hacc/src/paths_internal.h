@@ -1,7 +1,8 @@
 #ifndef HAVE_HACC_PATHS_INTERNAL_H
 #define HAVE_HACC_PATHS_INTERNAL_H
-#include "../inc/tree.h"
-#include "../inc/files.h"
+#include "hacc/inc/files.h"
+
+#include "hacc/inc/tree.h"
 
 namespace hacc {
 

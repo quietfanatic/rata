@@ -1,4 +1,6 @@
-#include "../inc/items.h"
+#include "ent/inc/items.h"
+#include "hacc/inc/everything.h"
+#include "vis/inc/models.h"
 
 namespace ent {
 

@@ -1,16 +1,14 @@
-#include <unistd.h>
-#include "../../core/inc/window.h"
-#include "../../core/inc/commands.h"
-#include "../../hacc/inc/files.h"
-#include "../../hacc/inc/haccable_standard.h"
-#include "../../phys/inc/phys.h"
-#include "../../geo/inc/camera.h"
-#include "../../ent/inc/control.h"
-#include "../../vis/inc/common.h"
-#include "../../vis/inc/text.h"
-#include "../../vis/inc/light.h"
-#include "../../util/inc/integration.h"
-#include "../inc/main.h"
+#include "shell/inc/main.h"
+
+#include "core/inc/commands.h"
+#include "core/inc/window.h"
+#include "ent/inc/control.h"
+#include "geo/inc/camera.h"
+#include "hacc/inc/files.h"
+#include "hacc/inc/haccable_standard.h"
+#include "phys/inc/phys.h"
+#include "util/inc/integration.h"
+#include "vis/inc/common.h"
 
 using namespace hacc;
 using namespace core;
@@ -59,7 +57,7 @@ void step () {
 int main (int argc, char** argv) {
 
     if (argc >= 2)
-        state_arg = rel2abs(argv[1]);
+        state_arg = util::rel2abs(argv[1]);
 
     auto here = util::my_dir(argc, argv);
     util::chdir(here + "/modules");

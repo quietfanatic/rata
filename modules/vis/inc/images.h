@@ -2,10 +2,9 @@
 #define HAVE_VIS_IMAGES_H
 
 #include <string>
-#include "../../util/inc/geometry.h"
+#include "util/inc/geometry.h"
 
 namespace vis {
-    using namespace util;
 
      // All positions of these structures are in PX
 
@@ -22,8 +21,8 @@ namespace vis {
 
     struct Texture {
         std::string name = "ALL";
-        Vec offset = Vec(0, 0);
-        Vec size;  // defaults to entire Image
+        util::Vec offset = util::Vec(0, 0);
+        util::Vec size;  // defaults to entire Image
         bool smooth = false;
         bool use_palettes = true;
 
@@ -35,7 +34,7 @@ namespace vis {
     };
 
     struct Palette {
-        Vec offset = Vec(0, 0);
+        util::Vec offset = util::Vec(0, 0);
         bool vertical = false;
         uint length = 0;  // 0 means go until it ends
         uint32 mask = 0xffffffff;  // Bits the palette affects
@@ -46,7 +45,7 @@ namespace vis {
         std::vector<Texture> textures {Texture()};
         std::vector<Palette> palettes;
 
-        Vec size;  // Set on load
+        util::Vec size;  // Set on load
          // These uint32s may be LE or BE.
         uint32* data;  // NULL when data is not in memory
         uint32* processed_data;  // After palettes are applied
@@ -57,7 +56,7 @@ namespace vis {
     };
 
     struct Layout {
-        Vec size;
+        util::Vec size;
         std::vector<Frame> frames;
 
         uint vbo_id;
@@ -71,16 +70,16 @@ namespace vis {
     struct Frame {
         Layout* parent;
         std::string name;
-        Vec offset;
-        Rect box;
-        std::vector<Vec> points;
+        util::Vec offset;
+        util::Rect box;
+        std::vector<util::Vec> points;
     };
 
     void images_init ();
 
-    void draw_frame (Frame*, Texture*, Vec pos, Vec scale = Vec(1, 1), float z = 0.5);
+    void draw_frame (Frame*, Texture*, util::Vec pos, util::Vec scale = util::Vec(1, 1), float z = 0.5);
      // Just draw a whole texture over the given area.
-    void draw_texture (Texture*, Rect area, float z = 0.5);
+    void draw_texture (Texture*, util::Rect area, float z = 0.5);
 
      // Internal usage
     void set_draw_phase (bool);

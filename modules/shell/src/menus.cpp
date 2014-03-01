@@ -1,6 +1,8 @@
-#include "../inc/menus.h"
-#include "../../geo/inc/camera.h"
-#include "../../vis/inc/color.h"
+#include "shell/inc/menus.h"
+
+#include "geo/inc/camera.h"
+#include "vis/inc/color.h"
+#include "vis/inc/text.h"
 
 namespace shell {
     using namespace core;

@@ -1,11 +1,11 @@
 #ifndef HAVE_ENT_ITEMS_H
 #define HAVE_ENT_ITEMS_H
 
-#include "../../util/inc/geometry.h"
-#include "../../util/inc/organization.h"
-#include "../../vis/inc/common.h"
-#include "../../vis/inc/models.h"
-#include "../../geo/inc/rooms.h"
+#include "geo/inc/rooms.h"
+#include "util/inc/geometry.h"
+#include "util/inc/organization.h"
+#include "vis/inc/common.h"
+namespace vis { struct Texture; struct Frame; struct Skin; struct Skel; }
 
 namespace ent {
 

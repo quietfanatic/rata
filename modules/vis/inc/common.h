@@ -1,20 +1,18 @@
 #ifndef HAVE_VIS_COMMON_H
 #define HAVE_VIS_COMMON_H
 
-#include "images.h"
-#include "../../util/inc/geometry.h"
-#include "../../util/inc/organization.h"
-#include "../../core/inc/opengl.h"
+#include "core/inc/opengl.h"
+#include "util/inc/geometry.h"
+#include "util/inc/organization.h"
 
  // The vis namespace handles all rendering (though not all opengl
  //  integration; some of that's in core).
 
 namespace vis {
-    using namespace util;
 
      // Setting this alters rendering until the Hud step.
-    extern Vec camera_pos;
-    extern Vec camera_size;
+    extern util::Vec camera_pos;
+    extern util::Vec camera_size;
 
      // This can be called automatically, but it's better to do it manually,
      //  to avoid first-frame lag.
@@ -23,13 +21,13 @@ namespace vis {
      // Do it.
     void render ();
     template <class C>
-    struct Drawn : Link<Drawn<C>> {
+    struct Drawn : util::Link<Drawn<C>> {
         virtual void Drawn_draw (C) = 0;
 
         Drawn (bool visible) { if (visible) link(C::items); }
-        void appear () { Link<Drawn<C>>::link(C::items); }
-        void disappear () { Link<Drawn<C>>::unlink(); }
-        bool visible () { return Link<Drawn<C>>::linked(); }
+        void appear () { util::Link<Drawn<C>>::link(C::items); }
+        void disappear () { util::Link<Drawn<C>>::unlink(); }
+        bool visible () { return util::Link<Drawn<C>>::linked(); }
 
         Drawn () { }
         virtual ~Drawn () { }
@@ -41,41 +39,41 @@ namespace vis {
      // Input: materials with depth
      // Blend: no
      // Depth: yes
-    struct Map { static Links<Drawn<Map>> items; };
+    struct Map { static util::Links<Drawn<Map>> items; };
 
      // Coordinates: world
      // Input: materials without depth
      // Blend: no
      // Depth: checked but not set
-    struct Sprites { static Links<Drawn<Sprites>> items; };
+    struct Sprites { static util::Links<Drawn<Sprites>> items; };
 
      // Coordinates: world
      // Input: none (light values set through uniform)
      // Blend: additive, no alpha
      // Depth: no
-    struct Lights { static Links<Drawn<Lights>> items; };
+    struct Lights { static util::Links<Drawn<Lights>> items; };
 
      // Coordinates: world
      // Input: color with alpha
      // Blend: alpha blending
      // Depth: no
-    struct Overlay { static Links<Drawn<Overlay>> items; };
+    struct Overlay { static util::Links<Drawn<Overlay>> items; };
 
      // Coordinates: camera
      // Input: color with alpha
      // Blend: alpha blending
      // Depth: no
-    struct Hud { static Links<Drawn<Hud>> items; };
+    struct Hud { static util::Links<Drawn<Hud>> items; };
 
      // Coordinates: dev (strictly 16 window pixels per unit)
      // Input: color with alpha
      // Blend: alpha blending
      // Depth: no
-    struct Dev { static Links<Drawn<Dev>> items; };
+    struct Dev { static util::Links<Drawn<Dev>> items; };
 
      // For primarily internal use
-    extern Vec global_camera_pos;
-    extern Vec global_camera_size;
+    extern util::Vec global_camera_pos;
+    extern util::Vec global_camera_size;
 
      // Programs that inherit from this will be well-behaved regarding
      //  the game's camera.  The program must have two uniforms: camera_pos
@@ -83,8 +81,8 @@ namespace vis {
     struct Cameraed_Program : core::Program {
         GLint camera_pos = 0;
         GLint camera_size = 0;
-        Vec old_camera_pos = Vec(0, 0);
-        Vec old_camera_size = Vec(0, 0);
+        util::Vec old_camera_pos = util::Vec(0, 0);
+        util::Vec old_camera_size = util::Vec(0, 0);
         void Program_begin () override {
             Program::Program_begin();
             if (old_camera_pos != global_camera_pos) {

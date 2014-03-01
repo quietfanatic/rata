@@ -1,5 +1,6 @@
-#include "../inc/common.h"
-#include "../inc/haccable.h"
+#include "hacc/inc/common.h"
+
+#include "hacc/inc/haccable.h"
 
 namespace hacc {
 

@@ -1,10 +1,10 @@
 #ifndef HAVE_GEO_TILES_H
 #define HAVE_GEO_TILES_H
 
-#include "../inc/rooms.h"
-#include "../../phys/inc/phys.h"
-#include "../../vis/inc/common.h"
-#include "../../vis/inc/tiles.h"
+#include "geo/inc/rooms.h"
+#include "phys/inc/phys.h"
+#include "vis/inc/common.h"
+#include "vis/inc/tiles.h"
 
 namespace geo {
 

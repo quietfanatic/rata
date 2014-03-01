@@ -1,15 +1,14 @@
+#include "core/inc/commands.h"
+
 #include <string>
-#include <sstream>
 #include <stdexcept>
 #include <iostream>
-#include "../../util/inc/honestly.h"
-#include "../../hacc/inc/everything.h"
-#include "../../hacc/src/types_internal.h"
-#include "../inc/commands.h"
-#include "../inc/window.h"
+#include "core/inc/window.h"
+#include "hacc/inc/everything.h"
+#include "util/inc/honestly.h"
 
+using namespace util;
 using namespace hacc;
-using namespace core;
 
 namespace core {
 
@@ -75,11 +74,6 @@ namespace core {
     }
 
     INIT_SAFE(Links<Console>, consoles);
-
-    std::string no_description_available () {
-        static std::string r = "No description is available for this command.";
-        return r;
-    }
 
 } using namespace core;
 

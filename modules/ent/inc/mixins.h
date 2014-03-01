@@ -1,9 +1,9 @@
 #ifndef HAVE_ENT_MIXINS_H
 #define HAVE_ENT_MIXINS_H
 
-#include "../../geo/inc/rooms.h"
-#include "../../phys/inc/phys.h"
-#include "../../vis/inc/common.h"
+#include "geo/inc/rooms.h"
+#include "phys/inc/phys.h"
+#include "vis/inc/common.h"
 
 namespace ent {
 

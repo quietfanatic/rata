@@ -1,13 +1,18 @@
+#include "shell/inc/editing.h"
+
 #include <sstream>
-#include "../inc/editing.h"
-#include "../inc/main.h"
-#include "../../hacc/inc/files.h"
-#include "../../hacc/inc/documents.h"
-#include "../../hacc/inc/strings.h"
-#include "../../core/inc/commands.h"
-#include "../../vis/inc/color.h"
-#include "../../util/inc/debug.h"
-#include "../../ent/inc/control.h"
+#include "core/inc/commands.h"
+#include "ent/inc/control.h"
+#include "geo/inc/rooms.h"
+#include "geo/inc/tiles.h"
+#include "hacc/inc/documents.h"
+#include "hacc/inc/files.h"
+#include "hacc/inc/strings.h"
+#include "shell/inc/main.h"
+#include "util/inc/debug.h"
+#include "vis/inc/color.h"
+#include "vis/inc/text.h"
+#include "vis/inc/tiles.h"
 
 using namespace util;
 using namespace vis;
@@ -712,8 +717,6 @@ HACCABLE(Texture_Tester) {
     attr("layer", member(&Texture_Tester::layer).optional());
 }
 
-namespace {
-
 void _re_toggle () {
     if (!room_editor) return;
     if (room_editor->active)
@@ -809,4 +812,3 @@ void _re_edit_pts () {
 }
 New_Command _re_edit_pts_cmd ("re_edit_pts", "Edit object-specific pts.", 0, _re_edit_pts);
 
-}

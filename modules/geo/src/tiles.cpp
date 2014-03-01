@@ -1,14 +1,14 @@
+#include "geo/inc/tiles.h"
 
 #include <stdexcept>
-#include "../inc/tiles.h"
-#include "../../hacc/inc/everything.h"
-#include "../../util/inc/geometry.h"
-#include "../../util/inc/debug.h"
-#include "../../core/inc/opengl.h"
+#include "core/inc/opengl.h"
+#include "hacc/inc/everything.h"
+#include "util/inc/debug.h"
+#include "util/inc/geometry.h"
+using namespace phys;
+using namespace util;
 
 namespace geo {
-    using namespace util;
-    using namespace phys;
 
     void Tilemap::finish () {
         Object::finish();

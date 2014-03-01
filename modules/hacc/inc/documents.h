@@ -1,6 +1,9 @@
 #ifndef HAVE_HACC_DOCUMENTS_H
 #define HAVE_HACC_DOCUMENTS_H
 
+#include "hacc/inc/dynamicism.h"
+#include "hacc/inc/types.h"
+
  // This provides a container that can hold arbitrarily-typed objects
  //  with minimal overhead.  Objects can be given a string ID in the document.
  // If you have a Hacc file that contains various assorted objects, this
@@ -8,9 +11,6 @@
 
  // There is no protection for if you do something bad like try to use one
  //  document to destroy an object that belongs to another document.
-
-#include "types.h"
-#include "dynamicism.h"
 
 namespace hacc {
 

@@ -1,7 +1,7 @@
+#include "geo/inc/rooms.h"
 
-#include "../inc/rooms.h"
-#include "../../util/inc/debug.h"
-#include "../../hacc/inc/everything.h"
+#include "hacc/inc/everything.h"
+#include "util/inc/debug.h"
 
 namespace geo {
 

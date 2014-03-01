@@ -1,7 +1,7 @@
+#include "util/inc/debug.h"
 
-#include "../inc/debug.h"
-#include "../../hacc/inc/haccable.h"
-#include "../../core/inc/commands.h"
+#include "core/inc/commands.h"
+#include "hacc/inc/haccable.h"
 
 namespace util {
 
@@ -33,12 +33,9 @@ namespace util {
     }
 }
 
-namespace {
-
 void _log (std::string name, bool state) {
     util::log_tags()[name] = state;
 }
 
 core::New_Command _log_cmd ("log", "Change whether a particular tag is logged or not.", 2, _log);
 
-}

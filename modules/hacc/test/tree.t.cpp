@@ -1,10 +1,11 @@
-#include "../inc/tree.h"
-#include "../inc/files.h"
+#include "hacc/inc/tree.h"
 
-#include "../../tap/inc/tap.h"
-tap::Tester hacc_tester ("hacc/tree", [](){
-    using namespace hacc;
-    using namespace tap;
+#include "hacc/inc/files.h"
+#include "tap/inc/tap.h"
+using namespace hacc;
+using namespace tap;
+
+Tester hacc_tester ("hacc/tree", [](){
     plan(11);
     is(Tree().form(), NULLFORM, "nullary constructor makes null hacc");
     is(Tree(true).as<bool>(), true, "bool roundtrip");

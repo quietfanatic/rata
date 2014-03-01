@@ -1,8 +1,9 @@
-#include "../../hacc/inc/everything.h"
-#include "../inc/mixins.h"
-#include "../../vis/inc/images.h"
-#include "../../vis/inc/light.h"
-#include "../../util/inc/geometry.h"
+
+#include "ent/inc/mixins.h"
+#include "hacc/inc/everything.h"
+#include "util/inc/geometry.h"
+#include "vis/inc/images.h"
+#include "vis/inc/light.h"
 
 using namespace util;
 using namespace vis;

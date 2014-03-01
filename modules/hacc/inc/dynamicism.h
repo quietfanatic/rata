@@ -1,8 +1,8 @@
 #ifndef HAVE_HACC_DYNAMICISM_H
 #define HAVE_HACC_DYNAMICISM_H
 
-#include "tree.h"
-#include "types.h"
+#include "hacc/inc/tree.h"
+#include "hacc/inc/types.h"
 
 namespace hacc {
 

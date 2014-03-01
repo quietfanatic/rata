@@ -1,8 +1,9 @@
+#include "util/inc/integration.h"
+
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-#include "../inc/integration.h"
-#include "../../hacc/inc/common.h"
+#include "hacc/inc/common.h"
  // TODO: Windows support
 
 static inline int builtin_chdir (const char* s) { return chdir(s); }

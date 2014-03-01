@@ -1,7 +1,8 @@
+#include "hacc/inc/haccable.h"
 
-#include "../inc/haccable.h"
-#include "../inc/haccable_standard.h"
+#include "hacc/inc/haccable_standard.h"
 using namespace hacc;
+using namespace tap;
 
 struct Vectorly {
     float x;
@@ -157,9 +158,7 @@ MyNamed* mnp = mns[0];
 MyThing myt (10, 20, 30);
 
 #include "../../tap/inc/tap.h"
-tap::Tester haccable_tester ("hacc/haccable", [](){
-    using namespace hacc;
-    using namespace tap;
+Tester haccable_tester ("hacc/haccable", [](){
     plan(54);
     is(to_tree(&i).as<int>(), 4, "to_tree on int32 works");
     doesnt_throw([](){ from_tree(&i, Tree(35)); }, "from_tree on int32");

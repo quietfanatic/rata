@@ -1,4 +1,6 @@
+#include "hacc/inc/strings.h"
 
+ // TODO: replace all this scanf stuff with sstreams
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <string.h>
@@ -7,7 +9,6 @@
 #include <iomanip>
 #include <unordered_map>
 #include "../inc/files.h"  // for Path
-#include "../inc/strings.h"
 #include "paths_internal.h"
 
 namespace hacc {

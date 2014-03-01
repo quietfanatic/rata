@@ -1,8 +1,8 @@
 #ifndef HAVE_HACC_FILES_H
 #define HAVE_HACC_FILES_H
 
-#include "common.h"
-#include "dynamicism.h"
+#include "hacc/inc/common.h"
+#include "hacc/inc/dynamicism.h"
 
  // Most if not all of the important objects in this program should be
  //  loaded from files through this module.

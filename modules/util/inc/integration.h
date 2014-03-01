@@ -1,5 +1,6 @@
 #ifndef HAVE_UTIL_INTEGRATION_H
 #define HAVE_UTIL_INTEGRATION_H
+
 #include <string>
 #include <vector>
 

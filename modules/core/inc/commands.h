@@ -5,9 +5,9 @@
 #include <type_traits>
 #include <string>
 #include <vector>
-#include "../../util/inc/honestly.h"
-#include "../../util/inc/organization.h"
-#include "../../hacc/inc/haccable_standard.h"
+#include "hacc/inc/haccable_standard.h"
+#include "util/inc/honestly.h"
+#include "util/inc/organization.h"
 
 namespace core {
      // The API for declaring functions.
@@ -24,8 +24,6 @@ namespace core {
      // And getting them by name.
     std::unordered_map<std::string, New_Command*>& commands_by_name ();
 
-    using namespace util;
-
     void command_from_string (std::string s);
     void command_from_terminal ();
     extern std::vector<std::string> command_history;
@@ -34,13 +32,10 @@ namespace core {
     std::string console_help ();
     void print_to_console (std::string);
     struct Console;
-    EXTERN_INIT_SAFE(Links<Console>, consoles);
-    struct Console : Linked<Console, consoles> {
+    EXTERN_INIT_SAFE(util::Links<Console>, consoles);
+    struct Console : util::Linked<Console, consoles> {
         virtual void Console_print (std::string) = 0;
     };
-
-     // Default help message
-    std::string no_description_available ();
 
      // Internal command implementation
     struct CommandData : hacc::DPtee {

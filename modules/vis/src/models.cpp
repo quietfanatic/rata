@@ -1,8 +1,10 @@
+#include "vis/inc/models.h"
+
 #include <sstream>
-#include "../inc/models.h"
-#include "../inc/common.h"
-#include "../../hacc/inc/everything.h"
-#include "../../util/inc/debug.h"
+#include "hacc/inc/everything.h"
+#include "util/inc/debug.h"
+#include "vis/inc/common.h"
+using namespace util;
 
 namespace vis {
 

@@ -1,6 +1,8 @@
-#include "../inc/color.h"
-#include "../inc/common.h"
-#include "../../hacc/inc/everything.h"
+#include "vis/inc/color.h"
+
+#include "vis/inc/common.h"
+#include "hacc/inc/everything.h"
+using namespace util;
 
 namespace vis {
 

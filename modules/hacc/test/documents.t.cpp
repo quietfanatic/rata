@@ -1,8 +1,8 @@
-#include <string.h>
-#include "../../tap/inc/tap.h"
-#include "../inc/documents.h"
-#include "../inc/files.h"
+#include "hacc/inc/documents.h"
 
+#include <string.h>
+#include "hacc/inc/files.h"
+#include "tap/inc/tap.h"
 using namespace hacc;
 using namespace tap;
 

@@ -1,8 +1,8 @@
 #ifndef HAVE_GEO_ROOMS_H
 #define HAVE_GEO_ROOMS_H
 
-#include "../../util/inc/geometry.h"
-#include "../../util/inc/organization.h"
+#include "util/inc/geometry.h"
+#include "util/inc/organization.h"
 
 namespace geo {
     using namespace util;

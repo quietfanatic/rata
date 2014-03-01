@@ -1,13 +1,13 @@
 #ifndef HAVE_HACC_COMMON_H
 #define HAVE_HACC_COMMON_H
 
- // This contains various types and exceptions that are used throughout Hacc
-
 #include <stdint.h>
 #include <stddef.h>
 #include <string>
 #include <vector>
 #include <functional>
+
+ // This contains various types and exceptions that are used throughout Hacc
 
 typedef int8_t int8;
 typedef int16_t int16;

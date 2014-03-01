@@ -1,8 +1,9 @@
+#include "hacc/inc/documents.h"
+
 #include <unordered_map>
 #include <unordered_set>
 #include <sstream>
-#include "../inc/documents.h"
-#include "../inc/haccable.h"
+#include "hacc/inc/haccable.h"
 
 namespace hacc {
 

@@ -7,17 +7,19 @@ use File::Path qw<remove_tree>;
 my $here = cwd;
 mkdir 'save';
 
+my @includes = ("$here/modules", "$here/lib/Box2D");
+
 ##### COMMAND LINE FLAGS
 my %flags = (
     clang => {
-        compile => [qw(-std=c++11 -c), "-I$here/lib/Box2D"],
+        compile => [qw(-std=c++11 -c), map "-I$_", @includes],
         link => [qw(-std=c++11 -lstdc++ -lm)],
         release => [qw(-O3 -Wno-null-conversion -Wno-format-security -fcolor-diagnostics)],
         debug => [qw(-ggdb -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security -fcolor-diagnostics)],
         profile => ['-pg'],
     },
     'g++' => {
-        compile => [qw(-std=c++11 -c), "-I$here/lib/Box2D"],
+        compile => [qw(-std=c++11 -c), map "-I$_", @includes],
         link => [qw(-std=c++11)],
         release => [qw(-O3 -Wno-null-conversion -Wno-format-security)],
         debug => [qw(-ggdb -Wall -Wno-null-conversion -Wno-unused-function -Wno-format-security)],
@@ -138,11 +140,13 @@ subdep sub {
     $file =~ /\.(?:c(?:pp)?|h)$/ or return ();
 
     my $base = ($file =~ /(.*?)[^\\\/]*$/ and $1);
-    my @includes = (slurp $file, 2048) =~ /^\s*#include\s*"([^"]*)"/gmi;
-    my $old_cwd = cwd;
-    chdir $base;
-    my @r = map -e($_) ? realpath($_) : (), @includes;
-    chdir $old_cwd;
+    my @incs = (slurp $file, 2048) =~ /^\s*#include\s*"([^"]*)"/gmi;
+    my @r;
+    for (@incs) {
+        for my $I (@includes, $base) {
+            push @r, realpath("$I/$_") if -e("$I/$_");
+        }
+    }
     return @r;
 };
 

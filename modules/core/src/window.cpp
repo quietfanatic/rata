@@ -1,13 +1,16 @@
+#include "core/inc/window.h"
+
 #include <float.h>
 #include <GL/glew.h>
 #include <GL/glfw.h>
-#include "../inc/window.h"
-#include "../inc/commands.h"
-#include "../../util/inc/debug.h"
-#include "../../hacc/inc/files.h"
-#include "../../hacc/inc/strings.h"
-#include "../../hacc/inc/documents.h"
-#include "../../util/inc/integration.h"
+#include "core/inc/commands.h"
+#include "hacc/inc/documents.h"
+#include "hacc/inc/files.h"
+#include "hacc/inc/strings.h"
+#include "util/inc/debug.h"
+#include "util/inc/integration.h"
+
+using namespace util;
 
 namespace core {
 

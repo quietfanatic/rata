@@ -1,9 +1,7 @@
-
-#include "../inc/camera.h"
-#include "../inc/rooms.h"
+#include "geo/inc/camera.h"
+using namespace core;
 
 namespace geo {
-    using namespace core;
 
     void Free_Camera::Camera_update () {
          // TODO: do stuff

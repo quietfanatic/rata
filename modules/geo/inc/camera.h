@@ -1,9 +1,9 @@
 #ifndef HAVE_GEO_CAMERA_H
 #define HAVE_GEO_CAMERA_H
 
-#include "../../vis/inc/common.h"
-#include "../../core/inc/window.h"
-#include "../../util/inc/geometry.h"
+#include "core/inc/window.h"
+#include "util/inc/geometry.h"
+#include "vis/inc/common.h"
 
  // TODO: port the constraint-satisfaction camera control from the old branch.
 

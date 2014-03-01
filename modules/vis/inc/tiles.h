@@ -1,12 +1,11 @@
 #ifndef HAVE_VIS_TILES_H
 #define HAVE_VIS_TILES_H
 
-#include "../../util/inc/geometry.h"
-#include "../../util/inc/organization.h"
-#include "images.h"
+#include "util/inc/geometry.h"
+#include "util/inc/organization.h"
+#include "vis/inc/images.h"
 
 namespace vis {
-    using namespace util;
 
     struct Tiles {
         uint width = 0;
@@ -35,8 +34,8 @@ namespace vis {
     };
 
     void tiles_init ();
-    void draw_tiles (Tiles*, Texture*, Vec pos);
-    void draw_tile (uint16, Texture*, Vec pos);
+    void draw_tiles (Tiles*, Texture*, util::Vec pos);
+    void draw_tile (uint16, Texture*, util::Vec pos);
 
 }
 

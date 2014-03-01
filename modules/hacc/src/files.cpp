@@ -1,9 +1,10 @@
+#include "hacc/inc/files.h"
+
 #include <sstream>
 #include <unordered_map>
-#include "../inc/files.h"
-#include "../inc/strings.h"
-#include "types_internal.h"
-#include "paths_internal.h"
+#include "hacc/inc/strings.h"
+#include "hacc/src/paths_internal.h"
+#include "hacc/src/types_internal.h"
 
 namespace hacc {
 

@@ -1,5 +1,6 @@
-#include "../inc/haccable.h"
-#include "types_internal.h"
+#include "hacc/inc/haccable.h"
+
+#include "hacc/src/types_internal.h"
 
 namespace hacc {
 

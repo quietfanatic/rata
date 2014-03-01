@@ -1,10 +1,11 @@
-
+#include "hacc/inc/strings.h"
 #include <stdio.h>
 
-#include "../inc/strings.h"
-#include "../../tap/inc/tap.h"
+#include "tap/inc/tap.h"
+using namespace hacc;
+using namespace tap;
 
-void tst (hacc::String from, hacc::String to) {
+void tst (String from, String to) {
     using namespace hacc;
     using namespace tap;
     String name = escape_string(from) + " -> " + escape_string(to);
@@ -18,8 +19,7 @@ void tst (hacc::String from, hacc::String to) {
     }
 }
 
-tap::Tester tree_strings_tester ("hacc/strings", [](){
-    using namespace tap;
+Tester tree_strings_tester ("hacc/strings", [](){
     plan(47);
      printf(" # Bools\n");  // 2
     tst("true", "true");

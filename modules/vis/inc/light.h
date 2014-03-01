@@ -1,7 +1,8 @@
 #ifndef HAVE_VIS_LIGHT_H
 #define HAVE_VIS_LIGHT_H
 
-#include "common.h"
+#include <vector>
+#include "util/inc/geometry.h"
 
 namespace vis {
 
@@ -30,7 +31,7 @@ namespace vis {
 
     struct Materials {
         std::vector<Material> items;
-        GLuint tex = 0;
+        uint tex = 0;
         void update ();
         ~Materials ();
     };
@@ -43,11 +44,11 @@ namespace vis {
     void set_ambient (const RGBf&);
     void set_diffuse (const RGBf&);
     void set_radiant (const RGBf&);
-    void light_offset (Vec);
-    void draw_light (size_t, Vec*);
+    void light_offset (util::Vec);
+    void draw_light (size_t, util::Vec*);
 
      // This only needs to be called once, by common.cpp
-    void light_texture (GLuint);
+    void light_texture (uint);
 
     extern int light_debug_type;
 

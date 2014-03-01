@@ -1,19 +1,17 @@
 #ifndef HAVE_CORE_OPENGL_H
 #define HAVE_CORE_OPENGL_H
 
-#include <stdio.h>
-#include <stdexcept>
 #include <vector>
-#include <unordered_map>
+#include <string>
 #include <GL/glew.h>
 #include <GL/glfw.h>
 
 #ifdef CORE_OPENGL_VERY_DEBUG
 #include <sstream>
-#include "../../util/inc/debug.h"
+#include "util/inc/debug.h"
 #endif
 
-#include "../../util/inc/honestly.h"
+#include "util/inc/honestly.h"
 
 namespace core {
 
@@ -56,7 +54,6 @@ namespace core {
 
 #ifdef CORE_OPENGL_VERY_DEBUG
 namespace core {
-    extern Logger opengl_logger;  // TODO: name collisions may happen
     static std::string _concat () { return ""; }
     template <class H>
     static std::string _concat (H h) {
@@ -74,12 +71,12 @@ namespace core {
 
 template <class Func, class... Args>
 auto opengl_debug_wrap (Func* f, const char* name, Args... args) -> decltype((*f)(args...)) {
-    core::opengl_logger.log(std::string(name) + "(" + core::_concat(args...) + ")");
+    log("opengl", std::string(name) + "(" + core::_concat(args...) + ")");
     return (*f)(args...);
 }
 template <class Func, class... Args>
 auto opengl_debug_wrap_glew (Func* f, const char* name, Args... args) -> decltype((*f)(args...)) {
-    core::opengl_logger.log(std::string(name) + "(" + core::_concat(args...) + ")");
+    log("opwngl", std::string(name) + "(" + core::_concat(args...) + ")");
     return GLEW_GET_FUN(f)(args...);
 }
 

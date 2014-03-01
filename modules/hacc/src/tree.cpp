@@ -1,6 +1,7 @@
-#include "../inc/tree.h"
-#include "../inc/haccable.h"
-#include "paths_internal.h"
+#include "hacc/inc/tree.h"
+
+#include "hacc/inc/haccable.h"
+#include "hacc/src/paths_internal.h"
 
 namespace hacc {
 
