@@ -1,6 +1,7 @@
 #ifndef HAVE_GEO_EDITING_H
 #define HAVE_GEO_EDITING_H
 
+#include <string>
 #include "shell/inc/menus.h"
 #include "core/inc/window.h"
 #include "geo/inc/camera.h"

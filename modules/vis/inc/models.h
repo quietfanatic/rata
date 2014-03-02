@@ -1,6 +1,8 @@
 #ifndef HAVE_VIS_MODELS_H
 #define HAVE_VIS_MODELS_H
 
+#include <string>
+#include <vector>
 #include <stdexcept>
 #include "hacc/inc/haccable_standard.h"
 #include "util/inc/geometry.h"
@@ -21,8 +23,6 @@ namespace vis {
             std::vector<Skel::Seg*> branches;
             Layout* layout;
             float z_offset;
-
-            Skel::Seg* parent = NULL;  // Null if root, set after creation
         };
 
         hacc::named_vector<Skel::Seg> segs;

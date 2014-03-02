@@ -1,4 +1,5 @@
 
+#include <vector>
 #include "ent/inc/mixins.h"
 #include "hacc/inc/everything.h"
 #include "util/inc/geometry.h"
@@ -17,12 +18,10 @@ namespace ent {
     };
 
     struct Inert : ROD<Sprites, Inert_Def> {
-
         void Drawn_draw (Sprites) override {
             auto def = get_def();
             draw_texture(def->texture, pos() + def->boundary);
         }
-
     };
 
     struct Light : geo::Resident, Drawn<Lights> {

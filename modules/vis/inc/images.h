@@ -2,6 +2,7 @@
 #define HAVE_VIS_IMAGES_H
 
 #include <string>
+#include <vector>
 #include "util/inc/geometry.h"
 
 namespace vis {

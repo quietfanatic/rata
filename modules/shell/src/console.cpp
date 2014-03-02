@@ -1,4 +1,6 @@
 
+#include <string>
+#include <vector>
 #include <GL/glfw.h>
 #include "core/inc/commands.h"
 #include "core/inc/window.h"

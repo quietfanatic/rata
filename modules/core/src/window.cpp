@@ -3,6 +3,7 @@
 #include <float.h>
 #include <GL/glew.h>
 #include <GL/glfw.h>
+#include <string>
 #include "core/inc/commands.h"
 #include "hacc/inc/documents.h"
 #include "hacc/inc/files.h"
@@ -292,7 +293,8 @@ void _reload (std::string filename) {
         window->before_next_frame([](){
             hacc::file_transaction([](){
                 for (auto f : hacc::loaded_files()) {
-                    if (f.filename().find("/res/") != std::string::npos) {
+                    if (f.filename().find("/res/") != std::string::npos
+                     || f.filename().find("world/") != std::string::npos) {
                         hacc::reload(f);
                     }
                 }

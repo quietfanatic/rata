@@ -3,6 +3,8 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <string>
+#include <vector>
 #include "hacc/inc/common.h"
  // TODO: Windows support
 

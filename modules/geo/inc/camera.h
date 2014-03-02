@@ -17,7 +17,7 @@ namespace geo {
         virtual void Camera_update () { }
         virtual ~Camera () { deactivate(); }
 
-        Camera (bool active = false) { activate(); }
+        explicit Camera (bool active = false) { activate(); }
 
         bool active;
         Camera* prev = NULL;
@@ -59,7 +59,7 @@ namespace geo {
         Vec Camera_pos () override { return pos; }
         void Camera_update () { }
         void finish () { if (!active) activate(); }
-        Default_Camera (bool active = true) : Camera(active) { }
+        explicit Default_Camera (bool active = true) : Camera(active) { }
     };
     Default_Camera& default_camera ();
 

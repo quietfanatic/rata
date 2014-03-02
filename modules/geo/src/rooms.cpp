@@ -15,7 +15,7 @@ namespace geo {
 
     void Room::observe (bool observe_neighbors) {
         if (!observer_count++) {
-            log("geo", "Activating room @%lx", (unsigned long)this);
+            log("geo", "Activating room @%p", this);
             size_t i = 0;
             for (auto& r : residents) {
                 if (r.finished) {
@@ -35,10 +35,10 @@ namespace geo {
     }
     void Room::forget (bool forget_neighbors) {
         if (!observer_count) {
-            log("geo", "Room @%lx's reference count is corrupted!", (size_t)this);
+            log("geo", "Room @%p's reference count is corrupted!", this);
         }
         else if (!--observer_count) {
-            log("geo", "Deactivating room @%lx", (unsigned long)this);
+            log("geo", "Deactivating room @%p", this);
             size_t i = 0;
             for (auto& r : residents) {
                 r.Resident_reclude();

@@ -8,8 +8,8 @@
 #include <sstream>
 #include <iomanip>
 #include <unordered_map>
-#include "../inc/files.h"  // for Path
-#include "paths_internal.h"
+#include "hacc/inc/files.h"  // for Path
+#include "hacc/src/paths_internal.h"
 
 namespace hacc {
 

@@ -1,5 +1,6 @@
 #include "phys/inc/ground.h"
 
+#include <string>
 #include "hacc/inc/haccable_standard.h"
 
 namespace phys {

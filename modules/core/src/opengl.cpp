@@ -3,6 +3,7 @@
 #ifdef CORE_OPENGL_VERY_DEBUG
     #include <sstream>
 #endif
+#include <string>
 #include <stdexcept>
 #include "core/inc/window.h"
 #include "hacc/inc/everything.h"
@@ -10,10 +11,10 @@
 
 namespace core {
 
-    GLenum diagnose_opengl (std::string when) {
+    GLenum diagnose_opengl (const char* when) {
         GLenum err = glGetError();
         if (err)
-            fprintf(stderr, "OpenGL error %04x %s\n", err, when.c_str());
+            fprintf(stderr, "OpenGL error %04x %s\n", err, when);
         return err;
     }
 

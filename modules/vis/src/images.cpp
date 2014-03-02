@@ -1,5 +1,7 @@
 #include "vis/inc/images.h"
 
+#include <string>
+#include <vector>
 #include <stdexcept>
 #include <GL/glew.h>
 #include <GL/glfw.h>

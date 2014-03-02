@@ -1,5 +1,8 @@
 #include "shell/inc/main.h"
 
+#include <utility>
+#include <string>
+#include <vector>
 #include "core/inc/commands.h"
 #include "core/inc/window.h"
 #include "ent/inc/control.h"
@@ -55,7 +58,6 @@ void step () {
 }
 
 int main (int argc, char** argv) {
-
     if (argc >= 2)
         state_arg = util::rel2abs(argv[1]);
 

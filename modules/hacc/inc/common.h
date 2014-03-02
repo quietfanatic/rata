@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <string>
 #include <vector>
+#include <utility>
 #include <functional>
 
  // This contains various types and exceptions that are used throughout Hacc

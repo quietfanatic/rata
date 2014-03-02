@@ -1,6 +1,8 @@
 #ifndef HAVE_PHYS_PHYS_H
 #define HAVE_PHYS_PHYS_H
 
+#include <string>
+#include <vector>
 #include <Box2D/Box2D.h>
 #include "util/inc/geometry.h"
 

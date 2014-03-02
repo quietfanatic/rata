@@ -1,4 +1,7 @@
 #include "ent/inc/items.h"
+
+#include <string>
+#include <vector>
 #include "hacc/inc/everything.h"
 #include "vis/inc/models.h"
 
@@ -38,7 +41,6 @@ HACCABLE(Equipment_Slots) {
             s = Equipment_Slots(r);
         }
     ).narrow());
-
 }
 
 HACCABLE(Item_Def) {

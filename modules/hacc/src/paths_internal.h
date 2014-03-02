@@ -19,7 +19,7 @@ namespace hacc {
     };
     struct PathRoot : PathData {
         String filename;
-        PathRoot (String f) : filename(f) { }
+        explicit PathRoot (String f) : filename(f) { }
         PathType type () const { return ROOT; }
         String root () const { return filename; }
         Reference to_reference (Pointer root) const {

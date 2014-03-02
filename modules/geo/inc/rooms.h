@@ -1,6 +1,7 @@
 #ifndef HAVE_GEO_ROOMS_H
 #define HAVE_GEO_ROOMS_H
 
+#include <vector>
 #include "util/inc/geometry.h"
 #include "util/inc/organization.h"
 

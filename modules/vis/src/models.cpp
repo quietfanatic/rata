@@ -21,15 +21,6 @@ namespace vis {
                     );
                 }
             }
-            for (Skel::Seg* branch : seg.branches) {
-                if (branch->parent) {
-                    throw hacc::X::Logic_Error(
-                        "Skeleton error: Seg " + branch->name
-                      + " was claimed by multiple parents"
-                    );
-                }
-                branch->parent = branch;
-            }
         }
     }
 

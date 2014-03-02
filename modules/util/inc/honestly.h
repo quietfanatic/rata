@@ -1,23 +1,19 @@
 #ifndef HAVE_UTIL_HONESTLY_H
 #define HAVE_UTIL_HONESTLY_H
 
-#include <unordered_map>
-#include <string>
+#include <inttypes.h>
 #include <math.h>
+#include <stdlib.h>
 
  // These are things that I couldn't fit elsewhere.  Many of these are things
  //  that the language really ought to have built in.
 
-typedef std::string Str;
-template <class T> using Hash = std::unordered_map<std::string, T>;
-template <class T> using Init_Safe = T& ();
 #define INIT_SAFE(type, name, ...) type& name () { static type r __VA_ARGS__; return r; }
 #define EXTERN_INIT_SAFE(type, name) type& name ();
 
 #define STRINGIFY(v) #v
 #define _COMMA ,
 #define CE constexpr
-typedef const char* CStr;
 typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;

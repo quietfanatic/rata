@@ -74,34 +74,9 @@ namespace util {
 
     template <class C, Links<C>&(* all)()>
     struct Linked : Link<C> {
-        Linked (bool a = true) { if (a) activate(); }
+        explicit Linked (bool a = true) { if (a) activate(); }
         void activate () { Link<C>::link(all()); }
         void deactivate () { Link<C>::unlink(); }
-    };
-
-
-     // Things that are registered in an order
-    template <class C, std::vector<C*>& (* all )(), class O = std::string>
-    struct Ordered {
-        static std::vector<C*>& get_all () { return all(); }
-        O order;
-        Ordered (O order) : order(order) {
-            for (auto i = all().begin(); i != all().end(); i++) {
-                if (order < (*i)->order) {
-                    all().insert(i, static_cast<C*>(this));
-                    return;
-                }
-            }
-            all().push_back(static_cast<C*>(this));
-        }
-        ~Ordered () {
-            for (auto i = all().begin(); i != all().end(); i++) {
-                if (*i == static_cast<C*>(this)) {
-                    all().erase(i);
-                    return;
-                }
-            }
-        }
     };
 
 }

@@ -1,6 +1,7 @@
 #ifndef HAVE_GEO_TILES_H
 #define HAVE_GEO_TILES_H
 
+#include <vector>
 #include "geo/inc/rooms.h"
 #include "phys/inc/phys.h"
 #include "vis/inc/common.h"
@@ -28,7 +29,6 @@ namespace geo {
      // A visible, tangible object that uses a matrix of tiles to create
      //  level geometry.
     struct Tilemap : Resident, phys::Object, vis::Drawn<vis::Map> {
-
         Tilemap_Def* get_def () { return static_cast<Tilemap_Def*>(def); }
 
         void Resident_emerge () override;

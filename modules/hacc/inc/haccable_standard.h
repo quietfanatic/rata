@@ -3,6 +3,7 @@
 
 #include <tuple>
 #include <memory>
+#include <unordered_map>
 #include "hacc/inc/haccable.h"
 
  // This contains some predefined Haccables for builtin types:

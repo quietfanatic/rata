@@ -2,6 +2,7 @@
 #define HAVE_VIS_TEXT_H
 
 #include <string>
+#include <vector>
 #include "util/inc/geometry.h"
 #include "util/inc/organization.h"
 #include "vis/inc/images.h"

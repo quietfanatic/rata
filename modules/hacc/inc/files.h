@@ -8,7 +8,7 @@
  //  loaded from files through this module.
 
  // When in a file, objects refer to other objects through a path,
- //  consisting of a filename and a series of attribute or element lookups. 
+ //  consisting of a filename and a series of attribute or element lookups.
  //  When in memory, objects refer to other objects through plain pointers.
 
  // Pointers from document objects to outside object cannot be saved

@@ -1,5 +1,6 @@
 #include "shell/inc/editing.h"
 
+#include <string>
 #include <sstream>
 #include <GL/glfw.h>
 #include "core/inc/commands.h"
