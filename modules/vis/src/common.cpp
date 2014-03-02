@@ -50,11 +50,7 @@ namespace vis {
             glBindRenderbuffer(GL_RENDERBUFFER, world_depth_rb);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, rtt_camera_size.x/PX, rtt_camera_size.y/PX);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, world_depth_rb);
-             // Do we have to unbind world_tex first?
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, world_tex, 0);
-             // Do we have to do this here or when rendering?
-            auto ca = GL_COLOR_ATTACHMENT0;
-            glDrawBuffers(1, (const GLenum*)&ca);
             diagnose_opengl("after setting up render-to-texture capability");
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                 throw hacc::X::Logic_Error("Framebuffer creationg failed!\n");
