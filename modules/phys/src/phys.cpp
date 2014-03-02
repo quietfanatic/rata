@@ -236,11 +236,6 @@ namespace phys {
 
  // This is so satisfying
 
-HACCABLE(Collision_Rule*) {
-    name("phys::Collision_Rule*");
-    hacc::hacc_pointer_by_method(&Collision_Rule::name, coll_rules(), true);
-}
-
 HACCABLE(b2Vec2) {
     name("b2Vec2");
     elem(member(&b2Vec2::x));
@@ -316,37 +311,40 @@ HACCABLE(b2FixtureDef) {
     attr("is_sensor", member(&b2FixtureDef::isSensor).optional());
 }
 
-static std::vector<Collision_Rule*> coll_b2v (uint64 b) {
-    std::vector<Collision_Rule*> v;
-    for (uint i = 0; b; i++, b >>= 1) {
-        if (b & 1) v.push_back(coll_rules()[i]);
-    }
-    return v;
-}
-static uint64 coll_v2b (const std::vector<Collision_Rule*>& v) {
-    uint64 b = 0;
-    for (auto rule : v) {
-        if (!rule) throw hacc::X::Logic_Error("Somehow a null pointer got into a collision rule list");
-        b |= rule->bit();
-    }
-    return b;
+struct Collision_Rules {
+    uint64 ui64;
+};
+
+HACCABLE(Collision_Rules) {
+    name("phys::Collision_Rules");
+    prepare([](Collision_Rules&, hacc::Tree){ });
+    fill([](Collision_Rules& crs, hacc::Tree tree){
+        uint64 r = 0;
+        for (auto& e : tree.as<hacc::Array>()) {
+            auto n = e.as<std::string>();
+            for (auto rule : coll_rules()) {
+                if (rule->name() == n) {
+                    r |= rule->bit();
+                }
+                break;
+            }
+        }
+        crs.ui64 = r;
+    });
+    to_tree([](const Collision_Rules& crs) {
+        hacc::Array r;
+        for (size_t i = 0; i < coll_rules().size(); i++) {
+            if (crs.ui64 & (1<<i)) r.push_back(hacc::Tree(coll_rules()[i]->name()));
+        }
+        return hacc::Tree(std::move(r));
+    });
 }
 
 HACCABLE(FixtureDef) {
     name("phys::FixtureDef");
     attr("b2", member(&FixtureDef::b2).collapse());
-    attr("coll_a", value_funcs<std::vector<Collision_Rule*>>(
-        [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_a); },
-        [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
-            fdf.coll_a = coll_v2b(rules);
-        }
-    ).optional().narrow());
-    attr("coll_b", value_funcs<std::vector<Collision_Rule*>>(
-        [](const FixtureDef& fdf){ return coll_b2v(fdf.coll_b); },
-        [](FixtureDef& fdf, std::vector<Collision_Rule*> rules){
-            fdf.coll_b = coll_v2b(rules);
-        }
-    ).optional().narrow());
+    attr("coll_a", member((Collision_Rules FixtureDef::*)&FixtureDef::coll_a).optional());
+    attr("coll_b", member((Collision_Rules FixtureDef::*)&FixtureDef::coll_b).optional());
     attr("filter", member(&FixtureDef::filter).optional());
 }
 

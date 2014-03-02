@@ -54,11 +54,11 @@ namespace geo {
             }
         }
     }
-    void Room::set_neighbors (std::vector<Room*> new_ns) {
+    void Room::finish () {
         if (neighbor_observer_count) {
-            for (auto nn : new_ns) {
+            for (auto nn : neighbors) {
                 if (!nn) continue;
-                for (auto on : neighbors) {
+                for (auto on : old_neighbors) {
                     if (nn == on)
                         goto next_n;
                 }
@@ -67,9 +67,9 @@ namespace geo {
                 }
                 next_n: { }
             }
-            for (auto on : neighbors) {
+            for (auto on : old_neighbors) {
                 if (!on) continue;
-                for (auto nn : new_ns) {
+                for (auto nn : neighbors) {
                     if (on == nn)
                         goto next_o;
                 }
@@ -79,7 +79,7 @@ namespace geo {
                 next_o: { }
             }
         }
-        neighbors = new_ns;
+        old_neighbors = neighbors;
     }
 
     Room* Observer::get_room () const {
@@ -157,7 +157,8 @@ namespace geo {
 HACCABLE(Room) {
     name("geo::Room");
     attr("boundary", member(&Room::boundary).optional());
-    attr("neighbors", value_methods(&Room::get_neighbors, &Room::set_neighbors).optional());
+    attr("neighbors", member(&Room::neighbors).optional());
+    finish(&Room::finish);
 }
 
 HACCABLE(Resident) {
