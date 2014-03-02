@@ -86,6 +86,9 @@ namespace core {
             if (glew_initted != GLEW_OK) {
                 throw hacc::X::Internal_Error("GLEW init failed: " + std::string((const char*)glewGetErrorString(glew_initted)));
             }
+            if (!glewIsSupported("GL_VERSION_2_1 GL_ARB_texture_non_power_of_two GL_ARB_framebuffer_object")) {
+                throw hacc::X::Error("This implementation of OpenGL does not support enough things.");
+            }
         }
         else {
             glfwSetWindowSize(width, height);
