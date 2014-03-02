@@ -14,7 +14,8 @@
         [0x7b4528ff 0x552321ff 0x451311ff 0x00000000]  // 10. Metallic orange
         [0x5e4a49ff 0x5e4a49ff 0x4e3a39ff 0x00000000]  // 11. Metallic purple
         [0x00000000 0x00000000 0x00000000 0xffffffff]  // 12. Bright light source
-        [0x495c5eff 0x3a4b4dff 0x4a5b5dff 0x00000000]  // 13. Bluish metallic grey
-        [0x3a4d4dff 0x273535ff 0x273535ff 0x00000000]  // 14. Dark metallic grey
+        [0x3c4c4eff 0x2f3b3dff 0x2a3b3dff 0x00000000]  // 13. Bluish metallic grey
+        //[0x2a2d3dff 0x172525ff 0x172525ff 0x00000000]  // 14. Dark metallic grey
+        [0x2f3a3aff 0x2a2f2fff 0x2a2f2fff 0x00000000]  // 14. Dark metallic grey
     ]}
 }}
