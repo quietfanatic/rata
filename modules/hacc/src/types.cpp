@@ -48,6 +48,7 @@ namespace hacc {
     void Type::stalloc (const Func<void (void*)>& f) const { data->stalloc(f); }
 
     void init () {
+        if (types_to_init().empty()) return;
         for (size_t i = 0; i < types_to_init().size(); i++) {
             TypeData* td = types_to_init()[i];
             if (td->describe) {
