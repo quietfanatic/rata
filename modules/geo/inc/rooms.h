@@ -14,9 +14,8 @@ namespace geo {
     struct Room : Link<Room> {
         Rect boundary = Rect(-INF, -INF, INF, INF);
         std::vector<Room*> neighbors;
-
-        std::vector<Room*> get_neighbors () const { return neighbors; }
-        void set_neighbors (std::vector<Room*>);
+         // For making finish() idempotent
+        std::vector<Room*> old_neighbors;
 
         Links<Resident> residents;
          // The room is loaded if this is non-zero.
@@ -27,6 +26,9 @@ namespace geo {
          // Rooms are not to be destructed if they have non-doomed Residents
         Room ();
         ~Room ();
+
+        void finish ();
+
     };
     Links<Room>& all_rooms ();
 

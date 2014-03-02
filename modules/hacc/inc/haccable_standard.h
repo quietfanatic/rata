@@ -13,6 +13,7 @@
  //  - hacc::named_vector (thin wrapper around std::vector where each object has a .name)
  //  - std::unordered_map
  //  - std::pair
+ //  - std::unique_ptr
  // You can override individual types if you want
 
 namespace hacc {

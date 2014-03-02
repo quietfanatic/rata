@@ -234,7 +234,8 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                             kill 2, $_ for keys %jobs;
                             die $_[0];
                         };
-                        my $do_wait = sub {
+                        my $do_wait;
+                        $do_wait = sub {
                             keys(%jobs) > 0 or do {
                                 die "Tried to wait on no jobs -- internal planner error?\n", join "\n", map show_rule($_), @program;
                             };
@@ -246,6 +247,8 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                                 print readline($jobs{$child}{output});
                                 close $jobs{$child}{output};
                                 delete $jobs{$child};
+                                 # Wait for more children
+                                goto &$do_wait if %jobs;
                                 die "\n";
                             }
                             $jobs{$child}{done} = 1;

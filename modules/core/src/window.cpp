@@ -120,7 +120,6 @@ namespace core {
         glfwSetCharCallback(char_cb);
         glfwSetWindowSizeCallback(resize_cb);
         glfwDisable(GLFW_AUTO_POLL_EVENTS);
-        hacc::set_file_logger([](std::string s){ log("file", s); });
         glfwSetTime(0);
         static double lag = 0;
         try {

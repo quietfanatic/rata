@@ -18,7 +18,6 @@ namespace hacc {
     GetSet0& GetSet0::optional () { (*this)->optional = true; return *this; }
     GetSet0& GetSet0::required () { (*this)->optional = false; return *this; }
     GetSet0& GetSet0::readonly () { (*this)->readonly = true; return *this; }
-    GetSet0& GetSet0::narrow () { (*this)->narrow = true; return *this; }
     GetSet0& GetSet0::prepare () { (*this)->prepare = true; return *this; }
     GetSet0& GetSet0::collapse () { (*this)->collapse = true; return *this; }
 
@@ -467,7 +466,6 @@ namespace hacc {
     void Reference::prepare (Tree t) const {
         init();
         if (!type().initialized()) throw X::Unhaccable_Reference(*this, "call from_tree on");
-        if (gs->narrow) return;
         if (type().data->prepare) {
             mod([&](void* p){ type().data->prepare(p, t); });
         }
@@ -532,12 +530,6 @@ namespace hacc {
 
     void Reference::fill (Tree t, bool force) const {
         if (!force && gs->prepare) return;
-        if (gs->narrow) {
-            mod([&](void* p){
-                Reference(type(), p).from_tree(t);
-            });
-            return;
-        }
          // First check for special values
         if (t.form() == STRING) {
             String s = t.as<String>();
@@ -611,7 +603,6 @@ namespace hacc {
     }
 
     void Reference::finish () const {
-        if (gs->narrow) return;
         if (type().data->finish) {
             mod([&](void* p){ type().data->finish(p); });
         }

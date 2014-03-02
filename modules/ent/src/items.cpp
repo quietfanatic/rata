@@ -22,25 +22,26 @@ namespace ent {
 
 HACCABLE(Equipment_Slots) {
     name("ent::Equipment_Slots");
-    delegate(value_funcs<std::vector<std::string>>(
-        [](const Equipment_Slots& s) {
-            std::vector<std::string> r;
-            if (s & HEAD) r.push_back("head");
-            if (s & HAND) r.push_back("hand");
-            if (s & BODY) r.push_back("body");
-            if (s & FEET) r.push_back("feet");
-            return r;
-        }, [](Equipment_Slots& s, std::vector<std::string> names){
-            int r = 0;
-            for (auto n : names) {
-                if (n == "head") r |= HEAD;
-                if (n == "hand") r |= HAND;
-                if (n == "body") r |= BODY;
-                if (n == "feet") r |= FEET;
-            }
-            s = Equipment_Slots(r);
+    prepare([](Equipment_Slots& slots, hacc::Tree tree){ });
+    fill([](Equipment_Slots& slots, hacc::Tree tree){
+        int s = 0;
+        for (auto& m : tree.as<hacc::Array>()) {
+            auto n = m.as<std::string>();
+            if (n == "head") s |= HEAD;
+            if (n == "hand") s |= HAND;
+            if (n == "body") s |= BODY;
+            if (n == "feet") s |= FEET;
         }
-    ).narrow());
+        slots = Equipment_Slots(s);
+    });
+    to_tree([](const Equipment_Slots& slots){
+        hacc::Array r;
+        if (slots & HEAD) r.push_back(hacc::Tree("head"));
+        if (slots & HAND) r.push_back(hacc::Tree("hand"));
+        if (slots & BODY) r.push_back(hacc::Tree("body"));
+        if (slots & FEET) r.push_back(hacc::Tree("feet"));
+        return hacc::Tree(std::move(r));
+    });
 }
 
 HACCABLE(Item_Def) {
