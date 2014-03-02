@@ -49,7 +49,7 @@ namespace shell {
             hover(geo::camera->window_to_layer<Layer>(x, y));
         }
         bool Listener_button (int code, int press) {
-            if (code == 1 && press) {
+            if (code == 0 && press) {
                 bool res = click(geo::camera->window_to_layer<Layer>(
                     core::window->cursor_x,
                     core::window->cursor_y
