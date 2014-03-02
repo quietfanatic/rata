@@ -248,7 +248,7 @@ our @EXPORT = qw(make rule phony subdep defaults include config option cwd chdir
                                 close $jobs{$child}{output};
                                 delete $jobs{$child};
                                  # Wait for more children
-                                goto &$do_wait if %jobs;
+                                $do_wait->() if %jobs;
                                 die "\n";
                             }
                             $jobs{$child}{done} = 1;
