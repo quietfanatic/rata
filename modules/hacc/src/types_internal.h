@@ -26,7 +26,7 @@ namespace hacc {
     };
 
     struct GS_Ptr : GetSetData {
-        GS_Ptr (Type t) : GetSetData(t, t) { }
+        explicit GS_Ptr (Type t) : GetSetData(t, t) { }
         String description () const { return "<Converted from Pointer>"; }
         void* address (void* c) const { return c; }
         void* ro_address (void* c) const { return c; }

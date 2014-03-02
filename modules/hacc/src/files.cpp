@@ -40,7 +40,7 @@ namespace hacc {
         bool requested = false;
         bool addresses_scanned = false;
 
-        FileData (String n) : filename(n) { }
+        explicit FileData (String n) : filename(n) { }
     };
     String File::filename () { return p->filename; }
     bool File::loaded () { return p->state == LOADED; }

@@ -1,5 +1,6 @@
 #include "vis/inc/tiles.h"
 
+#include <string>
 #include "core/inc/commands.h"
 #include "core/inc/opengl.h"
 #include "hacc/inc/everything.h"

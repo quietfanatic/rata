@@ -37,7 +37,7 @@ namespace hacc {
              // TypeDatas are guaranteed to not be duplicated.
             return data == other.data;
         }
-        bool operator != (const Type& other) const { 
+        bool operator != (const Type& other) const {
             return data != other.data;
         }
     };

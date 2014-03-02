@@ -1,5 +1,6 @@
 #include "phys/inc/phys.h"
 
+#include <vector>
 #include <stdexcept>
 #include "core/inc/commands.h"
 #include "hacc/inc/haccable_standard.h"
@@ -209,11 +210,11 @@ namespace phys {
                                 draw_line(b2es->m_vertex1, b2es->m_vertex2);
                                 if (b2es->m_hasVertex0) {
                                     draw_color((fcolor&~0xff)|0x3f);
-                                    draw_line(Vec(b2es->m_vertex0)-Vec(.25,.25), b2es->m_vertex1);
+                                    draw_line(Vec(b2es->m_vertex0)-Vec(.25, .25), b2es->m_vertex1);
                                 }
                                 if (b2es->m_hasVertex3) {
                                     draw_color((fcolor&~0xff)|0x3f);
-                                    draw_line(b2es->m_vertex2, Vec(b2es->m_vertex3)+Vec(.25,.25));
+                                    draw_line(b2es->m_vertex2, Vec(b2es->m_vertex3)+Vec(.25, .25));
                                 }
                                 break;
                             }

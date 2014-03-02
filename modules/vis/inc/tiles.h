@@ -1,6 +1,7 @@
 #ifndef HAVE_VIS_TILES_H
 #define HAVE_VIS_TILES_H
 
+#include <vector>
 #include "util/inc/geometry.h"
 #include "util/inc/organization.h"
 #include "vis/inc/images.h"

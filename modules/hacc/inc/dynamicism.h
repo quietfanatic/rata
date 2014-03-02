@@ -55,7 +55,7 @@ namespace hacc {
         void* address;
 
         Pointer (Null n = null) : type(Type::CppType<Unknown>()), address(null) { }
-        Pointer (Type type, void* p = null) : type(type), address(p) { }
+        explicit Pointer (Type type, void* p = null) : type(type), address(p) { }
         template <class C>
         Pointer (C* p) : type(Type::CppType<C>()), address(p) { }
 

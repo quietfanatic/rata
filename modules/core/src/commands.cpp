@@ -1,6 +1,7 @@
 #include "core/inc/commands.h"
 
 #include <string>
+#include <vector>
 #include <stdexcept>
 #include <iostream>
 #include "core/inc/window.h"

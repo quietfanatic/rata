@@ -23,7 +23,7 @@ namespace vis {
     struct Drawn : util::Link<Drawn<C>> {
         virtual void Drawn_draw (C) = 0;
 
-        Drawn (bool visible) { if (visible) link(C::items); }
+        explicit Drawn (bool visible) { if (visible) link(C::items); }
         void appear () { util::Link<Drawn<C>>::link(C::items); }
         void disappear () { util::Link<Drawn<C>>::unlink(); }
         bool visible () { return util::Link<Drawn<C>>::linked(); }

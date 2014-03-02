@@ -3,6 +3,7 @@
 #include <float.h>
 #include <GL/glew.h>
 #include <GL/glfw.h>
+#include <string>
 #include "core/inc/commands.h"
 #include "hacc/inc/documents.h"
 #include "hacc/inc/files.h"

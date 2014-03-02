@@ -152,7 +152,7 @@ namespace geo {
         for (uint x = 0; x < width; x++)
         for (uint e = 0; e < MAX_EDGES; e++) {
             if (es[y * width + x][e].def) {
-                while(merge_edges(&es[y * width + x][e], &merged, &eaten));
+                while(merge_edges(&es[y * width + x][e], &merged, &eaten)) { }
             }
         }
          // The bodydef has already been manifested through phys::Object

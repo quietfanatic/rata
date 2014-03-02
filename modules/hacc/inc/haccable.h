@@ -1,7 +1,6 @@
 #ifndef HAVE_HACC_HACCABLE_H
 #define HAVE_HACC_HACCABLE_H
 
-#include <unordered_map>
 #include "hacc/inc/dynamicism.h"
 
  // TODO: put documentation here

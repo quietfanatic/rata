@@ -1,6 +1,8 @@
 #ifndef HAVE_VIS_MODELS_H
 #define HAVE_VIS_MODELS_H
 
+#include <string>
+#include <vector>
 #include <stdexcept>
 #include "hacc/inc/haccable_standard.h"
 #include "util/inc/geometry.h"

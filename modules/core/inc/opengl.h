@@ -16,7 +16,7 @@
 namespace core {
 
      // Queries glError
-    GLenum diagnose_opengl (std::string when = "");
+    GLenum diagnose_opengl (const char* when = "");
 
     struct Shader {
         uint glid = 0;

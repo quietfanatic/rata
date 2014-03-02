@@ -15,7 +15,7 @@ namespace hacc {
         DocLink* prev;
         DocLink* next;
         DocLink () : prev(this), next(this) { }
-        DocLink (DocLink* list) : prev(list), next(list->next) {
+        explicit DocLink (DocLink* list) : prev(list), next(list->next) {
             list->next->prev = this;
             list->next = this;
         }

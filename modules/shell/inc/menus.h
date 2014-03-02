@@ -1,6 +1,8 @@
 #ifndef HAVE_GEO_MENUS_H
 #define HAVE_GEO_MENUS_H
 
+#include <string>
+#include <vector>
 #include <memory>
 #include "core/inc/commands.h"
 #include "core/inc/window.h"

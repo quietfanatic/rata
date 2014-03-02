@@ -730,7 +730,7 @@ namespace hacc {
                             if (a.first == ksk)
                                 goto next;
                         {
-                            Path newpath = path ? Path(path,a.first) : path;
+                            Path newpath = path ? Path(path, a.first) : path;
                             if (chain(*this, a.second).foreach_pointer(cb, newpath))
                                 return true;
                         }
