@@ -1,6 +1,7 @@
 #include "util/inc/debug.h"
 
 #include <stdarg.h>
+#include <stdio.h>
 #include <string>
 #include "core/inc/commands.h"
 #include "hacc/inc/haccable.h"
@@ -12,6 +13,10 @@ namespace util {
     static std::unordered_map<std::string, bool>& log_tags () {
         static std::unordered_map<std::string, bool> r;
         return r;
+    }
+
+    void set_logging (const char* tag, bool on) {
+        log_tags()[tag] = on;
     }
 
     static void stamp (const char* tag) {
@@ -33,10 +38,10 @@ namespace util {
             va_end(args);
         }
     }
-}
+} using namespace util;
 
 void _log (std::string name, bool state) {
-    util::log_tags()[name] = state;
+    set_logging(name.c_str(), state);
 }
 
 core::New_Command _log_cmd ("log", "Change whether a particular tag is logged or not.", 2, _log);

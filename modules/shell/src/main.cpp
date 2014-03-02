@@ -10,6 +10,7 @@
 #include "hacc/inc/files.h"
 #include "hacc/inc/haccable_standard.h"
 #include "phys/inc/phys.h"
+#include "util/inc/debug.h"
 #include "util/inc/integration.h"
 #include "vis/inc/common.h"
 
@@ -58,6 +59,8 @@ void step () {
 }
 
 int main (int argc, char** argv) {
+    util::set_logging("file", true);
+    hacc::set_file_logger([](std::string s){ util::log("file", s); });
     if (argc >= 2)
         state_arg = util::rel2abs(argv[1]);
 

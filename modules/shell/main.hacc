@@ -1,7 +1,6 @@
 {hacc::Document:{
     game:{Game:{
         on_start:[seq[
-            [log file true]
             [log geo true]
             [log frameskip true]
             [set_default_font $("shell/res/monospace.hacc").font]
