@@ -36,8 +36,6 @@ namespace snd {
         Voice (Audio* audio);  // Calls finish
         ~Voice ();
     };
-    extern util::Links<Voice> voices;
-
 
 }
 

@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <mutex>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_audio.h>
 #include "hacc/inc/documents.h"
@@ -36,11 +37,18 @@ namespace snd {
 
     static SDL_AudioDeviceID dev = 0;
 
-    Links<Voice> voices;
+    static Links<Voice> voices;
+    static Links<Voice> new_voices;
+    std::mutex new_voices_mutex;
 
     void mix_voices (void* _, uint8* buf, int len) {
         auto samples = (Sample*)buf;
         len /= sizeof(Sample);  // Assuming len is divisible by sizeof(Sample)
+        new_voices_mutex.lock();
+        while (!new_voices.empty()) {
+            new_voices.begin()->link(voices);
+        }
+        new_voices_mutex.unlock();
         for (int i = 0; i < len; i++) {
             int32 l = 0;
             int32 r = 0;
@@ -86,24 +94,23 @@ namespace snd {
             spec.userdata = NULL;
 
             dev = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+            SDL_PauseAudioDevice(dev, 0);
         }
     }
 
     void Voice::finish () {
         init();
-        if (voices.empty()) {
-            SDL_PauseAudioDevice(dev, 0);
-        }
-        link(voices);
+        new_voices_mutex.lock();
+        link(new_voices);
+        new_voices_mutex.unlock();
     }
 
     Voice::Voice (Audio* audio) : audio(audio) { finish(); }
 
     Voice::~Voice () {
+        new_voices_mutex.lock();
         unlink();
-        if (voices.empty()) {
-            SDL_PauseAudioDevice(dev, 1);
-        }
+        new_voices_mutex.unlock();
     }
 
 } using namespace snd;
