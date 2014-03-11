@@ -55,7 +55,7 @@ namespace snd {
                     l += v.audio->samples[v.pos].l;
                     r += v.audio->samples[v.pos].r;
                     v.pos += 1;
-                    if (v.pos > v.audio->length && v.auto_delete_from) {
+                    if (v.pos >= v.audio->length && v.auto_delete_from) {
                         destroy = &v;
                     }
                 }
