@@ -28,6 +28,7 @@ my @objects = qw<
     ../hacc/tmp/types.o
     ../phys/tmp/ground.o
     ../phys/tmp/phys.o
+    ../snd/tmp/audio.o
     ../vis/tmp/common.o
     ../vis/tmp/color.o
     ../vis/tmp/images.o
@@ -43,8 +44,8 @@ my @objects = qw<
 
 my @libs =
     `uname -s` eq "Darwin\n"
-        ? qw(-framework OpenGL -lGLEW -lglfw -lSOIL -framework Cocoa -L/opt/local/lib)
-        : qw(-lGL -lGLEW -lglfw -lSOIL);
+        ? qw(-framework OpenGL -lGLEW -lglfw -lSOIL -lSDL2 -framework Cocoa -L/opt/local/lib)
+        : qw(-lGL -lGLEW -lglfw -lSOIL -lSDL2);
 
 include '../..';
 

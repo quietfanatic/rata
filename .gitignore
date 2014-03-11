@@ -4,12 +4,11 @@
 # resource dirs
 /lib/*
 !/lib/Put Box2D Here
-/res
-/img
 /save
 
 # intermediates
 tmp
+/modules/world/snd/*.s16s
 
 # misc
 gmon.out

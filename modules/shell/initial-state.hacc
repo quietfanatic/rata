@@ -23,4 +23,8 @@
         def:$("world/item/items.hacc").frock
         owner:$.rata.equipment
     }}
+    bgm:{snd::Voice:{
+        audio:$("world/snd/sounds.hacc").life
+        auto_delete_from:$
+    }}
 }}

@@ -153,14 +153,8 @@ subdep sub {
  # Let modules do their own declarations
 include glob 'modules/*';
 
- # Miscellaneous stuff
-phony 'test', sub { grep /modules\/.*\/test$/, targets }, sub { };
-
-phony 'clean', sub { grep /modules\/.*\/clean$/, targets }, sub {
-    unlink 'build-config';
-};
-
-unless (-e 'lib/libBox2D.a') {
+ # Require Box2D
+unless (-e 'lib/libBox2D.a' and -e 'lib/Box2D/Box2D/Box2D.h') {
     die <<END
 This program requires the physics engine Box2D.  Please get libBox2D via:
     cd lib
@@ -171,6 +165,17 @@ Sorry for the inconvenience.
 END
 }
 
-defaults 'rata';
+ # Miscellaneous stuff
+phony 'test', sub { grep /modules\/.*\/test$/, targets }, sub { };
+
+phony 'clean', sub { grep /modules\/.*\/clean$/, targets }, sub {
+    unlink 'build-config';
+};
+
+ # Tie it all together
+phony 'midis', sub { grep /modules\/world\/.*\.s16s/, targets }, sub { };
+phony 'build', ['rata', 'midis'], sub { };
+
+defaults 'build';
 
 make;
