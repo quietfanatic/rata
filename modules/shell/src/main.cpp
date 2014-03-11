@@ -10,6 +10,7 @@
 #include "hacc/inc/files.h"
 #include "hacc/inc/haccable_standard.h"
 #include "phys/inc/phys.h"
+#include "snd/inc/audio.h"
 #include "util/inc/debug.h"
 #include "util/inc/integration.h"
 #include "vis/inc/common.h"
@@ -79,6 +80,9 @@ int main (int argc, char** argv) {
     phys::space.start();
     game = main_file.attr("game");
     game->on_start();
+    if (!game->paused) {
+        snd::start();
+    }
     window->start();
      // After window closes
     if (game->on_exit)
@@ -98,10 +102,16 @@ HACCABLE(Hotkeys) {
     finish([](Hotkeys& v){ v.finish(); });
 }
 
-void _pause () {
+void pause () {
     game->paused = !game->paused;
+    if (game->paused) {
+        snd::stop();
+    }
+    else {
+        snd::start();
+    }
 }
-core::New_Command _pause_cmd ("pause", "Toggle whether game activity occurs.", 0, _pause);
+core::New_Command _pause_cmd ("pause", "Toggle whether game activity occurs.", 0, pause);
 
 void _lst (std::string s) {
     if (s.empty()) {

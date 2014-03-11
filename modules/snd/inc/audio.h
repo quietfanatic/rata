@@ -8,6 +8,8 @@ namespace hacc { struct Document; }
 namespace snd {
 
     void init ();
+    void start ();
+    void stop ();
 
     struct Sample {
         int16 l;
@@ -29,6 +31,7 @@ namespace snd {
     struct Voice : util::Link<Voice> {
         Audio* audio = NULL;
         uint32 pos = 0;
+        float volume = 1.0;
         bool paused = false;
         hacc::Document* auto_delete_from = NULL;
         Voice () { }

@@ -60,8 +60,8 @@ namespace snd {
                 }
                 if (v.audio && !v.paused) {
                     v.pos %= v.audio->length;
-                    l += v.audio->samples[v.pos].l;
-                    r += v.audio->samples[v.pos].r;
+                    l += v.audio->samples[v.pos].l * v.volume;
+                    r += v.audio->samples[v.pos].r * v.volume;
                     v.pos += 1;
                     if (v.pos >= v.audio->length && v.auto_delete_from) {
                         destroy = &v;
@@ -94,8 +94,13 @@ namespace snd {
             spec.userdata = NULL;
 
             dev = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
-            SDL_PauseAudioDevice(dev, 0);
         }
+    }
+    void start () {
+        SDL_PauseAudioDevice(dev, 0);
+    }
+    void stop () {
+        SDL_PauseAudioDevice(dev, 1);
     }
 
     void Voice::finish () {
