@@ -435,7 +435,13 @@ namespace hacc {
             p++;  // for the $
             switch (look()) {
                 case '(': case '.': case '[': return parse_path();
-                default: return parse_ref();
+                case '"': return parse_ref();
+                default:
+                    if (isalnum(look()))
+                        return parse_ref();
+                    else
+                        return parse_path();
+
             }
         }
         Tree parse_path () {
