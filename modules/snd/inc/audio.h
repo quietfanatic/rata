@@ -19,6 +19,10 @@ namespace snd {
      // Currently, only raw 16-bit 44.1khz interleaved-stereo PCM is supported
     struct Audio {
         std::string filename;
+         // If this is not defined, pauses when done
+        uint32 loop_begin = -1;
+         // If this is not defined, loops at end of file
+        uint32 loop_end = -1;
         Sample* samples = NULL;
         uint32 length = 0;
 
@@ -33,6 +37,7 @@ namespace snd {
         uint32 pos = 0;
         float volume = 1.0;
         bool paused = false;
+        bool done = false;
         hacc::Document* auto_delete_from = NULL;
         Voice () { }
         void finish ();

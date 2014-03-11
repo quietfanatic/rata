@@ -1,3 +1,6 @@
 {hacc::Document:{
-    life:{snd::Audio:{ filename:"world/snd/life.s16s" }}
+    life:{snd::Audio:{
+        filename:"world/snd/life.s16s"
+        loop_begin:0
+    }}
 }}
