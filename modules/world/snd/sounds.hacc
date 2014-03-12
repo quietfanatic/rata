@@ -9,6 +9,6 @@
     step_voice:{snd::Voice:{
         audio:$.step
         paused:true
-        volume:0.6
+        volume:0.5
     }}
 }}

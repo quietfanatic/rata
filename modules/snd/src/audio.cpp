@@ -143,6 +143,7 @@ HACCABLE(Voice) {
     attr("audio", member(&Voice::audio).optional());
     attr("pos", member(&Voice::pos).optional());
     attr("paused", member(&Voice::paused).optional());
+    attr("volume", member(&Voice::volume).optional());
     attr("auto_delete_from", member(&Voice::auto_delete_from).optional());
     finish(&Voice::finish);
 }
