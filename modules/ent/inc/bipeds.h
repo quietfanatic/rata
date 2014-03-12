@@ -7,6 +7,7 @@
 #include "geo/inc/rooms.h"
 #include "phys/inc/ground.h"
 #include "phys/inc/phys.h"
+#include "snd/inc/audio.h"
 #include "vis/inc/common.h"
 #include "vis/inc/models.h"
 
@@ -25,6 +26,10 @@ namespace ent {
         float air_speed;
         float jump_speed;
         float jump_delay;
+        float walk_stride;
+        float run_stride;
+        float crawl_stride;
+        snd::Voice* step_voice = NULL;
     };
 
      // Enumerates all possible poses for a Biped.

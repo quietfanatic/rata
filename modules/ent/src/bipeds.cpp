@@ -149,7 +149,18 @@ namespace ent {
                 distance_walked = 0;
             }
             else {
+                float stride = vel().x * direction > stats.walk_speed
+                    ? stats.run_stride
+                    : stats.walk_stride;
+                bool pre_step = fmod(distance_walked, stride / 2) < stride / 4;
                 distance_walked += fabs(pos().x - ground->pos().x - oldxrel);
+                if (pre_step && fmod(distance_walked, stride / 2) >= stride / 4) {
+                    if (stats.step_voice) {
+                        stats.step_voice->done = false;
+                        stats.step_voice->paused = false;
+                        stats.step_voice->pos = 0;
+                    }
+                }
             }
         }
         else {
@@ -187,7 +198,7 @@ namespace ent {
                     model.apply_pose(&def->poses->crawl[3]);
                 }
                 else {
-                    uint step = fmod(distance_walked * 2.0, 4.0);
+                    uint step = fmod(distance_walked / stats.crawl_stride * 4.0, 4.0);
                     model.apply_pose(&def->poses->crawl[step]);
                 }
             }
@@ -196,7 +207,7 @@ namespace ent {
                 model.apply_pose(&def->poses->look_stand[look_frame]);
             }
             else if (vel().x * direction > stats.walk_speed) {
-                float stepdist = fmod(distance_walked * 1.5, 6.0);
+                float stepdist = fmod(distance_walked / stats.run_stride * 6.0, 6.0);
                  // Expand frames 1 and 4 a little
                 uint step =
                     stepdist < 0.9 ? 0
@@ -212,7 +223,7 @@ namespace ent {
                     model.apply_pose(&def->poses->look_walk[look_frame]);
             }
             else if (fabs(vel().x) >= 0.01) {
-                uint step = fmod(distance_walked * 2.0, 4.0);
+                uint step = fmod(distance_walked / stats.walk_stride * 4.0, 4.0);
                 model.apply_pose(&def->poses->walk[step]);
                 if (step % 2 < 1)
                     model.apply_pose(&def->poses->look_walk[look_frame]);
@@ -274,6 +285,10 @@ HACCABLE(Biped_Stats) {
     attr("air_speed", member(&Biped_Stats::air_speed).optional());
     attr("jump_speed", member(&Biped_Stats::jump_speed).optional());
     attr("jump_delay", member(&Biped_Stats::jump_delay).optional());
+    attr("walk_stride", member(&Biped_Stats::walk_stride).optional());
+    attr("run_stride", member(&Biped_Stats::run_stride).optional());
+    attr("crawl_stride", member(&Biped_Stats::crawl_stride).optional());
+    attr("step_voice", member(&Biped_Stats::step_voice).optional());
 }
 
 HACCABLE(Biped_Def) {

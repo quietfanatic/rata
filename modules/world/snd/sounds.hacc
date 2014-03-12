@@ -3,4 +3,12 @@
         filename:"world/snd/life.s16s"
         loop_begin:0
     }}
+    step:{snd::Audio:{
+        filename:"world/snd/step.s16s"
+    }}
+    step_voice:{snd::Voice:{
+        audio:$.step
+        paused:true
+        volume:0.6
+    }}
 }}
