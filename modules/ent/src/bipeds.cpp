@@ -148,8 +148,11 @@ namespace ent {
             if (fabs(vel().x) < 0.01) {
                 distance_walked = 0;
             }
+            else if (crawling) {
+                distance_walked += fabs(pos().x - ground->pos().x - oldxrel);
+            }
             else {
-                float stride = vel().x * direction > stats.walk_speed
+                float stride = fabs(vel().x) > stats.walk_speed
                     ? stats.run_stride
                     : stats.walk_stride;
                 bool pre_step = fmod(distance_walked, stride / 2) < stride / 4;
@@ -159,6 +162,7 @@ namespace ent {
                         stats.step_voice->done = false;
                         stats.step_voice->paused = false;
                         stats.step_voice->pos = 0;
+                        stats.step_voice->volume = 0.3 + 0.3 * fabs(vel().x) / stats.walk_speed;
                     }
                 }
             }
