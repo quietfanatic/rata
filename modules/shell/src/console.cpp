@@ -1,7 +1,7 @@
 
 #include <string>
 #include <vector>
-#include <GL/glfw.h>
+#include <SDL2/SDL_events.h>
 #include "core/inc/commands.h"
 #include "core/inc/window.h"
 #include "vis/inc/color.h"
@@ -40,174 +40,177 @@ namespace shell {
             contents += message;
         }
 
-        bool Listener_key (int keycode, int action) override {
-            if (action == GLFW_PRESS) {
-                switch (keycode) {
-                    case GLFW_KEY_ESC: {
-                        exit_console();
-                        break;
-                    }
-                    case GLFW_KEY_LEFT: {
-                        if (cli_pos > 0) cli_pos--;
-                        break;
-                    }
-                    case GLFW_KEY_RIGHT: {
-                        if (cli_pos < cli.size()) cli_pos++;
-                        break;
-                    }
-                    case GLFW_KEY_UP: {
-                        if (history_size != core::command_history.size()) {
-                            history_size = core::command_history.size();
-                            history_index = history_size;
+        bool Listener_event (SDL_Event* event) override {
+            switch (event->type) {
+                case SDL_KEYDOWN: {
+                    switch (event->key.keysym.sym) {
+                        case SDLK_ESCAPE: {
+                            exit_console();
+                            break;
                         }
-                        if (history_index > 0) {
-                            if (history_index == core::command_history.size()) {
-                                stash_cli = cli;
+                        case SDLK_LEFT: {
+                            if (cli_pos > 0) cli_pos--;
+                            break;
+                        }
+                        case SDLK_RIGHT: {
+                            if (cli_pos < cli.size()) cli_pos++;
+                            break;
+                        }
+                        case SDLK_UP: {
+                            if (history_size != core::command_history.size()) {
+                                history_size = core::command_history.size();
+                                history_index = history_size;
                             }
-                            history_index--;
-                            cli = core::command_history[history_index];
-                            cli_pos = cli.size();
-                        }
-                        break;
-                    }
-                    case GLFW_KEY_DOWN: {
-                        if (history_index < core::command_history.size()) {
-                            history_index++;
-                            if (history_index == core::command_history.size())
-                                cli = stash_cli;
-                            else
-                                cli = core::command_history[history_index];
-                            cli_pos = cli.size();
-                        }
-                        break;
-                    }
-                    case GLFW_KEY_HOME: {
-                        cli_pos = 0;
-                        break;
-                    }
-                    case GLFW_KEY_END: {
-                        cli_pos = cli.size();
-                        break;
-                    }
-                    case GLFW_KEY_ENTER: {
-                        print_to_console(cli + "\n");
-                        command_from_string(cli);
-                        cli = "";
-                        cli_pos = 0;
-                        stash_cli = "";
-                        history_index = core::command_history.size();
-                         // Be jealous with the keyboard.
-                        Listener::activate();
-                        break;
-                    }
-                    case GLFW_KEY_BACKSPACE: {
-                        if (cli_pos) {
-                            cli = cli.substr(0, cli_pos - 1)
-                                + cli.substr(cli_pos);
-                            cli_pos--;
-                        }
-                        break;
-                    }
-                    case GLFW_KEY_DEL: {
-                        if (cli_pos < cli.size()) {
-                            cli = cli.substr(0, cli_pos)
-                                + cli.substr(cli_pos + 1);
-                        }
-                        break;
-                    }
-                    case GLFW_KEY_TAB: {
-                         // Completion of a command
-                        size_t start = 0;
-                        while (start < cli_pos && cli[start] == ' ')
-                            start++;
-                        size_t end = cli_pos;
-                        bool dont_complete = false;
-                        for (size_t i = start; i < end; i++) {
-                            if (cli[i] == ' ') {
-                                dont_complete = true;
-                                break;
-                            }
-                        }
-                        if (dont_complete) break;
-                        auto cmd_part = cli.substr(start, end - start);
-                        if (!completion_matches.empty()) {
-                            Console_print(cli + "\n");
-                            for (auto s : completion_matches) {
-                                Console_print(s + " ");
-                            }
-                            Console_print("\n");
-                        }
-                        else {
-                             // Find all commands beginning with this
-                            for (auto& p : commands_by_name()) {
-                                if (p.first.size() >= cmd_part.size()) {
-                                    for (size_t i = 0; i < cmd_part.size(); i++) {
-                                        if (p.first[i] != cmd_part[i])
-                                            goto no_match;
-                                    }
-                                    completion_matches.push_back(p.first);
+                            if (history_index > 0) {
+                                if (history_index == core::command_history.size()) {
+                                    stash_cli = cli;
                                 }
-                                no_match: { }
+                                history_index--;
+                                cli = core::command_history[history_index];
+                                cli_pos = cli.size();
                             }
-                             // One match?  Complete it.
-                            if (completion_matches.size() == 1) {
-                                cli.replace(start, end - start, completion_matches[0] + " ");
-                                cli_pos = completion_matches[0].size() + 1;
+                            break;
+                        }
+                        case SDLK_DOWN: {
+                            if (history_index < core::command_history.size()) {
+                                history_index++;
+                                if (history_index == core::command_history.size())
+                                    cli = stash_cli;
+                                else
+                                    cli = core::command_history[history_index];
+                                cli_pos = cli.size();
                             }
-                             // Multiple matches?  Fill as much as possible.
-                            else if (completion_matches.size() > 1) {
-                                for (;;) {
-                                    char common = completion_matches[0][cmd_part.size()];
-                                    for (auto s : completion_matches) {
-                                        if (s.size() < cmd_part.size() || s[cmd_part.size()] != common) {
-                                            goto done_adding;
+                            break;
+                        }
+                        case SDLK_HOME: {
+                            cli_pos = 0;
+                            break;
+                        }
+                        case SDLK_END: {
+                            cli_pos = cli.size();
+                            break;
+                        }
+                        case SDLK_RETURN: {
+                            print_to_console(cli + "\n");
+                            command_from_string(cli);
+                            cli = "";
+                            cli_pos = 0;
+                            stash_cli = "";
+                            history_index = core::command_history.size();
+                             // Be jealous with the keyboard.
+                            Listener::activate();
+                            break;
+                        }
+                        case SDLK_BACKSPACE: {
+                            if (cli_pos) {
+                                cli = cli.substr(0, cli_pos - 1)
+                                    + cli.substr(cli_pos);
+                                cli_pos--;
+                            }
+                            break;
+                        }
+                        case SDLK_DELETE: {
+                            if (cli_pos < cli.size()) {
+                                cli = cli.substr(0, cli_pos)
+                                    + cli.substr(cli_pos + 1);
+                            }
+                            break;
+                        }
+                        case SDLK_TAB: {
+                             // Completion of a command
+                            size_t start = 0;
+                            while (start < cli_pos && cli[start] == ' ')
+                                start++;
+                            size_t end = cli_pos;
+                            bool dont_complete = false;
+                            for (size_t i = start; i < end; i++) {
+                                if (cli[i] == ' ') {
+                                    dont_complete = true;
+                                    break;
+                                }
+                            }
+                            if (dont_complete) break;
+                            auto cmd_part = cli.substr(start, end - start);
+                            if (!completion_matches.empty()) {
+                                Console_print(cli + "\n");
+                                for (auto s : completion_matches) {
+                                    Console_print(s + " ");
+                                }
+                                Console_print("\n");
+                            }
+                            else {
+                                 // Find all commands beginning with this
+                                for (auto& p : commands_by_name()) {
+                                    if (p.first.size() >= cmd_part.size()) {
+                                        for (size_t i = 0; i < cmd_part.size(); i++) {
+                                            if (p.first[i] != cmd_part[i])
+                                                goto no_match;
+                                        }
+                                        completion_matches.push_back(p.first);
+                                    }
+                                    no_match: { }
+                                }
+                                 // One match?  Complete it.
+                                if (completion_matches.size() == 1) {
+                                    cli.replace(start, end - start, completion_matches[0] + " ");
+                                    cli_pos = completion_matches[0].size() + 1;
+                                }
+                                 // Multiple matches?  Fill as much as possible.
+                                else if (completion_matches.size() > 1) {
+                                    for (;;) {
+                                        char common = completion_matches[0][cmd_part.size()];
+                                        for (auto s : completion_matches) {
+                                            if (s.size() < cmd_part.size() || s[cmd_part.size()] != common) {
+                                                goto done_adding;
+                                            }
                                         }
                                     }
+                                    done_adding:
+                                    cli.replace(start, end - start, cmd_part);
+                                    cli_pos = cmd_part.size();
                                 }
-                                done_adding:
-                                cli.replace(start, end - start, cmd_part);
-                                cli_pos = cmd_part.size();
                             }
+                            return true;
                         }
-                        return true;
+                        case SDLK_d: {
+                            if (SDL_GetModState() & KMOD_CTRL) {
+                                exit_console();
+                            }
+                            break;
+                        }
+                        case SDLK_c: {
+                            if (SDL_GetModState() & KMOD_CTRL) {
+                                cli = "";
+                                cli_pos = 0;
+                            }
+                            break;
+                        }
+                        case SDLK_u: {
+                            if (SDL_GetModState() & KMOD_CTRL) {
+                                cli = cli.substr(cli_pos);
+                                cli_pos = 0;
+                            }
+                            break;
+                        }
+                        default: break;
                     }
-                    default: break;
+                    completion_matches.clear();
+                    return true;
                 }
-                completion_matches.clear();
-                return true;
-            }
-            return false;
-        }
-        bool Listener_char (int code, int action) override {
-            if (wait_for_draw) return false;
-            if (glfwGetKey(GLFW_KEY_LCTRL) || glfwGetKey(GLFW_KEY_RCTRL)) {
-                switch (code) {
-                    case 'd': {
-                        exit_console();
-                        break;
-                    }
-                    case 'c': {
-                        cli = "";
-                        cli_pos = 0;
-                        break;
-                    }
-                    case 'u': {
-                        cli = cli.substr(cli_pos);
-                        cli_pos = 0;
-                        break;
-                    }
-                    default: break;
+                case SDL_KEYUP: return true;
+                case SDL_TEXTINPUT: {
+                    std::string text = event->text.text;
+                    cli = cli.substr(0, cli_pos)
+                        + text
+                        + cli.substr(cli_pos);
+                    cli_pos += text.size();
+                    completion_matches.clear();
+                    return true;
                 }
+                default: return false;
             }
-            else if (code < 256) {
-                cli = cli.substr(0, cli_pos)
-                    + std::string(1, code)
-                    + cli.substr(cli_pos);
-                cli_pos++;
-            }
-            completion_matches.clear();
-            return true;
         }
+
         void enter_console () {
             if (active) return;
             wait_for_draw = true;

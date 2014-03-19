@@ -16,7 +16,7 @@ namespace ent {
         }
     }
 
-    void Biped::Controllable_buttons (Button_Bits bits) {
+    void Biped::Controllable_buttons (uint32 bits) {
          // Since we walk by altering our contact with the ground,
          //  and since contacts aren't processed if the body is asleep,
          //  then if the body falls asleep we can't move T_T

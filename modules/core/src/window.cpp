@@ -2,7 +2,9 @@
 
 #include <float.h>
 #include <GL/glew.h>
-#include <GL/glfw.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_video.h>
+#include <SDL2/SDL_events.h>
 #include <string>
 #include "core/inc/commands.h"
 #include "hacc/inc/documents.h"
@@ -15,72 +17,39 @@ using namespace util;
 
 namespace core {
 
-     // Input handling
-    static int GLFWCALL close_cb () {
-        window->stop();
-        return false;
-    }
-    static void GLFWCALL key_cb (int keycode, int action) {
-        Listener* next_l = NULL;
-        for (Listener* l = window->listener; l; l = next_l) {
-             // In case a listener disables itself.
-            next_l = l->next;
-            if (l->Listener_key(keycode, action))
-                return;
-        }
-        if (action == GLFW_PRESS) {
-            switch (keycode) {
-                case '~': {
-                    command_from_terminal();
-                    break;
-                }
-                case GLFW_KEY_ESC: {
-                    window->stop();
-                    break;
-                }
-                default: break;
-            }
-        }
-    }
-    static void GLFWCALL char_cb (int charcode, int action) {
-        Listener* next_l = NULL;
-        for (Listener* l = window->listener; l; l = next_l) {
-            next_l = l->next;
-            if (l->Listener_char(charcode, action))
-                return;
-        }
-    }
-    static void GLFWCALL button_cb (int code, int action) {
-        Listener* next_l = NULL;
-        for (Listener* l = window->listener; l; l = next_l) {
-            next_l = l->next;
-            if (l->Listener_button(code, action))
-                return;
-        }
-    }
-    static void GLFWCALL resize_cb (int width, int height) {
-        window->width = width;
-        window->height = height;
-    }
-
     Window* window = NULL;
     Window::Window () {
         if (window) throw hacc::X::Logic_Error("Tried to create multiple windows at once");
         window = this;
     }
     void Window::open () {
-        if (!is_open) {
+        if (is_open) {
+            SDL_SetWindowFullscreen(sdl_window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+            SDL_SetWindowSize(sdl_window, width, height);
+        }
+        else {
             auto wd = cwd();
-            glfwInit();
+            if (SDL_Init(0) < 0) {
+                throw hacc::X::Internal_Error("SDL_Init failed: " + std::string(SDL_GetError()));
+            }
+            if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
+                throw hacc::X::Internal_Error("SDL_Init video failed: " + std::string(SDL_GetError()));
+            }
+            atexit(SDL_Quit);
             util::chdir(wd);
-            is_open = glfwOpenWindow(
+            sdl_window = SDL_CreateWindow("asdfasdf",
+                SDL_WINDOWPOS_UNDEFINED,
+                SDL_WINDOWPOS_UNDEFINED,
                 width, height,
-                red, green, blue,
-                alpha, depth, stencil,
-                fullscreen ? GLFW_FULLSCREEN : GLFW_WINDOW
+                SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
+                | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0)
             );
-            if (!is_open) {
-                throw hacc::X::Internal_Error("glfwOpenWindow failed for some reason");
+            if (!sdl_window) {
+                throw hacc::X::Internal_Error("SDL_CreateWindow failed: " + std::string(SDL_GetError()));
+            }
+            context = SDL_GL_CreateContext(sdl_window);
+            if (!context) {
+                throw hacc::X::Internal_Error("SDL_GL_CreateContext failed: " + std::string(SDL_GetError()));
             }
             auto glew_initted = glewInit();
             if (glew_initted != GLEW_OK) {
@@ -89,154 +58,131 @@ namespace core {
             if (!glewIsSupported("GL_VERSION_2_1 GL_ARB_texture_non_power_of_two GL_ARB_framebuffer_object")) {
                 throw hacc::X::Error("This implementation of OpenGL does not support enough things.");
             }
-        }
-        else {
-            glfwSetWindowSize(width, height);
+            is_open = true;
         }
     }
 
     void Window::close () {
         is_open = false;
-        glfwCloseWindow();
+        SDL_DestroyWindow(sdl_window);
     }
     Window::~Window () {
         close();
         window = NULL;
     }
 
-    void really_stop_window () {
-        glfwSetKeyCallback(NULL);
-        glfwSetCharCallback(NULL);
-        glfwSetMouseButtonCallback(NULL);
-        glfwSetWindowCloseCallback(NULL);
-        glfwSetWindowSizeCallback(NULL);
-    }
-
     void Window::start () {
         if (!is_open) open();
-         // Set all the window callbacks.  The reason these aren't set on open
-         //  is because the input system may crash if the callbacks are called
-         //  while the program is exiting and things are being destructed.
-        glfwSetWindowCloseCallback(close_cb);
-        glfwSetKeyCallback(key_cb);
-        glfwSetMouseButtonCallback(button_cb);
-        glfwSetCharCallback(char_cb);
-        glfwSetWindowSizeCallback(resize_cb);
-        glfwDisable(GLFW_AUTO_POLL_EVENTS);
-        glfwSetTime(0);
-        static double lag = 0;
-        try {
-            for (;;) {
-                 // Run queued operations
-                if (!pending_ops.empty()) {
-                    try {
-                         // Allow ops to be expanded while executing
-                        for (size_t i = 0; i < pending_ops.size(); i++) {
-                            pending_ops[i]();
-                        }
-                    } catch (std::exception& e) {
-                        print_to_console("Exception: " + std::string(e.what()) + "\n");
+        double lag = 0;
+        uint32 last_ticks = SDL_GetTicks();
+
+         // MAIN RENDER LOOP
+        for (;;) {
+             // Run queued operations
+            if (!pending_ops.empty()) {
+                try {
+                     // Allow ops to be expanded while executing
+                    for (size_t i = 0; i < pending_ops.size(); i++) {
+                        pending_ops[i]();
                     }
-                    pending_ops.clear();
+                } catch (std::exception& e) {
+                    print_to_console("Exception: " + std::string(e.what()) + "\n");
                 }
-                 // Then check for stop
-                if (to_stop) {
-                    to_stop = false;
+                pending_ops.clear();
+            }
+             // Then check for stop
+            if (to_stop) {
+                to_stop = false;
+                break;
+            }
+
+             // Input handling
+             // Decide whether to trap the cursor
+            bool trap_cursor = false;
+            Listener* next_l = NULL;
+            Listener* l = NULL;
+            for (l = window->listener; l; l = next_l) {
+                next_l = l->next;
+                int trap = l->Listener_trap_cursor();
+                if (trap != -1) {
+                    trap_cursor = trap;
                     break;
                 }
-                 // Input handling!
-                bool trap_cursor = false;
+            }
+            if (l == NULL) trap_cursor = false;
+            if (trap_cursor != cursor_trapped) {
+                SDL_SetRelativeMouseMode(SDL_bool(trap_cursor));
+            }
+            cursor_trapped = trap_cursor;
+             // SDL-style event loop
+            SDL_Event event;
+            while (SDL_PollEvent(&event)) {
                 Listener* next_l = NULL;
-                Listener* l = NULL;
-                for (l = window->listener; l; l = next_l) {
+                for (Listener* l = window->listener; l; l = next_l) {
+                     // In case a listener disables itself.
                     next_l = l->next;
-                    int trap = l->Listener_trap_cursor();
-                    if (trap != -1) {
-                        trap_cursor = trap;
+                    if (l->Listener_event(&event))
+                        goto next_event;
+                }
+                switch (event.type) {
+                    case SDL_QUIT: {
+                        stop();
+                    }
+                    case SDL_KEYDOWN: {
+                        switch (event.key.keysym.scancode) {
+                            case 0x35: {  // `
+                                command_from_terminal();
+                                break;
+                            }
+                            case 0x29: { // Escape
+                                window->stop();
+                                break;
+                            }
+                            default: break;
+                        }
+                        break;
+                    }
+                    case SDL_WINDOWEVENT: {
+                        if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                            width = event.window.data1;
+                            height = event.window.data2;
+                        }
                         break;
                     }
                 }
-                if (l == NULL) trap_cursor = false;
-                if (trap_cursor != cursor_trapped) {
-                    if (trap_cursor) {
-                        glfwGetMousePos(&cursor_x, &cursor_y);
-                        glfwDisable(GLFW_MOUSE_CURSOR);
-                    }
-                    else {
-                        glfwEnable(GLFW_MOUSE_CURSOR);
-                        glfwSetMousePos(cursor_x, cursor_y);
-                    }
-                }
-                cursor_trapped = trap_cursor;
-                if (cursor_trapped)
-                    glfwSetMousePos(0, 0);
-                glfwPollEvents();
-                int x, y;
-                glfwGetMousePos(&x, &y);
-                if (cursor_trapped) {
-                    if (l) {
-                         // Something's odd about glfw's trapped cursor positioning.
-                        if (x != 0 || y != 0)
-                            l->Listener_trapped_motion(x+1, y+1);
-                        else
-                            l->Listener_trapped_motion(0, 0);
-                    }
-                }
-                else {
-                    cursor_x = x;
-                    cursor_y = y;
-                    if (l) {
-                        l->Listener_cursor_pos(cursor_x, cursor_y);
-                    }
-                }
-                 // Run step and render
-                if (step) step();
-                frames_simulated++;
-                logging_frame = frames_simulated;
-                 // Do timing around the render step.
-                 // TODO: this is not quite optimal.
-                lag -= 1/fps;
-                if (lag > 1/fps + 0.002 && lag < 4/fps) {
-                    log("frameskip", "Skipping frame!");
-                }
-                else {
-                    if (lag > 1/fps) {
-                         // Allow a tiny bit of slowdown in case the window is
-                         //  being vsynced at 59.9hz or something like that.
-                        lag = 1/fps;
-                    }
-                    if (render) render();
-                    frames_drawn++;
-                }
-                lag += glfwGetTime();
-                glfwSetTime(0);
-                if (limit_fps && lag < 0) {
-                    glfwSleep(-lag);
-                }
-                log("timing", "%f", lag);
-                glfwSwapBuffers();
+                next_event: { }
             }
+
+             // Run step and render
+            if (step) step();
+            frames_simulated++;
+            logging_frame = frames_simulated;
+             // Do timing around the render step.
+             // TODO: this is not quite optimal.
+            lag -= 1/fps;
+            if (lag > 1/fps + 0.002 && lag < 4/fps) {
+                log("frameskip", "Skipping frame!");
+            }
+            else {
+                if (lag > 1/fps) {
+                     // Allow a tiny bit of slowdown in case the window is
+                     //  being vsynced at 59.9hz or something like that.
+                    lag = 1/fps;
+                }
+                if (render) render();
+                frames_drawn++;
+            }
+            uint32 new_ticks = SDL_GetTicks();
+            lag += (new_ticks - last_ticks) / 1000.0;
+            last_ticks = new_ticks;
+            if (limit_fps && lag < 0) {
+                SDL_Delay(-lag * 1000);
+            }
+            log("timing", "%f", lag);
+            SDL_GL_SwapWindow(sdl_window);
         }
-        catch (...) {
-            really_stop_window();
-            throw;
-        }
-        really_stop_window();
     }
     void Window::stop () { to_stop = true; }
-
-    bool Listener::can_poll_input () {
-        if (!active) return false;
-        Listener* next_l = NULL;
-        for (Listener* l = window->listener; l; l = next_l) {
-            next_l = l->next;
-            if (l == this) return true;
-            if (l->Listener_blocks_input_polling()) return false;
-        }
-        return false;
-    }
-    bool Listener::key_pressed (int code) { return glfwGetKey(code); }
-    bool Listener::btn_pressed (int code) { return glfwGetMouseButton(code); }
 
     void Listener::activate () {
         if (active) deactivate();
@@ -256,7 +202,6 @@ namespace core {
     }
 
     void quick_exit () {
-        glfwTerminate();
         exit(0);
     }
 
@@ -269,12 +214,6 @@ HACCABLE(Window) {
     name("core::Window");
     attr("width", member(&Window::width).optional());
     attr("height", member(&Window::height).optional());
-    attr("red", member(&Window::red).optional());
-    attr("green", member(&Window::green).optional());
-    attr("blue", member(&Window::blue).optional());
-    attr("alpha", member(&Window::alpha).optional());
-    attr("depth", member(&Window::depth).optional());
-    attr("stencil", member(&Window::stencil).optional());
     attr("fullscreen", member(&Window::fullscreen).optional());
     attr("fps", member(&Window::fps).optional());
     attr("limit_fps", member(&Window::limit_fps).optional());
@@ -386,6 +325,8 @@ New_Command _remove_cmd (
 );
 
 void _window_size (int width, int height) {
-    window->set_size(width, height);
+    window->width = width;
+    window->height = height;
+    window->open();
 }
 New_Command _window_size_cmd ("window_size", "Set the window size in pixels.", 2, _window_size);
