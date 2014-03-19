@@ -14,20 +14,20 @@
         ]]
     }}
     hotkeys:{Hotkeys:[
-        [0x53 [open_console]]  // `
-        [0x19 [pause]]  // P
-        [0x39 [re_toggle]]  // 0
-        [0x30 [window_size 320 240]]  // 1
-        [0x31 [window_size 640 480]]  // 2
-        [0x32 [window_size 960 720]]  // 3
-        [0x33 [window_size 1280 960]]  // 4
-        [0x2F [global_lighting [-0.1 -0.1 -0.1] [0 0 0] true]]  // [
-        [0x30 [global_lighting [+0.1 +0.1 +0.1] [0 0 0] true]]  // ]
-        [0x51 [global_lighting [0 0 0] [-0.1 -0.1 -0.1] true]]  // ;
-        [0x34 [global_lighting [0 0 0] [+0.1 +0.1 +0.1] true]]  // '
-        [0x31 [light_debug]]  // \
-        [0x15 [reload]]  // R
-        [0x17 [texture_test $("world/res/tiles.hacc").img.tiles 0]]  // T
+        [96 [open_console]]  // `
+        [80 [pause]]  // P
+        [48 [re_toggle]]  // 0
+        [49 [window_size 320 240]]  // 1
+        [50 [window_size 640 480]]  // 2
+        [51 [window_size 960 720]]  // 3
+        [52 [window_size 1280 960]]  // 4
+        [91 [global_lighting [-0.1 -0.1 -0.1] [0 0 0] true]]  // [
+        [93 [global_lighting [+0.1 +0.1 +0.1] [0 0 0] true]]  // ]
+        [59 [global_lighting [0 0 0] [-0.1 -0.1 -0.1] true]]  // ;
+        [39 [global_lighting [0 0 0] [+0.1 +0.1 +0.1] true]]  // '
+        [92 [light_debug]]  // \
+        [82 [reload]]  // R
+        [84 [texture_test $("world/res/tiles.hacc").img.tiles 0]]  // T
     ]}
     console:{shell::Console:{ }}
     room_editor:{shell::Room_Editor:{ }}

@@ -2,8 +2,7 @@
 
 #include <string>
 #include <sstream>
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_mouse.h>
+#include <GL/glfw.h>
 #include "core/inc/commands.h"
 #include "ent/inc/control.h"
 #include "geo/inc/rooms.h"
@@ -100,159 +99,159 @@ namespace shell {
     }
 
      // Process cursor position; hover, drag
-    bool Room_Editor::Listener_event (SDL_Event* event) {
-        switch (event->type) {
-            case SDL_MOUSEMOTION: {
-                Vec world_pos = camera->window_to_world(event->motion.x, event->motion.y);
-                if (editing_pts) {
-                    if (dragging_pt >= 0) {
-                        Vec r_pos = selected->Resident_get_pos();
-                        selected->Resident_set_pt(dragging_pt, world_pos - r_pos - drag_offset);
-                    }
-                }
-                else {
-                    if (clicking) {
-                        if (selected) {
-                            if ((drag_origin - world_pos).mag2() > 0.2)
-                                dragging = true;
-                            if (dragging) {
-                                selected->Resident_set_pos(world_pos - drag_offset);
-                            }
-                        }
-                    }
-                    else {
-                         // Prefer residents with lower tops
-                        float lowest_res_t = INF;
-                        Resident* lowest_res = NULL;
-                        float lowest_room_t = INF;
-                        Room* lowest_room = NULL;
-                        size_t unpositioned_residents = 0;
-                        for (auto& room : all_rooms()) {
-                            if (room.observer_count) {
-                                if (room.boundary.covers(world_pos)) {
-                                    if (room.boundary.t < lowest_room_t) {
-                                        lowest_room_t = room.boundary.t;
-                                        lowest_room = &room;
-                                    }
-                                }
-                                for (auto& res : room.residents) {
-                                    Vec pos = res.Resident_get_pos();
-                                    const Rect& boundary = res.Resident_boundary();
-                                    if (!pos.is_defined() || !boundary.is_defined()) {
-                                        pos = room.boundary.lt() + Vec(0.5, -0.5);
-                                        pos.x += unpositioned_residents++;
-                                    }
-                                    if (boundary.covers(world_pos - pos)) {
-                                        if (boundary.t < lowest_res_t) {
-                                            lowest_res_t = boundary.t;
-                                            lowest_res = &res;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                         // Set status message about hovered object
-                        if (lowest_res) {
-                            if (lowest_res != hovering) {
-                                auto realp = res_realp(lowest_res);
-                                auto path = hacc::address_to_path(realp);
-                                std::ostringstream ss;
-                                ss << realp.address << " " << hacc::path_to_string(path);
-                                status = ss.str();
-                            }
-                        }
-                        else {
-                            status = "";
-                        }
-                        hovering = lowest_res;
-                        hovering_room = lowest_room;
-                    }
-                }
-                return true;
+    void Room_Editor::Listener_cursor_pos (int x, int y) {
+        Vec world_pos = camera->window_to_world(x, y);
+        if (editing_pts) {
+            if (dragging_pt >= 0) {
+                Vec r_pos = selected->Resident_get_pos();
+                selected->Resident_set_pt(dragging_pt, world_pos - r_pos - drag_offset);
             }
-            case SDL_MOUSEBUTTONDOWN: {
-                int x = event->button.x;
-                int y = event->button.y;
-                Vec realpos = camera->window_to_world(x, y);
-                if (editing_pts) {
-                    if (event->button.button == SDL_BUTTON_LEFT) {
-                        size_t n_pts = selected->Resident_n_pts();
-                        Vec r_pos = selected->Resident_get_pos();
-                        float lowest_pt_t = INF;
-                        Vec lowest_pt_pos = Vec(0, 0);
-                        int lowest_pt = -1;
-                        for (size_t i = 0; i < n_pts; i++) {
-                            Vec pos = selected->Resident_get_pt(i);
-                            const Rect& boundary = pos + r_pos
-                                                 + Rect(-0.25, -0.25, 0.25, 0.25);
-                            if (boundary.covers(realpos)) {
-                                if (boundary.t < lowest_pt_t) {
-                                    lowest_pt_t = boundary.t;
-                                    lowest_pt_pos = pos;
-                                    lowest_pt = i;
+        }
+        else {
+            if (clicking) {
+                if (selected) {
+                    if ((drag_origin - world_pos).mag2() > 0.2)
+                        dragging = true;
+                    if (dragging) {
+                        selected->Resident_set_pos(world_pos - drag_offset);
+                    }
+                }
+            }
+            else {
+                 // Prefer residents with lower tops
+                float lowest_res_t = INF;
+                Resident* lowest_res = NULL;
+                float lowest_room_t = INF;
+                Room* lowest_room = NULL;
+                size_t unpositioned_residents = 0;
+                for (auto& room : all_rooms()) {
+                    if (room.observer_count) {
+                        if (room.boundary.covers(world_pos)) {
+                            if (room.boundary.t < lowest_room_t) {
+                                lowest_room_t = room.boundary.t;
+                                lowest_room = &room;
+                            }
+                        }
+                        for (auto& res : room.residents) {
+                            Vec pos = res.Resident_get_pos();
+                            const Rect& boundary = res.Resident_boundary();
+                            if (!pos.is_defined() || !boundary.is_defined()) {
+                                pos = room.boundary.lt() + Vec(0.5, -0.5);
+                                pos.x += unpositioned_residents++;
+                            }
+                            if (boundary.covers(world_pos - pos)) {
+                                if (boundary.t < lowest_res_t) {
+                                    lowest_res_t = boundary.t;
+                                    lowest_res = &res;
                                 }
                             }
                         }
-                        dragging_pt = lowest_pt;
-                        drag_offset = realpos - r_pos - lowest_pt_pos;
+                    }
+                }
+                 // Set status message about hovered object
+                if (lowest_res) {
+                    if (lowest_res != hovering) {
+                        auto realp = res_realp(lowest_res);
+                        auto path = hacc::address_to_path(realp);
+                        std::ostringstream ss;
+                        ss << realp.address << " " << hacc::path_to_string(path);
+                        status = ss.str();
                     }
                 }
                 else {
-                     // Just upgrade hovering to selected
-                    dragging = NULL;
-                    selected = hovering;
-                    selected_room = hovering_room;
-                    if (selected) {
-                        Vec pos = selected->Resident_get_pos();
-                        if (event->button.button == SDL_BUTTON_LEFT) {
-                            drag_origin = pos;
-                            drag_offset = realpos - pos;
-                            log("editing", "Selected " + hacc::Reference(res_realp(selected)).show());
-                            clicking = true;
+                    status = "";
+                }
+                hovering = lowest_res;
+                hovering_room = lowest_room;
+            }
+        }
+    }
+     // Clicking behavior
+    bool Room_Editor::Listener_button (int code, int action) {
+        if (action == GLFW_PRESS) {
+            Vec realpos = camera->window_to_world(window->cursor_x, window->cursor_y);
+            if (editing_pts) {
+                if (code == GLFW_MOUSE_BUTTON_LEFT) {
+                    size_t n_pts = selected->Resident_n_pts();
+                    Vec r_pos = selected->Resident_get_pos();
+                    float lowest_pt_t = INF;
+                    Vec lowest_pt_pos = Vec(0, 0);
+                    int lowest_pt = -1;
+                    for (size_t i = 0; i < n_pts; i++) {
+                        Vec pos = selected->Resident_get_pt(i);
+                        const Rect& boundary = pos + r_pos
+                                             + Rect(-0.25, -0.25, 0.25, 0.25);
+                        if (boundary.covers(realpos)) {
+                            if (boundary.t < lowest_pt_t) {
+                                lowest_pt_t = boundary.t;
+                                lowest_pt_pos = pos;
+                                lowest_pt = i;
+                            }
                         }
-                        else if (event->button.button == SDL_BUTTON_RIGHT) {
+                    }
+                    dragging_pt = lowest_pt;
+                    drag_offset = realpos - r_pos - lowest_pt_pos;
+                }
+            }
+            else {
+                 // Just upgrade hovering to selected
+                dragging = NULL;
+                selected = hovering;
+                selected_room = hovering_room;
+                if (selected) {
+                    Vec pos = selected->Resident_get_pos();
+                    if (code == GLFW_MOUSE_BUTTON_LEFT) {
+                        drag_origin = pos;
+                        drag_offset = realpos - pos;
+                        log("editing", "Selected " + hacc::Reference(res_realp(selected)).show());
+                        clicking = true;
+                    }
+                    else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
+                        if (action == GLFW_PRESS) {
                             selected_type_name = res_realp(selected).type.name();
-                            menu_world_pos = camera->window_to_world(x, y);
+                            menu_world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
                             Vec area = camera->window_to_dev(window->width, 0);
                             res_menu->size = res_menu->root->Menu_Item_size(area);
-                            Vec pos = camera->window_to_dev(x, y);
+                            Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
                             res_menu->pos = pos - Vec(-1*PX, res_menu->size.y + 1*PX);
                             res_menu->activate();
                         }
                     }
-                    else if (selected_room) {
-                        if (event->button.button == SDL_BUTTON_RIGHT) {
-                            menu_world_pos = camera->window_to_world(x, y);
+                    return true;
+                }
+                else if (selected_room) {
+                    if (code == GLFW_MOUSE_BUTTON_RIGHT) {
+                        if (action == GLFW_PRESS) {
+                            menu_world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
                             Vec area = camera->window_to_dev(window->width, 0);
                             room_menu->size = room_menu->root->Menu_Item_size(area);
-                            Vec pos = camera->window_to_dev(x, y);
+                            Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
                             room_menu->pos = pos - Vec(-1*PX, room_menu->size.y + 1*PX);
                             room_menu->activate();
                         }
                     }
                 }
-                return true;
             }
-            case SDL_MOUSEBUTTONUP: {
-                if (event->button.button == SDL_BUTTON_LEFT) {
-                    dragging = false;
-                    clicking = false;
-                    dragging_pt = -1;
-                }
-                return true;
-            }
-            case SDL_KEYDOWN: {
-                if (event->key.keysym.sym == SDLK_ESCAPE) {
-                    if (editing_pts)
-                        editing_pts = false;
-                    else
-                        deactivate();
-                }
-                return true;
-            }
-            case SDL_KEYUP: return true;
-            default: return false;
         }
+        else {  // GLFW_RELEASE
+            if (code == GLFW_MOUSE_BUTTON_LEFT) {
+                dragging = false;
+                clicking = false;
+                dragging_pt = -1;
+            }
+            return true;
+        }
+        return false;
+    }
+    bool Room_Editor::Listener_key (int code, int action) {
+        if (action == GLFW_PRESS && code == GLFW_KEY_ESC) {
+            if (editing_pts)
+                editing_pts = false;
+            else
+                deactivate();
+            return true;
+        }
+        return false;
     }
 
     Room_Editor::Room_Editor () :
@@ -526,118 +525,118 @@ namespace shell {
             }
         }
     }
-    bool Tile_Editor::Listener_event (SDL_Event* event) {
+    bool Tile_Editor::Listener_button (int btn, int action) {
         if (!tilemap) return false;
-        switch (event->type) {
-            case SDL_MOUSEBUTTONDOWN: {
-                Vec pos = camera->window_to_world(event->button.x, event->button.y) - tilemap->pos();
-                if (event->button.button == SDL_BUTTON_LEFT) {
-                    draw(pos);
-                    clicking = true;
-                }
-                else if (event->button.button == SDL_BUTTON_RIGHT) {
-                    pick(pos);
-                }
-                return true;
+        if (action == GLFW_PRESS) {
+            Vec pos = camera->window_to_world(window->cursor_x, window->cursor_y) - tilemap->pos();
+            if (btn == GLFW_MOUSE_BUTTON_LEFT) {
+                draw(pos);
+                clicking = true;
             }
-            case SDL_MOUSEBUTTONUP: {
-                if (event->button.button == SDL_BUTTON_LEFT) {
-                    clicking = false;
-                }
-                return true;
+            else if (btn == GLFW_MOUSE_BUTTON_RIGHT) {
+                pick(pos);
             }
-            case SDL_MOUSEMOTION: {
-                if (clicking) {
-                    draw(camera->window_to_world(event->motion.x, event->motion.y));
-                }
+        }
+        else {  // GLFW_RELEASE
+            if (btn == GLFW_MOUSE_BUTTON_LEFT) {
+                clicking = false;
             }
-            case SDL_KEYDOWN: {
-                auto def = tilemap->get_def();
-                switch (event->key.keysym.sym) {
-                    case SDLK_ESCAPE:
-                        if (showing_selector) {
-                            showing_selector = false;
-                            selector_camera.deactivate();
-                        }
-                        else {
-                            deactivate();
-                        }
-                        return true;
-                    case SDLK_s: {
-                        for (auto& f : hacc::loaded_files()) {
-                            if (f.data().address() == def->tiles) {
-                                hacc::save(f);
-                                return true;
-                            }
-                        }
-                        fprintf(stderr, "Could not save this tiles object, because it doesn't belong to a file.\n");
-                        return true;
+        }
+        return true;
+    }
+    void Tile_Editor::Listener_cursor_pos (int x, int y) {
+        if (clicking) {
+            draw(camera->window_to_world(x, y));
+        }
+    }
+    bool Tile_Editor::Listener_key (int code, int action) {
+        if (action == GLFW_PRESS) {
+            auto def = tilemap->get_def();
+            switch (code) {
+                case GLFW_KEY_ESC:
+                    if (showing_selector) {
+                        showing_selector = false;
+                        selector_camera.deactivate();
                     }
-                    case SDLK_h:
-                        tile ^= 0x8000;
-                        return true;
-                    case SDLK_v:
-                        tile ^= 0x4000;
-                        return true;
-                    case SDLK_SLASH:
-                        showing_selector = !showing_selector;
-                        if (showing_selector) {
-                            selector_camera.pos = selector_pos + Vec(10, -7.5);
-                            selector_camera.size = Vec(40, 30);
-                            selector_camera.activate();
+                    else {
+                        deactivate();
+                    }
+                    return true;
+                case 'S': {
+                    for (auto& f : hacc::loaded_files()) {
+                        if (f.data().address() == def->tiles) {
+                            hacc::save(f);
+                            return true;
                         }
-                        else {
-                            selector_camera.deactivate();
-                        }
-                        return true;
-                    case SDLK_LEFT:
-                        if ((tile & 0x3fff) == 0) {
-                            tile += def->tileset->tiles.size() - 1;
-                        }
-                        else {
-                            tile -= 1;
-                        }
-                        return true;
-                    case SDLK_RIGHT:
+                    }
+                    fprintf(stderr, "Could not save this tiles object, because it doesn't belong to a file.\n");
+                    return true;
+                }
+                case 'H':
+                    tile ^= 0x8000;
+                    return true;
+                case 'V':
+                    tile ^= 0x4000;
+                    return true;
+                case '/':
+                    showing_selector = !showing_selector;
+                    if (showing_selector) {
+                        selector_camera.pos = selector_pos + Vec(10, -7.5);
+                        selector_camera.size = Vec(40, 30);
+                        selector_camera.activate();
+                    }
+                    else {
+                        selector_camera.deactivate();
+                    }
+                    return true;
+                case GLFW_KEY_LEFT:
+                    if ((tile & 0x3fff) == 0) {
+                        tile += def->tileset->tiles.size() - 1;
+                    }
+                    else {
+                        tile -= 1;
+                    }
+                    return true;
+                case GLFW_KEY_RIGHT:
+                    if ((tile & 0x3fff) >= def->tileset->tiles.size() - 1) {
+                        tile = 0;
+                    }
+                    else {
+                        tile += 1;
+                    }
+                    return true;
+                case GLFW_KEY_UP: {
+                    Vec size = def->texture->size*PX;
+                    if ((tile & 0x3fff) < size.y) {
+                        tile += size.y - size.x;
                         if ((tile & 0x3fff) >= def->tileset->tiles.size() - 1) {
-                            tile = 0;
-                        }
-                        else {
-                            tile += 1;
-                        }
-                        return true;
-                    case SDLK_UP: {
-                        Vec size = def->texture->size*PX;
-                        if ((tile & 0x3fff) < size.y) {
-                            tile += size.y - size.x;
-                            if ((tile & 0x3fff) >= def->tileset->tiles.size() - 1) {
-                                tile -= size.x;
-                            }
-                        }
-                        else {
                             tile -= size.x;
                         }
-                        return true;
                     }
-                    case SDLK_DOWN: {
-                        Vec size = def->texture->size*PX;
-                        if ((tile & 0x3fff) >= size.y - size.x) {
-                            tile -= size.y - size.x;
-                        }
-                        else if ((tile & 0x3fff) >= def->tileset->tiles.size() - size.x) {
-                            tile -= size.y - size.x - size.x;
-                        }
-                        else {
-                            tile += size.x;
-                        }
-                        return true;
+                    else {
+                        tile -= size.x;
                     }
-                    default: return true;
+                    return true;
                 }
+                case GLFW_KEY_DOWN: {
+                    Vec size = def->texture->size*PX;
+                    if ((tile & 0x3fff) >= size.y - size.x) {
+                        tile -= size.y - size.x;
+                    }
+                    else if ((tile & 0x3fff) >= def->tileset->tiles.size() - size.x) {
+                        tile -= size.y - size.x - size.x;
+                    }
+                    else {
+                        tile += size.x;
+                    }
+                    return true;
+                }
+                default:
+                    return false;
             }
-            case SDL_KEYUP: return true;
-            default: return false;
         }
+         // TODO: h and v flip current tile
+        return false;
     }
 
     Texture_Tester* texture_tester;
@@ -688,15 +687,12 @@ namespace shell {
         draw_texture(tex, Rect(pos, pos + tex->size*PX));
     }
 
-    bool Texture_Tester::Listener_event (SDL_Event* event) {
-        switch (event->type) {
-            case SDL_KEYDOWN:
-                if (event->key.keysym.sym == SDLK_ESCAPE)
-                    deactivate();
-                return true;
-            case SDL_KEYUP: return true;
-            default: return false;
+    bool Texture_Tester::Listener_key (int code, int action) {
+        if (action == GLFW_PRESS && code == GLFW_KEY_ESC) {
+            deactivate();
+            return true;
         }
+        return false;
     }
 
 } using namespace shell;

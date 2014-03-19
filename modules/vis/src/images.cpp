@@ -4,6 +4,7 @@
 #include <vector>
 #include <stdexcept>
 #include <GL/glew.h>
+#include <GL/glfw.h>
 #include <SOIL/SOIL.h>
 #include "core/inc/opengl.h"
 #include "core/inc/window.h"

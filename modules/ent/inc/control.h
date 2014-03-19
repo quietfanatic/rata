@@ -67,7 +67,7 @@ namespace ent {
 
     struct Controllable {
         Controllable** controller = NULL;
-        virtual void Controllable_buttons (uint32 bits) { }
+        virtual void Controllable_buttons (Button_Bits) { }
          // This changes the focus relative to its current position
         virtual void Controllable_move_focus (Vec diff) { }
          // This should return world coordinates, or NAN,NAN if no focus
@@ -89,7 +89,6 @@ namespace ent {
 
      // We're querying key state instead of going through Key_Listener
     struct Player : vis::Drawn<vis::Overlay>, Mind, core::Listener {
-        uint32 buttons;
         Mappings mappings;
         Controllable* character = NULL;
         Controllable* get_character () const { return character; }
@@ -105,7 +104,7 @@ namespace ent {
         void Mind_think () override;  // Read input and send control to character
 
         int Listener_trap_cursor () override { return true; }
-        bool Listener_event (SDL_Event*) override;
+        void Listener_trapped_motion (int x, int y) override;
 
         Player ();
         ~Player ();

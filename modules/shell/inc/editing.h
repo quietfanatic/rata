@@ -52,7 +52,9 @@ namespace shell {
 
         void Drawn_draw (vis::Overlay) override;
         void Drawn_draw (vis::Dev) override;
-        bool Listener_event (SDL_Event*) override;
+        bool Listener_key (int, int) override;
+        bool Listener_button (int, int) override;
+        void Listener_cursor_pos (int x, int y) override;
     };
     extern Room_Editor* room_editor;
 
@@ -76,7 +78,9 @@ namespace shell {
         void pick (util::Vec);
 
         void Drawn_draw (vis::Map) override;
-        bool Listener_event (SDL_Event* event) override;
+        bool Listener_button (int, int) override;
+        bool Listener_key (int, int) override;
+        void Listener_cursor_pos (int, int) override;
     };
     extern Tile_Editor* tile_editor;
 
@@ -96,7 +100,7 @@ namespace shell {
         void Drawn_draw (vis::Sprites) override;
         void Drawn_draw (vis::Overlay) override;
 
-        bool Listener_event (SDL_Event*) override;
+        bool Listener_key (int, int) override;
     };
     extern Texture_Tester* texture_tester;
 

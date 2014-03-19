@@ -1,6 +1,5 @@
 #include "ent/inc/control.h"
 
-#include <SDL2/SDL_events.h>
 #include "geo/inc/camera.h"
 #include "geo/inc/rooms.h"
 #include "hacc/inc/haccable_standard.h"
@@ -18,76 +17,49 @@ namespace ent {
         }
     }
     void Player::Mind_think () {
+        if (!can_poll_input()) return;
         if (!character) return;
-        character->Controllable_buttons(buttons);
-    }
-    bool Player::Listener_event (SDL_Event* event) {
-        if (!character) return false;
-        switch (event->type) {
-            case SDL_MOUSEMOTION: {
-                Vec mot = geo::camera->window_motion_to_world(event->motion.xrel, event->motion.yrel);
-                character->Controllable_move_focus(mot);
-                return true;
-            }
-            case SDL_KEYUP:
-            case SDL_KEYDOWN: {
-                bool found = false;
-                size_t bit = 1;
-                for (size_t i = 0; i < N_BUTTONS; i++) {
-                    for (auto& m : mappings[Button(i)]) {
-                        if (m.type == KEY && m.code == event->key.keysym.scancode) {
-                            if (event->key.state)
-                                buttons |= bit;
-                            else
-                                buttons &= ~bit;
-                            found = true;
-                        }
+        size_t buttons = 0;
+        size_t bit = 1;
+        for (size_t i = 0; i < N_BUTTONS; i++) {
+            for (auto& m : mappings[Button(i)]) {
+                switch (m.type) {
+                    case KEY: {
+                        if (key_pressed(m.code))
+                            buttons |= bit;
+                        break;
                     }
-                    bit <<= 1;
-                }
-                return found;
-            }
-            case SDL_MOUSEBUTTONUP:
-            case SDL_MOUSEBUTTONDOWN: {
-                bool found = false;
-                size_t bit = 1;
-                for (size_t i = 0; i < N_BUTTONS; i++) {
-                    for (auto& m : mappings[Button(i)]) {
-                        if (m.type == KEY && m.code == event->button.button) {
-                            if (event->button.state)
-                                buttons |= bit;
-                            else
-                                buttons &= ~bit;
-                            found = true;
-                        }
+                    case BTN: {
+                        if (btn_pressed(m.code))
+                            buttons |= bit;
+                        break;
                     }
-                    bit <<= 1;
+                    default: break;
                 }
-                return found;
             }
-            case SDL_WINDOWEVENT: {
-                if (event->window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
-                    buttons = 0;
-                }
-                return false;  // Don't hog this event
-            }
-            default: return false;
+            bit <<= 1;
         }
+        character->Controllable_buttons(Button_Bits(buttons));
+    }
+    void Player::Listener_trapped_motion (int x, int y) {
+        if (!character) return;
+        Vec mot = geo::camera->window_motion_to_world(x, y);
+        character->Controllable_move_focus(mot);
     }
 
     Player::Player () {
          // Default mappings
-        mappings[BTN_LEFT].emplace_back(KEY, SDL_SCANCODE_A);
-        mappings[BTN_RIGHT].emplace_back(KEY, SDL_SCANCODE_D);
-        mappings[BTN_DOWN].emplace_back(KEY, SDL_SCANCODE_S);
-        mappings[BTN_UP].emplace_back(KEY, SDL_SCANCODE_W);
-        mappings[BTN_CROUCH].emplace_back(KEY, SDL_SCANCODE_S);
-        mappings[BTN_JUMP].emplace_back(KEY, SDL_SCANCODE_SPACE);
-        mappings[BTN_ACTION].emplace_back(KEY, SDL_SCANCODE_E);
-        mappings[BTN_EXAMINE].emplace_back(BTN, SDL_BUTTON_LEFT);
-        mappings[BTN_AIM].emplace_back(BTN, SDL_BUTTON_RIGHT);
-        mappings[BTN_AIM].emplace_back(KEY, SDL_SCANCODE_LSHIFT);
-        mappings[BTN_ATTACK].emplace_back(BTN, SDL_BUTTON_LEFT);
+        mappings[BTN_LEFT].emplace_back(KEY, 'A');
+        mappings[BTN_RIGHT].emplace_back(KEY, 'D');
+        mappings[BTN_DOWN].emplace_back(KEY, 'S');
+        mappings[BTN_UP].emplace_back(KEY, 'W');
+        mappings[BTN_CROUCH].emplace_back(KEY, 'S');
+        mappings[BTN_JUMP].emplace_back(KEY, ' ');
+        mappings[BTN_ACTION].emplace_back(KEY, 'E');
+        mappings[BTN_EXAMINE].emplace_back(BTN, 1);
+        mappings[BTN_AIM].emplace_back(BTN, 2);
+        mappings[BTN_AIM].emplace_back(KEY, 287);
+        mappings[BTN_ATTACK].emplace_back(BTN, 1);
         player = this;
     }
     Player::~Player () {
