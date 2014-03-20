@@ -87,13 +87,13 @@ namespace geo {
     }
     size_t Camera_Bound::Resident_n_pts () { return 1; }
     Vec Camera_Bound::Resident_get_pt (size_t i) {
-        if (right)
+        if (edge.is_defined())
             return edge.a - corner.c;
         else
             return Vec(corner.r, 0);
     }
     void Camera_Bound::Resident_set_pt (size_t i, Vec p) {
-        if (right) {
+        if (edge.is_defined()) {
              // Figure out whether the user means negative or positive radius
             float mdist = (double_tangent(Circle(corner.c, -p.mag()), right->corner).a - (corner.c + p)).mag();
             float pdist = (double_tangent(Circle(corner.c, p.mag()), right->corner).a - (corner.c + p)).mag();
