@@ -52,6 +52,14 @@ namespace geo {
 
     Links<Camera_Bound> camera_bounds;
 
+    void Camera_Bound::set_right (Camera_Bound* o) {
+        if (right) right->left = NULL;
+        if (o) {
+            if (o->left) o->left->set_right(NULL);
+            o->left = this;
+        }
+        right = o;
+    }
     void Camera_Bound::finish () {
         if (right) {
             edge = double_tangent(corner, right->corner);
@@ -68,6 +76,9 @@ namespace geo {
     }
     Vec Camera_Bound::Resident_get_pos () { return corner.c; }
     void Camera_Bound::Resident_set_pos (Vec p) { corner.c = p; }
+    Camera_Bound::~Camera_Bound () {
+        if (right) right->left = NULL;
+    }
 
 } using namespace geo;
 
@@ -78,8 +89,8 @@ HACCABLE(Default_Camera) {
 }
 
 HACCABLE(Camera_Bound) {
-    name("geo::Camera_Bound*");
+    name("geo::Camera_Bound");
     attr("corner", member(&Camera_Bound::corner));
-    attr("right", member(&Camera_Bound::right));
+    attr("right", value_methods(&Camera_Bound::get_right, &Camera_Bound::set_right));
     finish(&Camera_Bound::finish);
 }
