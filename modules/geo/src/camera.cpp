@@ -1,5 +1,6 @@
 #include "geo/inc/camera.h"
 
+#include <GL/glew.h>  // Temporary for debug drawing
 #include "hacc/inc/haccable_standard.h"
 #include "vis/inc/color.h"
 using namespace core;
@@ -50,6 +51,7 @@ namespace geo {
                 }
             }
         }
+        printf("%lu\n", n_snaps);
         if (best_snap_bound) {
             if (best_snap_corner
                     ? best_snap_bound->corner.covers(ideal_pos)
@@ -59,6 +61,12 @@ namespace geo {
             }
         }
         pos = ideal_pos;
+    }
+
+    void Default_Camera::debug_draw () {
+        color_offset(Vec(0, 0));
+        draw_color(0x00ffffff);
+        draw_primitive(GL_POINTS, n_snaps, snaps);
     }
 
     void Free_Camera::Camera_update () {
@@ -125,6 +133,7 @@ namespace geo {
         else {
             edge = Line();
         }
+        Resident::finish();
     }
     void Camera_Bound::Resident_emerge () {
         printf("Camera_Bound::Resident_emerge()\n");
@@ -180,7 +189,7 @@ namespace geo {
 HACCABLE(Default_Camera) {
     name("geo::Default_Camera");
     attr("pos", member(&Default_Camera::pos).optional());
-    finish([](Default_Camera& v){ v.finish(); });
+    finish(&Default_Camera::finish);
 }
 
 HACCABLE(Camera_Bound) {

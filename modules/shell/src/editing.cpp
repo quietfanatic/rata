@@ -72,6 +72,7 @@ namespace shell {
                 }
             }
         }
+        default_camera().debug_draw();
     }
 
      // Draw status messages and other info
