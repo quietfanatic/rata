@@ -106,6 +106,7 @@ namespace geo {
         void Resident_reclude () override;
         Vec Resident_get_pos () override;
         void Resident_set_pos (Vec) override;
+        void Resident_debug_draw () override;
         ~Camera_Bound();
     };
     extern Links<Camera_Bound> camera_bounds;

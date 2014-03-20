@@ -1,5 +1,7 @@
 #include "util/inc/geometry.h"
 
+#include "hacc/inc/haccable.h"
+
 namespace util {
 
     float angle_diff (float a, float b) {

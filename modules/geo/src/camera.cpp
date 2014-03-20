@@ -1,5 +1,9 @@
 #include "geo/inc/camera.h"
+
+#include "hacc/inc/haccable_standard.h"
+#include "vis/inc/color.h"
 using namespace core;
+using namespace vis;
 
 namespace geo {
 
@@ -76,6 +80,14 @@ namespace geo {
     }
     Vec Camera_Bound::Resident_get_pos () { return corner.c; }
     void Camera_Bound::Resident_set_pos (Vec p) { corner.c = p; }
+    void Camera_Bound::Resident_debug_draw () {
+        color_offset(Vec(0, 0));
+        draw_color(0xff00ffff);
+        draw_circle(corner);
+        if (edge.is_defined()) {
+            draw_line(edge.a, edge.b);
+        }
+    }
     Camera_Bound::~Camera_Bound () {
         if (right) right->left = NULL;
     }

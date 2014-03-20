@@ -2,7 +2,6 @@
 #define HAVE_UTIL_GEOMETRY_H
 
 #include <Box2D/Box2D.h>
-#include "hacc/inc/haccable.h"
 #include "util/inc/honestly.h"
 
 namespace util {
