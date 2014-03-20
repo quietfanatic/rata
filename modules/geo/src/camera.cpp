@@ -73,6 +73,7 @@ namespace geo {
         }
     }
     void Camera_Bound::Resident_emerge () {
+        printf("Camera_Bound::Resident_emerge()\n");
         Link<Camera_Bound>::link(camera_bounds);
     }
     void Camera_Bound::Resident_reclude () {
@@ -102,6 +103,7 @@ HACCABLE(Default_Camera) {
 
 HACCABLE(Camera_Bound) {
     name("geo::Camera_Bound");
+    attr("Resident", base<Resident>().collapse());
     attr("corner", member(&Camera_Bound::corner));
     attr("right", value_methods(&Camera_Bound::get_right, &Camera_Bound::set_right));
     finish(&Camera_Bound::finish);
