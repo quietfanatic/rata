@@ -54,10 +54,11 @@ namespace vis {
     }
     void draw_circle (const Circle& c) {
         size_t n_pts = c.r * 16;
-        float flts [n_pts * 2];
-        Vec* pts = (Vec*)flts;
+        if (n_pts > 128) n_pts = 128;
+        char dat [n_pts * sizeof(Vec)];
+        Vec* pts = (Vec*)dat;
         for (size_t i = 0; i < n_pts; i++) {
-            pts[i] = polar(c.r, i * M_PI * 2 / n_pts);
+            pts[i] = c.c + polar(c.r, i * M_PI * 2 / n_pts);
         }
         draw_loop(n_pts, pts);
     }
