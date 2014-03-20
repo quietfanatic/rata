@@ -66,6 +66,7 @@ namespace shell {
                     color_offset(pos);
                     draw_color(&res == selected ? 0xff0000ff : 0x00ff00ff);
                     draw_rect(boundary);
+                    res.Resident_debug_draw();
                 }
             }
         }
