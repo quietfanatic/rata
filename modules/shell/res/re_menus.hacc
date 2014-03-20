@@ -19,6 +19,7 @@
                     ent::Biped:$.biped_menu
                     geo::Tilemap:$.tilemap_menu
                     ent::Light:$.edit_shape
+                    geo::Camera_Bound:$.edit_shape
                 }}
             ]
         }}

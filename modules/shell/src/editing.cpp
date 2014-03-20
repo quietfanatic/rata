@@ -49,7 +49,7 @@ namespace shell {
             }
         }
          // Draw outlines around all residents
-        else for (auto& room : all_rooms()) {
+        for (auto& room : all_rooms()) {
             color_offset(Vec(0, 0));
             draw_color(0xff00ffff);
             draw_rect(room.boundary);
@@ -57,15 +57,17 @@ namespace shell {
                 continue;
             if (room.observer_count) {
                 for (auto& res : room.residents) {
-                    Vec pos = res.Resident_get_pos();
-                    const Rect& boundary = res.Resident_boundary();
-                    if (!pos.is_defined() || !boundary.is_defined()) {
-                        pos = room.boundary.lt() + Vec(0.5, -0.5);
-                        pos.x += unpositioned_residents++;
+                    if (!editing_pts) {
+                        Vec pos = res.Resident_get_pos();
+                        const Rect& boundary = res.Resident_boundary();
+                        if (!pos.is_defined() || !boundary.is_defined()) {
+                            pos = room.boundary.lt() + Vec(0.5, -0.5);
+                            pos.x += unpositioned_residents++;
+                        }
+                        color_offset(pos);
+                        draw_color(&res == selected ? 0xff0000ff : 0x00ff00ff);
+                        draw_rect(boundary);
                     }
-                    color_offset(pos);
-                    draw_color(&res == selected ? 0xff0000ff : 0x00ff00ff);
-                    draw_rect(boundary);
                     res.Resident_debug_draw();
                 }
             }

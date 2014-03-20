@@ -80,7 +80,24 @@ namespace geo {
         Link<Camera_Bound>::unlink();
     }
     Vec Camera_Bound::Resident_get_pos () { return corner.c; }
-    void Camera_Bound::Resident_set_pos (Vec p) { corner.c = p; }
+    void Camera_Bound::Resident_set_pos (Vec p) {
+        corner.c = p;
+        finish();
+        if (left) left->finish();
+    }
+    size_t Camera_Bound::Resident_n_pts () { return 1; }
+    Vec Camera_Bound::Resident_get_pt (size_t i) {
+        if (right)
+            return edge.a - corner.c;
+        else
+            return Vec(corner.r, 0);
+    }
+    void Camera_Bound::Resident_set_pt (size_t i, Vec p) {
+        corner.r = p.mag();
+        finish();
+        if (left) left->finish();
+    }
+
     void Camera_Bound::Resident_debug_draw () {
         color_offset(Vec(0, 0));
         draw_color(0xff00ffff);

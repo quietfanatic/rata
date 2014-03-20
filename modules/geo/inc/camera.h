@@ -107,6 +107,9 @@ namespace geo {
         Vec Resident_get_pos () override;
         void Resident_set_pos (Vec) override;
         void Resident_debug_draw () override;
+        size_t Resident_n_pts () override;
+        Vec Resident_get_pt (size_t) override;
+        void Resident_set_pt (size_t, Vec) override;
         ~Camera_Bound();
     };
     extern Links<Camera_Bound> camera_bounds;
