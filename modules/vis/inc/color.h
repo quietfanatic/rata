@@ -14,6 +14,7 @@ namespace vis {
     void draw_line (util::Vec, util::Vec);
     void draw_rect (const util::Rect&);
     void draw_solid_rect (const util::Rect&);
+    void draw_circle (const util::Circle&);
     void draw_chain (size_t, util::Vec*);
     void draw_loop (size_t, util::Vec*);
     void draw_primitive (uint type, size_t, util::Vec*);

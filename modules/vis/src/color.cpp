@@ -52,6 +52,15 @@ namespace vis {
         pts[3] = r.lt();
         draw_loop(4, pts);
     }
+    void draw_circle (const Circle& c) {
+        size_t n_pts = c.r * 16;
+        float flts [n_pts * 2];
+        Vec* pts = (Vec*)flts;
+        for (size_t i = 0; i < n_pts; i++) {
+            pts[i] = polar(c.r, i * M_PI * 2 / n_pts);
+        }
+        draw_loop(n_pts, pts);
+    }
     void draw_solid_rect (const Rect& r) {
         Vec pts [4];
         pts[0] = r.lb();
