@@ -56,10 +56,14 @@ namespace geo {
     extern Camera* camera;
 
     struct Default_Camera : Camera {
+         // Ultimate final position
         Vec pos = Vec(10, 7.5);
+         // Ideal position  TODO: replace with Attention system
+        Vec ideal_pos = Vec(10, 7.5);
         Vec Camera_pos () override { return pos; }
-        void Camera_update () { }
+        void Camera_update () override;  // Set pos to ideal_pos constrained by Camera_Bounds
         void finish () { if (!active) activate(); }
+        void debug_draw ();
         explicit Default_Camera (bool active = true) : Camera(active) { }
     };
     Default_Camera& default_camera ();

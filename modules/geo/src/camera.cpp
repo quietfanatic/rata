@@ -7,6 +7,60 @@ using namespace vis;
 
 namespace geo {
 
+     // Temporary for debugging purposes
+    static size_t n_snaps = 0;
+    static Vec snaps [128];
+
+    void Default_Camera::Camera_update () {
+        n_snaps = 0;
+        bool best_snap_corner = false;
+        Camera_Bound* best_snap_bound = NULL;
+        float best_snap_dist = INF;
+        Vec best_snap;
+        for (auto& cb : camera_bounds) {
+            if (!cb.edge.is_defined())
+                continue;
+            if (cb.edge.bound_a().covers(ideal_pos)) {
+                 // Use edge
+                if (cb.edge.bound_b().covers(ideal_pos)) {
+                    Vec snap = cb.edge.snap(ideal_pos);
+                    float snap_dist = (snap - ideal_pos).mag();
+                    if (snap_dist < best_snap_dist) {
+                        snaps[n_snaps++] = snap;
+                        best_snap_bound = &cb;
+                        best_snap_corner = true;
+                        best_snap_dist = snap_dist;
+                        best_snap = snap;
+                    }
+                }
+            }
+            else {
+                 // Use corner
+                if (cb.left && cb.left->edge.is_defined()
+                        && cb.left->edge.bound_b().covers(ideal_pos)) {
+                    Vec snap = cb.corner.snap(ideal_pos);
+                    float snap_dist = (snap - ideal_pos).mag();
+                    if (snap_dist < best_snap_dist) {
+                        snaps[n_snaps++] = snap;
+                        best_snap_bound = &cb;
+                        best_snap_corner = false;
+                        best_snap_dist = snap_dist;
+                        best_snap = snap;
+                    }
+                }
+            }
+        }
+        if (best_snap_bound) {
+            if (best_snap_corner
+                    ? best_snap_bound->corner.covers(ideal_pos)
+                    : best_snap_bound->edge.covers(ideal_pos)) {
+                pos = best_snap;
+                return;
+            }
+        }
+        pos = ideal_pos;
+    }
+
     void Free_Camera::Camera_update () {
          // TODO: do stuff
         if (!window->cursor_trapped) {
