@@ -33,7 +33,7 @@ namespace util {
         CE float slope () const { return y/x; }
         CE Vec rotcw () const { return Vec(y, -x); }
         CE Vec rotccw () const { return Vec(-y, x); }
-        Vec norm () const;
+        Vec normalize () const;
     };
 
     CE Vec operator - (Vec a) { return Vec(-a.x, -a.y); }
@@ -50,7 +50,7 @@ namespace util {
     CE bool operator != (Vec a, Vec b) { return a.x!=b.x || a.y!=b.y; }
     CE float dot (Vec a, Vec b) { return a.x*b.x + a.y*b.y; }
 
-    inline Vec Vec::norm () const { return *this / mag(); }
+    inline Vec Vec::normalize () const { return *this / mag(); }
     static inline Vec polar (float r, float a) { return r*Vec(cos(a), sin(a)); }
 
     // RECTANGLES
@@ -162,14 +162,23 @@ namespace util {
         }
 
         CE bool covers (Vec p) {
-            return verticalish()
-                ? a.y < b.y ? y_at_x(p.x) < p.y
-                            : y_at_x(p.x) > p.y
-                : a.x < b.x ? x_at_y(p.y) < p.x
-                            : x_at_y(p.y) > p.x;
+            return bounds().covers(p);
         }
         Vec snap (Vec);
     };
+
+    CE Line operator + (const Line& a, Vec b) {
+        return Line(a.a+b, a.b+b);
+    }
+    CE Line operator + (Vec a, const Line& b) {
+        return Line(a+b.a, a+b.b);
+    }
+    CE Line operator - (const Line& a, Vec b) {
+        return Line(a.a-b, a.b-b);
+    }
+
+     // Find the point at which two lines cross
+    Vec intersect (const Line& a, const Line& b);
 
 }
 
