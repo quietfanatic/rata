@@ -50,10 +50,36 @@ namespace geo {
         return r;
     }
 
+    Links<Camera_Bound> camera_bounds;
+
+    void Camera_Bound::finish () {
+        if (right) {
+            edge = double_tangent(corner, right->corner);
+        }
+        else {
+            edge = Line();
+        }
+    }
+    void Camera_Bound::Resident_emerge () {
+        Link<Camera_Bound>::link(camera_bounds);
+    }
+    void Camera_Bound::Resident_reclude () {
+        Link<Camera_Bound>::unlink();
+    }
+    Vec Camera_Bound::Resident_get_pos () { return corner.c; }
+    void Camera_Bound::Resident_set_pos (Vec p) { corner.c = p; }
+
 } using namespace geo;
 
 HACCABLE(Default_Camera) {
     name("geo::Default_Camera");
     attr("pos", member(&Default_Camera::pos).optional());
     finish([](Default_Camera& v){ v.finish(); });
+}
+
+HACCABLE(Camera_Bound) {
+    name("geo::Camera_Bound*");
+    attr("corner", member(&Camera_Bound::corner));
+    attr("right", member(&Camera_Bound::right));
+    finish(&Camera_Bound::finish);
 }

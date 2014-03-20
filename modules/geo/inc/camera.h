@@ -2,6 +2,7 @@
 #define HAVE_GEO_CAMERA_H
 
 #include "core/inc/window.h"
+#include "geo/inc/rooms.h"
 #include "util/inc/geometry.h"
 #include "vis/inc/common.h"
 
@@ -91,6 +92,19 @@ namespace geo {
     inline Vec Camera::window_to_layer<vis::Dev> (int x, int y) {
         return window_to_dev(x, y);
     }
+
+     // These link together to form the boundaries for the camera
+    struct Camera_Bound : Link<Camera_Bound>, geo::Resident {
+        Circle corner;  // Negative radius means concave corner.  Radius can be 0
+        Line edge;  // Automatically set.  Between this and right.
+        Camera_Bound* right;  // Control this
+        void finish ();
+        void Resident_emerge () override;
+        void Resident_reclude () override;
+        Vec Resident_get_pos () override;
+        void Resident_set_pos (Vec) override;
+    };
+    extern Links<Camera_Bound> camera_bounds;
 
 }
 
