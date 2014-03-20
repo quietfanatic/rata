@@ -47,6 +47,16 @@ namespace util {
         return Vec(x, a.y_at_x(x));
     }
 
+    Line double_tangent (const Circle& a, const Circle& b) {
+        if (a.r == 0 && b.r == 0) {
+            return Line(a.c, b.c);
+        }
+        else {
+            float angle = (b.c - a.c).ang() - acos((a.r - b.r) / (b.c - a.c).mag());
+            return Line(a.c + polar(a.r, angle), b.c + polar(b.r, angle));
+        }
+    }
+
 } using namespace util;
 
 

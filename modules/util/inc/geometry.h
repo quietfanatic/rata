@@ -120,6 +120,7 @@ namespace util {
         float r;
         CE Circle () : c(),  r(NAN) { }
         CE Circle (Vec c, float r) : c(c), r(r) { }
+        CE bool is_defined () { return c.is_defined() && r == r; }
         CE Rect bounds () { return Rect(c.x-r, c.y-r, c.x+r, c.y+r); }
         CE bool covers (Vec p) {
             return ((p.x-c.x)*(p.x-c.y) + (p.y-c.y)*(p.y-c.y) < r*r) != (r < 0);
@@ -143,6 +144,7 @@ namespace util {
         Vec b;
         CE Line () : a(), b() { }
         CE Line (Vec a, Vec b) : a(a), b(b) { }
+        CE bool is_defined () { return a.is_defined() && b.is_defined(); }
         CE Rect bounds () { return Rect(a, b).uninvert(); }
         CE float slope () { return (b.y - a.y) / (b.x - a.x); }
 
@@ -179,6 +181,12 @@ namespace util {
 
      // Find the point at which two lines cross
     Vec intersect (const Line& a, const Line& b);
+
+     // Find a line tangent to both circles.
+     //      v this line v
+     //      _____________
+     // a-> O             O <-b
+    Line double_tangent (const Circle& a, const Circle& b);
 
 }
 
