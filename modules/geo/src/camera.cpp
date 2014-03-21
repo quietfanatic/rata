@@ -194,10 +194,11 @@ namespace geo {
     Vec attempt_constraint (Vec preferred, const Rect& bound) {
         log("camera", "Checking %f %f within %f %f %f %f.", preferred.x, preferred.y, bound.l, bound.b, bound.r, bound.t);
         dbg_snaps.resize(0);
-        bool currently_violating = true;
+        bool currently_violating = false;
         float closest_snap_dist2 = INF;
         Vec selected_snap;
          // First check if we're violating any walls and can simply snap to one
+        size_t i = 0;
         for (auto& cb : camera_bounds) {
             if (!defined(cb.edge)) continue;
             if (contains(bound_a(cb.edge), preferred)) {
@@ -211,9 +212,23 @@ namespace geo {
                         currently_violating = violating;
                         closest_snap_dist2 = snap_dist2;
                          // Record this snap if it's in the bound
-                        if (violating && contains(bound, snap_here))
+                        if (violating && covers(bound, snap_here)) {
+                            log("camera", "  Violating edge of wall %lu at %f %f", i, snap_here.x, snap_here.y);
                             selected_snap = snap_here;
+                        }
+                        else if (violating) {
+                            log("camera", "  Violation of edge of wall %lu at %f %f is oob", i, snap_here.x, snap_here.y);
+                        }
+                        else {
+                            log("camera", "  Not violating edge of wall %lu at %f %f", i, snap_here.x, snap_here.y);
+                        }
                     }
+                    else {
+                        log("camera", "  Snap to edge of wall %lu at %f %f is too far", i, snap_here.x, snap_here.y);
+                    }
+                }
+                else {
+                    log("camera", "  Not checking edge of wall %lu", i);
                 }
             }
             else {
@@ -226,17 +241,32 @@ namespace geo {
                     if (snap_dist2 < closest_snap_dist2) {
                         currently_violating = violating;
                         closest_snap_dist2 = snap_dist2;
-                        if (violating && contains(bound, snap_here))
+                        if (violating && covers(bound, snap_here)) {
+                            log("camera", "  Violating corner of wall %lu at %f %f", i, snap_here.x, snap_here.y);
                             selected_snap = snap_here;
+                        }
+                        else if (violating) {
+                            log("camera", "  Violation of corner of wall %lu at %f %f is oob", i, snap_here.x, snap_here.y);
+                        }
+                        else {
+                            log("camera", "  Not violating corner of wall %lu at %f %f", i, snap_here.x, snap_here.y);
+                        }
+                    }
+                    else {
+                        log("camera", "  Snap to corner of wall %lu at %f %f is too far", i, snap_here.x, snap_here.y);
                     }
                 }
+                else {
+                    log("camera", "  Not checking corner of wall %lu", i);
+                }
             }
+            i += 1;
         }
         if (closest_snap_dist2 == INF) {
             log("camera", "    No walls were checked!?");
         }
          // Now, did we not actually violate any walls?
-        if (!currently_violating && contains(bound, preferred)) {
+        if (!currently_violating) {
             log("camera", "    Preferred position is in bounds.");
             return preferred;  // Great!
         }
@@ -418,6 +448,7 @@ namespace geo {
             }
         }
          // Finally return the best wall&bound intersection.
+        log("camera", "Done checking %f %f within %f %f %f %f.", preferred.x, preferred.y, bound.l, bound.b, bound.r, bound.t);
         log("camera", "    Snapping to intersection at %f %f.", selected_snap.x, selected_snap.y);
         return selected_snap;
     }
