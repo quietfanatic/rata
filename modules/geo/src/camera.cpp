@@ -71,11 +71,16 @@ namespace geo {
         }
         draw_primitive(GL_POINTS, n_snaps, snaps);
         color_offset(Vec(0, 0));
-        draw_color(0xff00ffff);
         for (auto& cb : camera_bounds) {
+            draw_color(0xff00ffff);
             draw_circle(cb.corner);
             if (defined(cb.edge)) {
                 draw_line(cb.edge.a, cb.edge.b);
+                draw_color(0x0000ffff);
+                Line a = bound_a(cb.edge);
+                draw_line(a.a, a.b);
+                Line b = bound_b(cb.edge);
+                draw_line(b.a, b.b);
             }
         }
     }
