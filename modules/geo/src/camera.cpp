@@ -3,6 +3,7 @@
 #include <GL/glew.h>  // Temporary for debug drawing
 #include "core/inc/commands.h"
 #include "hacc/inc/haccable_standard.h"
+#include "util/inc/debug.h"
 #include "vis/inc/color.h"
 using namespace core;
 using namespace vis;
@@ -191,12 +192,14 @@ namespace geo {
      // This tries to find a valid camera position within the given rectangle.
      //  If it's not possible, returns Vec(NAN, NAN)
     Vec attempt_constraint (Vec preferred, const Rect& bound) {
+        log("camera", "Checking %f %f within %f %f %f %f.", preferred.x, preferred.y, bound.l, bound.b, bound.r, bound.t);
         dbg_snaps.resize(0);
         bool currently_violating = true;
         float closest_snap_dist2 = INF;
         Vec selected_snap;
+         // First check if we're violating any walls and can simply snap to one
         for (auto& cb : camera_bounds) {
-             // Check if we're violating any walls and can simply snap to one
+            if (!defined(cb.edge)) continue;
             if (contains(bound_a(cb.edge), preferred)) {
                  // Check the edge
                 if (contains(bound_b(cb.edge), preferred)) {
@@ -204,9 +207,7 @@ namespace geo {
                     Vec snap_here = snap(cb.edge, preferred);
                     dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
-                     // Consider violations to be a little closer than non-violations
-                    if (snap_dist2 + !violating
-                            < closest_snap_dist2 + !currently_violating) {
+                    if (snap_dist2 < closest_snap_dist2) {
                         currently_violating = violating;
                         closest_snap_dist2 = snap_dist2;
                          // Record this snap if it's in the bound
@@ -217,13 +218,12 @@ namespace geo {
             }
             else {
                  // Check the corner
-                if (cb.right && defined(cb.right->edge) && contains(bound_b(cb.right->edge), preferred)) {
+                if (cb.right && defined(cb.right->edge) && !contains(bound_b(cb.right->edge), preferred)) {
                     bool violating = contains(cb.corner, preferred);
                     Vec snap_here = snap(cb.corner, preferred);
                     dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
-                    if (snap_dist2 + !violating
-                            < closest_snap_dist2 + !currently_violating) {
+                    if (snap_dist2 < closest_snap_dist2) {
                         currently_violating = violating;
                         closest_snap_dist2 = snap_dist2;
                         if (violating && contains(bound, snap_here))
@@ -232,12 +232,17 @@ namespace geo {
                 }
             }
         }
+        if (closest_snap_dist2 == INF) {
+            log("camera", "    No walls were checked!?");
+        }
          // Now, did we not actually violate any walls?
         if (!currently_violating && contains(bound, preferred)) {
+            log("camera", "    Preferred position is in bounds.");
             return preferred;  // Great!
         }
          // Did we violate a wall, but its snap is in bounds?
         if (defined(selected_snap)) {
+            log("camera", "    Snapping to %f %f.", selected_snap.x, selected_snap.y);
             return selected_snap;
         }
          // Ugh, now we have to enumerate all the ways the bound intersects the walls.
@@ -413,20 +418,20 @@ namespace geo {
             }
         }
          // Finally return the best wall&bound intersection.
+        log("camera", "    Snapping to intersection at %f %f.", selected_snap.x, selected_snap.y);
         return selected_snap;
     }
 
      // This gets a valid camera position that's within as many attentions
      //  as possible.
     Vec satisfy_most_attentions (Vec preferred) {
-        printf("%lu\n", n_attentions);
          // TODO: let the cursor control position as much as possible
         Vec best_so_far = preferred;
         Rect attn_bound = Rect(-INF, -INF, INF, INF);
         dbg_area = attn_bound;
         for (size_t i = 0; i < n_attentions; i++) {
             attn_bound &= attentions[i].area;
-            Vec attempt = attempt_constraint(attn_bound.center(), attn_bound);
+            Vec attempt = attempt_constraint(preferred, attn_bound);
             if (!defined(attempt)) break;
             best_so_far = attempt;
             dbg_area = attn_bound;
