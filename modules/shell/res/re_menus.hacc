@@ -74,11 +74,21 @@
                 }}
                 {shell::SubMenu:{
                     text:"add furniture"
-                    contents:{shell::Text_Button:{
-                        text:"tilemap"
-                        on_click:[re_new_furniture geo::Tilemap {
-                            def:$("world/res/test-tiles.hacc").def
-                        }]
+                    contents:{shell::VBox:{
+                        contents:[
+                            {shell::Text_Button:{
+                                text:"tilemap"
+                                on_click:[re_new_furniture geo::Tilemap {
+                                    def:$("world/res/test-tiles.hacc").def
+                                }]
+                            }}
+                            {shell::Text_Button:{
+                                text:"camera bound"
+                                on_click:[re_new_furniture geo::Camera_Bound {
+                                    corner:[[0 0] 1]
+                                }]
+                            }}
+                        ]
                     }}
                 }}
             ]

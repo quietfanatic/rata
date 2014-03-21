@@ -231,7 +231,7 @@ HACCABLE(Camera_Bound) {
     name("geo::Camera_Bound");
     attr("Resident", base<Resident>().collapse());
     attr("corner", member(&Camera_Bound::corner));
-    attr("left", value_methods(&Camera_Bound::get_left, &Camera_Bound::set_left));
+    attr("left", value_methods(&Camera_Bound::get_left, &Camera_Bound::set_left).optional());
     finish(&Camera_Bound::finish);
 }
 
