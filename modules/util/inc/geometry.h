@@ -202,6 +202,9 @@ namespace util {
      // Find the point at which two lines cross
     Vec intersect (const Line& a, const Line& b);
 
+     // Find the two points (if any) at which these shapes touch
+    Line intersect (const Circle& a, const Line& b);
+
      // Find a line tangent to both circles counterclockwise.
      //      v this line v
      //      _____________
