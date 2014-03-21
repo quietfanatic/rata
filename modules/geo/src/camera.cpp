@@ -276,6 +276,7 @@ namespace geo {
             return selected_snap;
         }
          // Ugh, now we have to enumerate all the ways the bound intersects the walls.
+        closest_snap_dist2 = INF;
         i = 0;
         for (auto& cb : camera_bounds) {
             if (!defined(cb.edge)) continue;
