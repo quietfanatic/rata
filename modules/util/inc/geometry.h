@@ -162,8 +162,13 @@ namespace util {
             return Line(b, b + Vec(a.y - b.y, b.x - a.x));
         }
 
+         // Is the point in a shape defined by this line counterclockwise?
         CE bool covers (Vec p) {
-            return bounds().covers(p);
+            return verticalish()
+                ? a.y < b.y ? y_at_x(p.x) < p.y
+                            : y_at_x(p.x) > p.y
+                : a.x < b.x ? x_at_y(p.y) < p.x
+                            : x_at_y(p.y) > p.x;
         }
         Vec snap (Vec);
     };
@@ -181,10 +186,10 @@ namespace util {
      // Find the point at which two lines cross
     Vec intersect (const Line& a, const Line& b);
 
-     // Find a line tangent to both circles.
+     // Find a line tangent to both circles counterclockwise.
      //      v this line v
      //      _____________
-     // a-> O             O <-b
+     // b-> O             O <-a
     Line double_tangent (const Circle& a, const Circle& b);
 
 }

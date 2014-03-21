@@ -12,6 +12,6 @@ tap::Tester geometry_tester ("util/geometry", [](){
     ok(!Line(Vec(0, 1), Vec(3, 1)).covers(Vec(2, 2)), "Line::covers horizontal false");
     ok(Line(Vec(1, 0), Vec(1, 3)).covers(Vec(0, 2)), "Line::covers vertical true");
     ok(!Line(Vec(1, 0), Vec(1, 3)).covers(Vec(2, 2)), "Line::covers vertical false");
-    ok(Line(Vec(0, 0), Vec(5, 5)).covers(Vec(1, 0)), "Line::covers diagonal true");
-    ok(!Line(Vec(0, 0), Vec(5, 5)).covers(Vec(0, 1)), "Line::covers diagonal false");
+    ok(Line(Vec(0, 0), Vec(5, 5)).covers(Vec(0, 1)), "Line::covers diagonal true");
+    ok(!Line(Vec(0, 0), Vec(5, 5)).covers(Vec(1, 0)), "Line::covers diagonal false");
 });
