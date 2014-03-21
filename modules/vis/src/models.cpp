@@ -42,7 +42,7 @@ namespace vis {
         Model::Seg* ms = &model->segs[model->skel->seg_index(ss)];
         ms->pos = pos;
         for (size_t i = 0; i < ss->branches.size(); i++) {
-            Vec new_pos = pos + PX*ms->pose->frame->points[i].scale(ms->pose->scale);
+            Vec new_pos = pos + PX*ms->pose->frame->points[i] * ms->pose->scale;
             reposition_segment(model, ss->branches[i], new_pos);
         }
     }
@@ -84,8 +84,8 @@ namespace vis {
         for (size_t i = 0; i < n_draws; i++) {
             draw_frame(
                 draws[i].seg->pose->frame, draws[i].tex,
-                pos + draws[i].seg->pos.scale(scale),
-                scale.scale(draws[i].seg->pose->scale), z
+                pos + scale * draws[i].seg->pos * scale,
+                scale * draws[i].seg->pose->scale, z
             );
         }
     }

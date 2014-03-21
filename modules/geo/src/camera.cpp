@@ -16,46 +16,45 @@ namespace geo {
         n_snaps = 0;
         bool best_snap_corner = false;
         Camera_Bound* best_snap_bound = NULL;
-        float best_snap_dist = INF;
+        float best_snap_dist2 = INF;
         Vec best_snap;
         for (auto& cb : camera_bounds) {
-            if (!cb.edge.is_defined())
+            if (!defined(cb.edge))
                 continue;
-            if (cb.edge.bound_a().covers(ideal_pos)) {
+            if (covers(bound_a(cb.edge), ideal_pos)) {
                  // Use edge
-                if (cb.edge.bound_b().covers(ideal_pos)) {
-                    Vec snap = cb.edge.snap(ideal_pos);
-                    float snap_dist = (snap - ideal_pos).mag();
-                    if (snap_dist < best_snap_dist) {
-                        snaps[n_snaps++] = snap;
+                if (covers(bound_b(cb.edge), ideal_pos)) {
+                    Vec snap_v = snap(cb.edge, ideal_pos);
+                    snaps[n_snaps++] = snap_v;
+                    float snap_dist2 = length2(snap_v - ideal_pos);
+                    if (snap_dist2 < best_snap_dist2) {
                         best_snap_bound = &cb;
                         best_snap_corner = true;
-                        best_snap_dist = snap_dist;
-                        best_snap = snap;
+                        best_snap_dist2 = snap_dist2;
+                        best_snap = snap_v;
                     }
                 }
             }
             else {
                  // Use corner
-                if (cb.left && cb.left->edge.is_defined()
-                        && cb.left->edge.bound_b().covers(ideal_pos)) {
-                    Vec snap = cb.corner.snap(ideal_pos);
-                    float snap_dist = (snap - ideal_pos).mag();
-                    if (snap_dist < best_snap_dist) {
-                        snaps[n_snaps++] = snap;
+                if (cb.left && defined(cb.left->edge)
+                        && covers(bound_b(cb.left->edge), ideal_pos)) {
+                    Vec snap_v = snap(cb.corner, ideal_pos);
+                    snaps[n_snaps++] = snap_v;
+                    float snap_dist2 = length2(snap_v - ideal_pos);
+                    if (snap_dist2 < best_snap_dist2) {
                         best_snap_bound = &cb;
                         best_snap_corner = false;
-                        best_snap_dist = snap_dist;
-                        best_snap = snap;
+                        best_snap_dist2 = snap_dist2;
+                        best_snap = snap_v;
                     }
                 }
             }
         }
-        printf("%lu\n", n_snaps);
         if (best_snap_bound) {
             if (best_snap_corner
-                    ? best_snap_bound->corner.covers(ideal_pos)
-                    : best_snap_bound->edge.covers(ideal_pos)) {
+                    ? covers(best_snap_bound->corner, ideal_pos)
+                    : covers(best_snap_bound->edge, ideal_pos)) {
                 pos = best_snap;
                 return;
             }
@@ -66,6 +65,9 @@ namespace geo {
     void Default_Camera::debug_draw () {
         color_offset(Vec(0, 0));
         draw_color(0x00ffffff);
+        for (size_t i = 0; i < n_snaps; i++) {
+            draw_circle(Circle(snaps[i], 0.2));
+        }
         draw_primitive(GL_POINTS, n_snaps, snaps);
     }
 
@@ -86,7 +88,7 @@ namespace geo {
                 pos.y -= (window->cursor_y - window->height + 64) * move_speed;
             }
         }
-        if (!pos.is_defined())
+        if (!defined(pos))
             pos = Vec(10, 7.5);
     }
 
@@ -150,20 +152,20 @@ namespace geo {
     }
     size_t Camera_Bound::Resident_n_pts () { return 1; }
     Vec Camera_Bound::Resident_get_pt (size_t i) {
-        if (edge.is_defined())
+        if (defined(edge))
             return edge.a - corner.c;
         else
             return Vec(corner.r, 0);
     }
     void Camera_Bound::Resident_set_pt (size_t i, Vec p) {
-        if (edge.is_defined()) {
+        if (defined(edge)) {
              // Figure out whether the user means negative or positive radius
-            float mdist = (double_tangent(Circle(corner.c, -p.mag()), right->corner).a - (corner.c + p)).mag();
-            float pdist = (double_tangent(Circle(corner.c, p.mag()), right->corner).a - (corner.c + p)).mag();
+            float mdist = length2(double_tangent(Circle(corner.c, -length(p)), right->corner).a - (corner.c + p));
+            float pdist = length2(double_tangent(Circle(corner.c, length(p)), right->corner).a - (corner.c + p));
             if (mdist < pdist)
-                corner.r = -p.mag();
+                corner.r = -length(p);
             else
-                corner.r = p.mag();
+                corner.r = length(p);
         }
         else {
             corner.r = p.x;
@@ -176,7 +178,7 @@ namespace geo {
         color_offset(Vec(0, 0));
         draw_color(0xff00ffff);
         draw_circle(corner);
-        if (edge.is_defined()) {
+        if (defined(edge)) {
             draw_line(edge.a, edge.b);
         }
     }

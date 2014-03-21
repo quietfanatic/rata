@@ -72,8 +72,8 @@ namespace geo {
         TileEdge* ne = te->next;
         if (ne == te)
             throw std::logic_error("The tile edge merging algorithm went wrong somewhere.\n");
-        float angle = angle_diff((te->v2 - te->v1).ang(), (ne->v2 - ne->v1).ang());
-        if (angle < 0.01 && te->def == ne->def) {
+        float ang = angle_diff(angle(te->v2 - te->v1), angle(ne->v2 - ne->v1));
+        if (ang < 0.01 && te->def == ne->def) {
              // merge edges only with the same nature
             te->next = ne->next;
             te->next->prev = te;
@@ -82,12 +82,12 @@ namespace geo {
             (*merged)++;
             return true;
         }
-        else if (angle > PI - 0.01) {
+        else if (ang > PI - 0.01) {
              // Different natured edges can eat one another though
             te->next = ne->next;
             te->next->prev = te;
             te->v2 = ne->v2;
-            if ((te->v2 - te->v1).mag2() < (ne->v2 - ne->v1).mag2()) {
+            if (length2(te->v2 - te->v1) < length2(ne->v2 - ne->v1)) {
                 te->def = ne->def;
             }
             ne->def = NULL;

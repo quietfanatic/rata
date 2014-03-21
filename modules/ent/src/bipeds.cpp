@@ -25,7 +25,7 @@ namespace ent {
         buttons = bits;
     }
     void Biped::Controllable_move_focus (Vec diff) {
-        focus = constrain(focus + diff, Rect(-18, -13, 18, 13));
+        focus = constrain(Rect(-18, -13, 18, 13), focus + diff);
     }
     Vec Biped::Controllable_get_focus () {
         return focus + pos() + get_def()->focus_offset;

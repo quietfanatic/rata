@@ -54,6 +54,7 @@ namespace vis {
     }
     void draw_circle (const Circle& c) {
         size_t n_pts = c.r * 16;
+        if (n_pts < 8) n_pts = 8;
         if (n_pts > 128) n_pts = 128;
         char dat [n_pts * sizeof(Vec)];
         Vec* pts = (Vec*)dat;

@@ -41,7 +41,7 @@ namespace shell {
             auto n_pts = selected->Resident_n_pts();
             for (size_t i = 0; i < n_pts; i++) {
                 Vec pos = r_pos + selected->Resident_get_pt(i);
-                if (pos.is_defined()) {
+                if (defined(pos)) {
                     color_offset(pos);
                     draw_color((int)i == dragging_pt ? 0xff0000ff : 0xffff00ff);
                     draw_rect(Rect(-0.25, -0.25, 0.25, 0.25));
@@ -60,7 +60,7 @@ namespace shell {
                     if (!editing_pts) {
                         Vec pos = res.Resident_get_pos();
                         const Rect& boundary = res.Resident_boundary();
-                        if (!pos.is_defined() || !boundary.is_defined()) {
+                        if (!defined(pos) || !defined(boundary)) {
                             pos = room.boundary.lt() + Vec(0.5, -0.5);
                             pos.x += unpositioned_residents++;
                         }
@@ -114,7 +114,7 @@ namespace shell {
         else {
             if (clicking) {
                 if (selected) {
-                    if ((drag_origin - world_pos).mag2() > 0.2)
+                    if (length2(drag_origin - world_pos) > 0.2)
                         dragging = true;
                     if (dragging) {
                         selected->Resident_set_pos(world_pos - drag_offset);
@@ -139,7 +139,7 @@ namespace shell {
                         for (auto& res : room.residents) {
                             Vec pos = res.Resident_get_pos();
                             const Rect& boundary = res.Resident_boundary();
-                            if (!pos.is_defined() || !boundary.is_defined()) {
+                            if (!defined(pos) || !defined(boundary)) {
                                 pos = room.boundary.lt() + Vec(0.5, -0.5);
                                 pos.x += unpositioned_residents++;
                             }

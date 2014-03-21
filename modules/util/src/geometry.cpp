@@ -16,36 +16,21 @@ namespace util {
         return lround(up_ang / PI * 8);
     }
 
-    Vec constrain (Vec p, const Rect& r) {
-        return Vec(
-            p.x < r.l ? r.l : p.x > r.r ? r.r : p.x,
-            p.y < r.b ? r.b : p.y > r.t ? r.t : p.y
-        );
-    }
-
-    Vec Circle::snap (Vec p) {
-        return p.normalize() * fabs(r);
-    }
-
-    Vec Line::snap (Vec p) {
-        return intersect(*this, p + bound_a() - a);
-    }
-
     Vec intersect (const Line& a, const Line& b) {
-        if (a.vertical()) {
-            if (b.vertical()) return Vec();
-            if (b.horizontal()) return Vec(a.a.x, b.a.y);
+        if (vertical(a)) {
+            if (vertical(b)) return Vec();
+            if (horizontal(b)) return Vec(a.a.x, b.a.y);
             return Vec(a.a.x, b.y_at_x(a.a.x));
         }
-        if (a.horizontal()) {
-            if (b.vertical()) return Vec(b.a.x, a.a.y);
-            if (b.horizontal()) return Vec();
+        if (horizontal(a)) {
+            if (vertical(b)) return Vec(b.a.x, a.a.y);
+            if (horizontal(b)) return Vec();
             return Vec(b.x_at_y(a.a.y), a.a.y);
         }
-        if (b.vertical()) return Vec(b.a.x, a.y_at_x(b.a.x));
-        if (b.horizontal()) return Vec(a.x_at_y(b.a.y), b.a.y);
+        if (vertical(b)) return Vec(b.a.x, a.y_at_x(b.a.x));
+        if (horizontal(b)) return Vec(a.x_at_y(b.a.y), b.a.y);
         float x = (a.y_at_x(0) - b.y_at_x(0))
-                / (b.slope() - a.slope());
+                / (slope(b) - slope(a));
         return Vec(x, a.y_at_x(x));
     }
 
@@ -54,8 +39,8 @@ namespace util {
             return Line(a.c, b.c);
         }
         else {
-            float angle = (b.c - a.c).ang() - acos((a.r - b.r) / (b.c - a.c).mag());
-            return Line(a.c + polar(a.r, angle), b.c + polar(b.r, angle));
+            float ang = angle(b.c - a.c) - acos((a.r - b.r) / length(b.c - a.c));
+            return Line(a.c + polar(a.r, ang), b.c + polar(b.r, ang));
         }
     }
 

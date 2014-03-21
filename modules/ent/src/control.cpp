@@ -12,7 +12,7 @@ namespace ent {
     void Player::Drawn_draw (vis::Overlay) {
         if (character && cursor_tex && cursor_frame) {
             Vec focus = character->Controllable_get_focus();
-            if (focus.is_defined())
+            if (defined(focus))
                 vis::draw_frame(cursor_frame, cursor_tex, focus);
         }
     }

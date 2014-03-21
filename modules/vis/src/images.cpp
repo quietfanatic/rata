@@ -16,7 +16,7 @@ using namespace util;
 namespace vis {
 
     void Texture::load (Image* image) {
-        if (!size.is_defined()) size = image->size;
+        if (!defined(size)) size = image->size;
         GLuint newid;
         glGenTextures(1, &newid);
         glBindTexture(GL_TEXTURE_2D, newid);
