@@ -68,11 +68,9 @@ namespace shell {
                         draw_color(&res == selected ? 0xff0000ff : 0x00ff00ff);
                         draw_rect(boundary);
                     }
-                    res.Resident_debug_draw();
                 }
             }
         }
-        default_camera().debug_draw();
     }
 
      // Draw status messages and other info
@@ -818,4 +816,3 @@ void _re_edit_pts () {
     room_editor->editing_pts = !room_editor->editing_pts;
 }
 New_Command _re_edit_pts_cmd ("re_edit_pts", "Edit object-specific pts.", 0, _re_edit_pts);
-

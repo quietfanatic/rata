@@ -62,8 +62,6 @@ namespace geo {
         virtual Vec Resident_get_pt (size_t i) { return Vec(NAN, NAN); }
         virtual void Resident_set_pt (size_t i, Vec) { }
         virtual Rect Resident_boundary () { return Rect(-0.25, -0.25, 0.25, 0.25); }
-         // Run in the Overlay layer
-        virtual void Resident_debug_draw () { }
 
         virtual ~Resident () { }
         void finish ();

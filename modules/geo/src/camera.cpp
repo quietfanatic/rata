@@ -1,6 +1,7 @@
 #include "geo/inc/camera.h"
 
 #include <GL/glew.h>  // Temporary for debug drawing
+#include "core/inc/commands.h"
 #include "hacc/inc/haccable_standard.h"
 #include "vis/inc/color.h"
 using namespace core;
@@ -38,7 +39,7 @@ namespace geo {
             else {
                  // Use corner
                 if (cb.left && defined(cb.left->edge)
-                        && covers(bound_b(cb.left->edge), ideal_pos)) {
+                        && !covers(bound_b(cb.left->edge), ideal_pos)) {
                     Vec snap_v = snap(cb.corner, ideal_pos);
                     snaps[n_snaps++] = snap_v;
                     float snap_dist2 = length2(snap_v - ideal_pos);
@@ -62,13 +63,21 @@ namespace geo {
         pos = ideal_pos;
     }
 
-    void Default_Camera::debug_draw () {
+    void Default_Camera::Drawn_draw (vis::Overlay) {
         color_offset(Vec(0, 0));
         draw_color(0x00ffffff);
         for (size_t i = 0; i < n_snaps; i++) {
             draw_circle(Circle(snaps[i], 0.2));
         }
         draw_primitive(GL_POINTS, n_snaps, snaps);
+        color_offset(Vec(0, 0));
+        draw_color(0xff00ffff);
+        for (auto& cb : camera_bounds) {
+            draw_circle(cb.corner);
+            if (defined(cb.edge)) {
+                draw_line(cb.edge.a, cb.edge.b);
+            }
+        }
     }
 
     void Free_Camera::Camera_update () {
@@ -174,14 +183,6 @@ namespace geo {
         if (left) left->finish();
     }
 
-    void Camera_Bound::Resident_debug_draw () {
-        color_offset(Vec(0, 0));
-        draw_color(0xff00ffff);
-        draw_circle(corner);
-        if (defined(edge)) {
-            draw_line(edge.a, edge.b);
-        }
-    }
     Camera_Bound::~Camera_Bound () {
         if (right) right->left = NULL;
     }
@@ -201,3 +202,13 @@ HACCABLE(Camera_Bound) {
     attr("right", value_methods(&Camera_Bound::get_right, &Camera_Bound::set_right));
     finish(&Camera_Bound::finish);
 }
+
+void _camera_debug () {
+    if (default_camera().visible())
+        default_camera().disappear();
+    else
+        default_camera().appear();
+}
+
+core::New_Command _camera_debug_cmd ("camera_debug", "Toggle camera debug view", 0, _camera_debug);
+

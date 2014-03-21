@@ -55,7 +55,7 @@ namespace geo {
     };
     extern Camera* camera;
 
-    struct Default_Camera : Camera {
+    struct Default_Camera : Camera, vis::Drawn<vis::Overlay> {
          // Ultimate final position
         Vec pos = Vec(10, 7.5);
          // Ideal position  TODO: replace with Attention system
@@ -63,7 +63,7 @@ namespace geo {
         Vec Camera_pos () override { return pos; }
         void Camera_update () override;  // Set pos to ideal_pos constrained by Camera_Bounds
         void finish () { if (!active) activate(); }
-        void debug_draw ();
+        void Drawn_draw (vis::Overlay);
         explicit Default_Camera (bool active = true) : Camera(active) { }
     };
     Default_Camera& default_camera ();
@@ -110,7 +110,6 @@ namespace geo {
         void Resident_reclude () override;
         Vec Resident_get_pos () override;
         void Resident_set_pos (Vec) override;
-        void Resident_debug_draw () override;
         size_t Resident_n_pts () override;
         Vec Resident_get_pt (size_t) override;
         void Resident_set_pt (size_t, Vec) override;
