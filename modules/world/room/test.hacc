@@ -58,21 +58,21 @@
     lb_corner:{ geo::Camera_Bound:{
         room:$.room
         corner:[[11, 8.5] -1]
-        right:$.lt_corner
+        left:$.lt_corner
     } }
     lt_corner:{ geo::Camera_Bound:{
         room:$.room
         corner:[[11, 21.5] -1]
-        right:$.rt_corner
+        left:$.rt_corner
     } }
     rt_corner:{ geo::Camera_Bound:{
         room:$.room
         corner:[[29, 21.5] -1]
-        right:$.rb_corner
+        left:$.rb_corner
     } }
     rb_corner:{ geo::Camera_Bound:{
         room:$.room
         corner:[[29, 8.5] -1]
-        right:$.lb_corner
+        left:$.lb_corner
     } }
 } }

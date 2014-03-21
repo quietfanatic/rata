@@ -30,7 +30,7 @@ namespace geo {
                     float snap_dist2 = length2(snap_v - ideal_pos);
                     if (snap_dist2 < best_snap_dist2) {
                         best_snap_bound = &cb;
-                        best_snap_corner = true;
+                        best_snap_corner = false;
                         best_snap_dist2 = snap_dist2;
                         best_snap = snap_v;
                     }
@@ -38,14 +38,14 @@ namespace geo {
             }
             else {
                  // Use corner
-                if (cb.left && defined(cb.left->edge)
-                        && !covers(bound_b(cb.left->edge), ideal_pos)) {
+                if (cb.right && defined(cb.right->edge)
+                        && !covers(bound_b(cb.right->edge), ideal_pos)) {
                     Vec snap_v = snap(cb.corner, ideal_pos);
                     snaps[n_snaps++] = snap_v;
                     float snap_dist2 = length2(snap_v - ideal_pos);
                     if (snap_dist2 < best_snap_dist2) {
                         best_snap_bound = &cb;
-                        best_snap_corner = false;
+                        best_snap_corner = true;
                         best_snap_dist2 = snap_dist2;
                         best_snap = snap_v;
                     }
@@ -71,16 +71,17 @@ namespace geo {
         }
         draw_primitive(GL_POINTS, n_snaps, snaps);
         color_offset(Vec(0, 0));
+        size_t i = 0;
         for (auto& cb : camera_bounds) {
-            draw_color(0xff00ffff);
+            draw_color(0x0000ffff + 0x20000000 * i++);
             draw_circle(cb.corner);
             if (defined(cb.edge)) {
-                draw_line(cb.edge.a, cb.edge.b);
+                draw_line(cb.edge.a, cb.edge.b + Vec(0.4, 0.4));
                 draw_color(0x0000ffff);
                 Line a = bound_a(cb.edge);
-                draw_line(a.a, a.b);
+                draw_line(a.a, a.b + Vec(0.4, 0.4));
                 Line b = bound_b(cb.edge);
-                draw_line(b.a, b.b);
+                draw_line(b.a, b.b + Vec(0.4, 0.4));
             }
         }
     }
@@ -134,17 +135,17 @@ namespace geo {
 
     Links<Camera_Bound> camera_bounds;
 
-    void Camera_Bound::set_right (Camera_Bound* o) {
-        if (right) right->left = NULL;
+    void Camera_Bound::set_left (Camera_Bound* o) {
+        if (left) left->right = NULL;
         if (o) {
-            if (o->left) o->left->set_right(NULL);
-            o->left = this;
+            if (o->right) o->right->set_left(NULL);
+            o->right = this;
         }
-        right = o;
+        left = o;
     }
     void Camera_Bound::finish () {
-        if (right) {
-            edge = double_tangent(corner, right->corner);
+        if (left) {
+            edge = double_tangent(corner, left->corner);
         }
         else {
             edge = Line();
@@ -162,7 +163,7 @@ namespace geo {
     void Camera_Bound::Resident_set_pos (Vec p) {
         corner.c = p;
         finish();
-        if (left) left->finish();
+        if (right) right->finish();
     }
     size_t Camera_Bound::Resident_n_pts () { return 1; }
     Vec Camera_Bound::Resident_get_pt (size_t i) {
@@ -185,10 +186,11 @@ namespace geo {
             corner.r = p.x;
         }
         finish();
-        if (left) left->finish();
+        if (right) right->finish();
     }
 
     Camera_Bound::~Camera_Bound () {
+        if (left) left->right = NULL;
         if (right) right->left = NULL;
     }
 
@@ -204,7 +206,7 @@ HACCABLE(Camera_Bound) {
     name("geo::Camera_Bound");
     attr("Resident", base<Resident>().collapse());
     attr("corner", member(&Camera_Bound::corner));
-    attr("right", value_methods(&Camera_Bound::get_right, &Camera_Bound::set_right));
+    attr("left", value_methods(&Camera_Bound::get_left, &Camera_Bound::set_left));
     finish(&Camera_Bound::finish);
 }
 

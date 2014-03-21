@@ -101,10 +101,10 @@ namespace geo {
     struct Camera_Bound : Link<Camera_Bound>, geo::Resident {
         Circle corner;  // Negative radius means concave corner.  Radius can be 0
         Line edge;  // Automatically set.  Between this and right.
-        Camera_Bound* right = NULL;  // Control this
-        Camera_Bound* left = NULL;  // Automatically set
-        void set_right (Camera_Bound*);
-        Camera_Bound* get_right () const { return right; }
+        Camera_Bound* left = NULL;  // Control this
+        Camera_Bound* right = NULL;  // Automatically set
+        void set_left (Camera_Bound*);
+        Camera_Bound* get_left () const { return left; }
         void finish ();
         void Resident_emerge () override;
         void Resident_reclude () override;
