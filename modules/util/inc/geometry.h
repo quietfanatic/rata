@@ -109,14 +109,14 @@ namespace util {
     CE bool contains (const Rect& r, Vec p) {
         return p.x > r.l
             && p.y > r.b
-            && p.x < r.t
-            && p.y < r.r;
+            && p.x < r.r
+            && p.y < r.t;
     }
     CE bool covers (const Rect& r, Vec p) {
         return p.x >= r.l
             && p.y >= r.b
-            && p.x <= r.t
-            && p.y <= r.r;
+            && p.x <= r.r
+            && p.y <= r.t;
     }
     CE Vec constrain (const Rect& r, Vec p) {
         return Vec(

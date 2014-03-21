@@ -5,7 +5,8 @@ using namespace util;
 using namespace tap;
 
 tap::Tester geometry_tester ("util/geometry", [](){
-    plan(24);
+    plan(25);
+    ok(contains(Rect(12, -4, 32, 11), Vec(20, 7.5)), "previously troublesome contains(Rect) works");
     ok(verticalish(Line(Vec(0, 0), Vec(1, 2))), "verticalish(Line) can report true");
     ok(!verticalish(Line(Vec(0, 0), Vec(2, 1))), "verticalish(Line) can report false");
     ok(contains(Circle(Vec(2, 2), 2), Vec(1, 1)), "contains(Circle) can report true");
