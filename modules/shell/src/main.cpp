@@ -62,8 +62,18 @@ void step () {
 int main (int argc, char** argv) {
     util::set_logging("file", true);
     hacc::set_file_logger([](std::string s){ util::log("file", s); });
-    if (argc >= 2)
-        state_arg = util::rel2abs(argv[1]);
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-no-sound") == 0) {
+            snd::use_audio = false;
+        }
+        else if (argv[i][0] == '-') {
+            fprintf(stderr, "Unrecognized command line option: %s\n", argv[i]);
+            exit(1);
+        }
+        else {
+            state_arg = util::rel2abs(argv[i]);
+        }
+    }
 
     auto here = util::my_dir(argc, argv);
     util::chdir(here + "/modules");

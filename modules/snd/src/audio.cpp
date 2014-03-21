@@ -12,6 +12,8 @@
 namespace snd {
     using namespace util;
 
+    bool use_audio = true;
+
     void Audio::finish () {
         FILE* f = fopen(filename.c_str(), "r");
         if (!f) {
@@ -72,8 +74,14 @@ namespace snd {
                     }
                 }
             }
-            samples[i].l = l > 32767 ? 32767 : l < -32768 ? -32768 : l;
-            samples[i].r = r > 32767 ? 32767 : r < -32768 ? -32768 : r;
+            if (use_audio) {
+                samples[i].l = l > 32767 ? 32767 : l < -32768 ? -32768 : l;
+                samples[i].r = r > 32767 ? 32767 : r < -32768 ? -32768 : r;
+            }
+            else {
+                samples[i].l = 0;
+                samples[i].r = 0;
+            }
         }
         Voice* prev = NULL;
         for (auto& v : voices) {

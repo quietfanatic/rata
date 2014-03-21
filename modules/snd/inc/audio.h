@@ -7,6 +7,8 @@ namespace hacc { struct Document; }
 
 namespace snd {
 
+    extern bool use_audio;
+
     void init ();
     void start ();
     void stop ();
