@@ -159,28 +159,59 @@ namespace geo {
         finish();
         if (right) right->finish();
     }
-    size_t Camera_Bound::Resident_n_pts () { return 1; }
+    size_t Camera_Bound::Resident_n_pts () { return 2; }
     Vec Camera_Bound::Resident_get_pt (size_t i) {
-        if (defined(edge))
-            return edge.a - corner.c;
-        else
-            return Vec(corner.r, 0);
+        if (i == 0) {
+            if (defined(edge))
+                return edge.a - corner.c;
+            else
+                return Vec(corner.r, 0);
+        }
+        else if (i == 1) {
+            if (left && defined(edge))
+                return edge.b - corner.c;
+            else
+                return Vec(corner.r + 2, 0);
+        }
+        else return Vec();
     }
     void Camera_Bound::Resident_set_pt (size_t i, Vec p) {
-        if (defined(edge)) {
-             // Figure out whether the user means negative or positive radius
-            float mdist = length2(double_tangent(Circle(corner.c, -length(p)), right->corner).a - (corner.c + p));
-            float pdist = length2(double_tangent(Circle(corner.c, length(p)), right->corner).a - (corner.c + p));
-            if (mdist < pdist)
-                corner.r = -length(p);
-            else
-                corner.r = length(p);
+        if (i == 0) {
+            if (left) {
+                 // Figure out whether the user means negative or positive radius
+                Line medge = double_tangent(Circle(corner.c, -length(p)), left->corner);
+                Line pedge = double_tangent(Circle(corner.c, length(p)), left->corner);
+                float mdist = length2(medge.a - (corner.c + p));
+                float pdist = length2(pedge.a - (corner.c + p));
+                if (mdist < pdist) {
+                    corner.r = -length(p);
+                    edge = medge;
+                }
+                else {
+                    corner.r = length(p);
+                    edge = pedge;
+                }
+            }
+            else {
+                corner.r = p.x;
+            }
+            if (right) right->finish();
         }
-        else {
-            corner.r = p.x;
+        else if (i == 1) {
+            float best_dist2 = INF;
+            Camera_Bound* best_cb = NULL;
+            for (auto& cb : camera_bounds) {
+                float dist2 = length2((p + corner.c) - cb.corner.c);
+                if (dist2 < best_dist2) {
+                    best_dist2 = dist2;
+                    best_cb = &cb;
+                }
+            }
+            if (best_cb) {
+                set_left(best_cb == this ? NULL : best_cb);
+                finish();
+            }
         }
-        finish();
-        if (right) right->finish();
     }
 
     Camera_Bound::~Camera_Bound () {
