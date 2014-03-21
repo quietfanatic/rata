@@ -184,6 +184,7 @@ namespace ent {
         if (controller) {
             geo::default_camera().ideal_pos =
                 pos() + def->focus_offset + Vec(floor(focus.x/2/PX), floor(focus.y/2/PX))*PX;
+            geo::attention(pos() + def->focus_offset + focus + Rect(-1, -1, 1, 1), 1000000);
         }
     }
 

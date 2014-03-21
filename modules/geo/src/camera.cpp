@@ -162,25 +162,31 @@ namespace geo {
     };
 
     CE size_t max_attentions = 8;
-    size_t current_attentions = 0;
+    size_t n_attentions = 0;
     Attention attentions [max_attentions];
 
     void insert_attention (const Attention& a, size_t i) {
         if (i >= max_attentions) return;
-        if (i == current_attentions || a.priority > attentions[i].priority) {
+        if (i == n_attentions || a.priority > attentions[i].priority) {
             insert_attention(attentions[i], i + 1);
             attentions[i] = a;
-            current_attentions += 1;
+            n_attentions += 1;
         }
         else insert_attention(a, i + 1);
     }
 
     void attention (const Rect& r, double priority) {
-        insert_attention(Attention{r, priority}, 0);
+        Attention attn = {r, priority};
+        attn.area.l -= 9;
+        attn.area.b -= 6.5;
+        attn.area.r += 9;
+        attn.area.t += 6.5;
+        insert_attention(attn, 0);
     };
 
      // Temporary for debugging purposes
     static std::vector<Vec> dbg_snaps;
+    static Rect dbg_area;
 
      // This tries to find a valid camera position within the given rectangle.
      //  If it's not possible, returns Vec(NAN, NAN)
@@ -413,15 +419,19 @@ namespace geo {
      // This gets a valid camera position that's within as many attentions
      //  as possible.
     Vec satisfy_most_attentions (Vec preferred) {
+        printf("%lu\n", n_attentions);
          // TODO: let the cursor control position as much as possible
         Vec best_so_far = preferred;
         Rect attn_bound = Rect(-INF, -INF, INF, INF);
-        for (size_t i = 0; i < current_attentions; i++) {
+        dbg_area = attn_bound;
+        for (size_t i = 0; i < n_attentions; i++) {
             attn_bound &= attentions[i].area;
             Vec attempt = attempt_constraint(attn_bound.center(), attn_bound);
             if (!defined(attempt)) break;
             best_so_far = attempt;
+            dbg_area = attn_bound;
         }
+        n_attentions = 0;
         return best_so_far;
     }
 
@@ -444,6 +454,9 @@ namespace geo {
                 draw_line(cb.edge.a, cb.edge.b);
             }
         }
+        draw_color(0xffff00ff);
+        draw_circle(Circle(ideal_pos, 0.2));
+        draw_rect(dbg_area);
     }
 
 
