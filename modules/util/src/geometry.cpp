@@ -38,7 +38,7 @@ namespace util {
 
     Line intersect (const Circle& c, const Line& l) {
          // Formula taken from http://mathworld.wolfram.com/Circle-LineIntersection.html
-         // with slight modifications.
+         //  with slight modifications.
         double dx = l.b.x - l.a.x;
         double dy = l.b.y - l.a.y;
         double dr2 = dx*dx + dy*dy;

@@ -9,77 +9,6 @@ using namespace vis;
 
 namespace geo {
 
-     // Temporary for debugging purposes
-    static size_t n_snaps = 0;
-    static Vec snaps [128];
-
-    void Default_Camera::Camera_update () {
-        n_snaps = 0;
-        bool best_snap_corner = false;
-        Camera_Bound* best_snap_bound = NULL;
-        float best_snap_dist2 = INF;
-        Vec best_snap;
-        for (auto& cb : camera_bounds) {
-            if (!defined(cb.edge))
-                continue;
-            if (covers(bound_a(cb.edge), ideal_pos)) {
-                 // Use edge
-                if (covers(bound_b(cb.edge), ideal_pos)) {
-                    Vec snap_v = snap(cb.edge, ideal_pos);
-                    snaps[n_snaps++] = snap_v;
-                    float snap_dist2 = length2(snap_v - ideal_pos);
-                    if (snap_dist2 < best_snap_dist2) {
-                        best_snap_bound = &cb;
-                        best_snap_corner = false;
-                        best_snap_dist2 = snap_dist2;
-                        best_snap = snap_v;
-                    }
-                }
-            }
-            else {
-                 // Use corner
-                if (cb.right && defined(cb.right->edge)
-                        && !covers(bound_b(cb.right->edge), ideal_pos)) {
-                    Vec snap_v = snap(cb.corner, ideal_pos);
-                    snaps[n_snaps++] = snap_v;
-                    float snap_dist2 = length2(snap_v - ideal_pos);
-                    if (snap_dist2 < best_snap_dist2) {
-                        best_snap_bound = &cb;
-                        best_snap_corner = true;
-                        best_snap_dist2 = snap_dist2;
-                        best_snap = snap_v;
-                    }
-                }
-            }
-        }
-        if (best_snap_bound) {
-            if (best_snap_corner
-                    ? covers(best_snap_bound->corner, ideal_pos)
-                    : covers(best_snap_bound->edge, ideal_pos)) {
-                pos = best_snap;
-                return;
-            }
-        }
-        pos = ideal_pos;
-    }
-
-    void Default_Camera::Drawn_draw (vis::Overlay) {
-        color_offset(Vec(0, 0));
-        draw_color(0x00ffffff);
-        for (size_t i = 0; i < n_snaps; i++) {
-            draw_circle(Circle(snaps[i], 0.2));
-        }
-        draw_color(0xff00ffff);
-        color_offset(Vec(0, 0));
-        size_t i = 0;
-        for (auto& cb : camera_bounds) {
-            draw_circle(cb.corner);
-            if (defined(cb.edge)) {
-                draw_line(cb.edge.a, cb.edge.b);
-            }
-        }
-    }
-
     void Free_Camera::Camera_update () {
          // TODO: do stuff
         if (!window->cursor_trapped) {
@@ -218,6 +147,305 @@ namespace geo {
         if (left) left->right = NULL;
         if (right) right->left = NULL;
     }
+
+///// CAMERA CONSTRAINT SATISFACTION ALGORITHM /////
+ // This is big enough that it deserves its own section,
+ //  but the API is too simple to deserve its own file.
+ // Basically, we have a list of rectangles in priority order.  The algorithm
+ //  tries to find the largest prefix of that list where it can find a valid
+ //  point both within all the rectangles in that prefix and within all the
+ //  active Camera_Bounds in the map.
+
+    struct Attention {
+        Rect area;
+        double priority;
+    };
+
+    CE size_t max_attentions = 8;
+    size_t current_attentions = 0;
+    Attention attentions [max_attentions];
+
+    void insert_attention (const Attention& a, size_t i) {
+        if (i >= max_attentions) return;
+        if (i == current_attentions || a.priority > attentions[i].priority) {
+            insert_attention(attentions[i], i + 1);
+            attentions[i] = a;
+            current_attentions += 1;
+        }
+        else insert_attention(a, i + 1);
+    }
+
+    void attention (const Rect& r, double priority) {
+        insert_attention(Attention{r, priority}, 0);
+    };
+
+     // Temporary for debugging purposes
+    static std::vector<Vec> dbg_snaps;
+
+     // This tries to find a valid camera position within the given rectangle.
+     //  If it's not possible, returns Vec(NAN, NAN)
+    Vec attempt_constraint (Vec preferred, const Rect& bound) {
+        dbg_snaps.resize(0);
+        bool currently_violating = true;
+        float closest_snap_dist2 = INF;
+        Vec selected_snap;
+        for (auto& cb : camera_bounds) {
+             // Check if we're violating any walls and can simply snap to one
+            if (contains(bound_a(cb.edge), preferred)) {
+                 // Check the edge
+                if (contains(bound_b(cb.edge), preferred)) {
+                    bool violating = contains(cb.edge, preferred);
+                    Vec snap_here = snap(cb.edge, preferred);
+                    dbg_snaps.push_back(snap_here);
+                    float snap_dist2 = length2(snap_here - preferred);
+                     // Consider violations to be a little closer than non-violations
+                    if (snap_dist2 + !violating
+                            < closest_snap_dist2 + !currently_violating) {
+                        currently_violating = violating;
+                        closest_snap_dist2 = snap_dist2;
+                         // Record this snap if it's in the bound
+                        if (violating && contains(bound, snap_here))
+                            selected_snap = snap_here;
+                    }
+                }
+            }
+            else {
+                 // Check the corner
+                if (cb.right && defined(cb.right->edge) && contains(bound_b(cb.right->edge), preferred)) {
+                    bool violating = contains(cb.corner, preferred);
+                    Vec snap_here = snap(cb.corner, preferred);
+                    dbg_snaps.push_back(snap_here);
+                    float snap_dist2 = length2(snap_here - preferred);
+                    if (snap_dist2 + !violating
+                            < closest_snap_dist2 + !currently_violating) {
+                        currently_violating = violating;
+                        closest_snap_dist2 = snap_dist2;
+                        if (violating && contains(bound, snap_here))
+                            selected_snap = snap_here;
+                    }
+                }
+            }
+        }
+         // Now, did we not actually violate any walls?
+        if (!currently_violating && contains(bound, preferred)) {
+            return preferred;  // Great!
+        }
+         // Did we violate a wall, but its snap is in bounds?
+        if (defined(selected_snap)) {
+            return selected_snap;
+        }
+         // Ugh, now we have to enumerate all the ways the bound intersects the walls.
+        for (auto& cb : camera_bounds) {
+            if (!defined(cb.edge)) continue;
+             // Try the edge first
+            Rect edge_aabb = bounds(cb.edge);
+            if (proper(bound & edge_aabb)) {
+                 // Try intersecting all four walls
+                if (bound.l >= edge_aabb.l && bound.l <= edge_aabb.r) {
+                    Vec snap_here = Vec(bound.l, cb.edge.y_at_x(bound.l));
+                    dbg_snaps.push_back(snap_here);
+                    float snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.y >= bound.b && snap_here.y <= bound.t) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                }
+                if (bound.b >= edge_aabb.b && bound.b <= edge_aabb.t) {
+                    Vec snap_here = Vec(cb.edge.x_at_y(bound.b), bound.b);
+                    dbg_snaps.push_back(snap_here);
+                    float snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.x >= bound.l && snap_here.x <= bound.r) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                }
+                if (bound.r >= edge_aabb.l && bound.r <= edge_aabb.r) {
+                    Vec snap_here = Vec(bound.r, cb.edge.y_at_x(bound.r));
+                    dbg_snaps.push_back(snap_here);
+                    float snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.y >= bound.b && snap_here.y <= bound.t) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                }
+                if (bound.t >= edge_aabb.b && bound.t <= edge_aabb.t) {
+                    Vec snap_here = Vec(cb.edge.x_at_y(bound.t), bound.t);
+                    dbg_snaps.push_back(snap_here);
+                    float snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.x >= bound.l && snap_here.x <= bound.r) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                }
+            }
+             // Now try the corner
+            if (!cb.right || !defined(cb.right->edge)) continue;
+            Rect corner_aabb = bounds(cb.corner);
+            if (proper(bound & corner_aabb)) {
+                Line bound_l = bound_a(cb.edge);
+                Line bound_r = bound_b(cb.right->edge);
+                 // Try intersecting it with all four walls
+                if (bound.l >= corner_aabb.l && bound.l <= corner_aabb.r) {
+                     // Pythagoreas yields two intersections.
+                    float y_from_corner = sqrt(
+                        cb.corner.r * cb.corner.r - (bound.l-cb.corner.c.x) * (bound.l-cb.corner.c.x)
+                    );
+                     // Try higher intersection
+                    Vec snap_here = Vec(bound.l, cb.corner.c.y + y_from_corner);
+                    dbg_snaps.push_back(snap_here);
+                    float snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.y >= bound.b && snap_here.y <= bound.t
+                            && !contains(bound_l, snap_here)
+                            && !contains(bound_r, snap_here)) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                     // Now try the lower intersection
+                    snap_here.y = cb.corner.c.y - y_from_corner;
+                    dbg_snaps.push_back(snap_here);
+                    snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.y >= bound.b && snap_here.y <= bound.t
+                            && !contains(bound_l, snap_here)
+                            && !contains(bound_r, snap_here)) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                }
+                if (bound.b >= corner_aabb.b && bound.b <= corner_aabb.t) {
+                    float x_from_corner = sqrt(
+                        cb.corner.r * cb.corner.r - (bound.b-cb.corner.c.y) * (bound.b-cb.corner.c.y)
+                    );
+                    Vec snap_here = Vec(cb.corner.c.x + x_from_corner, bound.b);
+                    dbg_snaps.push_back(snap_here);
+                    float snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.x >= bound.l && snap_here.x <= bound.r
+                            && !contains(bound_l, snap_here)
+                            && !contains(bound_r, snap_here)) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                    snap_here.x = cb.corner.c.x - x_from_corner;
+                    dbg_snaps.push_back(snap_here);
+                    snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.x >= bound.l && snap_here.x <= bound.r
+                            && !contains(bound_l, snap_here)
+                            && !contains(bound_r, snap_here)) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                }
+                if (bound.r >= corner_aabb.l && bound.r <= corner_aabb.r) {
+                    float y_from_corner = sqrt(
+                        cb.corner.r * cb.corner.r - (bound.r-cb.corner.c.x) * (bound.r-cb.corner.c.x)
+                    );
+                    Vec snap_here = Vec(bound.r, cb.corner.c.y + y_from_corner);
+                    dbg_snaps.push_back(snap_here);
+                    float snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.y >= bound.b && snap_here.y <= bound.t
+                            && !contains(bound_l, snap_here)
+                            && !contains(bound_r, snap_here)) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                    snap_here.y = cb.corner.c.y - y_from_corner;
+                    dbg_snaps.push_back(snap_here);
+                    snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.y >= bound.b && snap_here.y <= bound.t
+                            && !contains(bound_l, snap_here)
+                            && !contains(bound_r, snap_here)) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                }
+                if (bound.t >= corner_aabb.b && bound.t <= corner_aabb.t) {
+                    float x_from_corner = sqrt(
+                        cb.corner.r * cb.corner.r - (bound.t-cb.corner.c.y) * (bound.t-cb.corner.c.y)
+                    );
+                    Vec snap_here = Vec(cb.corner.c.x + x_from_corner, bound.t);
+                    dbg_snaps.push_back(snap_here);
+                    float snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.x >= bound.l && snap_here.x <= bound.r
+                            && !contains(bound_l, snap_here)
+                            && !contains(bound_r, snap_here)) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                    snap_here.x = cb.corner.c.x - x_from_corner;
+                    dbg_snaps.push_back(snap_here);
+                    snap_dist2 = length2(snap_here - preferred);
+                    if (snap_here.x >= bound.l && snap_here.x <= bound.r
+                            && !contains(bound_l, snap_here)
+                            && !contains(bound_r, snap_here)) {
+                        if (snap_dist2 < closest_snap_dist2) {
+                            closest_snap_dist2 = snap_dist2;
+                            selected_snap = snap_here;
+                        }
+                    }
+                }
+            }
+        }
+         // Finally return the best wall&bound intersection.
+        return selected_snap;
+    }
+
+     // This gets a valid camera position that's within as many attentions
+     //  as possible.
+    Vec satisfy_most_attentions (Vec preferred) {
+         // TODO: let the cursor control position as much as possible
+        Vec best_so_far = preferred;
+        Rect attn_bound = Rect(-INF, -INF, INF, INF);
+        for (size_t i = 0; i < current_attentions; i++) {
+            attn_bound &= attentions[i].area;
+            Vec attempt = attempt_constraint(attn_bound.center(), attn_bound);
+            if (!defined(attempt)) break;
+            best_so_far = attempt;
+        }
+        return best_so_far;
+    }
+
+    void Default_Camera::Camera_update () {
+        pos = satisfy_most_attentions(ideal_pos);
+    }
+
+    void Default_Camera::Drawn_draw (vis::Overlay) {
+        color_offset(Vec(0, 0));
+        draw_color(0x00ffffff);
+        for (auto snap : dbg_snaps) {
+            draw_circle(Circle(snap, 0.2));
+        }
+        draw_color(0xff00ffff);
+        color_offset(Vec(0, 0));
+        size_t i = 0;
+        for (auto& cb : camera_bounds) {
+            draw_circle(cb.corner);
+            if (defined(cb.edge)) {
+                draw_line(cb.edge.a, cb.edge.b);
+            }
+        }
+    }
+
 
 } using namespace geo;
 

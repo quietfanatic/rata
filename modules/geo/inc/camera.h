@@ -117,6 +117,9 @@ namespace geo {
     };
     extern Links<Camera_Bound> camera_bounds;
 
+     // Define a rectangular area you'd like the camera to look within.
+    void attention (const Rect& r, double priority);
+
 }
 
 #endif
