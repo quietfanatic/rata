@@ -9,6 +9,8 @@ namespace util {
      // MISC
     CE bool defined (float a) { return a == a; }
 
+    CE float ce_abs (float a) { return a < 0 ? -a : a; }
+
      // ANGLES
     float angle_diff (float, float);
      // For animation; returns 0..8 where 0 = down, 4 = forward, 8 = up
@@ -171,7 +173,7 @@ namespace util {
     CE float slope (const Line& l) { return slope(l.b - l.a); }
     CE bool vertical (const Line& l) { return l.a.x == l.b.x; }
     CE bool horizontal (const Line& l) { return l.a.y == l.b.y; }
-    CE bool verticalish (const Line& l) { return slope(l) > 0.5 || slope(l) < -0.5; }
+    CE bool verticalish (const Line& l) { return ce_abs(l.b.y - l.a.y) > ce_abs(l.b.x - l.a.x); }
     CE bool horizontalish (const Line& l) { return !verticalish(l); }
     CE Rect bounds (const Line& l) { return Rect(l.a, l.b).uninvert(); }
     CE Line bound_a (const Line& l) {
@@ -183,18 +185,18 @@ namespace util {
      // The area covered by the line is half of all 2-D space;
      //  specifically the side consistent with CCW polygon winding.
     CE bool contains (const Line& l, Vec p) {
-        return verticalish(l)
-            ? l.a.y < l.b.y ? l.y_at_x(p.x) < p.y
-                            : l.y_at_x(p.x) > p.y
-            : l.a.x < l.b.x ? l.x_at_y(p.y) < p.x
-                            : l.x_at_y(p.y) > p.x;
+        return vertical(l)
+            ? l.a.y < l.b.y ? p.x < l.a.x
+                            : p.x > l.a.x
+            : l.a.x < l.b.x ? l.y_at_x(p.x) < p.y
+                            : l.y_at_x(p.x) > p.y;
     }
     CE bool covers (const Line& l, Vec p) {
-        return verticalish(l)
-            ? l.a.y < l.b.y ? l.y_at_x(p.x) <= p.y
-                            : l.y_at_x(p.x) >= p.y
-            : l.a.x < l.b.x ? l.x_at_y(p.y) <= p.x
-                            : l.x_at_y(p.y) >= p.x;
+        return vertical(l)
+            ? l.a.y < l.b.y ? p.x <= l.a.x
+                            : p.x >= l.a.x
+            : l.a.x < l.b.x ? l.y_at_x(p.x) <= p.y
+                            : l.y_at_x(p.x) >= p.y;
     }
 
      // Find the point at which two lines cross
