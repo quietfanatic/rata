@@ -69,19 +69,13 @@ namespace geo {
         for (size_t i = 0; i < n_snaps; i++) {
             draw_circle(Circle(snaps[i], 0.2));
         }
-        draw_primitive(GL_POINTS, n_snaps, snaps);
+        draw_color(0xff00ffff);
         color_offset(Vec(0, 0));
         size_t i = 0;
         for (auto& cb : camera_bounds) {
-            draw_color(0x0000ffff + 0x20000000 * i++);
             draw_circle(cb.corner);
             if (defined(cb.edge)) {
-                draw_line(cb.edge.a, cb.edge.b + Vec(0.4, 0.4));
-                draw_color(0x0000ffff);
-                Line a = bound_a(cb.edge);
-                draw_line(a.a, a.b + Vec(0.4, 0.4));
-                Line b = bound_b(cb.edge);
-                draw_line(b.a, b.b + Vec(0.4, 0.4));
+                draw_line(cb.edge.a, cb.edge.b);
             }
         }
     }
