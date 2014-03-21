@@ -5,7 +5,17 @@ using namespace util;
 using namespace tap;
 
 tap::Tester geometry_tester ("util/geometry", [](){
-    plan(25);
+    plan(33);
+    Rect a = Rect(0, 0, 2, 2) & Rect(1, 1, 3, 3);
+    is(a.l, 1.f, "Rect & Rect l 1");
+    is(a.b, 1.f, "Rect & Rect b 1");
+    is(a.r, 2.f, "Rect & Rect r 1");
+    is(a.t, 2.f, "Rect & Rect t 1");
+    a = Rect(1, 1, 3, 3) & Rect(0, 0, 2, 2);
+    is(a.l, 1.f, "Rect & Rect l 2");
+    is(a.b, 1.f, "Rect & Rect b 2");
+    is(a.r, 2.f, "Rect & Rect r 2");
+    is(a.t, 2.f, "Rect & Rect t 2");
     ok(contains(Rect(12, -4, 32, 11), Vec(20, 7.5)), "previously troublesome contains(Rect) works");
     ok(verticalish(Line(Vec(0, 0), Vec(1, 2))), "verticalish(Line) can report true");
     ok(!verticalish(Line(Vec(0, 0), Vec(2, 1))), "verticalish(Line) can report false");

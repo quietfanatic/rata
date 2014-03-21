@@ -80,14 +80,6 @@ namespace util {
             return Vec(r - l, t - b);
         }
         CE Vec center () const { return lb() + rt() / 2; }
-        CE Rect uninvert () const {
-            return Rect(
-                (l > r) ? r : l,
-                (b > t) ? t : b,
-                (l > r) ? l : r,
-                (b > t) ? b : t
-            );
-        }
     };
 
     CE Rect operator & (const Rect& a, const Rect& b) {
@@ -105,6 +97,14 @@ namespace util {
     CE Rect operator - (const Rect& a, Vec b) { return Rect(a.l-b.x, a.b-b.y, a.r-b.x, a.t-b.y); }
     CE bool defined (const Rect& a) { return defined(a.l) && defined(a.b) && defined(a.r) && defined(a.t); }
     CE bool proper (const Rect& a) { return a.l <= a.r && a.b <= a.t; }
+    CE Rect uninvert (const Rect& r) {
+        return Rect(
+            (r.l > r.r) ? r.r : r.l,
+            (r.b > r.t) ? r.t : r.b,
+            (r.l > r.r) ? r.l : r.r,
+            (r.b > r.t) ? r.b : r.t
+        );
+    }
     CE Rect bounds (const Rect& a) { return a; }
     CE bool contains (const Rect& r, Vec p) {
         return p.x > r.l
@@ -139,7 +139,7 @@ namespace util {
     CE bool defined (const Circle& a) { return defined(a.c) && defined(a.r); }
     CE bool proper (const Circle& a) { return a.r >= 0; }
     CE Rect bounds (const Circle& a) {
-        return Rect(a.c.x - a.r, a.c.y - a.r, a.c.x + a.r, a.c.y + a.r);
+        return uninvert(Rect(a.c.x - a.r, a.c.y - a.r, a.c.x + a.r, a.c.y + a.r));
     }
     CE bool contains (const Circle& c, Vec p) {
         return c.r >= 0
@@ -175,7 +175,7 @@ namespace util {
     CE bool horizontal (const Line& l) { return l.a.y == l.b.y; }
     CE bool verticalish (const Line& l) { return ce_abs(l.b.y - l.a.y) > ce_abs(l.b.x - l.a.x); }
     CE bool horizontalish (const Line& l) { return !verticalish(l); }
-    CE Rect bounds (const Line& l) { return Rect(l.a, l.b).uninvert(); }
+    CE Rect bounds (const Line& l) { return uninvert(Rect(l.a, l.b)); }
     CE Line bound_a (const Line& l) {
         return Line(l.a + rotccw(l.b - l.a), l.a);
     }

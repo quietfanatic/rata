@@ -276,11 +276,19 @@ namespace geo {
             return selected_snap;
         }
          // Ugh, now we have to enumerate all the ways the bound intersects the walls.
+        i = 0;
         for (auto& cb : camera_bounds) {
             if (!defined(cb.edge)) continue;
              // Try the edge first
             Rect edge_aabb = bounds(cb.edge);
+            Rect q = bound & edge_aabb;
+            log("camera", "[%f %f %f %f] & [%f %f %f %f] = [%f %f %f %f]",
+                bound.l, bound.b, bound.r, bound.t,
+                edge_aabb.l, edge_aabb.b, edge_aabb.r, edge_aabb.t,
+                q.l, q.b, q.r, q.t
+            );
             if (proper(bound & edge_aabb)) {
+                log("camera", "Trying intersect on edge of wall %lu\n", i);
                  // Try intersecting all four walls
                 if (bound.l >= edge_aabb.l && bound.l <= edge_aabb.r) {
                     Vec snap_here = Vec(bound.l, cb.edge.y_at_x(bound.l));
@@ -327,10 +335,20 @@ namespace geo {
                     }
                 }
             }
+            else {
+                log("camera", "Not trying intersect on edge of wall %lu\n", i);
+            }
              // Now try the corner
             if (!cb.right || !defined(cb.right->edge)) continue;
             Rect corner_aabb = bounds(cb.corner);
+            q = bound & corner_aabb;
+            log("camera", "[%f %f %f %f] & [%f %f %f %f] = [%f %f %f %f]",
+                bound.l, bound.b, bound.r, bound.t,
+                corner_aabb.l, corner_aabb.b, corner_aabb.r, corner_aabb.t,
+                q.l, q.b, q.r, q.t
+            );
             if (proper(bound & corner_aabb)) {
+                log("camera", "Trying intersect on corner of wall %lu\n", i);
                 Line bound_l = bound_a(cb.edge);
                 Line bound_r = bound_b(cb.right->edge);
                  // Try intersecting it with all four walls
@@ -446,6 +464,10 @@ namespace geo {
                     }
                 }
             }
+            else {
+                log("camera", "Not trying intersect on corner of wall %lu\n", i);
+            }
+            i++;
         }
          // Finally return the best wall&bound intersection.
         log("camera", "Done checking %f %f within %f %f %f %f.", preferred.x, preferred.y, bound.l, bound.b, bound.r, bound.t);
