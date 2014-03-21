@@ -15,6 +15,6 @@ tap::Tester geometry_tester ("util/geometry", [](){
     ok(Line(Vec(0, 0), Vec(5, 5)).covers(Vec(0, 1)), "Line::covers diagonal true");
     ok(!Line(Vec(0, 0), Vec(5, 5)).covers(Vec(1, 0)), "Line::covers diagonal false");
     Vec snapped = Line(Vec(0, 0), Vec(5, 5)).snap(Vec(2, 2));
-    within(snapped.x, 1, 0.01, "Line::snap seems to work (x)");
-    within(snapped.y, 1, 0.01, "Line::snap seems to work (y)");
+    within(snapped.x, 0.01, 1, "Line::snap seems to work (x)");
+    within(snapped.y, 0.01, 1, "Line::snap seems to work (y)");
 });
