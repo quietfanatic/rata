@@ -175,10 +175,10 @@ namespace util {
     CE bool horizontalish (const Line& l) { return !verticalish(l); }
     CE Rect bounds (const Line& l) { return Rect(l.a, l.b).uninvert(); }
     CE Line bound_a (const Line& l) {
-        return Line(l.a + Vec(l.a.y - l.b.y, l.b.x - l.a.x), l.a);
+        return Line(l.a + rotccw(l.b - l.a), l.a);
     }
     CE Line bound_b (const Line& l) {
-        return Line(l.b, l.b + Vec(l.a.y - l.b.y, l.b.x - l.a.x));
+        return Line(l.b, l.b + rotccw(l.b - l.a));
     }
      // The area covered by the line is half of all 2-D space;
      //  specifically the side consistent with CCW polygon winding.
