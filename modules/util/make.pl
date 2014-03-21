@@ -7,11 +7,13 @@ include '../..';
 mkdir 'tmp';
 
 objects(qw(debug geometry integration));
-tests(qw(integration));
+tests(qw(geometry integration));
 
 ld_rule('tmp/t', [qw[
     tmp/integration.o
     tmp/integration.t.o
+    tmp/geometry.o
+    tmp/geometry.t.o
     ../hacc/tmp/common.o
     ../hacc/tmp/tree.o
     ../hacc/tmp/types.o

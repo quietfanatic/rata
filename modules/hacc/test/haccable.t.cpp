@@ -1,6 +1,7 @@
 #include "hacc/inc/haccable.h"
 
 #include "hacc/inc/haccable_standard.h"
+#include "tap/inc/tap.h"
 using namespace hacc;
 using namespace tap;
 
@@ -157,7 +158,6 @@ Dynamic dyn = Dynamic::New<int32>(3);
 MyNamed* mnp = mns[0];
 MyThing myt (10, 20, 30);
 
-#include "../../tap/inc/tap.h"
 Tester haccable_tester ("hacc/haccable", [](){
     plan(54);
     is(to_tree(&i).as<int>(), 4, "to_tree on int32 works");
