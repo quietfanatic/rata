@@ -351,6 +351,7 @@ std::unordered_map<std::string, void (*)(void*)> printers = {
     {typeid(double).name(), [](void* p){ printf("%lg", *(double*)p); } },
     {typeid(const char*).name(), [](void* p){ if (*(void**)p) printf("\"%s\"", *(const char**)p); else printf("NULL"); } },
     {typeid(std::string).name(), [](void* p){ printf("\"%s\"", ((std::string*)p)->c_str()); } },
+    {typeid(plusminus).name(), [](void* p){ printf("within %g of %g", ((plusminus*)p)->range, ((plusminus*)p)->center); } },
 };
 
 bool default_can_print (const type_info& t, void* p) {
