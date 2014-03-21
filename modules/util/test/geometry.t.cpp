@@ -20,7 +20,7 @@ tap::Tester geometry_tester ("util/geometry", [](){
     Line bb = Line(Vec(0, 0), Vec(5, 5)).bound_b();
     is(bb.a, Vec(5, 5), "Line::bound_b seems to work (a)");
     is(bb.b, Vec(0, 10), "Line::bound_b seems to work (b)");
-    Vec snapped = Line(Vec(0, 0), Vec(5, 5)).snap(Vec(2, 2));
+    Vec snapped = Line(Vec(0, 0), Vec(5, 5)).snap(Vec(2, 0));
     within(snapped.x, 0.01, 1, "Line::snap seems to work (x)");
     within(snapped.y, 0.01, 1, "Line::snap seems to work (y)");
 });
