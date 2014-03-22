@@ -199,6 +199,14 @@ New_Command _copy_cmd (
     3, _copy
 );
 
+void _try (const Command& c) {
+    try { c(); }
+    catch (std::exception& e) {
+        print_to_console(e.what() + std::string("\n"));
+    }
+}
+New_Command _try_cmd ("try", "Run command without aborting on exception", 1, _try);
+
  // This is large because we have to manipulate arrays and do dynamically-typed stuff
 HACCABLE(Command) {
     name("core::Command");
