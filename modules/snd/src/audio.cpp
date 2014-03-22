@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <mutex>
 #include <SDL2/SDL.h>
@@ -102,6 +103,7 @@ namespace snd {
             if (SDL_Init(SDL_INIT_AUDIO) < 0) {
                 printf("SDL_Init failed: %s\n", SDL_GetError());
             }
+            atexit(SDL_Quit);
 
             SDL_AudioSpec spec;
             spec.freq = 44100;
