@@ -48,10 +48,23 @@ namespace shell {
                 }
             }
         }
+        if (editing_room) {
+            if (!selected_room) return;
+            auto n_pts = selected_room->n_pts();
+            for (size_t i = 0; i < n_pts; i++) {
+                Vec pos = selected_room->get_pt(i);
+                if (defined(pos)) {
+                    color_offset(pos);
+                    draw_color((int)i == dragging_pt ? 0xff0000ff : 0xffff00ff);
+                    draw_rect(Rect(-0.25, -0.25, 0.25, 0.25));
+                }
+            }
+        }
          // Draw outlines around all residents
         for (auto& room : all_rooms()) {
+             // But first draw room outline
             color_offset(Vec(0, 0));
-            draw_color(0xff00ffff);
+            draw_color(0xff0000ff);
             draw_rect(room.boundary);
             if (tile_editor && tile_editor->active)
                 continue;
@@ -107,6 +120,11 @@ namespace shell {
             if (dragging_pt >= 0) {
                 Vec r_pos = selected->Resident_get_pos();
                 selected->Resident_set_pt(dragging_pt, world_pos - r_pos - drag_offset);
+            }
+        }
+        else if (editing_room) {
+            if (dragging_pt >= 0) {
+                selected_room->set_pt(dragging_pt, world_pos - drag_offset);
             }
         }
         else {
@@ -195,6 +213,27 @@ namespace shell {
                     drag_offset = realpos - r_pos - lowest_pt_pos;
                 }
             }
+            else if (editing_room) {
+                if (code == GLFW_MOUSE_BUTTON_LEFT) {
+                    size_t n_pts = selected_room->n_pts();
+                    float lowest_pt_t = INF;
+                    Vec lowest_pt_pos = Vec(0, 0);
+                    int lowest_pt = -1;
+                    for (size_t i = 0; i < n_pts; i++) {
+                        Vec pos = selected_room->get_pt(i);
+                        const Rect& boundary = pos + Rect(-0.25, -0.25, 0.25, 0.25);
+                        if (boundary.covers(realpos)) {
+                            if (boundary.t < lowest_pt_t) {
+                                lowest_pt_t = boundary.t;
+                                lowest_pt_pos = pos;
+                                lowest_pt = i;
+                            }
+                        }
+                    }
+                    dragging_pt = lowest_pt;
+                    drag_offset = realpos - lowest_pt_pos;
+                }
+            }
             else {
                  // Just upgrade hovering to selected
                 dragging = NULL;
@@ -249,6 +288,8 @@ namespace shell {
         if (action == GLFW_PRESS && code == GLFW_KEY_ESC) {
             if (editing_pts)
                 editing_pts = false;
+            else if (editing_room)
+                editing_room = false;
             else
                 deactivate();
             return true;
@@ -391,10 +432,6 @@ namespace shell {
         else {
             throw hacc::X::Logic_Error("Could not re_delete: this object does not belong to a document.");
         }
-    }
-    void Room_Editor::re_edit_room () {
-        if (!selected_room) return;
-        general_edit(selected_room);
     }
     void Room_Editor::re_reload_room () {
         if (!selected_room) return;
@@ -784,8 +821,8 @@ void _re_delete () {
 New_Command _re_delete_cmd ("re_delete", "Delete the selected object.", 0, _re_delete);
 
 void _re_edit_room () {
-    if (!room_editor) return;
-    room_editor->re_edit_room();
+    if (!room_editor || !room_editor->selected_room) return;
+    room_editor->editing_room = !room_editor->editing_room;
 }
 New_Command _re_edit_room_cmd ("re_edit_room", "Text-edit the selected room.", 0, _re_edit_room);
 

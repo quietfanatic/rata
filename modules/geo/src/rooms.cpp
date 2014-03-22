@@ -82,6 +82,55 @@ namespace geo {
         old_neighbors = neighbors;
     }
 
+    size_t Room::n_pts () {
+        return 4 + neighbors.size() + 1;
+    }
+    Vec Room::get_pt (size_t i) {
+        switch (i) {
+            case 0: return boundary.lb();
+            case 1: return boundary.rb();
+            case 2: return boundary.rt();
+            case 3: return boundary.lt();
+            default: if (i-4 < neighbors.size()) {
+                if (neighbors[i-4])
+                    return neighbors[i-4]->boundary.lt();
+                else
+                    return boundary.rb() + Vec(-0.5 - i, 0.5);
+            }
+            else if (i-4 == neighbors.size()) {
+                return boundary.rb() + Vec(-0.5 - i, 0.5);
+            }
+            else {
+                return Vec();
+            }
+        }
+    }
+    void Room::set_pt (size_t i, Vec p) {
+        switch (i) {
+            case 0: boundary.l = p.x; boundary.b = p.y; return;
+            case 1: boundary.r = p.x; boundary.b = p.y; return;
+            case 2: boundary.r = p.x; boundary.t = p.y; return;
+            case 3: boundary.l = p.x; boundary.t = p.y; return;
+            default: {
+                if (i-4 < neighbors.size()) {
+                    neighbors[i-4] = NULL;
+                }
+                for (auto& r : all_rooms()) {
+                    if (covers(r.boundary, p)) {
+                        if (i-4 < neighbors.size()) {
+                            neighbors[i] = &r;
+                        }
+                        else if (i-4 == neighbors.size()) {
+                            neighbors.push_back(&r);
+                        }
+                        break;
+                    }
+                }
+                finish();
+            }
+        }
+    }
+
     Room* Observer::get_room () const {
         return room;
     }

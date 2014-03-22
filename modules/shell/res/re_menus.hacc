@@ -41,7 +41,7 @@
         root:{shell::VBox:{
             contents:[
                 {shell::Text_Button:{
-                    text:"edit room..."
+                    text:"edit room shape"
                     on_click:[re_edit_room]
                 }}
                 {shell::Text_Button:{

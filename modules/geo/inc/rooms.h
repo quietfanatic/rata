@@ -27,6 +27,12 @@ namespace geo {
         Room ();
         ~Room ();
 
+         // Like Resident's point editing functions.
+         // these are absolute though.
+        size_t n_pts ();
+        Vec get_pt (size_t);
+        void set_pt (size_t, Vec);
+
         void finish ();
 
     };
