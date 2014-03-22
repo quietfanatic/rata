@@ -19,11 +19,17 @@ namespace shell {
         root->Menu_Item_hover(cursor_pos - pos, size);
     }
     bool Menu_Base::click (Vec cursor_pos) {
-        if (root->Menu_Item_click(cursor_pos - pos, size))
+        try {
+            if (root->Menu_Item_click(cursor_pos - pos, size))
+                return true;
+            if (Rect(0, 0, size.x, size.y).covers(cursor_pos - pos))
+                return true;
+            return false;
+        }
+        catch (std::exception& e) {
+            print_to_console(e.what() + std::string("\n"));
             return true;
-        if (Rect(0, 0, size.x, size.y).covers(cursor_pos - pos))
-            return true;
-        return false;
+        }
     }
 
     void Button::Menu_Item_draw (Vec pos, Vec size) {

@@ -62,8 +62,6 @@ namespace core {
          //  is safe to do things like IO.  Efficiency is not guaranteed.
          // This can be called before start() or even open(), and the op
          //  will be run when the window loop is started.
-         // All ops in one frame will be run in one hacc file transaction,
-         //  and an exception will abort all ops.
         void before_next_frame (const std::function<void ()>& f) { pending_ops.emplace_back(f); }
     };
     extern Window* window;

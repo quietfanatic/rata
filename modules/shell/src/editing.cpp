@@ -296,29 +296,34 @@ namespace shell {
     static void general_edit (hacc::Reference ref) {
         auto tree = ref.to_tree();
         auto tmp = tmpnam(NULL);
-        auto str = " // Editing " + ref.show() + "\n"
-                 + hacc::tree_to_string(tree, tmp, 3);
-        hacc::string_to_file(str, tmp);
-        auto editor = (const char*)getenv("EDITOR");
-        if (!editor) {
-            if (system("which gedit") == 0)
-                editor = "gedit";
-            else if (system("which mate-text-editor") == 0)
-                editor = "mate-text-editor";
-            else
-                editor = "vim";
+        try {
+            auto str = " // Editing " + ref.show() + "\n"
+                     + hacc::tree_to_string(tree, tmp, 3);
+            hacc::string_to_file(str, tmp);
+            auto editor = (const char*)getenv("EDITOR");
+            if (!editor) {
+                if (system("which gedit") == 0)
+                    editor = "gedit";
+                else if (system("which mate-text-editor") == 0)
+                    editor = "mate-text-editor";
+                else
+                    editor = "vim";
+            }
+            if (system((std::string(editor) + " " + tmp).c_str()) != 0)
+                log("editing", "Failed to open text editor.");
+            auto new_str = hacc::string_from_file(tmp);
+            if (new_str != str) {
+                log("editing", "Updating");
+                ref.from_tree(hacc::tree_from_string(new_str));
+            }
+            else {
+                log("editing", "Not updating");
+            }
         }
-        if (system((std::string(editor) + " " + tmp).c_str()) != 0)
-            log("editing", "Failed to open text editor.");
-        auto new_str = hacc::string_from_file(tmp);
-        if (new_str != str) {
-            log("editing", "Updating");
-            ref.from_tree(hacc::tree_from_string(new_str));
+        catch (...) {
+            remove(tmp);
+            throw;
         }
-        else {
-            log("editing", "Not updating");
-        }
-        remove(tmp);
     }
 
      // Context menu actions
