@@ -131,9 +131,9 @@ namespace geo {
 
      // This tries to find a valid camera position within the given rectangle.
      //  If it's not possible, returns Vec(NAN, NAN)
-    static Vec attempt_constraint (Vec preferred, const Rect& bound) {
+    static Vec attempt_constraint (Vec preferred, const Rect& bound, bool debug_draw_this) {
         log("vision", "Checking %f %f within %f %f %f %f.", preferred.x, preferred.y, bound.l, bound.b, bound.r, bound.t);
-        dbg_snaps.resize(0);
+        if (debug_draw_this) dbg_snaps.resize(0);
         bool currently_violating = false;
         float closest_snap_dist2 = INF;
         Vec selected_snap;
@@ -146,7 +146,7 @@ namespace geo {
                 if (contains(bound_b(wall.edge), preferred)) {
                     bool violating = contains(wall.edge, preferred);
                     Vec snap_here = snap(wall.edge, preferred);
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_dist2 < closest_snap_dist2) {
                         currently_violating = violating;
@@ -176,7 +176,7 @@ namespace geo {
                 if (wall.right && defined(wall.right->edge) && !contains(bound_b(wall.right->edge), preferred)) {
                     bool violating = contains(wall.corner, preferred);
                     Vec snap_here = snap(wall.corner, preferred);
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_dist2 < closest_snap_dist2) {
                         currently_violating = violating;
@@ -233,7 +233,7 @@ namespace geo {
                  // Try intersecting all four walls
                 if (bound.l >= edge_aabb.l && bound.l <= edge_aabb.r) {
                     Vec snap_here = Vec(bound.l, wall.edge.y_at_x(bound.l));
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.y >= bound.b && snap_here.y <= bound.t) {
                         if (snap_dist2 < closest_snap_dist2) {
@@ -244,7 +244,7 @@ namespace geo {
                 }
                 if (bound.b >= edge_aabb.b && bound.b <= edge_aabb.t) {
                     Vec snap_here = Vec(wall.edge.x_at_y(bound.b), bound.b);
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.x >= bound.l && snap_here.x <= bound.r) {
                         if (snap_dist2 < closest_snap_dist2) {
@@ -255,7 +255,7 @@ namespace geo {
                 }
                 if (bound.r >= edge_aabb.l && bound.r <= edge_aabb.r) {
                     Vec snap_here = Vec(bound.r, wall.edge.y_at_x(bound.r));
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.y >= bound.b && snap_here.y <= bound.t) {
                         if (snap_dist2 < closest_snap_dist2) {
@@ -266,7 +266,7 @@ namespace geo {
                 }
                 if (bound.t >= edge_aabb.b && bound.t <= edge_aabb.t) {
                     Vec snap_here = Vec(wall.edge.x_at_y(bound.t), bound.t);
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.x >= bound.l && snap_here.x <= bound.r) {
                         if (snap_dist2 < closest_snap_dist2) {
@@ -300,7 +300,7 @@ namespace geo {
                     );
                      // Try higher intersection
                     Vec snap_here = Vec(bound.l, wall.corner.c.y + y_from_corner);
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.y >= bound.b && snap_here.y <= bound.t
                             && !contains(bound_l, snap_here)
@@ -312,7 +312,7 @@ namespace geo {
                     }
                      // Now try the lower intersection
                     snap_here.y = wall.corner.c.y - y_from_corner;
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.y >= bound.b && snap_here.y <= bound.t
                             && !contains(bound_l, snap_here)
@@ -328,7 +328,7 @@ namespace geo {
                         wall.corner.r * wall.corner.r - (bound.b-wall.corner.c.y) * (bound.b-wall.corner.c.y)
                     );
                     Vec snap_here = Vec(wall.corner.c.x + x_from_corner, bound.b);
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.x >= bound.l && snap_here.x <= bound.r
                             && !contains(bound_l, snap_here)
@@ -339,7 +339,7 @@ namespace geo {
                         }
                     }
                     snap_here.x = wall.corner.c.x - x_from_corner;
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.x >= bound.l && snap_here.x <= bound.r
                             && !contains(bound_l, snap_here)
@@ -355,7 +355,7 @@ namespace geo {
                         wall.corner.r * wall.corner.r - (bound.r-wall.corner.c.x) * (bound.r-wall.corner.c.x)
                     );
                     Vec snap_here = Vec(bound.r, wall.corner.c.y + y_from_corner);
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.y >= bound.b && snap_here.y <= bound.t
                             && !contains(bound_l, snap_here)
@@ -366,7 +366,7 @@ namespace geo {
                         }
                     }
                     snap_here.y = wall.corner.c.y - y_from_corner;
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.y >= bound.b && snap_here.y <= bound.t
                             && !contains(bound_l, snap_here)
@@ -382,7 +382,7 @@ namespace geo {
                         wall.corner.r * wall.corner.r - (bound.t-wall.corner.c.y) * (bound.t-wall.corner.c.y)
                     );
                     Vec snap_here = Vec(wall.corner.c.x + x_from_corner, bound.t);
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.x >= bound.l && snap_here.x <= bound.r
                             && !contains(bound_l, snap_here)
@@ -393,7 +393,7 @@ namespace geo {
                         }
                     }
                     snap_here.x = wall.corner.c.x - x_from_corner;
-                    dbg_snaps.push_back(snap_here);
+                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.x >= bound.l && snap_here.x <= bound.r
                             && !contains(bound_l, snap_here)
@@ -418,18 +418,18 @@ namespace geo {
 
      // This gets a valid camera position that's within as many attentions
      //  as possible.
-    Vec Vision::get_pos () {
+    Vec Vision::get_pos (bool debug_draw_this) {
          // TODO: let the focus control position as much as possible
-        dbg_ideal_pos = focus;
+        if (debug_draw_this) dbg_ideal_pos = focus;
         Vec best_so_far = focus;
         Rect attn_bound = Rect(-INF, -INF, INF, INF);
-        dbg_area = attn_bound;
+        if (debug_draw_this) dbg_area = attn_bound;
         for (size_t i = 0; i < n_attns; i++) {
             attn_bound &= attns[i].area;
-            Vec attempt = attempt_constraint(focus, attn_bound);
+            Vec attempt = attempt_constraint(focus, attn_bound, debug_draw_this);
             if (!defined(attempt)) break;
             best_so_far = attempt;
-            dbg_area = attn_bound;
+            if (debug_draw_this) dbg_area = attn_bound;
         }
         n_attns = 0;
         return best_so_far;

@@ -187,7 +187,7 @@ namespace ent {
          // Vision update
         vision.set_focus(pos() + def->focus_offset + Vec(floor(focus.x/2/PX), floor(focus.y/2/PX))*PX);
         vision.look_at(pos() + def->focus_offset + focus + Rect(-1, -1, 1, 1), 1000000);
-        Vec v_pos = vision.get_pos();
+        Vec v_pos = vision.get_pos(!!controller);
          // Camera control
          // TODO: Put this in Player
         if (controller) {

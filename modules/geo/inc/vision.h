@@ -18,7 +18,7 @@ namespace geo {
          // Special point for this Vision to look at.
         void set_focus (Vec p) { focus = p; }
          // Use focus, account for as many Attns as possible, constrained by Walls.
-        Vec get_pos ();
+        Vec get_pos (bool debug_draw_this = false);
 
          // A list of priority-order areas this will try to look at.
         struct Attn {
