@@ -1,6 +1,5 @@
 #include "shell/inc/menus.h"
 
-#include "geo/inc/camera.h"
 #include "vis/inc/color.h"
 #include "vis/inc/text.h"
 

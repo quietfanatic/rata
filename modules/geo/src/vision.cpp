@@ -1,9 +1,9 @@
 #include "geo/inc/vision.h"
 
 #include "core/inc/commands.h"
-#include "geo/inc/camera.h"
 #include "util/inc/debug.h"
 #include "vis/inc/color.h"
+#include "vis/inc/common.h"
 using namespace vis;
 
 namespace geo {

@@ -74,13 +74,15 @@ namespace ent {
          // This should return world coordinates, or NAN,NAN if no focus
         virtual Vec Controllable_get_focus () { return Vec(NAN, NAN); }
         virtual Vec Controllable_get_pos () { return Vec(NAN, NAN); }
+        virtual Vec Controllable_get_vision_pos () { return Vec(NAN, NAN); }
         virtual geo::Room* Controllable_get_room () { return NULL; }
         virtual ~Controllable () { if (controller) *controller = NULL; }
     };
 
      // Between input and simulation, these run to do player interaction and AI
     struct Mind : Link<Mind> {
-        virtual void Mind_think () = 0;
+        virtual void Mind_think () { }
+        virtual void Mind_think_after () { }
         Mind ();
         ~Mind ();
          // These start out active
@@ -89,6 +91,7 @@ namespace ent {
     };
      // Call think on all minds
     void run_minds ();
+    void run_minds_after ();
 
      // We're querying key state instead of going through Key_Listener
     struct Player : vis::Drawn<vis::Overlay>, Mind, core::Listener, geo::Observer {
@@ -106,8 +109,11 @@ namespace ent {
         vis::Texture* cursor_tex = NULL;
         vis::Frame* cursor_frame = NULL;
 
+        vis::Camera camera;
+
         void Drawn_draw (vis::Overlay) override;  // Draws the cursor
         void Mind_think () override;  // Read input and send control to character
+        void Mind_think_after () override;
 
         int Listener_trap_cursor () override { return true; }
         void Listener_trapped_motion (int x, int y) override;

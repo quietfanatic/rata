@@ -1,6 +1,7 @@
 #ifndef HAVE_VIS_COMMON_H
 #define HAVE_VIS_COMMON_H
 
+#include "core/inc/window.h"
 #include "util/inc/geometry.h"
 #include "util/inc/organization.h"
 
@@ -8,10 +9,7 @@
  //  integration; some of that's in core).
 
 namespace vis {
-
-     // Setting this alters rendering until the Hud step.
-    extern util::Vec camera_pos;
-    extern util::Vec camera_size;
+    using namespace util;
 
      // This can be called automatically, but it's better to do it manually,
      //  to avoid first-frame lag.
@@ -70,9 +68,65 @@ namespace vis {
      // Depth: no
     struct Dev { static util::Links<Drawn<Dev>> items; };
 
-     // For primarily internal use
-    extern util::Vec global_camera_pos;
-    extern util::Vec global_camera_size;
+     // There can be multiple cameras, though only one is used at once
+     // This is not a haccable item.
+    struct Camera {
+        Vec pos = Vec(10, 7.5);
+        Vec size = Vec(20, 15);
+        bool active = false;
+        Camera* prev = NULL;
+
+        void activate ();
+        void deactivate ();
+        Camera () { }
+        ~Camera () { deactivate(); }
+
+         // USAGE
+        Vec window_to_world (int x, int y) {
+            using namespace core;
+            return pos - size/2 + Vec(
+                x * size.x / window->width,
+                (window->height - y) * size.y / window->height
+            );
+        }
+        Vec window_motion_to_world (int x, int y) {
+            return Vec(x, -y)*PX;
+        }
+        Vec window_to_hud (int x, int y) {
+            using namespace core;
+            return Vec(
+                x * size.x / window->width,
+                (window->height - y) * size.y / window->height
+            );
+        }
+        Vec window_to_dev (int x, int y) {
+            return Vec(x, core::window->height - y)*PX;
+        }
+        template <class C>
+        Vec window_to_layer (int, int);
+    };
+    extern Camera* camera;
+
+    template <>
+    inline Vec Camera::window_to_layer<vis::Map> (int x, int y) {
+        return window_to_world(x, y);
+    }
+    template <>
+    inline Vec Camera::window_to_layer<vis::Sprites> (int x, int y) {
+        return window_to_world(x, y);
+    }
+    template <>
+    inline Vec Camera::window_to_layer<vis::Overlay> (int x, int y) {
+        return window_to_world(x, y);
+    }
+    template <>
+    inline Vec Camera::window_to_layer<vis::Hud> (int x, int y) {
+        return window_to_hud(x, y);
+    }
+    template <>
+    inline Vec Camera::window_to_layer<vis::Dev> (int x, int y) {
+        return window_to_dev(x, y);
+    }
 
 }
 

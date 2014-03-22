@@ -1,6 +1,5 @@
 #include "ent/inc/bipeds.h"
 
-#include "geo/inc/camera.h"
 #include "hacc/inc/everything.h"
 #include "util/inc/debug.h"
 #include "vis/inc/models.h"
@@ -32,6 +31,9 @@ namespace ent {
     }
     Vec Biped::Controllable_get_pos () {
         return pos() + get_def()->focus_offset;
+    }
+    Vec Biped::Controllable_get_vision_pos () {
+        return vision_pos;
     }
     geo::Room* Biped::Controllable_get_room () {
         return room;
@@ -187,12 +189,7 @@ namespace ent {
          // Vision update
         vision.set_focus(pos() + def->focus_offset + Vec(floor(focus.x/2/PX), floor(focus.y/2/PX))*PX);
         vision.look_at(pos() + def->focus_offset + focus + Rect(-1, -1, 1, 1), 1000000);
-        Vec v_pos = vision.get_pos(!!controller);
-         // Camera control
-         // TODO: Put this in Player
-        if (controller) {
-            geo::default_camera().pos = v_pos;
-        }
+        vision_pos = vision.get_pos(!!controller);
     }
 
     void Biped::Drawn_draw (vis::Sprites) {

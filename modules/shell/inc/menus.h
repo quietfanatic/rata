@@ -6,7 +6,6 @@
 #include <memory>
 #include "core/inc/commands.h"
 #include "core/inc/window.h"
-#include "geo/inc/camera.h"
 #include "vis/inc/common.h"
 namespace vis { struct Font; }
 
@@ -46,11 +45,11 @@ namespace shell {
             core::Listener::deactivate();
         }
         void Listener_cursor_pos (int x, int y) {
-            hover(geo::camera->window_to_layer<Layer>(x, y));
+            hover(vis::camera->window_to_layer<Layer>(x, y));
         }
         bool Listener_button (int code, int press) {
             if (code == 0 && press) {
-                bool res = click(geo::camera->window_to_layer<Layer>(
+                bool res = click(vis::camera->window_to_layer<Layer>(
                     core::window->cursor_x,
                     core::window->cursor_y
                 ));

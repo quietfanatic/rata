@@ -1,6 +1,5 @@
 #include "ent/inc/control.h"
 
-#include "geo/inc/camera.h"
 #include "geo/inc/rooms.h"
 #include "hacc/inc/haccable_standard.h"
 #include "vis/inc/images.h"
@@ -42,9 +41,16 @@ namespace ent {
         character->Controllable_buttons(Button_Bits(buttons));
         Observer::set_room(character->Controllable_get_room());
     }
+    void Player::Mind_think_after () {
+        if (!character) return;
+        camera.size = Vec(20, 15);
+        Vec v_pos = character->Controllable_get_vision_pos();
+        if (defined(v_pos))
+            camera.pos = v_pos;
+    }
     void Player::Listener_trapped_motion (int x, int y) {
         if (!character) return;
-        Vec mot = geo::camera->window_motion_to_world(x, y);
+        Vec mot = vis::camera->window_motion_to_world(x, y);
         character->Controllable_move_focus(mot);
     }
 
@@ -85,6 +91,11 @@ namespace ent {
     void run_minds () {
         for (auto& m : minds()) {
             m.Mind_think();
+        }
+    }
+    void run_minds_after () {
+        for (auto& m : minds()) {
+            m.Mind_think_after();
         }
     }
 

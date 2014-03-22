@@ -15,10 +15,8 @@ using namespace util;
 
 namespace vis {
 
-    Vec camera_pos = Vec(20, 15);
-    Vec camera_size = Vec(20, 15);
-    Vec global_camera_pos = camera_pos;
-    Vec global_camera_size = camera_size;
+    Vec global_camera_pos = Vec(10, 7.5);
+    Vec global_camera_size = Vec(20, 15);
 
     bool initted = false;
     GLuint world_fb = 0;
@@ -32,8 +30,8 @@ namespace vis {
 
      // Set up the requirements for a render-to-texture step
     void setup_rtt () {
-        if (rtt_camera_size != camera_size) {
-            rtt_camera_size = camera_size;
+        if (rtt_camera_size != global_camera_size) {
+            rtt_camera_size = global_camera_size;
             log("vis", "setting up world framebuffer: %dx%d", (int)(rtt_camera_size.x/PX), (int)(rtt_camera_size.y/PX));
             if (world_fb) glDeleteFramebuffers(1, &world_fb);
             if (world_tex) glDeleteTextures(1, &world_tex);
@@ -86,9 +84,15 @@ namespace vis {
         set_draw_phase(true);
         Program::unuse();
          // Use camera
-        global_camera_pos.x = round(camera_pos.x/PX) * PX;
-        global_camera_pos.y = round(camera_pos.y/PX) * PX;
-        global_camera_size = camera_size;
+        if (camera) {
+            global_camera_pos.x = round(camera->pos.x/PX) * PX;
+            global_camera_pos.y = round(camera->pos.y/PX) * PX;
+            global_camera_size = camera->size;
+        }
+        else {
+            global_camera_pos = Vec(10, 7.5);
+            global_camera_size = Vec(20, 15);
+        }
         for (auto& i : Map::items)
             i.Drawn_draw(Map());
          // Sprite rendering uses blend for shadows
@@ -138,7 +142,7 @@ namespace vis {
         for (auto& i : Hud::items)
             i.Drawn_draw(Hud());
          // Draw normal camera boundaries if camera_size is too big
-        if (camera_size != Vec(20, 15)) {
+        if (global_camera_size != Vec(20, 15)) {
             color_offset(Vec(10, 7.5));
             float h = 10 + 0.5*PX;
             float v = 7.5 + 0.5*PX;
@@ -166,6 +170,23 @@ namespace vis {
     Links<Drawn<Overlay>> Overlay::items;
     Links<Drawn<Hud>> Hud::items;
     Links<Drawn<Dev>> Dev::items;
+
+    Camera* camera = NULL;
+
+    void Camera::activate () {
+        prev = camera;
+        camera = this;
+        active = true;
+    }
+    void Camera::deactivate () {
+        for (Camera** cp = &camera; *cp; cp = &(*cp)->prev) {
+            if (*cp == this) {
+                *cp = prev;
+                break;
+            }
+        }
+        active = false;
+    }
 
 } using namespace vis;
 

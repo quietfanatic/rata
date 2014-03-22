@@ -82,10 +82,12 @@ namespace ent {
          // For control
         Button_Bits buttons = Button_Bits(0);
         Vec focus = Vec(2, 0);
+        Vec vision_pos;
         void Controllable_buttons (Button_Bits) override;
         void Controllable_move_focus (Vec) override;
         Vec Controllable_get_focus () override;
         Vec Controllable_get_pos () override;
+        Vec Controllable_get_vision_pos () override;
         geo::Room* Controllable_get_room () override;
         int8 move_direction () {
             return !!(buttons & RIGHT_BIT) - !!(buttons & LEFT_BIT);

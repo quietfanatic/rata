@@ -33,7 +33,7 @@ namespace shell {
          // Associated utilities
         Menu<vis::Dev>* res_menu = NULL;  // Set on construction
         Menu<vis::Dev>* room_menu = NULL;  // Set on construction
-        geo::Free_Camera fc;
+        vis::Camera camera;
         vis::Font* font = NULL;
          // Selected items
         geo::Resident* hovering = NULL;
@@ -62,9 +62,12 @@ namespace shell {
                 room_menu = hacc::File("shell/res/re_menus.hacc").attr("room_menu");
             log("editing", "Activating room editor.");
             Listener::activate();
-            fc.pos = camera->Camera_pos();
-            fc.size = Vec(40, 30);
-            fc.activate();
+            if (vis::camera)
+                camera.pos = vis::camera->pos;
+            else
+                camera.pos = Vec(10, 7.5);
+            camera.size = Vec(40, 30);
+            camera.activate();
             Drawn<Overlay>::appear();
             Drawn<Dev>::appear();
             clicking = false;
@@ -77,7 +80,7 @@ namespace shell {
             dragging = false;
             clicking = false;
             Listener::deactivate();
-            fc.deactivate();
+            camera.deactivate();
             Drawn<Overlay>::disappear();
             Drawn<Dev>::disappear();
             res_menu->deactivate();
@@ -97,7 +100,7 @@ namespace shell {
         }
         bool Listener_button (int code, int action) override {
             if (action == GLFW_PRESS) {
-                Vec realpos = camera->window_to_world(window->cursor_x, window->cursor_y);
+                Vec realpos = vis::camera->window_to_world(window->cursor_x, window->cursor_y);
                 if (editing_pts) {
                     if (code == GLFW_MOUSE_BUTTON_LEFT) {
                         size_t n_pts = selected->Resident_n_pts();
@@ -158,10 +161,10 @@ namespace shell {
                         else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
                             if (action == GLFW_PRESS) {
                                 selected_type_name = res_realp(selected).type.name();
-                                menu_world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
-                                Vec area = camera->window_to_dev(window->width, 0);
+                                menu_world_pos = vis::camera->window_to_world(window->cursor_x, window->cursor_y);
+                                Vec area = vis::camera->window_to_dev(window->width, 0);
                                 res_menu->size = res_menu->root->Menu_Item_size(area);
-                                Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
+                                Vec pos = vis::camera->window_to_dev(window->cursor_x, window->cursor_y);
                                 res_menu->pos = pos - Vec(-1*PX, res_menu->size.y + 1*PX);
                                 res_menu->activate();
                             }
@@ -171,10 +174,10 @@ namespace shell {
                     else if (selected_room) {
                         if (code == GLFW_MOUSE_BUTTON_RIGHT) {
                             if (action == GLFW_PRESS) {
-                                menu_world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
-                                Vec area = camera->window_to_dev(window->width, 0);
+                                menu_world_pos = vis::camera->window_to_world(window->cursor_x, window->cursor_y);
+                                Vec area = vis::camera->window_to_dev(window->width, 0);
                                 room_menu->size = room_menu->root->Menu_Item_size(area);
-                                Vec pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
+                                Vec pos = vis::camera->window_to_dev(window->cursor_x, window->cursor_y);
                                 room_menu->pos = pos - Vec(-1*PX, room_menu->size.y + 1*PX);
                                 room_menu->activate();
                             }
@@ -198,7 +201,21 @@ namespace shell {
             return false;
         }
         void Listener_cursor_pos (int x, int y) override {
-            Vec world_pos = camera->window_to_world(x, y);
+             // Adjust camera
+            float move_speed = 1/256.0;
+            if (x < 64) {
+                camera.pos.x += (x - 64) * move_speed;
+            }
+            else if (x > window->width - 64) {
+                camera.pos.x += (x - window->width + 64) * move_speed;
+            }
+            if (y < 64) {
+                camera.pos.y -= (y - 64) * move_speed;
+            }
+            else if (y > window->height - 64) {
+                camera.pos.y -= (y - window->height + 64) * move_speed;
+            }
+            Vec world_pos = vis::camera->window_to_world(x, y);
              // Snap to grid when pressing CTRL
             if (key_pressed(GLFW_KEY_LCTRL) || key_pressed(GLFW_KEY_RCTRL)) {
                 world_pos.x = round(world_pos.x * 2) / 2;
@@ -345,9 +362,9 @@ namespace shell {
                 draw_text(status, font, Vec(0, window->height*PX), Vec(1, 1));
             }
              // Show position in various coordinate spaces
-            Vec world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
-            Vec hud_pos = camera->window_to_hud(window->cursor_x, window->cursor_y);
-            Vec dev_pos = camera->window_to_dev(window->cursor_x, window->cursor_y);
+            Vec world_pos = vis::camera->window_to_world(window->cursor_x, window->cursor_y);
+            Vec hud_pos = vis::camera->window_to_hud(window->cursor_x, window->cursor_y);
+            Vec dev_pos = vis::camera->window_to_dev(window->cursor_x, window->cursor_y);
             draw_text(
                 "window: " + std::to_string(window->cursor_x) +
                       ", " + std::to_string(window->cursor_y) + "\n" +
@@ -357,7 +374,7 @@ namespace shell {
                    ", " + std::to_string(hud_pos.y) + "\n" +
                 "dev: " + std::to_string(dev_pos.x) +
                    ", " + std::to_string(dev_pos.y),
-                font, camera->window_to_dev(window->width, 0),
+                font, vis::camera->window_to_dev(window->width, 0),
                 Vec(-1, 1)
             );
         }

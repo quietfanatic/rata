@@ -15,7 +15,6 @@ my @objects = qw<
     ../ent/tmp/control.o
     ../ent/tmp/items.o
     ../ent/tmp/various.o
-    ../geo/tmp/camera.o
     ../geo/tmp/rooms.o
     ../geo/tmp/tiles.o
     ../geo/tmp/vision.o

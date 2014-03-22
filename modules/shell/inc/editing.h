@@ -4,7 +4,6 @@
 #include <string>
 #include "shell/inc/menus.h"
 #include "core/inc/window.h"
-#include "geo/inc/camera.h"
 #include "vis/inc/common.h"
 namespace geo { struct Room; struct Resident; struct Tilemap; }
 namespace vis { struct Font; struct Texture; }
@@ -18,7 +17,7 @@ namespace shell {
         bool showing_selector = false;
         util::Vec selector_pos = util::Vec(-10020, -9985);
 
-        geo::Free_Camera selector_camera;
+        vis::Camera selector_camera;
 
         Tile_Editor ();
         ~Tile_Editor ();
@@ -34,6 +33,7 @@ namespace shell {
         bool Listener_button (int, int) override;
         bool Listener_key (int, int) override;
         void Listener_cursor_pos (int, int) override;
+        int Listener_trap_cursor () override { return selector_camera.active ? false : -1; }
     };
     extern Tile_Editor* tile_editor;
 
@@ -41,7 +41,7 @@ namespace shell {
         vis::Texture* tex = NULL;
         util::Vec pos = util::Vec(10000, 10000);
         uint layer = 1;
-        geo::Free_Camera camera;
+        vis::Camera camera;
 
         Texture_Tester ();
         ~Texture_Tester ();
@@ -54,6 +54,8 @@ namespace shell {
         void Drawn_draw (vis::Overlay) override;
 
         bool Listener_key (int, int) override;
+        void Listener_cursor_pos (int, int) override;
+        int Listener_trap_cursor () override { return camera.active ? false : -1; }
     };
     extern Texture_Tester* texture_tester;
 

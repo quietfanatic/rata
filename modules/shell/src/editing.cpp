@@ -132,6 +132,21 @@ namespace shell {
         return true;
     }
     void Tile_Editor::Listener_cursor_pos (int x, int y) {
+        if (selector_camera.active) {
+            float move_speed = 1/256.0;
+            if (x < 64) {
+                selector_camera.pos.x += (x - 64) * move_speed;
+            }
+            else if (x > window->width - 64) {
+                selector_camera.pos.x += (x - window->width + 64) * move_speed;
+            }
+            if (y < 64) {
+                selector_camera.pos.y -= (y - 64) * move_speed;
+            }
+            else if (y > window->height - 64) {
+                selector_camera.pos.y -= (y - window->height + 64) * move_speed;
+            }
+        }
         if (!tilemap) return;
         if (clicking) {
             draw(camera->window_to_world(x, y) - tilemap->pos());
@@ -281,6 +296,22 @@ namespace shell {
             return true;
         }
         return false;
+    }
+    void Texture_Tester::Listener_cursor_pos (int x, int y) {
+         // Adjust camera
+        float move_speed = 1/256.0;
+        if (x < 64) {
+            camera.pos.x += (x - 64) * move_speed;
+        }
+        else if (x > window->width - 64) {
+            camera.pos.x += (x - window->width + 64) * move_speed;
+        }
+        if (y < 64) {
+            camera.pos.y -= (y - 64) * move_speed;
+        }
+        else if (y > window->height - 64) {
+            camera.pos.y -= (y - window->height + 64) * move_speed;
+        }
     }
 
 } using namespace shell;

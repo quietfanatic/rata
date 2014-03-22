@@ -6,7 +6,6 @@
 #include "core/inc/commands.h"
 #include "core/inc/window.h"
 #include "ent/inc/control.h"
-#include "geo/inc/camera.h"
 #include "hacc/inc/files.h"
 #include "hacc/inc/haccable_standard.h"
 #include "phys/inc/phys.h"
@@ -53,10 +52,8 @@ void step () {
     if (!game->paused) {
         ent::run_minds();
         phys::space.run();
+        ent::run_minds_after();
     }
-    geo::camera->Camera_update();
-    vis::camera_pos = geo::camera->Camera_pos();
-    vis::camera_size = geo::camera->Camera_size();
 }
 
 int main (int argc, char** argv) {

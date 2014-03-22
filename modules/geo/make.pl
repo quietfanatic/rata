@@ -6,7 +6,7 @@ include '../..';
 
 mkdir 'tmp';
 
-objects(qw(camera rooms tiles vision));
+objects(qw(rooms tiles vision));
 
 clean_rule(glob 'tmp/*');
 
