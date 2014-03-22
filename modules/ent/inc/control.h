@@ -2,6 +2,7 @@
 #define HAVE_ENT_CONTROL_H
 
 #include "core/inc/window.h"
+#include "geo/inc/rooms.h"
 #include "util/inc/geometry.h"
 #include "vis/inc/common.h"
 namespace vis { struct Texture; struct Frame; }
@@ -72,6 +73,8 @@ namespace ent {
         virtual void Controllable_move_focus (Vec diff) { }
          // This should return world coordinates, or NAN,NAN if no focus
         virtual Vec Controllable_get_focus () { return Vec(NAN, NAN); }
+        virtual Vec Controllable_get_pos () { return Vec(NAN, NAN); }
+        virtual geo::Room* Controllable_get_room () { return NULL; }
         virtual ~Controllable () { if (controller) *controller = NULL; }
     };
 
@@ -88,14 +91,17 @@ namespace ent {
     void run_minds ();
 
      // We're querying key state instead of going through Key_Listener
-    struct Player : vis::Drawn<vis::Overlay>, Mind, core::Listener {
+    struct Player : vis::Drawn<vis::Overlay>, Mind, core::Listener, geo::Observer {
         Mappings mappings;
         Controllable* character = NULL;
         Controllable* get_character () const { return character; }
         void set_character (Controllable* c) {
             if (character) character->controller = NULL;
             character = c;
-            c->controller = &character;
+            if (c) {
+                c->controller = &character;
+                Observer::set_room(c->Controllable_get_room());
+            }
         }
         vis::Texture* cursor_tex = NULL;
         vis::Frame* cursor_frame = NULL;

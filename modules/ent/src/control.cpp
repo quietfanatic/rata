@@ -40,6 +40,7 @@ namespace ent {
             bit <<= 1;
         }
         character->Controllable_buttons(Button_Bits(buttons));
+        Observer::set_room(character->Controllable_get_room());
     }
     void Player::Listener_trapped_motion (int x, int y) {
         if (!character) return;

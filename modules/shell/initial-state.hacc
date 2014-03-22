@@ -5,9 +5,6 @@
         room:$("world/room/test.hacc").room
         direction:1
     }}
-    observer:{geo::Observer:{
-        room:$("world/room/test.hacc").room
-    }}
     player:{ent::Player:{
         character:$.rata.Controllable
         cursor_tex:$("world/res/cursor.hacc").img.ALL

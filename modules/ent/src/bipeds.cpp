@@ -30,6 +30,12 @@ namespace ent {
     Vec Biped::Controllable_get_focus () {
         return focus + pos() + get_def()->focus_offset;
     }
+    Vec Biped::Controllable_get_pos () {
+        return pos() + get_def()->focus_offset;
+    }
+    geo::Room* Biped::Controllable_get_room () {
+        return room;
+    }
 
      // Change some kinds of movement state
      // Do not change ground velocity, but do change air velocity
