@@ -7,17 +7,24 @@
             60~42700000
             15~41700000
         ]
-        neighbors:[$("world/room/test.hacc").room]
+        neighbors:[
+            $("world/room/test.hacc").room
+            $("world/room/test3.hacc").room
+        ]
     } }
     tilemap_def:{ geo::Tilemap_Def:{
         type:static
+        mass:0~00000000
+        damping:0~00000000
+        gravity_scale:1~3f800000
+        fixtures:[]
         tileset:$("world/res/test-tiles.hacc").tileset
         texture:$("world/res/test-tiles.hacc").img.textures[0]
         tiles:$("world/room/test2.tiles")
     } }
     _1:{ geo::Tilemap:{
         room:$.room
-        def:$.tilemap_def
+        def:$.tilemap_def.Object_Def
         pos:[
             40~42200000
             0~00000000

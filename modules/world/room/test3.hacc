@@ -1,0 +1,12 @@
+{ hacc::Document:{
+    _next_id:1
+    room:{ geo::Room:{
+        boundary:[
+            60~42700000
+            -60~c2700000
+            100~42c80000
+            20~41a00000
+        ]
+        neighbors:[$("world/room/test.hacc").room]
+    } }
+} }
