@@ -320,6 +320,7 @@ namespace shell {
             else {
                 log("editing", "Not updating");
             }
+            remove(tmp);
         }
         catch (...) {
             remove(tmp);
@@ -328,28 +329,19 @@ namespace shell {
     }
     struct New_File {
         std::string filename;
-        std::string type;
         hacc::Tree data;
     };
-    static void edit_new_file (std::string rec_name, std::string rec_type, hacc::Tree rec_data) {
-        New_File nf {rec_name, rec_type, rec_data};
+    static void edit_new_file (std::string rec_name, hacc::Tree rec_data) {
+        New_File nf {rec_name, rec_data};
         general_edit(&nf, " // Creating new file\n");
-        auto type = hacc::Type(nf.type);
-        void* p = operator new(type.size());
+        hacc::Dynamic d;
+        hacc::Reference(&d).from_tree(nf.data);
+        auto file = hacc::File(nf.filename, std::move(d));
         try {
-            type.construct(p);
-            hacc::Reference(type, p).from_tree(nf.data);
-            auto file = hacc::File(nf.filename, hacc::Dynamic(type, p));
-            try {
-                hacc::save(file);
-            }
-            catch (...) {
-                hacc::unload(file);
-            }
+            hacc::save(file);
         }
         catch (...) {
-            type.destruct(p);
-            operator delete(p);
+            hacc::unload(file);
         }
     }
 
@@ -364,29 +356,26 @@ namespace shell {
         auto realp = res_realp(selected);
         if (hacc::Document* doc = hacc::get_document_containing(realp.address)) {
             void* newp = NULL;
-            if (realp.type.can_copy_assign()) {
-                newp = doc->alloc(realp.type);
-                realp.type.copy_assign(newp, realp);
-            }
-            else {
-                hacc::Tree tree = hacc::Reference(realp).to_tree();
-                newp = doc->alloc(realp.type);
-                try {
-                    realp.type.construct(newp);
+            newp = doc->alloc(realp.type);
+            realp.type.construct(newp);
+            try {
+                if (realp.type.can_copy_assign()) {
+                    realp.type.copy_assign(newp, realp);
+                }
+                else {
+                    hacc::Tree tree = hacc::Reference(realp).to_tree();
                     hacc::Reference(realp.type, newp).from_tree(tree);
                 }
-                catch (...) {
-                    realp.type.destruct(newp);
-                    doc->dealloc(newp);
-                    throw;
-                }
+            }
+            catch (...) {
+                realp.type.destruct(newp);
+                doc->dealloc(newp);
             }
             Resident* old_res = hacc::Pointer(realp.type, realp.address);
             Resident* new_res = hacc::Pointer(realp.type, newp);
             Vec pos = old_res->Resident_get_pos();
             pos += Vec(frand()*2-1, 0.8);
             new_res->Resident_set_pos(pos);
-             // TODO: set pos to nearby
         }
         else {
             throw hacc::X::Logic_Error("Could not re_duplicate: this object does not belong to a document.");
@@ -421,11 +410,18 @@ namespace shell {
         hacc::Document* st = current_state.data();
         void* newp = st->alloc(type);
         type.construct(newp);
-        hacc::Reference(type, newp).from_tree(data);
-        Resident* resp = (Resident*)hacc::Pointer(type, newp).address_of_type(hacc::Type::CppType<Resident>());
-        if (resp) {
-            resp->Resident_set_pos(menu_world_pos);
-            resp->set_room(selected_room);
+        try {
+            hacc::Reference(type, newp).from_tree(data);
+            Resident* resp = (Resident*)hacc::Pointer(type, newp).address_of_type(hacc::Type::CppType<Resident>());
+            if (resp) {
+                resp->Resident_set_pos(menu_world_pos);
+                resp->set_room(selected_room);
+            }
+        }
+        catch (...) {
+            type.destruct(newp);
+            st->dealloc(newp);
+            throw;
         }
     }
     void Room_Editor::re_new_furniture (hacc::Type type, hacc::Tree data) {
@@ -433,11 +429,18 @@ namespace shell {
         hacc::Document* doc = hacc::get_document_containing(selected_room);
         void* newp = doc->alloc(type);
         type.construct(newp);
-        hacc::Reference(type, newp).from_tree(data);
-        Resident* resp = (Resident*)hacc::Pointer(type, newp).address_of_type(hacc::Type::CppType<Resident>());
-        if (resp) {
-            resp->Resident_set_pos(menu_world_pos);
-            resp->set_room(selected_room);
+        try {
+            hacc::Reference(type, newp).from_tree(data);
+            Resident* resp = (Resident*)hacc::Pointer(type, newp).address_of_type(hacc::Type::CppType<Resident>());
+            if (resp) {
+                resp->Resident_set_pos(menu_world_pos);
+                resp->set_room(selected_room);
+            }
+        }
+        catch (...) {
+            type.destruct(newp);
+            doc->dealloc(newp);
+            throw;
         }
     }
 
@@ -849,14 +852,13 @@ void _re_edit_pts () {
 }
 New_Command _re_edit_pts_cmd ("re_edit_pts", "Edit object-specific pts.", 0, _re_edit_pts);
 
-void _re_new_file (std::string name, std::string type, hacc::Tree data) {
-    edit_new_file(name, type, data);
+void _re_new_file (std::string name, hacc::Tree data) {
+    edit_new_file(name, data);
 }
-New_Command _re_new_file_cmd ("re_new_file", "Create new file with $EDITOR.", 3, _re_new_file);
+New_Command _re_new_file_cmd ("re_new_file", "Create new file with $EDITOR.", 2, _re_new_file);
 
 HACCABLE(New_File) {
     name("shell::New_File");
     attr("filename", member(&New_File::filename));
-    attr("type", member(&New_File::type));
     attr("data", member(&New_File::data));
 }

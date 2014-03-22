@@ -339,23 +339,14 @@ void _files () {
 }
 New_Command _files_cmd ("files", "List all loaded files", 0, _files);
 
-void _create_file (std::string filename, std::string type_name, hacc::Tree data) {
-    auto type = hacc::Type(type_name);
-    void* p = operator new(type.size());
-    try {
-        type.construct(p);
-        hacc::Reference(type, p).from_tree(data);
-        hacc::File(filename, hacc::Dynamic(type, p));
-    }
-    catch (...) {
-        type.destruct(p);
-        operator delete (p);
-        throw;
-    }
+void _create_file (std::string filename, hacc::Tree data) {
+    hacc::Dynamic d;
+    hacc::Reference(&d).from_tree(data);
+    hacc::File(filename, std::move(d));
 }
 New_Command _create_file_cmd (
     "create_file", "Create a new file object.  It will not yet be saved to disk.",
-    3, _create_file
+    2, _create_file
 );
 
 void _add (hacc::Document* doc, std::string type, hacc::Tree data) {
