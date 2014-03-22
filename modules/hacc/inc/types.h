@@ -24,6 +24,7 @@ namespace hacc {
         bool can_copy_assign () const;
         void stalloc (const Func<void (void*)>&) const;
 
+        Type () : data(null) { }  // Don't recommend using this.
         Type (TypeData* p) : data(p) { }
          // Find type by name; throws if none found
         explicit Type (String);

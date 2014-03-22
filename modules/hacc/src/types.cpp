@@ -1,5 +1,7 @@
 #include "hacc/src/types_internal.h"
 
+#include "hacc/inc/haccable.h"
+
 namespace hacc {
 
     std::vector<TypeData*>& types_to_init () {
@@ -140,4 +142,12 @@ namespace hacc {
             ), type(t)
         { }
     }
+} using namespace hacc;
+
+HACCABLE(Type) {
+    name("hacc::Type");
+    delegate(value_funcs<std::string>(
+        [](const Type& t){ return t.name(); },
+        [](Type& t, std::string n){ t = Type(n); }
+    ));
 }
