@@ -18,6 +18,7 @@ my @objects = qw<
     ../geo/tmp/camera.o
     ../geo/tmp/rooms.o
     ../geo/tmp/tiles.o
+    ../geo/tmp/vision.o
     ../hacc/tmp/common.o
     ../hacc/tmp/documents.o
     ../hacc/tmp/dynamicism.o

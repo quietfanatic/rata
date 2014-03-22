@@ -5,6 +5,7 @@
 #include "ent/inc/items.h"
 #include "ent/inc/mixins.h"
 #include "geo/inc/rooms.h"
+#include "geo/inc/vision.h"
 #include "phys/inc/ground.h"
 #include "phys/inc/phys.h"
 #include "snd/inc/audio.h"
@@ -89,6 +90,8 @@ namespace ent {
         int8 move_direction () {
             return !!(buttons & RIGHT_BIT) - !!(buttons & LEFT_BIT);
         }
+
+        geo::Vision vision;
 
          // For movement
         Biped_Stats stats;

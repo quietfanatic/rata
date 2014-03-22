@@ -61,7 +61,6 @@ namespace geo {
          // Ideal position  TODO: replace with Attention system
         Vec ideal_pos = Vec(10, 7.5);
         Vec Camera_pos () override { return pos; }
-        void Camera_update () override;  // Set pos to ideal_pos constrained by Camera_Bounds
         void finish () { if (!active) activate(); }
         void Drawn_draw (vis::Overlay);
         explicit Default_Camera (bool active = true) : Camera(active) { }
@@ -96,29 +95,6 @@ namespace geo {
     inline Vec Camera::window_to_layer<vis::Dev> (int x, int y) {
         return window_to_dev(x, y);
     }
-
-     // These link together to form the boundaries for the camera
-    struct Camera_Bound : Link<Camera_Bound>, geo::Resident {
-        Circle corner;  // Negative radius means concave corner.  Radius can be 0
-        Line edge;  // Automatically set.  Between this and right.
-        Camera_Bound* left = NULL;  // Control this
-        Camera_Bound* right = NULL;  // Automatically set
-        void set_left (Camera_Bound*);
-        Camera_Bound* get_left () const { return left; }
-        void finish ();
-        void Resident_emerge () override;
-        void Resident_reclude () override;
-        Vec Resident_get_pos () override;
-        void Resident_set_pos (Vec) override;
-        size_t Resident_n_pts () override;
-        Vec Resident_get_pt (size_t) override;
-        void Resident_set_pt (size_t, Vec) override;
-        ~Camera_Bound();
-    };
-    extern Links<Camera_Bound> camera_bounds;
-
-     // Define a rectangular area you'd like the camera to look within.
-    void attention (const Rect& r, double priority);
 
 }
 

@@ -55,22 +55,22 @@
             0~00000000
         ]
     } }
-    lb_corner:{ geo::Camera_Bound:{
+    lb_corner:{ geo::Wall:{
         room:$.room
         corner:[[11, 8.5] -1]
         left:$.lt_corner
     } }
-    lt_corner:{ geo::Camera_Bound:{
+    lt_corner:{ geo::Wall:{
         room:$.room
         corner:[[11, 21.5] -1]
         left:$.rt_corner
     } }
-    rt_corner:{ geo::Camera_Bound:{
+    rt_corner:{ geo::Wall:{
         room:$.room
         corner:[[29, 21.5] -1]
         left:$.rb_corner
     } }
-    rb_corner:{ geo::Camera_Bound:{
+    rb_corner:{ geo::Wall:{
         room:$.room
         corner:[[29, 8.5] -1]
         left:$.lb_corner
