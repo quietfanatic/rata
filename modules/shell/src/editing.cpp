@@ -660,8 +660,9 @@ namespace shell {
         return true;
     }
     void Tile_Editor::Listener_cursor_pos (int x, int y) {
+        if (!tilemap) return;
         if (clicking) {
-            draw(camera->window_to_world(x, y));
+            draw(camera->window_to_world(x, y) - tilemap->pos());
         }
     }
     bool Tile_Editor::Listener_key (int code, int action) {
