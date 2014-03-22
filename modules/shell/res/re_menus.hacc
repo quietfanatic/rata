@@ -4,7 +4,7 @@
         root:{shell::VBox:{
             contents:[
                 {shell::Text_Button:{
-                    text:"text edit"
+                    text:"text edit..."
                     on_click:[re_edit]
                 }}
                 {shell::Text_Button:{
@@ -41,7 +41,7 @@
         root:{shell::VBox:{
             contents:[
                 {shell::Text_Button:{
-                    text:"edit room"
+                    text:"edit room..."
                     on_click:[re_edit_room]
                 }}
                 {shell::Text_Button:{
@@ -90,6 +90,13 @@
                             }}
                         ]
                     }}
+                }}
+                {shell::Text_Button:{
+                    text:"new room..."
+                    on_click:[re_new_file "world/room/<untitled>.hacc" geo::Room {
+                        boundary:[-4 -4 4 4]
+                        neighbors:[]
+                    }]
                 }}
             ]
         }}

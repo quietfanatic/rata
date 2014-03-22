@@ -293,12 +293,13 @@ namespace shell {
         room_menu->deactivate();
     }
 
-    static void general_edit (hacc::Reference ref) {
+    static void general_edit (hacc::Reference ref, std::string prefix = "") {
         auto tree = ref.to_tree();
         auto tmp = tmpnam(NULL);
         try {
-            auto str = " // Editing " + ref.show() + "\n"
-                     + hacc::tree_to_string(tree, tmp, 3);
+            if (prefix.empty())
+                prefix = " // Editing " + ref.show() + "\n";
+            auto str = prefix + hacc::tree_to_string(tree, tmp, 3);
             hacc::string_to_file(str, tmp);
             auto editor = (const char*)getenv("EDITOR");
             if (!editor) {
@@ -323,6 +324,32 @@ namespace shell {
         catch (...) {
             remove(tmp);
             throw;
+        }
+    }
+    struct New_File {
+        std::string filename;
+        std::string type;
+        hacc::Tree data;
+    };
+    static void edit_new_file (std::string rec_name, std::string rec_type, hacc::Tree rec_data) {
+        New_File nf {rec_name, rec_type, rec_data};
+        general_edit(&nf, " // Creating new file\n");
+        auto type = hacc::Type(nf.type);
+        void* p = operator new(type.size());
+        try {
+            type.construct(p);
+            hacc::Reference(type, p).from_tree(nf.data);
+            auto file = hacc::File(nf.filename, hacc::Dynamic(type, p));
+            try {
+                hacc::save(file);
+            }
+            catch (...) {
+                hacc::unload(file);
+            }
+        }
+        catch (...) {
+            type.destruct(p);
+            operator delete(p);
         }
     }
 
@@ -821,3 +848,15 @@ void _re_edit_pts () {
     room_editor->editing_pts = !room_editor->editing_pts;
 }
 New_Command _re_edit_pts_cmd ("re_edit_pts", "Edit object-specific pts.", 0, _re_edit_pts);
+
+void _re_new_file (std::string name, std::string type, hacc::Tree data) {
+    edit_new_file(name, type, data);
+}
+New_Command _re_new_file_cmd ("re_new_file", "Create new file with $EDITOR.", 3, _re_new_file);
+
+HACCABLE(New_File) {
+    name("shell::New_File");
+    attr("filename", member(&New_File::filename));
+    attr("type", member(&New_File::type));
+    attr("data", member(&New_File::data));
+}
