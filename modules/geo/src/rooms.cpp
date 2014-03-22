@@ -95,10 +95,10 @@ namespace geo {
                 if (neighbors[i-4])
                     return neighbors[i-4]->boundary.lt();
                 else
-                    return boundary.rb() + Vec(-0.5 - i, 0.5);
+                    return boundary.rb() + Vec(-0.5 - (i-4), 0.5);
             }
             else if (i-4 == neighbors.size()) {
-                return boundary.rb() + Vec(-0.5 - i, 0.5);
+                return boundary.rb() + Vec(-0.5 - (i-4), 0.5);
             }
             else {
                 return Vec();
@@ -118,7 +118,7 @@ namespace geo {
                 for (auto& r : all_rooms()) {
                     if (covers(r.boundary, p)) {
                         if (i-4 < neighbors.size()) {
-                            neighbors[i] = &r;
+                            neighbors[i-4] = &r;
                         }
                         else if (i-4 == neighbors.size()) {
                             neighbors.push_back(&r);
