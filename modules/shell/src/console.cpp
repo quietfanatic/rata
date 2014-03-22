@@ -19,6 +19,8 @@ namespace shell {
         std::string contents = console_help();
         std::string cli = "";
         uint cli_pos = 0;
+        uint inactive_status_timer = 0;
+        uint inactive_status_pos = -1;
 
         uint history_size = core::command_history.size();
         uint history_index = history_size;
@@ -37,6 +39,12 @@ namespace shell {
         ~Console () { if (console == this) console = NULL; }
 
         void Console_print (std::string message) override {
+            if (!active) {
+                if (inactive_status_pos == (uint)-1)
+                    inactive_status_pos = contents.size();
+                inactive_status_timer = 300;
+                appear();
+            }
             contents += message;
         }
 
@@ -212,6 +220,8 @@ namespace shell {
             if (active) return;
             wait_for_draw = true;
             Listener::activate();
+            inactive_status_pos = (uint)-1;
+            inactive_status_timer = 0;
             appear();
         }
         void exit_console () {
@@ -222,18 +232,35 @@ namespace shell {
         void Drawn_draw (Dev r) override {
             wait_for_draw = false;
             if (!font && !default_font) return;
-             // Darken background
-            color_offset(Vec(0, 0));
-            draw_color(0x000000cf);
-            draw_solid_rect(Rect(0, 0, core::window->width*PX, core::window->height*PX));
-             // Draw text
-            auto line_height = font ? font->line_height : default_font->line_height;
-            Vec cli_size = draw_text(cli + " ", font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, core::window->width*PX);
-            Vec cursor_pos = get_glyph_pos(cli, font, cli_pos, Vec(1, -1), core::window->width*PX);
-            if (window->frames_drawn % 40 < 20) {
-                draw_text("_", font, Vec(1*PX + cursor_pos.x, cli_size.y - cursor_pos.y - line_height*PX - 2*PX), Vec(1, -1), 0xffffffff);
+            if (active) {
+                 // Darken background
+                color_offset(Vec(0, 0));
+                draw_color(0x000000cf);
+                draw_solid_rect(Rect(0, 0, core::window->width*PX, core::window->height*PX));
+                 // Draw text
+                auto line_height = font ? font->line_height : default_font->line_height;
+                Vec cli_size = draw_text(cli + " ", font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, core::window->width*PX);
+                Vec cursor_pos = get_glyph_pos(cli, font, cli_pos, Vec(1, -1), core::window->width*PX);
+                if (window->frames_drawn % 40 < 20) {
+                    draw_text("_", font, Vec(1*PX + cursor_pos.x, cli_size.y - cursor_pos.y - line_height*PX - 2*PX), Vec(1, -1), 0xffffffff);
+                }
+                draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, core::window->width*PX);
             }
-            draw_text(contents, font, Vec(1*PX, cli_size.y), Vec(1, -1), 0x00ff00ff, core::window->width*PX);
+            else {
+                if (inactive_status_timer && inactive_status_pos != (uint)-1) {
+                    auto status = contents.substr(inactive_status_pos);
+                    Vec size = text_size(status, font, core::window->width*PX);
+                    color_offset(Vec(0, 0));
+                    draw_color(0x0000007f);
+                    draw_solid_rect(Rect(0, 0, size.x, size.y));
+                    draw_text(status, font, Vec(1, 0)*PX, Vec(1, -1), 0x7fff00ff, core::window->width*PX);
+                    inactive_status_timer -= 1;
+                }
+                else {
+                    inactive_status_pos = (uint)-1;
+                    core::window->before_next_frame([this](){disappear();});
+                }
+            }
         }
     };
 } using namespace shell;

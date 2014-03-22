@@ -76,11 +76,11 @@ namespace shell {
      // Draw status messages and other info
     void Room_Editor::Drawn_draw (Dev) {
         if (!status.empty()) {
-            color_offset(Vec(0, 0));
+            color_offset(Vec(0, window->height*PX));
             draw_color(0x0000007f);
             Vec size = text_size(status, font);
-            draw_solid_rect(Rect(0, size.y, size.x, 0));
-            draw_text(status, font, Vec(0, 0), Vec(1, -1));
+            draw_solid_rect(Rect(0, -size.y, size.x, 0));
+            draw_text(status, font, Vec(0, window->height*PX), Vec(1, 1));
         }
          // Show position in various coordinate spaces
         Vec world_pos = camera->window_to_world(window->cursor_x, window->cursor_y);
