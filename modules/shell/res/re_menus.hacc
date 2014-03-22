@@ -28,9 +28,28 @@
         text:"control this"
         on_click:[re_control_this]
     }}
-    tilemap_menu:{shell::Text_Button:{
-        text:"edit tiles"
-        on_click:[re_start_te]
+    tilemap_menu:{shell::VBox:{
+        contents:[
+            {shell::Text_Button:{
+                text:"edit tiles"
+                on_click:[re_start_te]
+            }}
+            {shell::Text_Button:{
+                text:"new def and tiles file"
+                on_click:[re_uniqueify_tilemap
+                    {
+                        type:static
+                        tileset:$("world/res/test-tiles.hacc").tileset
+                        texture:$("world/res/test-tiles.hacc").img.ALL
+                    }
+                    {vis::Tiles:{
+                        width:2
+                        height:2
+                        tiles:[1 0 0 1]
+                    }}
+                ]
+            }}
+        ]
     }}
     edit_shape:{shell::Text_Button:{
         text:"edit shape"

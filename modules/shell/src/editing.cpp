@@ -393,6 +393,38 @@ namespace shell {
         }
         catch (...) {
             hacc::unload(file);
+            throw;
+        }
+    }
+    struct Tilemap_Uniqueification {
+        std::string tiles_filename;
+        hacc::Tree Tilemap_Def;
+    };
+    static void uniqueify_tilemap (geo::Tilemap* tilemap, hacc::Tree def_data, hacc::Tree tiles_data) {
+        auto realp = res_realp(tilemap);
+        if (hacc::Document* doc = hacc::get_document_containing(realp.address)) {
+            Tilemap_Uniqueification tu {"world/room/<unititled>.tiles", def_data};
+            general_edit(&tu, " // Uniqueifying tilemap " + hacc::Reference(tilemap).show() + "\n");
+            auto def = doc->create<geo::Tilemap_Def>();
+            try {
+                hacc::Reference(def).from_tree(tu.Tilemap_Def);
+                hacc::Dynamic d;
+                hacc::Reference(&d).from_tree(tiles_data);
+                def->tiles = d.address();
+                auto file = hacc::File(tu.tiles_filename, std::move(d));
+                try {
+                    hacc::save(file);
+                }
+                catch (...) {
+                    hacc::unload(file);
+                    throw;
+                }
+                tilemap->def = def;
+            }
+            catch (...) {
+                doc->destroy(def);
+                throw;
+            }
         }
     }
 
@@ -406,8 +438,7 @@ namespace shell {
         if (!selected) return;
         auto realp = res_realp(selected);
         if (hacc::Document* doc = hacc::get_document_containing(realp.address)) {
-            void* newp = NULL;
-            newp = doc->alloc(realp.type);
+            void* newp = doc->alloc(realp.type);
             realp.type.construct(newp);
             try {
                 if (realp.type.can_copy_assign()) {
@@ -903,9 +934,24 @@ void _re_new_file (std::string name, hacc::Tree data) {
     edit_new_file(name, data);
 }
 New_Command _re_new_file_cmd ("re_new_file", "Create new file with $EDITOR.", 2, _re_new_file);
-
 HACCABLE(New_File) {
     name("shell::New_File");
     attr("filename", member(&New_File::filename));
     attr("data", member(&New_File::data));
+}
+
+void _re_uniqueify_tilemap (hacc::Tree def_data, hacc::Tree tiles_data) {
+    if (!room_editor || !room_editor->selected) return;
+    if (auto tilemap = dynamic_cast<Tilemap*>(room_editor->selected)) {
+        uniqueify_tilemap(tilemap, def_data, tiles_data);
+    }
+}
+New_Command _re_uniqueify_tilemap_cmd (
+    "re_uniqueify_tilemap", "Give selected tilemap a unique Tilemap_Def and tiles file.",
+    2, _re_uniqueify_tilemap
+);
+HACCABLE(Tilemap_Uniqueification) {
+    name("shell::Tilemap_Uniqueification");
+    attr("tiles_filename", member(&Tilemap_Uniqueification::tiles_filename));
+    attr("Tilemap_Def", member(&Tilemap_Uniqueification::Tilemap_Def));
 }

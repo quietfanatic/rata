@@ -27,7 +27,7 @@ namespace geo {
 
     void Tilemap::Drawn_draw (vis::Map) {
         auto def = get_def();
-        if (!def->tiles) return;
+        if (!def->tiles || !def->texture) return;
         vis::draw_tiles(def->tiles, def->texture, Object::pos());
     }
 
@@ -114,6 +114,7 @@ namespace geo {
 
     void Tilemap::physicalize () {
         auto def = get_def();
+        if (!def->tiles || !def->tileset) return;
         auto width = def->tiles->width;
         auto height = def->tiles->height;
         auto es = new TileEdge [height * width][MAX_EDGES];
@@ -189,7 +190,7 @@ HACCABLE(Tilemap_Def) {
     attr("Object_Def", base<Object_Def>().collapse());
     attr("tileset", member(&Tilemap_Def::tileset));
     attr("texture", member(&Tilemap_Def::texture));
-    attr("tiles", member(&Tilemap_Def::tiles));
+    attr("tiles", member(&Tilemap_Def::tiles).optional());
 }
 
 HACCABLE(Tilemap) {

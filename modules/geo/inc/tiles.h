@@ -21,9 +21,9 @@ namespace geo {
     };
 
     struct Tilemap_Def : phys::Object_Def {
-        Tileset* tileset;
-        vis::Tiles* tiles;
-        vis::Texture* texture;
+        Tileset* tileset = NULL;
+        vis::Tiles* tiles = NULL;
+        vis::Texture* texture = NULL;
     };
 
      // A visible, tangible object that uses a matrix of tiles to create
