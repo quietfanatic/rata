@@ -28,7 +28,7 @@
         [39 [global_lighting [0 0 0] [+0.1 +0.1 +0.1] true]]  // '
         [92 [light_debug]]  // \
         [82 [reload]]  // R
-        [67 [camera_debug]]  // C
+        [86 [vision_debug]]  // V
         [84 [texture_test $("world/res/tiles.hacc").img.tiles 0]]  // T
     ]}
     console:{shell::Console:{ }}

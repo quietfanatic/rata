@@ -55,14 +55,13 @@ namespace geo {
     };
     extern Camera* camera;
 
-    struct Default_Camera : Camera, vis::Drawn<vis::Overlay> {
+    struct Default_Camera : Camera {
          // Ultimate final position
         Vec pos = Vec(10, 7.5);
          // Ideal position  TODO: replace with Attention system
         Vec ideal_pos = Vec(10, 7.5);
         Vec Camera_pos () override { return pos; }
         void finish () { if (!active) activate(); }
-        void Drawn_draw (vis::Overlay);
         explicit Default_Camera (bool active = true) : Camera(active) { }
     };
     Default_Camera& default_camera ();

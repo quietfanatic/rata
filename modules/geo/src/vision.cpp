@@ -126,6 +126,7 @@ namespace geo {
 
      // Temporary for debugging purposes
     static std::vector<Vec> dbg_snaps;
+    static Vec dbg_ideal_pos;
     static Rect dbg_area;
 
      // This tries to find a valid camera position within the given rectangle.
@@ -419,6 +420,7 @@ namespace geo {
      //  as possible.
     Vec Vision::get_pos () {
          // TODO: let the focus control position as much as possible
+        dbg_ideal_pos = focus;
         Vec best_so_far = focus;
         Rect attn_bound = Rect(-INF, -INF, INF, INF);
         dbg_area = attn_bound;
@@ -433,26 +435,28 @@ namespace geo {
         return best_so_far;
     }
 
-    void Default_Camera::Drawn_draw (vis::Overlay) {
-        color_offset(Vec(0, 0));
-        draw_color(0x00ffffff);
-        for (auto snap : dbg_snaps) {
-            draw_circle(Circle(snap, 0.2));
-        }
-        draw_color(0xff00ffff);
-        color_offset(Vec(0, 0));
-        size_t i = 0;
-        for (auto& cb : walls) {
-            draw_circle(cb.corner);
-            if (defined(cb.edge)) {
-                draw_line(cb.edge.a, cb.edge.b);
+    struct Vision_Debug : vis::Drawn<vis::Overlay> {
+        void Drawn_draw (vis::Overlay) override {
+            color_offset(Vec(0, 0));
+            draw_color(0x00ffffff);
+            for (auto snap : dbg_snaps) {
+                draw_circle(Circle(snap, 0.2));
             }
+            draw_color(0xff00ffff);
+            color_offset(Vec(0, 0));
+            size_t i = 0;
+            for (auto& cb : walls) {
+                draw_circle(cb.corner);
+                if (defined(cb.edge)) {
+                    draw_line(cb.edge.a, cb.edge.b);
+                }
+            }
+            draw_color(0xffff00ff);
+            draw_circle(Circle(dbg_ideal_pos, 0.2));
+            draw_rect(dbg_area);
         }
-        draw_color(0xffff00ff);
-        draw_circle(Circle(ideal_pos, 0.2));
-        draw_rect(dbg_area);
-    }
-
+    };
+    static Vision_Debug vision_debug;
 
 } using namespace geo;
 
@@ -464,12 +468,12 @@ HACCABLE(Wall) {
     finish(&Wall::finish);
 }
 
-void _camera_debug () {
-    if (default_camera().visible())
-        default_camera().disappear();
+void _vision_debug () {
+    if (vision_debug.visible())
+        vision_debug.disappear();
     else
-        default_camera().appear();
+        vision_debug.appear();
 }
 
-core::New_Command _camera_debug_cmd ("camera_debug", "Toggle camera debug view", 0, _camera_debug);
+core::New_Command _vision_debug_cmd ("vision_debug", "Toggle vision debug view", 0, _vision_debug);
 
