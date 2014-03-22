@@ -7,6 +7,7 @@ my @objects = qw<
     tmp/console.o
     tmp/editing.o
     tmp/menus.o
+    tmp/room_editor.o
     ../core/tmp/commands.o
     ../core/tmp/opengl.o
     ../core/tmp/window.o
@@ -51,7 +52,7 @@ include '../..';
 
 mkdir 'tmp';
 
-objects(qw(main console editing menus));
+objects(qw(main console editing menus room_editor));
 
  # Here's the main program
 ld_rule('../../rata', [@objects], [@libs]);

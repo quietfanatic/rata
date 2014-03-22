@@ -11,53 +11,6 @@ namespace vis { struct Font; struct Texture; }
 
 namespace shell {
 
-    struct Room_Editor : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Dev>, core::Listener {
-         // Associated utilities
-        Menu<vis::Dev>* res_menu = NULL;  // Set on construction
-        Menu<vis::Dev>* room_menu = NULL;  // Set on construction
-        geo::Free_Camera fc;
-        vis::Font* font = NULL;
-         // Selected items
-        geo::Resident* hovering = NULL;
-        geo::Resident* selected = NULL;
-        std::string selected_type_name;
-        geo::Room* hovering_room = NULL;
-        geo::Room* selected_room = NULL;
-         // Modes
-        bool editing_pts = false;
-        bool editing_room = false;
-         // Cursor control
-        bool clicking = false;
-        bool dragging = false;
-        util::Vec drag_origin;
-        util::Vec drag_offset;
-        util::Vec menu_world_pos;
-        int dragging_pt = -1;
-         // Drawing
-        std::string status;
-
-        void activate ();
-        void deactivate ();
-        Room_Editor ();
-        ~Room_Editor ();
-
-         // Context menu actions
-        void re_edit ();
-        void re_duplicate ();
-        void re_delete ();
-        void re_reload_room ();
-        void re_save_room ();
-        void re_new_actor (hacc::Type type, hacc::Tree data);
-        void re_new_furniture (hacc::Type type, hacc::Tree data);
-
-        void Drawn_draw (vis::Overlay) override;
-        void Drawn_draw (vis::Dev) override;
-        bool Listener_key (int, int) override;
-        bool Listener_button (int, int) override;
-        void Listener_cursor_pos (int x, int y) override;
-    };
-    extern Room_Editor* room_editor;
-
     struct Tile_Editor : vis::Drawn<vis::Map>, core::Listener {
         geo::Tilemap* tilemap = NULL;
         uint16 tile = 0x0001;
