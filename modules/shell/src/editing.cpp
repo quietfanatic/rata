@@ -126,6 +126,11 @@ namespace shell {
      // Process cursor position; hover, drag
     void Room_Editor::Listener_cursor_pos (int x, int y) {
         Vec world_pos = camera->window_to_world(x, y);
+         // Snap to grid when pressing CTRL
+        if (key_pressed(GLFW_KEY_LCTRL) || key_pressed(GLFW_KEY_RCTRL)) {
+            world_pos.x = round(world_pos.x * 2) / 2;
+            world_pos.y = round(world_pos.y * 2) / 2;
+        }
         if (editing_pts) {
             if (dragging_pt >= 0) {
                 Vec r_pos = selected->Resident_get_pos();
@@ -282,6 +287,11 @@ namespace shell {
                         }
                     }
                 }
+            }
+             // Snap to grid if pressing CTRL
+            if (key_pressed(GLFW_KEY_LCTRL) || key_pressed(GLFW_KEY_RCTRL)) {
+                drag_offset.x = round(drag_offset.x * 2) / 2;
+                drag_offset.y = round(drag_offset.y * 2) / 2;
             }
         }
         else {  // GLFW_RELEASE
