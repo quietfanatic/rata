@@ -60,14 +60,24 @@ namespace shell {
                 }
             }
         }
-         // Draw outlines around all residents
         for (auto& room : all_rooms()) {
-             // But first draw room outline
+             // Draw outline around room
             color_offset(Vec(0, 0));
             draw_color(0xff0000ff);
             draw_rect(room.boundary);
             if (tile_editor && tile_editor->active)
                 continue;
+             // Draw lines to neighbors
+            color_offset(Vec(0, 0));
+            for (size_t i = 0; i < room.neighbors.size(); i++) {
+                if (room.neighbors[i]) {
+                    draw_color(0xff0000ff);
+                    Vec start = room.boundary.rb() + Vec(-0.5 - i, 0.5);
+                    Vec end = room.neighbors[i]->boundary.lt();
+                    draw_line(start, end);
+                }
+            }
+             // Draw outlines around all residents
             if (room.observer_count) {
                 for (auto& res : room.residents) {
                     if (!editing_pts) {
