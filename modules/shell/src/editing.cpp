@@ -2,7 +2,8 @@
 
 #include <string>
 #include <sstream>
-#include <GL/glfw.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_mouse.h>
 #include "core/inc/commands.h"
 #include "ent/inc/control.h"
 #include "geo/inc/rooms.h"
@@ -112,134 +113,135 @@ namespace shell {
             }
         }
     }
-    bool Tile_Editor::Listener_button (int btn, int action) {
+    bool Tile_Editor::Listener_event (SDL_Event* event) {
         if (!tilemap) return false;
-        if (action == GLFW_PRESS) {
-            Vec pos = camera->window_to_world(window->cursor_x, window->cursor_y) - tilemap->pos();
-            if (btn == GLFW_MOUSE_BUTTON_LEFT) {
-                draw(pos);
-                clicking = true;
-            }
-            else if (btn == GLFW_MOUSE_BUTTON_RIGHT) {
-                pick(pos);
-            }
-        }
-        else {  // GLFW_RELEASE
-            if (btn == GLFW_MOUSE_BUTTON_LEFT) {
-                clicking = false;
-            }
-        }
-        return true;
-    }
-    void Tile_Editor::Listener_cursor_pos (int x, int y) {
-        if (selector_camera.active) {
-            float move_speed = 1/256.0;
-            if (x < 64) {
-                selector_camera.pos.x += (x - 64) * move_speed;
-            }
-            else if (x > window->width - 64) {
-                selector_camera.pos.x += (x - window->width + 64) * move_speed;
-            }
-            if (y < 64) {
-                selector_camera.pos.y -= (y - 64) * move_speed;
-            }
-            else if (y > window->height - 64) {
-                selector_camera.pos.y -= (y - window->height + 64) * move_speed;
-            }
-        }
-        if (!tilemap) return;
-        if (clicking) {
-            draw(camera->window_to_world(x, y) - tilemap->pos());
-        }
-    }
-    bool Tile_Editor::Listener_key (int code, int action) {
-        if (action == GLFW_PRESS) {
-            auto def = tilemap->get_def();
-            switch (code) {
-                case GLFW_KEY_ESC:
-                    if (showing_selector) {
-                        showing_selector = false;
-                        selector_camera.deactivate();
-                    }
-                    else {
-                        deactivate();
-                    }
-                    return true;
-                case 'S': {
-                    for (auto& f : hacc::loaded_files()) {
-                        if (f.data().address() == def->tiles) {
-                            hacc::save(f);
-                            return true;
-                        }
-                    }
-                    fprintf(stderr, "Could not save this tiles object, because it doesn't belong to a file.\n");
-                    return true;
+        switch (event->type) {
+            case SDL_MOUSEBUTTONDOWN: {
+                Vec pos = camera->window_to_world(event->button.x, event->button.y) - tilemap->pos();
+                if (event->button.button == SDL_BUTTON_LEFT) {
+                    draw(pos);
+                    clicking = true;
                 }
-                case 'H':
-                    tile ^= 0x8000;
-                    return true;
-                case 'V':
-                    tile ^= 0x4000;
-                    return true;
-                case '/':
-                    showing_selector = !showing_selector;
-                    if (showing_selector) {
-                        selector_camera.pos = selector_pos + Vec(10, -7.5);
-                        selector_camera.size = Vec(40, 30);
-                        selector_camera.activate();
+                else if (event->button.button == SDL_BUTTON_RIGHT) {
+                    pick(pos);
+                }
+                return true;
+            }
+            case SDL_MOUSEBUTTONUP: {
+                if (event->button.button == SDL_BUTTON_LEFT) {
+                    clicking = false;
+                }
+                return true;
+            }
+            case SDL_MOUSEMOTION: {
+                if (selector_camera.active) {
+                    auto x = event->motion.x;
+                    auto y = event->motion.y;
+                    float move_speed = 1/256.0;
+                    if (x < 64) {
+                        selector_camera.pos.x += (x - 64) * move_speed;
                     }
-                    else {
-                        selector_camera.deactivate();
+                    else if (x > window->width - 64) {
+                        selector_camera.pos.x += (x - window->width + 64) * move_speed;
                     }
-                    return true;
-                case GLFW_KEY_LEFT:
-                    if ((tile & 0x3fff) == 0) {
-                        tile += def->tileset->tiles.size() - 1;
+                    if (y < 64) {
+                        selector_camera.pos.y -= (y - 64) * move_speed;
                     }
-                    else {
-                        tile -= 1;
+                    else if (y > window->height - 64) {
+                        selector_camera.pos.y -= (y - window->height + 64) * move_speed;
                     }
-                    return true;
-                case GLFW_KEY_RIGHT:
-                    if ((tile & 0x3fff) >= def->tileset->tiles.size() - 1) {
-                        tile = 0;
+                }
+                if (clicking) {
+                    draw(camera->window_to_world(event->motion.x, event->motion.y));
+                }
+            }
+            case SDL_KEYDOWN: {
+                auto def = tilemap->get_def();
+                switch (event->key.keysym.sym) {
+                    case SDLK_ESCAPE:
+                        if (showing_selector) {
+                            showing_selector = false;
+                            selector_camera.deactivate();
+                        }
+                        else {
+                            deactivate();
+                        }
+                        return true;
+                    case SDLK_s: {
+                        for (auto& f : hacc::loaded_files()) {
+                            if (f.data().address() == def->tiles) {
+                                hacc::save(f);
+                                return true;
+                            }
+                        }
+                        fprintf(stderr, "Could not save this tiles object, because it doesn't belong to a file.\n");
+                        return true;
                     }
-                    else {
-                        tile += 1;
-                    }
-                    return true;
-                case GLFW_KEY_UP: {
-                    Vec size = def->texture->size*PX;
-                    if ((tile & 0x3fff) < size.y) {
-                        tile += size.y - size.x;
+                    case SDLK_h:
+                        tile ^= 0x8000;
+                        return true;
+                    case SDLK_v:
+                        tile ^= 0x4000;
+                        return true;
+                    case SDLK_SLASH:
+                        showing_selector = !showing_selector;
+                        if (showing_selector) {
+                            selector_camera.pos = selector_pos + Vec(10, -7.5);
+                            selector_camera.size = Vec(40, 30);
+                            selector_camera.activate();
+                        }
+                        else {
+                            selector_camera.deactivate();
+                        }
+                        return true;
+                    case SDLK_LEFT:
+                        if ((tile & 0x3fff) == 0) {
+                            tile += def->tileset->tiles.size() - 1;
+                        }
+                        else {
+                            tile -= 1;
+                        }
+                        return true;
+                    case SDLK_RIGHT:
                         if ((tile & 0x3fff) >= def->tileset->tiles.size() - 1) {
+                            tile = 0;
+                        }
+                        else {
+                            tile += 1;
+                        }
+                        return true;
+                    case SDLK_UP: {
+                        Vec size = def->texture->size*PX;
+                        if ((tile & 0x3fff) < size.y) {
+                            tile += size.y - size.x;
+                            if ((tile & 0x3fff) >= def->tileset->tiles.size() - 1) {
+                                tile -= size.x;
+                            }
+                        }
+                        else {
                             tile -= size.x;
                         }
+                        return true;
                     }
-                    else {
-                        tile -= size.x;
+                    case SDLK_DOWN: {
+                        Vec size = def->texture->size*PX;
+                        if ((tile & 0x3fff) >= size.y - size.x) {
+                            tile -= size.y - size.x;
+                        }
+                        else if ((tile & 0x3fff) >= def->tileset->tiles.size() - size.x) {
+                            tile -= size.y - size.x - size.x;
+                        }
+                        else {
+                            tile += size.x;
+                        }
+                        return true;
                     }
-                    return true;
+                    default: return true;
                 }
-                case GLFW_KEY_DOWN: {
-                    Vec size = def->texture->size*PX;
-                    if ((tile & 0x3fff) >= size.y - size.x) {
-                        tile -= size.y - size.x;
-                    }
-                    else if ((tile & 0x3fff) >= def->tileset->tiles.size() - size.x) {
-                        tile -= size.y - size.x - size.x;
-                    }
-                    else {
-                        tile += size.x;
-                    }
-                    return true;
-                }
-                default:
-                    return false;
             }
+            case SDL_KEYUP: return true;
+            default: return false;
         }
-         // TODO: h and v flip current tile
-        return false;
     }
 
     Texture_Tester* texture_tester;
@@ -290,27 +292,14 @@ namespace shell {
         draw_texture(tex, Rect(pos, pos + tex->size*PX));
     }
 
-    bool Texture_Tester::Listener_key (int code, int action) {
-        if (action == GLFW_PRESS && code == GLFW_KEY_ESC) {
-            deactivate();
-            return true;
-        }
-        return false;
-    }
-    void Texture_Tester::Listener_cursor_pos (int x, int y) {
-         // Adjust camera
-        float move_speed = 1/256.0;
-        if (x < 64) {
-            camera.pos.x += (x - 64) * move_speed;
-        }
-        else if (x > window->width - 64) {
-            camera.pos.x += (x - window->width + 64) * move_speed;
-        }
-        if (y < 64) {
-            camera.pos.y -= (y - 64) * move_speed;
-        }
-        else if (y > window->height - 64) {
-            camera.pos.y -= (y - window->height + 64) * move_speed;
+    bool Texture_Tester::Listener_event (SDL_Event* event) {
+        switch (event->type) {
+            case SDL_KEYDOWN:
+                if (event->key.keysym.sym == SDLK_ESCAPE)
+                    deactivate();
+                return true;
+            case SDL_KEYUP: return true;
+            default: return false;
         }
     }
 

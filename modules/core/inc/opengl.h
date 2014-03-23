@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 #include <GL/glew.h>
-#include <GL/glfw.h>
 
 #ifdef CORE_OPENGL_VERY_DEBUG
 #include <sstream>

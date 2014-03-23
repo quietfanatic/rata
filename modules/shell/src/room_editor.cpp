@@ -1,7 +1,7 @@
 
 #include <string>
 #include <sstream>
-#include <GL/glfw.h>
+#include <SDL2/SDL_events.h>
 #include "core/inc/commands.h"
 #include "ent/inc/control.h"
 #include "geo/inc/rooms.h"
@@ -86,209 +86,202 @@ namespace shell {
             res_menu->deactivate();
             room_menu->deactivate();
         }
-        bool Listener_key (int code, int action) override {
-            if (action == GLFW_PRESS && code == GLFW_KEY_ESC) {
-                if (editing_pts)
-                    editing_pts = false;
-                else if (editing_room)
-                    editing_room = false;
-                else
-                    deactivate();
-                return true;
-            }
-            return false;
-        }
-        bool Listener_button (int code, int action) override {
-            if (action == GLFW_PRESS) {
-                Vec realpos = vis::camera->window_to_world(window->cursor_x, window->cursor_y);
-                if (editing_pts) {
-                    if (code == GLFW_MOUSE_BUTTON_LEFT) {
-                        size_t n_pts = selected->Resident_n_pts();
-                        Vec r_pos = selected->Resident_get_pos();
-                        float lowest_pt_t = INF;
-                        Vec lowest_pt_pos = Vec(0, 0);
-                        int lowest_pt = -1;
-                        for (size_t i = 0; i < n_pts; i++) {
-                            Vec pos = selected->Resident_get_pt(i);
-                            const Rect& boundary = pos + r_pos
-                                                 + Rect(-0.25, -0.25, 0.25, 0.25);
-                            if (boundary.covers(realpos)) {
-                                if (boundary.t < lowest_pt_t) {
-                                    lowest_pt_t = boundary.t;
-                                    lowest_pt_pos = pos;
-                                    lowest_pt = i;
+        bool Listener_event (SDL_Event* event) override {
+            switch (event->type) {
+                case SDL_MOUSEMOTION: {
+                    auto x = event->motion.x;
+                    auto y = event->motion.y;
+                     // Adjust camera
+                    float move_speed = 1/256.0;
+                    if (x < 64) {
+                        camera.pos.x += (x - 64) * move_speed;
+                    }
+                    else if (x > window->width - 64) {
+                        camera.pos.x += (x - window->width + 64) * move_speed;
+                    }
+                    if (y < 64) {
+                        camera.pos.y -= (y - 64) * move_speed;
+                    }
+                    else if (y > window->height - 64) {
+                        camera.pos.y -= (y - window->height + 64) * move_speed;
+                    }
+                    Vec world_pos = vis::camera->window_to_world(event->motion.x, event->motion.y);
+                    if (editing_pts) {
+                        if (dragging_pt >= 0) {
+                            Vec r_pos = selected->Resident_get_pos();
+                            selected->Resident_set_pt(dragging_pt, world_pos - r_pos - drag_offset);
+                        }
+                    }
+                    else if (editing_room) {
+                        if (dragging_pt >= 0) {
+                            selected_room->set_pt(dragging_pt, world_pos - drag_offset);
+                        }
+                    }
+                    else {
+                        if (clicking) {
+                            if (selected) {
+                                if (length2(drag_origin - world_pos) > 0.2)
+                                    dragging = true;
+                                if (dragging) {
+                                    selected->Resident_set_pos(world_pos - drag_offset);
                                 }
                             }
                         }
-                        dragging_pt = lowest_pt;
-                        drag_offset = realpos - r_pos - lowest_pt_pos;
-                    }
-                }
-                else if (editing_room) {
-                    if (code == GLFW_MOUSE_BUTTON_LEFT) {
-                        size_t n_pts = selected_room->n_pts();
-                        float lowest_pt_t = INF;
-                        Vec lowest_pt_pos = Vec(0, 0);
-                        int lowest_pt = -1;
-                        for (size_t i = 0; i < n_pts; i++) {
-                            Vec pos = selected_room->get_pt(i);
-                            const Rect& boundary = pos + Rect(-0.25, -0.25, 0.25, 0.25);
-                            if (boundary.covers(realpos)) {
-                                if (boundary.t < lowest_pt_t) {
-                                    lowest_pt_t = boundary.t;
-                                    lowest_pt_pos = pos;
-                                    lowest_pt = i;
+                        else {
+                             // Prefer residents with lower tops
+                            float lowest_res_t = INF;
+                            Resident* lowest_res = NULL;
+                            float lowest_room_t = INF;
+                            Room* lowest_room = NULL;
+                            size_t unpositioned_residents = 0;
+                            for (auto& room : all_rooms()) {
+                                if (room.observer_count) {
+                                    if (room.boundary.covers(world_pos)) {
+                                        if (room.boundary.t < lowest_room_t) {
+                                            lowest_room_t = room.boundary.t;
+                                            lowest_room = &room;
+                                        }
+                                    }
+                                    for (auto& res : room.residents) {
+                                        Vec pos = res.Resident_get_pos();
+                                        const Rect& boundary = res.Resident_boundary();
+                                        if (!defined(pos) || !defined(boundary)) {
+                                            pos = room.boundary.lt() + Vec(0.5, -0.5);
+                                            pos.x += unpositioned_residents++;
+                                        }
+                                        if (covers(boundary, world_pos - pos)) {
+                                            if (boundary.t < lowest_res_t) {
+                                                lowest_res_t = boundary.t;
+                                                lowest_res = &res;
+                                            }
+                                        }
+                                    }
                                 }
                             }
+                             // Set status message about hovered object
+                            if (lowest_res) {
+                                if (lowest_res != hovering) {
+                                    auto realp = res_realp(lowest_res);
+                                    auto path = hacc::address_to_path(realp);
+                                    std::ostringstream ss;
+                                    ss << realp.address << " " << hacc::path_to_string(path);
+                                    status = ss.str();
+                                }
+                            }
+                            else {
+                                status = "";
+                            }
+                            hovering = lowest_res;
+                            hovering_room = lowest_room;
                         }
-                        dragging_pt = lowest_pt;
-                        drag_offset = realpos - lowest_pt_pos;
                     }
+                    return true;
                 }
-                else {
-                     // Just upgrade hovering to selected
-                    dragging = NULL;
-                    selected = hovering;
-                    selected_room = hovering_room;
-                    if (selected) {
-                        Vec pos = selected->Resident_get_pos();
-                        if (code == GLFW_MOUSE_BUTTON_LEFT) {
-                            drag_origin = pos;
-                            drag_offset = realpos - pos;
-                            log("editing", "Selected " + hacc::Reference(res_realp(selected)).show());
-                            clicking = true;
+                case SDL_MOUSEBUTTONDOWN: {
+                    int x = event->button.x;
+                    int y = event->button.y;
+                    Vec realpos = vis::camera->window_to_world(x, y);
+                    if (editing_pts) {
+                        if (event->button.button == SDL_BUTTON_LEFT) {
+                            size_t n_pts = selected->Resident_n_pts();
+                            Vec r_pos = selected->Resident_get_pos();
+                            float lowest_pt_t = INF;
+                            Vec lowest_pt_pos = Vec(0, 0);
+                            int lowest_pt = -1;
+                            for (size_t i = 0; i < n_pts; i++) {
+                                Vec pos = selected->Resident_get_pt(i);
+                                const Rect& boundary = pos + r_pos
+                                                     + Rect(-0.25, -0.25, 0.25, 0.25);
+                                if (covers(boundary, realpos)) {
+                                    if (boundary.t < lowest_pt_t) {
+                                        lowest_pt_t = boundary.t;
+                                        lowest_pt_pos = pos;
+                                        lowest_pt = i;
+                                    }
+                                }
+                            }
+                            dragging_pt = lowest_pt;
+                            drag_offset = realpos - r_pos - lowest_pt_pos;
                         }
-                        else if (code == GLFW_MOUSE_BUTTON_RIGHT) {
-                            if (action == GLFW_PRESS) {
+                    }
+                    else if (editing_room) {
+                        if (event->button.button == SDL_BUTTON_LEFT) {
+                            size_t n_pts = selected_room->n_pts();
+                            float lowest_pt_t = INF;
+                            Vec lowest_pt_pos = Vec(0, 0);
+                            int lowest_pt = -1;
+                            for (size_t i = 0; i < n_pts; i++) {
+                                Vec pos = selected_room->get_pt(i);
+                                const Rect& boundary = pos + Rect(-0.25, -0.25, 0.25, 0.25);
+                                if (covers(boundary, realpos)) {
+                                    if (boundary.t < lowest_pt_t) {
+                                        lowest_pt_t = boundary.t;
+                                        lowest_pt_pos = pos;
+                                        lowest_pt = i;
+                                    }
+                                }
+                            }
+                            dragging_pt = lowest_pt;
+                            drag_offset = realpos - lowest_pt_pos;
+                        }
+                    }
+                    else {
+                         // Just upgrade hovering to selected
+                        dragging = NULL;
+                        selected = hovering;
+                        selected_room = hovering_room;
+                        if (selected) {
+                            Vec pos = selected->Resident_get_pos();
+                            if (event->button.button == SDL_BUTTON_LEFT) {
+                                drag_origin = pos;
+                                drag_offset = realpos - pos;
+                                log("editing", "Selected " + hacc::Reference(res_realp(selected)).show());
+                                clicking = true;
+                            }
+                            else if (event->button.button == SDL_BUTTON_RIGHT) {
                                 selected_type_name = res_realp(selected).type.name();
-                                menu_world_pos = vis::camera->window_to_world(window->cursor_x, window->cursor_y);
+                                menu_world_pos = vis::camera->window_to_world(x, y);
                                 Vec area = vis::camera->window_to_dev(window->width, 0);
                                 res_menu->size = res_menu->root->Menu_Item_size(area);
-                                Vec pos = vis::camera->window_to_dev(window->cursor_x, window->cursor_y);
+                                Vec pos = vis::camera->window_to_dev(x, y);
                                 res_menu->pos = pos - Vec(-1*PX, res_menu->size.y + 1*PX);
                                 res_menu->activate();
                             }
                         }
-                        return true;
-                    }
-                    else if (selected_room) {
-                        if (code == GLFW_MOUSE_BUTTON_RIGHT) {
-                            if (action == GLFW_PRESS) {
-                                menu_world_pos = vis::camera->window_to_world(window->cursor_x, window->cursor_y);
+                        else if (selected_room) {
+                            if (event->button.button == SDL_BUTTON_RIGHT) {
+                                menu_world_pos = vis::camera->window_to_world(x, y);
                                 Vec area = vis::camera->window_to_dev(window->width, 0);
                                 room_menu->size = room_menu->root->Menu_Item_size(area);
-                                Vec pos = vis::camera->window_to_dev(window->cursor_x, window->cursor_y);
+                                Vec pos = vis::camera->window_to_dev(x, y);
                                 room_menu->pos = pos - Vec(-1*PX, room_menu->size.y + 1*PX);
                                 room_menu->activate();
                             }
                         }
                     }
+                    return true;
                 }
-                 // Snap to grid if pressing CTRL
-                if (key_pressed(GLFW_KEY_LCTRL) || key_pressed(GLFW_KEY_RCTRL)) {
-                    drag_offset.x = round(drag_offset.x * 2) / 2;
-                    drag_offset.y = round(drag_offset.y * 2) / 2;
-                }
-            }
-            else {  // GLFW_RELEASE
-                if (code == GLFW_MOUSE_BUTTON_LEFT) {
-                    dragging = false;
-                    clicking = false;
-                    dragging_pt = -1;
-                }
-                return true;
-            }
-            return false;
-        }
-        void Listener_cursor_pos (int x, int y) override {
-             // Adjust camera
-            float move_speed = 1/256.0;
-            if (x < 64) {
-                camera.pos.x += (x - 64) * move_speed;
-            }
-            else if (x > window->width - 64) {
-                camera.pos.x += (x - window->width + 64) * move_speed;
-            }
-            if (y < 64) {
-                camera.pos.y -= (y - 64) * move_speed;
-            }
-            else if (y > window->height - 64) {
-                camera.pos.y -= (y - window->height + 64) * move_speed;
-            }
-            Vec world_pos = vis::camera->window_to_world(x, y);
-             // Snap to grid when pressing CTRL
-            if (key_pressed(GLFW_KEY_LCTRL) || key_pressed(GLFW_KEY_RCTRL)) {
-                world_pos.x = round(world_pos.x * 2) / 2;
-                world_pos.y = round(world_pos.y * 2) / 2;
-            }
-            if (editing_pts) {
-                if (dragging_pt >= 0) {
-                    Vec r_pos = selected->Resident_get_pos();
-                    selected->Resident_set_pt(dragging_pt, world_pos - r_pos - drag_offset);
-                }
-            }
-            else if (editing_room) {
-                if (dragging_pt >= 0) {
-                    selected_room->set_pt(dragging_pt, world_pos - drag_offset);
-                }
-            }
-            else {
-                if (clicking) {
-                    if (selected) {
-                        if (length2(drag_origin - world_pos) > 0.2)
-                            dragging = true;
-                        if (dragging) {
-                            selected->Resident_set_pos(world_pos - drag_offset);
-                        }
+                case SDL_MOUSEBUTTONUP: {
+                    if (event->button.button == SDL_BUTTON_LEFT) {
+                        dragging = false;
+                        clicking = false;
+                        dragging_pt = -1;
                     }
+                    return true;
                 }
-                else {
-                     // Prefer residents with lower tops
-                    float lowest_res_t = INF;
-                    Resident* lowest_res = NULL;
-                    float lowest_room_t = INF;
-                    Room* lowest_room = NULL;
-                    size_t unpositioned_residents = 0;
-                    for (auto& room : all_rooms()) {
-                        if (room.observer_count) {
-                            if (room.boundary.covers(world_pos)) {
-                                if (room.boundary.t < lowest_room_t) {
-                                    lowest_room_t = room.boundary.t;
-                                    lowest_room = &room;
-                                }
-                            }
-                            for (auto& res : room.residents) {
-                                Vec pos = res.Resident_get_pos();
-                                const Rect& boundary = res.Resident_boundary();
-                                if (!defined(pos) || !defined(boundary)) {
-                                    pos = room.boundary.lt() + Vec(0.5, -0.5);
-                                    pos.x += unpositioned_residents++;
-                                }
-                                if (boundary.covers(world_pos - pos)) {
-                                    if (boundary.t < lowest_res_t) {
-                                        lowest_res_t = boundary.t;
-                                        lowest_res = &res;
-                                    }
-                                }
-                            }
-                        }
+                case SDL_KEYDOWN: {
+                    if (event->key.keysym.sym == SDLK_ESCAPE) {
+                        if (editing_pts)
+                            editing_pts = false;
+                        else if (editing_room)
+                            editing_room = false;
+                        else
+                            deactivate();
                     }
-                     // Set status message about hovered object
-                    if (lowest_res) {
-                        if (lowest_res != hovering) {
-                            auto realp = res_realp(lowest_res);
-                            auto path = hacc::address_to_path(realp);
-                            std::ostringstream ss;
-                            ss << realp.address << " " << hacc::path_to_string(path);
-                            status = ss.str();
-                        }
-                    }
-                    else {
-                        status = "";
-                    }
-                    hovering = lowest_res;
-                    hovering_room = lowest_room;
+                    return true;
                 }
+                case SDL_KEYUP: return true;
+                default: return false;
             }
         }
         void Drawn_draw (Overlay) override {

@@ -45,8 +45,8 @@ my @objects = qw<
 
 my @libs =
     `uname -s` eq "Darwin\n"
-        ? qw(-framework OpenGL -lGLEW -lglfw -lSOIL -lSDL2 -framework Cocoa -L/opt/local/lib)
-        : qw(-lGL -lGLEW -lglfw -lSOIL -lSDL2);
+        ? qw(-framework OpenGL -lGLEW -lSOIL -lSDL2 -framework Cocoa -L/opt/local/lib)
+        : qw(-lGL -lGLEW -lSOIL -lSDL2);
 
 include '../..';
 

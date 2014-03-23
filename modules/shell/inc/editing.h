@@ -30,10 +30,7 @@ namespace shell {
         void pick (util::Vec);
 
         void Drawn_draw (vis::Map) override;
-        bool Listener_button (int, int) override;
-        bool Listener_key (int, int) override;
-        void Listener_cursor_pos (int, int) override;
-        int Listener_trap_cursor () override { return selector_camera.active ? false : -1; }
+        bool Listener_event (SDL_Event* event) override;
     };
     extern Tile_Editor* tile_editor;
 
@@ -53,9 +50,7 @@ namespace shell {
         void Drawn_draw (vis::Sprites) override;
         void Drawn_draw (vis::Overlay) override;
 
-        bool Listener_key (int, int) override;
-        void Listener_cursor_pos (int, int) override;
-        int Listener_trap_cursor () override { return camera.active ? false : -1; }
+        bool Listener_event (SDL_Event*) override;
     };
     extern Texture_Tester* texture_tester;
 

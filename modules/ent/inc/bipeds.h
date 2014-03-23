@@ -80,10 +80,10 @@ namespace ent {
     struct Biped : ROD<vis::Sprites, Biped_Def>, phys::Grounded, Controllable {
 
          // For control
-        Button_Bits buttons = Button_Bits(0);
+        uint32 buttons = 0;
         Vec focus = Vec(2, 0);
         Vec vision_pos;
-        void Controllable_buttons (Button_Bits) override;
+        void Controllable_buttons (uint32) override;
         void Controllable_move_focus (Vec) override;
         Vec Controllable_get_focus () override;
         Vec Controllable_get_pos () override;

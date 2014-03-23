@@ -100,8 +100,8 @@ namespace snd {
         static bool initted = false;
         if (!initted) {
             initted = true;
-            if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-                printf("SDL_Init failed: %s\n", SDL_GetError());
+            if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
+                throw hacc::X::Internal_Error("SDL_Init audio failed: " + std::string(SDL_GetError()));
             }
             atexit(SDL_Quit);
 
