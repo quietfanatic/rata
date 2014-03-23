@@ -24,11 +24,11 @@ File current_state = File("shell/initial-state.hacc");
 static std::string state_arg;
 
 struct Hotkeys : core::Listener {
-    std::vector<std::pair<int, core::Command>> hotkeys;
+    std::vector<std::pair<ent::Mapping, core::Command>> hotkeys;
     bool Listener_event (SDL_Event* event) override {
-        if (event->type == SDL_KEYDOWN) {
+        if (event->type == SDL_KEYDOWN && !event->key.repeat) {
             for (auto& hk : hotkeys) {
-                if (event->key.keysym.scancode == hk.first) {
+                if (hk.first.match(event)) {
                     hk.second();
                     return true;
                 }
