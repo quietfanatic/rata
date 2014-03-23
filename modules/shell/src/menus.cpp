@@ -1,11 +1,37 @@
 #include "shell/inc/menus.h"
 
+#include <SDL2/SDL_events.h>
 #include "vis/inc/color.h"
 #include "vis/inc/text.h"
 
 namespace shell {
     using namespace core;
     using namespace vis;
+
+    bool Menu_Base::Listener_event (SDL_Event* event) {
+        switch (event->type) {
+            case SDL_MOUSEMOTION: {
+                hover(decoord(event->motion.x, event->motion.y));
+                return true;
+            }
+            case SDL_MOUSEBUTTONDOWN: {
+                if (event->button.button == SDL_BUTTON_LEFT) {
+                    bool res = click(decoord(event->button.x, event->button.y));
+                    if (deactivate_on_click) deactivate();
+                    return res;
+                }
+                else return false;
+            }
+            case SDL_KEYDOWN: {
+                if (event->key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+                    deactivate();
+                    return true;
+                }
+                else return false;
+            }
+            default: return false;
+        }
+    }
 
     void Menu_Base::draw () {
         if (root) root->Menu_Item_draw(pos, size);

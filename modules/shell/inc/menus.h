@@ -5,7 +5,6 @@
 #include <vector>
 #include <memory>
 #include "core/inc/commands.h"
-#include "core/inc/window.h"
 #include "vis/inc/common.h"
 namespace vis { struct Font; }
 
@@ -32,31 +31,25 @@ namespace shell {
 
         void hover (Vec pos);
         bool click (Vec pos);
+
+        virtual Vec decoord (int x, int y) = 0;
+        virtual void activate () = 0;
+        virtual void deactivate () = 0;
+        bool Listener_event (SDL_Event*) override;
     };
     template <class Layer>
     struct Menu : Menu_Base, vis::Drawn<Layer> {
         void Drawn_draw (Layer) override { draw(); }
-        void activate () {
+        void activate () override {
             vis::Drawn<Layer>::appear();
             core::Listener::activate();
         }
-        void deactivate () {
+        void deactivate () override {
             vis::Drawn<Layer>::disappear();
             core::Listener::deactivate();
         }
-        void Listener_cursor_pos (int x, int y) {
-            hover(vis::camera->window_to_layer<Layer>(x, y));
-        }
-        bool Listener_button (int code, int press) {
-            if (code == 0 && press) {
-                bool res = click(vis::camera->window_to_layer<Layer>(
-                    core::window->cursor_x,
-                    core::window->cursor_y
-                ));
-                if (deactivate_on_click) deactivate();
-                return res;
-            }
-            else return false;
+        Vec decoord (int x, int y) override {
+            return vis::camera->window_to_layer<Layer>(x, y);
         }
     };
 
