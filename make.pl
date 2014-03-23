@@ -168,9 +168,8 @@ END
  # Miscellaneous stuff
 phony 'test', sub { grep /modules\/.*\/test$/, targets };
 
-phony 'clean', sub { grep /modules\/.*\/clean$/, targets }, sub {
-    unlink 'build-config';
-};
+phony 'clean', sub { grep /modules\/.*\/clean$/, targets };
+phony 'really-clean', 'clean', sub { unlink 'build-config'; };
 
  # Tie it all together
 phony 'midis', sub { grep /modules\/world\/.*\.s16s/, targets };
