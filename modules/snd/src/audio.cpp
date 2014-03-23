@@ -103,7 +103,6 @@ namespace snd {
             if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0) {
                 throw hacc::X::Internal_Error("SDL_Init audio failed: " + std::string(SDL_GetError()));
             }
-            atexit(SDL_Quit);
 
             SDL_AudioSpec spec;
             spec.freq = 44100;
