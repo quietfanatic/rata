@@ -24,7 +24,7 @@ namespace core {
     }
     void Window::open () {
         if (is_open) {
-            SDL_SetWindowFullscreen(sdl_window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+            SDL_SetWindowFullscreen(sdl_window, fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
             SDL_SetWindowSize(sdl_window, width, height);
         }
         else {
@@ -42,7 +42,7 @@ namespace core {
                 SDL_WINDOWPOS_UNDEFINED,
                 width, height,
                 SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
-                | (fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0)
+                | (fullscreen ? SDL_WINDOW_FULLSCREEN : 0)
             );
             if (!sdl_window) {
                 throw hacc::X::Internal_Error("SDL_CreateWindow failed: " + std::string(SDL_GetError()));
