@@ -18,10 +18,10 @@
         [0x35 [open_console]]  // `
         [0x13 [pause]]  // P
         [0x27 [re_toggle]]  // 0
-        [0x28 [window_size 320 240]]  // 1
-        [0x29 [window_size 640 480]]  // 2
-        [0x2A [window_size 960 720]]  // 3
-        [0x2B [window_size 1280 960]]  // 4
+        [0x1E [window_size 320 240]]  // 1
+        [0x1F [window_size 640 480]]  // 2
+        [0x20 [window_size 960 720]]  // 3
+        [0x21 [window_size 1280 960]]  // 4
         [0x2F [global_lighting [-0.1 -0.1 -0.1] [0 0 0] true]]  // [
         [0x30 [global_lighting [+0.1 +0.1 +0.1] [0 0 0] true]]  // ]
         [0x33 [global_lighting [0 0 0] [-0.1 -0.1 -0.1] true]]  // ;
