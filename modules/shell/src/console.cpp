@@ -207,12 +207,19 @@ namespace shell {
                 }
                 case SDL_KEYUP: return true;
                 case SDL_TEXTINPUT: {
+                    if (wait_for_draw) return false;
                     std::string text = event->text.text;
                     cli = cli.substr(0, cli_pos)
                         + text
                         + cli.substr(cli_pos);
                     cli_pos += text.size();
                     completion_matches.clear();
+                    return true;
+                }
+                case SDL_MOUSEMOTION:
+                case SDL_MOUSEBUTTONUP:
+                case SDL_MOUSEBUTTONDOWN: {
+                     // Eat these events.
                     return true;
                 }
                 default: return false;
