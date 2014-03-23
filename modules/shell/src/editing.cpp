@@ -301,6 +301,27 @@ namespace shell {
                     return true;
                 }
                 else return false;
+            case SDL_MOUSEMOTION: {
+                auto x = event->motion.x;
+                auto y = event->motion.y;
+                float move_speed = 1/256.0;
+                if (x < 64) {
+                    camera.pos.x += (x - 64) * move_speed;
+                }
+                else if (x > window->width - 64) {
+                    camera.pos.x += (x - window->width + 64) * move_speed;
+                }
+                if (y < 64) {
+                    camera.pos.y -= (y - 64) * move_speed;
+                }
+                else if (y > window->height - 64) {
+                    camera.pos.y -= (y - window->height + 64) * move_speed;
+                }
+                return true;
+            }
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP:
+                return true;
             default: return false;
         }
     }
