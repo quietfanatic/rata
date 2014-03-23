@@ -128,6 +128,15 @@ namespace vis {
         return window_to_dev(x, y);
     }
 
+    static Vec get_camera_pos () {
+        if (camera) return camera->pos;
+        else return Vec(10, 7.5);
+    }
+    static Vec get_camera_size () {
+        if (camera) return camera->size;
+        else return Vec(20, 15);
+    }
+
 }
 
 #endif

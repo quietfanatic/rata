@@ -30,8 +30,8 @@ namespace vis {
 
      // Set up the requirements for a render-to-texture step
     void setup_rtt () {
-        if (rtt_camera_size != global_camera_size) {
-            rtt_camera_size = global_camera_size;
+        if (rtt_camera_size != get_camera_size()) {
+            rtt_camera_size = get_camera_size();
             log("vis", "setting up world framebuffer: %dx%d", (int)(rtt_camera_size.x/PX), (int)(rtt_camera_size.y/PX));
             if (world_fb) glDeleteFramebuffers(1, &world_fb);
             if (world_tex) glDeleteTextures(1, &world_tex);
