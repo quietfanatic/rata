@@ -277,10 +277,10 @@ namespace shell {
                             editing_room = false;
                         else
                             deactivate();
+                        return true;
                     }
-                    return true;
+                    else return false;
                 }
-                case SDL_KEYUP: return true;
                 default: return false;
             }
         }

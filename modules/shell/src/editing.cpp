@@ -150,9 +150,11 @@ namespace shell {
                     else if (y > window->height - 64) {
                         selector_camera.pos.y -= (y - window->height + 64) * move_speed;
                     }
+                    return true;
                 }
                 if (clicking) {
                     draw(camera->window_to_world(event->motion.x, event->motion.y));
+                    return false;  // Let room_editor move camera
                 }
             }
             case SDL_KEYDOWN: {
@@ -236,10 +238,9 @@ namespace shell {
                         }
                         return true;
                     }
-                    default: return true;
+                    default: return false;
                 }
             }
-            case SDL_KEYUP: return true;
             default: return false;
         }
     }
@@ -295,10 +296,11 @@ namespace shell {
     bool Texture_Tester::Listener_event (SDL_Event* event) {
         switch (event->type) {
             case SDL_KEYDOWN:
-                if (event->key.keysym.sym == SDLK_ESCAPE)
+                if (event->key.keysym.sym == SDLK_ESCAPE) {
                     deactivate();
-                return true;
-            case SDL_KEYUP: return true;
+                    return true;
+                }
+                else return false;
             default: return false;
         }
     }
