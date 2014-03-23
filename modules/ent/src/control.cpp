@@ -7,6 +7,31 @@
 
 namespace ent {
 
+    bool Mapping::match (SDL_Event* event) {
+        switch (event->type) {
+            case SDL_KEYUP:
+            case SDL_KEYDOWN: {
+                switch (type) {
+                    case KEY: {
+                        return event->key.keysym.sym == code
+                            && event->key.keysym.mod == modifiers;
+                    }
+                    case SCN: return event->key.keysym.scancode == code;
+                    case BTN: return false;
+                }
+            }
+            case SDL_MOUSEBUTTONUP:
+            case SDL_MOUSEBUTTONDOWN: {
+                switch (type) {
+                    case KEY: return false;
+                    case SCN: return false;
+                    case BTN: return event->button.button == code;
+                }
+            }
+            default: return false;
+        }
+    }
+
     Player* player = NULL;
 
     void Player::Drawn_draw (vis::Overlay) {
@@ -34,7 +59,7 @@ namespace ent {
                 size_t bit = 1;
                 for (size_t i = 0; i < N_BUTTONS; i++) {
                     for (auto& m : mappings[Button(i)]) {
-                        if (m.type == KEY && m.code == event->key.keysym.scancode) {
+                        if (m.match(event)) {
                             if (event->key.state)
                                 buttons |= bit;
                             else
@@ -52,7 +77,7 @@ namespace ent {
                 size_t bit = 1;
                 for (size_t i = 0; i < N_BUTTONS; i++) {
                     for (auto& m : mappings[Button(i)]) {
-                        if (m.type == KEY && m.code == event->button.button) {
+                        if (m.match(event)) {
                             if (event->button.state)
                                 buttons |= bit;
                             else
@@ -83,16 +108,16 @@ namespace ent {
 
     Player::Player () {
          // Default mappings
-        mappings[BTN_LEFT].emplace_back(KEY, SDL_SCANCODE_A);
-        mappings[BTN_RIGHT].emplace_back(KEY, SDL_SCANCODE_D);
-        mappings[BTN_DOWN].emplace_back(KEY, SDL_SCANCODE_S);
-        mappings[BTN_UP].emplace_back(KEY, SDL_SCANCODE_W);
-        mappings[BTN_CROUCH].emplace_back(KEY, SDL_SCANCODE_S);
-        mappings[BTN_JUMP].emplace_back(KEY, SDL_SCANCODE_SPACE);
-        mappings[BTN_ACTION].emplace_back(KEY, SDL_SCANCODE_E);
+        mappings[BTN_LEFT].emplace_back(SCN, SDL_SCANCODE_A);
+        mappings[BTN_RIGHT].emplace_back(SCN, SDL_SCANCODE_D);
+        mappings[BTN_DOWN].emplace_back(SCN, SDL_SCANCODE_S);
+        mappings[BTN_UP].emplace_back(SCN, SDL_SCANCODE_W);
+        mappings[BTN_CROUCH].emplace_back(SCN, SDL_SCANCODE_S);
+        mappings[BTN_JUMP].emplace_back(SCN, SDL_SCANCODE_SPACE);
+        mappings[BTN_ACTION].emplace_back(SCN, SDL_SCANCODE_E);
         mappings[BTN_EXAMINE].emplace_back(BTN, SDL_BUTTON_LEFT);
         mappings[BTN_AIM].emplace_back(BTN, SDL_BUTTON_RIGHT);
-        mappings[BTN_AIM].emplace_back(KEY, SDL_SCANCODE_LSHIFT);
+        mappings[BTN_AIM].emplace_back(SCN, SDL_SCANCODE_LSHIFT);
         mappings[BTN_ATTACK].emplace_back(BTN, SDL_BUTTON_LEFT);
         player = this;
         camera.activate();
@@ -136,6 +161,7 @@ HACCABLE(Controllable) {
 HACCABLE(Mapping_Type) {
     name("ent::MappingType");
     value("key", KEY);
+    value("scn", SCN);
     value("btn", BTN);
 }
 
@@ -143,6 +169,7 @@ HACCABLE(Mapping) {
     name("ent::Mapping");
     elem(member(&Mapping::type));
     elem(member(&Mapping::code));
+    elem(member(&Mapping::modifiers).optional());
 }
 
 HACCABLE(Mappings) {

@@ -42,15 +42,20 @@ namespace ent {
     };
 
     enum Mapping_Type {
-        KEY,
-        BTN
+        KEY,  // Keycode according to I guess SDL's standard?
+        SCN,  // Scancode according to USB keyboard scancode standards
+        BTN  // Mouse button, ??
     };
 
     struct Mapping {
         Mapping_Type type;
         int code;
+        uint16 modifiers;  // shift, ctrl, etc.  Only affects KEY
         Mapping () { }
-        Mapping (Mapping_Type type, int code) : type(type), code(code) { }
+        Mapping (Mapping_Type type, int code, uint16 mod = 0) :
+            type(type), code(code), modifiers(mod)
+        { }
+        bool match (SDL_Event* event);
     };
     struct Mappings {
         std::vector<Mapping> left;
