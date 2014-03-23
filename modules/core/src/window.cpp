@@ -328,3 +328,9 @@ void _window_size (int width, int height) {
     window->open();
 }
 New_Command _window_size_cmd ("window_size", "Set the window size in pixels.", 2, _window_size);
+
+void _window_fullscreen () {
+    window->fullscreen = !window->fullscreen;
+    window->open();
+}
+New_Command _window_fullscreen_cmd ("window_fullscreen", "Toggle between window fullscreen modes", 0, _window_fullscreen);
