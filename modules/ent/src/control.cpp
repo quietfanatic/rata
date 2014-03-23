@@ -68,6 +68,7 @@ namespace ent {
         mappings[BTN_AIM].emplace_back(KEY, 287);
         mappings[BTN_ATTACK].emplace_back(BTN, 1);
         player = this;
+        camera.activate();
     }
     Player::~Player () {
         if (player == this)
