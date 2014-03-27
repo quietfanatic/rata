@@ -189,6 +189,7 @@ HACCABLE(Mappings) {
 
 HACCABLE(Player) {
     name("ent::Player");
+    attr("Observer", base<geo::Observer>().collapse());
     attr("character", value_methods(&Player::get_character, &Player::set_character));
     attr("cursor_tex", member(&Player::cursor_tex).optional());
     attr("cursor_frame", member(&Player::cursor_frame).optional());

@@ -218,5 +218,5 @@ HACCABLE(Resident) {
 
 HACCABLE(Observer) {
     name("geo::Observer");
-    attr("room", value_methods(&Observer::get_room, &Observer::set_room));
+    attr("room", value_methods(&Observer::get_room, &Observer::set_room).optional());
 }
