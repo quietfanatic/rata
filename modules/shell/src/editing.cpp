@@ -153,9 +153,10 @@ namespace shell {
                     return true;
                 }
                 if (clicking) {
-                    draw(camera->window_to_world(event->motion.x, event->motion.y));
-                    return false;  // Let room_editor move camera
+                    if (!tilemap) return false;
+                    draw(camera->window_to_world(event->motion.x, event->motion.y) - tilemap->pos());
                 }
+                return false;  // Let room_editor move camera
             }
             case SDL_KEYDOWN: {
                 auto def = tilemap->get_def();
