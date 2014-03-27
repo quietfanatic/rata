@@ -25,7 +25,13 @@ namespace core {
     void Window::open () {
         if (is_open) {
             SDL_SetWindowFullscreen(sdl_window, fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
-            SDL_SetWindowSize(sdl_window, width, height);
+            int ox, oy, ow, oh;
+            SDL_GetWindowSize(sdl_window, &ow, &oh);
+            if (ow != width || oh != height) {
+                SDL_GetWindowPosition(sdl_window, &ox, &oy);
+                SDL_SetWindowPosition(sdl_window, ox - (width - ow)/2, oy - (height - oh)/2);
+                SDL_SetWindowSize(sdl_window, width, height);
+            }
         }
         else {
             auto wd = cwd();
