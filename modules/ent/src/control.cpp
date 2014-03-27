@@ -104,6 +104,7 @@ namespace ent {
         Vec v_pos = character->Controllable_get_vision_pos();
         if (defined(v_pos))
             camera.pos = v_pos;
+        Observer::set_room(character->Controllable_get_room());
     }
 
     Player::Player () {

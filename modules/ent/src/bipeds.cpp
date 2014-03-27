@@ -149,9 +149,9 @@ namespace ent {
      // Ensure we're in the right room and also calculate walk animation.
     void Biped::Object_after_move () {
         auto def = get_def();
+        reroom(pos());
          // Clear input before next frame
         buttons = Button_Bits(0);
-        reroom(pos());
         if (ground && (!crouching || crawling)) {
             if (fabs(vel().x) < 0.01) {
                 distance_walked = 0;
