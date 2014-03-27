@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include "core/inc/commands.h"
+#include "core/inc/window.h"
 #include "vis/inc/common.h"
 namespace vis { struct Font; }
 
@@ -21,6 +22,8 @@ namespace shell {
         virtual bool Menu_Item_hover (Vec pos, Vec area) { return false; }
         virtual bool Menu_Item_click (Vec pos, Vec area) { return false; }
     };
+
+    extern uint64 last_hover_frame;
 
     struct Menu_Base : core::Listener {
         Vec pos = Vec(0, 0);
@@ -41,6 +44,7 @@ namespace shell {
     struct Menu : Menu_Base, vis::Drawn<Layer> {
         void Drawn_draw (Layer) override { draw(); }
         void activate () override {
+            last_hover_frame = core::window->frames_drawn;
             vis::Drawn<Layer>::appear();
             core::Listener::activate();
         }
@@ -52,8 +56,6 @@ namespace shell {
             return vis::camera->window_to_layer<Layer>(x, y);
         }
     };
-
-    extern uint64 last_hover_frame;
 
     struct Button : Menu_Item {
         core::Command on_click;
