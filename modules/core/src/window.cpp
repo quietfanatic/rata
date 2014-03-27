@@ -171,15 +171,15 @@ namespace core {
                 }
                 if (render) render();
                 frames_drawn++;
+                uint32 new_ticks = SDL_GetTicks();
+                lag += (new_ticks - last_ticks) / 1000.0;
+                last_ticks = new_ticks;
+                if (limit_fps && lag < 0) {
+                    SDL_Delay(-lag * 1000);
+                }
+                log("timing", "%f", lag);
+                SDL_GL_SwapWindow(sdl_window);
             }
-            uint32 new_ticks = SDL_GetTicks();
-            lag += (new_ticks - last_ticks) / 1000.0;
-            last_ticks = new_ticks;
-            if (limit_fps && lag < 0) {
-                SDL_Delay(-lag * 1000);
-            }
-            log("timing", "%f", lag);
-            SDL_GL_SwapWindow(sdl_window);
         }
     }
     void Window::stop () { to_stop = true; }
