@@ -27,7 +27,7 @@
         [[key 0x3B] [global_lighting [0 0 0] [-0.1 -0.1 -0.1] true]]  // ;
         [[key 0x27] [global_lighting [0 0 0] [+0.1 +0.1 +0.1] true]]  // '
         [[key 0x5C] [light_debug]]  // \
-        [[key 0x72 0x00C0] [reload]]  // Ctrl-R
+        [[key 0x72] [reload]]  // R
         [[key 0x76] [vision_debug]]  // V
         [[key 0x74] [texture_test $("world/res/tiles.hacc").img.tiles 0]]  // T
     ]}
