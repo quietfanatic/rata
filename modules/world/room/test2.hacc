@@ -1,5 +1,5 @@
 { hacc::Document:{
-    _next_id:2
+    _next_id:5
     room:{ geo::Room:{
         boundary:[
             40~42200000
@@ -33,5 +33,21 @@
             0~00000000
             0~00000000
         ]
+    } }
+    _2:{ geo::Wall:{
+        room:$.room
+        corner:[
+            [48.5~42420000 7.5~40f00000]
+            0~00000000
+        ]
+        left:$("world/room/test.hacc").lb_corner
+    } }
+    _4:{ geo::Wall:{
+        room:$.room
+        corner:[
+            [50.5~424a0000 7.5~40f00000]
+            0~00000000
+        ]
+        left:null
     } }
 } }

@@ -39,13 +39,17 @@
     } }
     tilemap_def:{ geo::Tilemap_Def:{
         type:static
+        mass:0~00000000
+        damping:0~00000000
+        gravity_scale:1~3f800000
+        fixtures:[]
         tileset:$("world/res/test-tiles.hacc").tileset
         texture:$("world/res/test-tiles.hacc").img.textures[0]
         tiles:$("world/room/test.tiles")
-    }}
+    } }
     tilemap:{ geo::Tilemap:{
-        def:$.tilemap_def
         room:$.room
+        def:$.tilemap_def.Object_Def
         pos:[
             0~00000000
             0~00000000
@@ -57,22 +61,34 @@
     } }
     lb_corner:{ geo::Wall:{
         room:$.room
-        corner:[[11, 8.5] -1]
+        corner:[
+            [11~41300000 8.5~41080000]
+            -1~bf800000
+        ]
         left:$.lt_corner
     } }
     lt_corner:{ geo::Wall:{
         room:$.room
-        corner:[[11, 21.5] -1]
+        corner:[
+            [11~41300000 21.5~41ac0000]
+            -1~bf800000
+        ]
         left:$.rt_corner
     } }
     rt_corner:{ geo::Wall:{
         room:$.room
-        corner:[[29, 21.5] -1]
+        corner:[
+            [29~41e80000 21.5~41ac0000]
+            -1~bf800000
+        ]
         left:$.rb_corner
     } }
     rb_corner:{ geo::Wall:{
         room:$.room
-        corner:[[29, 8.5] -1]
-        left:$.lb_corner
+        corner:[
+            [31~41f80000 8.5~41080000]
+            1~3f800000
+        ]
+        left:$("world/room/test2.hacc")._4
     } }
 } }
