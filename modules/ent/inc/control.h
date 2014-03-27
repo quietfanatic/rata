@@ -50,10 +50,12 @@ namespace ent {
     struct Mapping {
         Mapping_Type type;
         int code;
-        uint16 modifiers;  // shift, ctrl, etc.  Only affects KEY
+        bool shift = false;
+        bool ctrl = false;
+        bool alt = false;
         Mapping () { }
-        Mapping (Mapping_Type type, int code, uint16 mod = 0) :
-            type(type), code(code), modifiers(mod)
+        Mapping (Mapping_Type type, int code, bool s = false, bool c = false, bool a = false) :
+            type(type), code(code), shift(s), ctrl(c), alt(a)
         { }
         bool match (SDL_Event* event);
     };

@@ -14,7 +14,9 @@ namespace ent {
                 switch (type) {
                     case KEY: {
                         return event->key.keysym.sym == code
-                            && event->key.keysym.mod == modifiers;
+                            && (!!(event->key.keysym.mod & KMOD_SHIFT) == shift)
+                            && (!!(event->key.keysym.mod & KMOD_CTRL) == ctrl)
+                            && (!!(event->key.keysym.mod & KMOD_ALT) == alt);
                     }
                     case SCN: return event->key.keysym.scancode == code;
                     case BTN: return false;
@@ -170,7 +172,9 @@ HACCABLE(Mapping) {
     name("ent::Mapping");
     elem(member(&Mapping::type));
     elem(member(&Mapping::code));
-    elem(member(&Mapping::modifiers).optional());
+    elem(member(&Mapping::shift).optional());
+    elem(member(&Mapping::ctrl).optional());
+    elem(member(&Mapping::alt).optional());
 }
 
 HACCABLE(Mappings) {
