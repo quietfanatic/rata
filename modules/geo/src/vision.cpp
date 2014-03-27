@@ -148,7 +148,9 @@ namespace geo {
                     Vec snap_here = snap(wall.edge, preferred);
                     if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
-                    if (snap_dist2 < closest_snap_dist2) {
+                     // Prefer violations over non-violations; otherwise we may
+                     //  miss some violations.
+                    if (snap_dist2 + !violating < closest_snap_dist2 + !currently_violating) {
                         currently_violating = violating;
                         closest_snap_dist2 = snap_dist2;
                          // Record this snap if it's in the bound
@@ -178,7 +180,7 @@ namespace geo {
                     Vec snap_here = snap(wall.corner, preferred);
                     if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
-                    if (snap_dist2 < closest_snap_dist2) {
+                    if (snap_dist2 + !violating < closest_snap_dist2 + !currently_violating) {
                         currently_violating = violating;
                         closest_snap_dist2 = snap_dist2;
                         if (violating && covers(bound, snap_here)) {
