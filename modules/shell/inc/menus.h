@@ -53,6 +53,8 @@ namespace shell {
         }
     };
 
+    extern uint64 last_hover_frame;
+
     struct Button : Menu_Item {
         core::Command on_click;
         uint32 color = 0xffffffff;
@@ -60,7 +62,7 @@ namespace shell {
         uint32 hover_color = 0xffffffff;
         uint32 hover_background_color = 0x00000000;
         uint64 hovering_frame = -1;
-        bool hovering () { return hovering_frame == core::window->frames_drawn; }
+        bool hovering () { return hovering_frame == last_hover_frame; }
         bool Menu_Item_hover (Vec, Vec) override;
         bool Menu_Item_click (Vec, Vec) override;
         void Menu_Item_draw (Vec, Vec) override;

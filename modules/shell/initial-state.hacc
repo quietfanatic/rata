@@ -10,12 +10,6 @@
         cursor_tex:$("world/res/cursor.hacc").img.ALL
         cursor_frame:$("world/res/cursor.hacc").layout.normal
     }}
-    rata2:{ent::Biped:{
-        def:$("world/char/rata.hacc").def
-        pos:[4 22]
-        room:$("world/room/test.hacc").room
-        direction:-1
-    }}
     frock:{ent::ResItem:{
         def:$("world/item/items.hacc").frock
         owner:$.rata.equipment

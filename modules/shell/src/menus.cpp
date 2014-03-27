@@ -57,6 +57,8 @@ namespace shell {
         }
     }
 
+    uint64 last_hover_frame = 0;
+
     void Button::Menu_Item_draw (Vec pos, Vec size) {
         uint32 bg = hovering() ? hover_background_color : background_color;
         if (bg & 0xff) {
@@ -68,6 +70,7 @@ namespace shell {
     bool Button::Menu_Item_hover (Vec pos, Vec size) {
         if (Rect(0, 0, size.x, size.y).covers(pos)) {
             hovering_frame = core::window->frames_drawn;
+            last_hover_frame = hovering_frame;
             return true;
         }
         return false;
