@@ -157,11 +157,13 @@ namespace vis {
         glDisable(GL_BLEND);
         glPixelZoom(window->width*PX/rtt_camera_size.x, window->height*PX/rtt_camera_size.y);
         glCopyPixels(0, 0, rtt_camera_size.x/PX, rtt_camera_size.y/PX, GL_COLOR);
+        diagnose_opengl("after zooming with CopyPixels");
          // Draw dev layer
         glEnable(GL_BLEND);
         glViewport(0, 0, window->width, window->height);
         for (auto& i : Dev::items)
             i.Drawn_draw(Dev());
+        diagnose_opengl("after rendering a frame");
     }
 
     Links<Drawn<Map>> Map::items;
