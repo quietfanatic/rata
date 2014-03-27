@@ -106,6 +106,11 @@ namespace shell {
                         camera.pos.y -= (y - window->height + 64) * move_speed;
                     }
                     Vec world_pos = vis::camera->window_to_world(event->motion.x, event->motion.y);
+                     // Snap to grid when pressing CTRL
+                    if (SDL_GetModState() & KMOD_CTRL) {
+                        world_pos.x = round(world_pos.x * 2) / 2;
+                        world_pos.y = round(world_pos.y * 2) / 2;
+                    }
                     if (editing_pts) {
                         if (dragging_pt >= 0) {
                             Vec r_pos = selected->Resident_get_pos();
@@ -258,6 +263,11 @@ namespace shell {
                                 room_menu->activate();
                             }
                         }
+                    }
+                     // Snap to grid if pressing ctrl
+                    if (SDL_GetModState() & KMOD_CTRL) {
+                        drag_offset.x = round(drag_offset.x * 2) / 2;
+                        drag_offset.y = round(drag_offset.y * 2) / 2;
                     }
                     return true;
                 }
