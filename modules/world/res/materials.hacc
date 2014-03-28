@@ -16,6 +16,11 @@
         [0x00000000 0x00000000 0x00000000 0xffffffff]  // 12. Bright light source
         [0x3c4c4eff 0x2f3b3dff 0x2a3b3dff 0x00000000]  // 13. Bluish metallic grey
         [0x2f3a3aff 0x2a2f2fff 0x2a2f2fff 0x00000000]  // 14. Dark metallic grey
-        [0x583535ff 0x583535ff 0x00000000 0x00000000]  // 15. Red stone?
+        [0x583535ff 0x583535ff 0x00000000 0x00000000]  // 15. Reddish stone
+        [0x262626ff 0x262626ff 0x00000000 0x00000000]  // 16. Gray Stone/Rock
+        [0x1b1b1bff 0x1b1b1bff 0x1b1b1bff 0x00000000]  // 17. Black Rock
+        [0x1d2f24ff 0x1d2f24ff 0x00000000 0x00000000]  // 18. pipe outside (green)
+        [0x111321ff 0x111321ff 0x111321ff 0x00000000]  // 19. pipe inside (blue)
+        [0x49804fff 0x49804fff 0x49804fff 0x00000000]  // 20. foliage/metal
     ]}
 }}
