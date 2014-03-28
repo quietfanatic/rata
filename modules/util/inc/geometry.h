@@ -32,9 +32,10 @@ namespace util {
     CE Vec operator - (Vec a, Vec b) { return Vec(a.x-b.x, a.y-b.y); }
     CE Vec operator * (Vec a, float b) { return Vec(a.x*b, a.y*b); }
     CE Vec operator * (float a, Vec b) { return Vec(a*b.x, a*b.y); }
+    CE Vec operator / (Vec a,  float b) { return Vec(a.x/b, a.y/b); }
      // Okay, okay.
     CE Vec operator * (Vec a, Vec b) { return Vec(a.x*b.x, a.y*b.y); }
-    CE Vec operator / (Vec a,  float b) { return Vec(a.x/b, a.y/b); }
+    CE Vec operator / (Vec a, Vec b) { return Vec(a.x/b.x, a.y/b.y); }
     static inline Vec operator += (Vec& a, Vec b) { return a = a + b; }
     static inline Vec operator -= (Vec& a, Vec b) { return a = a - b; }
     static inline Vec operator *= (Vec& a, float b) { return a = a * b; }
