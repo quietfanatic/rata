@@ -28,7 +28,6 @@ namespace geo {
         Resident::finish();
     }
     void Wall::Resident_emerge () {
-        printf("Wall::Resident_emerge()\n");
         Link<Wall>::link(walls);
     }
     void Wall::Resident_reclude () {
