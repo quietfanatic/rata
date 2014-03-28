@@ -14,11 +14,14 @@ namespace geo {
          //  because the configuration of Walls in the world rely on it.
         static CE Vec range = Vec(20, 15);
          // Register one attention for the next frame.
-        void look_at (const Rect& area, float priority);
-         // Special point for this Vision to look at.
-        void set_focus (Vec p) { focus = p; }
-         // Use focus, account for as many Attns as possible, constrained by Walls.
-        Vec get_pos (bool debug_draw_this = false);
+        void attend (const Rect& area, float priority);
+         // Run the constraint satisfaction algorithm.
+         //   origin: where you're looking from
+         //   focus: where you're looking to (e.g. a cursor)
+         //   returns a point somewhere between origin and focus accounting for
+         //    all the currently active Walls.
+         //   focus will be constrained to within the view of the returned point.
+        Vec look (Vec origin, Vec* focus, bool debug_draw_this = false);
 
          // A list of priority-order areas this will try to look at.
         struct Attn {
@@ -28,7 +31,6 @@ namespace geo {
         static CE size_t MAX_ATTNS = 4;
         Attn attns [MAX_ATTNS];
         uint32 n_attns = 0;
-        Vec focus;
     };
 
      // These link together to form the boundaries for vision fields.

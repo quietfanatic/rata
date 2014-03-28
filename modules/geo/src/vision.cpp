@@ -115,7 +115,7 @@ namespace geo {
         else insert_attn(v, a, i + 1);
     }
 
-    void Vision::look_at (const Rect& r, float priority) {
+    void Vision::attend (const Rect& r, float priority) {
         Attn attn = {r, priority};
         attn.area.l -= 9;
         attn.area.b -= 6.5;
@@ -127,7 +127,7 @@ namespace geo {
      // Temporary for debugging purposes
     static std::vector<Vec> dbg_snaps;
     static Vec dbg_ideal_pos;
-    static Rect dbg_area;
+    static std::vector<Rect> dbg_areas;
 
      // This tries to find a valid camera position within the given rectangle.
      //  If it's not possible, returns Vec(NAN, NAN)
@@ -420,18 +420,82 @@ namespace geo {
 
      // This gets a valid camera position that's within as many attentions
      //  as possible.
-    Vec Vision::get_pos (bool debug_draw_this) {
-         // TODO: let the focus control position as much as possible
-        if (debug_draw_this) dbg_ideal_pos = focus;
-        Vec best_so_far = focus;
-        Rect attn_bound = Rect(-INF, -INF, INF, INF);
-        if (debug_draw_this) dbg_area = attn_bound;
+    Vec Vision::look (Vec origin, Vec* focus, bool debug_draw_this) {
+        Vec rel = *focus - origin;
+         // Preliminary focus restriction.  TODO: leave this to the caller
+        if (rel.x < -18) {
+            rel = Vec(-18, -18 * slope(rel));
+        }
+        else if (rel.x > 18) {
+            rel = Vec(18, 18 * slope(rel));
+        }
+        if (rel.y < -13) {
+            rel = Vec(-13 / slope(rel), -13);
+        }
+        else if (rel.y > 13) {
+            rel = Vec(13 / slope(rel), 13);
+        }
+         // Secondary focus restriction (restrict to walls)
+        Vec middle = (rel + origin) / 2;
+        middle = attempt_constraint(middle, origin + Rect(-9, -6.5, 9, 6.5), false);
+        if (!defined(middle)) return (rel + origin) / 2;  // Something went wrong
+        Vec middle_rel = middle - origin;
+         // Tertiary focus restriction
+        if (rel.x < middle_rel.x - 10) {
+            rel = Vec(middle_rel.x - 10, (middle_rel.x - 10) * slope(rel));
+        }
+        else if (rel.x > middle_rel.x + 10) {
+            rel = Vec(middle_rel.x + 10, (middle_rel.x + 10) * slope(rel));
+        }
+        if (rel.y < middle_rel.y - 7.5) {
+            rel = Vec((middle_rel.y - 7.5) / slope(rel), middle_rel.y - 7.5);
+        }
+        else if (rel.y > middle_rel.y + 7.5) {
+            rel = Vec((middle_rel.y + 7.5) / slope(rel), middle_rel.y + 7.5);
+        }
+        *focus = rel + origin;
+         // Now allow the area around the cursor to stretch by one block
+        Rect cursor_range = *focus + Rect(-9, -6.5, 9, 6.5);
+        if (cursor_range.r < middle.x) {
+            cursor_range.r = middle.x;
+        }
+        else if (cursor_range.l > middle.x) {
+            cursor_range.l = middle.x;
+        }
+        if (cursor_range.t < middle.y) {
+            cursor_range.t = middle.y;
+        }
+        else if (cursor_range.b > middle.y) {
+            cursor_range.b = middle.y;
+        }
+         // Keep two separate bounds so we can account for cursor motion
+         //  within the non-cursor range.
+        Rect without_cursor = Rect(-INF, -INF, INF, INF);
+        Rect with_cursor = cursor_range;
+        Vec best_so_far = (*focus + origin) / 2;
+        if (debug_draw_this) {
+            dbg_ideal_pos = best_so_far;
+            dbg_areas.resize(0);
+            dbg_areas.push_back(cursor_range);
+            for (size_t i = 0; i < n_attns; i++) {
+                dbg_areas.push_back(attns[i].area);
+            }
+        }
+         // Now iterate over attentions to find the most we can satisfy
         for (size_t i = 0; i < n_attns; i++) {
-            attn_bound &= attns[i].area;
-            Vec attempt = attempt_constraint(focus, attn_bound, debug_draw_this);
+            with_cursor &= attns[i].area;
+            without_cursor &= attns[i].area;
+            if (!defined(with_cursor)) break;
+             // The position of ideal in without_cursor is proportional to
+             // the position of the cursor in with_cursor...or something like that?
+            Vec ideal = (cursor_range.rt() - without_cursor.lb())
+                      / (cursor_range.size() - without_cursor.size())
+                      * without_cursor.size()
+                      + without_cursor.lb();
+            ideal = constrain(with_cursor, ideal);
+            Vec attempt = attempt_constraint(ideal, with_cursor, debug_draw_this);
             if (!defined(attempt)) break;
             best_so_far = attempt;
-            if (debug_draw_this) dbg_area = attn_bound;
         }
         n_attns = 0;
         return best_so_far;
@@ -455,7 +519,9 @@ namespace geo {
             }
             draw_color(0xffff00ff);
             draw_circle(Circle(dbg_ideal_pos, 0.2));
-            draw_rect(dbg_area);
+            for (auto& a : dbg_areas) {
+                draw_rect(a);
+            }
         }
     };
     static Vision_Debug vision_debug;
