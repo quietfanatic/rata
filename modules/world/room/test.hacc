@@ -86,8 +86,8 @@
     rb_corner:{ geo::Wall:{
         room:$.room
         corner:[
-            [31~41f80000 8.5~41080000]
-            1~3f800000
+            [34~42080000 11.5~41380000]
+            4~40800000
         ]
         left:$("world/room/test2.hacc")._4
     } }
