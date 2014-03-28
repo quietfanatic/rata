@@ -142,13 +142,16 @@ namespace util {
     CE Rect bounds (const Circle& a) {
         return uninvert(Rect(a.c.x - a.r, a.c.y - a.r, a.c.x + a.r, a.c.y + a.r));
     }
+     // This may not be the right place to make this judgement, but
+     //  circles of zero radius are considered to be inverted, for the sake
+     //  of the geo::Wall class.
     CE bool contains (const Circle& c, Vec p) {
-        return c.r >= 0
+        return c.r > 0
             ? length2(p - c.c) < c.r*c.r
             : length2(p - c.c) >= c.r*c.r;
     }
     CE bool covers (const Circle& c, Vec p) {
-        return c.r >= 0
+        return c.r > 0
             ? length2(p - c.c) <= c.r*c.r
             : length2(p - c.c) > c.r*c.r;
     }
