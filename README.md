@@ -90,7 +90,8 @@ that module's directory, if it exists.
 
 ###### The Future and Beyond
 
- - ☐ windows support
+ - ☐ Use runtime MIDI player
+ - ☐ Windows support
  - ☐ Implement some AI
  - ☐ Implement text layout engine (for speech bubbles and maybe inventory)
  - ☐ Scripting system (for story and events and stuff)
