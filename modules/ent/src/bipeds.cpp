@@ -187,10 +187,11 @@ namespace ent {
             }
         });
          // Vision update
-        vision.attend(pos() + def->focus_offset + Rect(-1, -1, 1, 1), 1000000);
-        Vec focus_world = focus + pos() + def->focus_offset;
-        vision_pos = vision.look(pos() + def->focus_offset, &focus_world, !!controller);
-        focus = focus_world - (pos() + def->focus_offset);
+        Vec origin = pos() + def->focus_offset;
+        vision.attend(origin + Rect(-1, -1, 1, 1), 1000000);
+        Vec focus_world = focus + origin;
+        vision_pos = vision.look(origin, &focus_world, !!controller);
+        focus = focus_world - origin;
     }
 
     void Biped::Drawn_draw (vis::Sprites) {

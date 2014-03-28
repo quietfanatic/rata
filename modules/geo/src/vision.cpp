@@ -436,9 +436,9 @@ namespace geo {
             rel = Vec(13 / slope(rel), 13);
         }
          // Secondary focus restriction (restrict to walls)
-        Vec middle = (rel + origin) / 2;
+        Vec middle = (rel + origin + origin) / 2;
         middle = attempt_constraint(middle, origin + Rect(-9, -6.5, 9, 6.5), false);
-        if (!defined(middle)) return (rel + origin) / 2;  // Something went wrong
+        if (!defined(middle)) return (*focus + origin) / 2;  // Something went wrong
         Vec middle_rel = middle - origin;
          // Tertiary focus restriction
         if (rel.x < middle_rel.x - 10) {
@@ -474,7 +474,6 @@ namespace geo {
         Rect with_cursor = cursor_range;
         Vec best_so_far = (*focus + origin) / 2;
         if (debug_draw_this) {
-            dbg_ideal_pos = best_so_far;
             dbg_areas.resize(0);
             dbg_areas.push_back(cursor_range);
             for (size_t i = 0; i < n_attns; i++) {
@@ -489,12 +488,13 @@ namespace geo {
              // The position of ideal in without_cursor is proportional to
              // the position of the cursor in with_cursor...or something like that?
             Vec ideal = (cursor_range.rt() - without_cursor.lb())
-                      / (cursor_range.size() - without_cursor.size())
+                      / (cursor_range.size() + without_cursor.size())
                       * without_cursor.size()
                       + without_cursor.lb();
             ideal = constrain(with_cursor, ideal);
             Vec attempt = attempt_constraint(ideal, with_cursor, debug_draw_this);
             if (!defined(attempt)) break;
+            dbg_ideal_pos = ideal;
             best_so_far = attempt;
         }
         n_attns = 0;
