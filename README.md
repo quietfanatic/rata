@@ -78,8 +78,9 @@ that module's directory, if it exists.
 
 ###### Milestone 3
 
- - ☐ Sound and music, probably with OpenAL
- - ☐ Camera control (bring constraint satisfaction system from master branch)
+ - ☑ Basic sound system
+ - ☑ Port from GLFW to SDL2
+ - ☑ Camera control (bring constraint satisfaction system from master branch)
  - ☐ Items and equipment
 
 ###### Milestone 4
