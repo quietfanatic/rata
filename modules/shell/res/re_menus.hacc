@@ -112,9 +112,11 @@
                 }}
                 {shell::Text_Button:{
                     text:"new room..."
-                    on_click:[re_new_file "world/room/<untitled>.hacc" {geo::Room:{
-                        boundary:[-4 -4 4 4]
-                        neighbors:[]
+                    on_click:[re_new_file "world/room/<untitled>.hacc" {hacc::Document:{
+                        room:{geo::Room:{
+                            boundary:[-4 -4 4 4]
+                            neighbors:[]
+                        }}
                     }}]
                 }}
             ]
