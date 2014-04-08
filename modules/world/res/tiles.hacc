@@ -2,10 +2,36 @@
     img:{vis::Image:{
         filename:"world/res/tiles.png"
         textures: [
-            { name:tiles offset:[16 192] size:[256 272] }
+            { name:tiles offset:[16 192] size:[256 288] }
         ]
         palettes:[
             { offset:[279 456] length:0 vertical:true mask:0x00ffffff }
         ]
+    }}
+    tileset:{geo::Tileset:{
+        tiles: [
+            null null null null null null null null null null null null null null null null
+            $.solid $.solid $.solid null $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid
+            $.solid null $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid
+            $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid $.solid null $.solid $.solid $.solid
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+            null null null null null null null null null null null null null null null null
+        ]
+    }}
+    solid:{geo::TileDef:{
+        nature:{ friction:0.4 coll_b:[ground] }
+        vertices:[[0 0] [1 0] [1 1] [0 1]]
     }}
 }}
