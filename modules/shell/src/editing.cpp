@@ -81,7 +81,7 @@ namespace shell {
         return def->tiles->tiles[def->tiles->width * y + x];
     }
     void Tile_Editor::draw (Vec pos) {
-        pos += tilemap->pos();
+        pos -= tilemap->pos();
         if (!in_bounds(pos))
             return;
         auto def = tilemap->get_def();
@@ -102,8 +102,8 @@ namespace shell {
     }
     void Tile_Editor::pick (Vec pos) {
         auto def = tilemap->get_def();
-        if (in_bounds(pos + tilemap->pos())) {
-            tile = tile_at(pos + tilemap->pos());
+        if (in_bounds(pos - tilemap->pos())) {
+            tile = tile_at(pos - tilemap->pos());
             log("editing", "Selecting tile %04hx", tile);
         }
         else if (def->tileset && def->texture
@@ -158,7 +158,7 @@ namespace shell {
                 }
                 if (clicking) {
                     if (!tilemap) return false;
-                    draw(camera->window_to_world(event->motion.x, event->motion.y) - tilemap->pos());
+                    draw(camera->window_to_world(event->motion.x, event->motion.y));
                 }
                 return false;  // Let room_editor move camera
             }
