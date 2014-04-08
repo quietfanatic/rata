@@ -554,6 +554,9 @@ namespace shell {
     static void re_new_furniture (hacc::Type type, hacc::Tree data) {
         if (!room_editor.selected_room) return;
         hacc::Document* doc = hacc::get_document_containing(room_editor.selected_room);
+        if (!doc) {
+            throw hacc::X::Logic_Error("Selected room is not in a document!?");
+        }
         void* newp = doc->alloc(type);
         type.construct(newp);
         try {
