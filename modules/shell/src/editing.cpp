@@ -81,6 +81,7 @@ namespace shell {
         return def->tiles->tiles[def->tiles->width * y + x];
     }
     void Tile_Editor::draw (Vec pos) {
+        pos += tilemap->pos();
         if (!in_bounds(pos))
             return;
         auto def = tilemap->get_def();
@@ -101,15 +102,18 @@ namespace shell {
     }
     void Tile_Editor::pick (Vec pos) {
         auto def = tilemap->get_def();
-        if (in_bounds(pos))
-            tile = tile_at(pos);
+        if (in_bounds(pos + tilemap->pos())) {
+            tile = tile_at(pos + tilemap->pos());
+            log("editing", "Selecting tile %04hx", tile);
+        }
         else if (def->tileset && def->texture
               && pos.x >= selector_pos.x && pos.x < (selector_pos.x + def->texture->size.x*PX)
               && pos.y <= selector_pos.y && pos.y > (selector_pos.y - def->texture->size.y*PX)) {
-            uint16 index = pos.x - selector_pos.x
-                         + (pos.y - selector_pos.y) / def->texture->size.y*PX;
+            uint16 index = uint(pos.x - selector_pos.x)
+                         + uint(selector_pos.y - pos.y) * uint(def->texture->size.x*PX);
             if (index < def->tileset->tiles.size()) {
                 tile = (tile & 0xc000) | index;
+                log("editing", "Selecting tile %04hx", tile);
             }
         }
     }
@@ -117,7 +121,7 @@ namespace shell {
         if (!tilemap) return false;
         switch (event->type) {
             case SDL_MOUSEBUTTONDOWN: {
-                Vec pos = camera->window_to_world(event->button.x, event->button.y) - tilemap->pos();
+                Vec pos = camera->window_to_world(event->button.x, event->button.y);
                 if (event->button.button == SDL_BUTTON_LEFT) {
                     draw(pos);
                     clicking = true;
