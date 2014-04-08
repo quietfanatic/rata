@@ -1,0 +1,34 @@
+{ hacc::Document:{
+    _next_id:3
+    room:{ geo::Room:{
+        boundary:[
+            0~00000000
+            30~41f00000
+            40~42200000
+            60~42700000
+        ]
+        neighbors:[$("world/room/test.hacc").room]
+    } }
+    _1:{ geo::Tilemap:{
+        room:$.room
+        def:$._2.Object_Def
+        pos:[
+            0~00000000
+            30~41f00000
+        ]
+        vel:[
+            0~00000000
+            0~00000000
+        ]
+    } }
+    _2:{ geo::Tilemap_Def:{
+        type:static
+        mass:0~00000000
+        damping:0~00000000
+        gravity_scale:1~3f800000
+        fixtures:[]
+        tileset:$("world/res/tiles.hacc").tileset
+        texture:$("world/res/tiles.hacc").img.textures[0]
+        tiles:$("world/room/room1.tiles")
+    } }
+} }

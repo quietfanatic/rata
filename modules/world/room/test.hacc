@@ -7,7 +7,10 @@
             40~42200000
             30~41f00000
         ]
-        neighbors:[$("world/room/test2.hacc").room]
+        neighbors:[
+            $("world/room/test2.hacc").room
+            $("world/room/room1.hacc").room
+        ]
     } }
     test_light:{ ent::Light:{
         room:$.room
