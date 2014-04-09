@@ -12,6 +12,7 @@ my @objects = qw<
     ../core/tmp/opengl.o
     ../core/tmp/window.o
     ../ent/tmp/bipeds.o
+    ../ent/tmp/bullets.o
     ../ent/tmp/control.o
     ../ent/tmp/items.o
     ../ent/tmp/various.o
