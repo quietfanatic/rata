@@ -166,7 +166,7 @@ namespace core {
              // Do timing around the render step.
              // TODO: this is not quite optimal.
             lag -= 1/fps;
-            if (lag > 1/fps + 0.002 && lag < 4/fps) {
+            if (!limit_fps && lag > 1/fps + 0.002 && lag < 4/fps) {
                 log("frameskip", "Skipping frame!");
             }
             else {
