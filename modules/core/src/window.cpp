@@ -57,6 +57,7 @@ namespace core {
             if (!context) {
                 throw hacc::X::Internal_Error("SDL_GL_CreateContext failed: " + std::string(SDL_GetError()));
             }
+            if (benchmark) SDL_GL_SetSwapInterval(0);
             auto glew_initted = glewInit();
             if (glew_initted != GLEW_OK) {
                 throw hacc::X::Internal_Error("GLEW init failed: " + std::string((const char*)glewGetErrorString(glew_initted)));
@@ -187,8 +188,8 @@ namespace core {
                 log("timing", "%f", lag);
                 SDL_GL_SwapWindow(sdl_window);
                 if (benchmark) {
-                    if (frames_drawn % 60 == 0) {
-                        printf("FPS: %f\n", 60.0 / ((last_framerate_check - new_ticks) / 1000.0));
+                    if (frames_drawn % 240 == 0) {
+                        printf("FPS: %f\n", 240.0 / ((new_ticks - last_framerate_check) / 1000.0));
                         last_framerate_check = new_ticks;
                     }
                 }
