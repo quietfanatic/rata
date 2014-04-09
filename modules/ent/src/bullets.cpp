@@ -2,6 +2,7 @@
 
 #include "hacc/inc/haccable_standard.h"
 #include "phys/inc/phys.h"
+#include "util/inc/debug.h"
 #include "vis/inc/color.h"
 
 namespace ent {
@@ -43,6 +44,7 @@ namespace ent {
                 new_pos = pts[0] + vel * (1 - earliest_fraction);
                  // We've ended up with a more than 100% elastic collision but oh well
                 struck->GetBody()->ApplyLinearImpulse(vel_perp * normal, pos, true);
+                log("bullet", "Bullet velocity perpendicular: %f", vel_perp);
                 if (vel_perp > -0.8) {
                      // TODO play ricochet sound
                     goto try_bounce;

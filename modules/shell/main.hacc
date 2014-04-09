@@ -5,6 +5,7 @@
             [log frameskip true]
             [log editing true]
             [log DEBUG true]
+            [log bullet true]
             [set_default_font $("shell/res/monospace.hacc").font]
             [set_materials $("world/res/materials.hacc").materials]
             [lst_arg "shell/initial-state.hacc"]
