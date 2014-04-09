@@ -1,3 +1,10 @@
+
+ // This is the palette of materials for the game.
+ // It's currently limited to 255 colors.  It might be valuable to eventually
+ //  reduce the limit to 64 or so to use the extra bits for another field, but
+ //  right now we'll just add as many materials as we need.  We can consolidate
+ //  similar-looking materials later.
+
 {hacc::Document:{
     materials:{vis::Materials:[
      //   Ambient    Diffuse    Specular    Radiant
@@ -22,5 +29,8 @@
         [0x1d2f24ff 0x1d2f24ff 0x00000000 0x00000000]  // 18. pipe outside (green)
         [0x111321ff 0x111321ff 0x111321ff 0x00000000]  // 19. pipe inside (blue)
         [0x49804fff 0x49804fff 0x49804fff 0x00000000]  // 20. foliage/metal
+        [0x605800ff 0x605800ff 0x00000000 0x00000000]  // 21. Caution yellow paint
+        [0x131512ff 0x131512ff 0x00000000 0x00000000]  // 22. Black weaponish color
+        [0x2f2f2fff 0x2f2f2fff 0x00000000 0x00000000]  // 23. Dark grey rubber
     ]}
 }}

@@ -1,0 +1,31 @@
+{hacc::Document:{
+    def:{ent::Ext_Def:{
+        mass:1
+        fixtures:[{
+            shape:$.shape
+            friction:0.4
+            coll_a:[ground] coll_b:[ground]
+        }]
+        layout:$.layout
+        texture:$.img.body
+    }}
+    shape:{b2PolygonShape:{
+        verts:[[-0.5 0] [0.5 0] [0.5 0.5] [-0.5 0.5]]
+    }}
+    layout:{vis::Layout:{
+        size:[16 32]
+        frames:[
+            { name:high offset:[8 16] box:[-8 0 8 16] }
+            { name:low  offset:[8  0] box:[-8 0 8 16] }
+        ]
+    }}
+    img:{vis::Image:{
+        filename:"world/char/patroller.png"
+        textures:[
+            { name:body offset:[0 0] size:[16 32] }
+        ]
+        palettes:[
+            { offset:[21 26] vertical:true mask:0x00ffffff }
+        ]
+    }}
+}}

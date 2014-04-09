@@ -2,6 +2,7 @@
 #include <vector>
 #include "ent/inc/mixins.h"
 #include "hacc/inc/everything.h"
+#include "phys/inc/ground.h"
 #include "util/inc/geometry.h"
 #include "vis/inc/images.h"
 #include "vis/inc/light.h"
@@ -15,6 +16,11 @@ namespace ent {
     struct Inert_Def : Object_Def {
         Texture* texture;
         Rect boundary;
+    };
+
+    struct Ext_Def : Object_Def {
+        vis::Texture* texture;
+        vis::Layout* layout;
     };
 
     struct Inert : ROD<Sprites, Inert_Def> {
@@ -48,6 +54,17 @@ namespace ent {
         }
     };
 
+    struct Patroller : ROD<Sprites, Ext_Def>, phys::Grounded {
+        enum Frame {
+            UP,
+            DOWN
+        };
+        void Drawn_draw (Sprites) override {
+            auto def = get_def();
+            draw_frame(&def->layout->frames[UP], def->texture, pos());
+        }
+    };
+
 } using namespace ent;
 
 HACCABLE(Inert_Def) {
@@ -55,6 +72,13 @@ HACCABLE(Inert_Def) {
     attr("Object_Def", base<Object_Def>().collapse());
     attr("texture", member(&Inert_Def::texture));
     attr("boundary", member(&Inert_Def::boundary));
+}
+
+HACCABLE(Ext_Def) {
+    name("ent::Ext_Def");
+    attr("Object_Def", base<Object_Def>().collapse());
+    attr("texture", member(&Ext_Def::texture));
+    attr("layout", member(&Ext_Def::layout));
 }
 
 HACCABLE(Inert) {
@@ -70,5 +94,10 @@ HACCABLE(Light) {
     attr("ambient", member(&Light::ambient).optional());
     attr("diffuse", member(&Light::diffuse).optional());
     attr("radiant", member(&Light::radiant).optional());
+}
+
+HACCABLE(Patroller) {
+    name("ent::Patroller");
+    attr("ROD", base<ROD<Sprites, Ext_Def>>().collapse());
 }
 
