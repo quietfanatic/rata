@@ -10,9 +10,10 @@ namespace ent {
     Links<Bullet> bullets;
 
     void Bullet::update () {
-        Vec new_pos = pts[0] + vel;
         pts[1] = Vec(NAN, NAN);
+        Vec new_pos;
         try_bounce: {
+            new_pos = pts[0] + vel;
             float earliest_fraction = 1;
             b2Fixture* struck = NULL;
             Vec pos;
