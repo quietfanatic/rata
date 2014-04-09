@@ -20,17 +20,23 @@ namespace ent {
             b2Fixture* struck = NULL;
             Vec pos;
             Vec normal;
+            float vel_perp;
             phys::space.ray_cast(pts[0], new_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction)->float{
                 if (fix->GetBody() == owner->b2body) return -1;
                  // Prevent infinite detection
                 if (fix == old_struck) return -1;
                  // TODO check filter
                 if (fraction < earliest_fraction) {
+                    float vp = dot(vel, n);
+                     // Ignore backwards collisions
+                    if (vp > 0) return -1;
+                    vel_perp = vp;
                     struck = fix;
                     pos = p;
                     normal = n;
+                    return fraction;
                 }
-                return fraction;
+                return -1;
             });
             if (struck) {
                 old_struck = struck;
@@ -40,7 +46,6 @@ namespace ent {
                 pts[1] = pts[0];
                 pts[0] = pos;
                  // This is how you bounce
-                float vel_perp = dot(vel, normal);
                 vel -= 2 * vel_perp * normal;
                 new_pos = pts[0] + vel * (1 - earliest_fraction);
                  // We've ended up with a more than 100% elastic collision but oh well
