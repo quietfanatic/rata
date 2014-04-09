@@ -14,6 +14,10 @@
         def:$("world/item/items.hacc").frock
         owner:$.rata.equipment
     }}
+    pp8:{ent::PP8:{
+        def:$("world/item/items.hacc").pp8
+        owner:$.rata.equipment
+    }}
     bgm:{snd::Voice:{
         audio:$("world/snd/sounds.hacc").life
     }}

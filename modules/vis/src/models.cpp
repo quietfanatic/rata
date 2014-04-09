@@ -82,11 +82,13 @@ namespace vis {
         }
         qsort(draws, n_draws, sizeof(Draw), cmp_Draw);
         for (size_t i = 0; i < n_draws; i++) {
-            draw_frame(
-                draws[i].seg->pose->frame, draws[i].tex,
-                pos + scale * draws[i].seg->pos,
-                scale * draws[i].seg->pose->scale, z
-            );
+            if (draws[i].seg->pose) {
+                draw_frame(
+                    draws[i].seg->pose->frame, draws[i].tex,
+                    pos + scale * draws[i].seg->pos,
+                    scale * draws[i].seg->pose->scale, z
+                );
+            }
         }
     }
 
