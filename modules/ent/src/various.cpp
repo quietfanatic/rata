@@ -65,6 +65,8 @@ namespace ent {
             DOWN
         };
         int8 direction = -1;
+        float stride_phase = 0;  // Stored
+        float oldxrel = 0;  // Set per frame
         void Object_before_move () override {
             auto def = get_def();
             if (ground) {
@@ -77,6 +79,16 @@ namespace ent {
                         sensed = true;
                 });
                 if (!sensed) direction = -direction;
+                oldxrel = pos().x - ground->pos().x;
+            }
+        }
+        void Object_after_move () override {
+            if (ground) {
+                stride_phase += fabs(pos().x - ground->pos().x - oldxrel) / 0.7;
+                stride_phase = fmod(stride_phase, 1);
+            }
+            else {
+                stride_phase = 0;
             }
         }
         float Grounded_velocity () override {
@@ -85,7 +97,8 @@ namespace ent {
         void Drawn_draw (Sprites) override {
             auto def = get_def();
             float dir = vel().x >= 0 ? 1 : -1;
-            draw_frame(&def->layout->frames[UP], def->texture, pos(), Vec(dir, 1));
+            auto frame_i = stride_phase < 0.5 ? UP : DOWN;
+            draw_frame(&def->layout->frames[frame_i], def->texture, pos(), Vec(dir, 1));
         }
     };
 
