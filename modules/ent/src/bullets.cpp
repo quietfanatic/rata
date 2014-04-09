@@ -27,7 +27,7 @@ namespace ent {
     void update_bullets () {
          // Delete-safe loop
         for (auto bp = bullets.begin(); bp != bullets.end();) {
-            auto b = bp; ++bp;
+            auto b = bp++;
             b->update();
         }
     }

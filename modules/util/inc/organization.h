@@ -59,6 +59,7 @@ namespace util {
         struct iterator {
             Link<C, which>* p;
             iterator& operator ++ () { p = p->next; return *this; }
+            iterator operator ++ (int) { auto r = *this; p = p->next; return r; }
             bool operator != (const iterator& o) { return p != o.p; }
             C& operator * () { return *static_cast<C*>(p); }
             C* operator -> () { return static_cast<C*>(p); }
