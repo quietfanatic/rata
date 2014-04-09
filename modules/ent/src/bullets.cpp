@@ -11,9 +11,8 @@ namespace ent {
 
     void Bullet::update () {
         pts[1] = Vec(NAN, NAN);
-        Vec new_pos;
+        Vec new_pos = pts[0] + vel;
         try_bounce: {
-            new_pos = pts[0] + vel;
             float earliest_fraction = 1;
             b2Fixture* struck = NULL;
             Vec pos;
@@ -37,6 +36,7 @@ namespace ent {
                  // This is how you bounce
                 float vel_perp = dot(vel, normal);
                 vel -= 2 * vel_perp * normal;
+                new_pos = pts[0] + vel * (1 - earliest_fraction);
                  // We've ended up with a more than 100% elastic collision but oh well
                 struck->GetBody()->ApplyLinearImpulse(vel_perp * normal, pos, true);
                 if (vel_perp > -0.8) {
