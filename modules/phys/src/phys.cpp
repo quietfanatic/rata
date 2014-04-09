@@ -87,13 +87,17 @@ namespace phys {
         b2world->SetContactListener(&mycl);
         b2world->SetContactFilter(&mycf);
     }
-    void Space::run () {
+    void Space::run_before () {
         for (b2Body* b2b = b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
             if (Object* obj = (Object*)b2b->GetUserData())
                 if (b2b->IsActive())
                     obj->Object_before_move();
         }
+    }
+    void Space::run_simulation () {
         b2world->Step(1/60.0, 10, 10);
+    }
+    void Space::run_after () {
         for (b2Body* b2b = b2world->GetBodyList(); b2b; b2b = b2b->GetNext()) {
             if (Object* obj = (Object*)b2b->GetUserData()) {
                 if (b2b->IsActive())
@@ -101,6 +105,11 @@ namespace phys {
                 else obj->Object_while_intangible();
             }
         }
+    }
+    void Space::run () {
+        run_before();
+        run_simulation();
+        run_after();
     }
     void Space::stop () {
         log("space", "Destroying space.");

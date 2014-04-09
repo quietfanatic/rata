@@ -6,6 +6,7 @@
 #include <SDL2/SDL_events.h>
 #include "core/inc/commands.h"
 #include "core/inc/window.h"
+#include "ent/inc/bullets.h"
 #include "ent/inc/control.h"
 #include "hacc/inc/files.h"
 #include "hacc/inc/haccable_standard.h"
@@ -52,7 +53,10 @@ static Game* game = NULL;
 void step () {
     if (!game->paused) {
         ent::run_minds();
-        phys::space.run();
+        phys::space.run_before();
+        ent::update_bullets();
+        phys::space.run_simulation();
+        phys::space.run_after();
         ent::run_minds_after();
     }
 }

@@ -22,6 +22,10 @@ namespace phys {
         void start ();
         void run ();
         void stop ();
+         // Individual phases of run, in case you want to interleave them with other stuff
+        void run_before ();
+        void run_simulation ();
+        void run_after ();
 
          // Do a ray cast with a function instead of a class.  See Box2D API reference.
         typedef std::function<float (b2Fixture*, const util::Vec&, const util::Vec&, float)> RayCaster;
