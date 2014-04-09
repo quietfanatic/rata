@@ -88,6 +88,12 @@
                                     def:$("world/res/stuff.hacc").crate_def
                                 }]
                             }}
+                            {shell::Text_Button:{
+                                text:"patroller"
+                                on_click:[re_new_actor ent::Patroller {
+                                    def:$("world/char/patroller.hacc").def
+                                }]
+                            }}
                         ]
                     }}
                 }}

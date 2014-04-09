@@ -55,13 +55,37 @@ namespace ent {
     };
 
     struct Patroller : ROD<Sprites, Ext_Def>, phys::Grounded {
-        enum Frame {
+        enum Fixture_Index {
+            BODY,
+            FLOOR_SENSOR_L,
+            FLOOR_SENSOR_R
+        };
+        enum Frame_Index {
             UP,
             DOWN
         };
+        int8 direction = -1;
+        void Object_before_move () override {
+            auto def = get_def();
+            if (ground) {
+                 // Turn around at end of platform
+                auto floor_sensor = &def->fixtures[direction < 0 ? FLOOR_SENSOR_L : FLOOR_SENSOR_R];
+                bool sensed = false;
+                foreach_contact([&](b2Fixture* mine, b2Fixture* other){
+                    auto fd = (phys::FixtureDef*)mine->GetUserData();
+                    if (fd == floor_sensor)
+                        sensed = true;
+                });
+                if (!sensed) direction = -direction;
+            }
+        }
+        float Grounded_velocity () override {
+            return 2 * direction;
+        }
         void Drawn_draw (Sprites) override {
             auto def = get_def();
-            draw_frame(&def->layout->frames[UP], def->texture, pos());
+            float dir = vel().x >= 0 ? 1 : -1;
+            draw_frame(&def->layout->frames[UP], def->texture, pos(), Vec(dir, 1));
         }
     };
 
@@ -99,5 +123,6 @@ HACCABLE(Light) {
 HACCABLE(Patroller) {
     name("ent::Patroller");
     attr("ROD", base<ROD<Sprites, Ext_Def>>().collapse());
+    attr("direction", member(&Patroller::direction).optional());
 }
 
