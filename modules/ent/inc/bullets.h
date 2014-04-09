@@ -16,6 +16,8 @@ namespace ent {
         util::Vec pts [MAX_PTS];
         util::Vec vel = util::Vec(0, 0);
 
+        bool done = false;
+
         Bullet () { pts[0] = util::Vec(NAN, NAN); Link<Bullet>::link(bullets); }
          // For convenience
         Bullet (phys::Object* owner, util::Vec pos, util::Vec vel) : owner(owner), vel(vel) {

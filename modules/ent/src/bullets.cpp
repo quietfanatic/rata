@@ -14,6 +14,10 @@ namespace ent {
     Links<Bullet> bullets;
 
     void Bullet::update () {
+        if (done) {
+            state_document()->destroy(this);
+            return;
+        }
         pts[1] = Vec(NAN, NAN);
         Vec new_pos = pts[0] + vel;
         b2Fixture* old_struck = NULL;
@@ -54,7 +58,7 @@ namespace ent {
                 struck->GetBody()->ApplyLinearImpulse(vel_perp * normal, pos, true);
                 if (auto d = dynamic_cast<Damagable*>((Object*)struck->GetBody()->GetUserData())) {
                     d->Damagable_damage(48);
-                    state_document()->destroy(this);
+                    done = true;
                     return;
                 }
                 log("bullet", "Bullet velocity perpendicular: %f", vel_perp);
@@ -63,7 +67,7 @@ namespace ent {
                     goto try_bounce;
                 }
                 else {
-                    state_document()->destroy(this);
+                    done = true;
                     return;
                 }
             }
@@ -101,5 +105,6 @@ HACCABLE(Bullet) {
     attr("owner", member(&Bullet::owner));
     attr("pts", member(&Bullet::pts));
     attr("vel", member(&Bullet::vel));
+    attr("done", member(&Bullet::done));
     finish(&Bullet::finish);
 }
