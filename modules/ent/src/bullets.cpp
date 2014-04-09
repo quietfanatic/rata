@@ -2,6 +2,7 @@
 
 #include "hacc/inc/haccable_standard.h"
 #include "phys/inc/phys.h"
+#include "shell/inc/main.h"
 #include "util/inc/debug.h"
 #include "vis/inc/color.h"
 
@@ -50,7 +51,8 @@ namespace ent {
                     goto try_bounce;
                 }
                 else {
-                     // TODO delete self
+                    state_document()->destroy(this);
+                    return;
                 }
             }
         }
