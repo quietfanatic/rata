@@ -106,10 +106,16 @@ namespace ent {
          // Fire bullets
          // TODO: constrain range in some circumstances
         if (attack_timeout) attack_timeout--;
-        if (buttons & ATTACK_BIT && attack_timeout == 0) {
-            if (auto hi = hand_item()) {
-                attack_timeout = hi->Item_attack(this, focus);
+        if (buttons & AIM_BIT) {
+            aiming = true;
+            if (buttons & ATTACK_BIT && attack_timeout == 0) {
+                if (auto hi = hand_item()) {
+                    attack_timeout = hi->Item_attack(this, focus);
+                }
             }
+        }
+        else {
+            aiming = false;
         }
          // For walking animation
         if (ground)
@@ -268,6 +274,9 @@ namespace ent {
             model.apply_pose(&def->poses->jump);
             model.apply_pose(&def->poses->look_walk[look_frame]);
         }
+        if (aiming) {
+            model.apply_pose(&def->poses->aim_f[look_frame]);
+        }
          // TODO: implement this as an item
         size_t n_skins = 1 + equipment.items.count();
         vis::Skin* skins [n_skins];
@@ -346,6 +355,7 @@ HACCABLE(Biped_Poses) {
     attr("laybk", member(&Biped_Poses::laybk));
     attr("look_stand", member(&Biped_Poses::look_stand));
     attr("look_walk", member(&Biped_Poses::look_walk));
+    attr("aim_f", member(&Biped_Poses::aim_f));
 }
 
 HACCABLE(Biped_Fixdefs) {

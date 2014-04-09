@@ -48,6 +48,7 @@ namespace ent {
         vis::Pose laybk;
         vis::Pose look_stand [9];
         vis::Pose look_walk [9];
+        vis::Pose aim_f [9];
     };
 
      // All the fixdefs for a given Biped.
@@ -120,6 +121,7 @@ namespace ent {
         void animate ();
         float distance_walked = 0;
         float oldxrel = 0;
+        bool aiming = false;
         void Drawn_draw (vis::Sprites) override;
 
         Biped ();
