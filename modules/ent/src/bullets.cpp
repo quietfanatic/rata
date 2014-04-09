@@ -12,6 +12,7 @@ namespace ent {
     void Bullet::update () {
         pts[1] = Vec(NAN, NAN);
         Vec new_pos = pts[0] + vel;
+        b2Fixture* old_struck = NULL;
         try_bounce: {
             float earliest_fraction = 1;
             b2Fixture* struck = NULL;
@@ -19,6 +20,8 @@ namespace ent {
             Vec normal;
             phys::space.ray_cast(pts[0], new_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction)->float{
                 if (fix->GetBody() == owner->b2body) return -1;
+                 // Prevent infinite detection
+                if (fix == old_struck) return -1;
                  // TODO check filter
                 if (fraction < earliest_fraction) {
                     struck = fix;
@@ -28,6 +31,7 @@ namespace ent {
                 return fraction;
             });
             if (struck) {
+                old_struck = struck;
                  // TODO check ricochet angle
                 pts[3] = pts[2];
                 pts[2] = pts[1];
