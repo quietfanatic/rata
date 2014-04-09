@@ -2,7 +2,6 @@
 
 #include "ent/inc/bullets.h"
 #include "hacc/inc/everything.h"
-#include "shell/inc/main.h"  // For state_document()
 #include "util/inc/debug.h"
 #include "vis/inc/models.h"
 
@@ -39,6 +38,15 @@ namespace ent {
     }
     geo::Room* Biped::Controllable_get_room () {
         return room;
+    }
+
+    Item* Biped::hand_item () {
+        for (auto& i : equipment.items) {
+            if (i.def->slots & HAND) {
+                return &i;
+            }
+        }
+        return NULL;
     }
 
      // Change some kinds of movement state
@@ -99,14 +107,8 @@ namespace ent {
          // TODO: constrain range in some circumstances
         if (attack_timeout) attack_timeout--;
         if (buttons & ATTACK_BIT && attack_timeout == 0) {
-            Vec bullet_vel = 2 * normalize(focus);
-            state_document()->create<Bullet>(this, pos() + def->focus_offset, bullet_vel);
-            attack_timeout = 60;
-            if (stats.shoot_voice) {
-                stats.shoot_voice->done = false;
-                stats.shoot_voice->paused = false;
-                stats.shoot_voice->pos = 0;
-                stats.shoot_voice->volume = 1.0;
+            if (auto hi = hand_item()) {
+                attack_timeout = hi->Item_attack(this, focus);
             }
         }
          // For walking animation
@@ -294,6 +296,7 @@ HACCABLE(Biped) {
     attr("focus", member(&Biped::focus).optional());
     attr("inventory", member(&Biped::inventory).optional());
     attr("equipment", member(&Biped::equipment).optional());
+    attr("attack_timeout", member(&Biped::attack_timeout).optional());
     attr("distance_walked", member(&Biped::distance_walked).optional());
     finish(&Biped::finish);
 }

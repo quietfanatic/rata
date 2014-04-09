@@ -1,0 +1,13 @@
+{hacc::Document:{
+    img:{vis::Image:{
+        filename:"world/item/pp8.png"
+        textures:[
+            { name:hand offset:[0 0] size:[65 81] }
+        ]
+    }}
+    skin:{vis::Skin:{
+        apps: [
+            [$("world/char/small.hacc").skel.segs.hand $.img.hand -0.01]
+        ]
+    }}
+}}

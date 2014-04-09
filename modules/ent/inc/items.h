@@ -11,6 +11,7 @@ namespace ent {
 
     struct Item;
     struct Biped_Stats;
+    struct Biped;
 
     enum Equipment_Slots {
         HEAD = 1<<0,
@@ -28,9 +29,6 @@ namespace ent {
          // For drawing as an inventory item.
         vis::Texture* tex = NULL;
         vis::Frame* frame = NULL;
-
-         // Inherit if you want to alter the equipper's stats
-        virtual void Item_stats (Biped_Stats*) { }
     };
 
     struct Inventory {
@@ -50,6 +48,12 @@ namespace ent {
                 link(owner->items);
         }
         Item () { }
+
+         // Inherit if you want to alter the equipper's stats
+        virtual void Item_stats (Biped_Stats*) { }
+         // Will be called if it occupies HAND slot
+         // Returns frames until attack can be repeated.
+        virtual uint Item_attack (Biped*, util::Vec focus) { return 0; }
     };
 
     struct ResItem_Def : Item_Def {
@@ -63,6 +67,11 @@ namespace ent {
         void Resident_emerge () override { appear(); }
         void Resident_reclude () override { disappear(); }
         ResItem () { }
+    };
+
+    struct PP8 : ResItem {
+         // TODO ammo count
+        uint Item_attack (Biped*, util::Vec) override;
     };
 
 }

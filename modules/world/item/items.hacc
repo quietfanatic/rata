@@ -10,4 +10,15 @@
         res_tex:null  // TODO
         res_frame:null  // TODO
     }}
+    pp8:{ent::ResItem_Def:{
+        name:"PP8"
+        holdable:true
+        equippable:[$("world/char/small.hacc").skel]
+        slots:[hand]
+        skin:$("world/item/pp8.hacc").skin
+        tex:null  // TODO
+        frame:null  // TODO
+        res_tex:null  // TODO
+        res_frame:null  // TODO
+    }}
 }}

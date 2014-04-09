@@ -51,6 +51,11 @@
             name:head
             branches:[]
             layout:$lh=$.head_layout
+            z_offset:0
+        } {
+            name:hand
+            branches:[]
+            layout:$hf=$.hand_layout
             z_offset:1
         } {
             name:forearm1
@@ -76,7 +81,7 @@
             name:body
             branches:[$.skel.segs.head $.skel.segs.arm1 $.skel.segs.arm2]
             layout:$lb=$.body_layout
-            z_offset:0
+            z_offset:-1
         }]
         root:$.skel.segs.body
         root_offset:[0 0]
@@ -200,6 +205,29 @@
             {name: a135 offset: [70 8] box: [-3 -7 7 7]}
             {name: a158 offset: [81 8] box: [-3 -7 7 7]}
             {name: a180 offset: [92 8] box: [-3 -7 7 7]}
+        ]
+    }}
+    hand_layout:{vis::Layout:{
+        size:[65 81]
+        frames:[
+            { name:a0   offset:[ 8 73] box:[-7 -8 8 7] }
+            { name:a23  offset:[24 73] box:[-7 -8 8 7] }
+            { name:a45  offset:[40 73] box:[-7 -8 8 7] }
+            { name:a68  offset:[56 73] box:[-7 -8 8 7] }
+            { name:a90  offset:[ 8 57] box:[-7 -8 8 7] }
+            { name:a113 offset:[24 57] box:[-7 -8 8 7] }
+            { name:a135 offset:[40 57] box:[-7 -8 8 7] }
+            { name:a158 offset:[56 57] box:[-7 -8 8 7] }
+            { name:a180 offset:[ 8 41] box:[-7 -8 8 7] }
+            { name:a203 offset:[24 41] box:[-7 -8 8 7] }
+            { name:a225 offset:[40 41] box:[-7 -8 8 7] }
+            { name:a248 offset:[56 41] box:[-7 -8 8 7] }
+            { name:a270 offset:[ 8 25] box:[-7 -8 8 7] }
+            { name:a293 offset:[24 25] box:[-7 -8 8 7] }
+            { name:a315 offset:[40 25] box:[-7 -8 8 7] }
+            { name:a338 offset:[56 25] box:[-7 -8 8 7] }
+            { name:flat offset:[ 8  9] box:[-7 -8 8 7] }
+            { name:out  offset:[24  9] box:[-7 -8 8 7] }
         ]
     }}
 }}

@@ -2,10 +2,14 @@
 
 #include <string>
 #include <vector>
+#include "ent/inc/bipeds.h"
+#include "ent/inc/bullets.h"
 #include "hacc/inc/everything.h"
+#include "shell/inc/main.h"
 #include "vis/inc/models.h"
 
 namespace ent {
+    using namespace util;
 
     void ResItem::Drawn_draw (vis::Sprites) {
         if (!def || !room) return;
@@ -16,6 +20,20 @@ namespace ent {
     Inventory::~Inventory () {
         for (auto& i : items)
             i.set_owner(NULL);
+    }
+
+    uint PP8::Item_attack (Biped* biped, Vec focus) {
+         // TODO come out of barrel of weapon
+        Vec bullet_vel = 2 * normalize(focus);
+        state_document()->create<Bullet>(biped, biped->pos() + biped->get_def()->focus_offset, bullet_vel);
+        auto& stats = biped->stats;
+        if (stats.shoot_voice) {
+            stats.shoot_voice->done = false;
+            stats.shoot_voice->paused = false;
+            stats.shoot_voice->pos = 0;
+            stats.shoot_voice->volume = 1.0;
+        }
+        return 60;
     }
 
 } using namespace ent;
@@ -76,5 +94,10 @@ HACCABLE(ResItem) {
     name("ent::ResItem");
     attr("Item", base<Item>().collapse());
     attr("Resident", base<geo::Resident>().collapse());
+}
+
+HACCABLE(PP8) {
+    name("ent::PP8");
+    attr("ResItem", base<ResItem>().collapse());
 }
 

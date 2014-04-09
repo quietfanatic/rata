@@ -113,7 +113,7 @@ namespace ent {
          // Items, equipment
         Inventory equipment;
         Inventory inventory;
-         // TODO: associate attacking with weapon
+        Item* hand_item ();  // NULL if none
         uint attack_timeout = 0;
 
          // For animation
