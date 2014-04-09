@@ -10,6 +10,47 @@ namespace ent {
     Links<Bullet> bullets;
 
     void Bullet::update () {
+        Vec new_pos = pts[0] + vel;
+        pts[1] = Vec(NAN, NAN);
+        try_bounce: {
+            float earliest_fraction = 1;
+            b2Fixture* struck = NULL;
+            Vec pos;
+            Vec normal;
+            phys::space.ray_cast(pts[0], new_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction)->float{
+                if (fix->GetBody() == owner->b2body) return -1;
+                 // TODO check filter
+                if (fraction < earliest_fraction) {
+                    struck = fix;
+                    pos = p;
+                    normal = n;
+                }
+                return fraction;
+            });
+            if (struck) {
+                 // TODO check ricochet angle
+                pts[3] = pts[2];
+                pts[2] = pts[1];
+                pts[1] = pts[0];
+                pts[0] = pos;
+                 // This is how you bounce
+                float vel_perp = dot(vel, normal);
+                vel -= 2 * vel_perp * normal;
+                 // We've ended up with a more than 100% elastic collision but oh well
+                struck->GetBody()->ApplyLinearImpulse(vel_perp * normal, pos, true);
+                if (vel_perp > -0.8) {
+                     // TODO play ricochet sound
+                    goto try_bounce;
+                }
+                else {
+                     // TODO delete self
+                }
+            }
+        }
+        pts[3] = pts[2];
+        pts[2] = pts[1];
+        pts[1] = pts[0];
+        pts[0] = new_pos;
     }
     void Bullet::Drawn_draw (Overlay) {
         uint n_pts = 0;

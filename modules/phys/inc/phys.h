@@ -1,6 +1,7 @@
 #ifndef HAVE_PHYS_PHYS_H
 #define HAVE_PHYS_PHYS_H
 
+#include <functional>
 #include <string>
 #include <vector>
 #include <Box2D/Box2D.h>
@@ -21,6 +22,10 @@ namespace phys {
         void start ();
         void run ();
         void stop ();
+
+         // Do a ray cast with a function instead of a class.  See Box2D API reference.
+        typedef std::function<float (b2Fixture*, const util::Vec&, const util::Vec&, float)> RayCaster;
+        void ray_cast (util::Vec start, util::Vec end, const RayCaster& f);
 
         ~Space ();
     };
