@@ -137,5 +137,6 @@ HACCABLE(Patroller) {
     name("ent::Patroller");
     attr("ROD", base<ROD<Sprites, Ext_Def>>().collapse());
     attr("direction", member(&Patroller::direction).optional());
+    attr("stride_phase", member(&Patroller::stride_phase).optional());
 }
 
