@@ -17,6 +17,11 @@ namespace ent {
         void finish () { Object::finish(); Resident::finish(); }
     };
 
+     // Must be in the state document
+    struct Damagable {
+        virtual void Damagable_damage (int32) = 0;
+    };
+
 }
 
  // This is provided, but you can skip directly to each of the bases instead.

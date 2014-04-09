@@ -1,5 +1,6 @@
 #include "ent/inc/bullets.h"
 
+#include "ent/inc/mixins.h"
 #include "hacc/inc/haccable_standard.h"
 #include "phys/inc/phys.h"
 #include "shell/inc/main.h"
@@ -8,6 +9,7 @@
 
 namespace ent {
     using namespace vis;
+    using namespace phys;
 
     Links<Bullet> bullets;
 
@@ -21,7 +23,7 @@ namespace ent {
             Vec pos;
             Vec normal;
             float vel_perp;
-            phys::space.ray_cast(pts[0], new_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction)->float{
+            space.ray_cast(pts[0], new_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction)->float{
                 if (fix->GetBody() == owner->b2body) return -1;
                  // Prevent infinite detection
                 if (fix == old_struck) return -1;
@@ -50,6 +52,11 @@ namespace ent {
                 new_pos = pts[0] + vel * (1 - earliest_fraction);
                  // We've ended up with a more than 100% elastic collision but oh well
                 struck->GetBody()->ApplyLinearImpulse(vel_perp * normal, pos, true);
+                if (auto d = dynamic_cast<Damagable*>((Object*)struck->GetBody()->GetUserData())) {
+                    d->Damagable_damage(48);
+                    state_document()->destroy(this);
+                    return;
+                }
                 log("bullet", "Bullet velocity perpendicular: %f", vel_perp);
                 if (vel_perp > -0.8) {
                      // TODO play ricochet sound

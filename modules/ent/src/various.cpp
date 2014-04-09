@@ -3,6 +3,7 @@
 #include "ent/inc/mixins.h"
 #include "hacc/inc/everything.h"
 #include "phys/inc/ground.h"
+#include "shell/inc/main.h"
 #include "util/inc/geometry.h"
 #include "vis/inc/images.h"
 #include "vis/inc/light.h"
@@ -54,7 +55,7 @@ namespace ent {
         }
     };
 
-    struct Patroller : ROD<Sprites, Ext_Def>, phys::Grounded {
+    struct Patroller : ROD<Sprites, Ext_Def>, phys::Grounded, Damagable {
         enum Fixture_Index {
             BODY,
             FLOOR_SENSOR_L,
@@ -100,6 +101,13 @@ namespace ent {
             auto frame_i = stride_phase < 0.5 ? UP : DOWN;
             draw_frame(&def->layout->frames[frame_i], def->texture, pos(), Vec(dir, 1));
         }
+        int32 life = 96;
+        void Damagable_damage (int32 d) override {
+            life -= d;
+            if (life <= 0) {
+                state_document()->destroy(this);
+            }
+        }
     };
 
 } using namespace ent;
@@ -138,5 +146,6 @@ HACCABLE(Patroller) {
     attr("ROD", base<ROD<Sprites, Ext_Def>>().collapse());
     attr("direction", member(&Patroller::direction).optional());
     attr("stride_phase", member(&Patroller::stride_phase).optional());
+    attr("life", member(&Patroller::life).optional());
 }
 
