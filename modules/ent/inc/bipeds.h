@@ -111,6 +111,8 @@ namespace ent {
          // Items, equipment
         Inventory equipment;
         Inventory inventory;
+         // TODO: associate attacking with weapon
+        uint attack_timeout = 0;
 
          // For animation
         void animate ();

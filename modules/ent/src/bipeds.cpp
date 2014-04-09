@@ -1,6 +1,8 @@
 #include "ent/inc/bipeds.h"
 
+#include "ent/inc/bullets.h"
 #include "hacc/inc/everything.h"
+#include "shell/inc/main.h"  // For state_document()
 #include "util/inc/debug.h"
 #include "vis/inc/models.h"
 
@@ -92,6 +94,14 @@ namespace ent {
             else if (vel().x * mdir <= stats.air_speed) {
                 set_vel(Vec(stats.air_speed * mdir, vel().y));
             }
+        }
+         // Fire bullets
+         // TODO: constrain range in some circumstances
+        if (attack_timeout) attack_timeout--;
+        if (buttons & ATTACK_BIT && attack_timeout == 0) {
+            Vec bullet_vel = 2 * normalize(focus);
+            state_document()->create<Bullet>(this, pos() + def->focus_offset, bullet_vel);
+            attack_timeout = 60;
         }
          // For walking animation
         if (ground)
