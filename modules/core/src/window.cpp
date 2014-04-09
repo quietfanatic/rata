@@ -81,6 +81,7 @@ namespace core {
         if (!is_open) open();
         double lag = 0;
         uint32 last_ticks = SDL_GetTicks();
+        uint32 last_framerate_check = last_ticks;
 
          // MAIN RENDER LOOP
         for (;;) {
@@ -166,7 +167,7 @@ namespace core {
              // Do timing around the render step.
              // TODO: this is not quite optimal.
             lag -= 1/fps;
-            if (!limit_fps && lag > 1/fps + 0.002 && lag < 4/fps) {
+            if (!benchmark && lag > 1/fps + 0.002 && lag < 4/fps) {
                 log("frameskip", "Skipping frame!");
             }
             else {
@@ -180,11 +181,17 @@ namespace core {
                 uint32 new_ticks = SDL_GetTicks();
                 lag += (new_ticks - last_ticks) / 1000.0;
                 last_ticks = new_ticks;
-                if (limit_fps && lag < 0) {
+                if (!benchmark && lag < 0) {
                     SDL_Delay(-lag * 1000);
                 }
                 log("timing", "%f", lag);
                 SDL_GL_SwapWindow(sdl_window);
+                if (benchmark) {
+                    if (frames_drawn % 60 == 0) {
+                        printf("FPS: %f\n", 60.0 / ((last_framerate_check - new_ticks) / 1000.0));
+                        last_framerate_check = new_ticks;
+                    }
+                }
             }
         }
     }
@@ -222,7 +229,7 @@ HACCABLE(Window) {
     attr("height", member(&Window::height).optional());
     attr("fullscreen", member(&Window::fullscreen).optional());
     attr("fps", member(&Window::fps).optional());
-    attr("limit_fps", member(&Window::limit_fps).optional());
+    attr("benchmark", member(&Window::benchmark).optional());
 }
 
 void _load (std::string filename) {

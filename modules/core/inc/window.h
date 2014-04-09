@@ -18,7 +18,7 @@ namespace core {
         uint16 height = 480;
         bool fullscreen = false;
         double fps = 60.0;
-        bool limit_fps = true;
+        bool benchmark = false;
 
         std::function<void ()> step;
         std::function<void ()> render;
