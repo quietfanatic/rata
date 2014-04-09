@@ -14,6 +14,9 @@ for my $mid (glob 'snd/*.mid') {
         run qw(timidity -idqq -s 44100 -OrSs1 -o), $s16s, $mid;
     };
 }
+rule 'snd/shoot.s16s', [], sub {
+    die "Unfortunately, you're missing a file because quietfanatic was in a hurry to make something presentable by Wednesday.\n";
+};
 
 clean_rule(sub { unlink glob 'snd/*.s16s' });
 

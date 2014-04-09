@@ -102,6 +102,12 @@ namespace ent {
             Vec bullet_vel = 2 * normalize(focus);
             state_document()->create<Bullet>(this, pos() + def->focus_offset, bullet_vel);
             attack_timeout = 60;
+            if (stats.shoot_voice) {
+                stats.shoot_voice->done = false;
+                stats.shoot_voice->paused = false;
+                stats.shoot_voice->pos = 0;
+                stats.shoot_voice->volume = 1.0;
+            }
         }
          // For walking animation
         if (ground)
@@ -310,6 +316,7 @@ HACCABLE(Biped_Stats) {
     attr("run_stride", member(&Biped_Stats::run_stride).optional());
     attr("crawl_stride", member(&Biped_Stats::crawl_stride).optional());
     attr("step_voice", member(&Biped_Stats::step_voice).optional());
+    attr("shoot_voice", member(&Biped_Stats::shoot_voice).optional());
 }
 
 HACCABLE(Biped_Def) {

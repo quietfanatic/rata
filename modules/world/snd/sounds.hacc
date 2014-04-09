@@ -11,4 +11,11 @@
         paused:true
         volume:0.5
     }}
+    shoot:{snd::Audio:{
+        filename:"world/snd/shoot.s16s"
+    }}
+    shoot_voice:{snd::Voice:{
+        audio:$.shoot
+        paused:true
+    }}
 }}

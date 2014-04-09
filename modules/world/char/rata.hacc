@@ -25,5 +25,6 @@
         run_stride: 4.0
         crawl_stride: 2.0
         step_voice: $("world/snd/sounds.hacc").step_voice
+        shoot_voice: $("world/snd/sounds.hacc").shoot_voice
     }}
 }}
