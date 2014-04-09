@@ -15,8 +15,9 @@ using namespace phys;
 namespace ent {
 
     struct Inert_Def : Object_Def {
-        Texture* texture;
+        Texture* texture = NULL;
         Rect boundary;
+        int32 life = -1;  // If negative, invincible
     };
 
     struct Ext_Def : Object_Def {
@@ -24,10 +25,23 @@ namespace ent {
         vis::Layout* layout;
     };
 
-    struct Inert : ROD<Sprites, Inert_Def> {
+    struct Inert : ROD<Sprites, Inert_Def>, Damagable {
+        int32 life = -1;
+        void finish () {
+            if (life < 0) life = get_def()->life;
+            ROD::finish();
+        }
         void Drawn_draw (Sprites) override {
             auto def = get_def();
             draw_texture(def->texture, pos() + def->boundary);
+        }
+        void Damagable_damage (int32 d) override {
+            if (life >= 0) {
+                life -= d;
+                if (life <= 0) {
+                    state_document()->destroy(this);
+                }
+            }
         }
     };
 
@@ -117,6 +131,7 @@ HACCABLE(Inert_Def) {
     attr("Object_Def", base<Object_Def>().collapse());
     attr("texture", member(&Inert_Def::texture));
     attr("boundary", member(&Inert_Def::boundary));
+    attr("life", member(&Inert_Def::life).optional());
 }
 
 HACCABLE(Ext_Def) {
@@ -129,6 +144,8 @@ HACCABLE(Ext_Def) {
 HACCABLE(Inert) {
     name("ent::Inert");
     attr("ROD", base<ROD<Sprites, Inert_Def>>().collapse());
+    attr("life", member(&Inert::life).optional());
+    finish(&Inert::finish);
 }
 
 HACCABLE(Light) {
