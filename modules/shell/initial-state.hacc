@@ -17,4 +17,9 @@
     bgm:{snd::Voice:{
         audio:$("world/snd/sounds.hacc").life
     }}
+    patroller:{ent::Patroller:{
+        def:$("world/char/patroller.hacc").def
+        room:$("world/room/test.hacc").room
+        pos:[9.5 21.0]
+    }}
 }}
