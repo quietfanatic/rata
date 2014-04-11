@@ -25,10 +25,16 @@ namespace ent {
 
     struct Agent_Def : phys::Object_Def {
         util::Vec focus_offset {0, 0};
+        int32 max_life = 144;
     };
 
     template <class Layer, class Def = Agent_Def>
-    struct Agent : ROD<Layer, Def>, Controllable {
+    struct Agent : ROD<Layer, Def>, Controllable, Damagable {
+        int32 life = -1;
+        int32 Damagable_life () override { return life; }
+        int32 Damagable_max_life () override { return ROD<Layer, Def>::get_def()->max_life; }
+        void Damagable_damage (int32 d) { life -= d; }
+
         uint32 buttons = 0;
         util::Vec focus {2, 0};
         util::Vec vision_pos;
@@ -49,7 +55,11 @@ namespace ent {
         geo::Room* Controllable_get_room () override {
             return ROD<Layer, Def>::room;
         }
-        void finish () { ROD<Layer, Def>::finish(); }
+        void finish () {
+            ROD<Layer, Def>::finish();
+            if (life < 0)
+                life = ROD<Layer, Def>::get_def()->max_life;
+        }
         void update_vision () {
             auto def = ROD<Layer, Def>::get_def();
             util::Vec origin = get_pos() + def->focus_offset;
@@ -82,6 +92,7 @@ HACCABLE_TEMPLATE(<class Layer HCB_COMMA class Def>, ent::Agent<Layer HCB_COMMA 
     });
     attr("ROD", hcb::template base<ent::ROD<Layer, Def>>().collapse());
     attr("focus", member(&ent::Agent<Layer, Def>::focus).optional());
+    attr("life", member(&ent::Agent<Layer, Def>::life).optional());
     finish(&ent::Agent<Layer, Def>::finish);
 }
 

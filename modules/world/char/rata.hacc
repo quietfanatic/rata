@@ -7,6 +7,7 @@
         poses: $("world/char/small.hacc").poses
         skin: $("world/char/rata-base.hacc").skin
         focus_offset: [0 1]
+        max_life:144
     }}
     stats:{ent::Biped_Stats:{
         walk_friction: 0.8

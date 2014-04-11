@@ -77,7 +77,7 @@ namespace ent {
         }
     };
 
-    struct Patroller : Robot, phys::Grounded, Damagable {
+    struct Patroller : Robot, phys::Grounded {
         enum Fixture_Index {
             BODY,
             FLOOR_SENSOR_L,
@@ -175,11 +175,8 @@ namespace ent {
             auto frame_i = stride_phase < 0.5 ? UP : DOWN;
             draw_frame(&def->layout->frames[frame_i], def->texture, get_pos(), Vec(dir, 1));
         }
-        int32 life = 96;
-        int32 Damagable_life () override { return life; }
-        int32 Damagable_max_life () override { return 96; }
         void Damagable_damage (int32 d) override {
-            life -= d;
+            Agent::Damagable_damage(d);
             if (life <= 0) {
                 state_document()->destroy(this);
             }
@@ -188,7 +185,7 @@ namespace ent {
     };
 
 
-    struct Flyer : Robot, Damagable {
+    struct Flyer : Robot {
         enum Fixture_Index {
             BODY,
             ENEMY_SENSOR
@@ -206,11 +203,8 @@ namespace ent {
             Vec scale = focus.x > 0 ? Vec(-1, 1) : Vec(1, 1);
             draw_frame(&def->layout->frames[frame_i], def->texture, get_pos(), scale);
         }
-        int32 life = 96;
-        int32 Damagable_life () override { return life; }
-        int32 Damagable_max_life () override { return 96; }
         void Damagable_damage (int32 d) override {
-            life -= d;
+            Agent::Damagable_damage(d);
             if (life <= 0) {
                 state_document()->destroy(this);
             }
@@ -329,13 +323,11 @@ HACCABLE(Patroller) {
     name("ent::Patroller");
     attr("Robot", base<Robot>().collapse());
     attr("stride_phase", member(&Patroller::stride_phase).optional());
-    attr("life", member(&Patroller::life).optional());
 }
 
 HACCABLE(Flyer) {
     name("ent::Flyer");
-    attr("Flyer", base<Robot>().collapse());
-    attr("life", member(&Flyer::life).optional());
+    attr("Robot", base<Robot>().collapse());
     attr("target", member(&Flyer::target).optional());
     attr("stun_timer", member(&Flyer::stun_timer).optional());
 }

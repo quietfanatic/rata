@@ -8,6 +8,7 @@
         ]
         layout:$.layout
         texture:$.img.body
+        max_life:96
     }}
     shape:{b2CircleShape:{ c:[0 0] r:0.4 }}
     enemy_sensor:{b2PolygonShape:{

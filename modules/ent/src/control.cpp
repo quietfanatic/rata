@@ -52,11 +52,11 @@ namespace ent {
             int32 max_life = d->Damagable_max_life();
             for (int i = 0; i < max_life / 48; i++) {
                 auto frame = &heart_layout->frames[
-                    i * 48 >= life + 12 ? 0
-                  : i * 48 >= life + 24 ? 1
-                  : i * 48 >= life + 36 ? 2
-                  : i * 48 >= life + 48 ? 3
-                  :                       4
+                    life >= i * 48 + 48 ? 4
+                  : life >= i * 48 + 36 ? 3
+                  : life >= i * 48 + 24 ? 2
+                  : life >= i * 48 + 12 ? 1
+                  :                       0
                 ];
                 vis::draw_frame(frame, heart_tex, Vec(19.5 - i * 0.75, 14.5));
             }

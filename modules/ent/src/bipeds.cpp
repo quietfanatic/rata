@@ -8,7 +8,7 @@
 namespace ent {
 
     void Biped::finish () {
-        ROD::finish();
+        Agent::finish();
         auto def = get_def();
         stats = *def->stats;
         for (auto fp = &def->fixdefs->feet; fp <= &def->fixdefs->ceiling_low; fp++) {
@@ -281,7 +281,7 @@ namespace ent {
 
 HACCABLE(Biped) {
     name("ent::Biped");
-    attr("ROD", base<ROD<vis::Sprites, Biped_Def>>().collapse());
+    attr("Agent", base<Agent<vis::Sprites, Biped_Def>>().collapse());
     attr("Grounded", base<phys::Grounded>().collapse());
     attr("Controllable", base<ent::Controllable>().collapse());
     attr("direction", member(&Biped::direction).optional());

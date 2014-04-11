@@ -12,6 +12,7 @@
         ]
         layout:$.layout
         texture:$.img.body
+        max_life:144
     }}
     shape:{b2PolygonShape:{
         verts:[[-0.4375 0] [0.4375 0] [0.4375 0.5] [-0.4375 0.5]]
