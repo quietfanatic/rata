@@ -30,9 +30,6 @@ namespace ent {
     Vec Biped::Controllable_get_focus () {
         return focus + get_pos() + get_def()->focus_offset;
     }
-    Vec Biped::Controllable_get_pos () {
-        return get_pos() + get_def()->focus_offset;
-    }
     Vec Biped::Controllable_get_vision_pos () {
         return vision_pos;
     }

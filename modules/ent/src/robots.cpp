@@ -43,7 +43,6 @@ namespace ent {
         Vec Controllable_get_focus () override {
             return focus + get_pos() + Vec(0, 0.5);
         }
-        Vec Controllable_get_pos () override { return get_pos() + focus_offset(); }
         Vec Controllable_get_vision_pos () override { return vision_pos; }
         geo::Room* Controllable_get_room () { return room; }
 

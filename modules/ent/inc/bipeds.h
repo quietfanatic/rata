@@ -87,7 +87,6 @@ namespace ent {
         void Controllable_buttons (uint32) override;
         void Controllable_move_focus (Vec) override;
         Vec Controllable_get_focus () override;
-        Vec Controllable_get_pos () override;
         Vec Controllable_get_vision_pos () override;
         geo::Room* Controllable_get_room () override;
         int8 move_direction () {

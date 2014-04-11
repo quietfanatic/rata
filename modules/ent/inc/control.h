@@ -3,6 +3,7 @@
 
 #include "core/inc/window.h"
 #include "geo/inc/rooms.h"
+#include "geo/inc/spatial.h"
 #include "util/inc/geometry.h"
 #include "vis/inc/common.h"
 namespace vis { struct Texture; struct Frame; }
@@ -73,14 +74,13 @@ namespace ent {
         std::vector<Mapping>& operator [] (Button b) { return *(&left + uint(b)); }
     };
 
-    struct Controllable {
+    struct Controllable : virtual geo::Spatial {
         Controllable** controller = NULL;
         virtual void Controllable_buttons (uint32 bits) { }
          // This changes the focus relative to its current position
         virtual void Controllable_move_focus (Vec diff) { }
          // This should return world coordinates, or NAN,NAN if no focus
         virtual Vec Controllable_get_focus () { return Vec(NAN, NAN); }
-        virtual Vec Controllable_get_pos () { return Vec(NAN, NAN); }
         virtual Vec Controllable_get_vision_pos () { return Vec(NAN, NAN); }
         virtual geo::Room* Controllable_get_room () { return NULL; }
         virtual ~Controllable () { if (controller) *controller = NULL; }
