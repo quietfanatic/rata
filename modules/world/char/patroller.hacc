@@ -5,6 +5,7 @@
             { shape:$.shape friction:0.4 coll_a:[ground] coll_b:[ground] }
             { shape:$.floor_sensor_l is_sensor:true }
             { shape:$.floor_sensor_r is_sensor:true }
+            { shape:$.enemy_sensor is_sensor:true }
         ]
         layout:$.layout
         texture:$.img.body
@@ -17,6 +18,9 @@
     }}
     floor_sensor_r:{b2PolygonShape:{
         verts:[[0.5 -0.5] [1.0 -0.5] [1.0 0.1] [0.5 0.1]]
+    }}
+    enemy_sensor:{b2PolygonShape:{
+        verts:[[-10, -7] [10 -7] [10 8] [-10 8]]
     }}
     layout:{vis::Layout:{
         size:[16 32]

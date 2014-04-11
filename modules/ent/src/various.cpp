@@ -1,5 +1,6 @@
 
 #include <vector>
+#include "ent/inc/bipeds.h"
 #include "ent/inc/mixins.h"
 #include "hacc/inc/everything.h"
 #include "phys/inc/ground.h"
@@ -69,7 +70,52 @@ namespace ent {
         }
     };
 
-    struct Patroller : ROD<Sprites, Ext_Def>, phys::Grounded, Damagable {
+     // Robots cannot see through walls.
+    struct Robot : ROD<Sprites, Ext_Def> {
+         // This is not stored.  TODO: should it be?
+        Object* enemy = NULL;
+        Vec enemy_pos;
+
+         // All this does is do some ray casts to make sure we have a direct
+         //  line of sight to the human.  TODO: check Filters instead of dynamic cast to Biped
+        virtual void Object_before_move () override {
+            enemy = NULL;
+            foreach_contact([&](b2Fixture* mine, b2Fixture* other){
+                auto fd = (phys::FixtureDef*)mine->GetUserData();
+                auto oo = (Object*)other->GetBody()->GetUserData();
+                if (dynamic_cast<Biped*>(oo)) {
+                    if (!enemy || length2(oo->pos() - pos()) < length2(enemy->pos() - pos()))
+                        enemy = oo;
+                }
+            });
+            if (enemy) {
+                if (!try_see_at(enemy, enemy->pos())
+                        && !try_see_at(enemy, enemy->pos() + Vec(0.4, 0.4))
+                        && !try_see_at(enemy, enemy->pos() + Vec(-0.4, 0.5))
+                        && !try_see_at(enemy, enemy->pos() + Vec(0, 1))
+                        && !try_see_at(enemy, enemy->pos() + Vec(0, 1.4)))
+                    enemy = NULL;
+            }
+        }
+
+        bool try_see_at (Object* obj, Vec o_pos) {
+            bool r = false;
+            space.ray_cast(ROD::pos(), o_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction){
+                if ((Object*)fix->GetBody()->GetUserData() == obj) {
+                    r = true;
+                    return fraction;
+                }
+                else {
+                    r = false;
+                    return 0.f;
+                }
+            });
+            if (r) enemy_pos = o_pos;
+            return r;
+        }
+    };
+
+    struct Patroller : Robot, phys::Grounded, Damagable {
         enum Fixture_Index {
             BODY,
             FLOOR_SENSOR_L,
@@ -82,9 +128,11 @@ namespace ent {
         int8 direction = -1;
         float stride_phase = 0;  // Stored
         float oldxrel = 0;  // Set per frame
+
         void Object_before_move () override {
             auto def = get_def();
             if (ground) {
+                Robot::Object_before_move();
                  // Turn around at end of platform
                 auto floor_sensor = &def->fixtures[direction < 0 ? FLOOR_SENSOR_L : FLOOR_SENSOR_R];
                 bool sensed = false;
@@ -107,7 +155,7 @@ namespace ent {
             }
         }
         float Grounded_velocity () override {
-            return 2 * direction;
+            return enemy ? 0 : 2 * direction;
         }
         void Drawn_draw (Sprites) override {
             auto def = get_def();
@@ -158,9 +206,14 @@ HACCABLE(Light) {
     attr("radiant", member(&Light::radiant).optional());
 }
 
+HACCABLE(Robot) {
+    name("ent::Robot");
+    attr("ROD", base<ROD<Sprites, Ext_Def>>().collapse());
+}
+
 HACCABLE(Patroller) {
     name("ent::Patroller");
-    attr("ROD", base<ROD<Sprites, Ext_Def>>().collapse());
+    attr("Robot", base<Robot>().collapse());
     attr("direction", member(&Patroller::direction).optional());
     attr("stride_phase", member(&Patroller::stride_phase).optional());
     attr("life", member(&Patroller::life).optional());

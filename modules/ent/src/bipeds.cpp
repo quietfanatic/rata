@@ -206,7 +206,8 @@ namespace ent {
         ceiling_low = false;
         foreach_contact([&](b2Fixture* mine, b2Fixture* other){
             auto fd = (phys::FixtureDef*)mine->GetUserData();
-            if (fd == &def->fixdefs->ceiling_low) {
+             // This call to IsSensor...lol I really need to start using Filters
+            if (fd == &def->fixdefs->ceiling_low && !other->IsSensor()) {
                 ceiling_low = true;
             }
         });
