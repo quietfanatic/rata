@@ -24,8 +24,8 @@ namespace vis {
     GLuint world_depth_rb = 0;
     Vec rtt_camera_size = Vec(NAN, NAN);
 
-    RGBf ambient_light = 1;
-    RGBf diffuse_light = 1;
+    RGBf ambient_light = 0.3;
+    RGBf diffuse_light = 0.1;
     RGBf radiant_light = 1;
 
      // Set up the requirements for a render-to-texture step
