@@ -78,8 +78,6 @@ namespace ent {
 
     struct Biped : Agent<vis::Sprites, Biped_Def>, phys::Grounded {
 
-         // For control
-        uint32 buttons = 0;
         int8 move_direction () {
             return !!(buttons & RIGHT_BIT) - !!(buttons & LEFT_BIT);
         }
