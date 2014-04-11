@@ -12,7 +12,7 @@
         texture:$.img.body
     }}
     shape:{b2PolygonShape:{
-        verts:[[-0.5 0] [0.5 0] [0.5 0.5] [-0.5 0.5]]
+        verts:[[-0.4375 0] [0.4375 0] [0.4375 0.5] [-0.4375 0.5]]
     }}
     floor_sensor_l:{b2PolygonShape:{
         verts:[[-1.0 -0.5] [-0.5 -0.5] [-0.5 0.1] [-1.0 0.1]]
