@@ -1,4 +1,5 @@
 #include "ent/inc/bipeds.h"
+#include "ent/inc/bullets.h"
 #include "ent/inc/control.h"
 #include "ent/inc/mixins.h"
 #include "geo/inc/vision.h"
@@ -23,6 +24,7 @@ namespace ent {
     struct Robot : ROD<Sprites, Ext_Def>, Controllable {
          // This is not stored.  TODO: should it be?
         Object* enemy = NULL;
+        Vec enemy_pos = Vec(0, 0);
         int8 direction = 0;
 
         uint32 buttons = 0;
@@ -87,8 +89,8 @@ namespace ent {
                     return 0.f;
                 }
             });
-            if (r && !controller)
-                focus = constrain(Rect(-18, -13, 18, 13), o_pos - pos() - focus_offset());
+            if (r)
+                enemy_pos = o_pos;
             return r;
         }
     };
@@ -103,8 +105,10 @@ namespace ent {
             UP,
             DOWN
         };
+        Vec target = Vec(0, 0);
         float stride_phase = 0;  // Stored
         float oldxrel = 0;  // Set per frame
+        uint32 attack_timer = 0;
 
         void Object_before_move () override {
             Robot::Object_before_move();
@@ -126,6 +130,19 @@ namespace ent {
                     if (!sensed) direction = -direction;
                 }
                 oldxrel = pos().x - ground->pos().x;
+            }
+            if (attack_timer) {
+                focus = 0.8*focus + 0.2*(target - pos() - focus_offset());
+                if (--attack_timer == 0) {
+                    Vec bullet_pos = pos() + focus_offset();
+                    Vec bullet_vel = 2 * normalize(focus);
+                    log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
+                    shoot_bullet(this, pos() + focus_offset(), bullet_vel);
+                }
+            }
+            if (enemy && !attack_timer) {
+                target = enemy_pos;
+                attack_timer = 60;
             }
         }
         void Object_after_move () override {
