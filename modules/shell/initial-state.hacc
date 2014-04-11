@@ -30,6 +30,7 @@
         def:$("world/char/flyer.hacc").def
         room:$("world/room/test.hacc").room
         pos:[5 9]
+        vel:[0 0.4]
     }}
     crate0:{ent::Inert:{
         room:$("world/room/test.hacc").room

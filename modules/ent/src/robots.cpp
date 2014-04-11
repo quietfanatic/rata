@@ -184,6 +184,7 @@ namespace ent {
         };
         Vec target = Vec(NAN, NAN);
         uint32 attack_timer = 0;
+        uint32 stun_timer = 0;
 
         void Drawn_draw (Sprites) override {
             auto def = get_def();
@@ -227,6 +228,8 @@ namespace ent {
                 }
             }
             else {
+                if (!defined(target)) target = get_pos();
+                if (stun_timer) stun_timer--;
                 if (attack_timer) {
                     focus = 0.8*focus + 0.2*(target - get_pos() - def->focus_offset);
                     if (--attack_timer == 0) {
@@ -240,7 +243,7 @@ namespace ent {
                     target = enemy_pos;
                     attack_timer = 90;
                 }
-                else if (defined(target)) {
+                else if (!stun_timer && length2(target - get_pos()) > 0.15) {
                      // Chase the last seen enemy
                     float acc = 8.0;
                     Vec rel_target = target - get_pos();
@@ -251,17 +254,32 @@ namespace ent {
                      // d = p + vv/a + vv/a/2;
                      // d = p + 3vv/2a
                      // Weird, but that's what the math says.
-                    float stop_distance = 1.5 * vel_to_target * vel_to_target / acc;
-                    if (off_track || stop_distance < length(rel_target)) {
-                        b2body->ApplyForceToCenter(acc * normalize(-get_vel()), true);
+                    float stop_distance = 1.5 * vel_to_target * vel_to_target / acc - 0.2;
+                    Vec force = Vec(frand() * 4 - 2, frand() * 4 - 2);
+                    if (off_track) {
+                        if (get_vel() != Vec(0, 0)) {
+                            force += acc * normalize(-get_vel());
+                        }
                     }
-                    else {
-                        b2body->ApplyForceToCenter(acc * normalize(rel_target), true);
+                    else if (rel_target == Vec(0, 0)) {
                     }
+                    else if (stop_distance >= length(rel_target)) {
+                        force -= acc * normalize(rel_target);
+                    }
+                    else if (rel_target != Vec(0, 0)) {
+                        force += acc * normalize(rel_target);
+                    }
+                    b2body->ApplyForceToCenter(force, true);
                 }
             }
         }
         void Object_after_move () override {
+            foreach_contact([&](b2Fixture* mine, b2Fixture* other){
+                auto fd = (phys::FixtureDef*)mine->GetUserData();
+                if (fd == &def->fixtures[BODY]) {
+                    stun_timer = 30;
+                }
+            });
             if (enemy) {
                 if (auto biped = dynamic_cast<Biped*>(enemy)) {
                     biped->vision.attend(get_pos() + Rect(-0.5, 0, 0.5, 1), 10);
@@ -301,5 +319,6 @@ HACCABLE(Flyer) {
     attr("Flyer", base<Robot>().collapse());
     attr("life", member(&Flyer::life).optional());
     attr("target", member(&Flyer::target).optional());
+    attr("stun_timer", member(&Flyer::stun_timer).optional());
 }
 

@@ -94,6 +94,7 @@
                                 text:"patroller"
                                 on_click:[re_new_actor ent::Patroller {
                                     def:$("world/char/patroller.hacc").def
+                                    vel:[0 0.4]
                                 }]
                             }}
                             {shell::Text_Button:{
