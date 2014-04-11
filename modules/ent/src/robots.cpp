@@ -182,6 +182,7 @@ HACCABLE(Ext_Def) {
 HACCABLE(Robot) {
     name("ent::Robot");
     attr("ROD", base<ROD<Sprites, Ext_Def>>().collapse());
+    attr("Controllable", base<Controllable>().collapse());
     attr("direction", member(&Patroller::direction).optional());
 }
 

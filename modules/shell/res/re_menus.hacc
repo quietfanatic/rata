@@ -20,11 +20,16 @@
                     geo::Tilemap:$.tilemap_menu
                     ent::Light:$.edit_shape
                     geo::Wall:$.edit_shape
+                    ent::Patroller:$.patroller_menu
                 }}
             ]
         }}
     }}
     biped_menu:{shell::Text_Button:{
+        text:"control this"
+        on_click:[re_control_this]
+    }}
+    patroller_menu:{shell::Text_Button:{
         text:"control this"
         on_click:[re_control_this]
     }}
