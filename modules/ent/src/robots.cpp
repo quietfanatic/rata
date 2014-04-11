@@ -33,6 +33,7 @@ namespace ent {
             auto old_enemy = enemy;
             enemy = NULL;
             foreach_contact([&](b2Fixture* mine, b2Fixture* other){
+                if (other->IsSensor()) return;
                 auto fd = (phys::FixtureDef*)mine->GetUserData();
                 auto oo = (Object*)other->GetBody()->GetUserData();
                 if (dynamic_cast<Biped*>(oo)) {
@@ -81,6 +82,8 @@ namespace ent {
             BODY,
             FLOOR_SENSOR_L,
             FLOOR_SENSOR_R,
+            WALL_SENSOR_L,
+            WALL_SENSOR_R,
             ENEMY_SENSOR
         };
         enum Frame_Index {
@@ -96,20 +99,25 @@ namespace ent {
             Robot::Object_before_move();
             auto def = get_def();
             if (ground) {
-                 // Turn around at end of platform
-                auto floor_sensor = &def->fixtures[direction < 0 ? FLOOR_SENSOR_L : FLOOR_SENSOR_R];
-                bool sensed = false;
-                foreach_contact([&](b2Fixture* mine, b2Fixture* other){
-                    auto fd = (phys::FixtureDef*)mine->GetUserData();
-                    if (fd == floor_sensor)
-                        sensed = true;
-                });
                 if (controller) {
                     if (buttons & LEFT_BIT && !(buttons & RIGHT_BIT)) direction = -1;
                     if (buttons & RIGHT_BIT && !(buttons & LEFT_BIT)) direction = 1;
                 }
                 else {
-                    if (!sensed) direction = -direction;
+                     // Turn around at end of platform
+                    auto floor_sensor = &def->fixtures[direction < 0 ? FLOOR_SENSOR_L : FLOOR_SENSOR_R];
+                    auto wall_sensor = &def->fixtures[direction < 0 ? WALL_SENSOR_L : WALL_SENSOR_R];
+                    bool floor = false;
+                    bool wall = false;
+                    foreach_contact([&](b2Fixture* mine, b2Fixture* other){
+                        if (other->IsSensor()) return;
+                        auto fd = (phys::FixtureDef*)mine->GetUserData();
+                        if (fd == floor_sensor)
+                            floor = true;
+                        else if (fd == wall_sensor)
+                            wall = true;
+                    });
+                    if (wall || !floor) direction = -direction;
                 }
                 oldxrel = get_pos().x - ground->get_pos().x;
             }
