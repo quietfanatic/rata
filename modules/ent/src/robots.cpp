@@ -189,8 +189,7 @@ namespace ent {
             auto def = get_def();
             float down_angle = angle_diff(angle(focus), -M_PI / 2);
             auto frame_i = lround(down_angle / M_PI * 8);
-            Vec scale = focus.x > 0 ? Vec(1, 1) : Vec(-1, 1);
-            log("robot", "[%f %f] [%f %f]", get_pos().x, get_pos().y, scale.x, scale.y);
+            Vec scale = focus.x > 0 ? Vec(-1, 1) : Vec(1, 1);
             draw_frame(&def->layout->frames[frame_i], def->texture, get_pos(), scale);
         }
         int32 life = 96;
