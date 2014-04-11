@@ -9,6 +9,8 @@
         character:$.rata.Controllable
         cursor_tex:$("world/res/cursor.hacc").img.ALL
         cursor_frame:$("world/res/cursor.hacc").layout.normal
+        heart_tex:$("world/res/hud.hacc").img.heart
+        heart_layout:$("world/res/hud.hacc").heart_layout
     }}
     frock:{ent::ResItem:{
         def:$("world/item/items.hacc").frock

@@ -1,6 +1,7 @@
 #include "ent/inc/control.h"
 
 #include <SDL2/SDL_events.h>
+#include "ent/inc/mixins.h"
 #include "geo/inc/rooms.h"
 #include "hacc/inc/haccable_standard.h"
 #include "vis/inc/images.h"
@@ -37,10 +38,28 @@ namespace ent {
     Player* player = NULL;
 
     void Player::Drawn_draw (vis::Overlay) {
-        if (character && cursor_tex && cursor_frame) {
+        if (!character) return;
+        if (cursor_tex && cursor_frame) {
             Vec focus = character->Controllable_get_focus();
             if (defined(focus))
                 vis::draw_frame(cursor_frame, cursor_tex, focus);
+        }
+    }
+    void Player::Drawn_draw (vis::Hud) {
+        if (!character || !heart_tex || !heart_layout) return;
+        if (auto d = dynamic_cast<Damagable*>(character)) {
+            int32 life = d->Damagable_life();
+            int32 max_life = d->Damagable_max_life();
+            for (int i = 0; i < max_life / 48; i++) {
+                auto frame = &heart_layout->frames[
+                    i * 48 >= life + 12 ? 0
+                  : i * 48 >= life + 24 ? 1
+                  : i * 48 >= life + 36 ? 2
+                  : i * 48 >= life + 48 ? 3
+                  :                       4
+                ];
+                vis::draw_frame(frame, heart_tex, Vec(19.5 - i * 0.75, 14.5));
+            }
         }
     }
     void Player::Mind_think () {
@@ -133,7 +152,8 @@ namespace ent {
     void Player::finish () {
         if (!active)
             Listener::activate();
-        appear();
+        Drawn<vis::Overlay>::appear();
+        Drawn<vis::Hud>::appear();
     }
 
     bool player_controllable = true;
@@ -197,6 +217,8 @@ HACCABLE(Player) {
     attr("character", value_methods(&Player::get_character, &Player::set_character));
     attr("cursor_tex", member(&Player::cursor_tex).optional());
     attr("cursor_frame", member(&Player::cursor_frame).optional());
+    attr("heart_tex", member(&Player::heart_tex).optional());
+    attr("heart_layout", member(&Player::heart_layout).optional());
     attr("mappings", member(&Player::mappings).optional());
     finish(&Player::finish);
 }

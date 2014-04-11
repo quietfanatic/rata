@@ -6,7 +6,7 @@
 #include "geo/inc/spatial.h"
 #include "util/inc/geometry.h"
 #include "vis/inc/common.h"
-namespace vis { struct Texture; struct Frame; }
+namespace vis { struct Texture; struct Frame; struct Layout; }
 
 namespace ent {
     using namespace util;
@@ -101,7 +101,7 @@ namespace ent {
     void run_minds_after ();
 
      // We're querying key state instead of going through Key_Listener
-    struct Player : vis::Drawn<vis::Overlay>, Mind, core::Listener, geo::Observer {
+    struct Player : vis::Drawn<vis::Overlay>, vis::Drawn<vis::Hud>, Mind, core::Listener, geo::Observer {
         uint32 buttons = 0;
         Mappings mappings;
         Controllable* character = NULL;
@@ -116,10 +116,13 @@ namespace ent {
         }
         vis::Texture* cursor_tex = NULL;
         vis::Frame* cursor_frame = NULL;
+        vis::Texture* heart_tex = NULL;
+        vis::Layout* heart_layout = NULL;
 
         vis::Camera camera;
 
         void Drawn_draw (vis::Overlay) override;  // Draws the cursor
+        void Drawn_draw (vis::Hud) override;  // Draws a life meter
         void Mind_think () override;  // Read input and send control to character
         void Mind_think_after () override;
 

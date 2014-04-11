@@ -18,6 +18,8 @@ namespace ent {
     };
 
     struct Damagable {
+        virtual int32 Damagable_life () = 0;
+        virtual int32 Damagable_max_life () = 0;
         virtual void Damagable_damage (int32) = 0;
     };
 

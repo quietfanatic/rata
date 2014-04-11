@@ -16,19 +16,21 @@ namespace ent {
     struct Inert_Def : Object_Def {
         Texture* texture = NULL;
         Rect boundary;
-        int32 life = -1;  // If negative, invincible
+        int32 max_life = -1;  // If negative, invincible
     };
 
     struct Inert : ROD<Sprites, Inert_Def>, Damagable {
         int32 life = -1;
         void finish () {
-            if (life < 0) life = get_def()->life;
+            if (life < 0) life = get_def()->max_life;
             ROD::finish();
         }
         void Drawn_draw (Sprites) override {
             auto def = get_def();
             draw_texture(def->texture, get_pos() + def->boundary);
         }
+        int32 Damagable_life () override { return life; }
+        int32 Damagable_max_life () override { return get_def()->max_life; }
         void Damagable_damage (int32 d) override {
             if (life >= 0) {
                 life -= d;
@@ -70,7 +72,7 @@ HACCABLE(Inert_Def) {
     attr("Object_Def", base<Object_Def>().collapse());
     attr("texture", member(&Inert_Def::texture));
     attr("boundary", member(&Inert_Def::boundary));
-    attr("life", member(&Inert_Def::life).optional());
+    attr("max_life", member(&Inert_Def::max_life).optional());
 }
 
 HACCABLE(Inert) {

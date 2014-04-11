@@ -1,0 +1,18 @@
+{hacc::Document:{
+    img:{vis::Image:{
+        filename:"world/res/hud.png"
+        textures:[
+            { name:heart offset:[0 24] size:[8 40] }
+        ]
+    }}
+    heart_layout:{vis::Layout:{
+        size:[8 40]
+        frames:[
+            { name:empty  offset:[4  4] box:[-4 -4 4 4] }
+            { name:oneq   offset:[4 12] box:[-4 -4 4 4] }
+            { name:half   offset:[4 20] box:[-4 -4 4 4] }
+            { name:threeq offset:[4 28] box:[-4 -4 4 4] }
+            { name:full   offset:[4 36] box:[-4 -4 4 4] }
+        ]
+    }}
+}}

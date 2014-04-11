@@ -168,6 +168,8 @@ namespace ent {
             draw_frame(&def->layout->frames[frame_i], def->texture, get_pos(), Vec(dir, 1));
         }
         int32 life = 96;
+        int32 Damagable_life () override { return life; }
+        int32 Damagable_max_life () override { return 96; }
         void Damagable_damage (int32 d) override {
             life -= d;
             if (life <= 0) {
@@ -197,6 +199,8 @@ namespace ent {
             draw_frame(&def->layout->frames[frame_i], def->texture, get_pos(), scale);
         }
         int32 life = 96;
+        int32 Damagable_life () override { return life; }
+        int32 Damagable_max_life () override { return 96; }
         void Damagable_damage (int32 d) override {
             life -= d;
             if (life <= 0) {
