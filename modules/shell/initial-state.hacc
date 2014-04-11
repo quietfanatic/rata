@@ -49,4 +49,46 @@
         def:$("world/res/stuff.hacc").crate_def.Object_Def
         pos:[10.5 18]
     }}
+    flyer2:{ent::Flyer:{
+        room:$("world/room/test3.hacc").room
+        def:$("world/char/flyer.hacc").def.Agent_Def.Object_Def
+        pos:[
+            71.9437~428fe327
+            14.6071~4169b6e1
+        ]
+        vel:[
+            -0.458635~beead232
+            -1.43636~bfb7daca
+        ]
+        focus:[
+            0~00000000
+            -1~bf800000
+        ]
+        life:96
+        direction:0
+        target:[
+            71.8678~428fbc4d
+            14.3438~41658000
+        ]
+        stun_timer:0
+    }}
+    patroller2:{ ent::Patroller:{
+        room:$("world/room/test3.hacc").room
+        def:$("world/char/patroller.hacc").def.Agent_Def.Object_Def
+        pos:[
+            88.7922~42b1959d
+            7.015~40e07adf
+        ]
+        vel:[
+            -2~c0000000
+            0~00000000
+        ]
+        focus:[
+            1~3f800000
+            0~00000000
+        ]
+        life:144
+        direction:-1
+        stride_phase:0.321464~3ea496f2
+    } }
 }}

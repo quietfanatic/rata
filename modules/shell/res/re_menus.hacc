@@ -21,7 +21,7 @@
                     ent::Light:$.edit_shape
                     geo::Wall:$.edit_shape
                     ent::Patroller:$.control_menu
-                    ent::Flyer:$.control_menu
+                    ent::Flyer:$.flyer_menu
                 }}
             ]
         }}
@@ -29,6 +29,18 @@
     control_menu:{shell::Text_Button:{
         text:"control this"
         on_click:[re_control_this]
+    }}
+    flyer_menu:{shell::VBox:{
+        contents:[
+            {shell::Text_Button:{
+                text:"control this"
+                on_click:[re_control_this]
+            }}
+            {shell::Text_Button:{
+                text:"edit shape"
+                on_click:[re_edit_pts]
+            }}
+        ]
     }}
     tilemap_menu:{shell::VBox:{
         contents:[
