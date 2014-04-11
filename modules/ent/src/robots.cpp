@@ -23,6 +23,7 @@ namespace ent {
          // This is not stored.  TODO: should it be?
         Object* enemy = NULL;
         Vec enemy_pos;
+        int8 direction = 0;
 
          // All this does is do some ray casts to make sure we have a direct
          //  line of sight to the human.  TODO: check Filters instead of dynamic cast to Biped
@@ -44,14 +45,15 @@ namespace ent {
                         && !try_see_at(enemy, enemy->pos() + Vec(0, 1))
                         && !try_see_at(enemy, enemy->pos() + Vec(0, 1.4)))
                     enemy = NULL;
-                if (enemy != old_enemy) {
-                    b2body->SetAwake(true);
-                    log("robot", "Enemy detected: %p", enemy);
-                }
+            }
+            if (enemy != old_enemy) {
+                b2body->SetAwake(true);
+                log("robot", "Enemy detected: %p", enemy);
             }
         }
 
         bool try_see_at (Object* obj, Vec o_pos) {
+            if ((o_pos.x - pos().x) * direction < 0) return false;
             bool r = false;
             space.ray_cast(pos() + Vec(0, 0.5), o_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction){
                 if ((Object*)fix->GetBody()->GetUserData() == obj) {
@@ -78,7 +80,6 @@ namespace ent {
             UP,
             DOWN
         };
-        int8 direction = -1;
         float stride_phase = 0;  // Stored
         float oldxrel = 0;  // Set per frame
 
@@ -128,6 +129,7 @@ namespace ent {
                 state_document()->destroy(this);
             }
         }
+        Patroller () { direction = -1; }
     };
 
 } using namespace ent;
@@ -142,12 +144,12 @@ HACCABLE(Ext_Def) {
 HACCABLE(Robot) {
     name("ent::Robot");
     attr("ROD", base<ROD<Sprites, Ext_Def>>().collapse());
+    attr("direction", member(&Patroller::direction).optional());
 }
 
 HACCABLE(Patroller) {
     name("ent::Patroller");
     attr("Robot", base<Robot>().collapse());
-    attr("direction", member(&Patroller::direction).optional());
     attr("stride_phase", member(&Patroller::stride_phase).optional());
     attr("life", member(&Patroller::life).optional());
 }
