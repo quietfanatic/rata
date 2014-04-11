@@ -18,4 +18,11 @@
         audio:$.shoot
         paused:true
     }}
+    ricochet:{snd::Audio:{
+        filename:"world/snd/ricochet.s16s"
+    }}
+    ricochet_voice:{snd::Voice:{
+        audio:$.ricochet
+        paused:true
+    }}
 }}

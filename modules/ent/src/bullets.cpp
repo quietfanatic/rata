@@ -4,6 +4,7 @@
 #include "hacc/inc/haccable_standard.h"
 #include "phys/inc/phys.h"
 #include "shell/inc/main.h"
+#include "snd/inc/audio.h"
 #include "util/inc/debug.h"
 #include "vis/inc/color.h"
 
@@ -12,6 +13,8 @@ namespace ent {
     using namespace phys;
 
     Links<Bullet> bullets;
+
+    static snd::Voice* ricochet_voice;
 
     void Bullet::update () {
         if (done) {
@@ -63,7 +66,11 @@ namespace ent {
                 }
                 log("bullet", "Bullet velocity perpendicular: %f", vel_perp);
                 if (vel_perp > -0.8) {
-                     // TODO play ricochet sound
+                    ricochet_voice->done = false;
+                    ricochet_voice->paused = false;
+                     // TODO: make this not necessary
+                    ricochet_voice->pos = 5512;
+                    ricochet_voice->volume = 0.4;
                     goto try_bounce;
                 }
                 else {
@@ -91,6 +98,12 @@ namespace ent {
     }
 
     void update_bullets () {
+        static bool initted = false;
+        if (!initted) {
+            initted = true;
+            ricochet_voice = hacc::File("world/snd/sounds.hacc").attr("ricochet_voice");
+            hacc::manage(&ricochet_voice);
+        }
          // Delete-safe loop
         for (auto bp = bullets.begin(); bp != bullets.end();) {
             auto b = bp++;
