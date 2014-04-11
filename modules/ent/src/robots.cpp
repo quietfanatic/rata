@@ -301,6 +301,11 @@ namespace ent {
             frame_timer %= 4;
         }
         Flyer () { focus = Vec(0, -1); }
+
+        size_t Spatial_n_pts () override { return 1; }
+        Vec Spatial_get_pt (size_t) override { return target - get_pos(); }
+        void Spatial_set_pt (size_t, Vec p) override { target = p + get_pos(); }
+
     };
 
 } using namespace ent;
