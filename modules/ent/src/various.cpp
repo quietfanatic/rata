@@ -5,6 +5,7 @@
 #include "hacc/inc/everything.h"
 #include "phys/inc/ground.h"
 #include "shell/inc/main.h"
+#include "util/inc/debug.h"
 #include "util/inc/geometry.h"
 #include "vis/inc/images.h"
 #include "vis/inc/light.h"
@@ -79,6 +80,7 @@ namespace ent {
          // All this does is do some ray casts to make sure we have a direct
          //  line of sight to the human.  TODO: check Filters instead of dynamic cast to Biped
         virtual void Object_before_move () override {
+            auto old_enemy = enemy;
             enemy = NULL;
             foreach_contact([&](b2Fixture* mine, b2Fixture* other){
                 auto fd = (phys::FixtureDef*)mine->GetUserData();
@@ -95,6 +97,8 @@ namespace ent {
                         && !try_see_at(enemy, enemy->pos() + Vec(0, 1))
                         && !try_see_at(enemy, enemy->pos() + Vec(0, 1.4)))
                     enemy = NULL;
+                if (enemy != old_enemy)
+                    log("robot", "Enemy detected: %p", enemy);
             }
         }
 

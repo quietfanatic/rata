@@ -6,6 +6,7 @@
             [log editing true]
             [log DEBUG true]
             [log bullet true]
+            [log robot true]
             [set_default_font $("shell/res/monospace.hacc").font]
             [set_materials $("world/res/materials.hacc").materials]
             [lst_arg "shell/initial-state.hacc"]
@@ -32,6 +33,7 @@
         [[key 0x72] [reload]]  // R
         [[key 0x76] [vision_debug]]  // V
         [[key 0x74] [texture_test $("world/res/tiles.hacc").img.tiles 0]]  // T
+        [[key 0x3D] [phys_debug]]  // =
     ]}
     console:{shell::Console:{ }}
     tile_editor:{shell::Tile_Editor:{ }}

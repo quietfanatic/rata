@@ -178,21 +178,9 @@ namespace phys {
     void Object::materialize () { b2body->SetActive(true); }
     void Object::dematerialize () { b2body->SetActive(false); }
 
-     // Ray casting
-
-    struct RayCaster_CB : b2RayCastCallback {
-        const Space::RayCaster& f;
-        RayCaster_CB (const Space::RayCaster& f) : f(f) { }
-        float ReportFixture (b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float frac) override {
-            return f(fix, reinterpret_cast<const util::Vec&>(p), reinterpret_cast<const util::Vec&>(n), frac);
-        }
-    };
-    void Space::ray_cast (Vec start, Vec end, const RayCaster& f) {
-        RayCaster_CB cb (f);
-        b2world->RayCast(&cb, start, end);
-    }
-
      // Debug fixture drawing
+
+    static std::vector<Line> ray_casts;
 
     struct Phys_Debug_Layer : vis::Drawn<vis::Overlay> {
         void Drawn_draw (vis::Overlay) override {
@@ -252,8 +240,29 @@ namespace phys {
                 }
             }
             color_offset(Vec(0, 0));
+            draw_color(0xff7f007f);
+            for (auto& rc : ray_casts) {
+                draw_line(rc.a, rc.b);
+            }
+            ray_casts.resize(0);
         }
     } phys_debug_layer;
+
+     // Ray casting
+
+    struct RayCaster_CB : b2RayCastCallback {
+        const Space::RayCaster& f;
+        RayCaster_CB (const Space::RayCaster& f) : f(f) { }
+        float ReportFixture (b2Fixture* fix, const b2Vec2& p, const b2Vec2& n, float frac) override {
+            return f(fix, reinterpret_cast<const util::Vec&>(p), reinterpret_cast<const util::Vec&>(n), frac);
+        }
+    };
+    void Space::ray_cast (Vec start, Vec end, const RayCaster& f) {
+        if (phys_debug_layer.visible())
+            ray_casts.push_back(Line(start, end));
+        RayCaster_CB cb (f);
+        b2world->RayCast(&cb, start, end);
+    }
 
 } using namespace phys;
 
