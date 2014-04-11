@@ -80,7 +80,8 @@ namespace ent {
         enum Fixture_Index {
             BODY,
             FLOOR_SENSOR_L,
-            FLOOR_SENSOR_R
+            FLOOR_SENSOR_R,
+            ENEMY_SENSOR
         };
         enum Frame_Index {
             UP,
@@ -176,6 +177,118 @@ namespace ent {
         Patroller () { direction = -1; }
     };
 
+    struct Flyer : Robot, Damagable {
+        enum Fixture_Index {
+            BODY,
+            ENEMY_SENSOR
+        };
+        enum Frame_Index {
+            A0,
+            A23,
+            A45,
+            A68,
+            A90,
+            A113,
+            A135,
+            A158,
+            A180,
+            A203,
+            A225,
+            A248,
+            A270,
+            A293,
+            A315,
+            A338
+        };
+        Vec target = Vec(NAN, NAN);
+        uint32 attack_timer = 0;
+
+        void Drawn_draw (Sprites) override {
+            auto def = get_def();
+            int frame_i = lround(angle(focus) / M_PI * 8) + 4;
+            if (frame_i < 0) frame_i += 16;
+            draw_frame(&def->layout->frames[frame_i], def->texture, get_pos());
+        }
+        int32 life = 96;
+        void Damagable_damage (int32 d) override {
+            life -= d;
+            if (life <= 0) {
+                state_document()->destroy(this);
+            }
+        }
+
+        void Object_before_move () override {
+            Robot::Object_before_move();
+            auto def = get_def();
+             // Attack logic
+            if (controller) {
+                Vec acc = Vec(0, 0);
+                if (buttons & LEFT_BIT)
+                    acc.x -= 0.2;
+                if (buttons & DOWN_BIT)
+                    acc.y -= 0.2;
+                if (buttons & RIGHT_BIT)
+                    acc.x += 0.2;
+                if (buttons & UP_BIT)
+                    acc.y += 0.2;
+                if (buttons) {
+                    set_vel(get_vel() + acc);
+                }
+                if (attack_timer) --attack_timer;
+                else if (buttons & ATTACK_BIT) {
+                    Vec bullet_pos = get_pos() + def->focus_offset;
+                    Vec bullet_vel = 2 * normalize(focus);
+                    log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
+                    shoot_bullet(this, get_pos() + def->focus_offset, bullet_vel);
+                    attack_timer = 90;
+                }
+            }
+            else {
+                if (attack_timer) {
+                    focus = 0.8*focus + 0.2*(target - get_pos() - def->focus_offset);
+                    if (--attack_timer == 0) {
+                        Vec bullet_pos = get_pos() + def->focus_offset;
+                        Vec bullet_vel = 2 * normalize(focus);
+                        log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
+                        shoot_bullet(this, get_pos() + def->focus_offset, bullet_vel);
+                    }
+                }
+                else if (enemy) {
+                    target = enemy_pos;
+                    attack_timer = 90;
+                }
+                else if (defined(target)) {
+                     // Chase the last seen enemy
+                    float acc = 8.0;
+                    Vec rel_target = target - get_pos();
+                    float vel_to_target = dot(get_vel(), normalize(rel_target));
+                    bool off_track = vel_to_target < length(get_vel()) - 1.0;
+                     // We have: p, v, a. We need d.
+                     // d = p + vt + att/2; since v = at, t = v/a
+                     // d = p + vv/a + vv/a/2;
+                     // d = p + 3vv/2a
+                     // Weird, but that's what the math says.
+                    float stop_distance = 1.5 * vel_to_target * vel_to_target / acc;
+                    if (off_track || stop_distance < length(rel_target)) {
+                        b2body->ApplyForceToCenter(acc * normalize(-get_vel()), true);
+                    }
+                    else {
+                        b2body->ApplyForceToCenter(acc * normalize(rel_target), true);
+                    }
+                }
+            }
+        }
+        void Object_after_move () override {
+            if (enemy) {
+                if (auto biped = dynamic_cast<Biped*>(enemy)) {
+                    biped->vision.attend(get_pos() + Rect(-0.5, 0, 0.5, 1), 10);
+                    vision.attend(biped->get_pos() + Rect(-0.5, 0, 0.5, 2), 10);
+                }
+            }
+            Robot::Object_after_move();
+        }
+    };
+
 } using namespace ent;
 
 HACCABLE(Ext_Def) {
@@ -197,5 +310,11 @@ HACCABLE(Patroller) {
     attr("Robot", base<Robot>().collapse());
     attr("stride_phase", member(&Patroller::stride_phase).optional());
     attr("life", member(&Patroller::life).optional());
+}
+
+HACCABLE(Flyer) {
+    name("ent::Flyer");
+    attr("Flyer", base<Robot>().collapse());
+    attr("life", member(&Flyer::life).optional());
 }
 
