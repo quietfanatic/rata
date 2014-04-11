@@ -26,6 +26,11 @@
         room:$("world/room/test.hacc").room
         pos:[9.5 21.0]
     }}
+    flyer:{ent::Flyer:{
+        def:$("world/char/flyer.hacc").def
+        room:$("world/room/test.hacc").room
+        pos:[5 9]
+    }}
     crate0:{ent::Inert:{
         room:$("world/room/test.hacc").room
         def:$("world/res/stuff.hacc").crate_def.Object_Def
