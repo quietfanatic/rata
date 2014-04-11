@@ -16,20 +16,17 @@
                     on_click:[re_delete]
                 }}
                 {shell::Type_Specific_Menu:{
-                    ent::Biped:$.biped_menu
+                    ent::Biped:$.control_menu
                     geo::Tilemap:$.tilemap_menu
                     ent::Light:$.edit_shape
                     geo::Wall:$.edit_shape
-                    ent::Patroller:$.patroller_menu
+                    ent::Patroller:$.control_menu
+                    ent::Flyer:$.control_menu
                 }}
             ]
         }}
     }}
-    biped_menu:{shell::Text_Button:{
-        text:"control this"
-        on_click:[re_control_this]
-    }}
-    patroller_menu:{shell::Text_Button:{
+    control_menu:{shell::Text_Button:{
         text:"control this"
         on_click:[re_control_this]
     }}
@@ -97,6 +94,12 @@
                                 text:"patroller"
                                 on_click:[re_new_actor ent::Patroller {
                                     def:$("world/char/patroller.hacc").def
+                                }]
+                            }}
+                            {shell::Text_Button:{
+                                text:"flyer"
+                                on_click:[re_new_actor ent::Flyer {
+                                    def:$("world/char/flyer.hacc").def
                                 }]
                             }}
                         ]
