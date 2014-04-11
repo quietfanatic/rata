@@ -16,27 +16,6 @@ namespace ent {
         }
     }
 
-    void Biped::Controllable_buttons (uint32 bits) {
-         // Since we walk by altering our contact with the ground,
-         //  and since contacts aren't processed if the body is asleep,
-         //  then if the body falls asleep we can't move T_T
-        if (bits)
-            b2body->SetAwake(true);
-        buttons = bits;
-    }
-    void Biped::Controllable_move_focus (Vec diff) {
-        focus = constrain(Rect(-18, -13, 18, 13), focus + diff);
-    }
-    Vec Biped::Controllable_get_focus () {
-        return focus + get_pos() + get_def()->focus_offset;
-    }
-    Vec Biped::Controllable_get_vision_pos () {
-        return vision_pos;
-    }
-    geo::Room* Biped::Controllable_get_room () {
-        return room;
-    }
-
     Item* Biped::hand_item () {
         for (auto& i : equipment.items) {
             if (i.def->slots & HAND) {
@@ -210,11 +189,7 @@ namespace ent {
             }
         });
          // Vision update
-        Vec origin = get_pos() + def->focus_offset;
-        vision.attend(origin + Rect(-1, -1, 1, 1), 1000000);
-        Vec focus_world = focus + origin;
-        vision_pos = vision.look(origin, &focus_world, !!controller);
-        focus = focus_world - origin;
+        Agent::Object_after_move();
     }
 
     void Biped::animate (vis::Model* model) {
@@ -344,13 +319,12 @@ HACCABLE(Biped_Stats) {
 
 HACCABLE(Biped_Def) {
     name("ent::Biped_Def");
-    attr("Object_def", base<phys::Object_Def>().collapse());
+    attr("Agent_def", base<Agent_Def>().collapse());
     attr("fixdefs", member(&Biped_Def::fixdefs));
     attr("stats", member(&Biped_Def::stats));
     attr("skel", member(&Biped_Def::skel));
     attr("poses", member(&Biped_Def::poses));
     attr("skin", member(&Biped_Def::skin));
-    attr("focus_offset", member(&Biped_Def::focus_offset));
 }
 
 HACCABLE(Biped_Poses) {

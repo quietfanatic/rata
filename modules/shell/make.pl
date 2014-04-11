@@ -15,6 +15,7 @@ my @objects = qw<
     ../ent/tmp/bullets.o
     ../ent/tmp/control.o
     ../ent/tmp/items.o
+    ../ent/tmp/mixins.o
     ../ent/tmp/robots.o
     ../ent/tmp/various.o
     ../geo/tmp/rooms.o

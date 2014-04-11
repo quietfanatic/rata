@@ -68,27 +68,20 @@ namespace ent {
     };
 
      // Various bits of static info.
-    struct Biped_Def : phys::Object_Def {
+    struct Biped_Def : Agent_Def {
         Biped_Fixdefs* fixdefs;
         Biped_Stats* stats;  // Initial stats only.
         Biped_Poses* poses;
         vis::Skel* skel;
         vis::Skin* skin;
-         // Not part of the frame pts, because it shouldn't vary.
-        Vec focus_offset;
     };
 
-    struct Biped : ROD<vis::Sprites, Biped_Def>, phys::Grounded, Controllable {
+    struct Biped : Agent<vis::Sprites, Biped_Def>, phys::Grounded {
 
          // For control
         uint32 buttons = 0;
         Vec focus = Vec(2, 0);
         Vec vision_pos;
-        void Controllable_buttons (uint32) override;
-        void Controllable_move_focus (Vec) override;
-        Vec Controllable_get_focus () override;
-        Vec Controllable_get_vision_pos () override;
-        geo::Room* Controllable_get_room () override;
         int8 move_direction () {
             return !!(buttons & RIGHT_BIT) - !!(buttons & LEFT_BIT);
         }
