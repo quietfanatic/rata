@@ -3,7 +3,7 @@
         mass:1
         gravity_scale:0
         fixtures:[
-            { shape:$.shape friction:0.4 resitution:0.6 coll_a:[ground] coll_b:[ground] }
+            { shape:$.shape friction:0.4 restitution:0.6 coll_a:[ground] coll_b:[ground] }
             { shape:$.enemy_sensor is_sensor:true }
         ]
         layout:$.layout
