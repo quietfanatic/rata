@@ -177,6 +177,7 @@ namespace ent {
         Patroller () { direction = -1; }
     };
 
+
     struct Flyer : Robot, Damagable {
         enum Fixture_Index {
             BODY,
@@ -185,11 +186,13 @@ namespace ent {
         Vec target = Vec(NAN, NAN);
         uint32 attack_timer = 0;
         uint32 stun_timer = 0;
+        uint32 frame_timer = 0;
 
         void Drawn_draw (Sprites) override {
             auto def = get_def();
             float down_angle = angle_diff(angle(focus), -M_PI / 2);
             auto frame_i = lround(down_angle / M_PI * 8);
+            if (frame_timer >= 2) frame_i += 9;
             Vec scale = focus.x > 0 ? Vec(-1, 1) : Vec(1, 1);
             draw_frame(&def->layout->frames[frame_i], def->texture, get_pos(), scale);
         }
@@ -287,6 +290,8 @@ namespace ent {
                 }
             }
             Robot::Object_after_move();
+            frame_timer += 1;
+            frame_timer %= 4;
         }
         Flyer () { focus = Vec(0, -1); }
     };

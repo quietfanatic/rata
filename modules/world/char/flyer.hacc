@@ -14,23 +14,32 @@
         verts:[[-10, -7] [10 -7] [10 8] [-10 8]]
     }}
     layout:{vis::Layout:{
-        size:[144 16]
+        size:[144 32]
         frames:[
-            { name:a0   offset:[  8 6] box:[-8 -6 8 10] }
-            { name:a23  offset:[ 24 6] box:[-8 -6 8 10] }
-            { name:a45  offset:[ 40 6] box:[-8 -6 8 10] }
-            { name:a68  offset:[ 56 6] box:[-8 -6 8 10] }
-            { name:a90  offset:[ 72 6] box:[-8 -6 8 10] }
-            { name:a113 offset:[ 88 6] box:[-8 -6 8 10] }
-            { name:a135 offset:[104 6] box:[-8 -6 8 10] }
-            { name:a158 offset:[120 6] box:[-8 -6 8 10] }
-            { name:a180 offset:[136 6] box:[-8 -6 8 10] }
+            { name:a0   offset:[  8  6] box:[-8 -6 8 10] }
+            { name:a23  offset:[ 24  6] box:[-8 -6 8 10] }
+            { name:a45  offset:[ 40  6] box:[-8 -6 8 10] }
+            { name:a68  offset:[ 56  6] box:[-8 -6 8 10] }
+            { name:a90  offset:[ 72  6] box:[-8 -6 8 10] }
+            { name:a113 offset:[ 88  6] box:[-8 -6 8 10] }
+            { name:a135 offset:[104  6] box:[-8 -6 8 10] }
+            { name:a158 offset:[120  6] box:[-8 -6 8 10] }
+            { name:a180 offset:[136  6] box:[-8 -6 8 10] }
+            { name:b0   offset:[  8 22] box:[-8 -6 8 10] }
+            { name:b23  offset:[ 24 22] box:[-8 -6 8 10] }
+            { name:b45  offset:[ 40 22] box:[-8 -6 8 10] }
+            { name:b68  offset:[ 56 22] box:[-8 -6 8 10] }
+            { name:b90  offset:[ 72 22] box:[-8 -6 8 10] }
+            { name:b113 offset:[ 88 22] box:[-8 -6 8 10] }
+            { name:b135 offset:[104 22] box:[-8 -6 8 10] }
+            { name:b158 offset:[120 22] box:[-8 -6 8 10] }
+            { name:b180 offset:[136 22] box:[-8 -6 8 10] }
         ]
     }}
     img:{vis::Image:{
         filename:"world/char/flyer.png"
         textures:[
-            { name:body offset:[0 16] size:[144 16] }
+            { name:body offset:[0 0] size:[144 32] }
         ]
         palettes:[
             { offset:[146 27] vertical:true mask:0x00ffffff }
