@@ -290,6 +290,7 @@ namespace ent {
         }
         void Object_after_move () override {
             foreach_contact([&](b2Fixture* mine, b2Fixture* other){
+                if (other->IsSensor()) return;
                 auto fd = (phys::FixtureDef*)mine->GetUserData();
                 if (fd == &def->fixtures[BODY]) {
                     stun_timer = 30;
