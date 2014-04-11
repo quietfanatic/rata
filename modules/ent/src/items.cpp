@@ -28,7 +28,6 @@ namespace ent {
         Vec bullet_pos = biped->get_pos() + biped->model_seg_point(&biped->get_def()->skel->segs[1], 0);
          // TODO come out of barrel of weapon
         Vec bullet_vel = 2 * normalize(focus);
-        state_document()->create<Bullet>(biped, bullet_pos, bullet_vel);
         shoot_bullet(biped, bullet_pos, bullet_vel);
         return 40;
     }

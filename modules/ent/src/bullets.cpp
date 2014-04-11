@@ -61,6 +61,7 @@ namespace ent {
                  // We've ended up with a more than 100% elastic collision but oh well
                 struck->GetBody()->ApplyLinearImpulse(vel_perp * normal, pos, true);
                 if (auto d = dynamic_cast<Damagable*>((Object*)struck->GetBody()->GetUserData())) {
+                    log("bullet", "%p hitting %p for 48 damage", this, d);
                     d->Damagable_damage(48);
                     done = true;
                     return;
