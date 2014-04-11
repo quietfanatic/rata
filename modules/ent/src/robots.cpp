@@ -182,32 +182,15 @@ namespace ent {
             BODY,
             ENEMY_SENSOR
         };
-        enum Frame_Index {
-            A0,
-            A23,
-            A45,
-            A68,
-            A90,
-            A113,
-            A135,
-            A158,
-            A180,
-            A203,
-            A225,
-            A248,
-            A270,
-            A293,
-            A315,
-            A338
-        };
         Vec target = Vec(NAN, NAN);
         uint32 attack_timer = 0;
 
         void Drawn_draw (Sprites) override {
             auto def = get_def();
-            int frame_i = lround(angle(focus) / M_PI * 8) + 4;
-            if (frame_i < 0) frame_i += 16;
-            draw_frame(&def->layout->frames[frame_i], def->texture, get_pos());
+            float up_angle = angle_diff(angle(focus), M_PI / 2);
+            auto frame_i = lround(up_angle / M_PI * 8);
+            Vec scale = focus.x > 0 ? Vec(1, 1) : Vec(-1, 1);
+            draw_frame(&def->layout->frames[frame_i], def->texture, get_pos(), scale);
         }
         int32 life = 96;
         void Damagable_damage (int32 d) override {
@@ -316,5 +299,6 @@ HACCABLE(Flyer) {
     name("ent::Flyer");
     attr("Flyer", base<Robot>().collapse());
     attr("life", member(&Flyer::life).optional());
+    attr("target", member(&Flyer::target).optional());
 }
 

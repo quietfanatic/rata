@@ -289,7 +289,6 @@ HACCABLE(Biped) {
     attr("crawling", member(&Biped::crawling).optional());
     attr("ceiling_low", member(&Biped::ceiling_low).optional());
     attr("jump_timer", member(&Biped::jump_timer).optional());
-    attr("focus", member(&Biped::focus).optional());
     attr("inventory", member(&Biped::inventory).optional());
     attr("equipment", member(&Biped::equipment).optional());
     attr("attack_timeout", member(&Biped::attack_timeout).optional());

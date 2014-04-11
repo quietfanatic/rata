@@ -32,5 +32,6 @@
         [0x605800ff 0x605800ff 0x00000000 0x00000000]  // 21. Caution yellow paint
         [0x131512ff 0x131512ff 0x00000000 0x00000000]  // 22. Black weaponish color
         [0x2f2f2fff 0x2f2f2fff 0x00000000 0x00000000]  // 23. Dark grey rubber
+        [0x000000ff 0x000000ff 0x00000000 0xd70a00ff]  // 24. Red LED
     ]}
 }}

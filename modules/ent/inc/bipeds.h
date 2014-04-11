@@ -80,13 +80,9 @@ namespace ent {
 
          // For control
         uint32 buttons = 0;
-        Vec focus = Vec(2, 0);
-        Vec vision_pos;
         int8 move_direction () {
             return !!(buttons & RIGHT_BIT) - !!(buttons & LEFT_BIT);
         }
-
-        geo::Vision vision;
 
          // For movement
         Biped_Stats stats;

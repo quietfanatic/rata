@@ -79,6 +79,7 @@ HACCABLE_TEMPLATE(<class Layer HCB_COMMA class Def>, ent::Agent<Layer HCB_COMMA 
              + ", " + hacc::Type::CppType<Def>().name() + ">";
     });
     attr("ROD", hcb::template base<ent::ROD<Layer, Def>>().collapse());
+    attr("focus", member(&ent::Agent<Layer, Def>::focus).optional());
     finish(&ent::Agent<Layer, Def>::finish);
 }
 

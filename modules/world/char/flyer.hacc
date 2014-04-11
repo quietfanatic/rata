@@ -1,0 +1,38 @@
+{hacc::Document:{
+    def:{ent::Ext_Def:{
+        mass:1
+        fixtures:[
+            { shape:$.shape friction:0.4 resitution:0.6 coll_a:[ground] coll_b:[ground] }
+            { shape:$.enemy_sensor is_sensor:true }
+        ]
+        layout:$.layout
+        texture:$.img.body
+    }}
+    shape:{b2CircleShape:{ radius: 0.4; }}
+    enemy_sensor:{b2PolygonShape:{
+        verts:[[-10, -7] [10 -7] [10 8] [-10 8]]
+    }}
+    layout:{vis::Layout:{
+        size:[16 32]
+        frames:[
+            { name:a0   offset:[  8 6] box:[-8 6 -8 10] }
+            { name:a23  offset:[ 24 6] box:[-8 6 -8 10] }
+            { name:a45  offset:[ 40 6] box:[-8 6 -8 10] }
+            { name:a68  offset:[ 56 6] box:[-8 6 -8 10] }
+            { name:a90  offset:[ 72 6] box:[-8 6 -8 10] }
+            { name:a113 offset:[ 88 6] box:[-8 6 -8 10] }
+            { name:a135 offset:[104 6] box:[-8 6 -8 10] }
+            { name:a158 offset:[120 6] box:[-8 6 -8 10] }
+            { name:a180 offset:[136 6] box:[-8 6 -8 10] }
+        ]
+    }}
+    img:{vis::Image:{
+        filename:"world/char/flyer.png"
+        textures:[
+            { name:body offset:[0 16] size:[144 16] }
+        ]
+        palettes:[
+            { offset:[146 27] vertical:true mask:0x00ffffff }
+        ]
+    }}
+}}
