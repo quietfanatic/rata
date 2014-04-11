@@ -15,36 +15,17 @@ using namespace vis;
 
 namespace ent {
 
-    struct Ext_Def : Object_Def {
+    struct Ext_Def : Agent_Def {
         vis::Texture* texture;
         vis::Layout* layout;
     };
 
      // Robots cannot see through walls.
-    struct Robot : ROD<Sprites, Ext_Def>, Controllable {
+    struct Robot : Agent<Sprites, Ext_Def> {
          // This is not stored.  TODO: should it be?
         Object* enemy = NULL;
         Vec enemy_pos = Vec(0, 0);
         int8 direction = 0;
-
-        uint32 buttons = 0;
-        Vec focus = Vec(0, 0);
-        static CE Vec focus_offset () { return Vec(0, 0.5); }
-        Vec vision_pos;
-        geo::Vision vision;
-        void Controllable_buttons (uint32 bits) override {
-            if (bits)
-                b2body->SetAwake(true);
-            buttons = bits;
-        }
-        void Controllable_move_focus (Vec diff) override {
-            focus = constrain(Rect(-18, -13, 18, 13), focus + diff);
-        }
-        Vec Controllable_get_focus () override {
-            return focus + get_pos() + Vec(0, 0.5);
-        }
-        Vec Controllable_get_vision_pos () override { return vision_pos; }
-        geo::Room* Controllable_get_room () { return room; }
 
          // All this does is do some ray casts to make sure we have a direct
          //  line of sight to the human.  TODO: check Filters instead of dynamic cast to Biped
@@ -77,8 +58,9 @@ namespace ent {
 
         bool try_see_at (Object* obj, Vec o_pos) {
             if ((o_pos.x - get_pos().x) * direction < 0) return false;
+            auto def = get_def();
             bool r = false;
-            space.ray_cast(get_pos() + focus_offset(), o_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction){
+            space.ray_cast(get_pos() + def->focus_offset, o_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction){
                 if ((Object*)fix->GetBody()->GetUserData() == obj) {
                     r = true;
                     return fraction;
@@ -133,21 +115,21 @@ namespace ent {
             if (controller) {
                 if (attack_timer) --attack_timer;
                 else if (buttons & ATTACK_BIT) {
-                    Vec bullet_pos = get_pos() + focus_offset();
+                    Vec bullet_pos = get_pos() + def->focus_offset;
                     Vec bullet_vel = 2 * normalize(focus);
                     log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
-                    shoot_bullet(this, get_pos() + focus_offset(), bullet_vel);
+                    shoot_bullet(this, get_pos() + def->focus_offset, bullet_vel);
                     attack_timer = 60;
                 }
             }
             else {
                 if (attack_timer) {
-                    focus = 0.8*focus + 0.2*(target - get_pos() - focus_offset());
+                    focus = 0.8*focus + 0.2*(target - get_pos() - def->focus_offset);
                     if (--attack_timer == 0) {
-                        Vec bullet_pos = get_pos() + focus_offset();
+                        Vec bullet_pos = get_pos() + def->focus_offset;
                         Vec bullet_vel = 2 * normalize(focus);
                         log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
-                        shoot_bullet(this, get_pos() + focus_offset(), bullet_vel);
+                        shoot_bullet(this, get_pos() + def->focus_offset, bullet_vel);
                     }
                 }
                 if (enemy && !attack_timer) {
@@ -170,11 +152,7 @@ namespace ent {
                     vision.attend(biped->get_pos() + Rect(-0.5, 0, 0.5, 2), 10);
                 }
             }
-            Vec origin = get_pos() + focus_offset();
-            vision.attend(origin + Rect(-1, -1, 1, 1), 1000000);
-            Vec focus_world = focus + origin;
-            vision_pos = vision.look(origin, &focus_world, !!controller);
-            focus = focus_world - origin;
+            Robot::Object_after_move();
         }
         float Grounded_velocity () override {
             if (controller)
@@ -202,14 +180,14 @@ namespace ent {
 
 HACCABLE(Ext_Def) {
     name("ent::Ext_Def");
-    attr("Object_Def", base<Object_Def>().collapse());
+    attr("Agent_Def", base<Agent_Def>().collapse());
     attr("texture", member(&Ext_Def::texture));
     attr("layout", member(&Ext_Def::layout));
 }
 
 HACCABLE(Robot) {
     name("ent::Robot");
-    attr("ROD", base<ROD<Sprites, Ext_Def>>().collapse());
+    attr("Agent", base<Agent<Sprites, Ext_Def>>().collapse());
     attr("Controllable", base<Controllable>().collapse());
     attr("direction", member(&Patroller::direction).optional());
 }

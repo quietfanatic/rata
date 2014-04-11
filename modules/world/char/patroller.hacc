@@ -1,5 +1,6 @@
 {hacc::Document:{
     def:{ent::Ext_Def:{
+        focus_offset:[0 0.5]
         mass:1
         fixtures:[
             { shape:$.shape friction:0.4 coll_a:[ground] coll_b:[ground] }
