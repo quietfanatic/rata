@@ -74,7 +74,7 @@ namespace vis {
         glBindFramebuffer(GL_FRAMEBUFFER, world_fb);
         glViewport(0, 0, rtt_camera_size.x/PX, rtt_camera_size.y/PX);
          // For now, clear to default background material
-        glClearColor(1 / 255.0, 0, 0, 0);
+        glClearColor(1 / 255.0, 0.5, 0, 0);
         glClearDepth(0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
          // Map rendering uses depth and no blend
