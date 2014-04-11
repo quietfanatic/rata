@@ -31,8 +31,6 @@ namespace ent {
         float run_stride;
         float crawl_stride;
         snd::Voice* step_voice = NULL;
-         // TODO: terrible time-saving hack!
-        snd::Voice* shoot_voice = NULL;
     };
 
      // Enumerates all possible poses for a Biped.

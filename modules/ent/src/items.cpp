@@ -29,14 +29,8 @@ namespace ent {
          // TODO come out of barrel of weapon
         Vec bullet_vel = 2 * normalize(focus);
         state_document()->create<Bullet>(biped, bullet_pos, bullet_vel);
-        auto& stats = biped->stats;
-        if (stats.shoot_voice) {
-            stats.shoot_voice->done = false;
-            stats.shoot_voice->paused = false;
-            stats.shoot_voice->pos = 0;
-            stats.shoot_voice->volume = 1.0;
-        }
-        return 60;
+        shoot_bullet(biped, bullet_pos, bullet_vel);
+        return 40;
     }
 
 } using namespace ent;

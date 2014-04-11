@@ -342,7 +342,6 @@ HACCABLE(Biped_Stats) {
     attr("run_stride", member(&Biped_Stats::run_stride).optional());
     attr("crawl_stride", member(&Biped_Stats::crawl_stride).optional());
     attr("step_voice", member(&Biped_Stats::step_voice).optional());
-    attr("shoot_voice", member(&Biped_Stats::shoot_voice).optional());
 }
 
 HACCABLE(Biped_Def) {

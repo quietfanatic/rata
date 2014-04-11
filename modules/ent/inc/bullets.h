@@ -1,6 +1,7 @@
 #ifndef HAVE_ENT_BULLETS_H
 #define HAVE_ENT_BULLETS_H
 
+#include "shell/inc/main.h"
 #include "util/inc/organization.h"
 #include "util/inc/honestly.h"
 #include "vis/inc/common.h"
@@ -34,6 +35,11 @@ namespace ent {
         void update ();
         void Drawn_draw (vis::Overlay) override;
     };
+
+    void shoot_sound (float volume = 1.0);
+    void ricochet_sound (float volume = 0.4);
+     // Calls shoot_sound and makes new Bullet
+    Bullet* shoot_bullet (phys::Object* owner, util::Vec pos, util::Vec vel);
 
      // 名前通り。Call this after before_move I guess.
     void update_bullets ();

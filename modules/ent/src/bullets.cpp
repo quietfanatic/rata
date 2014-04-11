@@ -14,6 +14,7 @@ namespace ent {
 
     Links<Bullet> bullets;
 
+    static snd::Voice* shoot_voice;
     static snd::Voice* ricochet_voice;
 
     void Bullet::update () {
@@ -66,11 +67,6 @@ namespace ent {
                 }
                 log("bullet", "Bullet velocity perpendicular: %f", vel_perp);
                 if (vel_perp > -0.8) {
-                    ricochet_voice->done = false;
-                    ricochet_voice->paused = false;
-                     // TODO: make this not necessary
-                    ricochet_voice->pos = 5512;
-                    ricochet_voice->volume = 0.4;
                     goto try_bounce;
                 }
                 else {
@@ -101,6 +97,7 @@ namespace ent {
         static bool initted = false;
         if (!initted) {
             initted = true;
+            shoot_voice = hacc::File("world/snd/sounds.hacc").attr("shoot_voice");
             ricochet_voice = hacc::File("world/snd/sounds.hacc").attr("ricochet_voice");
             hacc::manage(&ricochet_voice);
         }
@@ -109,6 +106,27 @@ namespace ent {
             auto b = bp++;
             b->update();
         }
+    }
+
+    void shoot_sound (float volume) {
+        shoot_voice->done = false;
+        shoot_voice->paused = false;
+         // TODO: make this not necessary
+        shoot_voice->pos = 5512;
+        shoot_voice->volume = volume;
+    }
+
+    void ricochet_sound (float volume) {
+        ricochet_voice->done = false;
+        ricochet_voice->paused = false;
+         // TODO: make this not necessary
+        ricochet_voice->pos = 5512;
+        ricochet_voice->volume = volume;
+    }
+
+    Bullet* shoot_bullet (phys::Object* owner, Vec pos, Vec vel) {
+        shoot_sound();
+        return state_document()->create<Bullet>(owner, pos, vel);
     }
 
 } using namespace ent;
