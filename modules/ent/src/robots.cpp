@@ -1,4 +1,5 @@
 #include "ent/inc/bipeds.h"
+#include "ent/inc/control.h"
 #include "ent/inc/mixins.h"
 #include "geo/inc/vision.h"
 #include "hacc/inc/everything.h"
@@ -19,11 +20,30 @@ namespace ent {
     };
 
      // Robots cannot see through walls.
-    struct Robot : ROD<Sprites, Ext_Def> {
+    struct Robot : ROD<Sprites, Ext_Def>, Controllable {
          // This is not stored.  TODO: should it be?
         Object* enemy = NULL;
-        Vec enemy_pos;
         int8 direction = 0;
+
+        uint32 buttons = 0;
+        Vec focus = Vec(0, 0);
+        static CE Vec focus_offset () { return Vec(0, 0.5); }
+        Vec vision_pos;
+        geo::Vision vision;
+        void Controllable_buttons (uint32 bits) override {
+            if (bits)
+                b2body->SetAwake(true);
+            buttons = bits;
+        }
+        void Controllable_move_focus (Vec diff) override {
+            focus = constrain(Rect(-18, -13, 18, 13), focus + diff);
+        }
+        Vec Controllable_get_focus () override {
+            return focus + pos() + Vec(0, 0.5);
+        }
+        Vec Controllable_get_pos () override { return pos() + focus_offset(); }
+        Vec Controllable_get_vision_pos () override { return vision_pos; }
+        geo::Room* Controllable_get_room () { return room; }
 
          // All this does is do some ray casts to make sure we have a direct
          //  line of sight to the human.  TODO: check Filters instead of dynamic cast to Biped
@@ -40,11 +60,13 @@ namespace ent {
             });
             if (enemy) {
                 if (!try_see_at(enemy, enemy->pos())
-                        && !try_see_at(enemy, enemy->pos() + Vec(0.4, 0.4))
-                        && !try_see_at(enemy, enemy->pos() + Vec(-0.4, 0.5))
-                        && !try_see_at(enemy, enemy->pos() + Vec(0, 1))
-                        && !try_see_at(enemy, enemy->pos() + Vec(0, 1.4)))
+                    && !try_see_at(enemy, enemy->pos() + Vec(0.4, 0.4))
+                    && !try_see_at(enemy, enemy->pos() + Vec(-0.4, 0.5))
+                    && !try_see_at(enemy, enemy->pos() + Vec(0, 1))
+                    && !try_see_at(enemy, enemy->pos() + Vec(0, 1.4))
+                ) {
                     enemy = NULL;
+                }
             }
             if (enemy != old_enemy) {
                 b2body->SetAwake(true);
@@ -55,7 +77,7 @@ namespace ent {
         bool try_see_at (Object* obj, Vec o_pos) {
             if ((o_pos.x - pos().x) * direction < 0) return false;
             bool r = false;
-            space.ray_cast(pos() + Vec(0, 0.5), o_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction){
+            space.ray_cast(pos() + focus_offset(), o_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction){
                 if ((Object*)fix->GetBody()->GetUserData() == obj) {
                     r = true;
                     return fraction;
@@ -65,7 +87,8 @@ namespace ent {
                     return 0.f;
                 }
             });
-            if (r) enemy_pos = o_pos;
+            if (r && !controller)
+                focus = constrain(Rect(-18, -13, 18, 13), o_pos - pos() - focus_offset());
             return r;
         }
     };
@@ -95,7 +118,13 @@ namespace ent {
                     if (fd == floor_sensor)
                         sensed = true;
                 });
-                if (!sensed) direction = -direction;
+                if (controller) {
+                    if (buttons & LEFT_BIT && !(buttons & RIGHT_BIT)) direction = -1;
+                    if (buttons & RIGHT_BIT && !(buttons & LEFT_BIT)) direction = 1;
+                }
+                else {
+                    if (!sensed) direction = -direction;
+                }
                 oldxrel = pos().x - ground->pos().x;
             }
         }
@@ -110,11 +139,20 @@ namespace ent {
             if (enemy) {
                 if (auto biped = dynamic_cast<Biped*>(enemy)) {
                     biped->vision.attend(pos() + Rect(-0.5, 0, 0.5, 1), 10);
+                    vision.attend(biped->pos() + Rect(-0.5, 0, 0.5, 2), 10);
                 }
             }
+            Vec origin = pos() + focus_offset();
+            vision.attend(origin + Rect(-1, -1, 1, 1), 1000000);
+            Vec focus_world = focus + origin;
+            vision_pos = vision.look(origin, &focus_world, !!controller);
+            focus = focus_world - origin;
         }
         float Grounded_velocity () override {
-            return enemy ? 0.0 : 2.0 * direction;
+            if (controller)
+                return buttons & LEFT_BIT ? -2.0 : buttons & RIGHT_BIT ? 2.0 : 0.0;
+            else
+                return enemy ? 0.0 : 2.0 * direction;
         }
         void Drawn_draw (Sprites) override {
             auto def = get_def();
