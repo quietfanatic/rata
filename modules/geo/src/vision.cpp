@@ -33,14 +33,14 @@ namespace geo {
     void Wall::Resident_reclude () {
         Link<Wall>::unlink();
     }
-    Vec Wall::Resident_get_pos () { return corner.c; }
-    void Wall::Resident_set_pos (Vec p) {
+    Vec Wall::Spatial_get_pos () { return corner.c; }
+    void Wall::Spatial_set_pos (Vec p) {
         corner.c = p;
         finish();
         if (right) right->finish();
     }
-    size_t Wall::Resident_n_pts () { return 2; }
-    Vec Wall::Resident_get_pt (size_t i) {
+    size_t Wall::Spatial_n_pts () { return 2; }
+    Vec Wall::Spatial_get_pt (size_t i) {
         if (i == 0) {
             if (defined(edge))
                 return edge.a - corner.c;
@@ -55,7 +55,7 @@ namespace geo {
         }
         else return Vec();
     }
-    void Wall::Resident_set_pt (size_t i, Vec p) {
+    void Wall::Spatial_set_pt (size_t i, Vec p) {
         if (i == 0) {
             if (left) {
                  // Figure out whether the user means negative or positive radius

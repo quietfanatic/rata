@@ -406,8 +406,8 @@ HACCABLE(Object_Def) {
 HACCABLE(Object) {
     name("phys::Object");
     attr("def", member(&Object::def));
-    attr("pos", value_methods(&Object::pos, &Object::set_pos).optional());
-    attr("vel", value_methods(&Object::vel, &Object::set_vel).optional());
+    attr("pos", value_methods(&Object::Object_get_pos, &Object::Object_set_pos).optional());
+    attr("vel", value_methods(&Object::get_vel, &Object::set_vel).optional());
     finish(&Object::finish);
 }
 

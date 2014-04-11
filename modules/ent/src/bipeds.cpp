@@ -28,10 +28,10 @@ namespace ent {
         focus = constrain(Rect(-18, -13, 18, 13), focus + diff);
     }
     Vec Biped::Controllable_get_focus () {
-        return focus + pos() + get_def()->focus_offset;
+        return focus + get_pos() + get_def()->focus_offset;
     }
     Vec Biped::Controllable_get_pos () {
-        return pos() + get_def()->focus_offset;
+        return get_pos() + get_def()->focus_offset;
     }
     Vec Biped::Controllable_get_vision_pos () {
         return vision_pos;
@@ -65,7 +65,7 @@ namespace ent {
             }
             else if (jump_timer) {
                 if (jump_timer >= stats.jump_delay / FR) {
-                    set_vel(Vec(vel().x, stats.jump_speed));
+                    set_vel(Vec(get_vel().x, stats.jump_speed));
                     jump_timer = 0;
                     ground = NULL;
                 }
@@ -73,7 +73,7 @@ namespace ent {
                     jump_timer++;
                 }
                 else {  // Short jump
-                    set_vel(Vec(vel().x, stats.jump_speed * 2 / 3));
+                    set_vel(Vec(get_vel().x, stats.jump_speed * 2 / 3));
                     jump_timer = 0;
                     ground = NULL;
                 }
@@ -96,11 +96,12 @@ namespace ent {
             crouching = false;
             crawling = false;
             jump_timer = 0;
-            if (vel().x * mdir <= stats.air_speed - stats.air_friction) {
-                set_vel(Vec(vel().x + stats.air_friction * mdir, vel().y));
+            auto vel = get_vel();
+            if (get_vel().x * mdir <= stats.air_speed - stats.air_friction) {
+                set_vel(Vec(vel.x + stats.air_friction * mdir, vel.y));
             }
-            else if (vel().x * mdir <= stats.air_speed) {
-                set_vel(Vec(stats.air_speed * mdir, vel().y));
+            else if (get_vel().x * mdir <= stats.air_speed) {
+                set_vel(Vec(stats.air_speed * mdir, vel.y));
             }
         }
          // Fire bullets
@@ -119,7 +120,7 @@ namespace ent {
         }
          // For walking animation
         if (ground)
-            oldxrel = pos().x - ground->pos().x;
+            oldxrel = get_pos().x - ground->get_pos().x;
         else
             oldxrel = 0;
          // Change active fixture
@@ -161,9 +162,9 @@ namespace ent {
             return stats.crawl_friction;
         }
         else if (int8 mdir = move_direction()) {
-            if (vel().x * mdir > stats.walk_speed)
+            if (get_vel().x * mdir > stats.walk_speed)
                 return stats.run_friction;
-            else if (vel().x * mdir >= 0)
+            else if (get_vel().x * mdir >= 0)
                 return stats.walk_friction;
             else
                 return stats.skid_friction;
@@ -173,28 +174,28 @@ namespace ent {
      // Ensure we're in the right room and also calculate walk animation.
     void Biped::Object_after_move () {
         auto def = get_def();
-        reroom(pos());
+        reroom(get_pos());
          // Clear input before next frame
         buttons = Button_Bits(0);
         if (ground && (!crouching || crawling)) {
-            if (fabs(vel().x) < 0.01) {
+            if (fabs(get_vel().x) < 0.01) {
                 distance_walked = 0;
             }
             else if (crawling) {
-                distance_walked += fabs(pos().x - ground->pos().x - oldxrel);
+                distance_walked += fabs(get_pos().x - ground->get_pos().x - oldxrel);
             }
             else {
-                float stride = fabs(vel().x) > stats.walk_speed
+                float stride = fabs(get_vel().x) > stats.walk_speed
                     ? stats.run_stride
                     : stats.walk_stride;
                 bool pre_step = fmod(distance_walked, stride / 2) < stride / 4;
-                distance_walked += fabs(pos().x - ground->pos().x - oldxrel);
+                distance_walked += fabs(get_pos().x - ground->get_pos().x - oldxrel);
                 if (pre_step && fmod(distance_walked, stride / 2) >= stride / 4) {
                     if (stats.step_voice) {
                         stats.step_voice->done = false;
                         stats.step_voice->paused = false;
                         stats.step_voice->pos = 0;
-                        stats.step_voice->volume = 0.3 + 0.3 * fabs(vel().x) / stats.walk_speed;
+                        stats.step_voice->volume = 0.3 + 0.3 * fabs(get_vel().x) / stats.walk_speed;
                     }
                 }
             }
@@ -212,7 +213,7 @@ namespace ent {
             }
         });
          // Vision update
-        Vec origin = pos() + def->focus_offset;
+        Vec origin = get_pos() + def->focus_offset;
         vision.attend(origin + Rect(-1, -1, 1, 1), 1000000);
         Vec focus_world = focus + origin;
         vision_pos = vision.look(origin, &focus_world, !!controller);
@@ -228,7 +229,7 @@ namespace ent {
                 model->apply_pose(&def->poses->look_stand[look_frame]);
             }
             else if (crawling) {
-                if (fabs(vel().x) < 0.01) {
+                if (fabs(get_vel().x) < 0.01) {
                     model->apply_pose(&def->poses->crawl[3]);
                 }
                 else {
@@ -240,7 +241,7 @@ namespace ent {
                 model->apply_pose(&def->poses->crouch);
                 model->apply_pose(&def->poses->look_stand[look_frame]);
             }
-            else if (vel().x * direction > stats.walk_speed) {
+            else if (get_vel().x * direction > stats.walk_speed) {
                 float stepdist = fmod(distance_walked / stats.run_stride * 6.0, 6.0);
                  // Expand frames 1 and 4 a little
                 uint step =
@@ -256,7 +257,7 @@ namespace ent {
                 else
                     model->apply_pose(&def->poses->look_walk[look_frame]);
             }
-            else if (fabs(vel().x) >= 0.01) {
+            else if (fabs(get_vel().x) >= 0.01) {
                 uint step = fmod(distance_walked / stats.walk_stride * 4.0, 4.0);
                 model->apply_pose(&def->poses->walk[step]);
                 if (step % 2 < 1)
@@ -291,7 +292,7 @@ namespace ent {
         for (auto& e : equipment.items) {
             skins[++i] = e.def->skin;
         }
-        model.draw(n_skins, skins, pos(), Vec(direction, 1));
+        model.draw(n_skins, skins, get_pos(), Vec(direction, 1));
     }
 
     Vec Biped::model_seg_point (vis::Skel::Seg* seg, size_t i) {

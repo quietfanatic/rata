@@ -41,9 +41,9 @@ namespace ent {
             focus = constrain(Rect(-18, -13, 18, 13), focus + diff);
         }
         Vec Controllable_get_focus () override {
-            return focus + pos() + Vec(0, 0.5);
+            return focus + get_pos() + Vec(0, 0.5);
         }
-        Vec Controllable_get_pos () override { return pos() + focus_offset(); }
+        Vec Controllable_get_pos () override { return get_pos() + focus_offset(); }
         Vec Controllable_get_vision_pos () override { return vision_pos; }
         geo::Room* Controllable_get_room () { return room; }
 
@@ -56,16 +56,16 @@ namespace ent {
                 auto fd = (phys::FixtureDef*)mine->GetUserData();
                 auto oo = (Object*)other->GetBody()->GetUserData();
                 if (dynamic_cast<Biped*>(oo)) {
-                    if (!enemy || length2(oo->pos() - pos()) < length2(enemy->pos() - pos()))
+                    if (!enemy || length2(oo->get_pos() - get_pos()) < length2(enemy->get_pos() - get_pos()))
                         enemy = oo;
                 }
             });
             if (enemy) {
-                if (!try_see_at(enemy, enemy->pos())
-                    && !try_see_at(enemy, enemy->pos() + Vec(0.4, 0.4))
-                    && !try_see_at(enemy, enemy->pos() + Vec(-0.4, 0.5))
-                    && !try_see_at(enemy, enemy->pos() + Vec(0, 1))
-                    && !try_see_at(enemy, enemy->pos() + Vec(0, 1.4))
+                if (!try_see_at(enemy, enemy->get_pos())
+                    && !try_see_at(enemy, enemy->get_pos() + Vec(0.4, 0.4))
+                    && !try_see_at(enemy, enemy->get_pos() + Vec(-0.4, 0.5))
+                    && !try_see_at(enemy, enemy->get_pos() + Vec(0, 1))
+                    && !try_see_at(enemy, enemy->get_pos() + Vec(0, 1.4))
                 ) {
                     enemy = NULL;
                 }
@@ -77,9 +77,9 @@ namespace ent {
         }
 
         bool try_see_at (Object* obj, Vec o_pos) {
-            if ((o_pos.x - pos().x) * direction < 0) return false;
+            if ((o_pos.x - get_pos().x) * direction < 0) return false;
             bool r = false;
-            space.ray_cast(pos() + focus_offset(), o_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction){
+            space.ray_cast(get_pos() + focus_offset(), o_pos, [&](b2Fixture* fix, const Vec& p, const Vec& n, float fraction){
                 if ((Object*)fix->GetBody()->GetUserData() == obj) {
                     r = true;
                     return fraction;
@@ -129,26 +129,26 @@ namespace ent {
                 else {
                     if (!sensed) direction = -direction;
                 }
-                oldxrel = pos().x - ground->pos().x;
+                oldxrel = get_pos().x - ground->get_pos().x;
             }
             if (controller) {
                 if (attack_timer) --attack_timer;
                 else if (buttons & ATTACK_BIT) {
-                    Vec bullet_pos = pos() + focus_offset();
+                    Vec bullet_pos = get_pos() + focus_offset();
                     Vec bullet_vel = 2 * normalize(focus);
                     log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
-                    shoot_bullet(this, pos() + focus_offset(), bullet_vel);
+                    shoot_bullet(this, get_pos() + focus_offset(), bullet_vel);
                     attack_timer = 60;
                 }
             }
             else {
                 if (attack_timer) {
-                    focus = 0.8*focus + 0.2*(target - pos() - focus_offset());
+                    focus = 0.8*focus + 0.2*(target - get_pos() - focus_offset());
                     if (--attack_timer == 0) {
-                        Vec bullet_pos = pos() + focus_offset();
+                        Vec bullet_pos = get_pos() + focus_offset();
                         Vec bullet_vel = 2 * normalize(focus);
                         log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
-                        shoot_bullet(this, pos() + focus_offset(), bullet_vel);
+                        shoot_bullet(this, get_pos() + focus_offset(), bullet_vel);
                     }
                 }
                 if (enemy && !attack_timer) {
@@ -159,7 +159,7 @@ namespace ent {
         }
         void Object_after_move () override {
             if (ground) {
-                stride_phase += fabs(pos().x - ground->pos().x - oldxrel) / 0.7;
+                stride_phase += fabs(get_pos().x - ground->get_pos().x - oldxrel) / 0.7;
                 stride_phase = fmod(stride_phase, 1);
             }
             else {
@@ -167,11 +167,11 @@ namespace ent {
             }
             if (enemy) {
                 if (auto biped = dynamic_cast<Biped*>(enemy)) {
-                    biped->vision.attend(pos() + Rect(-0.5, 0, 0.5, 1), 10);
-                    vision.attend(biped->pos() + Rect(-0.5, 0, 0.5, 2), 10);
+                    biped->vision.attend(get_pos() + Rect(-0.5, 0, 0.5, 1), 10);
+                    vision.attend(biped->get_pos() + Rect(-0.5, 0, 0.5, 2), 10);
                 }
             }
-            Vec origin = pos() + focus_offset();
+            Vec origin = get_pos() + focus_offset();
             vision.attend(origin + Rect(-1, -1, 1, 1), 1000000);
             Vec focus_world = focus + origin;
             vision_pos = vision.look(origin, &focus_world, !!controller);
@@ -185,9 +185,9 @@ namespace ent {
         }
         void Drawn_draw (Sprites) override {
             auto def = get_def();
-            float dir = vel().x > 0 ? 1 : vel().x < 0 ? -1 : direction;
+            float dir = get_vel().x > 0 ? 1 : get_vel().x < 0 ? -1 : direction;
             auto frame_i = stride_phase < 0.5 ? UP : DOWN;
-            draw_frame(&def->layout->frames[frame_i], def->texture, pos(), Vec(dir, 1));
+            draw_frame(&def->layout->frames[frame_i], def->texture, get_pos(), Vec(dir, 1));
         }
         int32 life = 96;
         void Damagable_damage (int32 d) override {

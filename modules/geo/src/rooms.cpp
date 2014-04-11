@@ -82,30 +82,31 @@ namespace geo {
         old_neighbors = neighbors;
     }
 
-    size_t Room::n_pts () {
+    size_t Room::Spatial_n_pts () {
         return 4 + neighbors.size() + 1;
     }
-    Vec Room::get_pt (size_t i) {
+    Vec Room::Spatial_get_pt (size_t i) {
         switch (i) {
-            case 0: return boundary.lb();
-            case 1: return boundary.rb();
+            case 0: return Vec(0, 0);
+            case 1: return Vec(boundary.r, 0);
             case 2: return boundary.rt();
-            case 3: return boundary.lt();
+            case 3: return Vec(0, boundary.t);
             default: if (i-4 < neighbors.size()) {
                 if (neighbors[i-4])
-                    return neighbors[i-4]->boundary.lt();
+                    return neighbors[i-4]->boundary.lt() - get_pos();
                 else
-                    return boundary.rb() + Vec(-0.5 - (i-4), 0.5);
+                    return boundary.rb() + Vec(-0.5 - (i-4), 0.5) - get_pos();
             }
             else if (i-4 == neighbors.size()) {
-                return boundary.rb() + Vec(-0.5 - (i-4), 0.5);
+                return boundary.rb() + Vec(-0.5 - (i-4), 0.5) - get_pos();
             }
             else {
                 return Vec();
             }
         }
     }
-    void Room::set_pt (size_t i, Vec p) {
+    void Room::Spatial_set_pt (size_t i, Vec p) {
+        p += get_pos();
         switch (i) {
             case 0: boundary.l = p.x; boundary.b = p.y; return;
             case 1: boundary.r = p.x; boundary.b = p.y; return;

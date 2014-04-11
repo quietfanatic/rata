@@ -27,7 +27,7 @@ namespace ent {
         }
         void Drawn_draw (Sprites) override {
             auto def = get_def();
-            draw_texture(def->texture, pos() + def->boundary);
+            draw_texture(def->texture, get_pos() + def->boundary);
         }
         void Damagable_damage (int32 d) override {
             if (life >= 0) {
@@ -52,15 +52,15 @@ namespace ent {
             set_radiant(radiant);
             draw_light(vertices.size(), vertices.data());
         }
-        Vec Resident_get_pos () override { return pos; }
-        void Resident_set_pos (Vec p) override { pos = p; }
-        void Resident_emerge () override { appear(); }
-        void Resident_reclude () override { disappear(); }
-        size_t Resident_n_pts () override { return vertices.size(); }
-        Vec Resident_get_pt (size_t i) override { return vertices.at(i); }
-        void Resident_set_pt (size_t i, Vec v) override {
+        Vec Spatial_get_pos () override { return pos; }
+        void Spatial_set_pos (Vec p) override { pos = p; }
+        size_t Spatial_n_pts () override { return vertices.size(); }
+        Vec Spatial_get_pt (size_t i) override { return vertices.at(i); }
+        void Spatial_set_pt (size_t i, Vec v) override {
             vertices.at(i) = v;
         }
+        void Resident_emerge () override { appear(); }
+        void Resident_reclude () override { disappear(); }
     };
 
 } using namespace ent;

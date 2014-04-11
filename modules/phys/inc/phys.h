@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <Box2D/Box2D.h>
+#include "geo/inc/spatial.h"
 #include "util/inc/geometry.h"
 
 namespace phys {
@@ -72,19 +73,26 @@ namespace phys {
 
      // The dynamic thing
      // Every class that wants to have a physical presence should inherit from this.
-    struct Object {
+    struct Object : virtual geo::Spatial {
         Object_Def* def = NULL;
         b2Body* b2body = NULL;
 
         void finish ();
 
          // A paltry amount of wrapper methods.
-        util::Vec pos () const { return reinterpret_cast<const util::Vec&>(b2body->GetPosition()); }
-        void set_pos (util::Vec v) {
+        util::Vec Object_get_pos () const {
+            return reinterpret_cast<const util::Vec&>(b2body->GetPosition());
+        }
+        util::Vec Spatial_get_pos () override { return Object_get_pos(); }
+        void Object_set_pos (util::Vec v) {
             b2body->SetTransform(b2Vec2(v.x, v.y), 0);
             b2body->SetAwake(true);
         }
-        util::Vec vel () const { const b2Vec2& v = b2body->GetLinearVelocity(); return reinterpret_cast<const util::Vec&>(v); }
+        void Spatial_set_pos (util::Vec v) override { Object_set_pos(v); }
+        util::Vec get_vel () const {
+            const b2Vec2& v = b2body->GetLinearVelocity();
+            return reinterpret_cast<const util::Vec&>(v);
+        }
         void set_vel (util::Vec v) {
             b2body->SetLinearVelocity(b2Vec2(v.x, v.y));
             b2body->SetAwake(true);

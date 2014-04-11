@@ -25,7 +25,7 @@ namespace ent {
     uint PP8::Item_attack (Biped* biped, Vec focus) {
          // TODO: is there a more robust way of accessing a particular skeleton
          //  segment than just getting it by integer index?
-        Vec bullet_pos = biped->pos() + biped->model_seg_point(&biped->get_def()->skel->segs[1], 0);
+        Vec bullet_pos = biped->get_pos() + biped->model_seg_point(&biped->get_def()->skel->segs[1], 0);
          // TODO come out of barrel of weapon
         Vec bullet_vel = 2 * normalize(focus);
         state_document()->create<Bullet>(biped, bullet_pos, bullet_vel);

@@ -28,7 +28,7 @@ namespace geo {
     void Tilemap::Drawn_draw (vis::Map) {
         auto def = get_def();
         if (!def->tiles || !def->texture) return;
-        vis::draw_tiles(def->tiles, def->texture, Object::pos());
+        vis::draw_tiles(def->tiles, def->texture, Object::get_pos());
     }
 
 

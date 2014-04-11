@@ -2,6 +2,7 @@
 #define HAVE_GEO_ROOMS_H
 
 #include <vector>
+#include "geo/inc/spatial.h"
 #include "util/inc/geometry.h"
 #include "util/inc/organization.h"
 
@@ -11,7 +12,7 @@ namespace geo {
      // A resident is something that belongs to a room.
     struct Resident;
 
-    struct Room : Link<Room> {
+    struct Room : virtual Spatial, Link<Room> {
         Rect boundary = Rect(-INF, -INF, INF, INF);
         std::vector<Room*> neighbors;
          // For making finish() idempotent
@@ -27,11 +28,11 @@ namespace geo {
         Room ();
         ~Room ();
 
-         // Like Resident's point editing functions.
-         // these are absolute though.
-        size_t n_pts ();
-        Vec get_pt (size_t);
-        void set_pt (size_t, Vec);
+        Vec Spatial_get_pos () override { return boundary.lb(); }
+        void Spatial_set_pos (Vec pos) override { boundary = boundary + pos - boundary.lb(); }
+        size_t Spatial_n_pts () override;
+        Vec Spatial_get_pt (size_t) override;
+        void Spatial_set_pt (size_t, Vec) override;
 
         void finish ();
 
@@ -48,7 +49,7 @@ namespace geo {
         void finish ();
     };
 
-    struct Resident : Link<Resident> {
+    struct Resident : virtual Spatial, Link<Resident> {
         Room* room = NULL;
 
         Room* get_room () const { return room; }
@@ -60,16 +61,7 @@ namespace geo {
         virtual void Resident_emerge () = 0;
          // Called when the room is unloaded
         virtual void Resident_reclude () = 0;
-         // These are primarily for the editor
-        virtual Vec Resident_get_pos () { return Vec(NAN, NAN); }
-        virtual void Resident_set_pos (Vec p) { }
-        virtual size_t Resident_n_pts () { return 0; }
-         // These should be relative to get_pos
-        virtual Vec Resident_get_pt (size_t i) { return Vec(NAN, NAN); }
-        virtual void Resident_set_pt (size_t i, Vec) { }
-        virtual Rect Resident_boundary () { return Rect(-0.25, -0.25, 0.25, 0.25); }
 
-        virtual ~Resident () { }
         void finish ();
          // Checks if the agent has moved to a different room.  If the agent
          //  leaves the playable area, it's room is set to NULL.

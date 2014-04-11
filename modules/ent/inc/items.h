@@ -66,6 +66,8 @@ namespace ent {
         void Drawn_draw (vis::Sprites) override;
         void Resident_emerge () override { appear(); }
         void Resident_reclude () override { disappear(); }
+        util::Vec Spatial_get_pos () override { return pos; }
+        void Spatial_set_pos (util::Vec p) override { pos = p; }
         ResItem () { }
     };
 

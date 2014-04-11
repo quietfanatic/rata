@@ -10,8 +10,6 @@ namespace ent {
     template <class Layer, class Def = phys::Object_Def>
     struct ROD : geo::Resident, phys::Object, vis::Drawn<Layer> {
         Def* get_def () { return static_cast<Def*>(def); }
-        util::Vec Resident_get_pos () override { return Object::pos(); }
-        void Resident_set_pos (util::Vec p) override { Object::set_pos(p); Object::set_vel(util::Vec(0, 0)); }
         void Resident_emerge () override { materialize(); vis::Drawn<Layer>::appear(); }
         void Resident_reclude () override { vis::Drawn<Layer>::disappear(); dematerialize(); }
         void finish () { Object::finish(); Resident::finish(); }

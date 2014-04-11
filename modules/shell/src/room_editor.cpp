@@ -113,13 +113,14 @@ namespace shell {
                     }
                     if (editing_pts) {
                         if (dragging_pt >= 0) {
-                            Vec r_pos = selected->Resident_get_pos();
-                            selected->Resident_set_pt(dragging_pt, world_pos - r_pos - drag_offset);
+                            Vec r_pos = selected->get_pos();
+                            selected->Spatial_set_pt(dragging_pt, world_pos - r_pos - drag_offset);
                         }
                     }
                     else if (editing_room) {
                         if (dragging_pt >= 0) {
-                            selected_room->set_pt(dragging_pt, world_pos - drag_offset);
+                            Vec r_pos = selected_room->get_pos();
+                            selected_room->Spatial_set_pt(dragging_pt, world_pos - r_pos - drag_offset);
                         }
                     }
                     else {
@@ -128,7 +129,7 @@ namespace shell {
                                 if (length2(drag_origin - world_pos) > 0.2)
                                     dragging = true;
                                 if (dragging) {
-                                    selected->Resident_set_pos(world_pos - drag_offset);
+                                    selected->set_pos(world_pos - drag_offset);
                                 }
                             }
                         }
@@ -148,8 +149,8 @@ namespace shell {
                                         }
                                     }
                                     for (auto& res : room.residents) {
-                                        Vec pos = res.Resident_get_pos();
-                                        const Rect& boundary = res.Resident_boundary();
+                                        Vec pos = res.get_pos();
+                                        const Rect& boundary = res.Spatial_boundary();
                                         if (!defined(pos) || !defined(boundary)) {
                                             pos = room.boundary.lt() + Vec(0.5, -0.5);
                                             pos.x += unpositioned_residents++;
@@ -188,13 +189,13 @@ namespace shell {
                     Vec realpos = vis::camera->window_to_world(x, y);
                     if (editing_pts) {
                         if (event->button.button == SDL_BUTTON_LEFT) {
-                            size_t n_pts = selected->Resident_n_pts();
-                            Vec r_pos = selected->Resident_get_pos();
+                            size_t n_pts = selected->Spatial_n_pts();
+                            Vec r_pos = selected->get_pos();
                             float lowest_pt_t = INF;
                             Vec lowest_pt_pos = Vec(0, 0);
                             int lowest_pt = -1;
                             for (size_t i = 0; i < n_pts; i++) {
-                                Vec pos = selected->Resident_get_pt(i);
+                                Vec pos = selected->Spatial_get_pt(i);
                                 const Rect& boundary = pos + r_pos
                                                      + Rect(-0.25, -0.25, 0.25, 0.25);
                                 if (covers(boundary, realpos)) {
@@ -211,12 +212,13 @@ namespace shell {
                     }
                     else if (editing_room) {
                         if (event->button.button == SDL_BUTTON_LEFT) {
-                            size_t n_pts = selected_room->n_pts();
+                            size_t n_pts = selected_room->Spatial_n_pts();
+                            Vec r_pos = selected_room->get_pos();
                             float lowest_pt_t = INF;
                             Vec lowest_pt_pos = Vec(0, 0);
                             int lowest_pt = -1;
                             for (size_t i = 0; i < n_pts; i++) {
-                                Vec pos = selected_room->get_pt(i);
+                                Vec pos = selected_room->Spatial_get_pt(i);
                                 const Rect& boundary = pos + Rect(-0.25, -0.25, 0.25, 0.25);
                                 if (covers(boundary, realpos)) {
                                     if (boundary.t < lowest_pt_t) {
@@ -236,7 +238,7 @@ namespace shell {
                         selected = hovering;
                         selected_room = hovering_room;
                         if (selected) {
-                            Vec pos = selected->Resident_get_pos();
+                            Vec pos = selected->get_pos();
                             if (event->button.button == SDL_BUTTON_LEFT) {
                                 drag_origin = pos;
                                 drag_offset = realpos - pos;
@@ -298,10 +300,10 @@ namespace shell {
             size_t unpositioned_residents = 0;
             if (editing_pts) {
                 if (!selected) return;
-                Vec r_pos = selected->Resident_get_pos();
-                auto n_pts = selected->Resident_n_pts();
+                Vec r_pos = selected->get_pos();
+                auto n_pts = selected->Spatial_n_pts();
                 for (size_t i = 0; i < n_pts; i++) {
-                    Vec pos = r_pos + selected->Resident_get_pt(i);
+                    Vec pos = r_pos + selected->Spatial_get_pt(i);
                     if (defined(pos)) {
                         color_offset(pos);
                         draw_color((int)i == dragging_pt ? 0xff0000ff : 0xffff00ff);
@@ -311,9 +313,9 @@ namespace shell {
             }
             if (editing_room) {
                 if (!selected_room) return;
-                auto n_pts = selected_room->n_pts();
+                auto n_pts = selected_room->Spatial_n_pts();
                 for (size_t i = 0; i < n_pts; i++) {
-                    Vec pos = selected_room->get_pt(i);
+                    Vec pos = selected_room->Spatial_get_pt(i);
                     if (defined(pos)) {
                         color_offset(pos);
                         draw_color((int)i == dragging_pt ? 0xff0000ff : 0xffff00ff);
@@ -342,8 +344,8 @@ namespace shell {
                 if (room.observer_count) {
                     for (auto& res : room.residents) {
                         if (!editing_pts) {
-                            Vec pos = res.Resident_get_pos();
-                            const Rect& boundary = res.Resident_boundary();
+                            Vec pos = res.get_pos();
+                            const Rect& boundary = res.Spatial_boundary();
                             if (!defined(pos) || !defined(boundary)) {
                                 pos = room.boundary.lt() + Vec(0.5, -0.5);
                                 pos.x += unpositioned_residents++;
@@ -503,9 +505,9 @@ namespace shell {
             }
             Resident* old_res = hacc::Pointer(realp.type, realp.address);
             Resident* new_res = hacc::Pointer(realp.type, newp);
-            Vec pos = old_res->Resident_get_pos();
+            Vec pos = old_res->get_pos();
             pos += Vec(frand()*2-1, 0.8);
-            new_res->Resident_set_pos(pos);
+            new_res->set_pos(pos);
         }
         else {
             throw hacc::X::Logic_Error("Could not re_duplicate: this object does not belong to a document.");
@@ -541,7 +543,7 @@ namespace shell {
             hacc::Reference(type, newp).from_tree(data);
             Resident* resp = (Resident*)hacc::Pointer(type, newp).address_of_type(hacc::Type::CppType<Resident>());
             if (resp) {
-                resp->Resident_set_pos(room_editor.menu_world_pos);
+                resp->set_pos(room_editor.menu_world_pos);
                 resp->set_room(room_editor.selected_room);
             }
         }
@@ -563,7 +565,7 @@ namespace shell {
             hacc::Reference(type, newp).from_tree(data);
             Resident* resp = (Resident*)hacc::Pointer(type, newp).address_of_type(hacc::Type::CppType<Resident>());
             if (resp) {
-                resp->Resident_set_pos(room_editor.menu_world_pos);
+                resp->set_pos(room_editor.menu_world_pos);
                 resp->set_room(room_editor.selected_room);
             }
         }

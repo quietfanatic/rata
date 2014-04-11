@@ -45,11 +45,11 @@ namespace geo {
         void finish ();
         void Resident_emerge () override;
         void Resident_reclude () override;
-        Vec Resident_get_pos () override;
-        void Resident_set_pos (Vec) override;
-        size_t Resident_n_pts () override;
-        Vec Resident_get_pt (size_t) override;
-        void Resident_set_pt (size_t, Vec) override;
+        Vec Spatial_get_pos () override;
+        void Spatial_set_pos (Vec) override;
+        size_t Spatial_n_pts () override;
+        Vec Spatial_get_pt (size_t) override;
+        void Spatial_set_pt (size_t, Vec) override;
         ~Wall();
     };
     extern Links<Wall> walls;
