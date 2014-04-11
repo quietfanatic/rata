@@ -9,7 +9,7 @@
     materials:{vis::Materials:[
      //   Ambient    Diffuse    Specular    Radiant
         [0x3f3f3fff 0x2f2f2fff 0x2f2f2fff 0x00000000]  // 0.  Metallic grey
-        [0x7f7f7fff 0x00000000 0x00000000 0x00000000]  // 1.  Default background color
+        [0x668282ff 0x141a1aff 0x00000000 0x00000000]  // 1.  Default background color
         [0xb6a491ff 0x231e18ff 0x00000000 0x00000000]  // 2.  Light skin
         [0x363636ff 0x181818ff 0x00000000 0x00000000]  // 3.  Dark grey hair
         [0x00000000 0x00000000 0x00000000 0x7b0a25ff]  // 4.  Purple eyes, pupil
@@ -18,7 +18,7 @@
         [0x634209ff 0x634209ff 0x00000000 0x00000000]  // 7.  Wood, a little orangeish
         [0x383d28ff 0x383d28ff 0x00000000 0x00000000]  // 8.  Greenish bricks
         [0x43613aff 0x283b29ff 0x182b19ff 0x00000000]  // 9.  Metallic green
-        [0x7b4528ff 0x552321ff 0x451311ff 0x00000000]  // 10. Metallic orange
+        [0x7b4528ff 0x552321ff 0x1f1f1fff 0x00000000]  // 10. Metallic orange
         [0x5e4a49ff 0x5e4a49ff 0x4e3a39ff 0x00000000]  // 11. Metallic purple
         [0x00000000 0x00000000 0x00000000 0xffffffff]  // 12. Bright light source
         [0x3c4c4eff 0x2f3b3dff 0x2a3b3dff 0x00000000]  // 13. Bluish metallic grey
