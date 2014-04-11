@@ -6,7 +6,7 @@ include '../..';
 
 mkdir 'tmp';
 
-objects(qw(bipeds bullets control items various));
+objects(qw(bipeds bullets control items robots various));
 
 clean_rule(glob 'tmp/*');
 
