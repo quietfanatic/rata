@@ -131,18 +131,30 @@ namespace ent {
                 }
                 oldxrel = pos().x - ground->pos().x;
             }
-            if (attack_timer) {
-                focus = 0.8*focus + 0.2*(target - pos() - focus_offset());
-                if (--attack_timer == 0) {
+            if (controller) {
+                if (attack_timer) --attack_timer;
+                else if (buttons & ATTACK_BIT) {
                     Vec bullet_pos = pos() + focus_offset();
                     Vec bullet_vel = 2 * normalize(focus);
                     log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
                     shoot_bullet(this, pos() + focus_offset(), bullet_vel);
+                    attack_timer = 60;
                 }
             }
-            if (enemy && !attack_timer) {
-                target = enemy_pos;
-                attack_timer = 60;
+            else {
+                if (attack_timer) {
+                    focus = 0.8*focus + 0.2*(target - pos() - focus_offset());
+                    if (--attack_timer == 0) {
+                        Vec bullet_pos = pos() + focus_offset();
+                        Vec bullet_vel = 2 * normalize(focus);
+                        log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
+                        shoot_bullet(this, pos() + focus_offset(), bullet_vel);
+                    }
+                }
+                if (enemy && !attack_timer) {
+                    target = enemy_pos;
+                    attack_timer = 60;
+                }
             }
         }
         void Object_after_move () override {
