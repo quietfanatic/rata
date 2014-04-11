@@ -21,6 +21,19 @@
             0~00000000
         ]
     } }
+//    light:{ent::Light:{
+//        room:$.room
+//        pos:[80 20]
+//        vertices:[
+//            [-1 0]
+//            [0 -1]
+//            [1 0]
+//            [0 1]
+//        ]
+//        ambient:[0 0 0]
+//        diffuse:[1 1 1]
+//        radiant:[0 0 0]
+//    }}
     _2:{ geo::Tilemap_Def:{
         type:static
         mass:0~00000000

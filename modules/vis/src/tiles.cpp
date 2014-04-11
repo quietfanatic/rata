@@ -172,8 +172,8 @@ hacc::Special_Filetype _tiles_ft ("tiles",
             );
         }
         Tiles r;
-        r.width = s[0] << 24 | s[1] << 16 | s[2] << 8 | s[3];
-        r.height = s[4] << 24 | s[5] << 16 | s[6] << 8 | s[7];
+        r.width = (uint8)s[0] << 24 | (uint8)s[1] << 16 | (uint8)s[2] << 8 | (uint8)s[3];
+        r.height = (uint8)s[4] << 24 | (uint8)s[5] << 16 | (uint8)s[6] << 8 | (uint8)s[7];
         if ((s.size() - 8) / 2 != r.width * r.height) {
             throw hacc::X::Logic_Error(
                 "\"" + filename + "\" is not of correct size for its given width and height: " +
@@ -182,7 +182,7 @@ hacc::Special_Filetype _tiles_ft ("tiles",
         }
         r.tiles.resize(r.width * r.height);
         for (uint i = 0; i < r.tiles.size(); i++) {
-            r.tiles[i] = (s[8 + i*2] << 8) | (s[8 + i*2 + 1]);
+            r.tiles[i] = ((uint8)s[8 + i*2] << 8) | ((uint8)s[8 + i*2 + 1]);
         }
         r.finish();
         return hacc::Dynamic(std::move(r));
