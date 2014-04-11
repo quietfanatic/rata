@@ -222,24 +222,24 @@
     hand_layout:{vis::Layout:{
         size:[65 81]
         frames:[
-            { name:a0   offset:[ 8 73] box:[-7 -8 8 7] }
-            { name:a23  offset:[24 73] box:[-7 -8 8 7] }
-            { name:a45  offset:[40 73] box:[-7 -8 8 7] }
-            { name:a68  offset:[56 73] box:[-7 -8 8 7] }
-            { name:a90  offset:[ 8 57] box:[-7 -8 8 7] }
-            { name:a113 offset:[24 57] box:[-7 -8 8 7] }
-            { name:a135 offset:[40 57] box:[-7 -8 8 7] }
-            { name:a158 offset:[56 57] box:[-7 -8 8 7] }
-            { name:a180 offset:[ 8 41] box:[-7 -8 8 7] }
-            { name:a203 offset:[24 41] box:[-7 -8 8 7] }
-            { name:a225 offset:[40 41] box:[-7 -8 8 7] }
-            { name:a248 offset:[56 41] box:[-7 -8 8 7] }
-            { name:a270 offset:[ 8 25] box:[-7 -8 8 7] }
-            { name:a293 offset:[24 25] box:[-7 -8 8 7] }
-            { name:a315 offset:[40 25] box:[-7 -8 8 7] }
-            { name:a338 offset:[56 25] box:[-7 -8 8 7] }
-            { name:flat offset:[ 8  9] box:[-7 -8 8 7] }
-            { name:out  offset:[24  9] box:[-7 -8 8 7] }
+            { name:a0   offset:[ 8 73] box:[-7 -8 8 7] points:[[ 2 -5]] }
+            { name:a23  offset:[24 73] box:[-7 -8 8 7] points:[[ 3 -4]] }
+            { name:a45  offset:[40 73] box:[-7 -8 8 7] points:[[ 4 -2]] }
+            { name:a68  offset:[56 73] box:[-7 -8 8 7] points:[[ 5  0]] }
+            { name:a90  offset:[ 8 57] box:[-7 -8 8 7] points:[[ 5  2]] }
+            { name:a113 offset:[24 57] box:[-7 -8 8 7] points:[[ 4  3]] }
+            { name:a135 offset:[40 57] box:[-7 -8 8 7] points:[[ 2  4]] }
+            { name:a158 offset:[56 57] box:[-7 -8 8 7] points:[[ 0  5]] }
+            { name:a180 offset:[ 8 41] box:[-7 -8 8 7] points:[[-2  5]] }
+            { name:a203 offset:[24 41] box:[-7 -8 8 7] points:[[-3  4]] }
+            { name:a225 offset:[40 41] box:[-7 -8 8 7] points:[[-4  3]] }
+            { name:a248 offset:[56 41] box:[-7 -8 8 7] points:[[-5  0]] }
+            { name:a270 offset:[ 8 25] box:[-7 -8 8 7] points:[[-5 -2]] }
+            { name:a293 offset:[24 25] box:[-7 -8 8 7] points:[[-4 -3]] }
+            { name:a315 offset:[40 25] box:[-7 -8 8 7] points:[[-2 -4]] }
+            { name:a338 offset:[56 25] box:[-7 -8 8 7] points:[[ 0 -5]] }
+            { name:flat offset:[ 8  9] box:[-7 -8 8 7] points:[[ 5  0]] }
+            { name:out  offset:[24  9] box:[-7 -8 8 7] points:[[ 2  0]] }
         ]
     }}
 }}

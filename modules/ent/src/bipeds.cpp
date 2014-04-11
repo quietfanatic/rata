@@ -218,28 +218,26 @@ namespace ent {
         focus = focus_world - origin;
     }
 
-    void Biped::Drawn_draw (vis::Sprites) {
+    void Biped::animate (vis::Model* model) {
         auto def = get_def();
-        char model_data [def->skel->model_data_size()];
-        vis::Model model (def->skel, model_data);
         uint8 look_frame = angle_frame(atan2(focus.y, focus.x));
         if (ground) {
             if (jump_timer) {
-                model.apply_pose(&def->poses->prejump);
-                model.apply_pose(&def->poses->look_stand[look_frame]);
+                model->apply_pose(&def->poses->prejump);
+                model->apply_pose(&def->poses->look_stand[look_frame]);
             }
             else if (crawling) {
                 if (fabs(vel().x) < 0.01) {
-                    model.apply_pose(&def->poses->crawl[3]);
+                    model->apply_pose(&def->poses->crawl[3]);
                 }
                 else {
                     uint step = fmod(distance_walked / stats.crawl_stride * 4.0, 4.0);
-                    model.apply_pose(&def->poses->crawl[step]);
+                    model->apply_pose(&def->poses->crawl[step]);
                 }
             }
             else if (crouching) {
-                model.apply_pose(&def->poses->crouch);
-                model.apply_pose(&def->poses->look_stand[look_frame]);
+                model->apply_pose(&def->poses->crouch);
+                model->apply_pose(&def->poses->look_stand[look_frame]);
             }
             else if (vel().x * direction > stats.walk_speed) {
                 float stepdist = fmod(distance_walked / stats.run_stride * 6.0, 6.0);
@@ -251,32 +249,39 @@ namespace ent {
                   : stepdist < 3.9 ? 3
                   : stepdist < 5.1 ? 4
                   :                  5;
-                model.apply_pose(&def->poses->run[step]);
+                model->apply_pose(&def->poses->run[step]);
                 if (step % 3 < 1)
-                    model.apply_pose(&def->poses->look_stand[look_frame]);
+                    model->apply_pose(&def->poses->look_stand[look_frame]);
                 else
-                    model.apply_pose(&def->poses->look_walk[look_frame]);
+                    model->apply_pose(&def->poses->look_walk[look_frame]);
             }
             else if (fabs(vel().x) >= 0.01) {
                 uint step = fmod(distance_walked / stats.walk_stride * 4.0, 4.0);
-                model.apply_pose(&def->poses->walk[step]);
+                model->apply_pose(&def->poses->walk[step]);
                 if (step % 2 < 1)
-                    model.apply_pose(&def->poses->look_walk[look_frame]);
+                    model->apply_pose(&def->poses->look_walk[look_frame]);
                 else
-                    model.apply_pose(&def->poses->look_stand[look_frame]);
+                    model->apply_pose(&def->poses->look_stand[look_frame]);
             }
             else {
-                model.apply_pose(&def->poses->stand);
-                model.apply_pose(&def->poses->look_stand[look_frame]);
+                model->apply_pose(&def->poses->stand);
+                model->apply_pose(&def->poses->look_stand[look_frame]);
             }
         }
         else {
-            model.apply_pose(&def->poses->jump);
-            model.apply_pose(&def->poses->look_walk[look_frame]);
+            model->apply_pose(&def->poses->jump);
+            model->apply_pose(&def->poses->look_walk[look_frame]);
         }
         if (aiming) {
-            model.apply_pose(&def->poses->aim_f[look_frame]);
+            model->apply_pose(&def->poses->aim_f[look_frame]);
         }
+    }
+
+    void Biped::Drawn_draw (vis::Sprites) {
+        auto def = get_def();
+        char model_data [def->skel->model_data_size()];
+        vis::Model model (def->skel, model_data);
+        animate(&model);
          // TODO: implement this as an item
         size_t n_skins = 1 + equipment.items.count();
         vis::Skin* skins [n_skins];
@@ -286,6 +291,14 @@ namespace ent {
             skins[++i] = e.def->skin;
         }
         model.draw(n_skins, skins, pos(), Vec(direction, 1));
+    }
+
+    Vec Biped::model_seg_point (vis::Skel::Seg* seg, size_t i) {
+        auto def = get_def();
+        char model_data [def->skel->model_data_size()];
+        vis::Model model (def->skel, model_data);
+        animate(&model);
+        return model.seg_point(seg, i);
     }
 
     Biped::Biped () { }

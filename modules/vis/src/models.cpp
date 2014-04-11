@@ -92,6 +92,18 @@ namespace vis {
         }
     }
 
+    Vec Model::seg_pos (Skel::Seg* seg) {
+        reposition_segment(this, skel->root, skel->root_offset);
+        return segs[skel->seg_index(seg)].pos;
+    }
+
+    Vec Model::seg_point (Skel::Seg* seg, size_t pt_i) {
+        auto pose = segs[skel->seg_index(seg)].pose;
+        if (pt_i >= pose->frame->points.size())
+            throw hacc::X::Logic_Error("point index given to seg_point is too large");
+        return seg_pos(seg) + pose->frame->points[pt_i] * pose->scale * PX;
+    }
+
     void Model::apply_pose (Pose* pose) {
         for (auto& app : pose->apps) {
             segs[skel->seg_index(app.target)].pose = &app;

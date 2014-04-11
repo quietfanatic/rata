@@ -67,8 +67,9 @@ namespace vis {
 
         Model (Skel*, char*);
 
-        util::Vec offset_of (Skel::Seg* seg);
         void apply_pose (Pose*);
+        util::Vec seg_pos (Skel::Seg*);
+        util::Vec seg_point (Skel::Seg*, size_t point_i);
 
          // TODO: make this better
         void draw (size_t n_skins, Skin** skins, util::Vec pos, util::Vec scale = util::Vec(1, 1), float z = 0.5);

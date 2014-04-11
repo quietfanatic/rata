@@ -117,12 +117,16 @@ namespace ent {
         Item* hand_item ();  // NULL if none
         uint attack_timeout = 0;
 
+        Vec model_seg_point (vis::Skel::Seg*, size_t point_i);
+
          // For animation
-        void animate ();
         float distance_walked = 0;
         float oldxrel = 0;
         bool aiming = false;
         void Drawn_draw (vis::Sprites) override;
+
+         // Internal, used for both drawing and model_seg_point
+        void animate (vis::Model*);
 
         Biped ();
 
