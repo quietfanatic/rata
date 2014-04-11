@@ -1,8 +1,8 @@
 {hacc::Document:{
     rata:{ent::Biped:{
         def:$("world/char/rata.hacc").def
-        pos:[1 22]
-        room:$("world/room/test.hacc").room
+        pos:[50 5]
+        room:$("world/room/test2.hacc").room
         direction:1
     }}
     player:{ent::Player:{

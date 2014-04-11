@@ -1,11 +1,11 @@
 { hacc::Document:{
-    _next_id:8
+    _next_id:14
     room:{ geo::Room:{
         boundary:[
             60~42700000
             -30~c1f00000
-            100~42c80000
-            15~41700000
+            160~43200000
+            70~428c0000
         ]
         neighbors:[$("world/room/test2.hacc").room]
     } }
@@ -13,8 +13,8 @@
         room:$.room
         def:$._2.Object_Def
         pos:[
-            60.0052~42700550
-            -29.9839~c1efdf08
+            60~42700000
+            -3~c0400000
         ]
         vel:[
             0~00000000
@@ -27,48 +27,56 @@
         damping:0~00000000
         gravity_scale:1~3f800000
         fixtures:[]
-        tileset:$("world/res/test-tiles.hacc").tileset
-        texture:$("world/res/test-tiles.hacc").img.textures[0]
+        tileset:$("world/res/tiles.hacc").tileset
+        texture:$("world/res/tiles.hacc").img.textures[0]
         tiles:$("world/room/test3.tiles")
     } }
-    _3:{ geo::Wall:{
+    _8:{ geo::Wall:{
         room:$.room
         corner:[
-            [81~42a20000 -1.5~bfc00000]
-            9~41100000
+            [62.5~427a0000 12~41400000]
+            4.5~40900000
+        ]
+        left:$._9
+    } }
+    _9:{ geo::Wall:{
+        room:$.room
+        corner:[
+            [70~428c0000 10.5~41280000]
+            -1~bf800000
+        ]
+        left:$._12
+    } }
+    _10:{ geo::Wall:{
+        room:$.room
+        corner:[
+            [62.5~427a0000 3~40400000]
+            4.5~40900000
         ]
         left:$("world/room/test2.hacc")._2
     } }
-    _4:{ geo::Wall:{
+    _11:{ geo::Wall:{
         room:$.room
         corner:[
-            [81~42a20000 -1.5~bfc00000]
-            -9~c1100000
+            [70~428c0000 6.5~40d00000]
+            -1~bf800000
         ]
-        left:$._6
+        left:$._10
     } }
-    _5:{ geo::Wall:{
+    _12:{ geo::Wall:{
         room:$.room
         corner:[
-            [70~428c0000 -22.5~c1b40000]
+            [82.9688~42a5f000 11.5~41380000]
             0~00000000
         ]
-        left:$._7
+        left:$._13
     } }
-    _6:{ geo::Wall:{
+    _13:{ geo::Wall:{
         room:$.room
         corner:[
-            [90~42b40000 -22.5~c1b40000]
+            [83~42a60000 5.5~40b00000]
             0~00000000
         ]
-        left:$._5
-    } }
-    _7:{ geo::Wall:{
-        room:$.room
-        corner:[
-            [70~428c0000 -10.5~c1280000]
-            0~00000000
-        ]
-        left:$._3
+        left:$._11
     } }
 } }
