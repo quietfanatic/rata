@@ -63,33 +63,44 @@ that module's directory, if it exists.
 
 #### TODO
 
- - ☑ Basic room editor
- - ☑ OS X support
- - ☑ Implement area lighting
- - ☑ Add model-internal shadows to lighting shader
- - ☑ Allow model rendering for multiple interleaved skins
- - ☑ Tilemap editor
- - ☐ Convert graphics to material-lighting format
- - ☑ Basic sound system
- - ☑ Port from GLFW to SDL2
- - ☑ Camera control (bring constraint satisfaction system from master branch)
- - ☐ Items and equipment
- - ☐ Usable inventory screen
- - ☐ Some basic game content
- - ☐ Generic resizable tilemap objects
- - ☐ Try using queries instead of sensors
- - ☐ Reformulate vision walls
- - ☐ Use collision filters
- - ☐ Merge geo and phys
- - ☐ Use runtime MIDI player
- - ☐ Windows support
- - ☐ Implement some AI
- - ☐ Implement text layout engine (for speech bubbles and maybe inventory)
- - ☐ Scripting system (for story and events and stuff)
- - ☐ Think of some puzzle-like game mechanics
- - ☐ Characters and enemies
- - ☐ Formalize game script
- - ☐ Create approximately complete world
- - ☐ Refactor Haccable for better abstraction and predictability
- - ☐ In-program texture editor
+ - core
+     - ☑ Port from GLFW to SDL2
+ - ent
+     - ☐ Refactor Biped class
+     - ☐ Items and equipment
+     - ☐ Usable inventory screen
+     - ☐ Implement some AI
+     - ☐ Scripting system (for story and events and stuff)
+ - geo/phys
+     - ☐ Merge geo and phys
+     - ☑ Camera control (bring constraint satisfaction system from master branch)
+     - ☐ Reformulate vision walls
+     - ☐ Generic resizable tilemap objects
+     - ☐ Try using queries instead of sensors
+     - ☐ Use collision filters
+ - shell
+     - ☑ Basic room editor
+     - ☑ Tilemap editor
+ - util
+     - ☑ OS X support
+     - ☐ Windows support
+ - vis
+     - ☑ Implement area lighting
+     - ☑ Add model-internal shadows to lighting shader
+     - ☑ Allow model rendering for multiple interleaved skins
+     - ☐ Z-ordering and selective shadows
+     - ☐ Implement text layout engine (for speech bubbles and maybe inventory)
+ - world
+     - ☐ Convert graphics to material-lighting format
+     - ☐ Some basic game content
+     - ☐ Think of some puzzle-like game mechanics
+     - ☐ Characters and enemies
+     - ☐ Formalize game script
+     - ☐ Create approximately complete world
+ - snd
+     - ☑ Basic sound system
+     - ☐ Use runtime MIDI player
+ - Uncertain
+     - Refactor Haccable for better abstraction and predictability
+     - In-program texture editor
 
