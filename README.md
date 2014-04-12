@@ -81,6 +81,7 @@ that module's directory, if it exists.
  - shell
      - ☑ Basic room editor
      - ☑ Tilemap editor
+     - ☐ Clarify phases
  - util
      - ☑ OS X support
      - ☐ Windows support
