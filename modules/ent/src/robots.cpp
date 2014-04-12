@@ -2,14 +2,14 @@
 #include "ent/inc/bullets.h"
 #include "ent/inc/control.h"
 #include "ent/inc/mixins.h"
+#include "geo/inc/ground.h"
 #include "geo/inc/vision.h"
 #include "hacc/inc/everything.h"
-#include "phys/inc/ground.h"
 #include "shell/inc/main.h"
 #include "util/inc/debug.h"
 #include "util/inc/geometry.h"
 #include "vis/inc/images.h"
-using namespace phys;
+using namespace geo;
 using namespace util;
 using namespace vis;
 
@@ -34,7 +34,7 @@ namespace ent {
             enemy = NULL;
             foreach_contact([&](b2Fixture* mine, b2Fixture* other){
                 if (other->IsSensor()) return;
-                auto fd = (phys::FixtureDef*)mine->GetUserData();
+                auto fd = (FixtureDef*)mine->GetUserData();
                 auto oo = (Object*)other->GetBody()->GetUserData();
                 if (dynamic_cast<Biped*>(oo)) {
                     if (!enemy || length2(oo->get_pos() - get_pos()) < length2(enemy->get_pos() - get_pos()))
@@ -77,7 +77,7 @@ namespace ent {
         }
     };
 
-    struct Patroller : Robot, phys::Grounded {
+    struct Patroller : Robot, Grounded {
         enum Fixture_Index {
             BODY,
             FLOOR_SENSOR_L,
@@ -111,7 +111,7 @@ namespace ent {
                     bool wall = false;
                     foreach_contact([&](b2Fixture* mine, b2Fixture* other){
                         if (other->IsSensor()) return;
-                        auto fd = (phys::FixtureDef*)mine->GetUserData();
+                        auto fd = (FixtureDef*)mine->GetUserData();
                         if (fd == floor_sensor)
                             floor = true;
                         else if (fd == wall_sensor)
@@ -285,7 +285,7 @@ namespace ent {
         void Object_after_move () override {
             foreach_contact([&](b2Fixture* mine, b2Fixture* other){
                 if (other->IsSensor()) return;
-                auto fd = (phys::FixtureDef*)mine->GetUserData();
+                auto fd = (FixtureDef*)mine->GetUserData();
                 if (fd == &def->fixtures[BODY]) {
                     stun_timer = 30;
                 }

@@ -2,15 +2,15 @@
 #define HAVE_ENT_MIXINS_H
 
 #include "ent/inc/control.h"
+#include "geo/inc/phys.h"
 #include "geo/inc/rooms.h"
 #include "geo/inc/vision.h"
-#include "phys/inc/phys.h"
 #include "vis/inc/common.h"
 
 namespace ent {
 
-    template <class Layer, class Def = phys::Object_Def>
-    struct ROD : geo::Resident, phys::Object, vis::Drawn<Layer> {
+    template <class Layer, class Def = geo::Object_Def>
+    struct ROD : geo::Resident, geo::Object, vis::Drawn<Layer> {
         Def* get_def () { return static_cast<Def*>(def); }
         void Resident_emerge () override { materialize(); vis::Drawn<Layer>::appear(); }
         void Resident_reclude () override { vis::Drawn<Layer>::disappear(); dematerialize(); }
@@ -23,7 +23,7 @@ namespace ent {
         virtual void Damagable_damage (int32) = 0;
     };
 
-    struct Agent_Def : phys::Object_Def {
+    struct Agent_Def : geo::Object_Def {
         util::Vec focus_offset {0, 0};
         int32 max_life = 144;
     };
@@ -82,7 +82,7 @@ HACCABLE_TEMPLATE(<class Layer HCB_COMMA class Def>, ent::ROD<Layer HCB_COMMA De
              + ", " + hacc::Type::CppType<Def>().name() + ">";
     });
     attr("Resident", hcb::template base<geo::Resident>().collapse());
-    attr("Object", hcb::template base<phys::Object>().collapse());
+    attr("Object", hcb::template base<geo::Object>().collapse());
     finish(&ent::ROD<Layer, Def>::finish);
 }
 HACCABLE_TEMPLATE(<class Layer HCB_COMMA class Def>, ent::Agent<Layer HCB_COMMA Def>) {

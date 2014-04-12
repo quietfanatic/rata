@@ -4,10 +4,10 @@
 #include "ent/inc/control.h"
 #include "ent/inc/items.h"
 #include "ent/inc/mixins.h"
+#include "geo/inc/ground.h"
+#include "geo/inc/phys.h"
 #include "geo/inc/rooms.h"
 #include "geo/inc/vision.h"
-#include "phys/inc/ground.h"
-#include "phys/inc/phys.h"
 #include "snd/inc/audio.h"
 #include "vis/inc/common.h"
 #include "vis/inc/models.h"
@@ -51,18 +51,18 @@ namespace ent {
 
      // All the fixdefs for a given Biped.
     struct Biped_Fixdefs {
-        phys::FixtureDef feet;
-        phys::FixtureDef stand;
-        phys::FixtureDef hurt;
-        phys::FixtureDef crouch;
-        phys::FixtureDef crawl_l;
-        phys::FixtureDef crawl_r;
-        phys::FixtureDef ceiling_low;
+        geo::FixtureDef feet;
+        geo::FixtureDef stand;
+        geo::FixtureDef hurt;
+        geo::FixtureDef crouch;
+        geo::FixtureDef crawl_l;
+        geo::FixtureDef crawl_r;
+        geo::FixtureDef ceiling_low;
          // LOL, categorizing things by comparing their addresses
-        bool is_primary (phys::FixtureDef* fd) {
+        bool is_primary (geo::FixtureDef* fd) {
             return fd >= &stand && fd <= &crawl_r;
         }
-        bool is_sensor (phys::FixtureDef* fd) {
+        bool is_sensor (geo::FixtureDef* fd) {
             return fd == &ceiling_low;
         }
     };
@@ -76,7 +76,7 @@ namespace ent {
         vis::Skin* skin;
     };
 
-    struct Biped : Agent<vis::Sprites, Biped_Def>, phys::Grounded {
+    struct Biped : Agent<vis::Sprites, Biped_Def>, geo::Grounded {
 
         int8 move_direction () {
             return !!(buttons & RIGHT_BIT) - !!(buttons & LEFT_BIT);

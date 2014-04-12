@@ -1,4 +1,4 @@
-phys - integration with Box2D and related mixins
+geo - Geography, rooms, physics engine integration
 
 In order to modularly yet efficiently implement interactions between objects,
 there is a collision rule system in place.  For example, take the "ground"
@@ -16,7 +16,7 @@ collision rule.  This is specified in ground.cpp as
     } ground_rule;  // Make sure to actually instantiate this class.
 
 When this struct is declared and instantiated, magic happens to set up this
-rule.  When providing the phys::Fixdef for a fixture of an object, set the
+rule.  When providing the Fixdef for a fixture of an object, set the
 attribute coll_a to [ground] to allow it to stand on ground, and set the
 attribute coll_b to [ground] to make it ground that can be stood on.
 

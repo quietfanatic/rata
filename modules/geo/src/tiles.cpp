@@ -5,7 +5,6 @@
 #include "hacc/inc/everything.h"
 #include "util/inc/debug.h"
 #include "util/inc/geometry.h"
-using namespace phys;
 using namespace util;
 
 namespace geo {
@@ -105,7 +104,7 @@ namespace geo {
         b2es.m_hasVertex3 = true;
         b2es.m_vertex3 = te->next->v2;
         b2FixtureDef b2fdf = te->def->nature.b2;
-        b2fdf.filter = phys::Filter();  // Default filter should be okay
+        b2fdf.filter = Filter();  // Default filter should be okay
         b2fdf.shape = &b2es;
         b2fdf.userData = te->def;
         b2body->CreateFixture(&b2fdf);
@@ -156,7 +155,7 @@ namespace geo {
                 while(merge_edges(&es[y * width + x][e], &merged, &eaten)) { }
             }
         }
-         // The bodydef has already been manifested through phys::Object
+         // The bodydef has already been manifested through Object
          // Add the fixtures
         for (uint y = 0; y < height; y++)
         for (uint x = 0; x < width; x++)
@@ -196,7 +195,7 @@ HACCABLE(Tilemap_Def) {
 HACCABLE(Tilemap) {
     name("geo::Tilemap");
     attr("Resident", base<Resident>().collapse());
-    attr("Object", base<phys::Object>().optional().collapse());
+    attr("Object", base<Object>().optional().collapse());
     finish(&Tilemap::finish);
 }
 

@@ -5,14 +5,14 @@
 #include "util/inc/organization.h"
 #include "util/inc/honestly.h"
 #include "vis/inc/common.h"
-namespace phys { struct Object; }
+namespace geo { struct Object; }
 
 namespace ent {
     struct Bullet;
     extern util::Links<Bullet> bullets;
     struct Bullet : util::Link<Bullet>, vis::Drawn<vis::Overlay> {
         static CE size_t MAX_PTS = 4;
-        phys::Object* owner = NULL;
+        geo::Object* owner = NULL;
          // For ricocheting motion.  Front to back.  Some may be undefined.
         util::Vec pts [MAX_PTS];
         util::Vec vel = util::Vec(0, 0);
@@ -21,7 +21,7 @@ namespace ent {
 
         Bullet () { pts[0] = util::Vec(NAN, NAN); Link<Bullet>::link(bullets); }
          // For convenience
-        Bullet (phys::Object* owner, util::Vec pos, util::Vec vel) : owner(owner), vel(vel) {
+        Bullet (geo::Object* owner, util::Vec pos, util::Vec vel) : owner(owner), vel(vel) {
             pts[0] = pos;
             pts[1] = util::Vec(NAN, NAN);
             Link<Bullet>::link(bullets);
@@ -39,7 +39,7 @@ namespace ent {
     void shoot_sound (float volume = 1.0);
     void ricochet_sound (float volume = 0.4);
      // Calls shoot_sound and makes new Bullet
-    Bullet* shoot_bullet (phys::Object* owner, util::Vec pos, util::Vec vel);
+    Bullet* shoot_bullet (geo::Object* owner, util::Vec pos, util::Vec vel);
 
      // 名前通り。Call this after before_move I guess.
     void update_bullets ();

@@ -1,9 +1,9 @@
-#include "phys/inc/ground.h"
+#include "geo/inc/ground.h"
 
 #include <string>
 #include "hacc/inc/haccable_standard.h"
 
-namespace phys {
+namespace geo {
 
     struct Ground_Rule : Collision_Rule {
         std::string name () const { return "ground"; }
@@ -41,10 +41,10 @@ namespace phys {
         }
     } ground_rule;
 
-} using namespace phys;
+} using namespace geo;
 
 HACCABLE(Grounded) {
-    name("phys::Grounded");
+    name("geo::Grounded");
     attr("ground", member(&Grounded::ground).optional());
     attr("ground_fixdef", member(&Grounded::ground_fixdef).optional());
 }

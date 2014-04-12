@@ -2,8 +2,8 @@
 #define HAVE_GEO_TILES_H
 
 #include <vector>
+#include "geo/inc/phys.h"
 #include "geo/inc/rooms.h"
-#include "phys/inc/phys.h"
 #include "vis/inc/common.h"
 #include "vis/inc/tiles.h"
 
@@ -11,7 +11,7 @@ namespace geo {
 
      // Specifies the properties of one type of tile.
     struct TileDef {
-        phys::FixtureDef nature;  // No shape
+        geo::FixtureDef nature;  // No shape
         std::vector<Vec> vertices;  // The shape is made by merging vertices
     };
 
@@ -20,7 +20,7 @@ namespace geo {
         std::vector<TileDef*> tiles;  // TileDefs can be provided with local()
     };
 
-    struct Tilemap_Def : phys::Object_Def {
+    struct Tilemap_Def : geo::Object_Def {
         Tileset* tileset = NULL;
         vis::Tiles* tiles = NULL;
         vis::Texture* texture = NULL;
@@ -28,7 +28,7 @@ namespace geo {
 
      // A visible, tangible object that uses a matrix of tiles to create
      //  level geometry.
-    struct Tilemap : Resident, phys::Object, vis::Drawn<vis::Map> {
+    struct Tilemap : Resident, geo::Object, vis::Drawn<vis::Map> {
         Tilemap_Def* get_def () { return static_cast<Tilemap_Def*>(def); }
 
         void Resident_emerge () override;

@@ -8,9 +8,9 @@
 #include "core/inc/window.h"
 #include "ent/inc/bullets.h"
 #include "ent/inc/control.h"
+#include "geo/inc/phys.h"
 #include "hacc/inc/files.h"
 #include "hacc/inc/haccable_standard.h"
-#include "phys/inc/phys.h"
 #include "snd/inc/audio.h"
 #include "util/inc/debug.h"
 #include "util/inc/integration.h"
@@ -53,10 +53,10 @@ static Game* game = NULL;
 void step () {
     if (!game->paused) {
         ent::run_minds();
-        phys::space.run_before();
+        geo::space.run_before();
         ent::update_bullets();
-        phys::space.run_simulation();
-        phys::space.run_after();
+        geo::space.run_simulation();
+        geo::space.run_after();
         ent::run_minds_after();
     }
 }
@@ -89,7 +89,7 @@ int main (int argc, char** argv) {
     window->render = vis::render;
      // Run
     window->open();
-    phys::space.start();
+    geo::space.start();
     game = main_file.attr("game");
     game->on_start();
     if (!game->paused) {

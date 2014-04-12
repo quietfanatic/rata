@@ -9,7 +9,7 @@
 
 using namespace util;
 using namespace vis;
-using namespace phys;
+using namespace geo;
 
 namespace ent {
 

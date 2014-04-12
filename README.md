@@ -72,7 +72,7 @@ that module's directory, if it exists.
      - ☐ Implement some AI
      - ☐ Scripting system (for story and events and stuff)
  - geo/phys
-     - ☐ Merge geo and phys
+     - ☑ Merge geo and phys
      - ☑ Camera control (bring constraint satisfaction system from master branch)
      - ☐ Reformulate vision walls
      - ☐ Generic resizable tilemap objects

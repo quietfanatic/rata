@@ -18,6 +18,8 @@ my @objects = qw<
     ../ent/tmp/mixins.o
     ../ent/tmp/robots.o
     ../ent/tmp/various.o
+    ../geo/tmp/ground.o
+    ../geo/tmp/phys.o
     ../geo/tmp/rooms.o
     ../geo/tmp/tiles.o
     ../geo/tmp/vision.o
@@ -30,8 +32,6 @@ my @objects = qw<
     ../hacc/tmp/strings.o
     ../hacc/tmp/tree.o
     ../hacc/tmp/types.o
-    ../phys/tmp/ground.o
-    ../phys/tmp/phys.o
     ../snd/tmp/audio.o
     ../vis/tmp/common.o
     ../vis/tmp/color.o

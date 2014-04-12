@@ -1,4 +1,4 @@
-#include "phys/inc/phys.h"
+#include "geo/inc/phys.h"
 
 #include <vector>
 #include <stdexcept>
@@ -9,7 +9,7 @@
 #include "vis/inc/common.h"
 using namespace util;
 
-namespace phys {
+namespace geo {
 
      // Collision rules
 
@@ -264,7 +264,7 @@ namespace phys {
         b2world->RayCast(&cb, start, end);
     }
 
-} using namespace phys;
+} using namespace geo;
 
  // This is so satisfying
 
@@ -348,7 +348,7 @@ struct Collision_Rules {
 };
 
 HACCABLE(Collision_Rules) {
-    name("phys::Collision_Rules");
+    name("geo::Collision_Rules");
     prepare([](Collision_Rules&, hacc::Tree){ });
     fill([](Collision_Rules& crs, hacc::Tree tree){
         uint64 r = 0;
@@ -373,7 +373,7 @@ HACCABLE(Collision_Rules) {
 }
 
 HACCABLE(FixtureDef) {
-    name("phys::FixtureDef");
+    name("geo::FixtureDef");
     attr("b2", member(&FixtureDef::b2).collapse());
     attr("coll_a", member((Collision_Rules FixtureDef::*)&FixtureDef::coll_a).optional());
     attr("coll_b", member((Collision_Rules FixtureDef::*)&FixtureDef::coll_b).optional());
@@ -381,7 +381,7 @@ HACCABLE(FixtureDef) {
 }
 
 HACCABLE(Filter) {
-    name("phys::Filter");
+    name("geo::Filter");
     attr("mask", member(&Filter::mask).optional());
     attr("unmask", member(&Filter::unmask).optional());
     attr("active", member(&Filter::active).optional());
@@ -395,7 +395,7 @@ HACCABLE(b2BodyType) {
 }
 
 HACCABLE(Object_Def) {
-    name("phys::Object_Def");
+    name("geo::Object_Def");
     attr("type", member(&Object_Def::type).optional());
     attr("mass", member(&Object_Def::mass).optional());
     attr("damping", member(&Object_Def::damping).optional());
@@ -404,7 +404,7 @@ HACCABLE(Object_Def) {
 }
 
 HACCABLE(Object) {
-    name("phys::Object");
+    name("geo::Object");
     attr("def", member(&Object::def));
     attr("pos", value_methods(&Object::Object_get_pos, &Object::Object_set_pos).optional());
     attr("vel", value_methods(&Object::get_vel, &Object::set_vel).optional());
@@ -412,7 +412,7 @@ HACCABLE(Object) {
 }
 
 HACCABLE(Phys_Debug_Layer) {
-    name("phys::Phys_Debug_Layer");
+    name("geo::Phys_Debug_Layer");
     finish([](Phys_Debug_Layer& pdl){
         pdl.appear();
     });

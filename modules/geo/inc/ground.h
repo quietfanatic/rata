@@ -1,7 +1,7 @@
-#ifndef HAVE_PHYS_GROUND_H
-#define HAVE_PHYS_GROUND_H
+#ifndef HAVE_GEO_GROUND_H
+#define HAVE_GEO_GROUND_H
 
-#include "phys/inc/phys.h"
+#include "geo/inc/phys.h"
 
  // This modules provides a collision rule "ground" that
  //  allows Grounded objects to walk using friction and surface
@@ -13,7 +13,7 @@
  //  So you must make sure to call b2body->SetAwake(true) on any
  //  frames your ground velocity is likely to change.
 
-namespace phys {
+namespace geo {
 
     struct Grounded {
         Object* ground = NULL;

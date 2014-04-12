@@ -6,6 +6,7 @@
 #include <SDL2/SDL_mouse.h>
 #include "core/inc/commands.h"
 #include "ent/inc/control.h"
+#include "geo/inc/phys.h"
 #include "geo/inc/rooms.h"
 #include "geo/inc/tiles.h"
 #include "hacc/inc/documents.h"
@@ -90,8 +91,8 @@ namespace shell {
             selected = tile;
             def->tiles->finish();
              // Update all relevant tilemaps
-            for (auto b = phys::space.b2world->GetBodyList(); b; b = b->GetNext()) {
-                if (auto tm = dynamic_cast<Tilemap*>((phys::Object*)b->GetUserData())) {
+            for (auto b = geo::space.b2world->GetBodyList(); b; b = b->GetNext()) {
+                if (auto tm = dynamic_cast<Tilemap*>((geo::Object*)b->GetUserData())) {
                     if (tm->get_def()->tiles == def->tiles) {
                         tm->get_def()->tiles = def->tiles;
                         tm->finish();

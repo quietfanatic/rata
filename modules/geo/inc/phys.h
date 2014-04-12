@@ -1,5 +1,5 @@
-#ifndef HAVE_PHYS_PHYS_H
-#define HAVE_PHYS_PHYS_H
+#ifndef HAVE_GEO_PHYS_H
+#define HAVE_GEO_PHYS_H
 
 #include <functional>
 #include <string>
@@ -8,7 +8,7 @@
 #include "geo/inc/spatial.h"
 #include "util/inc/geometry.h"
 
-namespace phys {
+namespace geo {
 
     struct Object;
 
@@ -73,7 +73,7 @@ namespace phys {
 
      // The dynamic thing
      // Every class that wants to have a physical presence should inherit from this.
-    struct Object : virtual geo::Spatial {
+    struct Object : virtual Spatial {
         Object_Def* def = NULL;
         b2Body* b2body = NULL;
 

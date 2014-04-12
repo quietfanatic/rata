@@ -1,8 +1,8 @@
 #include "ent/inc/bullets.h"
 
 #include "ent/inc/mixins.h"
+#include "geo/inc/phys.h"
 #include "hacc/inc/haccable_standard.h"
-#include "phys/inc/phys.h"
 #include "shell/inc/main.h"
 #include "snd/inc/audio.h"
 #include "util/inc/debug.h"
@@ -10,7 +10,7 @@
 
 namespace ent {
     using namespace vis;
-    using namespace phys;
+    using namespace geo;
 
     Links<Bullet> bullets;
 
@@ -125,7 +125,7 @@ namespace ent {
         ricochet_voice->volume = volume;
     }
 
-    Bullet* shoot_bullet (phys::Object* owner, Vec pos, Vec vel) {
+    Bullet* shoot_bullet (Object* owner, Vec pos, Vec vel) {
         shoot_sound();
         return state_document()->create<Bullet>(owner, pos, vel);
     }

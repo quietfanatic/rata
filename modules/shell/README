@@ -5,6 +5,8 @@ to load from.  Otherwise the default initial state will be used.  If the
 program exits normally, the final state will be saved to save/last_stop.hacc
 
 The in-game console can be brought up by typing ` (grave accent).  A console
+ - ☐ Items and equipment
+ - ☐ Usable inventory screen
  command is literally just a HACC array without the square brackets.  Thus
     set $("start.hacc").rata.Object.pos [4 7]
  is the set command with two arguments; the first being a path (translated into

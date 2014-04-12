@@ -5,6 +5,8 @@
 #include "util/inc/debug.h"
 #include "vis/inc/models.h"
 
+using namespace geo;
+
 namespace ent {
 
     void Biped::finish () {
@@ -114,9 +116,9 @@ namespace ent {
                 : &def->fixdefs->stand
         );
         for (auto fix = b2body->GetFixtureList(); fix; fix = fix->GetNext()) {
-            auto fd = (phys::FixtureDef*)fix->GetUserData();
+            auto fd = (FixtureDef*)fix->GetUserData();
             if (def->fixdefs->is_primary(fd)) {
-                phys::Filter filt = fix->GetFilterData();
+                Filter filt = fix->GetFilterData();
                 if (filt.active != (fd == active)) {
                     filt.active = (fd == active);
                     fix->SetFilterData(filt);
@@ -182,7 +184,7 @@ namespace ent {
          // Read sensors
         ceiling_low = false;
         foreach_contact([&](b2Fixture* mine, b2Fixture* other){
-            auto fd = (phys::FixtureDef*)mine->GetUserData();
+            auto fd = (FixtureDef*)mine->GetUserData();
              // This call to IsSensor...lol I really need to start using Filters
             if (fd == &def->fixdefs->ceiling_low && !other->IsSensor()) {
                 ceiling_low = true;
@@ -282,7 +284,7 @@ namespace ent {
 HACCABLE(Biped) {
     name("ent::Biped");
     attr("Agent", base<Agent<vis::Sprites, Biped_Def>>().collapse());
-    attr("Grounded", base<phys::Grounded>().collapse());
+    attr("Grounded", base<Grounded>().collapse());
     attr("Controllable", base<ent::Controllable>().collapse());
     attr("direction", member(&Biped::direction).optional());
     attr("crouching", member(&Biped::crouching).optional());
