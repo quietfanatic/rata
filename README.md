@@ -63,33 +63,24 @@ that module's directory, if it exists.
 
 #### TODO
 
-###### Milestone 1
-
  - ☑ Basic room editor
  - ☑ OS X support
  - ☑ Implement area lighting
-
-###### Milestone 2
-
  - ☑ Add model-internal shadows to lighting shader
  - ☑ Allow model rendering for multiple interleaved skins
  - ☑ Tilemap editor
  - ☐ Convert graphics to material-lighting format
-
-###### Milestone 3
-
  - ☑ Basic sound system
  - ☑ Port from GLFW to SDL2
  - ☑ Camera control (bring constraint satisfaction system from master branch)
  - ☐ Items and equipment
-
-###### Milestone 4
-
  - ☐ Usable inventory screen
  - ☐ Some basic game content
-
-###### The Future and Beyond
-
+ - ☐ Generic resizable tilemap objects
+ - ☐ Try using queries instead of sensors
+ - ☐ Reformulate vision walls
+ - ☐ Use collision filters
+ - ☐ Merge geo and phys
  - ☐ Use runtime MIDI player
  - ☐ Windows support
  - ☐ Implement some AI
@@ -99,9 +90,6 @@ that module's directory, if it exists.
  - ☐ Characters and enemies
  - ☐ Formalize game script
  - ☐ Create approximately complete world
-
-###### Uncertain
-
  - ☐ Refactor Haccable for better abstraction and predictability
  - ☐ In-program texture editor
 
