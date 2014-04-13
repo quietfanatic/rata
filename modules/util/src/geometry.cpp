@@ -37,39 +37,17 @@ namespace util {
     float sign (float a) { return (a > 0) - (a < 0); }
 
     Line intersect (const Circle& c, const Line& l) {
-         // Formula taken from http://mathworld.wolfram.com/Circle-LineIntersection.html
-         //  with slight modifications.
-        double dx = l.b.x - l.a.x;
-        double dy = l.b.y - l.a.y;
-        double dr2 = dx*dx + dy*dy;
-        double D = (l.a.x - c.c.x) * (l.b.y - c.c.y) - (l.b.x - c.c.x) * (l.a.y - c.c.y);
-        double disc = c.r*c.r * dr2 - D*D;
-        if (disc < 0) return Line();
-        if (disc == 0) {
-            Vec tangent = c.c + Vec(
-                D * dy / dr2,
-                -D * dx / dr2
-            );
-            return Line(tangent, tangent);
-        }
-
-        // (disc > 0)
-        double sqrtdisc = sqrt(disc);
-        double variant_x = sign(dy) * dx * sqrtdisc;
-        double variant_y = abs(dy) * sqrtdisc;
-        Line r = Line(
-            c.c + Vec(
-                (D * dy - variant_x) / dr2,
-                (-D * dx - variant_y) / dr2
-            ),
-            c.c + Vec(
-                (D * dy + variant_x) / dr2,
-                (-D * dx + variant_y) / dr2
-            )
-        );
-        if (abs(slope(r) - slope(l)) > 0.1)
-            fprintf(stderr, "Warning: something went wrong in intersect(circle, Line).\n");
-        return r;
+         // This seems to have better numeric stability than the standard algorithm.
+         // Snapping the center to the line gives the midpoint between the two intersections.
+        Vec nearest = snap(l, c.c);
+        float dist2 = length2(nearest - c.c);
+        if (dist2 > c.r*c.r)
+            return Line();
+        if (dist2 == c.r*c.r)
+            return Line(nearest, nearest);
+        float offset = sqrt(c.r*c.r - dist2);
+        Vec direction = normalize(l.b - l.a);
+        return nearest + Line(-offset * direction, offset * direction);
     }
 
     Line double_tangent (const Circle& a, const Circle& b) {
