@@ -186,15 +186,12 @@ namespace geo {
                 if (snap_dist2 + !violating < closest_snap_dist2 + !currently_violating) {
                     currently_violating = violating;
                     closest_snap_dist2 = snap_dist2;
-                    if (!violating) {
-                        log("vision", "  Not violating edge of wall %p at %f %f", &wall, snap_here.x, snap_here.y);
-                    }
-                    else if (covers(bound, snap_here)) {
+                    if (violating) {
                         log("vision", "  Violating edge of wall %p at %f %f", &wall, snap_here.x, snap_here.y);
                         selected_snap = snap_here;
                     }
                     else {
-                        log("vision", "  Violation of edge of wall %p at %f %f is oob", &wall, snap_here.x, snap_here.y);
+                        log("vision", "  Not violating edge of wall %p at %f %f", &wall, snap_here.x, snap_here.y);
                     }
                 }
                 else {
@@ -230,15 +227,12 @@ namespace geo {
                 if (snap_dist2 + !violating < closest_snap_dist2 + !currently_violating) {
                     currently_violating = violating;
                     closest_snap_dist2 = snap_dist2;
-                    if (!violating) {
-                        log("vision", "  Not violating corner of wall %p at %f %f", &wall, snap_here.x, snap_here.y);
-                    }
-                    else if (covers(bound, snap_here)) {
+                    if (violating) {
                         log("vision", "  Violating corner of wall %p at %f %f", &wall, snap_here.x, snap_here.y);
                         selected_snap = snap_here;
                     }
                     else {
-                        log("vision", "  Violation of corner of wall %p at %f %f is oob", &wall, snap_here.x, snap_here.y);
+                        log("vision", "  Not violating corner of wall %p at %f %f", &wall, snap_here.x, snap_here.y);
                     }
                 }
                 else {
@@ -256,12 +250,13 @@ namespace geo {
             return preferred;  // Great!
         }
          // Did we violate a wall, but its snap is in bounds?
-        if (defined(selected_snap)) {
+        if (defined(selected_snap) && covers(bound, selected_snap)) {
             log("vision", "    Snapping to %f %f.", selected_snap.x, selected_snap.y);
             return selected_snap;
         }
          // Ugh, now we have to enumerate all the ways the bound intersects the walls.
         closest_snap_dist2 = INF;
+        preferred = selected_snap;
         for (auto& wall : walls) {
             if (!defined(wall.edge)) continue;
              // Try the edge first
@@ -273,7 +268,7 @@ namespace geo {
                 q.l, q.b, q.r, q.t
             );
             if (proper(bound & edge_aabb)) {
-                log("vision", "Trying intersect on edge of wall %p\n", &wall);
+                log("vision", "Trying intersect on edge of wall %p", &wall);
                  // Try intersecting all four walls
                 if (bound.l >= edge_aabb.l && bound.l <= edge_aabb.r) {
                     Vec snap_here = Vec(bound.l, wall.edge.y_at_x(bound.l));
@@ -321,7 +316,7 @@ namespace geo {
                 }
             }
             else {
-                log("vision", "Not trying intersect on edge of wall %p\n", &wall);
+                log("vision", "Not trying intersect on edge of wall %p", &wall);
             }
              // Now try the corner
             if (!wall.right || !defined(wall.right->edge)) continue;
@@ -333,7 +328,7 @@ namespace geo {
                 q.l, q.b, q.r, q.t
             );
             if (proper(bound & corner_aabb)) {
-                log("vision", "Trying intersect on corner of wall %p\n", &wall);
+                log("vision", "Trying intersect on corner of wall %p", &wall);
                 Line bound_l = bound_a(wall.edge);
                 Line bound_r = bound_b(wall.right->edge);
                  // Try intersecting it with all four walls
@@ -454,7 +449,7 @@ namespace geo {
                 }
             }
             else {
-                log("vision", "Not trying intersect on corner of wall %p\n", &wall);
+                log("vision", "Not trying intersect on corner of wall %p", &wall);
             }
         }
          // Finally return the best wall&bound intersection.
