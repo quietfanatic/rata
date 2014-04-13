@@ -33,7 +33,6 @@ namespace ent {
             auto old_enemy = enemy;
             enemy = NULL;
             foreach_contact([&](b2Fixture* mine, b2Fixture* other){
-                if (other->IsSensor()) return;
                 auto fd = (FixtureDef*)mine->GetUserData();
                 auto oo = (Object*)other->GetBody()->GetUserData();
                 if (dynamic_cast<Biped*>(oo)) {
@@ -110,7 +109,6 @@ namespace ent {
                     bool floor = false;
                     bool wall = false;
                     foreach_contact([&](b2Fixture* mine, b2Fixture* other){
-                        if (other->IsSensor()) return;
                         auto fd = (FixtureDef*)mine->GetUserData();
                         if (fd == floor_sensor)
                             floor = true;

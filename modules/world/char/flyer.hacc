@@ -4,7 +4,7 @@
         gravity_scale:0
         fixtures:[
             { shape:$.shape friction:0.4 restitution:0.6 coll_a:[ground] coll_b:[ground] }
-            { shape:$.enemy_sensor is_sensor:true }
+            { shape:$.enemy_sensor is_sensor:true filter:{ unmask:0x0001 } }
         ]
         layout:$.layout
         texture:$.img.body

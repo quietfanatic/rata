@@ -4,11 +4,11 @@
         mass:1
         fixtures:[
             { shape:$.shape friction:0.4 coll_a:[ground] coll_b:[ground] }
-            { shape:$.floor_sensor_l is_sensor:true }
-            { shape:$.floor_sensor_r is_sensor:true }
-            { shape:$.wall_sensor_l is_sensor:true }
-            { shape:$.wall_sensor_r is_sensor:true }
-            { shape:$.enemy_sensor is_sensor:true }
+            { shape:$.floor_sensor_l is_sensor:true filter:{ unmask:0x0001 } }
+            { shape:$.floor_sensor_r is_sensor:true filter:{ unmask:0x0001 } }
+            { shape:$.wall_sensor_l is_sensor:true filter:{ unmask:0x0001 } }
+            { shape:$.wall_sensor_r is_sensor:true filter:{ unmask:0x0001 } }
+            { shape:$.enemy_sensor is_sensor:true filter:{ unmask:0x0001 } }
         ]
         layout:$.layout
         texture:$.img.body
