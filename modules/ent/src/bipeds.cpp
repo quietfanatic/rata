@@ -27,10 +27,8 @@ namespace ent {
         return NULL;
     }
     bool Biped::check_ceiling () {
-        b2PolygonShape ps;
-        float height = get_def()->fixdefs->height;
-        ps.SetAsBox(0.2, height / 2 - 0.2);
-        return space.query_shape(get_pos() + Vec(0, height / 2 + 0.1), &ps, nullptr, Filter(0x0001, 0x0006));
+        auto height = get_def()->fixdefs->height;
+        return space.query(get_pos() + Rect(-0.2, 0.1, 0.2, height - 0.1), Filter(0x0001, 0x0006));
     }
 
      // Change some kinds of movement state

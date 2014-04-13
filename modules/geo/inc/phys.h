@@ -50,6 +50,9 @@ namespace geo {
         typedef std::function<bool (b2Fixture*)> ShapeTester;
         bool query_shape (util::Vec pos, b2Shape* shape, const ShapeTester& f = nullptr, const Filter& filter = Filter(0xffff));
 
+         // Shortcut for the above.
+        bool query (const util::Rect& area, const Filter& filter, const ShapeTester& f = nullptr);
+
         ~Space ();
     };
     extern Space space;

@@ -319,6 +319,12 @@ namespace geo {
         }
         return cb.shape_passed;
     }
+    bool Space::query (const Rect& area, const Filter& filter, const ShapeTester& f) {
+        Vec pos = area.lb() + area.size() / 2;
+        b2PolygonShape shape;
+        shape.SetAsBox(area.size().x / 2, area.size().y / 2);
+        return query_shape(pos, &shape, f, filter);
+    }
 
 } using namespace geo;
 

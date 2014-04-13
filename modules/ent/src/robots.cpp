@@ -99,13 +99,14 @@ namespace ent {
                     if (buttons & RIGHT_BIT && !(buttons & LEFT_BIT)) direction = 1;
                 }
                 else {
-                    Vec sensor_pos = get_pos() + Vec(direction * 0.75, -0.1);
-                    b2PolygonShape sensor_shape;
-                    sensor_shape.SetAsBox(0.2, 0.2);
-                    bool floor = space.query_shape(sensor_pos, &sensor_shape, nullptr, Filter(0x0001, 0x0001));
-                    sensor_pos = get_pos() + Vec(direction * 0.75, 0.5);
-                    sensor_shape.SetAsBox(0.2, 0.2);
-                    bool wall = space.query_shape(sensor_pos, &sensor_shape, nullptr, Filter(0x0001, 0x0001));
+                    Rect floor_sensor = direction > 0
+                        ? Rect(0.55, -0.3, 0.95, 0.1)
+                        : Rect(-0.95, -0.3, -0.55, 0.1);
+                    Rect wall_sensor = direction > 0
+                        ? Rect(0.55, 0.1, 0.95, 0.9)
+                        : Rect(-0.95, 0.1, -0.55, 0.9);
+                    bool floor = space.query(get_pos() + floor_sensor, Filter(0x0001, 0x0002));
+                    bool wall = space.query(get_pos() + wall_sensor, Filter(0x0001, 0x0002));
                     if (wall || !floor) direction = -direction;
                 }
                 oldxrel = get_pos().x - ground->get_pos().x;
