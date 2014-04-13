@@ -33,11 +33,10 @@ namespace ent {
             auto old_enemy = enemy;
             enemy = NULL;
             b2PolygonShape shape;
-            shape.SetAsBox(direction == 0 ? 10 : 5, 7.5);
-            Vec query_pos = get_pos() + direction * Vec(5, 0);
+            shape.SetAsBox(direction == 0 ? 20 : 10, 15);
+            Vec query_pos = get_pos() + direction * Vec(10, 0);
             space.query_shape(query_pos, &shape, [&](b2Fixture* fix){
                 auto oo = (Object*)fix->GetBody()->GetUserData();
-                log("robot", "%p in range", oo);
                 if (!enemy || length2(oo->get_pos() - get_pos()) < length2(enemy->get_pos() - get_pos()))
                     enemy = oo;
                 return true;
