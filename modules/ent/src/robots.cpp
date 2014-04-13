@@ -240,7 +240,7 @@ namespace ent {
                     target = enemy_pos;
                     attack_timer = 90;
                 }
-                else if (!stun_timer && length2(target - get_pos()) > 0.15) {
+                else if (stun_timer <= 30 && length2(target - get_pos()) > 0.15) {
                      // Chase the last seen enemy
                     float acc = 8.0;
                     Vec rel_target = target - get_pos();
@@ -271,13 +271,15 @@ namespace ent {
             }
         }
         void Object_after_move () override {
-            foreach_contact([&](b2Fixture* mine, b2Fixture* other){
-                if (other->IsSensor()) return;
-                auto fd = (FixtureDef*)mine->GetUserData();
-                if (fd == &def->fixtures[BODY]) {
-                    stun_timer = 30;
-                }
-            });
+            if (!stun_timer) {
+                foreach_contact([&](b2Fixture* mine, b2Fixture* other){
+                    if (other->IsSensor()) return;
+                    auto fd = (FixtureDef*)mine->GetUserData();
+                    if (fd == &def->fixtures[BODY]) {
+                        stun_timer = 60;
+                    }
+                });
+            }
             if (enemy) {
                 if (auto biped = dynamic_cast<Biped*>(enemy)) {
 //                    biped->vision.attend(get_pos() + Rect(-0.5, 0, 0.5, 1), 10);
