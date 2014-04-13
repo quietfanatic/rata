@@ -165,12 +165,12 @@ namespace geo {
                  // Account for repel points if necessary
                 if (wall.repel_point != Vec(0, 0)) {
                     Vec repel_snap = intersect(wall.edge, Line(preferred, wall.pos + wall.repel_point));
-                    if (length2(repel_snap - wall.pos) < length2(snap_here - wall.pos))
+                    if (length2(repel_snap - wall.left->pos) > length2(snap_here - wall.left->pos))
                         snap_here = repel_snap;
                 }
                 if (wall.left->repel_point != Vec(0, 0)) {
                     Vec repel_snap = intersect(wall.edge, Line(preferred, wall.left->pos + wall.left->repel_point));
-                    if (length2(repel_snap - wall.left->pos) < length2(snap_here - wall.left->pos))
+                    if (length2(repel_snap - wall.pos) > length2(snap_here - wall.pos))
                         snap_here = repel_snap;
                 }
                  // Didn't actually snap to the edge
