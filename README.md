@@ -74,10 +74,10 @@ that module's directory, if it exists.
  - geo/phys
      - ☑ Merge geo and phys
      - ☑ Camera control (bring constraint satisfaction system from master branch)
-     - ☐ Reformulate vision walls
+     - ☑ Reformulate vision walls (there's still a bug or two though)
      - ☐ Generic resizable tilemap objects
      - ☑ Try using queries instead of sensors
-     - ☐ Use collision filters
+     - ☑ Use collision filters
  - shell
      - ☑ Basic room editor
      - ☑ Tilemap editor
