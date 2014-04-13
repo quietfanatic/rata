@@ -54,7 +54,7 @@ namespace vis {
     }
     void draw_circle (const Circle& c) {
         size_t n_pts = c.r * 16;
-        if (n_pts < 8) n_pts = 8;
+        if (n_pts < 16) n_pts = 16;
         if (n_pts > 128) n_pts = 128;
         char dat [n_pts * sizeof(Vec)];
         Vec* pts = (Vec*)dat;
@@ -62,6 +62,19 @@ namespace vis {
             pts[i] = c.c + polar(c.r, i * M_PI * 2 / n_pts);
         }
         draw_loop(n_pts, pts);
+    }
+    void draw_arc (const Circle& c, float start_angle, float end_angle) {
+        if (end_angle < start_angle) end_angle += 2*M_PI;
+        size_t n_pts = c.r * (end_angle - start_angle) / M_PI * 16;
+        if (n_pts < 16) n_pts = 16;
+        if (n_pts > 128) n_pts = 128;
+        char dat [n_pts * sizeof(Vec)];
+        Vec* pts = (Vec*)dat;
+        float angle_change = (end_angle - start_angle) / (n_pts - 1);
+        for (size_t i = 0; i < n_pts; i++) {
+            pts[i] = c.c + polar(c.r, start_angle + i * angle_change);
+        }
+        draw_chain(n_pts, pts);
     }
     void draw_solid_rect (const Rect& r) {
         Vec pts [4];

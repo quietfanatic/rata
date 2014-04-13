@@ -539,7 +539,28 @@ namespace geo {
             color_offset(Vec(0, 0));
             size_t i = 0;
             for (auto& cb : walls) {
-                draw_circle(cb.real_circle);
+                if (cb.left && cb.right) {
+                    if (cb.convex()) {
+                        draw_arc(cb.real_circle,
+                            angle(cb.right->edge.b - cb.real_circle.c),
+                            angle(cb.edge.a - cb.real_circle.c)
+                        );
+                        draw_arc(cb.push_circle,
+                            angle(cb.right->edge.b - cb.push_circle.c),
+                            angle(cb.edge.a - cb.push_circle.c)
+                        );
+                    }
+                    else {
+                        draw_arc(cb.real_circle,
+                            angle(cb.real_circle.c - cb.edge.a),
+                            angle(cb.real_circle.c - cb.right->edge.b)
+                        );
+                        draw_arc(cb.push_circle,
+                            angle(cb.push_circle.c - cb.edge.a),
+                            angle(cb.push_circle.c - cb.right->edge.b)
+                        );
+                    }
+                }
                 if (defined(cb.edge)) {
                     draw_line(cb.edge.a, cb.edge.b);
                 }
