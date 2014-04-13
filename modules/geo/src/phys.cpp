@@ -325,6 +325,12 @@ namespace geo {
         shape.SetAsBox(area.size().x / 2, area.size().y / 2);
         return query_shape(pos, &shape, f, filter);
     }
+    bool Space::query (const Circle& area, const Filter& filter, const ShapeTester& f) {
+        Vec pos = area.c;
+        b2CircleShape shape;
+        shape.m_radius = area.r;
+        return query_shape(pos, &shape, f, filter);
+    }
 
 } using namespace geo;
 

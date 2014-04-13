@@ -36,18 +36,12 @@
     } }
     _2:{ geo::Wall:{
         room:$.room
-        corner:[
-            [48.5~42420000 7.5~40f00000]
-            0~00000000
-        ]
+        pos:[48.5 7.5]
         left:$("world/room/test.hacc").lb_corner
     } }
     _4:{ geo::Wall:{
         room:$.room
-        corner:[
-            [50.5~424a0000 7.5~40f00000]
-            0~00000000
-        ]
+        pos:[50.5 7.5]
         left:$("world/room/test3.hacc")._8
     } }
 } }

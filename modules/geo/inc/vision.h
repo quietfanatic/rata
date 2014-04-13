@@ -36,13 +36,26 @@ namespace geo {
      // These link together to form the boundaries for vision fields.
      // These constrain the CENTER of an area the size of vision_size.
     struct Wall : Link<Wall>, geo::Resident {
-        Circle corner;  // Negative radius means concave corner.  Radius can be 0
-        Line edge;  // Automatically set.  Between this and right.
+        Vec pos;
+        float real_curve = 0;  // Used for boundary of vision
+        float push_curve = NAN;  // Used for direction to correct vision
         Wall* left = NULL;  // Control this
+         // The following are automatically set
         Wall* right = NULL;  // Automatically set
+        Line edge;  // Between this and left
+        Circle real_circle;
+        Circle push_circle;
+
+        bool convex ();
+
+         // No two adjacent walls can have summed curve larger than their distance
+        float max_curve ();
+
         void set_left (Wall*);
         Wall* get_left () const { return left; }
         void finish ();
+        ~Wall();
+
         void Resident_emerge () override;
         void Resident_reclude () override;
         Vec Spatial_get_pos () override;
@@ -50,7 +63,6 @@ namespace geo {
         size_t Spatial_n_pts () override;
         Vec Spatial_get_pt (size_t) override;
         void Spatial_set_pt (size_t, Vec) override;
-        ~Wall();
     };
     extern Links<Wall> walls;
 
