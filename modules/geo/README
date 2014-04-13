@@ -20,3 +20,9 @@ rule.  When providing the Fixdef for a fixture of an object, set the
 attribute coll_a to [ground] to allow it to stand on ground, and set the
 attribute coll_b to [ground] to make it ground that can be stood on.
 
+
+Filter mask bits:
+ 0x0001 : solid objects
+ 0x0002 : interactibles
+Filter unmask bits:
+ 0x0001 : sensors
