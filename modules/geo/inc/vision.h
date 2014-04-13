@@ -37,14 +37,13 @@ namespace geo {
      // These constrain the CENTER of an area the size of vision_size.
     struct Wall : Link<Wall>, geo::Resident {
         Vec pos;
-        float real_curve = 0;  // Used for boundary of vision
-        float push_curve = NAN;  // Used for direction to correct vision
+        float curve = 0;  // Used for boundary of vision
+        Vec repel_point = Vec(0, 0);
         Wall* left = NULL;  // Control this
          // The following are automatically set
         Wall* right = NULL;  // Automatically set
         Line edge;  // Between this and left
-        Circle real_circle;
-        Circle push_circle;
+        Circle corner;
 
         bool convex ();
 

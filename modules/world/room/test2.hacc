@@ -40,8 +40,7 @@
             48.5~42420000
             7.5~40f00000
         ]
-        real_curve:0~00000000
-        push_curve:0~00000000
+        curve:0~00000000
         left:$("world/room/test.hacc").lb_corner
     } }
     _4:{ geo::Wall:{
@@ -50,8 +49,7 @@
             50.5~424a0000
             7.5~40f00000
         ]
-        real_curve:0~00000000
-        push_curve:0~00000000
+        curve:0~00000000
         left:$("world/room/test3.hacc")._8
     } }
 } }

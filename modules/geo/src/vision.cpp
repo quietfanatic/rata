@@ -11,8 +11,8 @@ namespace geo {
     Links<Wall> walls;
 
     float Wall::max_curve () {
-        float lr = left ? length(left->pos - pos) - fmax(left->real_curve, left->push_curve) : INF;
-        float rr = right ? length(right->pos - pos) - fmax(right->real_curve, right->push_curve) : INF;
+        float lr = left ? length(left->pos - pos) - left->curve : INF;
+        float rr = right ? length(right->pos - pos) - right->curve : INF;
         return fmin(lr, rr);
     }
     bool Wall::convex () {
@@ -35,38 +35,28 @@ namespace geo {
         if (left) left->finish();
     }
     void Wall::finish () {
-        if (!defined(push_curve)) push_curve = real_curve;
          // Calculate edge
         if (left) {
-            edge.a = pos + real_curve * normalize(left->pos - pos);
-            edge.b = left->pos + left->real_curve * normalize(pos - left->pos);
+            edge.a = pos + curve * normalize(left->pos - pos);
+            edge.b = left->pos + left->curve * normalize(pos - left->pos);
         }
         else {
             edge = Line();
         }
-         // Calculate circles
+         // Calculate corner
         if (left && right) {
              // Diagram: a right triangle mirrored about its hypotenuse
-            Vec r_left_v = real_curve * normalize(left->pos - pos);
-            Vec r_right_v = real_curve * normalize(right->pos - pos);
+            Vec r_left_v = curve * normalize(left->pos - pos);
+            Vec r_right_v = curve * normalize(right->pos - pos);
             Vec r_mid = (r_left_v + r_right_v) / 2;
-            float r_ratio = real_curve * real_curve / length2(r_mid);
-            real_circle.c = pos + r_mid * r_ratio;
-            real_circle.r = length(pos + r_right_v - real_circle.c);
+            float r_ratio = curve * curve / length2(r_mid);
+            corner.c = pos + r_mid * r_ratio;
+            corner.r = length(pos + r_right_v - corner.c);
              // TODO: deal with this differently
-            if (!convex()) real_circle.r *= -1;
-
-            Vec p_left_v = push_curve * normalize(left->pos - pos);
-            Vec p_right_v = push_curve * normalize(right->pos - pos);
-            Vec p_mid = (p_left_v + p_right_v) / 2;
-            float p_ratio = real_curve * real_curve / length2(p_mid);
-            push_circle.c = pos + p_mid * p_ratio;
-            push_circle.r = length(pos + p_right_v - push_circle.c);
-            if (!convex()) push_circle.r *= -1;
+            if (!convex()) corner.r *= -1;
         }
         else {
-            real_circle = Circle();
-            push_circle = Circle();
+            corner = Circle();
         }
         Resident::finish();
     }
@@ -86,16 +76,16 @@ namespace geo {
     size_t Wall::Spatial_n_pts () { return 3; }
     Vec Wall::Spatial_get_pt (size_t i) {
         switch (i) {
-            case 0: return Vec(-real_curve, 0);
-            case 1: return Vec(push_curve, 0);
+            case 0: return Vec(curve, 0);
+            case 1: return repel_point;
             case 2: return left ? left->pos - pos : Vec(0, -1);
             default: return Vec();
         }
     }
     void Wall::Spatial_set_pt (size_t i, Vec p) {
         switch (i) {
-            case 0: real_curve = fmin(fabs(p.x), max_curve()); break;
-            case 1: push_curve = fmin(fabs(p.x), max_curve()); break;
+            case 0: curve = fmin(fabs(p.x), max_curve()); break;
+            case 1: repel_point = p; break;
             case 2: {
                 float best_dist2 = INF;
                 Wall* best_wall = NULL;
@@ -199,8 +189,8 @@ namespace geo {
             else {
                  // Check the corner
                 if (wall.right && defined(wall.right->edge) && !contains(bound_b(wall.right->edge), preferred)) {
-                    bool violating = contains(wall.real_circle, preferred);
-                    Vec snap_here = snap(wall.real_circle, preferred);
+                    bool violating = contains(wall.corner, preferred);
+                    Vec snap_here = snap(wall.corner, preferred);
                     if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_dist2 + !violating < closest_snap_dist2 + !currently_violating) {
@@ -214,7 +204,7 @@ namespace geo {
                             log("vision", "  Violation of corner of wall %lu at %f %f is oob", i, snap_here.x, snap_here.y);
                         }
                         else {
-                            log("vision", "  Not violating corner of wall %lu at %f %f (%f)", i, snap_here.x, snap_here.y, wall.real_circle.r);
+                            log("vision", "  Not violating corner of wall %lu at %f %f (%f)", i, snap_here.x, snap_here.y, wall.corner.r);
                         }
                     }
                     else {
@@ -306,7 +296,7 @@ namespace geo {
             }
              // Now try the corner
             if (!wall.right || !defined(wall.right->edge)) continue;
-            Rect corner_aabb = bounds(wall.real_circle);
+            Rect corner_aabb = bounds(wall.corner);
             q = bound & corner_aabb;
             log("vision", "[%f %f %f %f] & [%f %f %f %f] = [%f %f %f %f]",
                 bound.l, bound.b, bound.r, bound.t,
@@ -321,11 +311,11 @@ namespace geo {
                 if (bound.l >= corner_aabb.l && bound.l <= corner_aabb.r) {
                      // Pythagoreas yields two intersections.
                     float y_from_corner = sqrt(
-                          wall.real_circle.r * wall.real_circle.r
-                        - (bound.l-wall.real_circle.c.x) * (bound.l-wall.real_circle.c.x)
+                          wall.corner.r * wall.corner.r
+                        - (bound.l-wall.corner.c.x) * (bound.l-wall.corner.c.x)
                     );
                      // Try higher intersection
-                    Vec snap_here = Vec(bound.l, wall.real_circle.c.y + y_from_corner);
+                    Vec snap_here = Vec(bound.l, wall.corner.c.y + y_from_corner);
                     if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.y >= bound.b && snap_here.y <= bound.t
@@ -337,7 +327,7 @@ namespace geo {
                         }
                     }
                      // Now try the lower intersection
-                    snap_here.y = wall.real_circle.c.y - y_from_corner;
+                    snap_here.y = wall.corner.c.y - y_from_corner;
                     if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.y >= bound.b && snap_here.y <= bound.t
@@ -351,10 +341,10 @@ namespace geo {
                 }
                 if (bound.b >= corner_aabb.b && bound.b <= corner_aabb.t) {
                     float x_from_corner = sqrt(
-                          wall.real_circle.r * wall.real_circle.r
-                        - (bound.b-wall.real_circle.c.y) * (bound.b-wall.real_circle.c.y)
+                          wall.corner.r * wall.corner.r
+                        - (bound.b-wall.corner.c.y) * (bound.b-wall.corner.c.y)
                     );
-                    Vec snap_here = Vec(wall.real_circle.c.x + x_from_corner, bound.b);
+                    Vec snap_here = Vec(wall.corner.c.x + x_from_corner, bound.b);
                     if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.x >= bound.l && snap_here.x <= bound.r
@@ -365,7 +355,7 @@ namespace geo {
                             selected_snap = snap_here;
                         }
                     }
-                    snap_here.x = wall.real_circle.c.x - x_from_corner;
+                    snap_here.x = wall.corner.c.x - x_from_corner;
                     if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.x >= bound.l && snap_here.x <= bound.r
@@ -379,10 +369,10 @@ namespace geo {
                 }
                 if (bound.r >= corner_aabb.l && bound.r <= corner_aabb.r) {
                     float y_from_corner = sqrt(
-                          wall.real_circle.r * wall.real_circle.r
-                        - (bound.r-wall.real_circle.c.x) * (bound.r-wall.real_circle.c.x)
+                          wall.corner.r * wall.corner.r
+                        - (bound.r-wall.corner.c.x) * (bound.r-wall.corner.c.x)
                     );
-                    Vec snap_here = Vec(bound.r, wall.real_circle.c.y + y_from_corner);
+                    Vec snap_here = Vec(bound.r, wall.corner.c.y + y_from_corner);
                     if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.y >= bound.b && snap_here.y <= bound.t
@@ -393,7 +383,7 @@ namespace geo {
                             selected_snap = snap_here;
                         }
                     }
-                    snap_here.y = wall.real_circle.c.y - y_from_corner;
+                    snap_here.y = wall.corner.c.y - y_from_corner;
                     if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.y >= bound.b && snap_here.y <= bound.t
@@ -407,10 +397,10 @@ namespace geo {
                 }
                 if (bound.t >= corner_aabb.b && bound.t <= corner_aabb.t) {
                     float x_from_corner = sqrt(
-                          wall.real_circle.r * wall.real_circle.r
-                        - (bound.t-wall.real_circle.c.y) * (bound.t-wall.real_circle.c.y)
+                          wall.corner.r * wall.corner.r
+                        - (bound.t-wall.corner.c.y) * (bound.t-wall.corner.c.y)
                     );
-                    Vec snap_here = Vec(wall.real_circle.c.x + x_from_corner, bound.t);
+                    Vec snap_here = Vec(wall.corner.c.x + x_from_corner, bound.t);
                     if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     float snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.x >= bound.l && snap_here.x <= bound.r
@@ -421,7 +411,7 @@ namespace geo {
                             selected_snap = snap_here;
                         }
                     }
-                    snap_here.x = wall.real_circle.c.x - x_from_corner;
+                    snap_here.x = wall.corner.c.x - x_from_corner;
                     if (debug_draw_this) dbg_snaps.push_back(snap_here);
                     snap_dist2 = length2(snap_here - preferred);
                     if (snap_here.x >= bound.l && snap_here.x <= bound.r
@@ -541,26 +531,19 @@ namespace geo {
             for (auto& cb : walls) {
                 if (cb.left && cb.right) {
                     if (cb.convex()) {
-                        draw_arc(cb.real_circle,
-                            angle(cb.right->edge.b - cb.real_circle.c),
-                            angle(cb.edge.a - cb.real_circle.c)
-                        );
-                        draw_arc(cb.push_circle,
-                            angle(cb.right->edge.b - cb.push_circle.c),
-                            angle(cb.edge.a - cb.push_circle.c)
+                        draw_arc(cb.corner,
+                            angle(cb.right->edge.b - cb.corner.c),
+                            angle(cb.edge.a - cb.corner.c)
                         );
                     }
                     else {
-                        draw_arc(cb.real_circle,
-                            angle(cb.real_circle.c - cb.edge.a),
-                            angle(cb.real_circle.c - cb.right->edge.b)
-                        );
-                        draw_arc(cb.push_circle,
-                            angle(cb.push_circle.c - cb.edge.a),
-                            angle(cb.push_circle.c - cb.right->edge.b)
+                        draw_arc(cb.corner,
+                            angle(cb.corner.c - cb.edge.a),
+                            angle(cb.corner.c - cb.right->edge.b)
                         );
                     }
                 }
+                draw_line(cb.pos, cb.pos + cb.repel_point);
                 if (defined(cb.edge)) {
                     draw_line(cb.edge.a, cb.edge.b);
                 }
@@ -580,8 +563,8 @@ HACCABLE(Wall) {
     name("geo::Wall");
     attr("Resident", base<Resident>().collapse());
     attr("pos", member(&Wall::pos));
-    attr("real_curve", member(&Wall::real_curve).optional());
-    attr("push_curve", member(&Wall::push_curve).optional());
+    attr("curve", member(&Wall::curve).optional());
+    attr("repel_point", member(&Wall::repel_point).optional());
     attr("left", value_methods(&Wall::get_left, &Wall::set_left).optional());
     finish(&Wall::finish);
 }

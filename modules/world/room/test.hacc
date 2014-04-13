@@ -72,22 +72,19 @@
     lt_corner:{ geo::Wall:{
         room:$.room
         pos:[10 22.5]
-        real_curve:1
-        push_curve:1
+        curve:1
         left:$.rt_corner
     } }
     rt_corner:{ geo::Wall:{
         room:$.room
         pos:[30 22.5]
-        real_curve:1
-        push_curve:1
+        curve:1
         left:$.rb_corner
     } }
     rb_corner:{ geo::Wall:{
         room:$.room
         pos:[30 7.5]
-        real_curve:4
-        push_curve:10
+        curve:4
         left:$("world/room/test2.hacc")._4
     } }
 } }
