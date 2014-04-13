@@ -45,15 +45,20 @@ namespace geo {
         }
          // Calculate corner
         if (left && right) {
-             // Diagram: a right triangle mirrored about its hypotenuse
-            Vec r_left_v = curve * normalize(left->pos - pos);
-            Vec r_right_v = curve * normalize(right->pos - pos);
-            Vec r_mid = (r_left_v + r_right_v) / 2;
-            float r_ratio = curve * curve / length2(r_mid);
-            corner.c = pos + r_mid * r_ratio;
-            corner.r = length(pos + r_right_v - corner.c);
-             // TODO: deal with this differently
-            if (!convex()) corner.r *= -1;
+            if (curve == 0) {
+                corner = Circle(pos, 0);
+            }
+            else {
+                 // Diagram: a right triangle mirrored about its hypotenuse
+                Vec r_left_v = curve * normalize(left->pos - pos);
+                Vec r_right_v = curve * normalize(right->pos - pos);
+                Vec r_mid = (r_left_v + r_right_v) / 2;
+                float r_ratio = curve * curve / length2(r_mid);
+                corner.c = pos + r_mid * r_ratio;
+                corner.r = length(pos + r_right_v - corner.c);
+                 // TODO: deal with this differently
+                if (!convex()) corner.r *= -1;
+            }
         }
         else {
             corner = Circle();
@@ -151,71 +156,94 @@ namespace geo {
         float closest_snap_dist2 = INF;
         Vec selected_snap;
          // First check if we're violating any walls and can simply snap to one
-        size_t i = 0;
         for (auto& wall : walls) {
-            if (!defined(wall.edge)) continue;
-            if (contains(bound_a(wall.edge), preferred)) {
-                 // Check the edge
-                if (contains(bound_b(wall.edge), preferred)) {
-                    bool violating = contains(wall.edge, preferred);
-                    Vec snap_here = snap(wall.edge, preferred);
-                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
-                    float snap_dist2 = length2(snap_here - preferred);
-                     // Prefer violations over non-violations; otherwise we may
-                     //  miss some violations.
-                    if (snap_dist2 + !violating < closest_snap_dist2 + !currently_violating) {
-                        currently_violating = violating;
-                        closest_snap_dist2 = snap_dist2;
-                         // Record this snap if it's in the bound
-                        if (violating && covers(bound, snap_here)) {
-                            log("vision", "  Violating edge of wall %lu at %f %f", i, snap_here.x, snap_here.y);
-                            selected_snap = snap_here;
-                        }
-                        else if (violating) {
-                            log("vision", "  Violation of edge of wall %lu at %f %f is oob", i, snap_here.x, snap_here.y);
-                        }
-                        else {
-                            log("vision", "  Not violating edge of wall %lu at %f %f", i, snap_here.x, snap_here.y);
-                        }
+            check_edge: {
+                 // Get snap position; we'll check if it's valid later
+                Vec snap_here = snap(wall.edge, preferred);
+                 // Account for repel points if necessary
+                if (wall.repel_point != Vec(0, 0)) {
+                    Vec repel_snap = intersect(wall.edge, Line(preferred, wall.repel_point));
+                    if (contains(bounds(wall.edge), repel_snap))
+                    if (length2(repel_snap - wall.pos) < length2(snap_here - wall.pos))
+                        snap_here = repel_snap;
+                }
+                if (wall.left->repel_point != Vec(0, 0)) {
+                    Vec repel_snap = intersect(wall.edge, Line(preferred, wall.left->repel_point));
+                    if (contains(bounds(wall.edge), repel_snap))
+                    if (length2(repel_snap - wall.left->pos) < length2(snap_here - wall.left->pos))
+                        snap_here = repel_snap;
+                }
+                 // Didn't actually snap to the edge
+                if (!covers(bounds(wall.edge), snap_here)) {
+                    log("vision", "  Out of range of edge of wall %p", &wall);
+                    goto check_corner;
+                }
+                if (debug_draw_this) dbg_snaps.push_back(snap_here);
+                bool violating = contains(wall.edge, preferred);
+                float snap_dist2 = length2(snap_here - preferred);
+                 // Prefer violations over non-violations; otherwise we may
+                 //  miss some violations when the camera is constrained to a
+                 //  one-dimensional line.
+                if (snap_dist2 + !violating < closest_snap_dist2 + !currently_violating) {
+                    currently_violating = violating;
+                    closest_snap_dist2 = snap_dist2;
+                    if (!violating) {
+                        log("vision", "  Not violating edge of wall %p at %f %f", &wall, snap_here.x, snap_here.y);
+                    }
+                    else if (covers(bound, snap_here)) {
+                        log("vision", "  Violating edge of wall %p at %f %f", &wall, snap_here.x, snap_here.y);
+                        selected_snap = snap_here;
                     }
                     else {
-                        log("vision", "  Snap to edge of wall %lu at %f %f is too far", i, snap_here.x, snap_here.y);
+                        log("vision", "  Violation of edge of wall %p at %f %f is oob", &wall, snap_here.x, snap_here.y);
                     }
                 }
                 else {
-                    log("vision", "  Not checking edge of wall %lu", i);
+                    log("vision", "  Snap to edge of wall %p at %f %f is too far", &wall, snap_here.x, snap_here.y);
                 }
             }
-            else {
-                 // Check the corner
-                if (wall.right && defined(wall.right->edge) && !contains(bound_b(wall.right->edge), preferred)) {
-                    bool violating = contains(wall.corner, preferred);
-                    Vec snap_here = snap(wall.corner, preferred);
-                    if (debug_draw_this) dbg_snaps.push_back(snap_here);
-                    float snap_dist2 = length2(snap_here - preferred);
-                    if (snap_dist2 + !violating < closest_snap_dist2 + !currently_violating) {
-                        currently_violating = violating;
-                        closest_snap_dist2 = snap_dist2;
-                        if (violating && covers(bound, snap_here)) {
-                            log("vision", "  Violating corner of wall %lu at %f %f", i, snap_here.x, snap_here.y);
-                            selected_snap = snap_here;
-                        }
-                        else if (violating) {
-                            log("vision", "  Violation of corner of wall %lu at %f %f is oob", i, snap_here.x, snap_here.y);
-                        }
-                        else {
-                            log("vision", "  Not violating corner of wall %lu at %f %f (%f)", i, snap_here.x, snap_here.y, wall.corner.r);
-                        }
-                    }
+            check_corner: {
+                Vec snap_here;
+                if (wall.repel_point != Vec(0, 0)) {
+                    Line itx = intersect(wall.corner, Line(preferred, wall.repel_point));
+                    if (length2(itx.a - wall.pos) <= wall.curve*wall.curve)
+                        snap_here = itx.a;
+                    else if (length2(itx.b - wall.pos) <= wall.curve*wall.curve)
+                        snap_here = itx.b;
                     else {
-                        log("vision", "  Snap to corner of wall %lu at %f %f is too far", i, snap_here.x, snap_here.y);
+                        log("vision", "  Out of range of corner of wall %p", &wall);
+                        goto next_wall;
                     }
                 }
                 else {
-                    log("vision", "  Not checking corner of wall %lu", i);
+                    snap_here = snap(wall.corner, preferred);
+                    if (length2(snap_here - wall.pos) > wall.curve*wall.curve) {
+                        log("vision", "  Out of range of corner of wall %p", &wall);
+                        goto next_wall;
+                    }
+                }
+                if (debug_draw_this) dbg_snaps.push_back(snap_here);
+                bool violating = contains(wall.corner, preferred);
+                float snap_dist2 = length2(snap_here - preferred);
+                if (snap_dist2 + !violating < closest_snap_dist2 + !currently_violating) {
+                    currently_violating = violating;
+                    closest_snap_dist2 = snap_dist2;
+                    if (!violating) {
+                        log("vision", "  Not violating corner of wall %p at %f %f", &wall, snap_here.x, snap_here.y);
+                    }
+                    else if (covers(bound, snap_here)) {
+                        log("vision", "  Violating corner of wall %p at %f %f", &wall, snap_here.x, snap_here.y);
+                        selected_snap = snap_here;
+                    }
+                    else {
+                        log("vision", "  Violation of corner of wall %p at %f %f is oob", &wall, snap_here.x, snap_here.y);
+                    }
+                }
+                else {
+                    log("vision", "  Snap to corner of wall %p at %f %f is too far", &wall, snap_here.x, snap_here.y);
                 }
             }
-            i += 1;
+            next_wall: { }
         }
         if (closest_snap_dist2 == INF) {
             log("vision", "    No walls were checked!?");
@@ -232,7 +260,6 @@ namespace geo {
         }
          // Ugh, now we have to enumerate all the ways the bound intersects the walls.
         closest_snap_dist2 = INF;
-        i = 0;
         for (auto& wall : walls) {
             if (!defined(wall.edge)) continue;
              // Try the edge first
@@ -244,7 +271,7 @@ namespace geo {
                 q.l, q.b, q.r, q.t
             );
             if (proper(bound & edge_aabb)) {
-                log("vision", "Trying intersect on edge of wall %lu\n", i);
+                log("vision", "Trying intersect on edge of wall %p\n", &wall);
                  // Try intersecting all four walls
                 if (bound.l >= edge_aabb.l && bound.l <= edge_aabb.r) {
                     Vec snap_here = Vec(bound.l, wall.edge.y_at_x(bound.l));
@@ -292,7 +319,7 @@ namespace geo {
                 }
             }
             else {
-                log("vision", "Not trying intersect on edge of wall %lu\n", i);
+                log("vision", "Not trying intersect on edge of wall %p\n", &wall);
             }
              // Now try the corner
             if (!wall.right || !defined(wall.right->edge)) continue;
@@ -304,7 +331,7 @@ namespace geo {
                 q.l, q.b, q.r, q.t
             );
             if (proper(bound & corner_aabb)) {
-                log("vision", "Trying intersect on corner of wall %lu\n", i);
+                log("vision", "Trying intersect on corner of wall %p\n", &wall);
                 Line bound_l = bound_a(wall.edge);
                 Line bound_r = bound_b(wall.right->edge);
                  // Try intersecting it with all four walls
@@ -425,9 +452,8 @@ namespace geo {
                 }
             }
             else {
-                log("vision", "Not trying intersect on corner of wall %lu\n", i);
+                log("vision", "Not trying intersect on corner of wall %p\n", &wall);
             }
-            i++;
         }
          // Finally return the best wall&bound intersection.
         log("vision", "Done checking %f %f within %f %f %f %f.", preferred.x, preferred.y, bound.l, bound.b, bound.r, bound.t);
