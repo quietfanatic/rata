@@ -1,6 +1,6 @@
 {hacc::Document:{
     def:{ent::Ext_Def:{
-        mass:1
+        mass:0.5
         gravity_scale:0
         fixtures:[
             { shape:$.shape friction:0.4 restitution:0.6 coll_a:[ground] coll_b:[ground] }

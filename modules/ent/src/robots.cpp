@@ -205,7 +205,7 @@ namespace ent {
             log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
             shoot_bullet(this, get_pos() + def->focus_offset, bullet_vel);
             attack_timer = 90;
-            impulse(-bullet_vel);
+            impulse(-bullet_vel / 2);
         }
 
         void Object_before_move () override {
