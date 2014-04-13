@@ -198,6 +198,16 @@ namespace ent {
             }
         }
 
+        void fire () {
+            auto def = get_def();
+            Vec bullet_pos = get_pos() + def->focus_offset;
+            Vec bullet_vel = 2 * normalize(focus);
+            log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
+            shoot_bullet(this, get_pos() + def->focus_offset, bullet_vel);
+            attack_timer = 90;
+            impulse(-bullet_vel);
+        }
+
         void Object_before_move () override {
             Robot::Object_before_move();
             auto def = get_def();
@@ -216,25 +226,16 @@ namespace ent {
                     set_vel(get_vel() + acc);
                 }
                 if (attack_timer) --attack_timer;
-                else if (buttons & ATTACK_BIT) {
-                    Vec bullet_pos = get_pos() + def->focus_offset;
-                    Vec bullet_vel = 2 * normalize(focus);
-                    log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
-                    shoot_bullet(this, get_pos() + def->focus_offset, bullet_vel);
-                    attack_timer = 90;
-                }
+                else if (buttons & ATTACK_BIT)
+                    fire();
             }
             else {
                 if (!defined(target)) target = get_pos();
                 if (stun_timer) stun_timer--;
                 if (attack_timer) {
                     focus = 0.8*focus + 0.2*(target - get_pos() - def->focus_offset);
-                    if (--attack_timer == 0) {
-                        Vec bullet_pos = get_pos() + def->focus_offset;
-                        Vec bullet_vel = 2 * normalize(focus);
-                        log("robot", "shooting [%f %f] [%f %f]", bullet_pos.x, bullet_pos.y, bullet_vel.x, bullet_vel.y);
-                        shoot_bullet(this, get_pos() + def->focus_offset, bullet_vel);
-                    }
+                    if (--attack_timer == 0)
+                        fire();
                 }
                 else if (enemy) {
                     target = enemy_pos;
