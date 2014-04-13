@@ -158,18 +158,18 @@ namespace geo {
          // First check if we're violating any walls and can simply snap to one
         for (auto& wall : walls) {
             check_edge: {
+                if (!wall.left) goto check_corner;
                  // Get snap position; we'll check if it's valid later
                 Vec snap_here = snap(wall.edge, preferred);
+                float snap_dist2 = length2(snap_here - preferred);
                  // Account for repel points if necessary
                 if (wall.repel_point != Vec(0, 0)) {
-                    Vec repel_snap = intersect(wall.edge, Line(preferred, wall.repel_point));
-                    if (contains(bounds(wall.edge), repel_snap))
+                    Vec repel_snap = intersect(wall.edge, Line(preferred, wall.pos + wall.repel_point));
                     if (length2(repel_snap - wall.pos) < length2(snap_here - wall.pos))
                         snap_here = repel_snap;
                 }
                 if (wall.left->repel_point != Vec(0, 0)) {
-                    Vec repel_snap = intersect(wall.edge, Line(preferred, wall.left->repel_point));
-                    if (contains(bounds(wall.edge), repel_snap))
+                    Vec repel_snap = intersect(wall.edge, Line(preferred, wall.left->pos + wall.left->repel_point));
                     if (length2(repel_snap - wall.left->pos) < length2(snap_here - wall.left->pos))
                         snap_here = repel_snap;
                 }
@@ -180,7 +180,6 @@ namespace geo {
                 }
                 if (debug_draw_this) dbg_snaps.push_back(snap_here);
                 bool violating = contains(wall.edge, preferred);
-                float snap_dist2 = length2(snap_here - preferred);
                  // Prefer violations over non-violations; otherwise we may
                  //  miss some violations when the camera is constrained to a
                  //  one-dimensional line.
@@ -203,9 +202,11 @@ namespace geo {
                 }
             }
             check_corner: {
-                Vec snap_here;
+                if (!wall.right) goto next_wall;
+                Vec snap_here = snap(wall.corner, preferred);
+                float snap_dist2 = length2(snap_here - preferred);
                 if (wall.repel_point != Vec(0, 0)) {
-                    Line itx = intersect(wall.corner, Line(preferred, wall.repel_point));
+                    Line itx = intersect(wall.corner, Line(preferred, wall.pos + wall.repel_point));
                     if (length2(itx.a - wall.pos) <= wall.curve*wall.curve)
                         snap_here = itx.a;
                     else if (length2(itx.b - wall.pos) <= wall.curve*wall.curve)
@@ -216,7 +217,6 @@ namespace geo {
                     }
                 }
                 else {
-                    snap_here = snap(wall.corner, preferred);
                     if (length2(snap_here - wall.pos) > wall.curve*wall.curve) {
                         log("vision", "  Out of range of corner of wall %p", &wall);
                         goto next_wall;
@@ -224,7 +224,6 @@ namespace geo {
                 }
                 if (debug_draw_this) dbg_snaps.push_back(snap_here);
                 bool violating = contains(wall.corner, preferred);
-                float snap_dist2 = length2(snap_here - preferred);
                 if (snap_dist2 + !violating < closest_snap_dist2 + !currently_violating) {
                     currently_violating = violating;
                     closest_snap_dist2 = snap_dist2;

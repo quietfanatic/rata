@@ -64,27 +64,54 @@
     } }
     lb_corner:{ geo::Wall:{
         room:$.room
-        pos:[10 7.5]
-        real_curve:1
-        push_curve:1
+        pos:[
+            10~41200000
+            7.5~40f00000
+        ]
+        curve:0~00000000
+        repel_point:[
+            0~00000000
+            0~00000000
+        ]
         left:$.lt_corner
     } }
     lt_corner:{ geo::Wall:{
         room:$.room
-        pos:[10 22.5]
-        curve:1
+        pos:[
+            10~41200000
+            22.5~41b40000
+        ]
+        curve:1~3f800000
+        repel_point:[
+            0~00000000
+            0~00000000
+        ]
         left:$.rt_corner
     } }
     rt_corner:{ geo::Wall:{
         room:$.room
-        pos:[30 22.5]
-        curve:1
+        pos:[
+            30~41f00000
+            22.5~41b40000
+        ]
+        curve:1~3f800000
+        repel_point:[
+            0~00000000
+            0~00000000
+        ]
         left:$.rb_corner
     } }
     rb_corner:{ geo::Wall:{
         room:$.room
-        pos:[30 7.5]
-        curve:4
+        pos:[
+            30~41f00000
+            7.5~40f00000
+        ]
+        curve:4~40800000
+        repel_point:[
+            10~41200000
+            7.5~40f00000
+        ]
         left:$("world/room/test2.hacc")._4
     } }
 } }
