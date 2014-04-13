@@ -204,6 +204,7 @@ namespace geo {
             check_corner: {
                 if (!wall.right) goto next_wall;
                 Vec snap_here = snap(wall.corner, preferred);
+                bool violating;
                 float snap_dist2 = length2(snap_here - preferred);
                 if (wall.repel_point != Vec(0, 0)) {
                     Line itx = intersect(wall.corner, Line(preferred, wall.pos + wall.repel_point));
@@ -215,15 +216,17 @@ namespace geo {
                         log("vision", "  Out of range of corner of wall %p", &wall);
                         goto next_wall;
                     }
+                    violating = length2(snap_here - (wall.pos + wall.repel_point))
+                              > length2(preferred - (wall.pos + wall.repel_point));
                 }
                 else {
                     if (length2(snap_here - wall.pos) > wall.curve*wall.curve) {
                         log("vision", "  Out of range of corner of wall %p", &wall);
                         goto next_wall;
                     }
+                    violating = contains(wall.corner, preferred);
                 }
                 if (debug_draw_this) dbg_snaps.push_back(snap_here);
-                bool violating = contains(wall.corner, preferred);
                 if (snap_dist2 + !violating < closest_snap_dist2 + !currently_violating) {
                     currently_violating = violating;
                     closest_snap_dist2 = snap_dist2;
