@@ -4,11 +4,6 @@
         mass:1
         fixtures:[
             { shape:$.shape friction:0.4 coll_a:[ground] coll_b:[ground] }
-            { shape:$.floor_sensor_l is_sensor:true filter:{ unmask:0x0001 } }
-            { shape:$.floor_sensor_r is_sensor:true filter:{ unmask:0x0001 } }
-            { shape:$.wall_sensor_l is_sensor:true filter:{ unmask:0x0001 } }
-            { shape:$.wall_sensor_r is_sensor:true filter:{ unmask:0x0001 } }
-            { shape:$.enemy_sensor is_sensor:true filter:{ unmask:0x0001 } }
         ]
         layout:$.layout
         texture:$.img.body
@@ -16,21 +11,6 @@
     }}
     shape:{b2PolygonShape:{
         verts:[[-0.4375 0] [0.4375 0] [0.4375 0.5] [-0.4375 0.5]]
-    }}
-    floor_sensor_l:{b2PolygonShape:{
-        verts:[[-1.0 -0.5] [-0.5 -0.5] [-0.5 0.1] [-1.0 0.1]]
-    }}
-    floor_sensor_r:{b2PolygonShape:{
-        verts:[[0.5 -0.5] [1.0 -0.5] [1.0 0.1] [0.5 0.1]]
-    }}
-    wall_sensor_l:{b2PolygonShape:{
-        verts:[[-0.6 0.2] [-0.5 0.2] [-0.5 0.5] [-0.6 0.5]]
-    }}
-    wall_sensor_r:{b2PolygonShape:{
-        verts:[[0.5 0.2] [0.6 0.2] [0.6 0.5] [0.5 0.5]]
-    }}
-    enemy_sensor:{b2PolygonShape:{
-        verts:[[-10, -7] [10 -7] [10 8] [-10 8]]
     }}
     layout:{vis::Layout:{
         size:[16 32]

@@ -80,11 +80,6 @@ namespace ent {
     struct Patroller : Robot, Grounded {
         enum Fixture_Index {
             BODY,
-            FLOOR_SENSOR_L,
-            FLOOR_SENSOR_R,
-            WALL_SENSOR_L,
-            WALL_SENSOR_R,
-            ENEMY_SENSOR
         };
         enum Frame_Index {
             UP,
@@ -104,18 +99,13 @@ namespace ent {
                     if (buttons & RIGHT_BIT && !(buttons & LEFT_BIT)) direction = 1;
                 }
                 else {
-                     // Turn around at end of platform
-                    auto floor_sensor = &def->fixtures[direction < 0 ? FLOOR_SENSOR_L : FLOOR_SENSOR_R];
-                    auto wall_sensor = &def->fixtures[direction < 0 ? WALL_SENSOR_L : WALL_SENSOR_R];
-                    bool floor = false;
-                    bool wall = false;
-                    foreach_contact([&](b2Fixture* mine, b2Fixture* other){
-                        auto fd = (FixtureDef*)mine->GetUserData();
-                        if (fd == floor_sensor)
-                            floor = true;
-                        else if (fd == wall_sensor)
-                            wall = true;
-                    });
+                    Vec sensor_pos = get_pos() + Vec(direction * 0.75, -0.1);
+                    b2PolygonShape sensor_shape;
+                    sensor_shape.SetAsBox(0.2, 0.2);
+                    bool floor = space.query_shape(sensor_pos, &sensor_shape, nullptr, Filter(0x0001, 0x0001));
+                    sensor_pos = get_pos() + Vec(direction * 0.75, 0.5);
+                    sensor_shape.SetAsBox(0.2, 0.2);
+                    bool wall = space.query_shape(sensor_pos, &sensor_shape, nullptr, Filter(0x0001, 0x0001));
                     if (wall || !floor) direction = -direction;
                 }
                 oldxrel = get_pos().x - ground->get_pos().x;
@@ -156,7 +146,7 @@ namespace ent {
             }
             if (enemy) {
                 if (auto biped = dynamic_cast<Biped*>(enemy)) {
-                    biped->vision.attend(get_pos() + Rect(-0.5, 0, 0.5, 1), 10);
+//                    biped->vision.attend(get_pos() + Rect(-0.5, 0, 0.5, 1), 10);
                     vision.attend(biped->get_pos() + Rect(-0.5, 0, 0.5, 2), 10);
                 }
             }
@@ -187,7 +177,6 @@ namespace ent {
     struct Flyer : Robot {
         enum Fixture_Index {
             BODY,
-            ENEMY_SENSOR
         };
         Vec target = Vec(NAN, NAN);
         uint32 attack_timer = 0;
@@ -291,7 +280,7 @@ namespace ent {
             });
             if (enemy) {
                 if (auto biped = dynamic_cast<Biped*>(enemy)) {
-                    biped->vision.attend(get_pos() + Rect(-0.5, 0, 0.5, 1), 10);
+//                    biped->vision.attend(get_pos() + Rect(-0.5, 0, 0.5, 1), 10);
                     vision.attend(biped->get_pos() + Rect(-0.5, 0, 0.5, 2), 10);
                 }
             }
