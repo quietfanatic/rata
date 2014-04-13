@@ -25,10 +25,7 @@
             b2:{ shape:$.crawl_r_shape.b2Shape friction:0 }
             filter:{ mask:0x0005 }
         }
-        ceiling_low:{
-            b2:{ shape:$.ceiling_low_shape.b2Shape friction:0 is_sensor:true }
-            filter:{ unmask:0x0001 }
-        }
+        height:1.6875
     }}
      // 16ths: 0.0625 0.125 0.1875 0.25 0.3125 0.375 0.4375 0.5
      //        0.5625 0.625 0.6875 0.75 0.8125 0.875 0.9375 1.0
@@ -49,9 +46,6 @@
     }}
     crawl_r_shape:{b2PolygonShape:{
         verts:[[-0.6875 0.0625] [0.375 0.0625] [0.625 0.25] [0.625 0.6875] [0.25 0.875]]
-    }}
-    ceiling_low_shape:{b2PolygonShape:{
-        verts:[[-0.1875 0.75] [0.1875 0.75] [0.1875 1.375] [-0.1875 1.375]]
     }}
     skel:{vis::Skel:{
         segs:[{

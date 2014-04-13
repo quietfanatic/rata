@@ -76,7 +76,7 @@ that module's directory, if it exists.
      - ☑ Camera control (bring constraint satisfaction system from master branch)
      - ☐ Reformulate vision walls
      - ☐ Generic resizable tilemap objects
-     - ☐ Try using queries instead of sensors
+     - ☑ Try using queries instead of sensors
      - ☐ Use collision filters
  - shell
      - ☑ Basic room editor

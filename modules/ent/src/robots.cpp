@@ -40,7 +40,7 @@ namespace ent {
                 if (!enemy || length2(oo->get_pos() - get_pos()) < length2(enemy->get_pos() - get_pos()))
                     enemy = oo;
                 return true;
-            }, Filter(0x0004, 0x0001));
+            }, Filter(0x0004, 0x0002));
             if (enemy) {
                 if (!try_see_at(enemy, enemy->get_pos())
                     && !try_see_at(enemy, enemy->get_pos() + Vec(0.4, 0.4))

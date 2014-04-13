@@ -66,7 +66,8 @@ namespace geo {
 
      // Filters
     bool Filter::test (const Filter& o) const {
-        return active && o.active && mask & o.mask && !(unmask && o.unmask);
+        return active && o.active && mask & o.mask
+            && !(unmask & o.mask) && !(mask & o.unmask);
     }
 
     struct myCF : b2ContactFilter {
@@ -185,6 +186,7 @@ namespace geo {
 
     static std::vector<Line> ray_casts;
     static std::vector<Rect> shape_queries;
+    static std::vector<uint32> shape_queries_color;
 
     struct Phys_Debug_Layer : vis::Drawn<vis::Overlay> {
         void Drawn_draw (vis::Overlay) override {
@@ -250,9 +252,11 @@ namespace geo {
             }
             ray_casts.resize(0);
             for (auto& sq : shape_queries) {
+                draw_color(shape_queries_color[&sq - &shape_queries[0]]);
                 draw_rect(sq);
             }
             shape_queries.resize(0);
+            shape_queries_color.resize(0);
         }
     } phys_debug_layer;
 
@@ -277,17 +281,22 @@ namespace geo {
         b2Shape* shape;
         const Space::ShapeTester& f;
         const Filter& filter;
-        bool found = false;
+        bool aabb_passed = false;
+        bool filter_passed = false;
+        bool shape_passed = false;
         ShapeTester_CB (const b2Transform& t, b2Shape* s, const Space::ShapeTester& f, const Filter& filt) :
             transform(t), shape(s), f(f), filter(filt)
         { }
         bool ReportFixture (b2Fixture* fix) override {
-            if (!filter.test(reinterpret_cast<const Filter&>(fix->GetFilterData())))
+            aabb_passed = true;
+            auto fix_filter = reinterpret_cast<const Filter&>(fix->GetFilterData());
+            if (!filter.test(fix_filter))
                 return true;
+            filter_passed = true;
             auto& fix_tr = fix->GetBody()->GetTransform();
             if (!b2TestOverlap(shape, 0, fix->GetShape(), 0, transform, fix_tr))
                 return true;
-            found = true;
+            shape_passed = true;
             return f ? f(fix) : false;
         }
     };
@@ -299,9 +308,16 @@ namespace geo {
         b2AABB aabb;
         shape->ComputeAABB(&aabb, transform, 0);
         b2world->QueryAABB(&cb, aabb);
-        if (phys_debug_layer.visible())
+        if (phys_debug_layer.visible()) {
             shape_queries.push_back(Rect(aabb.lowerBound, aabb.upperBound));
-        return cb.found;
+            shape_queries_color.push_back(
+                cb.shape_passed ? 0xffcf7f7f
+              : cb.filter_passed ? 0xff7f007f
+              : cb.aabb_passed ? 0x7f4f007f
+              : 0x4f2f007f
+            );
+        }
+        return cb.shape_passed;
     }
 
 } using namespace geo;

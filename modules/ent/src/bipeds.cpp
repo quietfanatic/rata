@@ -13,7 +13,7 @@ namespace ent {
         Agent::finish();
         auto def = get_def();
         stats = *def->stats;
-        for (auto fp = &def->fixdefs->feet; fp <= &def->fixdefs->ceiling_low; fp++) {
+        for (auto fp = &def->fixdefs->feet; fp <= &def->fixdefs->crawl_r; fp++) {
             add_fixture(fp);
         }
     }
@@ -26,12 +26,19 @@ namespace ent {
         }
         return NULL;
     }
+    bool Biped::check_ceiling () {
+        b2PolygonShape ps;
+        float height = get_def()->fixdefs->height;
+        ps.SetAsBox(0.2, height / 2 - 0.2);
+        return space.query_shape(get_pos() + Vec(0, height / 2 + 0.1), &ps, nullptr, Filter(0x0001, 0x0006));
+    }
 
      // Change some kinds of movement state
      // Do not change ground velocity, but do change air velocity
     void Biped::Object_before_move () {
         auto def = get_def();
         int8 mdir = move_direction();
+        bool ceiling_low = check_ceiling();
          // Turn around
         if (!crawling || !ceiling_low) {
             direction = focus.x > 0 ? 1 : focus.x < 0 ? -1 : direction;
@@ -181,14 +188,6 @@ namespace ent {
         else {
             distance_walked = 0;
         }
-         // Read sensors
-        ceiling_low = false;
-        foreach_contact([&](b2Fixture* mine, b2Fixture* other){
-            auto fd = (FixtureDef*)mine->GetUserData();
-            if (fd == &def->fixdefs->ceiling_low) {
-                ceiling_low = true;
-            }
-        });
          // Vision update
         Agent::Object_after_move();
     }
@@ -288,7 +287,6 @@ HACCABLE(Biped) {
     attr("direction", member(&Biped::direction).optional());
     attr("crouching", member(&Biped::crouching).optional());
     attr("crawling", member(&Biped::crawling).optional());
-    attr("ceiling_low", member(&Biped::ceiling_low).optional());
     attr("jump_timer", member(&Biped::jump_timer).optional());
     attr("inventory", member(&Biped::inventory).optional());
     attr("equipment", member(&Biped::equipment).optional());
@@ -351,5 +349,5 @@ HACCABLE(Biped_Fixdefs) {
     attr("crouch", member(&Biped_Fixdefs::crouch));
     attr("crawl_l", member(&Biped_Fixdefs::crawl_l));
     attr("crawl_r", member(&Biped_Fixdefs::crawl_r));
-    attr("ceiling_low", member(&Biped_Fixdefs::ceiling_low));
+    attr("height", member(&Biped_Fixdefs::height));
 }

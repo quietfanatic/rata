@@ -57,13 +57,10 @@ namespace ent {
         geo::FixtureDef crouch;
         geo::FixtureDef crawl_l;
         geo::FixtureDef crawl_r;
-        geo::FixtureDef ceiling_low;
+        float height;  // In lieu of sensor fixture
          // LOL, categorizing things by comparing their addresses
         bool is_primary (geo::FixtureDef* fd) {
             return fd >= &stand && fd <= &crawl_r;
-        }
-        bool is_sensor (geo::FixtureDef* fd) {
-            return fd == &ceiling_low;
         }
     };
 
@@ -87,8 +84,8 @@ namespace ent {
         int8 direction = 1;
         bool crouching = false;
         bool crawling = false;
-        bool ceiling_low = false;  // Established by a sensor
         uint8 jump_timer = 0;  // counts up until stats.jump_delay
+        bool check_ceiling ();
 
         void Object_before_move () override;
         void Object_after_move () override;
