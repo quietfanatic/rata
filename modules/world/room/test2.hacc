@@ -36,12 +36,22 @@
     } }
     _2:{ geo::Wall:{
         room:$.room
-        pos:[48.5 7.5]
+        pos:[
+            48.5~42420000
+            7.5~40f00000
+        ]
+        real_curve:0~00000000
+        push_curve:0~00000000
         left:$("world/room/test.hacc").lb_corner
     } }
     _4:{ geo::Wall:{
         room:$.room
-        pos:[50.5 7.5]
+        pos:[
+            50.5~424a0000
+            7.5~40f00000
+        ]
+        real_curve:0~00000000
+        push_curve:0~00000000
         left:$("world/room/test3.hacc")._8
     } }
 } }

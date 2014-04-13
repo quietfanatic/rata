@@ -61,44 +61,62 @@
     } }
     _8:{ geo::Wall:{
         room:$.room
-        pos:[62.5 12]
-        real_curve:4.5
-        push_curve:10
+        pos:[
+            62~42780000
+            7.5~40f00000
+        ]
+        real_curve:1~3f800000
+        push_curve:1~3f800000
         left:$._9
     } }
     _9:{ geo::Wall:{
         room:$.room
-        pos:[70 10.5]
-        real_curve:1
-        push_curve:1
+        pos:[
+            70~428c0000
+            11.5~41380000
+        ]
+        real_curve:1~3f800000
+        push_curve:1~3f800000
         left:$._12
     } }
     _10:{ geo::Wall:{
         room:$.room
-        pos:[62 3]
-        real_curve:4.5
-        push_curve:10
+        pos:[
+            62~42780000
+            7.5~40f00000
+        ]
+        real_curve:0.90271~3f671800
+        push_curve:1~3f800000
         left:$("world/room/test2.hacc")._2
     } }
     _11:{ geo::Wall:{
         room:$.room
-        pos:[70 6.5]
-        real_curve:1
-        push_curve:1
+        pos:[
+            70~428c0000
+            5.5~40b00000
+        ]
+        real_curve:1~3f800000
+        push_curve:1~3f800000
         left:$._10
     } }
     _12:{ geo::Wall:{
         room:$.room
-        pos:[82 11.5]
-        real_curve:0
-        push_curve:0
+        pos:[
+            83~42a60000
+            11.5~41380000
+        ]
+        real_curve:0~00000000
+        push_curve:0~00000000
         left:$._13
     } }
     _13:{ geo::Wall:{
         room:$.room
-        pos:[83 5.5]
-        real_curve:0
-        push_curve:0
+        pos:[
+            83~42a60000
+            5.5~40b00000
+        ]
+        real_curve:0~00000000
+        push_curve:0~00000000
         left:$._11
     } }
 } }

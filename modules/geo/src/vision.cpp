@@ -13,12 +13,14 @@ namespace geo {
     float Wall::max_curve () {
         float lr = left ? length(left->pos - pos) - fmax(left->real_curve, left->push_curve) : INF;
         float rr = right ? length(right->pos - pos) - fmax(right->real_curve, right->push_curve) : INF;
-        return fmax(lr, rr);
+        return fmin(lr, rr);
     }
     bool Wall::convex () {
         if (!left || !right) return true;
+        Vec l = left->pos - pos;
+        Vec r = right->pos - pos;
          // You may recognize this as the third component of a cross product.
-        return right->pos.x * left->pos.y - right->pos.y * left->pos.x > 0;
+        return l.x * r.y - l.y * r.x > 0;
     }
 
     void Wall::set_left (Wall* o) {
@@ -86,14 +88,14 @@ namespace geo {
         switch (i) {
             case 0: return Vec(-real_curve, 0);
             case 1: return Vec(push_curve, 0);
-            case 2: return left ? left->pos : Vec(0, -1);
+            case 2: return left ? left->pos - pos : Vec(0, -1);
             default: return Vec();
         }
     }
     void Wall::Spatial_set_pt (size_t i, Vec p) {
         switch (i) {
-            case 0: real_curve = fmax(fabs(p.x), max_curve()); break;
-            case 1: push_curve = fmax(fabs(p.x), max_curve()); break;
+            case 0: real_curve = fmin(fabs(p.x), max_curve()); break;
+            case 1: push_curve = fmin(fabs(p.x), max_curve()); break;
             case 2: {
                 float best_dist2 = INF;
                 Wall* best_wall = NULL;
@@ -212,7 +214,7 @@ namespace geo {
                             log("vision", "  Violation of corner of wall %lu at %f %f is oob", i, snap_here.x, snap_here.y);
                         }
                         else {
-                            log("vision", "  Not violating corner of wall %lu at %f %f", i, snap_here.x, snap_here.y);
+                            log("vision", "  Not violating corner of wall %lu at %f %f (%f)", i, snap_here.x, snap_here.y, wall.real_circle.r);
                         }
                     }
                     else {
