@@ -92,6 +92,11 @@ int main (int argc, char** argv) {
     geo::space.start();
     game = main_file.attr("game");
     game->on_start();
+    if (FILE* f = fopen("../save/local_config.hacc", "r")) {
+        fclose(f);
+        core::Command* cmd = File("../save/local_config.hacc").data();
+        (*cmd)();
+    }
     if (!game->paused) {
         snd::start();
     }
