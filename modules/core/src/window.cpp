@@ -78,6 +78,9 @@ namespace core {
         window = NULL;
     }
 
+    int32 fix_touchpad_x = 0;
+    int32 fix_touchpad_y = 0;
+
     void Window::start () {
         if (!is_open) open();
         double lag = 0;
@@ -126,6 +129,12 @@ namespace core {
             SDL_Event event;
             while (SDL_PollEvent(&event)) {
                 Listener* next_l = NULL;
+                if (cursor_trapped && event.type == SDL_MOUSEMOTION) {
+                    event.motion.x += fix_touchpad_x;
+                    event.motion.xrel += fix_touchpad_x;
+                    event.motion.y += fix_touchpad_y;
+                    event.motion.yrel += fix_touchpad_y;
+                }
                 for (Listener* l = window->listener; l; l = next_l) {
                      // In case a listener disables itself.
                     next_l = l->next;
@@ -348,3 +357,9 @@ void _window_fullscreen () {
     window->open();
 }
 New_Command _window_fullscreen_cmd ("window_fullscreen", "Toggle between window fullscreen modes", 0, _window_fullscreen);
+
+void _fix_touchpad (int32 x, int32 y) {
+    fix_touchpad_x = x;
+    fix_touchpad_y = y;
+}
+New_Command _fix_touchpad_cmd ("fix_touchpad", "My touchpad driver has a glitch during relative cursor mode.", 2, _fix_touchpad);
