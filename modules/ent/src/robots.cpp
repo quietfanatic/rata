@@ -32,14 +32,16 @@ namespace ent {
         virtual void Object_before_move () override {
             auto old_enemy = enemy;
             enemy = NULL;
-            foreach_contact([&](b2Fixture* mine, b2Fixture* other){
-                auto fd = (FixtureDef*)mine->GetUserData();
-                auto oo = (Object*)other->GetBody()->GetUserData();
-                if (dynamic_cast<Biped*>(oo)) {
-                    if (!enemy || length2(oo->get_pos() - get_pos()) < length2(enemy->get_pos() - get_pos()))
-                        enemy = oo;
-                }
-            });
+            b2PolygonShape shape;
+            shape.SetAsBox(direction == 0 ? 10 : 5, 7.5);
+            Vec query_pos = get_pos() + direction * Vec(5, 0);
+            space.query_shape(query_pos, &shape, [&](b2Fixture* fix){
+                auto oo = (Object*)fix->GetBody()->GetUserData();
+                log("robot", "%p in range", oo);
+                if (!enemy || length2(oo->get_pos() - get_pos()) < length2(enemy->get_pos() - get_pos()))
+                    enemy = oo;
+                return true;
+            }, Filter(0x0004, 0x0001));
             if (enemy) {
                 if (!try_see_at(enemy, enemy->get_pos())
                     && !try_see_at(enemy, enemy->get_pos() + Vec(0.4, 0.4))

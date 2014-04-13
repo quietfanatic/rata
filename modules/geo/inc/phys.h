@@ -12,6 +12,20 @@ namespace geo {
 
     struct Object;
 
+     // Box2D's default filtering system is really weird.  We're gonna
+     //  use our own.  We can reinterpret the b2Filter that's on every
+     //  fixture however we want, as long as we stay limited to 48 bits.
+    struct Filter {
+        uint16 mask;  // If two fixtures share mask bits, they collide,
+        uint16 unmask;  // unless they also share unmask bits.
+        bool active;  // Inactive fixtures do not collide.
+        Filter (uint16 m = 1, uint16 u = 0, bool a = true) : mask(m), unmask(u), active(a) { }
+        Filter (const b2Filter& b2f) : Filter(reinterpret_cast<const Filter&>(b2f)) { }
+        operator b2Filter& () { return reinterpret_cast<b2Filter&>(*this); }
+        operator const b2Filter& () const { return reinterpret_cast<const b2Filter&>(*this); }
+        bool test (const Filter&) const;
+    };
+
      // This contains all physical objects and provides access to the b2World.
     struct Space {
         b2World* b2world;
@@ -32,23 +46,13 @@ namespace geo {
         typedef std::function<float (b2Fixture*, const util::Vec&, const util::Vec&, float)> RayCaster;
         void ray_cast (util::Vec start, util::Vec end, const RayCaster& f);
 
+         // Query a shape at a position.
+        typedef std::function<bool (b2Fixture*)> ShapeTester;
+        bool query_shape (util::Vec pos, b2Shape* shape, const ShapeTester& f = nullptr, const Filter& filter = Filter(0xffff));
+
         ~Space ();
     };
     extern Space space;
-
-     // Box2D's default filtering system is really weird.  We're gonna
-     //  use our own.  We can reinterpret the b2Filter that's on every
-     //  fixture however we want, as long as we stay limited to 48 bits.
-    struct Filter {
-        uint16 mask = 1;  // If two fixtures share mask bits, they collide,
-        uint16 unmask = 0;  // unless they also share unmask bits.
-        bool active = true;  // Inactive fixtures do not collide.
-        Filter () { }
-        Filter (const b2Filter& b2f) : Filter(reinterpret_cast<const Filter&>(b2f)) { }
-        operator b2Filter& () { return reinterpret_cast<b2Filter&>(*this); }
-        operator const b2Filter& () const { return reinterpret_cast<const b2Filter&>(*this); }
-    };
-
 
      // Every physics interface has to decide which properties of objects are dynamic and
      //  which are static.  We are making a lot more properties static than Box2D does.

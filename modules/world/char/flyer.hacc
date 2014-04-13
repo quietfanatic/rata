@@ -4,16 +4,12 @@
         gravity_scale:0
         fixtures:[
             { shape:$.shape friction:0.4 restitution:0.6 coll_a:[ground] coll_b:[ground] }
-            { shape:$.enemy_sensor is_sensor:true filter:{ unmask:0x0001 } }
         ]
         layout:$.layout
         texture:$.img.body
         max_life:96
     }}
     shape:{b2CircleShape:{ c:[0 0] r:0.4 }}
-    enemy_sensor:{b2PolygonShape:{
-        verts:[[-10, -7] [10 -7] [10 8] [-10 8]]
-    }}
     layout:{vis::Layout:{
         size:[144 32]
         frames:[

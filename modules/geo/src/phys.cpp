@@ -64,13 +64,16 @@ namespace geo {
         }
     } mycl;
 
+     // Filters
+    bool Filter::test (const Filter& o) const {
+        return active && o.active && mask & o.mask && !(unmask && o.unmask);
+    }
+
     struct myCF : b2ContactFilter {
         bool ShouldCollide (b2Fixture* a, b2Fixture* b) override {
             const Filter& afilt = reinterpret_cast<const Filter&>(a->GetFilterData());
             const Filter& bfilt = reinterpret_cast<const Filter&>(b->GetFilterData());
-            return afilt.active && bfilt.active
-                && (afilt.mask & bfilt.mask)
-                && !(afilt.unmask & bfilt.unmask);
+            return afilt.test(bfilt);
         }
     } mycf;
 
@@ -181,6 +184,7 @@ namespace geo {
      // Debug fixture drawing
 
     static std::vector<Line> ray_casts;
+    static std::vector<Rect> shape_queries;
 
     struct Phys_Debug_Layer : vis::Drawn<vis::Overlay> {
         void Drawn_draw (vis::Overlay) override {
@@ -245,10 +249,14 @@ namespace geo {
                 draw_line(rc.a, rc.b);
             }
             ray_casts.resize(0);
+            for (auto& sq : shape_queries) {
+                draw_rect(sq);
+            }
+            shape_queries.resize(0);
         }
     } phys_debug_layer;
 
-     // Ray casting
+     // Queries
 
     struct RayCaster_CB : b2RayCastCallback {
         const Space::RayCaster& f;
@@ -262,6 +270,38 @@ namespace geo {
             ray_casts.push_back(Line(start, end));
         RayCaster_CB cb (f);
         b2world->RayCast(&cb, start, end);
+    }
+
+    struct ShapeTester_CB : b2QueryCallback {
+        const b2Transform& transform;
+        b2Shape* shape;
+        const Space::ShapeTester& f;
+        const Filter& filter;
+        bool found = false;
+        ShapeTester_CB (const b2Transform& t, b2Shape* s, const Space::ShapeTester& f, const Filter& filt) :
+            transform(t), shape(s), f(f), filter(filt)
+        { }
+        bool ReportFixture (b2Fixture* fix) override {
+            if (!filter.test(reinterpret_cast<const Filter&>(fix->GetFilterData())))
+                return true;
+            auto& fix_tr = fix->GetBody()->GetTransform();
+            if (!b2TestOverlap(shape, 0, fix->GetShape(), 0, transform, fix_tr))
+                return true;
+            found = true;
+            return f ? f(fix) : false;
+        }
+    };
+    bool Space::query_shape (Vec pos, b2Shape* shape, const Space::ShapeTester& f, const Filter& filter) {
+        b2Transform transform;
+        transform.p = pos;
+        transform.q.SetIdentity();  // this is stupid
+        ShapeTester_CB cb (transform, shape, f, filter);
+        b2AABB aabb;
+        shape->ComputeAABB(&aabb, transform, 0);
+        b2world->QueryAABB(&cb, aabb);
+        if (phys_debug_layer.visible())
+            shape_queries.push_back(Rect(aabb.lowerBound, aabb.upperBound));
+        return cb.found;
     }
 
 } using namespace geo;

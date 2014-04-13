@@ -24,5 +24,6 @@ attribute coll_b to [ground] to make it ground that can be stood on.
 Filter mask bits:
  0x0001 : solid objects
  0x0002 : interactibles
+ 0x0004 : living things
 Filter unmask bits:
  0x0001 : sensors
